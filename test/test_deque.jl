@@ -3,12 +3,12 @@ using Test
 
 # empty dequeue
 
-q = Dequeue{Int}()
+q = Deque{Int}()
 @test length(q) == 0
 @test isempty(q)
 @test block_size(q) == DataStructures.default_dequeue_blocksize
 
-q = Dequeue{Int}(3)
+q = Deque{Int}(3)
 @test length(q) == 0
 @test isempty(q) == true
 @test block_size(q) == 3
@@ -21,7 +21,7 @@ q = Dequeue{Int}(3)
 n = 10
 
 for i = 1 : n
-    push_back!(q, i)
+    push!(q, i)
     @test length(q) == i
     @test isempty(q) == false
     @test block_size(q) == 3
@@ -38,7 +38,7 @@ end
 # pop back
 
 for i = 1 : n
-    x = pop_back!(q)
+    x = pop!(q)
     @test length(q) == n - i
     @test isempty(q) == (i == n)
     @test block_size(q) == 3
@@ -56,10 +56,10 @@ end
 
 # push front
 
-q = Dequeue{Int}(3)
+q = Deque{Int}(3)
 
 for i = 1 : n
-    push_front!(q, i)
+    unshift!(q, i)
     @test length(q) == i
     @test isempty(q) == false
     @test block_size(q) == 3
@@ -76,7 +76,7 @@ end
 # pop front
 
 for i = 1 : n
-    x = pop_front!(q)
+    x = shift!(q)
     @test length(q) == n - i
     @test isempty(q) == (i == n)
     @test block_size(q) == 3
@@ -94,7 +94,7 @@ end
 
 # random operations
 
-q = Dequeue{Int}(5)
+q = Deque{Int}(5)
 r = Int[]
 m = 100
 
@@ -105,10 +105,10 @@ for k = 1 : m
     for i = 1 : la
         if randbool()
             push!(r, x[i])
-            push_back!(q, x[i])
+            push!(q, x[i])
         else
             unshift!(r, x[i])
-            push_front!(q, x[i])
+            unshift!(q, x[i])
         end
     end     
     
@@ -119,10 +119,10 @@ for k = 1 : m
     for i = 1 : lr
         if randbool()
             pop!(r)
-            pop_back!(q)
+            pop!(q)
         else
             shift!(r)
-            pop_front!(q)
+            shift!(q)
         end
     end
     

@@ -1,56 +1,56 @@
 # Block-based dequeue
 
-type DequeueBlock{T}
+type DequeBlock{T}
     data::Vector{T}  # only data[front:back] is valid
     capa::Int   
     front::Int
     back::Int
-    prev::Union(Nothing, DequeueBlock{T})  # ref to previous block
-    next::Union(Nothing, DequeueBlock{T})  # ref to next block
+    prev::Union(Nothing, DequeBlock{T})  # ref to previous block
+    next::Union(Nothing, DequeBlock{T})  # ref to next block
 end
 
-capacity(blk::DequeueBlock) = length(blk.data)
-length(blk::DequeueBlock) = blk.back - blk.front + 1
-isempty(blk::DequeueBlock) = blk.back < blk.front
+capacity(blk::DequeBlock) = length(blk.data)
+length(blk::DequeBlock) = blk.back - blk.front + 1
+isempty(blk::DequeBlock) = blk.back < blk.front
 
 function rear_deque_block{T}(ty::Type{T}, n::Int)
     data = Array(T, n)
-    DequeueBlock{T}(data, n, 1, 0, nothing, nothing)
+    DequeBlock{T}(data, n, 1, 0, nothing, nothing)
 end
 
 function head_deque_block{T}(ty::Type{T}, n::Int)
     data = Array(T, n)
-    DequeueBlock{T}(data, n, n+1, n, nothing, nothing)
+    DequeBlock{T}(data, n, n+1, n, nothing, nothing)
 end
 
 const default_dequeue_blocksize = 2048
 
-type Dequeue{T}
+type Deque{T}
     nblocks::Int
     blksize::Int
     len::Int
-    head::DequeueBlock{T}
-    rear::DequeueBlock{T}
+    head::DequeBlock{T}
+    rear::DequeBlock{T}
     
-    function Dequeue(blksize::Int)
+    function Deque(blksize::Int)
         head = rear = rear_deque_block(T, blksize)
         new(1, blksize, 0, head, rear)
     end
     
-    Dequeue() = Dequeue{T}(default_dequeue_blocksize::Int)
+    Deque() = Deque{T}(default_dequeue_blocksize::Int)
 end
 
-isempty(q::Dequeue) = q.len == 0
-length(q::Dequeue) = q.len
+isempty(q::Deque) = q.len == 0
+length(q::Deque) = q.len
 
-block_size(q::Dequeue) = q.blksize
-num_blocks(q::Dequeue) = q.nblocks
+block_size(q::Deque) = q.blksize
+num_blocks(q::Deque) = q.nblocks
 
-front(q::Dequeue) = q.head.data[q.head.front]
-back(q::Dequeue) = q.rear.data[q.rear.back]
+front(q::Deque) = q.head.data[q.head.front]
+back(q::Deque) = q.rear.data[q.rear.back]
 
-function dump(io::IO, q::Dequeue)
-    println(io, "Dequeue (length = $(q.len), blksize = $(q.blksize), nblocks = $(q.nblocks))")
+function dump(io::IO, q::Deque)
+    println(io, "Deque (length = $(q.len), blksize = $(q.blksize), nblocks = $(q.nblocks))")
     cb = q.head
     i = 1
     while (cb != nothing)
@@ -67,10 +67,10 @@ function dump(io::IO, q::Dequeue)
 end
 
 
-function empty!{T}(q::Dequeue{T})
+function empty!{T}(q::Deque{T})
     # release all blocks except the head
     if q.nblocks > 1
-        cb::DequeueBlock{T} = q.rear
+        cb::DequeBlock{T} = q.rear
         while cb != q.head
             empty!(cb.data)
             cb = cb.prev
@@ -91,7 +91,7 @@ function empty!{T}(q::Dequeue{T})
 end
 
 
-function push_back!{T}(q::Dequeue{T}, x::T)
+function push!{T}(q::Deque{T}, x::T)  # push back
     rear = q.rear
     
     if isempty(rear)
@@ -110,9 +110,10 @@ function push_back!{T}(q::Dequeue{T}, x::T)
         q.nblocks += 1 
     end
     q.len += 1
+    q
 end
 
-function push_front!{T}(q::Dequeue{T}, x::T)
+function unshift!{T}(q::Deque{T}, x::T)   # push front
     head = q.head
     
     if isempty(head)
@@ -133,9 +134,10 @@ function push_front!{T}(q::Dequeue{T}, x::T)
         q.nblocks += 1
     end 
     q.len += 1
+    q
 end
 
-function pop_back!{T}(q::Dequeue{T})
+function pop!{T}(q::Deque{T})   # pop back
     if isempty(q)
         throw(ArgumentError("Attempted to pop from an empty dequeue."))
     end
@@ -149,7 +151,7 @@ function pop_back!{T}(q::Dequeue{T})
         if q.nblocks > 1
             # release and detach the rear block
             empty!(rear.data)
-            q.rear = rear.prev::DequeueBlock{T}
+            q.rear = rear.prev::DequeBlock{T}
             q.rear.next = nothing
             q.nblocks -= 1
         end        
@@ -159,7 +161,7 @@ function pop_back!{T}(q::Dequeue{T})
 end
 
 
-function pop_front!{T}(q::Dequeue{T})
+function shift!{T}(q::Deque{T})  # pop front
     if isempty(q)
         throw(ArgumentError("Attempted to pop from an empty dequeue."))
     end
@@ -173,7 +175,7 @@ function pop_front!{T}(q::Dequeue{T})
         if q.nblocks > 1
             # release and detach the head block
             empty!(head.data)
-            q.head = head.next::DequeueBlock{T}
+            q.head = head.next::DequeBlock{T}
             q.head.prev = nothing
             q.nblocks -= 1
         end
@@ -185,16 +187,16 @@ end
 
 # dequeue iteration
 
-immutable DequeueIterator{T}
+immutable DequeIterator{T}
     is_done::Bool
-    cblock::DequeueBlock{T}  # current block
+    cblock::DequeBlock{T}  # current block
     i::Int
 end
 
-start{T}(q::Dequeue{T}) = DequeueIterator{T}(isempty(q), q.head, q.head.front)
+start{T}(q::Deque{T}) = DequeIterator{T}(isempty(q), q.head, q.head.front)
 
-function next{T}(q::Dequeue{T}, s::DequeueIterator{T})
-    cb::DequeueBlock{T} = s.cblock
+function next{T}(q::Deque{T}, s::DequeIterator{T})
+    cb::DequeBlock{T} = s.cblock
     i::Int = s.i
     x = cb.data[i]
     
@@ -210,8 +212,8 @@ function next{T}(q::Dequeue{T}, s::DequeueIterator{T})
         end
     end 
     
-    (x, DequeueIterator{T}(is_done, cb, i))
+    (x, DequeIterator{T}(is_done, cb, i))
 end
 
-done{T}(q::Dequeue{T}, s::DequeueIterator{T}) = s.is_done
+done{T}(q::Deque{T}, s::DequeIterator{T}) = s.is_done
 

@@ -2,14 +2,13 @@ module DataStructures
     
     import Base.length, Base.isempty, Base.start, Base.next, Base.done
     import Base.show, Base.dump, Base.empty!
-    import Base.push!, Base.pop!
+    import Base.push!, Base.pop!, Base.shift!, Base.unshift!
     
-    export Dequeue, Stack, Queue
-
-    export push_back!, push_front!, pop_back!, pop_front!, enqueue!, dequeue!
+    export Deque, Stack, Queue
+    export stack, queue, enqueue!, dequeue!
     export capacity, block_size, num_blocks, front, back, top
     
-    include("dequeue.jl") 
+    include("deque.jl") 
     include("stack.jl")   
     include("queue.jl")
 end

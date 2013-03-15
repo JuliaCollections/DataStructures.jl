@@ -1,17 +1,21 @@
 # FIFO queue
 
-type Queue{T}
-    q::Dequeue{T}
-    
-    Queue() = new(Dequeue{T}())
-    Queue(blksize::Int) = new(Dequeue{T}(blksize))
+type Queue{S}   # S is the type of internal deque
+    store::S
 end
 
-isempty(s::Queue) = isempty(s.q)
-length(s::Queue) = length(s.q)
+queue{T}(ty::Type{T}) = Queue(Deque{T}())
+queue{T}(ty::Type{T}, blksize::Integer) = Queue(Deque{T}(blksize))
 
-front(s::Queue) = front(s.q)
-back(s::Queue) = back(s.q)
+isempty(s::Queue) = isempty(s.store)
+length(s::Queue) = length(s.store)
 
-enqueue!{T}(s::Queue{T}, x::T) = push_back!(s.q, x)
-dequeue!{T}(s::Queue{T}) = pop_front!(s.q)
+front(s::Queue) = front(s.store)
+back(s::Queue) = back(s.store)
+
+function enqueue!(s::Queue, x)
+    push!(s.store, x)
+    s
+end
+
+dequeue!(s::Queue) = shift!(s.store)

@@ -1,16 +1,20 @@
 # stacks
 
-type Stack{T}
-    q::Dequeue{T}
-    
-    Stack() = new(Dequeue{T}())
-    Stack(blksize::Int) = new(Dequeue{T}(blksize))
+type Stack{S}   # S is the type of the internal dequeue instance
+    store::S
 end
 
-isempty(s::Stack) = isempty(s.q)
-length(s::Stack) = length(s.q)
+stack{T}(ty::Type{T}) = Stack(Deque{T}())
+stack{T}(ty::Type{T}, blksize::Integer) = Stack(Deque{T}(blksize))
 
-top(s::Stack) = back(s.q)
+isempty(s::Stack) = isempty(s.store)
+length(s::Stack) = length(s.store)
 
-push!{T}(s::Stack{T}, x::T) = push_back!(s.q, x)
-pop!{T}(s::Stack{T}) = pop_back!(s.q)
+top(s::Stack) = back(s.store)
+
+function push!(s::Stack, x)
+    push!(s.store, x)
+    s
+end
+
+pop!(s::Stack) = pop!(s.store)
