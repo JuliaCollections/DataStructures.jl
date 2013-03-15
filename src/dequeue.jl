@@ -23,7 +23,7 @@ function head_deque_block{T}(ty::Type{T}, n::Int)
     DequeueBlock{T}(data, n, n+1, n, nothing, nothing)
 end
 
-const default_dequeue_blocksize = 1024
+const default_dequeue_blocksize = 2048
 
 type Dequeue{T}
     nblocks::Int
