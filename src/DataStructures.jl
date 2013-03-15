@@ -8,7 +8,7 @@ module DataStructures
     export stack, queue, enqueue!, dequeue!
     export capacity, block_size, num_blocks, front, back, top
     
-    export IntDisjointSets, num_groups, find_root
+    export IntDisjointSets, DisjointSets, num_groups, find_root
     
     include("deque.jl") 
     include("stack.jl")   

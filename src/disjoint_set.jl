@@ -31,8 +31,8 @@ num_groups(s::IntDisjointSets) = s.ngroups
 #
 function find_root(s::IntDisjointSets, x::Integer)
     p::Int = s.parents[x]
-    if p != x
-        p = s.parents[x] = find_root(s, p)
+    if s.parents[p] != p
+        s.parents[x] = p = find_root(s, p)
     end
     p
 end
@@ -46,8 +46,8 @@ function union!(s::IntDisjointSets, x::Integer, y::Integer)
     yroot = find_root(s, y)
     if xroot != yroot
         rks::Vector{Int} = s.ranks
-        xrank = rks[xroot]
-        yrank = rks[yroot]
+        xrank::Int = rks[xroot]
+        yrank::Int = rks[yroot]
         
         if xrank < yrank
             s.parents[xroot] = yroot
@@ -61,4 +61,40 @@ function union!(s::IntDisjointSets, x::Integer, y::Integer)
     end
 end
 
+
+############################################################
+#
+#  A forest of disjoint sets of arbitrary value type T
+#
+#  It is a wrapper of IntDisjointSets, which uses a 
+#  dictionary to map the input value to an internal index
+#
+############################################################
+
+type DisjointSets{T}
+    intmap::Dict{T,Int}
+    internal::IntDisjointSets
+    
+    function DisjointSets(xs)    # xs must be iterable
+        imap = Dict{T,Int}()
+        n = length(xs)
+        sizehint(imap, n)
+        id = 0
+        for x in xs
+            imap[x] = (id += 1)
+        end
+        new(imap, IntDisjointSets(n))
+    end
+end
+
+length(s::DisjointSets) = length(s.internal)
+num_groups(s::DisjointSets) = num_groups(s.internal)
+
+find_root{T}(s::DisjointSets{T}, x::T) = find_root(s.internal, s.intmap[x])
+    
+in_same_set{T}(s::DisjointSets{T}, x::T, y::T) = in_same_set(s.internal, s.intmap[x], s.intmap[y])
+
+function union!{T}(s::DisjointSets{T}, x::T, y::T)
+    union!(s.internal, s.intmap[x], s.intmap[y])
+end
 

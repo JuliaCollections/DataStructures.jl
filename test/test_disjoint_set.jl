@@ -3,7 +3,7 @@
 using DataStructures
 using Test
 
-s = IntDisjointSets(10)
+s = DisjointSets{Int}(1:10)
 
 @test length(s) == 10
 @test num_groups(s) == 10
