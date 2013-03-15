@@ -1,6 +1,6 @@
 # benchmark of deque
 
-using SeqDataStructs
+using DataStructures
 
 # push_back
 

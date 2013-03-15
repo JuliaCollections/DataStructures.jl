@@ -1,6 +1,6 @@
 # test stacks and queues
 
-using SeqDataStructs
+using DataStructures
 using Test
 
 # Stack

@@ -1,4 +1,4 @@
-using SeqDataStructs
+using DataStructures
 using Test
 
 # empty dequeue
@@ -6,7 +6,7 @@ using Test
 q = Dequeue{Int}()
 @test length(q) == 0
 @test isempty(q)
-@test block_size(q) == SeqDataStructs.default_dequeue_blocksize
+@test block_size(q) == DataStructures.default_dequeue_blocksize
 
 q = Dequeue{Int}(3)
 @test length(q) == 0

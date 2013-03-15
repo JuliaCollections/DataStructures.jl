@@ -1,4 +1,4 @@
-module SeqDataStructs
+module DataStructures
     
     import Base.length, Base.isempty, Base.start, Base.next, Base.done
     import Base.show, Base.dump, Base.empty!
