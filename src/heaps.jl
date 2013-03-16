@@ -59,6 +59,7 @@ compare(c::GreaterThan, x, y) = x > y
 
 # heap implementations
 
+include("heaps/binary_heap.jl")
 include("heaps/mutable_binary_heap.jl")
 
 # generic functions

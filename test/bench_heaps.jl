@@ -21,7 +21,7 @@ function benchmark_heap(title::ASCIIString, h::AbstractHeap, xs::Vector{Float64}
         pop!(h)
     end
     
-    @printf("   On %16s:  add.elapsed = %7.4fs  pop.elapsed = %7.4fs\n", title, t1, t2)
+    @printf("   On %-24s:  add.elapsed = %7.4fs  pop.elapsed = %7.4fs\n", title, t1, t2)
 end
 
 
@@ -29,6 +29,8 @@ end
 
 xs = rand(10^6)
 
-h_bin = binary_minheap(Float64)
-benchmark_heap("BinaryHeap", h_bin, xs)
+h_bin  = binary_minheap(Float64)
+h_mbin = mutable_binary_minheap(Float64)
 
+benchmark_heap("BinaryHeap", h_bin, xs)
+benchmark_heap("MutableBinaryHeap", h_mbin, xs)

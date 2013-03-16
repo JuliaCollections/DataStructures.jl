@@ -123,7 +123,7 @@ function _binary_heap_pop!{Comp,T}(comp::Comp,
     v
 end
 
-function _make_binary_heap{Comp,T}(comp::Comp, ty::Type{T}, values)  # values is required to be iterable    
+function _make_mutable_binary_heap{Comp,T}(comp::Comp, ty::Type{T}, values)      
     # make a static binary index tree from a list of values
     
     n = length(values)
@@ -162,7 +162,7 @@ type MutableBinaryHeap{VT, Comp} <: AbstractMutableHeap{Int,VT}
     end
     
     function MutableBinaryHeap(comp::Comp, xs)  # xs is an iterable collection of values
-        nodes, node_map = _make_binary_heap(comp, VT, xs)
+        nodes, node_map = _make_mutable_binary_heap(comp, VT, xs)
         new(comp, nodes, node_map)
     end
 end
@@ -174,7 +174,7 @@ mutable_binary_minheap{T}(xs::AbstractVector{T}) = MutableBinaryHeap{T,LessThan}
 mutable_binary_maxheap{T}(xs::AbstractVector{T}) = MutableBinaryHeap{T,GreaterThan}(GreaterThan(), xs)
 
 function show(io::IO, h::MutableBinaryHeap)
-    print(io, "BinaryHeap(")
+    print(io, "MutableBinaryHeap(")
     nodes = h.nodes
     n = length(nodes)
     if n > 0

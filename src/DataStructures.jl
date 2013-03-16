@@ -12,6 +12,7 @@ module DataStructures
     export IntDisjointSets, DisjointSets, num_groups, find_root
     
     export AbstractHeap, compare, extract_all!
+    export BinaryHeap, binary_minheap, binary_maxheap
     export MutableBinaryHeap, mutable_binary_minheap, mutable_binary_maxheap
     
     include("deque.jl") 
