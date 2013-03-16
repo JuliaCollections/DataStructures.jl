@@ -15,7 +15,7 @@ The ``Deque`` type implements a dequeue using a list of blocks. This data struct
 
 Usage:
 ```julia
-a = deque{Int}()
+a = Deque{Int}()
 isempty(a)          # test whether the dequeue is empty
 length(a)           # get the number of elements
 push!(a, 10)        # add an element to the back
