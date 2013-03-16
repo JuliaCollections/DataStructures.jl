@@ -143,7 +143,7 @@ hmax = binary_maxheap(xs)
 @test verify_heap(hmin)
 @test verify_heap(hmax)
 
-for t = 1 : 1000
+for t = 1 : 1000    
     i = rand(1:100)
     v = rand()
     xs[i] = v

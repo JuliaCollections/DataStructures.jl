@@ -200,9 +200,10 @@ function add!{T}(h::BinaryHeap{T}, v::T)
     nodes = h.nodes
     nodemap = h.node_map
     i = length(nodemap) + 1
+    nd_id = length(nodes) + 1
     push!(nodes, BinaryHeapNode(v, i))
-    push!(nodemap, i)
-    _heap_bubble_up!(h.comparer, nodes, nodemap, nodemap[i])
+    push!(nodemap, nd_id)
+    _heap_bubble_up!(h.comparer, nodes, nodemap, nd_id)
     i
 end
 
