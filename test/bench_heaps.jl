@@ -8,14 +8,14 @@ function benchmark_heap(title::ASCIIString, h::AbstractHeap, xs::Vector{Float64}
     @assert isempty(h)
     
     # warming
-    add!(h, 0.5)
+    push!(h, 0.5)
     pop!(h)
     
     # bench
     n = length(xs)
     
     t1 = @elapsed for i = 1 : n
-        add!(h, xs[i])
+        push!(h, xs[i])
     end
     t2 = @elapsed for i = 1 : n
         pop!(h)
@@ -31,3 +31,4 @@ xs = rand(10^6)
 
 h_bin = binary_minheap(Float64)
 benchmark_heap("BinaryHeap", h_bin, xs)
+

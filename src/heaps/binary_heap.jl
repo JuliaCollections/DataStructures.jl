@@ -196,7 +196,7 @@ length(h::BinaryHeap) = length(h.nodes)
 
 isempty(h::BinaryHeap) = isempty(h.nodes)
 
-function add!{T}(h::BinaryHeap{T}, v::T)
+function push!{T}(h::BinaryHeap{T}, v::T)
     nodes = h.nodes
     nodemap = h.node_map
     i = length(nodemap) + 1

@@ -20,9 +20,12 @@ function list_values{VT,Comp}(h::BinaryHeap{VT,Comp})
     n = length(h)
     nodes = h.nodes
     nodemap = h.node_map
-    vs = Array(VT, n)
-    for i = 1 : n
-        vs[i] = nodes[nodemap[i]].value
+    vs = Array(VT, 0)
+    for i = 1 : length(nodemap)
+        id = nodemap[i]
+        if id > 0
+            push!(vs, nodes[id].value)
+        end
     end
     vs
 end
@@ -72,7 +75,7 @@ h = binary_maxheap(vs)
 @test isequal(list_values(h), vs)
 @test isequal(heap_values(h), [16, 14, 10, 8, 7, 3, 9, 1, 4, 2])
 
-# test add!
+# test push!
 
 hmin = binary_minheap(Int)
 @test length(hmin) == 0
@@ -91,7 +94,7 @@ ss = {
     [1, 2, 3, 4, 7, 9, 10, 14, 8, 16]}
 
 for i = 1 : length(vs)
-    ia = add!(hmin, vs[i])
+    ia = push!(hmin, vs[i])
     @test ia == i
     @test length(hmin) == i
     @test !isempty(hmin)
@@ -116,7 +119,7 @@ ss = {
     [16, 14, 10, 8, 7, 3, 9, 1, 4, 2]}
 
 for i = 1 : length(vs)
-    ia = add!(hmax, vs[i])
+    ia = push!(hmax, vs[i])
     @test ia == i
     @test length(hmax) == i
     @test !isempty(hmax)
@@ -131,6 +134,29 @@ end
 
 @test isequal(extract_all!(hmax), [16, 14, 10, 9, 8, 7, 4, 3, 2, 1])
 @test isempty(hmax)
+
+# test hybrid add! and pop!
+
+h = binary_minheap(Int)
+
+push!(h, 5)
+push!(h, 10)
+@test isequal(heap_values(h), [5, 10])
+@test isequal(list_values(h), [5, 10])
+
+@test pop!(h) == 5
+@test isequal(heap_values(h), [10])
+@test isequal(list_values(h), [10])
+
+push!(h, 7)
+push!(h, 2)
+@test isequal(heap_values(h), [2, 10, 7])
+@test isequal(list_values(h), [10, 7, 2])
+
+@test pop!(h) == 2
+@test isequal(heap_values(h), [7, 10])
+@test isequal(list_values(h), [10, 7])
+
 
 # test update!
 
@@ -156,10 +182,4 @@ for t = 1 : 1000
     @test isequal(list_values(hmin), xs)
     @test isequal(list_values(hmax), xs)
 end
-
-
-
-
-
-
 

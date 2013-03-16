@@ -20,7 +20,7 @@
 #   - isempty(h)        returns whether the heap is
 #                       empty
 #
-#   - add!(h, v)        add a value to the heap
+#   - push!(h, v)       add a value to the heap
 #                       return a handle to the value
 #
 #   - sizehint(h)       set size hint to a heap
