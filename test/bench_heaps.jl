@@ -14,16 +14,14 @@ function benchmark_heap(title::ASCIIString, h::AbstractHeap, xs::Vector{Float64}
     # bench
     n = length(xs)
     
-    tic()
-    for i = 1 : n
+    t1 = @elapsed for i = 1 : n
         add!(h, xs[i])
     end
-    for i = 1 : n
+    t2 = @elapsed for i = 1 : n
         pop!(h)
     end
-    et = toc()
     
-    @printf("   On %16s:  elapsed = %8.4fs\n", title, et)
+    @printf("   On %16s:  add.elapsed = %7.4fs  pop.elapsed = %7.4fs\n", title, t1, t2)
 end
 
 
