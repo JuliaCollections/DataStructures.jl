@@ -5,7 +5,7 @@ using Test
 
 # auxiliary functions
 
-function heap_values{VT,Comp}(h::BinaryHeap{VT,Comp})
+function heap_values{VT,Comp}(h::MutableBinaryHeap{VT,Comp})
     n = length(h)
     nodes = h.nodes
     @assert length(nodes) == n
@@ -16,7 +16,7 @@ function heap_values{VT,Comp}(h::BinaryHeap{VT,Comp})
     vs
 end
 
-function list_values{VT,Comp}(h::BinaryHeap{VT,Comp})
+function list_values{VT,Comp}(h::MutableBinaryHeap{VT,Comp})
     n = length(h)
     nodes = h.nodes
     nodemap = h.node_map
@@ -30,7 +30,7 @@ function list_values{VT,Comp}(h::BinaryHeap{VT,Comp})
     vs
 end
 
-function verify_heap{VT,Comp}(h::BinaryHeap{VT,Comp})
+function verify_heap{VT,Comp}(h::MutableBinaryHeap{VT,Comp})
     comp = h.comparer
     nodes = h.nodes
     n = length(h)
@@ -58,7 +58,7 @@ end
 # test make heap
 
 vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
-h = binary_minheap(vs)
+h = mutable_binary_minheap(vs)
 
 @test length(h) == 10
 @test !isempty(h)
@@ -67,7 +67,7 @@ h = binary_minheap(vs)
 @test isequal(heap_values(h), [1, 2, 3, 4, 7, 9, 10, 14, 8, 16])
 
 
-h = binary_maxheap(vs)
+h = mutable_binary_maxheap(vs)
 
 @test length(h) == 10
 @test !isempty(h)
@@ -77,7 +77,7 @@ h = binary_maxheap(vs)
 
 # test push!
 
-hmin = binary_minheap(Int)
+hmin = mutable_binary_minheap(Int)
 @test length(hmin) == 0
 @test isempty(hmin)
 
@@ -102,7 +102,7 @@ for i = 1 : length(vs)
     @test isequal(heap_values(hmin), ss[i])
 end
 
-hmax = binary_maxheap(Int)
+hmax = mutable_binary_maxheap(Int)
 @test length(hmax) == 0
 @test isempty(hmax)
 
@@ -137,7 +137,7 @@ end
 
 # test hybrid add! and pop!
 
-h = binary_minheap(Int)
+h = mutable_binary_minheap(Int)
 
 push!(h, 5)
 push!(h, 10)
@@ -161,8 +161,8 @@ push!(h, 2)
 # test update!
 
 xs = rand(100)
-hmin = binary_minheap(xs)
-hmax = binary_maxheap(xs)
+hmin = mutable_binary_minheap(xs)
+hmax = mutable_binary_maxheap(xs)
 
 @test length(hmin) == 100
 @test length(hmax) == 100

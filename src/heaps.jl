@@ -21,7 +21,6 @@
 #                       empty
 #
 #   - push!(h, v)       add a value to the heap
-#                       return a handle to the value
 #
 #   - sizehint(h)       set size hint to a heap
 #
@@ -30,6 +29,11 @@
 #   - pop!(h)           removes the top value, and
 #                       returns it
 #
+#  For mutable heaps, it should also support 
+#
+#   - push!(h, v)       adds a value to the heap and
+#                       returns a handle to v
+#
 #   - update!(h, i, v)  updates the value of an element 
 #                       (referred to by the handle i)
 #   
@@ -37,7 +41,10 @@
 
 # HT: handle type
 # VT: value type  
-abstract AbstractHeap{HT,VT}
+
+abstract AbstractHeap{VT}
+
+abstract AbstractMutableHeap{HT,VT} <: AbstractHeap{VT}
 
 # comparer
 
@@ -52,11 +59,11 @@ compare(c::GreaterThan, x, y) = x > y
 
 # heap implementations
 
-include("heaps/binary_heap.jl")
+include("heaps/mutable_binary_heap.jl")
 
 # generic functions
 
-function extract_all!{HT,VT}(h::AbstractHeap{HT,VT})
+function extract_all!{VT}(h::AbstractHeap{VT})
     n = length(h)
     r = Array(VT, n)
     for i = 1 : n

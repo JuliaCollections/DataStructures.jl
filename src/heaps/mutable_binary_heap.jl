@@ -1,6 +1,6 @@
 # Binary heap 
 
-immutable BinaryHeapNode{T}
+immutable MutableBinaryHeapNode{T}
     value::T
     handle::Int
 end
@@ -12,7 +12,7 @@ end
 #################################################
 
 function _heap_bubble_up!{Comp, T}(comp::Comp, 
-    nodes::Vector{BinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int) 
+    nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int) 
     
     nd = nodes[nd_id] 
     v::T = nd.value
@@ -41,7 +41,7 @@ function _heap_bubble_up!{Comp, T}(comp::Comp,
 end
 
 function _heap_bubble_down!{Comp, T}(comp::Comp, 
-    nodes::Vector{BinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int)
+    nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int)
     
     nd = nodes[nd_id]
     v::T = nd.value
@@ -100,7 +100,8 @@ function _heap_bubble_down!{Comp, T}(comp::Comp,
     end
 end
 
-function _binary_heap_pop!{Comp,T}(comp::Comp, nodes::Vector{BinaryHeapNode{T}}, nodemap::Vector{Int})
+function _binary_heap_pop!{Comp,T}(comp::Comp, 
+    nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int})
     
     # extract root node
     rt = nodes[1]
@@ -126,13 +127,13 @@ function _make_binary_heap{Comp,T}(comp::Comp, ty::Type{T}, values)  # values is
     # make a static binary index tree from a list of values
     
     n = length(values)
-    nodes = Array(BinaryHeapNode{T}, n)
+    nodes = Array(MutableBinaryHeapNode{T}, n)
     nodemap = Array(Int, n)
     
     i::Int = 0
     for v in values
         i += 1
-        nodes[i] = BinaryHeapNode{T}(v, i)
+        nodes[i] = MutableBinaryHeapNode{T}(v, i)
         nodemap[i] = i
     end
     
@@ -149,30 +150,30 @@ end
 #
 #################################################
 
-type BinaryHeap{VT, Comp} <: AbstractHeap{Int,VT}
+type MutableBinaryHeap{VT, Comp} <: AbstractMutableHeap{Int,VT}
     comparer::Comp
-    nodes::Vector{BinaryHeapNode{VT}}
+    nodes::Vector{MutableBinaryHeapNode{VT}}
     node_map::Vector{Int}
     
-    function BinaryHeap(comp::Comp)
-        nodes = Array(BinaryHeapNode{VT}, 0)
+    function MutableBinaryHeap(comp::Comp)
+        nodes = Array(MutableBinaryHeapNode{VT}, 0)
         node_map = Array(Int, 0)
         new(comp, nodes, node_map)
     end
     
-    function BinaryHeap(comp::Comp, xs)  # xs is an iterable collection of values
+    function MutableBinaryHeap(comp::Comp, xs)  # xs is an iterable collection of values
         nodes, node_map = _make_binary_heap(comp, VT, xs)
         new(comp, nodes, node_map)
     end
 end
 
-binary_minheap{T}(ty::Type{T}) = BinaryHeap{T,LessThan}(LessThan())
-binary_maxheap{T}(ty::Type{T}) = BinaryHeap{T,GreaterThan}(GreaterThan())
+mutable_binary_minheap{T}(ty::Type{T}) = MutableBinaryHeap{T,LessThan}(LessThan())
+mutable_binary_maxheap{T}(ty::Type{T}) = MutableBinaryHeap{T,GreaterThan}(GreaterThan())
 
-binary_minheap{T}(xs::AbstractVector{T}) = BinaryHeap{T,LessThan}(LessThan(), xs)
-binary_maxheap{T}(xs::AbstractVector{T}) = BinaryHeap{T,GreaterThan}(GreaterThan(), xs)
+mutable_binary_minheap{T}(xs::AbstractVector{T}) = MutableBinaryHeap{T,LessThan}(LessThan(), xs)
+mutable_binary_maxheap{T}(xs::AbstractVector{T}) = MutableBinaryHeap{T,GreaterThan}(GreaterThan(), xs)
 
-function show(io::IO, h::BinaryHeap)
+function show(io::IO, h::MutableBinaryHeap)
     print(io, "BinaryHeap(")
     nodes = h.nodes
     n = length(nodes)
@@ -192,33 +193,33 @@ end
 #
 #################################################
 
-length(h::BinaryHeap) = length(h.nodes)
+length(h::MutableBinaryHeap) = length(h.nodes)
 
-isempty(h::BinaryHeap) = isempty(h.nodes)
+isempty(h::MutableBinaryHeap) = isempty(h.nodes)
 
-function push!{T}(h::BinaryHeap{T}, v::T)
+function push!{T}(h::MutableBinaryHeap{T}, v::T)
     nodes = h.nodes
     nodemap = h.node_map
     i = length(nodemap) + 1
     nd_id = length(nodes) + 1
-    push!(nodes, BinaryHeapNode(v, i))
+    push!(nodes, MutableBinaryHeapNode(v, i))
     push!(nodemap, nd_id)
     _heap_bubble_up!(h.comparer, nodes, nodemap, nd_id)
     i
 end
 
-top(h::BinaryHeap) = h.nodes[1].value
+top(h::MutableBinaryHeap) = h.nodes[1].value
 
-pop!{T}(h::BinaryHeap{T}) = _binary_heap_pop!(h.comparer, h.nodes, h.node_map)
+pop!{T}(h::MutableBinaryHeap{T}) = _binary_heap_pop!(h.comparer, h.nodes, h.node_map)
 
-function update!{T}(h::BinaryHeap{T}, i::Int, v::T)
+function update!{T}(h::MutableBinaryHeap{T}, i::Int, v::T)
     nodes = h.nodes
     nodemap = h.node_map
     comp = h.comparer
     
     nd_id = nodemap[i]
     v0 = nodes[nd_id].value
-    nodes[nd_id] = BinaryHeapNode(v, i)
+    nodes[nd_id] = MutableBinaryHeapNode(v, i)
     if compare(comp, v, v0)
         _heap_bubble_up!(comp, nodes, nodemap, nd_id)
     else
