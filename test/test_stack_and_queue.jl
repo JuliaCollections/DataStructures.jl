@@ -1,7 +1,7 @@
 # test stacks and queues
 
 using DataStructures
-using Test
+using Base.Test
 
 # Stack
 

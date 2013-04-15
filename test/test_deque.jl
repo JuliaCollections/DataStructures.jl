@@ -1,5 +1,5 @@
 using DataStructures
-using Test
+using Base.Test
 
 # empty dequeue
 

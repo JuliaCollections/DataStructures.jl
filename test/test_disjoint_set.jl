@@ -1,7 +1,7 @@
 # Test disjoint set
 
 using DataStructures
-using Test
+using Base.Test
 
 s = DisjointSets{Int}(1:10)
 

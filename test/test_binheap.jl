@@ -1,7 +1,7 @@
 # Test of binary heaps
 
 using DataStructures
-using Test
+using Base.Test
 
 # test make heap
 
