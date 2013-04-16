@@ -44,7 +44,7 @@
 
 abstract AbstractHeap{VT}
 
-abstract AbstractMutableHeap{HT,VT} <: AbstractHeap{VT}
+abstract AbstractMutableHeap{VT,HT} <: AbstractHeap{VT}
 
 # comparer
 
