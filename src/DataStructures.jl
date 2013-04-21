@@ -9,7 +9,7 @@ module DataStructures
     export stack, queue, enqueue!, dequeue!, update!
     export capacity, block_size, num_blocks, front, back, top, sizehint
     
-    export IntDisjointSets, DisjointSets, num_groups, find_root
+    export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set
     
     export AbstractHeap, compare, extract_all!
     export BinaryHeap, binary_minheap, binary_maxheap
