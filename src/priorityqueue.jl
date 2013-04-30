@@ -1,54 +1,148 @@
-# This file contains code that was formerly a part of Julia. License is MIT: http://julialang.org/license
 
-using Base.Collections: heapparent, heapleft, heapright, heapify, heapify!, heappop!, heappush!, isheap
+module Collections
 
-"""
-    PriorityQueue(K, V, [ord])
-Construct a new [`PriorityQueue`](@ref), with keys of type
-`K` and values/priorites of type `V`.
-If an order is not given, the priority queue is min-ordered using
-the default comparison for `V`.
-A `PriorityQueue` acts like a `Dict`, mapping values to their
-priorities, with the addition of a `dequeue!` function to remove the
-lowest priority element.
-```jldoctest
-julia> a = PriorityQueue(["a","b","c"],[2,3,1],Base.Order.Forward)
-PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
-  "c" => 1
-  "b" => 3
-  "a" => 2
-```
-"""
-type PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
+import Base: setindex!, done, get, haskey, isempty, length, next, getindex, start
+import ..Sort: Forward, Ordering, lt
+
+export
+    PriorityQueue,
+    dequeue!,
+    enqueue!,
+    heapify!,
+    heappop!,
+    heappush!,
+    isheap,
+    peek
+
+
+
+# Heap operations on flat arrays
+# ------------------------------
+
+
+# Binary heap indexing
+heapleft(i::Integer) = 2i
+heapright(i::Integer) = 2i + 1
+heapparent(i::Integer) = div(i, 2)
+
+
+# Binary min-heap percolate down.
+function percolate_down!(xs::AbstractArray, i::Integer, o::Ordering)
+    while (l = heapleft(i)) <= length(xs)
+        r = heapright(i)
+        j = r > length(xs) || lt(o, xs[l], xs[r]) ? l : r
+        if lt(o, xs[j], xs[i])
+            xs[i], xs[j] = xs[j], xs[i]
+            i = j
+        else
+            break
+        end
+    end
+end
+
+percolate_down!(xs::AbstractArray, i::Integer) = percolate_down!(xs, i, Forward())
+
+
+
+# Binary min-heap percolate up.
+function percolate_up!(xs::AbstractArray, i::Integer, o::Ordering)
+    while i > 1
+        j = heapparent(i)
+        if lt(o, xs[i], xs[j])
+            xs[i], xs[j] = xs[j], xs[i]
+            i = j
+        else
+            break
+        end
+    end
+end
+
+percolate_up!(xs::AbstractArray, i::Integer) = percolate_up!(xs, i, Forward())
+
+
+# Binary min-heap pop.
+function heappop!(xs::AbstractArray, o::Ordering)
+    x = xs[1]
+    y = pop!(xs)
+    if !isempty(xs)
+        xs[1] = y
+        percolate_down!(xs, 1, o)
+    end
+    x
+end
+
+heappop!(xs::AbstractArray) = heappop!(xs, Forward())
+
+
+# Binary min-heap push.
+function heappush!(xs::AbstractArray, x, o::Ordering)
+    push!(xs, x)
+    percolate_up!(xs, length(xs), o)
+    xs
+end
+
+heappush!(xs::AbstractArray, x) = heappush!(xs, x, Forward())
+
+
+# Turn an arbitrary array into a binary min-heap in linear time.
+function heapify!(xs::AbstractArray, o::Ordering)
+    for i in heapparent(length(xs)):-1:1
+        percolate_down!(xs, i, o)
+    end
+    xs
+end
+
+heapify!(xs::AbstractArray) = heapify!(xs, Forward())
+heapify(xs::AbstractArray, o::Ordering) = heapify!(copy(xs), o)
+heapify(xs::AbstractArray) = heapify(xs, Forward())
+
+
+# Is an arbitrary array heap ordered?
+function isheap(xs::AbstractArray, o::Ordering)
+    for i in 1:div(length(xs), 2)
+        if lt(o, xs[heapleft(i)], xs[i]) ||
+           (heapright(i) <= length(xs) && lt(o, xs[heapright(i)], xs[i]))
+            return false
+        end
+    end
+    true
+end
+
+isheap(xs::AbstractArray) = isheap(xs, Forward())
+
+
+# PriorityQueue
+# -------------
+
+# A PriorityQueue that acts like a Dict, mapping values to their priorities,
+# with the addition of a dequeue! function to remove the lowest priority
+# element.
+type PriorityQueue{K,V} <: Associative{K,V}
     # Binary heap of (element, priority) pairs.
-    xs::Array{Pair{K,V}, 1}
-    o::O
+    xs::Array{(K, V), 1}
+    o::Ordering
 
     # Map elements to their index in xs
     index::Dict{K, Int}
 
-    function PriorityQueue(o::O)
-        new(Array{Pair{K,V}}(0), o, Dict{K, Int}())
+    function PriorityQueue(o::Ordering)
+        new(Array((K, V), 0), o, Dict{K, Int}())
     end
 
-    PriorityQueue() = PriorityQueue{K,V,O}(Forward)
+    PriorityQueue() = PriorityQueue{K,V}(Forward())
 
     function PriorityQueue(ks::AbstractArray{K}, vs::AbstractArray{V},
-                           o::O)
-        # TODO: maybe deprecate
+                           o::Ordering)
         if length(ks) != length(vs)
-            throw(ArgumentError("key and value arrays must have equal lengths"))
+            error("Key and value arrays have unequal lengths.")
         end
-        PriorityQueue{K,V,O}(zip(ks, vs), o)
-    end
 
-    function PriorityQueue(itr, o::O)
-        xs = Array{Pair{K,V}}(length(itr))
+        xs = Array((K, V), length(ks))
         index = Dict{K, Int}()
-        for (i, (k, v)) in enumerate(itr)
-            xs[i] = Pair{K,V}(k, v)
+        for (i, (k, v)) in enumerate(zip(ks, vs))
+            xs[i] = (k, v)
             if haskey(index, k)
-                throw(ArgumentError("PriorityQueue keys must be unique"))
+                error("PriorityQueue keys must be unique.")
             end
             index[k] = i
         end
@@ -63,83 +157,76 @@ type PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
     end
 end
 
-PriorityQueue(o::Ordering=Forward) = PriorityQueue{Any,Any,typeof(o)}(o)
-PriorityQueue{K,V}(::Type{K}, ::Type{V}, o::Ordering=Forward) = PriorityQueue{K,V,typeof(o)}(o)
+PriorityQueue(o::Ordering) = PriorityQueue{Any,Any}(o)
+PriorityQueue() = PriorityQueue{Any,Any}(Forward())
 
-# TODO: maybe deprecate
-PriorityQueue{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V},
-                   o::Ordering=Forward) = PriorityQueue{K,V,typeof(o)}(ks, vs, o)
+function PriorityQueue{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V},
+                            o::Ordering)
+    PriorityQueue{K,V}(ks, vs, o)
+end
 
-PriorityQueue{K,V}(kvs::Associative{K,V}, o::Ordering=Forward) = PriorityQueue{K,V,typeof(o)}(kvs, o)
+function PriorityQueue{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V})
+    PriorityQueue{K,V}(ks, vs, Forward())
+end
 
-PriorityQueue{K,V}(a::AbstractArray{Tuple{K,V}}, o::Ordering=Forward) = PriorityQueue{K,V,typeof(o)}(a, o)
+function PriorityQueue{K,V}(kvs::Dict{K,V}, o::Ordering)
+    PriorityQueue{K,V}([k for k in keys(kvs)], [v for v in values(kvs)], o)
+end
+
+function PriorityQueue{K,V}(kvs::Dict{K,V})
+    PriorityQueue(kvs, Forward())
+end
+
 
 length(pq::PriorityQueue) = length(pq.xs)
 isempty(pq::PriorityQueue) = isempty(pq.xs)
 haskey(pq::PriorityQueue, key) = haskey(pq.index, key)
-
-"""
-    peek(pq)
-Return the lowest priority key from a priority queue without removing that
-key from the queue.
-"""
 peek(pq::PriorityQueue) = pq.xs[1]
 
+
+# Swap two nodes in a PriorityQueue
+function swap!(pq::PriorityQueue, i::Integer, j::Integer)
+    pq.index[pq.xs[i][1]] = j
+    pq.index[pq.xs[j][1]] = i
+    pq.xs[i], pq.xs[j] = pq.xs[j], pq.xs[i]
+end
+
+
 function percolate_down!(pq::PriorityQueue, i::Integer)
-    x = pq.xs[i]
-    @inbounds while (l = heapleft(i)) <= length(pq)
+    while (l = heapleft(i)) <= length(pq)
         r = heapright(i)
-        j = r > length(pq) || lt(pq.o, pq.xs[l].second, pq.xs[r].second) ? l : r
-        if lt(pq.o, pq.xs[j].second, x.second)
-            pq.index[pq.xs[j].first] = i
-            pq.xs[i] = pq.xs[j]
+        j = r > length(pq) || lt(pq.o, pq.xs[l][2], pq.xs[r][2]) ? l : r
+        if lt(pq.o, pq.xs[j][2], pq.xs[i][2])
+            swap!(pq, i, j)
             i = j
         else
             break
         end
     end
-    pq.index[x.first] = i
-    pq.xs[i] = x
 end
 
 
 function percolate_up!(pq::PriorityQueue, i::Integer)
-    x = pq.xs[i]
-    @inbounds while i > 1
+    while i > 1
         j = heapparent(i)
-        if lt(pq.o, x.second, pq.xs[j].second)
-            pq.index[pq.xs[j].first] = i
-            pq.xs[i] = pq.xs[j]
+        if lt(pq.o, pq.xs[i][2], pq.xs[j][2])
+            swap!(pq, i, j)
             i = j
         else
             break
         end
     end
-    pq.index[x.first] = i
-    pq.xs[i] = x
 end
 
-# Equivalent to percolate_up! with an element having lower priority than any other
-function force_up!(pq::PriorityQueue, i::Integer)
-    x = pq.xs[i]
-    @inbounds while i > 1
-        j = heapparent(i)
-        pq.index[pq.xs[j].first] = i
-        pq.xs[i] = pq.xs[j]
-        i = j
-    end
-    pq.index[x.first] = i
-    pq.xs[i] = x
-end
 
 function getindex{K,V}(pq::PriorityQueue{K,V}, key)
-    pq.xs[pq.index[key]].second
+    pq.xs[pq.index[key]][2]
 end
 
 
 function get{K,V}(pq::PriorityQueue{K,V}, key, deflt)
     i = get(pq.index, key, 0)
-    i == 0 ? deflt : pq.xs[i].second
+    i == 0 ? deflt : pq.xs[i][2]
 end
 
 
@@ -147,8 +234,8 @@ end
 function setindex!{K,V}(pq::PriorityQueue{K, V}, value, key)
     if haskey(pq, key)
         i = pq.index[key]
-        oldvalue = pq.xs[i].second
-        pq.xs[i] = Pair{K,V}(key, value)
+        _, oldvalue = pq.xs[i]
+        pq.xs[i] = (key, value)
         if lt(pq.o, oldvalue, value)
             percolate_down!(pq, i)
         else
@@ -157,78 +244,44 @@ function setindex!{K,V}(pq::PriorityQueue{K, V}, value, key)
     else
         enqueue!(pq, key, value)
     end
-    value
 end
 
-"""
-    enqueue!(pq, k, v)
-Insert the a key `k` into a priority queue `pq` with priority `v`.
-```jldoctest
-julia> a = PriorityQueue(["a","b","c"],[2,3,1],Base.Order.Forward)
-PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
-  "c" => 1
-  "b" => 3
-  "a" => 2
-julia> enqueue!(a, "d", 4)
-PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 4 entries:
-  "c" => 1
-  "b" => 3
-  "a" => 2
-  "d" => 4
-```
-"""
+
 function enqueue!{K,V}(pq::PriorityQueue{K,V}, key, value)
     if haskey(pq, key)
-        throw(ArgumentError("PriorityQueue keys must be unique"))
+        error("PriorityQueue keys must be unique.")
     end
-    push!(pq.xs, Pair{K,V}(key, value))
+
+    push!(pq.xs, (key, value))
     pq.index[key] = length(pq)
     percolate_up!(pq, length(pq))
     pq
 end
 
-"""
-    dequeue!(pq)
-Remove and return the lowest priority key from a priority queue.
-```jldoctest
-julia> a = PriorityQueue(["a","b","c"],[2,3,1],Base.Order.Forward)
-PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
-  "c" => 1
-  "b" => 3
-  "a" => 2
-julia> dequeue!(a)
-"c"
-julia> a
-PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
-  "b" => 3
-  "a" => 2
-```
-"""
+
 function dequeue!(pq::PriorityQueue)
     x = pq.xs[1]
     y = pop!(pq.xs)
     if !isempty(pq)
         pq.xs[1] = y
-        pq.index[y.first] = 1
+        pq.index[pq.xs[1][1]] = 1
         percolate_down!(pq, 1)
     end
-    delete!(pq.index, x.first)
-    x.first
+    delete!(pq.index, x[1])
+    x[1]
 end
 
-function dequeue!(pq::PriorityQueue, key)
-    idx = pq.index[key]
-    force_up!(pq, idx)
-    dequeue!(pq)
-    key
-end
 
 # Unordered iteration through key value pairs in a PriorityQueue
 start(pq::PriorityQueue) = start(pq.index)
 
 done(pq::PriorityQueue, i) = done(pq.index, i)
 
-function next{K,V}(pq::PriorityQueue{K,V}, i)
+function next(pq::PriorityQueue, i)
     (k, idx), i = next(pq.index, i)
-    return (pq.xs[idx], i)
+    return ((k, pq.xs[idx][2]), i)
 end
+
+
+end # module Collections
+
