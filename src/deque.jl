@@ -46,8 +46,8 @@ length(q::Deque) = q.len
 block_size(q::Deque) = q.blksize
 num_blocks(q::Deque) = q.nblocks
 
-front(q::Deque) = q.head.data[q.head.front]
-back(q::Deque) = q.rear.data[q.rear.back]
+front(q::Deque) = isempty(q) ? throw(ArgumentError("Attempted to front at an empty dequeue.")) : q.head.data[q.head.front]
+back(q::Deque) = isempty(q) ? throw(ArgumentError("Attempted to back at an empty dequeue.")) : q.rear.data[q.rear.back]
 
 function dump(io::IO, q::Deque)
     println(io, "Deque (length = $(q.len), blksize = $(q.blksize), nblocks = $(q.nblocks))")
