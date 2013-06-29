@@ -48,6 +48,7 @@ Usage of Queue:
 q = queue(Int)
 enqueue!(q, x)
 x = front(q)
+x = back(q)
 x = dequeue!(q)
 ```
 
