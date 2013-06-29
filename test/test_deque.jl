@@ -7,12 +7,16 @@ q = Deque{Int}()
 @test length(q) == 0
 @test isempty(q)
 @test block_size(q) == DataStructures.default_dequeue_blocksize
+@test_fails front(q)
+@test_fails back(q)
 
 q = Deque{Int}(3)
 @test length(q) == 0
-@test isempty(q) == true
+@test isempty(q)
 @test block_size(q) == 3
 @test num_blocks(q) == 1
+@test_fails front(q)
+@test_fails back(q)
 @test isa(collect(q), Vector{Int})
 @test collect(q) == Int[]
 
@@ -48,6 +52,9 @@ for i = 1 : n
     if !isempty(q)
         @test front(q) == 1
         @test back(q) == n - i
+    else
+        @test_fails front(q)
+        @test_fails back(q)
     end
     
     cq = collect(q)
@@ -82,10 +89,13 @@ for i = 1 : n
     @test block_size(q) == 3
     @test num_blocks(q) == div(n-i-1, 3) + 1
     @test x == n - i + 1
-    
+
     if !isempty(q)
         @test front(q) == n - i
         @test back(q) == 1
+    else
+        @test_fails front(q)
+        @test_fails back(q)
     end
     
     cq = collect(q)
