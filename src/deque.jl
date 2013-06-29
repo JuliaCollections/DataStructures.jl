@@ -66,6 +66,23 @@ function dump(io::IO, q::Deque)
     end
 end
 
+function show(io::IO, q::Deque)
+    cb = q.head
+    i = 1
+    print(io, "[")
+    while (cb != nothing)
+        for j = cb.front : cb.back
+            print(io, string(cb.data[j]))
+            if (j < cb.back) || (cb.next != nothing)
+                print(io, ",")
+            end
+        end
+
+        cb = cb.next
+        i += 1
+    end
+    print(io, "]")
+end
 
 function empty!{T}(q::Deque{T})
     # release all blocks except the head
