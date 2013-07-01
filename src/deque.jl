@@ -46,8 +46,8 @@ length(q::Deque) = q.len
 block_size(q::Deque) = q.blksize
 num_blocks(q::Deque) = q.nblocks
 
-front(q::Deque) = q.head.data[q.head.front]
-back(q::Deque) = q.rear.data[q.rear.back]
+front(q::Deque) = isempty(q) ? throw(ArgumentError("Attempted to front at an empty dequeue.")) : q.head.data[q.head.front]
+back(q::Deque) = isempty(q) ? throw(ArgumentError("Attempted to back at an empty dequeue.")) : q.rear.data[q.rear.back]
 
 function dump(io::IO, q::Deque)
     println(io, "Deque (length = $(q.len), blksize = $(q.blksize), nblocks = $(q.nblocks))")
@@ -66,6 +66,23 @@ function dump(io::IO, q::Deque)
     end
 end
 
+function show(io::IO, q::Deque)
+    cb = q.head
+    i = 1
+    print(io, "[")
+    while (cb != nothing)
+        for j = cb.front : cb.back
+            print(io, string(cb.data[j]))
+            if (j < cb.back) || (cb.next != nothing)
+                print(io, ",")
+            end
+        end
+
+        cb = cb.next
+        i += 1
+    end
+    print(io, "]")
+end
 
 function empty!{T}(q::Deque{T})
     # release all blocks except the head
