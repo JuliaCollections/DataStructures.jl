@@ -103,12 +103,19 @@ Mutable heaps (values can be changed after being pushed to a heap) are derived f
 - update!(h, i, v)      # updates the value of an element (referred to by the handle i)
 ```
 
-Currently, the the binary heap (type ``BinaryHeap``) and the mutable binary heap (type ``MutableBinaryHeap``) has been implemented. 
+Currently, both min/max versions of binary heap (type ``BinaryHeap``) and mutable binary heap (type ``MutableBinaryHeap``) have been implemented.
 
 Examples of constructing a heap:
 ```julia
-h = binary_heap(Int)            # creates an empty binary heap of integers
-h = binary_heap([1,4,3,2])      # creates a heap from a vector
-h = mutable_binary_heap(Int)    # creates an empty mutable binary heap
-h = mutable_binary_heap(Int)    # creates a mutable heap from a vector
+h = binary_minheap(Int)            
+h = binary_maxheap(Int)            # create an empty min/max binary heap of integers
+
+h = binary_minheap([1,4,3,2])      
+h = binary_maxheap([1,4,3,2])      # create a min/max heap from a vector
+
+h = mutable_binary_minheap(Int)    
+h = mutable_binary_maxheap(Int)    # create an empty mutable min/max heap
+
+h = mutable_binary_minheap([1,4,3,2])    
+h = mutable_binary_maxheap([1,4,3,2])    # create a mutable min/max heap from a vector
 ```
