@@ -6,17 +6,17 @@ using Base.Test
 q = Deque{Int}()
 @test length(q) == 0
 @test isempty(q)
-@test block_size(q) == DataStructures.default_dequeue_blocksize
-@test_fails front(q)
-@test_fails back(q)
+@test q.blksize == DataStructures.DEFAULT_DEQUEUE_BLOCKSIZE
+@test_throws front(q)
+@test_throws back(q)
 
 q = Deque{Int}(3)
 @test length(q) == 0
 @test isempty(q)
-@test block_size(q) == 3
+@test q.blksize == 3
 @test num_blocks(q) == 1
-@test_fails front(q)
-@test_fails back(q)
+@test_throws front(q)
+@test_throws back(q)
 @test isa(collect(q), Vector{Int})
 @test collect(q) == Int[]
 
@@ -28,7 +28,6 @@ for i = 1 : n
     push!(q, i)
     @test length(q) == i
     @test isempty(q) == false
-    @test block_size(q) == 3
     @test num_blocks(q) == div(i-1, 3) + 1
     
     @test front(q) == 1
@@ -45,7 +44,6 @@ for i = 1 : n
     x = pop!(q)
     @test length(q) == n - i
     @test isempty(q) == (i == n)
-    @test block_size(q) == 3
     @test num_blocks(q) == div(n-i-1, 3) + 1
     @test x == n - i + 1
     
@@ -53,8 +51,8 @@ for i = 1 : n
         @test front(q) == 1
         @test back(q) == n - i
     else
-        @test_fails front(q)
-        @test_fails back(q)
+        @test_throws front(q)
+        @test_throws back(q)
     end
     
     cq = collect(q)
@@ -69,7 +67,6 @@ for i = 1 : n
     unshift!(q, i)
     @test length(q) == i
     @test isempty(q) == false
-    @test block_size(q) == 3
     @test num_blocks(q) == div(i-1, 3) + 1
     
     @test front(q) == i
@@ -86,7 +83,6 @@ for i = 1 : n
     x = shift!(q)
     @test length(q) == n - i
     @test isempty(q) == (i == n)
-    @test block_size(q) == 3
     @test num_blocks(q) == div(n-i-1, 3) + 1
     @test x == n - i + 1
 
@@ -94,8 +90,8 @@ for i = 1 : n
         @test front(q) == n - i
         @test back(q) == 1
     else
-        @test_fails front(q)
-        @test_fails back(q)
+        @test_throws front(q)
+        @test_throws back(q)
     end
     
     cq = collect(q)

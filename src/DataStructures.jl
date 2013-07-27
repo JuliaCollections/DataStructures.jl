@@ -7,7 +7,7 @@ module DataStructures
     
     export Deque, Stack, Queue
     export stack, queue, enqueue!, dequeue!, update!
-    export capacity, block_size, num_blocks, front, back, top, sizehint
+    export capacity, num_blocks, front, back, top, sizehint
     
     export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set
     

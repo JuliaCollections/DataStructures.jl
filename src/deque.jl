@@ -1,29 +1,60 @@
 # Block-based dequeue
 
+#######################################
+#
+#  DequeBlock
+#
+#######################################
+
 type DequeBlock{T}
     data::Vector{T}  # only data[front:back] is valid
     capa::Int   
     front::Int
     back::Int
-    prev::Union(Nothing, DequeBlock{T})  # ref to previous block
-    next::Union(Nothing, DequeBlock{T})  # ref to next block
+    prev::DequeBlock{T}  # ref to previous block
+    next::DequeBlock{T}  # ref to next block
+
+    function DequeBlock(capa::Int, front::Int)
+        data = Array(T, capa)
+        blk = new(data, capa, front, front-1)
+        blk.prev = blk
+        blk.next = blk
+        blk
+    end
 end
 
-capacity(blk::DequeBlock) = length(blk.data)
+# block at the rear of the chain, elements towards the front
+rear_deque_block{T}(ty::Type{T}, n::Int) = DequeBlock{T}(n, 1)
+
+# block at the head of the train, elements towards the back
+head_deque_block{T}(ty::Type{T}, n::Int) = DequeBlock{T}(n, n+1)
+
+capacity(blk::DequeBlock) = blk.capa
 length(blk::DequeBlock) = blk.back - blk.front + 1
 isempty(blk::DequeBlock) = blk.back < blk.front
 
-function rear_deque_block{T}(ty::Type{T}, n::Int)
-    data = Array(T, n)
-    DequeBlock{T}(data, n, 1, 0, nothing, nothing)
+# reset the block to empty, and position
+
+function reset!{T}(blk::DequeBlock{T}, front::Int)
+    blk.front = front
+    blk.back = front - 1
+    blk.prev = blk
+    blk.next = blk
 end
 
-function head_deque_block{T}(ty::Type{T}, n::Int)
-    data = Array(T, n)
-    DequeBlock{T}(data, n, n+1, n, nothing, nothing)
+function show(io::IO, blk::DequeBlock)  # avoids recursion into prev and next
+    x = blk.data[blk.front:blk.back]
+    print(io, "$(typeof(blk))(capa = $(blk.capa), front = $(blk.front), back = $(blk.back)): $x")
 end
 
-const default_dequeue_blocksize = 2048
+
+#######################################
+#
+#  Deque
+#
+#######################################
+
+const DEFAULT_DEQUEUE_BLOCKSIZE = 1024
 
 type Deque{T}
     nblocks::Int
@@ -37,52 +68,94 @@ type Deque{T}
         new(1, blksize, 0, head, rear)
     end
     
-    Deque() = Deque{T}(default_dequeue_blocksize::Int)
+    Deque() = Deque{T}(DEFAULT_DEQUEUE_BLOCKSIZE)
 end
 
 isempty(q::Deque) = q.len == 0
 length(q::Deque) = q.len
-
-block_size(q::Deque) = q.blksize
 num_blocks(q::Deque) = q.nblocks
 
-front(q::Deque) = isempty(q) ? throw(ArgumentError("Attempted to front at an empty dequeue.")) : q.head.data[q.head.front]
-back(q::Deque) = isempty(q) ? throw(ArgumentError("Attempted to back at an empty dequeue.")) : q.rear.data[q.rear.back]
-
-function dump(io::IO, q::Deque)
-    println(io, "Deque (length = $(q.len), blksize = $(q.blksize), nblocks = $(q.nblocks))")
-    cb = q.head
-    i = 1
-    while (cb != nothing)
-        print(io, "block $i [$(cb.front):$(cb.back)] ==> ")
-        for j = cb.front : cb.back
-            print(io, string(cb.data[j]))
-            print(io, "  ")
-        end
-        println(io, "")
-        
-        cb = cb.next
-        i += 1
+function front(q::Deque)
+    if isempty(q)
+        throw(ArgumentError("Attempted to front at an empty dequeue."))
     end
+    blk = q.head
+    blk.data[blk.front]
 end
+
+function back(q::Deque)
+    if isempty(q)
+        throw(ArgumentError("Attempted to back at an empty dequeue."))
+    end 
+    blk = q.rear
+    blk.data[blk.back]
+end
+
+
+# Iteration
+
+immutable DequeIterator{T}
+    is_done::Bool
+    cblock::DequeBlock{T}  # current block
+    i::Int
+end
+
+start{T}(q::Deque{T}) = DequeIterator{T}(isempty(q), q.head, q.head.front)
+
+function next{T}(q::Deque{T}, s::DequeIterator{T})
+    cb::DequeBlock{T} = s.cblock
+    i::Int = s.i
+    x = cb.data[i]
+    
+    is_done = false
+    
+    i += 1
+    if i > cb.back
+        cb_next::DequeBlock{T} = cb.next
+        if is(cb, cb_next)
+            is_done = true
+        else
+            cb = cb_next
+            i = 1
+        end
+    end 
+    
+    (x, DequeIterator{T}(is_done, cb, i))
+end
+
+done{T}(q::Deque{T}, s::DequeIterator{T}) = s.is_done
+
+
+# Showing
 
 function show(io::IO, q::Deque)
-    cb = q.head
-    i = 1
-    print(io, "[")
-    while (cb != nothing)
-        for j = cb.front : cb.back
-            print(io, string(cb.data[j]))
-            if (j < cb.back) || (cb.next != nothing)
-                print(io, ",")
-            end
-        end
-
-        cb = cb.next
-        i += 1
-    end
-    print(io, "]")
+    print(io, "Deque [$(collect(q))]")
 end
+
+function dump(io::IO, q::Deque)
+    println(io, "Deque (length = $(q.len), nblocks = $(q.nblocks))")
+    cb::DequeBlock = q.head
+    i = 1
+    while true
+        print(io, "block $i [$(cb.front):$(cb.back)] ==> ")
+        for j = cb.front : cb.back
+            print(io, cb.data[j])
+            print(io, ' ')
+        end
+        println(io)
+        
+        cb_next::DequeBlock = cb.next
+        if !is(cb, cb_next)
+            cb = cb_next            
+            i += 1
+        else
+            break
+        end
+    end
+end
+
+
+# Manipulation
 
 function empty!{T}(q::Deque{T})
     # release all blocks except the head
@@ -95,11 +168,7 @@ function empty!{T}(q::Deque{T})
     end
     
     # clean the head block (but retain the block itself)
-    h = q.head
-    h.front = 1
-    h.back = 0
-    h.prev = nothing
-    h.rear = nothing
+    reset!(q.head, 1)
     
     # reset queue fields
     q.nblocks = 1
@@ -169,7 +238,7 @@ function pop!{T}(q::Deque{T})   # pop back
             # release and detach the rear block
             empty!(rear.data)
             q.rear = rear.prev::DequeBlock{T}
-            q.rear.next = nothing
+            q.rear.next = q.rear
             q.nblocks -= 1
         end        
     end 
@@ -193,44 +262,11 @@ function shift!{T}(q::Deque{T})  # pop front
             # release and detach the head block
             empty!(head.data)
             q.head = head.next::DequeBlock{T}
-            q.head.prev = nothing
+            q.head.prev = q.head
             q.nblocks -= 1
         end
     end
     q.len -= 1
     x
 end
-
-
-# dequeue iteration
-
-immutable DequeIterator{T}
-    is_done::Bool
-    cblock::DequeBlock{T}  # current block
-    i::Int
-end
-
-start{T}(q::Deque{T}) = DequeIterator{T}(isempty(q), q.head, q.head.front)
-
-function next{T}(q::Deque{T}, s::DequeIterator{T})
-    cb::DequeBlock{T} = s.cblock
-    i::Int = s.i
-    x = cb.data[i]
-    
-    is_done = false
-    
-    i += 1
-    if i > cb.back
-        if cb.next == nothing
-            is_done = true
-        else
-            cb = cb.next
-            i = 1
-        end
-    end 
-    
-    (x, DequeIterator{T}(is_done, cb, i))
-end
-
-done{T}(q::Deque{T}, s::DequeIterator{T}) = s.is_done
 
