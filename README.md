@@ -1,5 +1,7 @@
 # DataStructures.jl
 
+[![Build Status](https://travis-ci.org/lindahua/DataStructures.jl.png)](https://travis-ci.org/lindahua/DataStructures.jl)
+
 This package implements a variety of data structures, including
 
 * Dequeue (based on block-list)
