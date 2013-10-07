@@ -8,15 +8,15 @@
 
 function _heap_bubble_up!{Comp,T}(comp::Comp, valtree::Array{T}, i::Int) 
     i0::Int = i
-    v = valtree[i]
+    @inbounds v = valtree[i]
     
     while i > 1  # nd is not root
         p = i >> 1
-        vp = valtree[p]
+        @inbounds vp = valtree[p]
         
         if compare(comp, v, vp)
             # move parent downward
-            valtree[i] = vp
+            @inbounds valtree[i] = vp
             i = p
         else  
             break
@@ -24,12 +24,12 @@ function _heap_bubble_up!{Comp,T}(comp::Comp, valtree::Array{T}, i::Int)
     end
     
     if i != i0
-        valtree[i] = v
+        @inbounds valtree[i] = v
     end
 end
 
 function _heap_bubble_down!{Comp,T}(comp::Comp, valtree::Array{T}, i::Int)
-    v::T = valtree[i]
+    @inbounds v::T = valtree[i]
     swapped = true
     n = length(valtree)
     last_parent = n >> 1
@@ -38,27 +38,27 @@ function _heap_bubble_down!{Comp,T}(comp::Comp, valtree::Array{T}, i::Int)
         lc = i << 1
         if lc < n   # contains both left and right children
             rc = lc + 1
-            lv = valtree[lc]
-            rv = valtree[rc]
+            @inbounds lv = valtree[lc]
+            @inbounds rv = valtree[rc]
             if compare(comp, rv, lv)
                 if compare(comp, rv, v)
-                    valtree[i] = rv
+                    @inbounds valtree[i] = rv
                     i = rc
                 else
                     swapped = false
                 end
             else
                 if compare(comp, lv, v)
-                    valtree[i] = lv
+                    @inbounds valtree[i] = lv
                     i = lc
                 else
                     swapped = false
                 end
             end                        
         else        # contains only left child
-            lv = valtree[lc]
+            @inbounds lv = valtree[lc]
             if compare(comp, lv, v)
-                valtree[i] = lv
+                @inbounds valtree[i] = lv
                 i = lc
             else
                 swapped = false

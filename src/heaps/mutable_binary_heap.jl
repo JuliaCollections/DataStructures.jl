@@ -14,7 +14,7 @@ end
 function _heap_bubble_up!{Comp, T}(comp::Comp, 
     nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int) 
     
-    nd = nodes[nd_id] 
+    @inbounds nd = nodes[nd_id] 
     v::T = nd.value
     
     swapped = true  # whether swap happens at last step
@@ -22,12 +22,12 @@ function _heap_bubble_up!{Comp, T}(comp::Comp,
     
     while swapped && i > 1  # nd is not root
         p = i >> 1
-        nd_p = nodes[p]
+        @inbounds nd_p = nodes[p]
         
         if compare(comp, v, nd_p.value)
             # move parent downward
-            nodes[i] = nd_p
-            nodemap[nd_p.handle] = i
+            @inbounds nodes[i] = nd_p
+            @inbounds nodemap[nd_p.handle] = i
             i = p
         else  
             swapped = false
@@ -43,7 +43,7 @@ end
 function _heap_bubble_down!{Comp, T}(comp::Comp, 
     nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int)
     
-    nd = nodes[nd_id]
+    @inbounds nd = nodes[nd_id]
     v::T = nd.value
     
     n = length(nodes)
@@ -59,14 +59,14 @@ function _heap_bubble_down!{Comp, T}(comp::Comp,
             ir = il + 1
             
             # determine the better child
-            nd_l = nodes[il]
-            nd_r = nodes[ir]
+            @inbounds nd_l = nodes[il]
+            @inbounds nd_r = nodes[ir]
             
             if compare(comp, nd_r.value, nd_l.value) 
                 # consider right child
                 if compare(comp, nd_r.value, v)
-                    nodes[i] = nd_r
-                    nodemap[nd_r.handle] = i 
+                    @inbounds nodes[i] = nd_r
+                    @inbounds nodemap[nd_r.handle] = i 
                     i = ir
                 else
                     swapped = false
@@ -74,8 +74,8 @@ function _heap_bubble_down!{Comp, T}(comp::Comp,
             else
                 # consider left child
                 if compare(comp, nd_l.value, v)
-                    nodes[i] = nd_l
-                    nodemap[nd_l.handle] = i
+                    @inbounds nodes[i] = nd_l
+                    @inbounds nodemap[nd_l.handle] = i
                     i = il
                 else
                     swapped = false
@@ -85,8 +85,8 @@ function _heap_bubble_down!{Comp, T}(comp::Comp,
         else  # contains only left child
             nd_l = nodes[il]
             if compare(comp, nd_l.value, v)
-                nodes[i] = nd_l
-                nodemap[nd_l.handle] = i
+                @inbounds nodes[i] = nd_l
+                @inbounds nodemap[nd_l.handle] = i
                 i = il
             else
                 swapped = false
@@ -95,8 +95,8 @@ function _heap_bubble_down!{Comp, T}(comp::Comp,
     end
     
     if i != nd_id
-        nodes[i] = nd
-        nodemap[nd.handle] = i
+        @inbounds nodes[i] = nd
+        @inbounds nodemap[nd.handle] = i
     end
 end
 
@@ -106,15 +106,15 @@ function _binary_heap_pop!{Comp,T}(comp::Comp,
     # extract root node
     rt = nodes[1]
     v = rt.value
-    nodemap[rt.handle] = 0
+    @inbounds nodemap[rt.handle] = 0
     
     if length(nodes) == 1
         # clear
         empty!(nodes)
     else
         # place last node to root
-        nodes[1] = new_rt = pop!(nodes)
-        nodemap[new_rt.handle] = 1
+        @inbounds nodes[1] = new_rt = pop!(nodes)
+        @inbounds nodemap[new_rt.handle] = 1
         
         if length(nodes) > 1
             _heap_bubble_down!(comp, nodes, nodemap, 1)
@@ -133,8 +133,8 @@ function _make_mutable_binary_heap{Comp,T}(comp::Comp, ty::Type{T}, values)
     i::Int = 0
     for v in values
         i += 1
-        nodes[i] = MutableBinaryHeapNode{T}(v, i)
-        nodemap[i] = i
+        @inbounds nodes[i] = MutableBinaryHeapNode{T}(v, i)
+        @inbounds nodemap[i] = i
     end
     
     for i = 1 : n
