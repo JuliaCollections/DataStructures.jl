@@ -45,3 +45,21 @@ println("push front 10^7 integers:")
 @printf("    Vector:   elapsed = %8.4fs\n", t1)
 @printf("    Deque:    elapsed = %8.4fs\n", t2)
 
+
+# traverse
+
+function traverse(container)
+	for e in container
+	end
+end
+
+traverse(v)
+t1 = @elapsed traverse(v)
+
+traverse(q)
+t2 = @elapsed traverse(q)
+
+println("traverse 10^7 integers:")
+@printf("    Vector:   elapsed = %8.4fs\n", t1)
+@printf("    Deque:    elapsed = %8.4fs\n", t2)
+

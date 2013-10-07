@@ -105,7 +105,7 @@ end
 start{T}(q::Deque{T}) = DequeIterator{T}(isempty(q), q.head, q.head.front)
 
 function next{T}(q::Deque{T}, s::DequeIterator{T})
-    cb::DequeBlock{T} = s.cblock
+    cb = s.cblock
     i::Int = s.i
     x::T = cb.data[i]
     
@@ -113,7 +113,7 @@ function next{T}(q::Deque{T}, s::DequeIterator{T})
     
     i += 1
     if i > cb.back
-        cb_next::DequeBlock{T} = cb.next
+        cb_next = cb.next
         if is(cb, cb_next)
             is_done = true
         else
