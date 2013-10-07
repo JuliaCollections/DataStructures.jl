@@ -30,8 +30,8 @@ num_groups(s::IntDisjointSets) = s.ngroups
 # path compression is implemented here
 #
 function find_root(s::IntDisjointSets, x::Integer)
-    p::Int = s.parents[x]
-    if s.parents[p] != p
+    @inbounds p::Int = s.parents[x]
+    @inbounds if s.parents[p] != p
         s.parents[x] = p = find_root(s, p)
     end
     p
@@ -46,13 +46,13 @@ function union!(s::IntDisjointSets, x::Integer, y::Integer)
     yroot = find_root(s, y)
     if xroot != yroot
         rks::Vector{Int} = s.ranks
-        xrank::Int = rks[xroot]
-        yrank::Int = rks[yroot]
+        @inbounds xrank::Int = rks[xroot]
+        @inbounds yrank::Int = rks[yroot]
         
         if xrank < yrank
-            s.parents[xroot] = yroot
+            @inbounds s.parents[xroot] = yroot
         else
-            s.parents[yroot] = xroot
+            @inbounds s.parents[yroot] = xroot
             if xrank == yrank
                 s.ranks[xroot] += 1
             end
