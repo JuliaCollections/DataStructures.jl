@@ -197,7 +197,7 @@ function push!{T}(q::Deque{T}, x::T)  # push back
     end
     
     if rear.back < rear.capa
-        rear.data[rear.back += 1] = x
+        @inbounds rear.data[rear.back += 1] = x
     else
         new_rear = rear_deque_block(T, q.blksize)
         new_rear.back = 1
@@ -220,7 +220,7 @@ function unshift!{T}(q::Deque{T}, x::T)   # push front
     end
     
     if head.front > 1
-        head.data[head.front -= 1] = x
+        @inbounds head.data[head.front -= 1] = x
     else
         n::Int = q.blksize
         new_head = head_deque_block(T, n)
@@ -242,7 +242,7 @@ function pop!{T}(q::Deque{T})   # pop back
     rear = q.rear
     @assert rear.back >= rear.front
 
-    x = rear.data[rear.back]
+    @inbounds x = rear.data[rear.back]
     rear.back -= 1
     if rear.back < rear.front
         if q.nblocks > 1
@@ -266,7 +266,7 @@ function shift!{T}(q::Deque{T})  # pop front
     head = q.head
     @assert head.back >= head.front
     
-    x = head.data[head.front]
+    @inbounds x = head.data[head.front]
     head.front += 1
     if head.back < head.front
         if q.nblocks > 1
