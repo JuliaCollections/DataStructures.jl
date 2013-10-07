@@ -71,6 +71,8 @@ type Deque{T}
     Deque() = Deque{T}(DEFAULT_DEQUEUE_BLOCKSIZE)
 end
 
+deque{T}(::Type{T}) = Deque{T}()
+
 isempty(q::Deque) = q.len == 0
 length(q::Deque) = q.len
 num_blocks(q::Deque) = q.nblocks
@@ -105,7 +107,7 @@ start{T}(q::Deque{T}) = DequeIterator{T}(isempty(q), q.head, q.head.front)
 function next{T}(q::Deque{T}, s::DequeIterator{T})
     cb::DequeBlock{T} = s.cblock
     i::Int = s.i
-    x = cb.data[i]
+    x::T = cb.data[i]
     
     is_done = false
     
@@ -124,6 +126,15 @@ function next{T}(q::Deque{T}, s::DequeIterator{T})
 end
 
 done{T}(q::Deque{T}, s::DequeIterator{T}) = s.is_done
+
+
+function Base.collect{T}(q::Deque{T})
+    r = T[]
+    for x::T in q
+        push!(r, x)
+    end
+    return r
+end
 
 
 # Showing

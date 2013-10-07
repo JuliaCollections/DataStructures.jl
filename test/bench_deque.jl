@@ -4,38 +4,44 @@ using DataStructures
 
 # push_back
 
+function batch_pushback!{Container,T}(v::Container, n::Int, e::T)
+	for i = 1 : n
+		push!(v, e)
+	end
+end
+
 v = Int[]
-q = stack(Int)
+q = deque(Int)
 
-push!(v, 0)
-t1 = @elapsed for i = 1 : 10^7
-    push!(v, i)
-end
+batch_pushback!(v, 10, 0)
+t1 = @elapsed batch_pushback!(v, 10^7, 0)
 
-push!(q, 0)
-t2 = @elapsed for i = 1 : 10^7
-    push!(q, i)
-end
+batch_pushback!(q, 10, 0)
+t2 = @elapsed batch_pushback!(q, 10^7, 0)
 
 println("push back 10^7 integers:")
 @printf("    Vector:   elapsed = %8.4fs\n", t1)
-@printf("    Stack:    elapsed = %8.4fs\n", t2)
+@printf("    Deque:    elapsed = %8.4fs\n", t2)
+
 
 # push_front
 
+function batch_pushfront!{Container,T}(v::Container, n::Int, e::T)
+	for i = 1 : n
+		unshift!(v, e)
+	end
+end
+
 v = Int[]
-q = queue(Int)
+q = deque(Int)
 
-unshift!(v, 0)
-t1 = @elapsed for i = 1 : 10^7
-    unshift!(v, i)
-end
+batch_pushfront!(v, 10, 0)
+t1 = @elapsed batch_pushfront!(v, 10^7, 0)
 
-enqueue!(q, 0)
-t2 = @elapsed for i = 1 : 10^7
-    enqueue!(q, i)
-end
+batch_pushfront!(q, 10, 0)
+t2 = @elapsed batch_pushfront!(q, 10^7, 0)
 
 println("push front 10^7 integers:")
 @printf("    Vector:   elapsed = %8.4fs\n", t1)
-@printf("    Queue:    elapsed = %8.4fs\n", t2)
+@printf("    Deque:    elapsed = %8.4fs\n", t2)
+

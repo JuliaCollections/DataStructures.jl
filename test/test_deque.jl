@@ -1,6 +1,7 @@
 using DataStructures
 using Base.Test
 
+
 # empty dequeue
 
 q = Deque{Int}()
