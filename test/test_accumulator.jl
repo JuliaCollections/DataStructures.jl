@@ -24,6 +24,8 @@ add!(ct, "b", 3)
 @test !haskey(ct, "abc")
 @test ct["abc"] == 0
 
+@test length(collect(keys(ct))) == 2
+
 ct2 = counter(["a", "a", "b", "b", "a", "c", "c"])
 @test isa(ct2, Accumulator{ASCIIString,Int})
 @test haskey(ct2, "a")
