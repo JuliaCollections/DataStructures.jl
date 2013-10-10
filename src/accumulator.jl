@@ -22,6 +22,7 @@ end
 
 copy{T,V<:Number}(ct::Accumulator{T,V}) = Accumulator{T,V}(copy(ct.map))
 
+length(a::Accumulator) = length(a.map)
 
 ## retrieval
 

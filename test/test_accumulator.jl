@@ -24,6 +24,8 @@ add!(ct, "b", 3)
 @test !haskey(ct, "abc")
 @test ct["abc"] == 0
 
+@test length(ct) == 2
+@test length(collect(ct)) == 2
 @test length(collect(keys(ct))) == 2
 
 ct2 = counter(["a", "a", "b", "b", "a", "c", "c"])
