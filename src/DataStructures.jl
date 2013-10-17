@@ -11,7 +11,8 @@ module DataStructures
     export capacity, num_blocks, front, back, top, sizehint
 
     export Accumulator, counter
-    export ClassifiedCollections, classified_lists, classified_sets
+    export ClassifiedCollections
+    export classified_lists, classified_sets, classified_counters
     
     export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set
 

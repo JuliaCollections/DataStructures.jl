@@ -1,6 +1,6 @@
 # A Classified Collection is a map which associates a collection to each key
 #
-# The collection can be either an array or a set, or other data structures
+# The collection can be either an array or a set, a counter, or other data structures
 # that support the push! method
 #
 
@@ -8,15 +8,17 @@ type ClassifiedCollections{K, Collection}
 	map::Dict{K, Collection}
 end
 
-_create_empty{T}(::Type{Vector{T}}) = Array(T, 0)
-_create_empty{T}(::Type{Set{T}}) = Set{T}()
-
 ## constructors
 
 ClassifiedCollections(K::Type, C::Type) = ClassifiedCollections{K, C}((K=>C)[])
 
 classified_lists(K::Type, V::Type) = ClassifiedCollections(K, Vector{V})
 classified_sets(K::Type, V::Type) = ClassifiedCollections(K, Set{V})
+classified_counters(K::Type, T::Type) = ClassifiedCollections(K, Accumulator{T, Int})
+
+_create_empty{T}(::Type{Vector{T}}) = Array(T, 0)
+_create_empty{T}(::Type{Set{T}}) = Set{T}()
+_create_empty{T,V}(::Type{Accumulator{T,V}}) = Accumulator(T, V)
 
 copy{K, C}(cc::ClassifiedCollections{K, C}) = ClassifiedCollections{K, C}(copy(cc.map))
 

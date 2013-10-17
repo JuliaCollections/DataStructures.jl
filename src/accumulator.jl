@@ -45,6 +45,7 @@ done(ct::Accumulator, state) = done(ct.map, state)
 add!{T,V<:Number}(ct::Accumulator{T,V}, x::T, a::V) = (ct.map[x] = ct[x] + a)
 add!{T,V<:Number,V2<:Number}(ct::Accumulator{T,V}, x::T, a::V2) = add!(ct, x, convert(V,a))
 add!{T,V<:Number}(ct::Accumulator{T,V}, x::T) = add!(ct, x, one(V))
+push!{T,V<:Number}(ct::Accumulator{T,V}, x::T) = add!(ct, x)
 
 function add!{T,V<:Number,V2<:Number}(ct::Accumulator{T,V}, r::Accumulator{T,V2})
 	for (x::T, v::V2) in r
