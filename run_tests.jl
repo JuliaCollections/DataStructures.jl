@@ -1,6 +1,7 @@
 tests = ["deque", 
 		 "stack_and_queue", 
 		 "accumulator",
+		 "classifiedcollections",
 		 "disjoint_set", 
 		 "binheap", 
 		 "mutable_binheap"]

@@ -11,6 +11,7 @@ module DataStructures
     export capacity, num_blocks, front, back, top, sizehint
 
     export Accumulator, counter
+    export ClassifiedCollections, classified_lists, classified_sets
     
     export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set
 
@@ -22,6 +23,7 @@ module DataStructures
     include("stack.jl")   
     include("queue.jl")
     include("accumulator.jl")
+    include("classifiedcollections.jl")
     include("disjoint_set.jl")
     include("heaps.jl")
 end
