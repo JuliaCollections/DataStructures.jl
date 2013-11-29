@@ -1,10 +1,10 @@
 module DataStructures
     
-    import Base.length, Base.isempty, Base.start, Base.next, Base.done
-    import Base.show, Base.dump, Base.empty!, Base.getindex
-    import Base.haskey, Base.keys, Base.merge, Base.copy
-    import Base.push!, Base.pop!, Base.shift!, Base.unshift!, Base.add!
-    import Base.union!
+    import Base: length, isempty, start, next, done,
+                 show, dump, empty!, getindex, setindex!, get,
+                 in, haskey, keys, merge, copy,
+                 push!, pop!, shift!, unshift!, add!,
+                 union!, delete!, similar, sizehint
     
     export Deque, Stack, Queue
     export deque, stack, queue, enqueue!, dequeue!, update!
@@ -17,6 +17,8 @@ module DataStructures
     export AbstractHeap, compare, extract_all!
     export BinaryHeap, binary_minheap, binary_maxheap
     export MutableBinaryHeap, mutable_binary_minheap, mutable_binary_maxheap
+
+    export DefaultDict
     
     include("deque.jl") 
     include("stack.jl")   
@@ -24,4 +26,5 @@ module DataStructures
     include("accumulator.jl")
     include("disjoint_set.jl")
     include("heaps.jl")
+    include("defaultdict.jl")
 end
