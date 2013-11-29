@@ -1,33 +1,39 @@
 # Dictionary which returns (and sets) a default value for a requested item not
 # already in to the dictionary
 
-type DefaultDict{K,V,F} <: Associative{K,V}
-    d::Dict{K,V}
+immutable DefaultDict{K,V,F,D<:Associative} <: Associative{K,V}
     default::F
+    d::D
 
-    DefaultDict(x::F) = new(Dict{K,V}(), x)
-    DefaultDict(kv::AbstractArray{(K,V)}, x::F) = new(Dict{K,V}(kv), x)
-    DefaultDict(ks, vs, x) = new(Dict{K,V}(ks,vs), x)
+    DefaultDict(x::F, kv::AbstractArray{(K,V)}) = new(x, D{K,V}(kv))
+    DefaultDict(x::F, d::DefaultDict) = DefaultDict(x, d.d)
+    DefaultDict(x::F, d::D=D{K,V}()) = new(x, d)
+    DefaultDict(x, ks, vs) = new(x, D{K,V}(ks,vs))
 end
 
 DefaultDict() = error("DefaultDict: no default specified")
 DefaultDict(k,v) = error("DefaultDict: no default specified")
 
-DefaultDict{K,V,F}(ks::AbstractArray{K}, vs::AbstractArray{V}, default::F) = DefaultDict{K,V,F}(ks,vs,default)
-DefaultDict{F}(ks,vs,default::F) = DefaultDict{Any,Any,F}(ks, vs, default)
-
+# TODO: these mimic similar Dict constructors, but may not be needed
+DefaultDict{K,V,F}(default::F, ks::AbstractArray{K}, vs::AbstractArray{V}) = DefaultDict{K,V,F,Dict}(default,ks,vs)
+DefaultDict{F}(default::F,ks,vs) = DefaultDict{Any,Any,F,Dict}(default, ks, vs)
 
 # syntax entry points
-DefaultDict{F}(default::F) = DefaultDict{Any,Any,F}(default)
-DefaultDict{K,V,F}(::Type{K}, ::Type{V}, default::F) = DefaultDict{K,V,F}(default)
-DefaultDict{K,V,F}(kv::AbstractArray{(K,V)}, default::F) = DefaultDict{K,V,F}
+DefaultDict{F}(default::F) = DefaultDict{Any,Any,F,Dict}(default)
+DefaultDict{K,V,F}(::Type{K}, ::Type{V}, default::F) = DefaultDict{K,V,F,Dict}(default)
+DefaultDict{K,V,F}(default::F, kv::AbstractArray{(K,V)}) = DefaultDict{K,V,F,Dict}(default, kv)
+DefaultDict{F,D<:Associative}(default::F, d::D) = ((K,V)=eltype(d); DefaultDict{K,V,F,D}(default, d))
 
-similar{K,V,F}(d::DefaultDict{K,V,F}) = DefaultDict{K,V,F}()
+similar{K,V,F,D}(d::DefaultDict{K,V,F,D}) = DefaultDict{K,V,F,D}()
 
 sizehint(d::DefaultDict) = sizehint(d.d)
 empty!(d::DefaultDict) = empty!(d.d)
 setindex!(d::DefaultDict, v, k) = setindex!(d.d, v, k)
 
+# Note that getindex depends on the particular implementation of Dict in Base.
+# If the Dict implementation changes, this may break.
+# Also note that we hash twice here if the key is not in the dictionary: once
+# when retrieving, and once when assigning.
 function getindex{K,V,F<:Base.Callable}(d::DefaultDict{K,V,F}, key)
     index = Base.ht_keyindex(d.d, key)
     if index < 0
@@ -48,7 +54,7 @@ end
 
 get(d::DefaultDict, key, deflt) = get(d.d, key, deflt)
 
-haskey(d::DefaultDict, key) = haskey(d, key)
+haskey(d::DefaultDict, key) = haskey(d.d, key)
 in{T<:DefaultDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d)
 getkey(d::DefaultDict, key, deflt) = getkey(d.d, key, deflt)
 

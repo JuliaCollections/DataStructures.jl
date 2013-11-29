@@ -167,3 +167,54 @@ h = mutable_binary_maxheap(Int)    # create an empty mutable min/max heap
 h = mutable_binary_minheap([1,4,3,2])    
 h = mutable_binary_maxheap([1,4,3,2])    # create a mutable min/max heap from a vector
 ```
+
+
+## DefaultDict
+
+A DefaultDict allows specification of a default value to return when a requested key is not in a dictionary.
+
+The version of ``DefaultDict`` provided here is a wrapper around an ``Associative`` type, which defaults to ``Dict``.  All ``Associative`` and ``Dict`` methods are supported.
+
+Constructors for ``DefaultDict`` include
+```julia
+DefaultDict(default, d::Associative=Dict())  # create a DefaultDict with a default value or function,
+                                             # optionally wrapping an existing dictionary
+DefaultDict(KeyType, ValueType, default)     # create a DefaultDict with Dict type (KeyType,ValueType)
+```
+
+Examples using ``DefaultDict``:
+```julia
+dd = DefaultDict(1)               # create an (Any=>Any) DefaultDict with a default value of 1
+dd = DefaultDict(String, Int, 0)  # create a (String=>Int) DefaultDict with a default value of 0
+
+d = ['a'=>1, 'b'=>2]
+dd = DefaultDict(0, d)            # provide a default value to an existing dictionary
+dd['c'] == 0                      # true
+d['c']  == 0                      # true
+
+dd = DefaultDict(time)            # call time() to provide the default value
+dd = DefaultDict(Dict)            # Create a dictionary of dictionaries
+                                  # Dict() is called to provide the default value
+dd = DefaultDict(()->myfunc())    # call function myfunc to provide the default value
+
+# create a Dictionary of String=>DefaultDict{String, Int}, where the default of the
+# inner set of DefaultDicts is zero
+dd = DefaultDict(String, DefaultDict, ()->DefaultDict(String,Int,0))
+```
+
+Note that in the last example, we need to use a function to create each new ``DefaultDict``.
+If we forget, we will end up using the same ``DefaultDict`` for all default values:
+
+```julia
+julia> dd = DefaultDict(String, DefaultDict, DefaultDict(String,Int,0));
+
+julia> dd["a"]
+DefaultDict{String,Int64,Int64,Dict{K,V}}()
+
+julia> dd["b"]["a"] = 1
+1
+
+julia> dd["a"]
+["a"=>1]
+
+```
