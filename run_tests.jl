@@ -4,7 +4,8 @@ tests = ["deque",
 		 "classifiedcollections",
 		 "disjoint_set", 
 		 "binheap", 
-		 "mutable_binheap"]
+		 "mutable_binheap",
+		 "defaultdict"]
 
 for t in tests
 	fp = joinpath("test", "test_$t.jl")
