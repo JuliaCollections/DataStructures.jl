@@ -10,6 +10,8 @@ This package implements a variety of data structures, including
 * Disjoint Sets
 * Binary Heap
 * Mutable Binary Heap
+* Ordered Dicts and Sets
+* Dictionaries with Defaults
 
 ## Deque
 
@@ -168,18 +170,61 @@ h = mutable_binary_minheap([1,4,3,2])
 h = mutable_binary_maxheap([1,4,3,2])    # create a mutable min/max heap from a vector
 ```
 
+## OrderedDicts and OrderedSets
 
-## DefaultDict
+``OrderedDicts`` are simply dictionaries whose entries have a
+particular order.  For ``OrderedDicts`` (and ``OrderedSets``), order
+refers to *insertion order*, which allows deterministic iteration over
+the dictionary or set.
+
+```julia
+d = OrderedDict(Char,Int)
+for c in 'a':'e'
+    d[c] = c-'a'+1
+end
+collect(d) # => [('a',1),('b',2),('c',3),('d',4),('e',5)]
+
+s = OrderedSet(π,e,γ,catalan,φ)
+collect(s) # => [π = 3.1415926535897...,
+           #     e = 2.7182818284590...,
+           #     γ = 0.5772156649015...,
+		   #     catalan = 0.9159655941772...,
+		   #	 φ = 1.6180339887498...]
+```
+
+All standard ``Associative`` and ``Dict`` functions are available for
+``OrderedDicts``, and all ``Set`` operations are available for
+OrderedSets.
+
+Note that to create an OrderedSet of a particular type, you must
+specify the type in curly-braces:
+
+```julia
+# create an OrderedSet of Strings
+strs = OrderedSet{String}()
+```
+
+
+## DefaultDict and DefaultOrderedDict
 
 A DefaultDict allows specification of a default value to return when a requested key is not in a dictionary.
 
-The version of ``DefaultDict`` provided here is a wrapper around an ``Associative`` type, which defaults to ``Dict``.  All ``Associative`` and ``Dict`` methods are supported.
+While the implementation is slightly different, a ``DefaultDict`` can be thought to provide a normal ``Dict``
+with a default value.  A ``DefaultOrderedDict`` does the same for an ``OrderedDict``.
 
-Constructors for ``DefaultDict`` include
+Constructors:
 ```julia
-DefaultDict(default, d::Associative=Dict())  # create a DefaultDict with a default value or function,
-                                             # optionally wrapping an existing dictionary
-DefaultDict(KeyType, ValueType, default)     # create a DefaultDict with Dict type (KeyType,ValueType)
+DefaultDict(default, kv)                        # create a DefaultDict with a default value or function,
+                                                # optionally wrapping an existing dictionary
+										        # or array of key-value pairs
+
+DefaultDict(KeyType, ValueType, default)        # create a DefaultDict with Dict type (KeyType,ValueType)
+
+OrderedDefaultDict(default, kv)                 # create a OrderedDefaultDict with a default value or function,
+                                                # optionally wrapping an existing dictionary
+							  	                # or array of key-value pairs
+
+OrderedDefaultDict(KeyType, ValueType, default) # create a OrderedDefaultDict with Dict type (KeyType,ValueType)
 ```
 
 Examples using ``DefaultDict``:
@@ -190,14 +235,14 @@ dd = DefaultDict(String, Int, 0)  # create a (String=>Int) DefaultDict with a de
 d = ['a'=>1, 'b'=>2]
 dd = DefaultDict(0, d)            # provide a default value to an existing dictionary
 dd['c'] == 0                      # true
-d['c']  == 0                      # true
+#d['c'] == 0                      # false
 
-dd = DefaultDict(time)            # call time() to provide the default value
+dd = DefaultOrderedDict(time)     # call time() to provide the default value for an OrderedDict
 dd = DefaultDict(Dict)            # Create a dictionary of dictionaries
                                   # Dict() is called to provide the default value
 dd = DefaultDict(()->myfunc())    # call function myfunc to provide the default value
 
-# create a Dictionary of String=>DefaultDict{String, Int}, where the default of the
+# create a Dictionary of type String=>DefaultDict{String, Int}, where the default of the
 # inner set of DefaultDicts is zero
 dd = DefaultDict(String, DefaultDict, ()->DefaultDict(String,Int,0))
 ```
