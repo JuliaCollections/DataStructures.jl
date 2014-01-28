@@ -1,6 +1,10 @@
 using DataStructures
 using Base.Test
 
+##############
+# DefaultDicts
+##############
+
 # construction
 @test_throws DefaultDict()
 @test_throws DefaultDict(String, Int)
@@ -42,10 +46,56 @@ end
 @test sort(collect(values(d))) == [1:26]
 
 # Starting from an existing dictionary
+# Note: dictionary is copied upon construction
 e = ['a'=>1, 'b'=>3, 'c'=>5]
 f = DefaultDict(0, e)
-@test_throws e['d']
 @test f['d'] == 0
-f['e'] = 9
-@test e['d'] == 0
+@test_throws e['d']
+e['e'] = 9
 @test e['e'] == 9
+@test f['e'] == 0
+
+
+#####################
+# DefaultOrderedDicts
+#####################
+
+# construction
+@test_throws DefaultOrderedDict()
+@test_throws DefaultOrderedDict(String, Int)
+
+# empty dictionary
+d = DefaultOrderedDict(Char, Int, 1)
+@test length(d) == 0
+@test isempty(d)
+@test d['c'] == 1
+@test !isempty(d)
+empty!(d)
+@test isempty(d)
+
+# access, modification
+@test (d['a'] += 1) == 2
+@test 'a' in keys(d)
+@test haskey(d, 'a')
+@test get(d, 'b', 0) == 0
+@test !('b' in keys(d))
+@test !haskey(d, 'b')
+@test pop!(d, 'a') == 2
+@test isempty(d)
+
+for c in 'a':'z'
+    d[c] = c-'a'+1
+end
+
+@test d['z'] == 26
+@test d['@'] == 1
+@test length(d) == 27
+delete!(d, '@')
+@test length(d) == 26
+
+for (k,v) in d
+    @test v == k-'a'+1
+end
+
+@test collect(keys(d)) == ['a':'z']
+@test collect(values(d)) == [1:26]
