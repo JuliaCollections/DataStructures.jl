@@ -220,11 +220,11 @@ DefaultDict(default, kv)                        # create a DefaultDict with a de
 
 DefaultDict(KeyType, ValueType, default)        # create a DefaultDict with Dict type (KeyType,ValueType)
 
-OrderedDefaultDict(default, kv)                 # create a OrderedDefaultDict with a default value or function,
+DefaultOrderedDict(default, kv)                 # create a DefaultOrderedDict with a default value or function,
                                                 # optionally wrapping an existing dictionary
 							  	                # or array of key-value pairs
 
-OrderedDefaultDict(KeyType, ValueType, default) # create a OrderedDefaultDict with Dict type (KeyType,ValueType)
+DefaultOrderedDict(KeyType, ValueType, default) # create a DefaultOrderedDict with Dict type (KeyType,ValueType)
 ```
 
 Examples using ``DefaultDict``:
