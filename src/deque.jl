@@ -188,7 +188,7 @@ function empty!{T}(q::Deque{T})
 end
 
 
-function push!{T}(q::Deque{T}, x::T)  # push back
+function push!{T}(q::Deque{T}, x)  # push back
     rear = q.rear
     
     if isempty(rear)
@@ -197,11 +197,11 @@ function push!{T}(q::Deque{T}, x::T)  # push back
     end
     
     if rear.back < rear.capa
-        @inbounds rear.data[rear.back += 1] = x
+        @inbounds rear.data[rear.back += 1] = convert(T, x)
     else
         new_rear = rear_deque_block(T, q.blksize)
         new_rear.back = 1
-        new_rear.data[1] = x
+        new_rear.data[1] = convert(T, x)
         new_rear.prev = rear
         q.rear = rear.next = new_rear
         q.nblocks += 1 
@@ -210,7 +210,7 @@ function push!{T}(q::Deque{T}, x::T)  # push back
     q
 end
 
-function unshift!{T}(q::Deque{T}, x::T)   # push front
+function unshift!{T}(q::Deque{T}, x)   # push front
     head = q.head
     
     if isempty(head)
@@ -220,12 +220,12 @@ function unshift!{T}(q::Deque{T}, x::T)   # push front
     end
     
     if head.front > 1
-        @inbounds head.data[head.front -= 1] = x
+        @inbounds head.data[head.front -= 1] = convert(T, x)
     else
         n::Int = q.blksize
         new_head = head_deque_block(T, n)
         new_head.front = n
-        new_head.data[n] = x
+        new_head.data[n] = convert(T, x)
         new_head.next = head
         q.head = head.prev = new_head
         q.nblocks += 1
