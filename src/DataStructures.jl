@@ -38,4 +38,7 @@ module DataStructures
     include("ordereddict.jl")
     include("orderedset.jl")
     include("defaultdict.jl")
+
+    @deprecate stack Stack
+    @deprecate queue Queue
 end
