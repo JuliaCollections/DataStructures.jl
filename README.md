@@ -15,7 +15,7 @@ This package implements a variety of data structures, including
 
 ## Deque
 
-The ``Deque`` type implements a double-ended queue using a list of blocks. This data structure supports constant-time insertion/removal of elements at both ends of a sequence.
+The ``Deque`` type implements a double-ended Queue using a list of blocks. This data structure supports constant-time insertion/removal of elements at both ends of a sequence.
 
 Usage:
 ```julia
@@ -41,7 +41,7 @@ The ``Stack`` and ``Queue`` types are a light-weight wrapper of a deque type, wh
 
 Usage of Stack:
 ```
-s = stack(Int)
+s = Stack(Int)
 push!(s, x)
 x = top(s)
 x = pop!(s)
@@ -49,7 +49,7 @@ x = pop!(s)
 
 Usage of Queue:
 ```
-q = queue(Int)
+q = Queue(Int)
 enqueue!(q, x)
 x = front(q)
 x = back(q)
