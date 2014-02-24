@@ -4,7 +4,7 @@
 
 This package implements a variety of data structures, including
 
-* Dequeue (based on block-list)
+* Deque (based on block-list)
 * Stack
 * Queue
 * Disjoint Sets
@@ -15,7 +15,7 @@ This package implements a variety of data structures, including
 
 ## Deque
 
-The ``Deque`` type implements a dequeue using a list of blocks. This data structure supports constant-time insertion/removal of elements at both ends of a sequence.
+The ``Deque`` type implements a double-ended queue using a list of blocks. This data structure supports constant-time insertion/removal of elements at both ends of a sequence.
 
 Usage:
 ```julia
@@ -30,14 +30,14 @@ front(a)            # get the element at the front
 back(a)             # get the element at the back
 ```
 
-*Note:* Julia's ``Vector`` type also provides this interface, and thus can be used as a dequeue. However, the ``Dequeue`` type in this package is implemented as a list of contiguous blocks (default size = 2K). As a dequeue grows, new blocks may be created and linked to existing blocks. This way avoids the copying when growing a vector.
+*Note:* Julia's ``Vector`` type also provides this interface, and thus can be used as a deque. However, the ``Deque`` type in this package is implemented as a list of contiguous blocks (default size = 2K). As a deque grows, new blocks may be created and linked to existing blocks. This way avoids the copying when growing a vector.
 
-Benchmark shows that the performance of ``Dequeue`` is comparable to ``Vector`` on ``push!``, and is noticeably faster on ``unshift!`` (by about 30% to 40%).
+Benchmark shows that the performance of ``Deque`` is comparable to ``Vector`` on ``push!``, and is noticeably faster on ``unshift!`` (by about 30% to 40%).
 
 
 ## Stack and Queue
 
-The ``Stack`` and ``Queue`` types are a light-weight wrapper of a dequeue type, which respectively provide interfaces for FILO and FIFO access.
+The ``Stack`` and ``Queue`` types are a light-weight wrapper of a deque type, which respectively provide interfaces for FILO and FIFO access.
 
 Usage of Stack:
 ```
