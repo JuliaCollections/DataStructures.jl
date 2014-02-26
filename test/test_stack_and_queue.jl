@@ -5,7 +5,7 @@ using Base.Test
 
 # Stack
 
-s = stack(Int, 5)
+s = Stack(Int, 5)
 n = 100
 
 @test length(s) == 0
@@ -34,7 +34,7 @@ end
 
 # Queue
 
-s = queue(Int, 5)
+s = Queue(Int, 5)
 n = 100
 
 @test length(s) == 0

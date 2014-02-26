@@ -8,7 +8,7 @@ module DataStructures
                  isequal, hash
     
     export Deque, Stack, Queue
-    export deque, stack, queue, enqueue!, dequeue!, update!
+    export deque, enqueue!, dequeue!, update!
     export capacity, num_blocks, front, back, top, sizehint
 
     export Accumulator, counter
@@ -38,4 +38,7 @@ module DataStructures
     include("ordereddict.jl")
     include("orderedset.jl")
     include("defaultdict.jl")
+
+    @deprecate stack Stack
+    @deprecate queue Queue
 end

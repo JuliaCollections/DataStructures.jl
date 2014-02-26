@@ -4,8 +4,8 @@ type Stack{S}   # S is the type of the internal dequeue instance
     store::S
 end
 
-stack{T}(ty::Type{T}) = Stack(Deque{T}())
-stack{T}(ty::Type{T}, blksize::Integer) = Stack(Deque{T}(blksize))
+Stack{T}(ty::Type{T}) = Stack(Deque{T}())
+Stack{T}(ty::Type{T}, blksize::Integer) = Stack(Deque{T}(blksize))
 
 isempty(s::Stack) = isempty(s.store)
 length(s::Stack) = length(s.store)

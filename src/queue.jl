@@ -4,8 +4,8 @@ type Queue{S}   # S is the type of internal deque
     store::S
 end
 
-queue{T}(ty::Type{T}) = Queue(Deque{T}())
-queue{T}(ty::Type{T}, blksize::Integer) = Queue(Deque{T}(blksize))
+Queue{T}(ty::Type{T}) = Queue(Deque{T}())
+Queue{T}(ty::Type{T}, blksize::Integer) = Queue(Deque{T}(blksize))
 
 isempty(s::Queue) = isempty(s.store)
 length(s::Queue) = length(s.store)

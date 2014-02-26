@@ -1,4 +1,4 @@
-# Block-based dequeue
+# Block-based deque
 
 #######################################
 #
@@ -79,7 +79,7 @@ num_blocks(q::Deque) = q.nblocks
 
 function front(q::Deque)
     if isempty(q)
-        throw(ArgumentError("Attempted to front at an empty dequeue."))
+        throw(ArgumentError("Attempted to front at an empty deque."))
     end
     blk = q.head
     blk.data[blk.front]
@@ -87,7 +87,7 @@ end
 
 function back(q::Deque)
     if isempty(q)
-        throw(ArgumentError("Attempted to back at an empty dequeue."))
+        throw(ArgumentError("Attempted to back at an empty deque."))
     end 
     blk = q.rear
     blk.data[blk.back]
@@ -236,7 +236,7 @@ end
 
 function pop!{T}(q::Deque{T})   # pop back
     if isempty(q)
-        throw(ArgumentError("Attempted to pop from an empty dequeue."))
+        throw(ArgumentError("Attempted to pop from an empty deque."))
     end
     
     rear = q.rear
@@ -260,7 +260,7 @@ end
 
 function shift!{T}(q::Deque{T})  # pop front
     if isempty(q)
-        throw(ArgumentError("Attempted to pop from an empty dequeue."))
+        throw(ArgumentError("Attempted to pop from an empty deque."))
     end
     
     head = q.head
