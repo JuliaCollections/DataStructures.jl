@@ -263,3 +263,15 @@ julia> dd["a"]
 ["a"=>1]
 
 ```
+
+##Trie
+
+An implementation of the `Trie` data structure. This is an associative structure, with `String` keys. 
+
+```julia
+t=Trie{Int}()
+t["Rob"]=42
+t["Roger"]=24
+t.haskey("Rob") #true
+t.get("Rob") #42
+```

@@ -23,6 +23,7 @@ module DataStructures
 
     export OrderedDict, OrderedSet
     export DefaultDict, DefaultOrderedDict
+    export Trie, subtrie, keys_with_prefix
     
     include("delegate.jl")
 
@@ -38,6 +39,7 @@ module DataStructures
     include("ordereddict.jl")
     include("orderedset.jl")
     include("defaultdict.jl")
+    include("trie.jl")
 
     @deprecate stack Stack
     @deprecate queue Queue
