@@ -7,7 +7,8 @@ tests = ["deque",
 		 "mutable_binheap",
 		 "defaultdict",
 		 "ordereddict",
-		 "orderedset"]
+		 "orderedset",
+		 "trie"]
 
 for t in tests
 	fp = joinpath("test", "test_$t.jl")
