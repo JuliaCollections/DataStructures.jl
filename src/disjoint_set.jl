@@ -61,12 +61,21 @@ function union!(s::IntDisjointSets, x::Integer, y::Integer)
     end
 end
 
-# make a new subset with a single new element
+# make a new subset with a given new element x
 #
 function make_set!(s::IntDisjointSets, x::Integer)
     push!(s.parents, x)
     push!(s.ranks, 0)
     s.ngroups += 1
+end
+
+# make a new subset with an automatically chosen new element x
+# returns the new element
+#
+function make_set!(s::IntDisjointSets)
+    x = length(s.parents) + 1
+    make_set!(s, x)
+    return x
 end
 
 
