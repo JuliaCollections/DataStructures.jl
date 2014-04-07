@@ -38,12 +38,13 @@ r = [find_root(s, i) for i in 1 : 10]
 @test isa(r, Vector{Int})
 @test isequal(r, r0)
 
-make_set!(s)
+make_set!(s, 17)
 
 @test length(s) == 11
+@test num_groups(s) == 3
 
 r0 = [1, 1, 1, 1, 1, 1, 7, 7, 7, 7, 11]
-r = [find_root(s, i) for i in 1 : 11]
+r = [find_root(s, i) for i in [1 : 10, 17] ]
 @test isa(r, Vector{Int})
 @test isequal(r, r0)
 
