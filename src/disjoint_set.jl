@@ -63,7 +63,7 @@ end
 
 # make a new subset with a single new element
 #
-function make_set(s::IntDisjointSets, x::Integer)
+function make_set!(s::IntDisjointSets, x::Integer)
     push!(s.parents, x)
     push!(s.ranks, 0)
     s.ngroups += 1
