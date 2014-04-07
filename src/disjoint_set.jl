@@ -115,3 +115,8 @@ function union!{T}(s::DisjointSets{T}, x::T, y::T)
     union!(s.internal, s.intmap[x], s.intmap[y])
 end
 
+function make_set!{T}(s::DisjointSets{T}, x::T)
+    id = make_set!(s.internal)
+    s.intmap[x] = id
+end
+
