@@ -73,7 +73,7 @@ end
 # returns the new element
 #
 function make_set!(s::IntDisjointSets)
-    x = length(s.parents) + 1
+    x = length(s) + 1
     make_set!(s, x)
     return x
 end
