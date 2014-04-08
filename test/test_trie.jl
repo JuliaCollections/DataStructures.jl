@@ -10,4 +10,7 @@ t["rob"]=27
 t["roger"]=52
 
 @test haskey(t, "roger")
-@test get(t,"rob") == 27
+@test get(t,"rob",nothing) == 27
+@test keys(t) == ["rob","roger","ann","amy","emma"]
+@test t["rob"] == 27
+@test keys_with_prefix(t,"ro") == ["rob","roger"]
