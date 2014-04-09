@@ -63,7 +63,7 @@ end
 
 # make a new subset with a given new element x
 #
-function make_set!(s::IntDisjointSets, x::Integer)
+function add_singleton!(s::IntDisjointSets, x::Integer)
     push!(s.parents, x)
     push!(s.ranks, 0)
     s.ngroups += 1
@@ -72,9 +72,9 @@ end
 # make a new subset with an automatically chosen new element x
 # returns the new element
 #
-function make_set!(s::IntDisjointSets)
+function add_singleton!(s::IntDisjointSets)
     x = length(s) + 1
-    make_set!(s, x)
+    add_singleton!(s, x)
     return x
 end
 
@@ -115,8 +115,8 @@ function union!{T}(s::DisjointSets{T}, x::T, y::T)
     union!(s.internal, s.intmap[x], s.intmap[y])
 end
 
-function make_set!{T}(s::DisjointSets{T}, x::T)
-    id = make_set!(s.internal)
+function add_singleton!{T}(s::DisjointSets{T}, x::T)
+    id = add_singleton!(s.internal)
     s.intmap[x] = id
 end
 
