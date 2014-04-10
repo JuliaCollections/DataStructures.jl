@@ -25,6 +25,14 @@ function setindex!{T}(t::Trie{T}, val::T, key::String)
     node.value = val
 end
 
+function getindex(t::Trie, key::String)
+    node = subtrie(t, key)
+    if node != nothing && node.is_key
+        return node.value
+    end
+    throw(KeyError("key not found: $key"))
+end
+
 function subtrie(t::Trie, prefix::String)
     node = t
     for char in prefix
@@ -42,7 +50,6 @@ function haskey(t::Trie, key::String)
     node != nothing && node.is_key
 end
 
-get(t::Trie, key::String) = get(t, key, nothing)
 function get(t::Trie, key::String, notfound)
     node = subtrie(t, key)
     if node != nothing && node.is_key
@@ -51,16 +58,15 @@ function get(t::Trie, key::String, notfound)
     notfound
 end
 
-function keys(t::Trie, prefix::String, found)
+function keys(t::Trie, prefix::String="", found=String[])
     if t.is_key
-        push(found, prefix)
+        push!(found, prefix)
     end
     for (char,child) in t.children
-        keys(child, strcat(prefix,char), found)
+        keys(child, string(prefix,char), found)
     end
+    found
 end
-keys(t::Trie, prefix::String) = (found=String[]; keys(t, prefix, found); found)
-keys(t::Trie) = keys(t, "")
 
 function keys_with_prefix(t::Trie, prefix::String)
     st = subtrie(t, prefix)
