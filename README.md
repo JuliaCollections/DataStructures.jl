@@ -4,6 +4,7 @@
 
 This package implements a variety of data structures, including
 
+* Accumulator and Counter
 * Deque (based on block-list)
 * Stack
 * Queue
