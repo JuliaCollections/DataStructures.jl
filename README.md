@@ -7,6 +7,7 @@ This package implements a variety of data structures, including
 * Deque (based on block-list)
 * Stack
 * Queue
+* Accumulators and Counters
 * Disjoint Sets
 * Binary Heap
 * Mutable Binary Heap
