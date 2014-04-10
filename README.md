@@ -12,6 +12,7 @@ This package implements a variety of data structures, including
 * Mutable Binary Heap
 * Ordered Dicts and Sets
 * Dictionaries with Defaults
+* Trie
 
 ## Deque
 
