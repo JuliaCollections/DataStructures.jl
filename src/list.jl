@@ -29,14 +29,10 @@ function show{T}(io::IO, l::List{T})
         end
     else
         print(io, "list(")
-        while true
-            show(io, head(l))
-            l = tail(l)
-            if isa(l,Cons)
-                print(io, ", ")
-            else
-                break
-            end
+        show(io, head(l))
+        for t in tail(l)
+            print(io, ", ")
+            show(io, t)
         end
         print(io, ")")
     end
@@ -66,7 +62,13 @@ function list{T}(elts::List{T}...)
 end
 
 length(l::Nil) = 0
-length(l::Cons) = 1 + length(tail(l))
+function length(l::Cons)
+    n = 0
+    for i in l
+        n += 1
+    end
+    n
+end
 
 map(f::Base.Callable, l::Nil) = l
 map(f::Base.Callable, l::Cons) = cons(f(head(l)), map(f, tail(l)))
