@@ -38,7 +38,7 @@ r = [find_root(s, i) for i in 1 : 10]
 @test isa(r, Vector{Int})
 @test isequal(r, r0)
 
-add_singleton!(s, 17)
+push!(s, 17)
 
 @test length(s) == 11
 @test num_groups(s) == 3
