@@ -1,7 +1,3 @@
-import Base: length, map, show, copy, cat, start, done, next
-
-export List, Nil, Cons, cons, nil, head, tail, list
-
 abstract List{T}
 
 type Nil{T} <: List{T}
@@ -95,7 +91,8 @@ function cat(lst::List, lsts...)
     return append2(lst, l)
 end
 
+start{T}(l::Nil{T}) = l
 start{T}(l::Cons{T}) = l
 done{T}(l::Cons{T}, state::Cons{T}) = false
-done{T}(l::Cons{T}, state::Nil{T}) = true
+done{T}(l::List, state::Nil{T}) = true
 next{T}(l::Cons{T}, state::Cons{T}) = (state.head, state.tail)
