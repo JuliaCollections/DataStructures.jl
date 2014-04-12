@@ -2,7 +2,7 @@ module DataStructures
     
     import Base: length, map, isempty, start, next, done,
                  show, dump, empty!, getindex, setindex!, get, get!,
-                 in, haskey, keys, merge, copy, cat
+                 in, haskey, keys, merge, copy, cat,
                  push!, pop!, shift!, unshift!, add!,
                  union!, delete!, similar, sizehint, 
                  isequal, hash
