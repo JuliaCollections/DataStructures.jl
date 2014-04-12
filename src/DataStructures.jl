@@ -1,11 +1,12 @@
 module DataStructures
     
-    import Base: length, map, isempty, start, next, done,
+    import Base: length, isempty, start, next, done,
                  show, dump, empty!, getindex, setindex!, get, get!,
                  in, haskey, keys, merge, copy, cat,
                  push!, pop!, shift!, unshift!, add!,
                  union!, delete!, similar, sizehint, 
-                 isequal, hash
+                 isequal, hash,
+                 map
     
     export Deque, Stack, Queue
     export deque, enqueue!, dequeue!, update!
@@ -26,7 +27,7 @@ module DataStructures
     export DefaultDict, DefaultOrderedDict
     export Trie, subtrie, keys_with_prefix
 
-    export List, Nil, Cons, cons, nil, head, tail, list
+    export List, Nil, Cons, cons, nil, head, tail, list, filter, reverse
 
     include("delegate.jl")
 

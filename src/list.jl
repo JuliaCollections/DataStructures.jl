@@ -69,6 +69,24 @@ end
 map(f::Base.Callable, l::Nil) = l
 map(f::Base.Callable, l::Cons) = cons(f(head(l)), map(f, tail(l)))
 
+function filter{T}(f::Function, l::List{T})    
+    l2 = nil(T)
+    for e in l
+        if f(e)
+            l2 = cons(e, l2)
+        end
+    end
+    reverse(l2)
+end
+
+function reverse{T}(l::List{T})
+    l2 = nil(T)
+    for e in l
+        l2 = cons(e, l2)
+    end    
+    l2
+end
+
 copy(l::Nil) = l
 copy(l::Cons) = cons(head(l), copy(tail(l)))
 

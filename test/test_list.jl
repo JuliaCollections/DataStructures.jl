@@ -20,3 +20,13 @@ l4 = cat(l1, l2, l3)
 
 l5 = map((x) -> x*2, l4)
 @test collect(l5) == [2; 4; 6]
+
+l6 = filter((x) -> x < 6, l5)
+@test length(l6) == 2
+@test l6.head == 2
+@test l6.tail.head == 4
+
+l7 = reverse(l6)
+@test length(l7) == 2
+@test l7.head == 4
+@test l7.tail.head == 2
