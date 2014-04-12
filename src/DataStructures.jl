@@ -16,7 +16,7 @@ module DataStructures
     export classified_lists, classified_sets, classified_counters
     
     export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set
-    export add_singleton!
+    export push!
 
     export AbstractHeap, compare, extract_all!
     export BinaryHeap, binary_minheap, binary_maxheap

@@ -114,6 +114,8 @@ Usage:
 a = IntDisjointSet(10)      # creates a forest comprised of 10 singletons
 union!(a, 3, 5)             # merges the sets that contain 3 and 5 into one
 in_same_set(a, x, y)        # determines whether x and y are in the same set
+elem = push!(a)             # adds a single element in a new set; returns the new element 
+                            # (this operation is often called MakeSet)
 ```
 
 One may also use other element types
@@ -121,6 +123,7 @@ One may also use other element types
 a = DisjointSet{String}(["a", "b", "c", "d"])
 union!(a, "a", "b")
 in_same_set(a, "c", "d")
+push!(a, "f")
 ```
 
 Note that the internal implementation of ``IntDisjointSet`` is based on vectors, and is very efficient. ``DisjointSet{T}`` is a wrapper of ``IntDisjointSet``, which uses a dictionary to map input elements to an internal index. 
