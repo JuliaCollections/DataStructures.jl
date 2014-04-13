@@ -8,7 +8,8 @@ tests = ["deque",
 		 "defaultdict",
 		 "ordereddict",
 		 "orderedset",
-		 "trie"]
+		 "trie",
+		 "list"]
 
 for t in tests
 	fp = joinpath("test", "test_$t.jl")

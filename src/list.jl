@@ -1,7 +1,3 @@
-import Base: length, map, show, copy, cat, start, done, next
-
-export List, Nil, Cons, cons, nil, head, tail, list
-
 abstract List{T}
 
 type Nil{T} <: List{T}
@@ -29,14 +25,10 @@ function show{T}(io::IO, l::List{T})
         end
     else
         print(io, "list(")
-        while true
-            show(io, head(l))
-            l = tail(l)
-            if isa(l,Cons)
-                print(io, ", ")
-            else
-                break
-            end
+        show(io, head(l))
+        for t in tail(l)
+            print(io, ", ")
+            show(io, t)
         end
         print(io, ")")
     end
@@ -66,10 +58,34 @@ function list{T}(elts::List{T}...)
 end
 
 length(l::Nil) = 0
-length(l::Cons) = 1 + length(tail(l))
+function length(l::Cons)
+    n = 0
+    for i in l
+        n += 1
+    end
+    n
+end
 
 map(f::Base.Callable, l::Nil) = l
 map(f::Base.Callable, l::Cons) = cons(f(head(l)), map(f, tail(l)))
+
+function filter{T}(f::Function, l::List{T})    
+    l2 = nil(T)
+    for e in l
+        if f(e)
+            l2 = cons(e, l2)
+        end
+    end
+    reverse(l2)
+end
+
+function reverse{T}(l::List{T})
+    l2 = nil(T)
+    for e in l
+        l2 = cons(e, l2)
+    end    
+    l2
+end
 
 copy(l::Nil) = l
 copy(l::Cons) = cons(head(l), copy(tail(l)))
@@ -93,7 +109,8 @@ function cat(lst::List, lsts...)
     return append2(lst, l)
 end
 
+start{T}(l::Nil{T}) = l
 start{T}(l::Cons{T}) = l
 done{T}(l::Cons{T}, state::Cons{T}) = false
-done{T}(l::Cons{T}, state::Nil{T}) = true
+done{T}(l::List, state::Nil{T}) = true
 next{T}(l::Cons{T}, state::Cons{T}) = (state.head, state.tail)
