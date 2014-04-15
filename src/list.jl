@@ -52,14 +52,6 @@ function list{T}(elts::T...)
     return l
 end
 
-function list{T}(elts::LinkedList{T}...)
-    l = nil(LinkedList{T})
-    for i=length(elts):-1:1
-        l = cons(elts[i],l)
-    end
-    return l
-end
-
 length(l::Nil) = 0
 
 function length(l::Cons)
@@ -105,29 +97,28 @@ function copy(l::Cons)
     l2 = reverse(reverse(l))
 end
 
-function append2{T1, T2}(a::LinkedList{T1}, b::LinkedList{T2})
-    T3 = if is(T1,T2) T1 else Any end
-    a = reverse(a)
-    b = reverse(b)
-    l2 = nil(T3)
-    for h in b
-        l2 = cons(h, l2)
-    end
-    for h in a
-        l2 = cons(h, l2)
-    end
-    l2
-end
-
 cat(lst::LinkedList) = lst
 
-function cat(lst::LinkedList, lsts...)
+function cat(lst::LinkedList, lsts::LinkedList...)
+    T = typeof(lst).parameters[1]
     n = length(lsts)
-    l = lsts[n]
-    for i = (n-1):-1:1
-        l = append2(lsts[i], l)
+    for i = 1:n
+        T2 = typeof(lsts[i]).parameters[1]
+        T = typejoin(T, T2)
     end
-    return append2(lst, l)
+
+    l2 = nil(T)
+    for h in lst
+        l2 = cons(h, l2)
+    end
+
+    for i = 1:n
+        for h in lsts[i]
+            l2 = cons(h, l2)
+        end
+    end
+
+    reverse(l2)
 end
 
 start{T}(l::Nil{T}) = l

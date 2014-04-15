@@ -40,6 +40,6 @@ l7 = reverse(l6)
 l8 = cat(l5b, l6)
 @test collect(l8) == ["2"; "4"; "6"; 2; 4]
 
-l9 = cat(l3, l6, l7)
-@test typeof(l9) == Cons{Int}
-@test collect(l9) == [2; 3; 2; 4; 4; 2]
+l9 = cat(list(1, 2), list(3.0, 4.0))
+@test typeof(l9) == Cons{Real}
+@test collect(l9) == [1; 2; 3.0; 4.0]
