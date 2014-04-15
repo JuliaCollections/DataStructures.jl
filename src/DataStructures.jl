@@ -27,7 +27,8 @@ module DataStructures
     export DefaultDict, DefaultOrderedDict
     export Trie, subtrie, keys_with_prefix
 
-    export List, Nil, Cons, cons, nil, head, tail, list, filter, reverse
+    export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
+           reverse
 
     include("delegate.jl")
 
