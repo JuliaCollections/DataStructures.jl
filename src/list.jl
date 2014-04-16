@@ -1,14 +1,14 @@
-abstract List{T}
+abstract LinkedList{T}
 
-type Nil{T} <: List{T}
+type Nil{T} <: LinkedList{T}
 end
 
-type Cons{T} <: List{T}
+type Cons{T} <: LinkedList{T}
     head::T
-    tail::List{T}
+    tail::LinkedList{T}
 end
 
-cons{T}(h, t::List{T}) = Cons{T}(h, t)
+cons{T}(h, t::LinkedList{T}) = Cons{T}(h, t)
 
 nil(T) = Nil{T}()
 nil() = nil(Any)
@@ -16,7 +16,7 @@ nil() = nil(Any)
 head(x::Cons) = x.head
 tail(x::Cons) = x.tail
 
-function show{T}(io::IO, l::List{T})
+function show{T}(io::IO, l::LinkedList{T})
     if isa(l,Nil)
         if is(T,Any)
             print(io, "nil()")
@@ -35,6 +35,7 @@ function show{T}(io::IO, l::List{T})
 end
 
 list() = nil()
+
 function list(elts...)
     l = nil()
     for i=length(elts):-1:1
@@ -42,6 +43,7 @@ function list(elts...)
     end
     return l
 end
+
 function list{T}(elts::T...)
     l = nil(T)
     for i=length(elts):-1:1
@@ -49,15 +51,9 @@ function list{T}(elts::T...)
     end
     return l
 end
-function list{T}(elts::List{T}...)
-    l = nil(List{T})
-    for i=length(elts):-1:1
-        l = cons(elts[i],l)
-    end
-    return l
-end
 
 length(l::Nil) = 0
+
 function length(l::Cons)
     n = 0
     for i in l
@@ -67,50 +63,66 @@ function length(l::Cons)
 end
 
 map(f::Base.Callable, l::Nil) = l
-map(f::Base.Callable, l::Cons) = cons(f(head(l)), map(f, tail(l)))
 
-function filter{T}(f::Function, l::List{T})    
+function map(f::Base.Callable, l::Cons)
+    first = f(l.head)
+    l2 = cons(first, nil(typeof(first)))
+    for h in l.tail
+        l2 = cons(f(h), l2)
+    end
+    reverse(l2)
+end
+
+function filter{T}(f::Function, l::LinkedList{T})
     l2 = nil(T)
-    for e in l
-        if f(e)
-            l2 = cons(e, l2)
+    for h in l
+        if f(h)
+            l2 = cons(h, l2)
         end
     end
     reverse(l2)
 end
 
-function reverse{T}(l::List{T})
+function reverse{T}(l::LinkedList{T})
     l2 = nil(T)
-    for e in l
-        l2 = cons(e, l2)
+    for h in l
+        l2 = cons(h, l2)
     end    
     l2
 end
 
 copy(l::Nil) = l
-copy(l::Cons) = cons(head(l), copy(tail(l)))
 
-function append2(a, b)
-    if isa(a,Nil)
-        b
-    else
-        cons(head(a), append2(tail(a), b))
-    end
+function copy(l::Cons)
+    l2 = reverse(reverse(l))
 end
 
-cat(lst::List) = lst
+cat(lst::LinkedList) = lst
 
-function cat(lst::List, lsts...)
+function cat(lst::LinkedList, lsts::LinkedList...)
+    T = typeof(lst).parameters[1]
     n = length(lsts)
-    l = lsts[n]
-    for i = (n-1):-1:1
-        l = append2(lsts[i], l)
+    for i = 1:n
+        T2 = typeof(lsts[i]).parameters[1]
+        T = typejoin(T, T2)
     end
-    return append2(lst, l)
+
+    l2 = nil(T)
+    for h in lst
+        l2 = cons(h, l2)
+    end
+
+    for i = 1:n
+        for h in lsts[i]
+            l2 = cons(h, l2)
+        end
+    end
+
+    reverse(l2)
 end
 
 start{T}(l::Nil{T}) = l
 start{T}(l::Cons{T}) = l
 done{T}(l::Cons{T}, state::Cons{T}) = false
-done{T}(l::List, state::Nil{T}) = true
+done{T}(l::LinkedList, state::Nil{T}) = true
 next{T}(l::Cons{T}, state::Cons{T}) = (state.head, state.tail)
