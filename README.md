@@ -278,8 +278,9 @@ An implementation of the `Trie` data structure. This is an associative structure
 t=Trie{Int}()
 t["Rob"]=42
 t["Roger"]=24
-t.haskey("Rob") #true
-t.get("Rob") #42
+haskey(t,"Rob") #true
+get(t,"Rob",nothing) #42
+keys(t) # "Rob", "Roger"
 ```
 
 ##Linked List
