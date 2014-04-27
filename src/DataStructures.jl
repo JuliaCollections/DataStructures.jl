@@ -6,7 +6,7 @@ module DataStructures
                  push!, pop!, shift!, unshift!, add!,
                  union!, delete!, similar, sizehint, 
                  isequal, hash,
-                 map
+                 map, reverse
     
     export Deque, Stack, Queue
     export deque, enqueue!, dequeue!, update!
