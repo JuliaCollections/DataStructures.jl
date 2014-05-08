@@ -55,6 +55,10 @@ e['e'] = 9
 @test e['e'] == 9
 @test f['e'] == 0
 
+s = similar(d)
+@test typeof(s) == typeof(d)
+@test s.d.default == d.d.default
+
 
 #####################
 # DefaultOrderedDicts
@@ -99,3 +103,7 @@ end
 
 @test collect(keys(d)) == ['a':'z']
 @test collect(values(d)) == [1:26]
+
+s = similar(d)
+@test typeof(s) == typeof(d)
+@test s.d.default == d.d.default
