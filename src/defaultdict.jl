@@ -12,7 +12,7 @@
 # each of the DefaultDictBase "subclasses", in some sense getting
 # around the Julia limitation of not allowing concrete classes to be
 # subclassed.
-# 
+#
 
 immutable DefaultDictBase{K,V,F,D<:Associative{K,V}} <: Associative{K,V}
     default::F
@@ -31,7 +31,7 @@ DefaultDictBase() = error("no default specified")
 DefaultDictBase(k,v) = error("no default specified")
 
 # TODO: these mimic similar Dict constructors, but may not be needed
-DefaultDictBase{K,V,F}(default::F, ks::AbstractArray{K}, vs::AbstractArray{V}) = 
+DefaultDictBase{K,V,F}(default::F, ks::AbstractArray{K}, vs::AbstractArray{V}) =
     DefaultDictBase{K,V,F,Dict{K,V}}(default,ks,vs)
 DefaultDictBase{F}(default::F,ks,vs) = DefaultDictBase{Any,Any,F,Dict}(default, ks, vs)
 
