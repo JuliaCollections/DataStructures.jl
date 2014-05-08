@@ -49,7 +49,7 @@ DefaultDictBase{F,D<:Associative}(default::F, d::D) = ((K,V)=eltype(d); DefaultD
                               getkey, pop!, delete!, start, done, next,
                               isempty, length ]
 
-similar{K,V,F}(d::DefaultDictBase{K,V,F}) = DefaultDictBase{K,V,F}()
+similar{K,V,F}(d::DefaultDictBase{K,V,F}) = DefaultDictBase{K,V,F}(d.default)
 in{T<:DefaultDictBase}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d)
 next{T<:DefaultDictBase}(v::Base.KeyIterator{T}, i) = (v.dict.d.keys[i], Base.skip_deleted(v.dict.d,i+1))
 next{T<:DefaultDictBase}(v::Base.ValueIterator{T}, i) = (v.dict.d.vals[i], Base.skip_deleted(v.dict.d,i+1))
@@ -100,7 +100,7 @@ for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Order
                                    getkey, pop!, delete!, start, next,
                                    done, next, isempty, length]
 
-        similar{K,V,F}(d::$DefaultDict{K,V,F}) = $DefaultDict{K,V,F}()
+        similar{K,V,F}(d::$DefaultDict{K,V,F}) = $DefaultDict{K,V,F}(d.d.default)
         in{T<:$DefaultDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
     end
 end
@@ -143,6 +143,6 @@ end
 #                            getkey, pop!, delete!, start, next,
 #                            done, next, isempty, length]
 
-# similar{K,V,F}(d::DefaultSortedDict{K,V,F}) = DefaultSortedDict{K,V,F}()
+# similar{K,V,F}(d::DefaultSortedDict{K,V,F}) = DefaultSortedDict{K,V,F}(d.d.default)
 # in{T<:DefaultSortedDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
 
