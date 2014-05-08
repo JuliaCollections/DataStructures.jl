@@ -56,24 +56,6 @@ next{T<:DefaultDictBase}(v::Base.ValueIterator{T}, i) = (v.dict.d.vals[i], Base.
 
 getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 
-# TODO: remove these if/when https://github.com/JuliaLang/julia/pull/5519 is committed
-if !applicable(get!, (Dict,))
-    global getindex
-    function getindex{K,V,F<:Base.Callable}(d::DefaultDictBase{K,V,F,Dict}, key)
-        if !haskey(d.d, key) 
-            return (d.d[key] = d.default())
-        end
-        return d.d[key]
-    end    
-
-    function getindex{K,V,F}(d::DefaultDictBase{K,V,F,Dict}, key)
-        if !haskey(d.d, key) 
-            return (d.d[key] = d.default)
-        end
-        return d.d[key]
-    end
-end    
-
 
 ################
 
