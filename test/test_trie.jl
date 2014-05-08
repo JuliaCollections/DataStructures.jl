@@ -11,6 +11,6 @@ t["roger"]=52
 
 @test haskey(t, "roger")
 @test get(t,"rob",nothing) == 27
-@test keys(t) == ["rob","roger","ann","amy","emma"]
+@test sort(keys(t)) == ["amy", "ann", "emma", "rob", "roger"]
 @test t["rob"] == 27
-@test keys_with_prefix(t,"ro") == ["rob","roger"]
+@test sort(keys_with_prefix(t,"ro")) == ["rob", "roger"]
