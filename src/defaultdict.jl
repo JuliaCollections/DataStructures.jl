@@ -12,7 +12,7 @@
 # each of the DefaultDictBase "subclasses", in some sense getting
 # around the Julia limitation of not allowing concrete classes to be
 # subclassed.
-# 
+#
 
 immutable DefaultDictBase{K,V,F,D<:Associative{K,V}} <: Associative{K,V}
     default::F
@@ -31,7 +31,7 @@ DefaultDictBase() = error("no default specified")
 DefaultDictBase(k,v) = error("no default specified")
 
 # TODO: these mimic similar Dict constructors, but may not be needed
-DefaultDictBase{K,V,F}(default::F, ks::AbstractArray{K}, vs::AbstractArray{V}) = 
+DefaultDictBase{K,V,F}(default::F, ks::AbstractArray{K}, vs::AbstractArray{V}) =
     DefaultDictBase{K,V,F,Dict{K,V}}(default,ks,vs)
 DefaultDictBase{F}(default::F,ks,vs) = DefaultDictBase{Any,Any,F,Dict}(default, ks, vs)
 
@@ -55,24 +55,6 @@ next{T<:DefaultDictBase}(v::Base.KeyIterator{T}, i) = (v.dict.d.keys[i], Base.sk
 next{T<:DefaultDictBase}(v::Base.ValueIterator{T}, i) = (v.dict.d.vals[i], Base.skip_deleted(v.dict.d,i+1))
 
 getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
-
-# TODO: remove these if/when https://github.com/JuliaLang/julia/pull/5519 is committed
-if !applicable(get!, (Dict,))
-    global getindex
-    function getindex{K,V,F<:Base.Callable}(d::DefaultDictBase{K,V,F,Dict}, key)
-        if !haskey(d.d, key) 
-            return (d.d[key] = d.default())
-        end
-        return d.d[key]
-    end    
-
-    function getindex{K,V,F}(d::DefaultDictBase{K,V,F,Dict}, key)
-        if !haskey(d.d, key) 
-            return (d.d[key] = d.default)
-        end
-        return d.d[key]
-    end
-end    
 
 
 ################
