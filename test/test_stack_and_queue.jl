@@ -10,8 +10,8 @@ n = 100
 
 @test length(s) == 0
 @test isempty(s)
-@test_throws top(s)
-@test_throws pop!(s)
+@test_throws ArgumentError top(s)
+@test_throws ArgumentError pop!(s)
 
 for i = 1 : n
     push!(s, i)
@@ -26,7 +26,7 @@ for i = 1 : n
     if i < n
         @test top(s) == n - i
     else
-        @test_throws top(s)
+        @test_throws ArgumentError top(s)
     end
     @test isempty(s) == (i == n)
     @test length(s) == n - i
@@ -39,9 +39,9 @@ n = 100
 
 @test length(s) == 0
 @test isempty(s)
-@test_throws front(s)
-@test_throws back(s)
-@test_throws dequeue!(s)
+@test_throws ArgumentError front(s)
+@test_throws ArgumentError back(s)
+@test_throws ArgumentError dequeue!(s)
 
 for i = 1 : n
     enqueue!(s, i)
@@ -53,13 +53,13 @@ end
 
 for i = 1 : n
     x = dequeue!(s)
-    @test x == i 
+    @test x == i
     if i < n
         @test front(s) == i + 1
         @test back(s) == n
     else
-        @test_throws front(s)
-        @test_throws back(s)
+        @test_throws ArgumentError front(s)
+        @test_throws ArgumentError back(s)
     end
     @test isempty(s) == (i == n)
     @test length(s) == n - i

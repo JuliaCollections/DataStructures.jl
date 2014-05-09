@@ -11,7 +11,7 @@ using Base.Test
 d = OrderedDict(Char, Int)
 @test length(d) == 0
 @test isempty(d)
-@test_throws d['c'] == 1
+@test_throws KeyError d['c'] == 1
 d['c'] = 1
 @test !isempty(d)
 empty!(d)
