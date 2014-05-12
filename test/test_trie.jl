@@ -14,3 +14,12 @@ t["roger"]=52
 @test sort(keys(t)) == ["amy", "ann", "emma", "rob", "roger"]
 @test t["rob"] == 27
 @test sort(keys_with_prefix(t,"ro")) == ["rob", "roger"]
+
+
+# constructors
+ks = ["amy", "ann", "emma", "rob", "roger"]
+vs = [56, 15, 30, 27, 52]
+@test typeof(Trie(ks, vs)) == Trie{Int}
+@test typeof(Trie(collect(zip(ks,vs)))) == Trie{Int}
+@test typeof(Trie(Dict(ks, vs))) == Trie{Int}
+@test typeof(Trie(ks)) == Trie{Nothing}

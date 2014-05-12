@@ -9,9 +9,29 @@ type Trie{T}
         self.is_key = false
         self
     end
+
+    function Trie(ks, vs)
+        t = Trie{T}()
+        for (k, v) in zip(ks, vs)
+            t[k] = v
+        end
+        return t
+    end
+
+    function Trie(kv)
+        t = Trie{T}()
+        for (k,v) in kv
+            t[k] = v
+        end
+        return t
+    end
 end
 
 Trie() = Trie{Any}()
+Trie{K<:String,V}(ks::AbstractVector{K}, vs::AbstractVector{V}) = Trie{V}(ks, vs)
+Trie{K<:String,V}(kv::AbstractVector{(K,V)}) = Trie{V}(kv)
+Trie{K<:String,V}(kv::Associative{K,V}) = Trie{V}(kv)
+Trie{K<:String}(ks::AbstractVector{K}) = Trie{Nothing}(ks, similar(ks, Nothing))
 
 function setindex!{T}(t::Trie{T}, val::T, key::String)
     node = t
