@@ -25,7 +25,7 @@ module DataStructures
 
     export OrderedDict, OrderedSet
     export DefaultDict, DefaultOrderedDict
-    export Trie, subtrie, keys_with_prefix
+    export Trie, subtrie, keys_with_prefix, path
 
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
            reverse
