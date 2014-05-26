@@ -14,12 +14,12 @@
 ############################################################
 
 type IntDisjointSets
-    parents::Vector{Int}
+    parents::Vector{Int} 
     ranks::Vector{Int}
     ngroups::Int
     
     # creates a disjoint set comprised of n singletons
-    IntDisjointSets(n::Integer) = new([1:n], zeros(Int, n), n)
+    IntDisjointSets(n::Integer) = new(Int[1:n], zeros(Int, n), n)
 end
 
 length(s::IntDisjointSets) = length(s.parents)
@@ -29,37 +29,44 @@ num_groups(s::IntDisjointSets) = s.ngroups
 # find the root element of the subset that contains x
 # path compression is implemented here
 #
-function find_root(s::IntDisjointSets, x::Integer)
-    @inbounds p::Int = s.parents[x]
-    @inbounds if s.parents[p] != p
-        s.parents[x] = p = find_root(s, p)
+
+function find_root_impl!(parents::Array{Int}, x::Integer)
+    @inbounds p = parents[x]
+    @inbounds if parents[p] != p
+        parents[x] = p = find_root_impl!(parents, p)
     end
     p
 end
+
+find_root(s::IntDisjointSets, x::Integer) = find_root_impl!(s.parents, x)
 
 in_same_set(s::IntDisjointSets, x::Integer, y::Integer) = find_root(s, x) == find_root(s, y)
 
 # merge the subset containing x and that containing y into one
 #
 function union!(s::IntDisjointSets, x::Integer, y::Integer)
-    xroot = find_root(s, x)
-    yroot = find_root(s, y)
+    parents = s.parents
+    xroot = find_root_impl!(parents, x)
+    yroot = find_root_impl!(parents, y)
+
     if xroot != yroot
-        rks::Vector{Int} = s.ranks
-        @inbounds xrank::Int = rks[xroot]
-        @inbounds yrank::Int = rks[yroot]
+        rks = s.ranks
+        @inbounds xrank = rks[xroot]
+        @inbounds yrank = rks[yroot]
         
         if xrank < yrank
-            @inbounds s.parents[xroot] = yroot
+            @inbounds parents[xroot] = yroot
         else
-            @inbounds s.parents[yroot] = xroot
+            @inbounds parents[yroot] = xroot
             if xrank == yrank
-                s.ranks[xroot] += 1
+                rks[xroot] += 1
             end
         end
-        s.ngroups -= 1
+        @inbounds s.ngroups -= 1
     end
 end
+
+# code_native(union!, (IntDisjointSets, Int, Int))
 
 # make a new subset with a given new element x
 #
