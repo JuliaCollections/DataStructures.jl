@@ -66,8 +66,6 @@ function union!(s::IntDisjointSets, x::Integer, y::Integer)
     end
 end
 
-# code_native(union!, (IntDisjointSets, Int, Int))
-
 # make a new subset with a given new element x
 #
 function push!(s::IntDisjointSets, x::Integer)
