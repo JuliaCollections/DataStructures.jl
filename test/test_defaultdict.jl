@@ -6,8 +6,8 @@ using Base.Test
 ##############
 
 # construction
-@test_throws DefaultDict()
-@test_throws DefaultDict(String, Int)
+@test_throws ErrorException DefaultDict()
+@test_throws ErrorException DefaultDict(String, Int)
 
 # empty dictionary
 d = DefaultDict(Char, Int, 1)
@@ -50,7 +50,7 @@ end
 e = ['a'=>1, 'b'=>3, 'c'=>5]
 f = DefaultDict(0, e)
 @test f['d'] == 0
-@test_throws e['d']
+@test_throws KeyError e['d']
 e['e'] = 9
 @test e['e'] == 9
 @test f['e'] == 0
@@ -65,8 +65,8 @@ s = similar(d)
 #####################
 
 # construction
-@test_throws DefaultOrderedDict()
-@test_throws DefaultOrderedDict(String, Int)
+@test_throws ErrorException DefaultOrderedDict()
+@test_throws ErrorException DefaultOrderedDict(String, Int)
 
 # empty dictionary
 d = DefaultOrderedDict(Char, Int, 1)
