@@ -13,17 +13,19 @@
 #
 ############################################################
 
-type IntDisjointSets
+type IntWrapper val::Int end
+
+immutable IntDisjointSets
     parents::Vector{Int}
     ranks::Vector{Int}
-    ngroups::Int
-    
+    ngroups::IntWrapper
+
     # creates a disjoint set comprised of n singletons
-    IntDisjointSets(n::Integer) = new([1:n], zeros(Int, n), n)
+    IntDisjointSets(n::Integer) = new([1:n], zeros(Int, n), IntWrapper(n))
 end
 
 length(s::IntDisjointSets) = length(s.parents)
-num_groups(s::IntDisjointSets) = s.ngroups
+num_groups(s::IntDisjointSets) = s.ngroups.val
 
 
 # find the root element of the subset that contains x
@@ -48,7 +50,7 @@ function union!(s::IntDisjointSets, x::Integer, y::Integer)
         rks::Vector{Int} = s.ranks
         @inbounds xrank::Int = rks[xroot]
         @inbounds yrank::Int = rks[yroot]
-        
+
         if xrank < yrank
             @inbounds s.parents[xroot] = yroot
         else
@@ -57,7 +59,7 @@ function union!(s::IntDisjointSets, x::Integer, y::Integer)
                 s.ranks[xroot] += 1
             end
         end
-        s.ngroups -= 1
+        @inbounds s.ngroups.val -= 1
     end
 end
 
@@ -66,7 +68,7 @@ end
 function push!(s::IntDisjointSets, x::Integer)
     push!(s.parents, x)
     push!(s.ranks, 0)
-    s.ngroups += 1
+    @inbounds s.ngroups.val += 1
 end
 
 # make a new subset with an automatically chosen new element x
@@ -83,15 +85,15 @@ end
 #
 #  A forest of disjoint sets of arbitrary value type T
 #
-#  It is a wrapper of IntDisjointSets, which uses a 
+#  It is a wrapper of IntDisjointSets, which uses a
 #  dictionary to map the input value to an internal index
 #
 ############################################################
 
-type DisjointSets{T}
+immutable DisjointSets{T}
     intmap::Dict{T,Int}
     internal::IntDisjointSets
-    
+
     function DisjointSets(xs)    # xs must be iterable
         imap = Dict{T,Int}()
         n = length(xs)
@@ -108,7 +110,7 @@ length(s::DisjointSets) = length(s.internal)
 num_groups(s::DisjointSets) = num_groups(s.internal)
 
 find_root{T}(s::DisjointSets{T}, x::T) = find_root(s.internal, s.intmap[x])
-    
+
 in_same_set{T}(s::DisjointSets{T}, x::T, y::T) = in_same_set(s.internal, s.intmap[x], s.intmap[y])
 
 function union!{T}(s::DisjointSets{T}, x::T, y::T)
