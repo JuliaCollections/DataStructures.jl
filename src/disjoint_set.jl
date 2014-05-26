@@ -13,17 +13,19 @@
 #
 ############################################################
 
-type IntDisjointSets
+type IntWrapper val::Int end
+
+immutable IntDisjointSets
     parents::Vector{Int}
     ranks::Vector{Int}
-    ngroups::Int
+    ngroups::IntWrapper
 
     # creates a disjoint set comprised of n singletons
-    IntDisjointSets(n::Integer) = new([1:n], zeros(Int, n), n)
+    IntDisjointSets(n::Integer) = new([1:n], zeros(Int, n), IntWrapper(n))
 end
 
 length(s::IntDisjointSets) = length(s.parents)
-num_groups(s::IntDisjointSets) = s.ngroups
+num_groups(s::IntDisjointSets) = s.ngroups.val
 
 
 # find the root element of the subset that contains x
@@ -57,7 +59,7 @@ function union!(s::IntDisjointSets, x::Integer, y::Integer)
                 s.ranks[xroot] += 1
             end
         end
-        s.ngroups -= 1
+        @inbounds s.ngroups.val -= 1
     end
 end
 
@@ -66,7 +68,7 @@ end
 function push!(s::IntDisjointSets, x::Integer)
     push!(s.parents, x)
     push!(s.ranks, 0)
-    s.ngroups += 1
+    @inbounds s.ngroups.val += 1
 end
 
 # make a new subset with an automatically chosen new element x
@@ -88,7 +90,7 @@ end
 #
 ############################################################
 
-type DisjointSets{T}
+immutable DisjointSets{T}
     intmap::Dict{T,Int}
     internal::IntDisjointSets
 
