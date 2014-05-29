@@ -80,7 +80,6 @@ a = accumulator(dict)    # construct an accumulator from a dictionary
 a = counter(K)           # construct a counter, i.e. an accumulator with
                          # key type K and value type Int
 
-
 a = counter(dict)        # construct a counter from a dictionary
 
 a = counter(seq)         # construct a counter by counting keys in a sequence
@@ -137,26 +136,26 @@ Heaps are data structures that efficiently maintain the minimum (or maximum) for
 All heaps in this package are derived from ``AbstractHeap``, and provides the following interface:
 
 ```julia
-let h be a heap, i be a handle, and v be a value.
+# Let h be a heap, i be a handle, and v be a value.
 
-- length(h)         # returns the number of elements
+length(h)         # returns the number of elements
 
-- isempty(h)        # returns whether the heap is empty
+isempty(h)        # returns whether the heap is empty
 
-- push!(h, v)       # add a value to the heap
+push!(h, v)       # add a value to the heap
 
-- top(h)            # return the top value of a heap
+top(h)            # return the top value of a heap
 
-- pop!(h)           # removes the top value, and returns it
+pop!(h)           # removes the top value, and returns it
 ```
 
 Mutable heaps (values can be changed after being pushed to a heap) are derived from 
 ``AbstractMutableHeap <: AbstractHeap``, and additionally provides the following interface:
 
 ```julia
-- i = push!(h, v)       # adds a value to the heap and and returns a handle to v
+i = push!(h, v)       # adds a value to the heap and and returns a handle to v
                     
-- update!(h, i, v)      # updates the value of an element (referred to by the handle i)
+update!(h, i, v)      # updates the value of an element (referred to by the handle i)
 ```
 
 Currently, both min/max versions of binary heap (type ``BinaryHeap``) and mutable binary heap (type ``MutableBinaryHeap``) have been implemented.
