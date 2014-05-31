@@ -137,4 +137,11 @@ for k = 1 : m
     @test collect(q) == r
 end
 
+# issue #38
+
+q = Deque{Int}(1)
+push!(q,1)
+@test !isempty(q)
+empty!(q)
+@test isempty(q)
 
