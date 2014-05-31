@@ -180,7 +180,8 @@ function empty!{T}(q::Deque{T})
     # reset queue fields
     q.nblocks = 1
     q.len = 0
-    q.rear = h
+    q.rear = q.head
+    q
 end
 
 
