@@ -48,7 +48,7 @@ s = Stack(Int)
 push!(s, x)
 x = top(s)
 x = pop!(s)
-``` 
+```
 
 Usage of Queue:
 ```
@@ -61,7 +61,7 @@ x = dequeue!(q)
 
 ## Accumulators and Counters
 
-A accumulator, as defined below, is a data structure that maintains an accumulated number for each key. This is a counter when the accumulated values reflect the counts. 
+A accumulator, as defined below, is a data structure that maintains an accumulated number for each key. This is a counter when the accumulated values reflect the counts.
 
 ```julia
 type Accumulator{K, V<:Number}
@@ -72,7 +72,7 @@ end
 There are different ways to construct an accumulator/counter:
 
 ```julia
-a = accumulator(K, V)    # construct an accumulator with key-type K and 
+a = accumulator(K, V)    # construct an accumulator with key-type K and
                          # accumulated value type V
 
 a = accumulator(dict)    # construct an accumulator from a dictionary
@@ -90,7 +90,7 @@ Usage of an accumulator/counter:
 ```julia
 # let a and a2 be accumulators/counters
 
-a[x]             # get the current value/count for x. 
+a[x]             # get the current value/count for x.
                  # if x was not added to a, it returns zero(V)
 
 push!(a, x)       # add the value/count for x by 1
@@ -106,15 +106,15 @@ merge(a, a2)     # return a new accumulator/counter that combines the
 
 ## Disjoint Sets
 
-Some algorithms, such as finding connected components in undirected graph and Kruskal's method of finding minimum spanning tree, require a data structure that can efficiently represent a collection of disjoint subsets. 
-A widely used data structure for this purpose is the *Disjoint set forest*. 
+Some algorithms, such as finding connected components in undirected graph and Kruskal's method of finding minimum spanning tree, require a data structure that can efficiently represent a collection of disjoint subsets.
+A widely used data structure for this purpose is the *Disjoint set forest*.
 
 Usage:
 ```
 a = IntDisjointSets(10)      # creates a forest comprised of 10 singletons
 union!(a, 3, 5)             # merges the sets that contain 3 and 5 into one
 in_same_set(a, x, y)        # determines whether x and y are in the same set
-elem = push!(a)             # adds a single element in a new set; returns the new element 
+elem = push!(a)             # adds a single element in a new set; returns the new element
                             # (this operation is often called MakeSet)
 ```
 
@@ -126,12 +126,12 @@ in_same_set(a, "c", "d")
 push!(a, "f")
 ```
 
-Note that the internal implementation of ``IntDisjointSets`` is based on vectors, and is very efficient. ``DisjointSets{T}`` is a wrapper of ``IntDisjointSets``, which uses a dictionary to map input elements to an internal index. 
+Note that the internal implementation of ``IntDisjointSets`` is based on vectors, and is very efficient. ``DisjointSets{T}`` is a wrapper of ``IntDisjointSets``, which uses a dictionary to map input elements to an internal index.
 
 
 ## Heaps
 
-Heaps are data structures that efficiently maintain the minimum (or maximum) for a set of data that may dynamically change. 
+Heaps are data structures that efficiently maintain the minimum (or maximum) for a set of data that may dynamically change.
 
 All heaps in this package are derived from ``AbstractHeap``, and provides the following interface:
 
@@ -149,29 +149,30 @@ top(h)            # return the top value of a heap
 pop!(h)           # removes the top value, and returns it
 ```
 
-Mutable heaps (values can be changed after being pushed to a heap) are derived from 
+Mutable heaps (values can be changed after being pushed to a heap) are derived from
 ``AbstractMutableHeap <: AbstractHeap``, and additionally provides the following interface:
 
 ```julia
 i = push!(h, v)       # adds a value to the heap and and returns a handle to v
-                    
+
 update!(h, i, v)      # updates the value of an element (referred to by the handle i)
 ```
+
 
 Currently, both min/max versions of binary heap (type ``BinaryHeap``) and mutable binary heap (type ``MutableBinaryHeap``) have been implemented.
 
 Examples of constructing a heap:
 ```julia
-h = binary_minheap(Int)            
+h = binary_minheap(Int)
 h = binary_maxheap(Int)            # create an empty min/max binary heap of integers
 
-h = binary_minheap([1,4,3,2])      
+h = binary_minheap([1,4,3,2])
 h = binary_maxheap([1,4,3,2])      # create a min/max heap from a vector
 
-h = mutable_binary_minheap(Int)    
+h = mutable_binary_minheap(Int)
 h = mutable_binary_maxheap(Int)    # create an empty mutable min/max heap
 
-h = mutable_binary_minheap([1,4,3,2])    
+h = mutable_binary_minheap([1,4,3,2])
 h = mutable_binary_maxheap([1,4,3,2])    # create a mutable min/max heap from a vector
 ```
 
@@ -271,7 +272,7 @@ julia> dd["a"]
 
 ##Trie
 
-An implementation of the `Trie` data structure. This is an associative structure, with `String` keys. 
+An implementation of the `Trie` data structure. This is an associative structure, with `String` keys.
 
 ```julia
 t=Trie{Int}()
