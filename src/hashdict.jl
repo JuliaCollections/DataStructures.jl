@@ -3,7 +3,7 @@
 import Base: KeyIterator, ValueIterator, haskey, get, getkey, delete!,
              pop!, empty!, filter!, setindex!, getindex, similar,
              sizehint, length, filter, isempty, start, next, done,
-             keys, values, _tablesz, skip_deleted, serialize, deserialize
+             keys, values, _tablesz, skip_deleted, serialize, deserialize, serialize_type
 
 typealias Unordered Nothing
 typealias Ordered   Int
