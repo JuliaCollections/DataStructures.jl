@@ -6,7 +6,8 @@ module DataStructures
                  push!, pop!, shift!, unshift!, add!,
                  union!, delete!, similar, sizehint, 
                  isequal, hash,
-                 map, reverse
+                 map, reverse,
+                 sort, sort!, issorted
     
     export Deque, Stack, Queue
     export deque, enqueue!, dequeue!, update!
@@ -25,6 +26,8 @@ module DataStructures
 
     export OrderedDict, OrderedSet
     export DefaultDict, DefaultOrderedDict
+    export sort, sort!, issorted
+
     export Trie, subtrie, keys_with_prefix
 
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
@@ -44,6 +47,9 @@ module DataStructures
     include("ordereddict.jl")
     include("orderedset.jl")
     include("defaultdict.jl")
+    include("dictsort.jl")
+    using .DictSort
+
     include("trie.jl")
     
     include("list.jl")
