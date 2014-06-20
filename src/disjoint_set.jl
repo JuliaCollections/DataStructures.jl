@@ -31,9 +31,18 @@ num_groups(s::IntDisjointSets) = s.ngroups
 #
 
 function find_root_impl!(parents::Array{Int}, x::Integer)
+    p = parents[x]
+    @inbounds if parents[p] != p
+        parents[x] = p = _find_root_impl!(parents, p)
+    end
+    p
+end
+
+# unsafe version of the above
+function _find_root_impl!(parents::Array{Int}, x::Integer)
     @inbounds p = parents[x]
     @inbounds if parents[p] != p
-        parents[x] = p = find_root_impl!(parents, p)
+        parents[x] = p = _find_root_impl!(parents, p)
     end
     p
 end
@@ -66,20 +75,14 @@ function union!(s::IntDisjointSets, x::Integer, y::Integer)
     end
 end
 
-# make a new subset with a given new element x
-#
-function push!(s::IntDisjointSets, x::Integer)
-    push!(s.parents, x)
-    push!(s.ranks, 0)
-    s.ngroups += 1
-end
-
 # make a new subset with an automatically chosen new element x
 # returns the new element
 #
 function push!(s::IntDisjointSets)
     x = length(s) + 1
-    push!(s, x)
+    push!(s.parents, x)
+    push!(s.ranks, 0)
+    s.ngroups += 1
     return x
 end
 
