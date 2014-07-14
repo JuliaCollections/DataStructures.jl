@@ -10,15 +10,15 @@ ct = counter(ASCIIString)
 @test !haskey(ct, "abc")
 @test isempty(collect(keys(ct)))
 
-add!(ct, "a")
+push!(ct, "a")
 @test haskey(ct, "a")
 @test ct["a"] == 1
 
-add!(ct, "b", 2)
+push!(ct, "b", 2)
 @test haskey(ct, "b")
 @test ct["b"] == 2
 
-add!(ct, "b", 3)
+push!(ct, "b", 3)
 @test ct["b"] == 5
 
 @test !haskey(ct, "abc")
@@ -37,7 +37,7 @@ ct2 = counter(["a", "a", "b", "b", "a", "c", "c"])
 @test ct2["b"] == 2
 @test ct2["c"] == 2
 
-add!(ct, ct2)
+push!(ct, ct2)
 @test ct["a"] == 4
 @test ct["b"] == 7
 @test ct["c"] == 2

@@ -77,7 +77,7 @@ end
 @test isequal(extract_all!(hmax), [16, 14, 10, 9, 8, 7, 4, 3, 2, 1])
 @test isempty(hmax)
 
-# test hybrid add! and pop!
+# test hybrid push! and pop!
 
 h = binary_minheap(Int)
 

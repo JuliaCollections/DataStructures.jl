@@ -40,7 +40,7 @@ done(cc::ClassifiedCollections, state) = done(cc.map, state)
 
 # manipulation
 
-function add!{K, C}(cc::ClassifiedCollections{K, C}, key::K, e)
+function push!{K, C}(cc::ClassifiedCollections{K, C}, key::K, e)
 	c = get(cc.map, key, nothing)
 	if is(c, nothing)
 		c = _create_empty(C)

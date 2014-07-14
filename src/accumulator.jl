@@ -15,7 +15,7 @@ counter{T}(dct::Dict{T,Int}) = Accumulator{T,Int}(copy(dct))
 function counter{T}(seq::AbstractArray{T})
 	ct = counter(T)
 	for x in seq
-		add!(ct, x)
+		push!(ct, x)
 	end
 	return ct
 end
@@ -42,19 +42,18 @@ done(ct::Accumulator, state) = done(ct.map, state)
 
 # manipulation
 
-add!{T,V<:Number}(ct::Accumulator{T,V}, x::T, a::V) = (ct.map[x] = ct[x] + a)
-add!{T,V<:Number,V2<:Number}(ct::Accumulator{T,V}, x::T, a::V2) = add!(ct, x, convert(V,a))
-add!{T,V<:Number}(ct::Accumulator{T,V}, x::T) = add!(ct, x, one(V))
-push!{T,V<:Number}(ct::Accumulator{T,V}, x::T) = add!(ct, x)
+push!{T,V<:Number}(ct::Accumulator{T,V}, x::T, a::V) = (ct.map[x] = ct[x] + a)
+push!{T,V<:Number,V2<:Number}(ct::Accumulator{T,V}, x::T, a::V2) = push!(ct, x, convert(V,a))
+push!{T,V<:Number}(ct::Accumulator{T,V}, x::T) = push!(ct, x, one(V))
 
-function add!{T,V<:Number,V2<:Number}(ct::Accumulator{T,V}, r::Accumulator{T,V2})
+function push!{T,V<:Number,V2<:Number}(ct::Accumulator{T,V}, r::Accumulator{T,V2})
 	for (x::T, v::V2) in r
-		add!(ct, x, v)
+		push!(ct, x, v)
 	end
 	ct
 end
 
 pop!{T,V<:Number}(ct::Accumulator{T,V}, x::T) = pop!(ct.map, x)
 
-merge{T,V<:Number}(ct1::Accumulator{T,V}, ct2::Accumulator{T,V}) = add!(copy(ct1), ct2)
+merge{T,V<:Number}(ct1::Accumulator{T,V}, ct2::Accumulator{T,V}) = push!(copy(ct1), ct2)
 
