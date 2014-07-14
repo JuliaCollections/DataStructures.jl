@@ -21,11 +21,11 @@ function benchmark_heap(title::ASCIIString, h::AbstractHeap, xs::Vector{Float64}
         pop!(h)
     end
     
-    @printf("   On %-24s:  add.elapsed = %7.4fs  pop.elapsed = %7.4fs\n", title, t1, t2)
+    @printf("   On %-24s:  push.elapsed = %7.4fs  pop.elapsed = %7.4fs\n", title, t1, t2)
 end
 
 
-# Benchmark on add! and pop!
+# Benchmark on push! and pop!
 
 xs = rand(10^6)
 
