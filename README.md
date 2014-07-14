@@ -93,9 +93,9 @@ Usage of an accumulator/counter:
 a[x]             # get the current value/count for x. 
                  # if x was not added to a, it returns zero(V)
 
-add!(a, x)       # add the value/count for x by 1
-add!(a, x, v)    # add the value/count for x by v
-add!(a, a2)      # add all counts from a2 to a1
+push!(a, x)       # add the value/count for x by 1
+push!(a, x, v)    # add the value/count for x by v
+push!(a, a2)      # add all counts from a2 to a1
 
 pop!(a, x)       # remove a key x from a, and returns its current value
 
