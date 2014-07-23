@@ -1,13 +1,13 @@
 module DataStructures
-    
+
     import Base: length, isempty, start, next, done,
                  show, dump, empty!, getindex, setindex!, get, get!,
                  in, haskey, keys, merge, copy, cat,
                  push!, pop!, shift!, unshift!,
-                 union!, delete!, similar, sizehint, 
+                 union!, delete!, similar, sizehint,
                  isequal, hash,
                  map, reverse
-    
+
     export Deque, Stack, Queue
     export deque, enqueue!, dequeue!, update!
     export capacity, num_blocks, front, back, top, sizehint
@@ -15,7 +15,7 @@ module DataStructures
     export Accumulator, counter
     export ClassifiedCollections
     export classified_lists, classified_sets, classified_counters
-    
+
     export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set
     export push!
 
@@ -29,11 +29,12 @@ module DataStructures
 
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
            reverse
+    export Tree, EmptyTree, TreeNode, BinaryTree
 
     include("delegate.jl")
 
-    include("deque.jl") 
-    include("stack.jl")   
+    include("deque.jl")
+    include("stack.jl")
     include("queue.jl")
     include("accumulator.jl")
     include("classifiedcollections.jl")
@@ -45,8 +46,9 @@ module DataStructures
     include("orderedset.jl")
     include("defaultdict.jl")
     include("trie.jl")
-    
+
     include("list.jl")
+    include("tree.jl")
 
     @deprecate stack Stack
     @deprecate queue Queue
