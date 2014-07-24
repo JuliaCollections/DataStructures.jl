@@ -1,4 +1,4 @@
-import Base: haskey, getindex, setindex!, delete!
+import Base: haskey, getindex, setindex!, delete!, insert!
 
 export Tree, EmptyTree, TreeNode, BinaryTree
 
@@ -72,7 +72,7 @@ function delete!(t::TreeNode, k)
         else
             r = t.right
             t = t.left
-            treeinsert!(t, r)
+            insert!(t, r)
         end
     elseif k < t.key
         t.left = delete!(t.left, k)
@@ -82,13 +82,13 @@ function delete!(t::TreeNode, k)
     t
 end
 
-treeinsert!(t::EmptyTree, r::TreeNode) = r
+insert!(t::EmptyTree, r::TreeNode) = r
 
-function treeinsert!(t::TreeNode, r::TreeNode)
+function insert!(t::TreeNode, r::TreeNode)
     if r.key < t.key
-        t.left = treeinsert!(t.left, r)
+        t.left = insert!(t.left, r)
     else
-        t.right = treeinsert!(t.right, r)
+        t.right = insert!(t.right, r)
     end
     t
 end
