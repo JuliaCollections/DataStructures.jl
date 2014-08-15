@@ -111,7 +111,7 @@ A widely used data structure for this purpose is the *Disjoint set forest*.
 
 Usage:
 ```
-a = IntDisjointSet(10)      # creates a forest comprised of 10 singletons
+a = IntDisjointSets(10)      # creates a forest comprised of 10 singletons
 union!(a, 3, 5)             # merges the sets that contain 3 and 5 into one
 in_same_set(a, x, y)        # determines whether x and y are in the same set
 elem = push!(a)             # adds a single element in a new set; returns the new element 
@@ -120,13 +120,13 @@ elem = push!(a)             # adds a single element in a new set; returns the ne
 
 One may also use other element types
 ```
-a = DisjointSet{String}(["a", "b", "c", "d"])
+a = DisjointSets{String}(["a", "b", "c", "d"])
 union!(a, "a", "b")
 in_same_set(a, "c", "d")
 push!(a, "f")
 ```
 
-Note that the internal implementation of ``IntDisjointSet`` is based on vectors, and is very efficient. ``DisjointSet{T}`` is a wrapper of ``IntDisjointSet``, which uses a dictionary to map input elements to an internal index. 
+Note that the internal implementation of ``IntDisjointSets`` is based on vectors, and is very efficient. ``DisjointSets{T}`` is a wrapper of ``IntDisjointSets``, which uses a dictionary to map input elements to an internal index. 
 
 
 ## Heaps
