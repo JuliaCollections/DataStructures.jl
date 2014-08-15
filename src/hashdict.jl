@@ -220,6 +220,16 @@ function _compact_order{K,V}(h::HashDict{K,V,Ordered})
     nothing
 end
 
+function _update_order{K,V}(h::HashDict{K,V,Ordered}, first, last)
+    if first > last
+        (first, last) = (last, first)
+    end
+
+    for i = first:last
+        h.idxs[h.order[i]] = i
+    end
+end
+
 function sizehint(d::HashDict, newsz)
     oldsz = length(d.slots)
     if newsz <= oldsz
@@ -498,3 +508,4 @@ next(v::ValueIterator{HashDict}, i) = (v.dict.vals[i], skip_deleted(v.dict,i+1))
 
 next{K,V}(v::KeyIterator{HashDict{K,V,Ordered}}, i) = (v.dict.keys[v.dict.order[i]], skip_deleted(v.dict,i+1))
 next{K,V}(v::ValueIterator{HashDict{K,V,Ordered}}, i) = (v.dict.vals[v.dict.order[i]], skip_deleted(v.dict,i+1))
+

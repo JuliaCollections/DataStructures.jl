@@ -38,7 +38,7 @@ OrderedDict{K,V}(kv::AbstractArray{(K,V)}) = OrderedDict{K,V}(kv)
 @delegate OrderedDict.d [ haskey, get, get!, getkey, delete!, pop!,
                           empty!, setindex!, getindex, sizehint,
                           length, isempty, start, next, done, keys,
-                          values ]
+                          values, sort, sort! ]
 
 similar{K,V}(d::OrderedDict{K,V}) = OrderedDict{K,V}()
 in{T<:OrderedDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
