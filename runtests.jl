@@ -9,7 +9,8 @@ tests = ["deque",
 		 "ordereddict",
 		 "orderedset",
 		 "trie",
-		 "list"]
+		 "list",
+                 "balancedTree"]
 
 for t in tests
 	fp = joinpath("test", "test_$t.jl")
