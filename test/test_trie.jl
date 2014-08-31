@@ -14,3 +14,24 @@ t["roger"]=52
 @test sort(keys(t)) == ["amy", "ann", "emma", "rob", "roger"]
 @test t["rob"] == 27
 @test sort(keys_with_prefix(t,"ro")) == ["rob", "roger"]
+
+
+# constructors
+ks = ["amy", "ann", "emma", "rob", "roger"]
+vs = [56, 15, 30, 27, 52]
+@test typeof(Trie(ks, vs)) == Trie{Int}
+@test typeof(Trie(collect(zip(ks,vs)))) == Trie{Int}
+@test typeof(Trie(Dict(ks, vs))) == Trie{Int}
+@test typeof(Trie(ks)) == Trie{Nothing}
+
+
+# path iterator
+t0 = t
+t1 = t0.children['r']
+t2 = t1.children['o']
+t3 = t2.children['b']
+@test collect(path(t, "b")) == [t0]
+@test collect(path(t, "rob")) == [t0, t1, t2, t3]
+@test collect(path(t, "robb")) == [t0, t1, t2, t3]
+@test collect(path(t, "ro")) == [t0, t1, t2]
+@test collect(path(t, "roa")) == [t0, t1, t2]
