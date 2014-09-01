@@ -24,8 +24,8 @@
 ##  there are no valid K or D values to store in the initial
 ##  data nodes.
 
-
-using Order
+import Base.Ordering
+import Base.lt
 
 immutable KDRec{K,D}
     parent::Int
