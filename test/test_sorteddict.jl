@@ -2,6 +2,7 @@ using DataStructures
 import Base.Ordering
 import Base.Forward
 import Base.Reverse
+import Base.lt
 
 
 ## Function fulldump dumps the entire tree; helpful for debugging.
@@ -262,7 +263,7 @@ function test1()
         # fulldump(m1.bt)
     end
     i1 = ind_first(m1)
-    while !is_ind_past_end(m1,i1)
+    while i1 != past_end(m1)
         k,d = deref_ind(m1,i1)
         #println("+ reading: k = $k, d = $d")
         i1 = advance_ind(m1,i1)
@@ -281,7 +282,7 @@ function test2()
     p = first(m1)
     @assert(p[1] == 6 && p[2] == 18.2)
     for j = 1 : 3
-        @assert(!is_ind_past_end(m1, ii))
+        @assert(i1 != past_end(m1))
         pr = deref_ind(m1, ii)
         @assert(pr[1] == expected[1][j] && pr[2] == expected[2][j])
         checkcorrectness(m1.bt)
@@ -313,7 +314,7 @@ function test2()
 
     @assert(isempty(m1))
     @assert(length(m1) == 0)
-    @assert(is_ind_past_end(m1, ii))
+    @assert(i1 == past_end(m1))
     N = 100
     for i = N : -1 : 2
         m1[i] = convert(Float64,i) ^ 2
@@ -334,13 +335,13 @@ function test2()
     lastprime = 1
     while true
         ii = ind_greater(m1, lastprime)
-        if is_ind_past_end(m1, ii)
+        if ii == past_end(m1)
             break
         end
         j = deref_key_only_ind(m1, ii)
         for k = j * 2 : j : N
             p = ind_find(m1, k)
-            if !is_ind_past_end(m1,p)
+            if p != past_end(m1)
                 delete_ind!(m1, p)
                 checkcorrectness(m1.bt)
             end
@@ -376,9 +377,9 @@ function test2()
     i8 = ind_first(m1)
     p = deref_ind(m1, i8)
     @assert(p[1] == 2 && p[2] == 4.0)
-    @assert(!is_ind_before_start(m1,i8))
+    @assert(i8 != before_start(m1))
     i9 = regress_ind(m1, i8)
-    @assert(is_ind_before_start(m1,i9))
+    @assert(i9 == before_start(m1))
     i10 = ind_find(m1, 17)
     i11 = regress_ind(m1, i10)
     @assert(deref_key_only_ind(m1, i11) == 13)
