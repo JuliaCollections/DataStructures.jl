@@ -328,6 +328,7 @@ function insert!{K,D, Ord <: Ordering}(t::BalancedTree{K,D,Ord},
     # that duplicates are allowed.
     # In this case we insert a new node.
     depth = t.depth
+    ord = t.ord
 
     ## Check if there is a free space in the 
     ## data array (due to previous deletions);
@@ -371,7 +372,7 @@ function insert!{K,D, Ord <: Ordering}(t::BalancedTree{K,D,Ord},
         ## has a new index called newparentnum.
 
         if oldtreenode.child3 > 0
-            cmp = cmp3(oldtreenode, minkeynewchild, isleaf)
+            cmp = cmp3(ord, oldtreenode, minkeynewchild, isleaf)
             if cmp == 1
                 lefttreenodenew = TreeNode{K}(oldtreenode.child1, newchild, 0,
                                               oldtreenode.parent,
@@ -461,7 +462,7 @@ function insert!{K,D, Ord <: Ordering}(t::BalancedTree{K,D,Ord},
             ## a 3-node by giving it a child3 field that is >0.
             ## Encountering a 2-node halts the ascent up the tree.
 
-            t.tree[p1] = (cmp2(oldtreenode, minkeynewchild, isleaf) == 1)?
+            t.tree[p1] = (cmp2(ord,oldtreenode, minkeynewchild, isleaf) == 1)?
                 TreeNode{K}(oldtreenode.child1, newchild, oldtreenode.child2,
                             oldtreenode.parent,
                             minkeynewchild, oldtreenode.splitkey1) :
