@@ -615,3 +615,5 @@ test2()
 test5()
 test6(2, "soothingly", "compere")
 test5()
+
+export eq
