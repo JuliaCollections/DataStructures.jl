@@ -12,7 +12,7 @@ type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
 end
 
 
-function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ordering)
+function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord)
     bt1 = BalancedTree{K,D,Ord}(o)
     for pr in d
         insert!(bt1, pr[1], pr[2], false)
