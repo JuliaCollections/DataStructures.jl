@@ -12,7 +12,7 @@ type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
 end
 
 
-function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord)
+function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o=Forward)
     bt1 = BalancedTree{K,D,Ord}(o)
     for pr in d
         insert!(bt1, pr[1], pr[2], false)
@@ -20,9 +20,6 @@ function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord)
     SortedDict(bt1)
 end
 
-function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D})
-    SortedDict(d, Forward)
-end
 
 
 ## A SortedDictIndex is a small structure for iterating
@@ -141,7 +138,7 @@ end
 ## previous index in the sorted order. 
 
 function regress_ind{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, 
-                                           ii::SortedDictIndex{K,D,ord})
+                                           ii::SortedDictIndex{K,D,Ord})
     if !in(ii.address, m.bt.useddatacells)
         throw(BoundsError())
         #error("regress_ind invoked on deleted index")
