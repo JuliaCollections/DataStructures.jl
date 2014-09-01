@@ -4,7 +4,6 @@ import Base.Forward
 import Base.Reverse
 import Base.lt
 
-
 ## Function fulldump dumps the entire tree; helpful for debugging.
 
 function fulldump{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree{K,D,Ord})
@@ -532,10 +531,11 @@ eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
 function test5()
     keylist = ["Apple", "aPPle", "berry", "CHerry", "Dairy", "diary"]
     vallist = [6,9,-4,2,1,8]
-    m = SortedDict((ASCIIString=>Int))
+    m = SortedDict((ASCIIString=>Int)[])
     for j = 1:6
         m[keylist[j]] = vallist[j]
     end
+    checkcorrectness(m.bt)
     expectedord1 = [1,4,5,2,3,6]
     count = 0
     for p in m
@@ -544,10 +544,11 @@ function test5()
                 p[2] == vallist[expectedord1[count]])
     end
     @assert(count == 6)
-    m2 = SortedDict((ASCIIString=>Int), Reverse)
+    m2 = SortedDict((ASCIIString=>Int)[], Reverse)
     for j = 1 : 6
         m2[keylist[j]] = vallist[j]
     end
+    checkcorrectness(m2.bt)
     expectedord2 = [6,3,2,5,4,1]
     count = 0
     for p in m2
@@ -556,10 +557,11 @@ function test5()
                 p[2] == vallist[expectedord2[count]])
     end
     @assert(count == 6)
-    m3 = SortedDict((ASCIIString=>Int), CaseInsensitive())
+    m3 = SortedDict((ASCIIString=>Int)[], CaseInsensitive())
     for j = 1 : 6
         m3[keylist[j]] = vallist[j]
     end
+    checkcorrectness(m3.bt)
     expectedord3 = [2,3,4,5,6]
     count = 0
     for p in m3
@@ -569,9 +571,6 @@ function test5()
     end
     @assert(count == 5)
 end
-
-    
-    
     
 
 

@@ -40,6 +40,7 @@ module DataStructures
     export advance_ind, regress_ind, deref_ind, deref_key_only_ind
     export ind_equal_or_greater, ind_greater, sorted_dict_range_iteration
     export enumerate_ind, packcopy, packdeepcopy
+    export eq
     
 
 
