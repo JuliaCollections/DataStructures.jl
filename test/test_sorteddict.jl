@@ -282,7 +282,7 @@ function test2()
     p = first(m1)
     @assert(p[1] == 6 && p[2] == 18.2)
     for j = 1 : 3
-        @assert(i1 != past_end(m1))
+        @assert(ii != past_end(m1))
         pr = deref_ind(m1, ii)
         @assert(pr[1] == expected[1][j] && pr[2] == expected[2][j])
         checkcorrectness(m1.bt)
@@ -309,12 +309,8 @@ function test2()
         ii = advance_ind(m3, ii)
     end
 
-
-
-
     @assert(isempty(m1))
     @assert(length(m1) == 0)
-    @assert(i1 == past_end(m1))
     N = 100
     for i = N : -1 : 2
         m1[i] = convert(Float64,i) ^ 2
