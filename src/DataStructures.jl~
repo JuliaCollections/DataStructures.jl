@@ -8,8 +8,9 @@ module DataStructures
                  isequal, hash,
                  map, reverse,
                  endof, first, last, eltype, getkey, values,
-                 merge!,lt, Ordering, ForwardOrdering, Forward,
-                 ReverseOrdering
+                 merge!, union, intersect, symdiff, setdiff,
+                 setdiff!, issubset
+
 
 
     
@@ -34,13 +35,16 @@ module DataStructures
 
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
            reverse
-    export SortedDict, SortedDictIndex
+    export SortedDict, SortedDictIndex, MultiMap, MultiMapIndex
     export ind_find, ind_insert!, delete_ind!, ind_first
-    export past_end, before_start
+    export is_ind_past_end, is_ind_before_start, past_end, before_start
     export advance_ind, regress_ind, deref_ind, deref_key_only_ind
     export ind_equal_or_greater, ind_greater, sorted_dict_range_iteration
-    export enumerate_ind, packcopy, packdeepcopy
-    
+    export multimap_range_iteration, ind_findrange, SortedSet, SortedSetIndex
+    export sorted_set_range_iteration, enumerate_ind, packcopy, packdeepcopy
+
+
+
 
 
     include("delegate.jl")
@@ -60,9 +64,7 @@ module DataStructures
     include("trie.jl")
     
     include("list.jl")
-    include("ordering.jl")
     include("balancedTree.jl")
-    include("sortedDict.jl")
 
     @deprecate stack Stack
     @deprecate queue Queue

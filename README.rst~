@@ -18,7 +18,8 @@ This package implements a variety of data structures, including
 * Trie
 * Linked List
 * Sorted Dictionary
-
+* Multimap
+* Sorted Set
 
 -----
 Deque
@@ -318,70 +319,63 @@ A list of sequentially linked nodes. This allows efficient insertion of nodes to
 Sorted Containers: Overview
 ------------------------------
 
-One sorted container is provided:
-SortedDict. 
+Three sorted containers are provided:
+SortedDict, MultiMap and SortedSet.
 *SortedDict* is similar to the built-in Julia type Dict
 except with the additional feature that the keys are stored in
 sorted order and can be efficiently iterated in this order.
-SortedDict is a subtype of Associative.n
+*MultiMap* is also like Dict except that the same key
+may occur multiple times, each time with a different (or the same)
+value.  Finally *SortedSet* is similar to the built-in Set with
+the feature that
+the entries are stored in sorted
+order and can be efficiently iterated in this order.
+SortedDict is a subtype of Associative; MultiMap and SortedSet
+are currently subtypes only of Any.  (There is a proposal
+to create an abstract set type in Julia, in which case SortedSet will
+become a subtype of that.)
 
-SortedDict internally uses a 2-3 trees.  A 2-3 tree is a
+All three data structures internally use 2-3 trees.  A 2-3 tree is a
 kind of balanced tree and is described in many elementary data
 structure textbook.
 
-This container requires a function to compare keys.  With the
-default ordering argument, the functions are ``isless(a,b)`` (to test if key
-``a`` 
-is less than ``b``) and ``isequal(a,b)`` (to test if they are equal).
-It is a requirement of the container that ``isequal(a,b)`` is true if and
-only if ``!isless(a,b)`` and ``!isless(b,a)`` are both true.  This relationship
-between ``isequal`` and ``isless`` holds for common built-in types, but
-it may not hold for all types especially user-defined types.
-If it does not hold for a certain type, then the default ordering argument
-must be customized as discussed in the next few paragraphs.
+The type of the key for all three containers must support an
+``isless`` comparison operation.  This operation must be transitive
+(i.e., ``isless(a,b)`` and ``isless(b,c)`` imply ``isless(a,c)``)
+and anti-symmetric (i.e., ``isless(a,b)`` implies ``!isless(b,a)``).
+Equality between ``a`` and ``b`` is assumed to hold iff 
+``!isless(a,b)`` and ``!isless(b,a)`` both hold.  The user must provide
+an ``isless`` method for the key type
+if it is not already built in.  (Many common key types
+such as numbers and strings already have a transitive and anti-symmetric
+``isless`` method).  
 
-The name for this default ordering is ``Forward``.  Another possible
-choice is ``Reverse``, which reverses the usual sorted order.  (These
-names are defined in the file ordering.jl`.)  Finally, the user of the
-container can define a custom ordering.  For example, suppose the keys
-are of type ``ASCIIString``, and the user wishes to order the keys ignoring
-case.  (For example, *APPLE*, *berry* and *Cherry* would appear in that
-order, and *APPLE* and *aPPlE* would be indistinguishable in this
-ordering.)
+The code also requires a function called ``isequal_l`` which must have the
+property that ``isequal_l(a,b)`` if and only if
+``!isless(a,b) && !isless(b,a)``.  For many data types, the function
+``isequal`` has this property, so that the user may simply define
+``isequal_l`` to be the same as ``isequal``.  However, this equivalance
+is not guaranteed by Julia, so the package defines a default implementation::
 
-First, the user should create a singleton type which is a subtype of
-``Ordering`` as follows::
+  isequal_l(a,b) = !isless(a,b) && !isless(b,a)
 
-    immutable CaseInsensitive <: Ordering
-    end
-
-Next, the user needs to define two methods for less-than and equal-to 
-in this ordering.  The methods should be named ``lt`` and ``eq`` and should
-take as a first argument an element (there is only one) of the newly
-defined ordering type::
-
-    lt(::CaseInsensitive, a, b) = isless(lowercase(a), lowercase(b))
-    eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
-
-Finally, the user specifies the unique element of ``CaseInsensitive``, namely
-the object ``CaseInsensitive()``, as the ordering argument to
-the ``SortedDict`` constructor.
+in case the user does not provide a more efficient version of ``isequal_l.``
 
 ------------------------------
 Indices for Sorted Containers
 ------------------------------
 
 
-The SortedDict type is accompanied by an auxiliary type called the *index*.  
-The name this type is ``SortedDictIndex{K,V}``.
-This index is reminiscent of an array subscript; it provides
-the address of a specific (key,value) pair
-and can be
+All three containers are accompanied by an auxiliary type called the *index*.  
+The names for these types are ``SortedDictIndex{K,V}``, ``MultiMapIndex{K,V}``
+and ``SortedSetIndex{K}``.
+This index is analogous to an array subscript; it provides
+the address of a specific (key,value) pair (in the case of SortedDict
+and MultiMap) or key (in the case of Sorted Set) and can be
 dereferenced in O(1) time.  (For readers familiar with C++ standard
 containers, this notion of index is similar to the C++ iterator.  The
 main difference is that indices in this package are array subscripts and
-cannot be dereferenced unless the container is also specified, 
-whereas C++ iterators
+cannot be dereferenced without knowledge of the container, whereas C++ iterators
 are essentially memory addresses that can be dereferenced by themselves.)
 An index can be advanced or regressed via the functions 
 ``advance_ind`` and ``regress_ind``.  There are two special values that
@@ -390,15 +384,7 @@ values act as lower and upper bounds
 on the actual data.  The before-start index can be advanced,
 while the past-end index can be regressed.  A dereferencing operation on either
 leads to an error.  In the current release, an index is stored
-as an integer.  
-
-However, accessing this internal integer is not recommended
-for two reasons. First, the implementation may change in a future
-release. Second, accessing this integer may lead to misleading
-or incorrect code.  For example, it is not true in general that successive
-entries in the container (according to the sorted order) have consecutive
-or even monotonically increasing index values, so using integer operations
-like ``i+=1`` or ``i<j`` on these indices is likely to be erroneous.
+as an integer.
 
 ----------------------------------
 Constructors for sorted containers
@@ -406,7 +392,7 @@ Constructors for sorted containers
 
 ``SortedDict(d)``
   Argument ``d`` is an ordinary Julia dict (or any associative type)
-  used to initialize the container, e.g.::
+  used to initialize the contained, e.g.::
 
      c = SortedDict(["New York" => 1788, "Illinois" => 1818])
 
@@ -415,12 +401,16 @@ Constructors for sorted containers
   empty SortedDict is created by using an empty but typed value of ``d``
   as the argument, e.g., ``t = SortedDict((ASCIIString=>Int)[])``.
 
-``SortedDict(d,o)``
-  Argument ``d`` is an ordinary Julia dict (or any associative type)
-  used to initialize the container and ``o`` is an Ordering object
-  used for ordering the keys as discussed above.  The default value
-  for ``o`` if not specified is ``Forward``.
+``MultiMap(karray, varray)``
+  Argument ``karray`` is a 1-dimensional array of keys while ``varray`` is
+  a 1-dimensional array of values.  The two arrays must be the same length.
+  An empty MultiMap is initialized by specifying two empty but typed arrays,
+  e.g., ``t = MultiMap(Int[], Float64[])``.  The arrays can be any subtype
+  of ``AbstractArray``.
 
+``SortedSet(karray)``
+  Argument ``karray`` is a 1-dimensional array of keys.  An empty set is
+  initialized by specifying an empty but typed array.  
 
 ---------------------------------
 Complexity of sorted containers
@@ -447,46 +437,54 @@ Navigating the containers
   see also ``ind_insert!`` below.)  Time: O(log *n*)
 
 ``ind_find(m,k)``
-  Argument ``m`` is a SortedDict and argument ``k`` is a key.
+  Argument ``m`` is a SortedDict or SortedSet and argument ``k`` is a key.
   This function returns the index of ``k`` in the container, or the
   past-end marker if ``k`` is absent. Time: O(log *n*)
 
 
+``ind_findrange(m,k)``
+  Argument ``m`` is a MultiMap and ``k`` is a key.  This function returns
+  a pair of indices, one for the first occurrence of key ``k`` and the second
+  for the first occurrence of a key greater than ``k`` (suitable for a loop
+  using the ``multimap_range_iteration`` below.  If ``k`` is absent, then
+  two past-end indices are returned. Time: O(log *n*)
+
 ``deref_ind(m,i)``
-  Argument ``m`` is a SortedDict while ``i``
-  is an index.  This returns the (key,value) pair 
-  pointed to by the index.  Time: O(1)
+  Argument ``m`` is a SortedDict, MultiMap or SortedSet, while ``i``
+  is an index.  This returns the (key,value) pair (for SortedDict and MultiMap)
+  or key (for SortedSet) pointed to by the index.  Time: O(1)
 
 ``deref_key_only_ind(m,i)``
-  Argument ``m`` is a SortedDict while ``i``
+  Argument ``m`` is a SortedDict, MultiMap or SortedSet, while ``i``
   is an index.  This returns the key pointed to by the index.  
+  (Thus, for SortedSet, deref_ind and deref_key_only are identical.)
   Time: O(1)
 
 ``ind_first(m)``
-  Argument ``m`` is a SortedDict.  This function
+  Argument ``m`` is a SortedDict, MultiMap or SortedSet.  This function
   returns the index of the first item according
   to the sorted order in the container.  If the container is empty,
   it returns the past-end index. Time: O(log *n*)
 
 ``endof(m)``
-  Argument ``m`` is a SortedDict.  This function
+  Argument ``m`` is a SortedDict, MultiMap or SortedSet.  This function
   returns the index of the last item according
   to the sorted order in the container.  If the container is empty,
   it returns the before-start index.  Time: O(log *n*)
 
 ``first(m)``
-  Argument ``m`` is a SortedDict.  This function
-  returns the first item (a ``(k,v)`` pair)
-  according
+  Argument ``m`` is a SortedDict, MultiMap or SortedSet.  This function
+  returns the first item (a ``(k,v)`` pair for SortedDict or MultiMap;
+  a key for SortedSet) according
   to the sorted order in the container.  Thus, ``first(m)`` is
   equivalent to ``deref_ind(m, ind_first(m))``.
   It is an error to call this
   function on an empty container. Time: O(log *n*)
 
 ``last(m)``
-  Argument ``m`` is a SortedDict.  This function
-  returns the last item (a ``(k,v)`` pair)
-  according
+  Argument ``m`` is a SortedDict, MultiMap or SortedSet.  This function
+  returns the last item (a ``(k,v)`` pair for SortedDict or MultiMap;
+  a key for SortedSet) according
   to the sorted order in the container.  Thus, ``last(m)`` is
   equivalent to ``deref_ind(m, endof(m))``.
   It is an error to call this
@@ -496,12 +494,25 @@ Navigating the containers
   Argument ``m`` is a SortedDict, MultiMap or SortedSet.  This
   function returns the past-end index.  Time: O(1)
 
+``is_ind_past_end(m, i)``
+  Argument ``m`` is a SortedDict, MultiMap or SortedSet, and 
+  ``i`` is an index.  This
+  function tests whether the index is past-end for the container. 
+  Equivalent to ``i == past_end(m)``.  Time: O(1)
+
 ``before_start(m)``
   Argument ``m`` is a SortedDict, MultiMap or SortedSet.  This
   function returns the before-start index.  Time: O(1)
 
+``is_ind_before_start(m, i)``
+  Argument ``m`` is a SortedDict, MultiMap or SortedSet, and 
+  ``i`` is an index.  This
+  function tests whether the index is before-start for the container. 
+  Equivalent to ``i == before_start(m)``.  Time: O(1)
+
+
 ``advance_ind(m, i)``
-  Argument ``m`` is a SortedDict and
+  Argument ``m`` is a SortedDict, MultiMap or SortedSet and
   ``i`` is an index.  This function returns the index of the
   next entry in the container according to the sort order of the
   keys.  After the last item, this routine returns the past-end
@@ -512,7 +523,7 @@ Navigating the containers
   Time: O(log *n*)
 
 ``regress_ind(m, i)``
-  Argument ``m`` is a SortedDict and
+  Argument ``m`` is a SortedDict, MultiMap or SortedSet and
   ``i`` is an index.  This function returns the index of the
   previous entry in the container according to the sort order of the
   keys.  If ``i`` indexes the first item, this routine returns the before-start
@@ -523,7 +534,7 @@ Navigating the containers
   Time: O(log *n*)
 
 ``ind_equal_or_greater(m,k)``
-  Argument ``m`` is a SortedDict and
+  Argument ``m`` is a SortedDict, MultiMap or SortedSet and
   ``k`` is an element of the key type.  This routine returns the index
   of the first item in the container whose key is equal to or greater
   than ``k``.  If there is no such key, then the past-end index
@@ -531,7 +542,7 @@ Navigating the containers
   Time: O(log *n*)
 
 ``ind_greater(m,k)``
-  Argument ``m`` is a SortedDict and
+  Argument ``m`` is a SortedDict, MultiMap or SortedSet and
   `k`` is an element of the key type.  This routine returns the index
   of the first item in the container whose key is greater 
   than ``k``.  If there is no such key, then the past-end 
@@ -544,22 +555,31 @@ Inserting & Deleting for sorted containers
 --------------------------------------------
 
 ``empty!(m)``
-    Argument ``m`` is a SortedDict.  This
+    Argument ``m`` is a SortedDict, MultiMap or SortedSet.  This
     empties the container.  Time: O(1).
 
 ``ind_insert!(m,k,v)``
-  Argument ``m`` is a SortedDict, ``k`` is a key and ``v``
+  Argument ``m`` is a SortedDict or Multimap, ``k`` is a key and ``v``
   is the corresponding value.  This inserts the ``(k,v)`` pair into
   the container.  If the key is already present, SortedDict overwrites
-  the old value.  The return
+  the old value, while MultiMap inserts the new value at the end of
+  the sequence of records with the same key.  For SortedDict the return
   value is a pair whose first entry is boolean and indicates whether
+  the insertion was new (i.e., the key was not previously present) and
+  the second entry is the index of the new entry.  For MultiMap, only
+  the index is returned.
+  Time: O(log *n*)
+
+
+``ind_insert!(m,k)``
+  Argument ``m`` is a SortedSet.  This function returns a pair
+  whose first entry is boolean and indicates whether
   the insertion was new (i.e., the key was not previously present) and
   the second entry is the index of the new entry.
   Time: O(log *n*)
 
-
 ``delete_ind!(m,i)``
-  Argument ``m`` is a SortedDict and
+  Argument ``m`` is a SortedDict, MultiMap or SortedSet and
   ``i`` is an index.  This operation deletes the item
   (either (key,value) pair for SortedDict and MultiMap or
   key for SortedSet) indexed by ``i``.  It is an error to call
@@ -570,13 +590,19 @@ Inserting & Deleting for sorted containers
   Time: O(log *n*)
 
 ``delete!(m,k)``
-  Argument ``m`` is a SortedDict and
+  Argument ``m`` is a SortedDict, MultiMap or SortedSet and
   ``k`` is a key.  This operation deletes the item
-  whose key is ``k``.  It is an error 
+  (either (key,value) pair for SortedDict or
+  key for SortedSet) whose key is ``k``.  It is an error 
   if ``k`` is not a key of an item in the container.
   After this operation is 
   complete, any index addressing the deleted item is invalid.
   Time: O(log *n*)
+
+``push!(m,k)``
+  Argument ``m`` is a SortedSet.  This function inserts ``k`` into ``m``.
+  If ``k`` is already in ``m``, nothing happens.  This function returns ``m``.
+  Time: O(log *n*)  
 
 ``pop!(m,k)``
   Deletes the item with key ``k`` in SortedDict ``m`` and returns
@@ -596,15 +622,15 @@ explicitly, so they are presented here in for-loop notation.
 Internally, all of these iterations are implemented with indices
 that are advanced via the ``advance_ind`` operation.  Each iteration
 of these loops requires O(log *n*) operations to advance the
-index.  
+index.
 
 -----------------------------------
 Iterating over an entire container
 -----------------------------------
 The following loops over the entire container ``m``, where
-``m`` is a SortedDict::
+``m`` is a SortedDict, MultiMap or SortedSet::
 
-  for p in m
+  for p = m
      < body >
   end
 
@@ -618,7 +644,7 @@ Iterating over an entire container retrieving indices
 The following loops over the entire container ``m``, where
 ``m`` is a SortedDict, MultiMap or SortedSet::
 
-  for p in enumerate_ind(m)
+  for p = enumerate_ind(m)
      < body >
   end
 
@@ -626,7 +652,7 @@ In this loop, ``p`` takes on successive (index, (key,value)) pairs (or
 (index, key) in the case of SortedSet) according to 
 the sort order of the key.  Note that the following loop is safe::
 
-  for p in enumerate_ind(m)
+  for p = enumerate_ind(m)
      delete_ind!(m, p[1])
   end
 
@@ -640,15 +666,15 @@ Iterating over a subrange of a container
 
 It is possible to iterate over a subrange of a container as follows::
 
-   for p in sorted_dict_range_iteration(m, startind, endind)
+   for p = sorted_dict_range_iteration(m, startind, endind)
      < body >
    end
 
-   for p in multimap_range_iteration(m, startind, endind)
+   for p = multimap_range_iteration(m, startind, endind)
      < body >
    end
 
-   for p in sorted_set_range_iteration(m, startind, endind)
+   for p = sorted_set_range_iteration(m, startind, endind)
      < body >
    end
 
@@ -671,15 +697,15 @@ The following versions of these loops retrieve the indices as well;
 for these loops, ``p`` takes on successive (index,(key,value)) values
 in the first two, and successive (index,key) values in the third::
 
-   for p in enumerate_ind(sorted_dict_range_iteration(m, startind, endind))
+   for p = enumerate_ind(sorted_dict_range_iteration(m, startind, endind))
      < body >
    end
 
-   for p in enumerate_ind(multimap_range_iteration(m, startind, endind))
+   for p = enumerate_ind(multimap_range_iteration(m, startind, endind))
      < body >
    end
 
-   for p in enumerate_ind(sorted_set_range_iteration(m, startind, endind))
+   for p = enumerate_ind(sorted_set_range_iteration(m, startind, endind))
      < body >
    end
 
@@ -691,19 +717,19 @@ In order to be compatible with associative types, SortedDict also has
 keys and values iterations which are as follows.  In all of these,
 ``m`` is a SortedDict::
 
-   for k in keys(m)
+   for k = keys(m)
       < body >
    end
 
-   for v in values(m)
+   for v = values(m)
       < body >
    end
 
-   for p in enumerate_ind(keys(m))
+   for p = enumerate_ind(keys(m))
       < body >
    end
 
-   for p in enumerate_ind(values(m))
+   for p = enumerate_ind(values(m))
       < body >
    end
 
