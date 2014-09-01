@@ -113,7 +113,7 @@ end
 
 ## Function before_start returns the index past the end of the data.
 
-function before_start{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord})
+function before_start{K,D, Ord <: Ordering}(m::SortedDict{K,D,ord})
     SortedDictIndex{K,D,Ord}(1)
 end
 
