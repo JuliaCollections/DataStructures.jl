@@ -432,7 +432,7 @@ end
 
 function getkey{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k::K, default::K)
     i, exactfound = findkey(m.bt, k)
-    exactfound? k : default
+    exactfound? m.bt.data[i].k : default
 end
 
 ## Function delete! deletes an item at a given 
