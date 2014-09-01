@@ -60,7 +60,6 @@ module DataStructures
     include("trie.jl")
     
     include("list.jl")
-    include("ordering.jl")
     include("balancedTree.jl")
     include("sortedDict.jl")
 
