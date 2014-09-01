@@ -3,6 +3,8 @@ import Base.Ordering
 import Base.Forward
 import Base.Reverse
 import Base.lt
+import DataStructures.eq
+
 
 ## Function fulldump dumps the entire tree; helpful for debugging.
 
@@ -616,4 +618,3 @@ test5()
 test6(2, "soothingly", "compere")
 test5()
 
-export eq

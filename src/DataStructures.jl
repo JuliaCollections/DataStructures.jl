@@ -8,7 +8,7 @@ module DataStructures
                  isequal, hash,
                  map, reverse,
                  endof, first, last, eltype, getkey, values,
-                 merge!,lt, eq, Ordering, ForwardOrdering, Forward,
+                 merge!,lt, Ordering, ForwardOrdering, Forward,
                  ReverseOrdering
 
 
