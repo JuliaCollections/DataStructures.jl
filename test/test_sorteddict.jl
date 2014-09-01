@@ -1,5 +1,7 @@
 using DataStructures
 import Base.Ordering
+import Base.Forward
+import Base.Reverse
 
 
 ## Function fulldump dumps the entire tree; helpful for debugging.
@@ -247,7 +249,7 @@ end
 
 
 function test1()
-    m1 = SortedDict((ASCIIString=>ASCIIString)[])
+    m1 = SortedDict((ASCIIString=>ASCIIString)[], Forward)
     kdarray = ["hello", "jello", "alpha", "beta", "fortune", "random",
                "july", "wednesday"]
     checkcorrectness(m1.bt)
