@@ -603,7 +603,7 @@ function beginloc{K, D, Ord <: Ordering}(t::BalancedTree{K,D,Ord})
     nextloc0(t,1)
 end
 
-function endloc{K, D, Ord <: Ordering }(t::BalancedTree{K,D,ord})
+function endloc{K, D, Ord <: Ordering }(t::BalancedTree{K,D,Ord})
     prevloc0(t,2)
 end
 
