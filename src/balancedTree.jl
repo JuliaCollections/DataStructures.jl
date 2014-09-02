@@ -8,7 +8,7 @@
 ## All the internal tree
 ## nodes are stored in an array of TreeNodes.  The bottom layer
 ## of internal tree nodes, 
-## called the "leaves" in this file, sit about one more layer
+## called the "leaves" in this file, sit above one more layer
 ## of data nodes, which are stored in a different array.  
 
 

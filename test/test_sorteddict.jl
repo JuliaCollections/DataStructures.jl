@@ -138,12 +138,12 @@ function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree{K,
             error("Data nodes out of order")
         end
         if s < bfstreesize || c3 > 0
-            if t.tree[anc].splitkey1 != t.data[c2].k
+            if !eq(t.ord, t.tree[anc].splitkey1, t.data[c2].k)
                 error("Splitkey1 of leaf should match key of 2nd child")
             end
         end
         if s < bfstreesize && c3 > 0
-            if t.tree[anc].splitkey2 != t.data[c3].k
+            if !eq(t.ord, t.tree[anc].splitkey2, t.data[c3].k)
                 error("Splitkey2 of leaf should match key of 1st child")
             end
         end
@@ -195,10 +195,10 @@ function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree{K,
             if s > levstart[curdepth]
                 minkeys[s] = mk1
             end
-            if t.tree[anc].splitkey1 != mk2
+            if !eq(t.ord, t.tree[anc].splitkey1, mk2)
                 error("Minkey2 not equal to minimum key among descendants of child2")
             end
-            if c3 > 0 && t.tree[anc].splitkey2 != mk3
+            if c3 > 0 && !eq(t.ord, t.tree[anc].splitkey2, mk3)
                 error("Minkey3 not equal to minimum key among descendants of child3")
             end
         end
@@ -251,6 +251,7 @@ end
 
 
 function test1()
+    # a few basic tests to start
     m1 = SortedDict((ASCIIString=>ASCIIString)[], Forward)
     kdarray = ["hello", "jello", "alpha", "beta", "fortune", "random",
                "july", "wednesday"]
@@ -273,6 +274,7 @@ function test1()
 end
 
 function test2()
+    # test all the methods here
     m0 = SortedDict((Int=>Float64)[])
     m1 = SortedDict([8=>32.0, 12=>33.1, 6=>18.2])
     expected = ([6,8,12], [18.2, 32.0, 33.1])
@@ -494,6 +496,7 @@ function test2()
                         "Hungary"=>19, 
                         "Moldova"=>11])
     c3 = merge(c1, c2)
+    checkcorrectness(c3.bt)
     c4 = SortedDict(["Albania"=>7, 
                         "France"=>9,
                         "England"=>6,
@@ -501,24 +504,21 @@ function test2()
                         "Hungary"=>19])
     @assert(isequal(c3,c4))
     merge!(c1,c2)
+    checkcorrectness(c1.bt)
     @assert(isequal(c3,c1))
+    merge!(c3,c3)
+    @assert(isequal(c3,c1))
+    checkcorrectness(c3.bt)
 end
+
+
+    
+
 
 
 
 function seekfile(fname)
-    global LOAD_PATH
-    for item = LOAD_PATH
-        if item[end] != '\\' && item[end] != '/'
-            fullname = item * "/../test/" * fname
-        else
-            fullname = item * "../test/" * fname
-        end
-        if filesize(fullname) > 0
-            return fullname
-        end
-    end
-    error("file $fname not found in LOAD_PATH/../test/ which is\n $LOAD_PATH")
+    fullname = joinpath(Pkg.dir("DataStructures"), "test", fname)
 end
 
 
@@ -582,7 +582,7 @@ function test6(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
     strlist = ASCIIString[]
     open(seekfile("wordsScram.txt"), "r") do inio
         for j = 1 : NSTRINGPAIR * 2
-            push!(strlist, readline(inio))
+            push!(strlist, chomp(readline(inio)))
         end
     end
     for trial = 1 : numtrial
@@ -605,8 +605,8 @@ function test6(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
             l = advance_ind(m1,l)
         end
         k,d = deref_ind(m1,l)
-        ekn = expectedk * "\r\n"
-        edn = expectedd * "\r\n"
+        ekn = expectedk
+        edn = expectedd
         @assert(k == ekn && d == edn)
     end
 end
