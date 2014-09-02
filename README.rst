@@ -327,11 +327,11 @@ SortedDict internally uses a 2-3 tree.  A 2-3 tree is a
 kind of balanced tree and is described in many elementary data
 structure textbook.
 
-This container requires a function to compare keys.  With the
+This container requires two functions to compare keys: a *less-than* and
+*equals* function.  With the
 default ordering argument, the comparison
-functions are ``isless(a,b)`` (to test if key
-``a`` 
-is less than ``b``) and ``isequal(a,b)`` (to test if they are equal).
+functions are ``isless(a,b)`` and ``isequal(a,b)`` where ``a`` and ``b``
+are keys.
 It is a requirement of the container that ``isequal(a,b)`` is true if and
 only if ``!isless(a,b)`` and ``!isless(b,a)`` are both true.  This relationship
 between ``isequal`` and ``isless`` holds for common built-in types, but
@@ -385,17 +385,17 @@ The SortedDict type is accompanied by an auxiliary type called the *token*
 and is defined as type ``token{K,V}``.  A token is a data item that stores
 the address of a single data item in the SortedDict and can be
 quickly
-(i.e., in time O(1)) dereferenced.
-(For readers familiar with C++ standard
-containers, this notion of index is similar to the C++ iterator.)
+dereferenced (i.e., in time O(1)) .
+For readers familiar with C++ standard
+containers, this notion of token is similar to the C++ iterator.
 Tokens can be explicitly advanced or regressed through the data in
 the sorted order; they are implicitly advanced or regressed via
 iteration loops defined below.
 There are two special values that
 a token may take: the *before-start* value and the *past-end* value.  These special
 values act as lower and upper bounds
-on the actual data.  The before-start index can be advanced,
-while the past-end index can be regressed.  A dereferencing operation on either
+on the actual data.  The before-start token can be advanced,
+while the past-end token can be regressed.  A dereferencing operation on either
 leads to an error.  
 
 A token has two parts: one part refers to the container overall and the
@@ -404,9 +404,10 @@ second part refers to the particular item.  The second part is called a
 that contains thousands of tokens addressing the same container.  In this
 case, it may be more efficient to store semitokens rather than tokens
 and reconstruct the full tokens as needed.  In the current implementation,
-semitokens are integers; these integers do not have any direct interpretation
+semitokens are integers. These integers do not have any direct interpretation
 in terms of the container (e.g., their order does not necessarily correspond
-to the sorted order of the container).
+to the sorted order of the container) and so are mostly unsuitable for
+direct modification.
 
 
 ----------------------------------
@@ -480,7 +481,7 @@ Navigating the containers using tokens
   Argument ``m`` is a SortedDict.  This function
   returns the token of the first item according
   to the sorted order in the container.  If the container is empty,
-  it returns the past-end otken. Time: O(log *n*)
+  it returns the past-end token. Time: O(log *n*)
 
 ``endof(m)``
   Argument ``m`` is a SortedDict.  This function
@@ -493,7 +494,7 @@ Navigating the containers using tokens
   returns the first item (a ``(k,v)`` pair)
   according
   to the sorted order in the container.  Thus, ``first(m)`` is
-  equivalent to ``deref_ind(m, ind_first(m))``.
+  equivalent to ``deref(firsttoken(m))``.
   It is an error to call this
   function on an empty container. Time: O(log *n*)
 
@@ -508,14 +509,14 @@ Navigating the containers using tokens
 
 ``pastendtoken(m)``
   Argument ``m`` is a SortedDict.  This
-  function returns the pastend token.  Time: O(1)
+  function returns the past-end token.  Time: O(1)
 
 ``beforestarttoken(m)``
   Argument ``m`` is a SortedDict.  This
   function returns the before-start token.  Time: O(1)
 
 ``advance(i)``
-  Argument `  ``i`` is a token.  This function returns the token of the
+  Argument   ``i`` is a token.  This function returns the token of the
   next entry in the container according to the sort order of the
   keys.  After the last item, this routine returns the past-end
   token.  It is an error to invoke this function if ``i`` is the
@@ -525,21 +526,21 @@ Navigating the containers using tokens
   Time: O(log *n*)
 
 ``regress(i)``
-  Argument `
+  Argument 
   ``i`` is a token.  This function returns the token  the
   previous entry in the container according to the sort order of the
   keys.  If ``i`` indexes the first item, this routine returns the before-start
-  index.  It is an error to invoke this function if ``i`` is the
+  token.  It is an error to invoke this function if ``i`` is the
   before-start token.  If ``i`` is the past-end token, then this
-  routine returns the index of the last item in the sort order (i.e., the
-  same index returned by the ``endof`` function).
+  routine returns the token of the last item in the sort order (i.e., the
+  same token returned by the ``endof`` function).
   Time: O(log *n*)
 
 ``searchsortedfirst(m,k)``
   Argument ``m`` is a SortedDict and
   ``k`` is an element of the key type.  This routine returns the token
   of the first item in the container whose key is greater than or equal to
-  `k``.  If there is no such key, then the past-end token
+  ``k``.  If there is no such key, then the past-end token
   is returned.
   Time: O(log *n*)
 
@@ -547,7 +548,7 @@ Navigating the containers using tokens
   Argument ``m`` is a SortedDict and
   ``k`` is an element of the key type.  This routine returns the token
   of the first item in the container whose key is less than or equal to
-  `k``.  If there is no such key, then the before-start token
+  ``k``.  If there is no such key, then the before-start token
   is returned.
   Time: O(log *n*)
 
@@ -555,7 +556,7 @@ Navigating the containers using tokens
   Argument ``m`` is a SortedDict and
   ``k`` is an element of the key type.  This routine returns the token
   of the first item in the container whose key is greater than
-  `k``.  If there is no such key, then the past-end token
+  ``k``.  If there is no such key, then the past-end token
   is returned.
   Time: O(log *n*)
 
@@ -584,7 +585,7 @@ Inserting & Deleting for sorted containers
   This operation deletes the item addressed by ``i``.
   It is an error to call
   this on an entry that has already been deleted or on the
-  before-start or past-end indices.  After this operation is 
+  before-start or past-end tokens.  After this operation is 
   complete, ``i`` is an invalid token and cannot be used in
   any further operations.
   Time: O(log *n*)
@@ -621,8 +622,8 @@ Token manipulation
 ``assembletoken(m,s)``
   Here, ``m`` is a sorted container and ``s`` is a semitoken; this
   function reassembles the complete token. In other words, if ``i``
-  is a valid token, then `
-  `assembletoken(containerextract(i), semiextract(i))``
+  is a valid token, then 
+  ``assembletoken(containerextract(i), semiextract(i))``
   yields ``i``.  Time: O(1)
 
 ``isless(i1,i2)``
@@ -652,7 +653,7 @@ explicitly, so they are presented here in for-loop notation.
 Internally, all of these iterations are implemented with tokens
 that are advanced via the ``advance`` operation.  Each iteration
 of these loops requires O(log *n*) operations to advance the
-index.  
+token.  
 
 -----------------------------------
 Iteration
