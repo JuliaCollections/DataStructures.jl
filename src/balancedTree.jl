@@ -600,9 +600,9 @@ end
 ## The return value is -1 if i1 precedes i2, 0 if i1 == i2
 ##, 1 if i2 precedes i1.
 
-function compareInd{K, D, ord <: Ordering}(t::BalancedTree{K,D,Ord},
-                                           i1::Int,
-                                           i2::Int)
+function compareInd(t::BalancedTree,
+                    i1::Int,
+                    i2::Int)
     @assert(in(i1, t.useddatacells) && in(i2, t.useddatacells))
     if i1 == i2
         return 0
