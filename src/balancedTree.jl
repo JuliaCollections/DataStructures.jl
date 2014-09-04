@@ -169,7 +169,7 @@ end
 
 function cmp2le(o::Ordering, 
                 treenode::TreeNode,
-                k
+                k,
                 isleaf::Bool)
     ((isleaf && treenode.child2 == 2) || 
      !lt(o,treenode.splitkey1,k))? 1 : 2
