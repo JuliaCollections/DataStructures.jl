@@ -74,7 +74,7 @@ end
 ## marker whose index is 1 and the after-end marker whose index is 2.
 ## These two markers live in dummy data nodes.
 
-function initializeTree{K}!(tree::Array{TreeNode{K},1})
+function initializeTree!{K}(tree::Array{TreeNode{K},1})
     resize!(tree,1)
     tree[1] = TreeNode{K}(K, 1, 2, 0, 0)
 end
