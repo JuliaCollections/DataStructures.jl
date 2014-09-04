@@ -12,7 +12,7 @@ type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
 end
 
 
-function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord)
+function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
     bt1 = BalancedTree{K,D,Ord}(o)
     for pr in d
         insert!(bt1, pr[1], pr[2], false)
@@ -20,9 +20,6 @@ function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord)
     SortedDict(bt1)
 end
 
-function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D})
-    SortedDict(d, Forward)
-end
 
 
 ## A SortedDictIndex is a small structure for iterating
@@ -113,7 +110,7 @@ end
 
 ## Function before_start returns the index past the end of the data.
 
-function before_start{K,D, Ord <: Ordering}(m::SortedDict{K,D,ord})
+function before_start{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord})
     SortedDictIndex{K,D,Ord}(1)
 end
 
@@ -141,7 +138,7 @@ end
 ## previous index in the sorted order. 
 
 function regress_ind{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, 
-                                           ii::SortedDictIndex{K,D,ord})
+                                           ii::SortedDictIndex{K,D,Ord})
     if !in(ii.address, m.bt.useddatacells)
         throw(BoundsError())
         #error("regress_ind invoked on deleted index")
@@ -435,7 +432,7 @@ end
 
 function getkey{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k::K, default::K)
     i, exactfound = findkey(m.bt, k)
-    exactfound? k : default
+    exactfound? m.bt.data[i].k : default
 end
 
 ## Function delete! deletes an item at a given 
@@ -601,18 +598,20 @@ function isequal{K,D,Ord <: Ordering}(m1::SortedDict{K,D,Ord},
                                       m2::SortedDict{K,D,Ord})
     p1 = ind_first(m1)
     p2 = ind_first(m2)
-    if !isequal(orderobject(m1), orderobject(m2))
+    ord = orderobject(m1)
+    if !isequal(ord, orderobject(m2))
         error("Cannot use isequal for two SortedDicts unless their ordering objects are equal")
+    end
     while true
-        if is_ind_past_end(m1,p1)
-            return is_ind_past_end(m2,p2)
+        if p1 == past_end(m1)
+            return p2 == past_end(m2)
         end
-        if is_ind_past_end(m2,p2)
+        if p2 == past_end(m2)
             return false
         end
         k1,d1 = deref_ind(m1,p1)
         k2,d2 = deref_ind(m2,p2)
-        if !eq(m1.bt.ord,k1,k2) || !isequal(d1,d2)
+        if !eq(ord,k1,k2) || !isequal(d1,d2)
             return false
         end
         p1 = advance_ind(m1,p1)

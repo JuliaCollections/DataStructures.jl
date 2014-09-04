@@ -24,8 +24,6 @@
 ##  there are no valid K or D values to store in the initial
 ##  data nodes.
 
-import Base.Ordering
-import Base.lt
 
 immutable KDRec{K,D}
     parent::Int
@@ -76,7 +74,7 @@ end
 ## marker whose index is 1 and the after-end marker whose index is 2.
 ## These two markers live in dummy data nodes.
 
-function initializeTree!{K}(tree::Array{TreeNode{K},1})
+function initializeTree{K}!(tree::Array{TreeNode{K},1})
     resize!(tree,1)
     tree[1] = TreeNode{K}(K, 1, 2, 0, 0)
 end
@@ -154,10 +152,10 @@ end
 ## if the node is a leaf and its right child is the end
 ## of the sorted order.
 
-function cmp2{K, Ord <: Ordering}(o::Ord, 
-                                  treenode::TreeNode{K}, 
-                                  k::K, 
-                                  isleaf::Bool)
+function cmp2(o::Ordering, 
+              treenode::TreeNode, 
+              k, 
+              isleaf::Bool)
     ((isleaf && treenode.child2 == 2) || 
      lt(o, k, treenode.splitkey1))? 1 : 2
 end
@@ -169,10 +167,10 @@ end
 ## if the node is a leaf and its right child is the end
 ## of the sorted order.
 
-function cmp2le{K, Ord <: Ordering}(o::Ord, 
-                                    treenode::TreeNode{K}, 
-                                    k::K, 
-                                    isleaf::Bool)
+function cmp2le(o::Ordering, 
+                treenode::TreeNode,
+                k
+                isleaf::Bool)
     ((isleaf && treenode.child2 == 2) || 
      !lt(o,treenode.splitkey1,k))? 1 : 2
 end
@@ -186,10 +184,10 @@ end
 ## if the node is a leaf and its right child is the end
 ## of the sorted order.
 
-function cmp3{K, Ord <: Ordering}(o::Ord,
-                                  treenode::TreeNode{K}, 
-                                  k::K, 
-                                  isleaf::Bool)
+function cmp3(o::Ordering,
+              treenode::TreeNode,
+              k,
+              isleaf::Bool)
     (lt(o, k, treenode.splitkey1))? 1 :
     (((isleaf && treenode.child3 == 2) || 
       lt(o, k, treenode.splitkey2))? 2 : 3)
@@ -203,10 +201,10 @@ end
 ## if the node is a leaf and its right child is the end
 ## of the sorted order.
 
-function cmp3le{K, Ord <: Ordering}(o::Ord,
-                                    treenode::TreeNode{K}, 
-                                    k::K, 
-                                    isleaf::Bool)
+function cmp3le(o::Ordering,
+                treenode::TreeNode,
+                k::K, 
+                isleaf::Bool)
     (!lt(o,treenode.splitkey1,k))? 1 :
     (((isleaf && treenode.child3 == 2) || 
       !lt(o,treenode.splitkey2,k))? 2 : 3)
@@ -216,7 +214,7 @@ end
 ## The empty! function deletes all data in the balanced tree.
 ## Therefore, it invalidates all indices.
 
-function empty!{K,D,Ord <: Ordering}(t::BalancedTree{K,D,Ord})
+function empty!(t::BalancedTree)
     resize!(t.data,2)
     initializeData!(t.data)
     resize!(t.tree,1)
@@ -230,11 +228,12 @@ function empty!{K,D,Ord <: Ordering}(t::BalancedTree{K,D,Ord})
     push!(t.useddatacells,2)
 end
 
-## Default implementations of eq for Forward and Reverse
-## ordering
+## Default implementations of eq for Forward, Reverse
+## and default ordering
 
 eq(::ForwardOrdering, a, b) = isequal(a,b)
 eq(::ReverseOrdering{ForwardOrdering}, a, b) = isequal(a,b)
+eq(o::Ordering, a, b) = !lt(o, a, b) && !lt(o, b, a)
 
 
 ## The findkey function finds the index of a (key,data) pair in the tree that
@@ -594,6 +593,53 @@ function prevloc0{K,D, Ord <: Ordering}(t::BalancedTree{K,D,Ord}, i::Int)
         depthp += 1
     end
 end
+
+## This function takes two indices into t.data and checks which
+## one comes first in the sorted order by chasing them both
+## up the tree until a common ancestor is found.  
+## The return value is -1 if i1 precedes i2, 0 if i1 == i2
+##, 1 if i2 precedes i1.
+
+function compareInd{K, D, ord <: Ordering}(t::BalancedTree{K,D,Ord},
+                                           i1::Int,
+                                           i2::Int)
+    @assert(in(i1, t.useddatacells) && in(i2, t.useddatacells))
+    if i1 == i2
+        return 0
+    end
+    i1a = i1
+    i2a = i2
+    p1 = t.data[i1].parent
+    p2 = t.data[i2].parent
+    curdepth = t.depth
+    while true
+        @assert(curdepth > 0)
+        if p1 == p2
+            if i1a == t.tree[p1].child1
+                @assert(t.tree[p1].child2 == i2a || t.tree[p1].child3 == i2a)
+                return -1
+            end
+            if i1a == t.tree[p1].child2
+                if (t.tree[p1].child1 == i2a)
+                    return 1
+                end
+                @assert(t.tree[p1].child3 == i2a)
+                return -1
+            end
+            @assert(i1a == t.tree[p1].child3)
+            @assert(t.tree[p1].child1 == i2a || t.tree[p1].child2 == i2a)
+            return 1
+        end
+        i1a = p1
+        i2a = p2
+        p1 = t.tree[i1a].parent
+        p2 = t.tree[i2a].parent
+        curdepth -= 1
+    end
+end        
+
+            
+
 
 
 ## beginloc, endloc return the index (into t.data) of the first, last item in the 

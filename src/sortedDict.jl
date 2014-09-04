@@ -1,16 +1,14 @@
-
-
-
-
 ## A SortedDict is a wrapper around balancedTree with
 ## methods similiar to those of Julia container Dict.
-## QUESTION: better to make this type ... or immutable... ??
-## I'm not sure what the tradeoffs are.
+
+
 
 type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
     bt::BalancedTree{K,D,Ord}
 end
 
+## Constructor takes an ordering object which defaults
+## to Forward
 
 function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
     bt1 = BalancedTree{K,D,Ord}(o)
@@ -22,9 +20,11 @@ end
 
 
 
-## A SortedDictIndex is a small structure for iterating
-## over the items in a tree in sorted order.  It is
-## a wrapper around an Int; the int is the index
+
+
+## An SDToken is a small structure for iterating
+## over the items in a sorted dict order.  It is
+## a wrapper around an (SortedDict,Int) pair; the int is the index
 ## of the current item in t.data.  An iterator
 ## should never point to a deleted item.  An iterator
 ## that points to the before-start item (=1)

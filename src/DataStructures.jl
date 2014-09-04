@@ -9,7 +9,7 @@ module DataStructures
                  map, reverse,
                  endof, first, last, eltype, getkey, values,
                  merge!,lt, Ordering, ForwardOrdering, Forward,
-                 ReverseOrdering
+                 ReverseOrdering, Reverse, ord
 
 
     

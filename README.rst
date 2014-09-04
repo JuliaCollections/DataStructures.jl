@@ -327,54 +327,7 @@ SortedDict internally uses a 2-3 tree.  A 2-3 tree is a
 kind of balanced tree and is described in many elementary data
 structure textbook.
 
-This container requires two functions to compare keys: a *less-than* and
-*equals* function.  With the
-default ordering argument, the comparison
-functions are ``isless(a,b)`` and ``isequal(a,b)`` where ``a`` and ``b``
-are keys.
-It is a requirement of the container that ``isequal(a,b)`` is true if and
-only if ``!isless(a,b)`` and ``!isless(b,a)`` are both true.  This relationship
-between ``isequal`` and ``isless`` holds for common built-in types, but
-it may not hold for all types, especially user-defined types.
-If it does not hold for a certain type, then the default ordering argument
-must be customized as discussed in the next few paragraphs.
 
-The name for this default ordering is ``Forward``.  Another possible
-choice is ``Reverse``, which reverses the usual sorted order.  (These
-names are defined in the file ordering.jl` and must be imported via
-``import Base.Forward`` and ``import Base.Reverse.``)  Finally, the user of the
-container can define a custom ordering.  For example, suppose the keys
-are of type ``ASCIIString``, and the user wishes to order the keys ignoring
-case.  (For example, *APPLE*, *berry* and *Cherry* would appear in that
-order, and *APPLE* and *aPPlE* would be indistinguishable in this
-ordering.)
-
-First, the user should create a singleton type which is a subtype of
-``Ordering`` as follows::
-
-    immutable CaseInsensitive <: Ordering
-    end
-
-Next, the user needs to define two methods for less-than and equal-to 
-in this ordering.  The methods should be named ``lt`` and ``eq`` and should
-take as a first argument an element (there is only one) of the newly
-defined ordering type::
-
-    lt(::CaseInsensitive, a, b) = isless(lowercase(a), lowercase(b))
-    eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
-
-Finally, the user specifies the unique element of ``CaseInsensitive``, namely
-the object ``CaseInsensitive()``, as the ordering argument to
-the ``SortedDict`` constructor (see below for constructor syntax).
-
-For the above code to work, the module must make the following declarations,
-typically near the beginning::
-
-    import Base.lt
-    import DataStructures.eq
-
-because of the Julia rule that, in order to extend a function defined
-in another module, the function name must first be imported.
 
 
 ------------------------------

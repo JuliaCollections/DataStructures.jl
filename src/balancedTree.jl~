@@ -1,4 +1,6 @@
 ## This file implements 2-3 trees for sorted containers.
+## The types and functions in this file are not exported; they
+## are meant to be used by SortedDict, MultiMap and SortedSet.
 ## A 2-3 tree is a rooted trees in which all leaves are at the same
 ## depth (i.e., it is "balanced")
 ## and in which each internal node of the tree has either 2 or 3
@@ -6,7 +8,7 @@
 ## All the internal tree
 ## nodes are stored in an array of TreeNodes.  The bottom layer
 ## of internal tree nodes, 
-## called the "leaves" in this file, sit about one more layer
+## called the "leaves" in this file, sit above one more layer
 ## of data nodes, which are stored in a different array.  
 
 
@@ -21,6 +23,9 @@
 ##  is needed because when the data structure is first created,
 ##  there are no valid K or D values to store in the initial
 ##  data nodes.
+
+import Base.Ordering
+import Base.lt
 
 immutable KDRec{K,D}
     parent::Int
@@ -83,14 +88,17 @@ function initializeData!{K,D}(data::Array{KDRec{K,D},1})
 end
 
 
-## Type BalancedTree{K,D} is 'base class' for
-## SortedDict, MultiMap, SortedSet.  
+## Type BalancedTree{K,D,Ord} is 'base class' for
+## SortedDict.
 ## K = key type, D = data type
-## Key type must support 'isless' operation.
-## Ideally, it also supports isequal_l (equality relationship
-## compatible with isless)
-## but a generic versions of the isequal_l function appear below.
+## Key type must support an ordering operation defined by Ordering
+## object Ord.
+## The default is Forward which implies that the ordering function
+## is isless (see ordering.jl)
 ## The fields are as follows.
+## ord:: The ordering object.  Often the ordering type
+##   is a singleton type, so this field is empty, but it
+##   is still necessary to direct the multiple dispatch.
 ## data: the (key,data) pairs of the tree.  
 ##   The first and second entries of the data array are dummy placeholders
 ##   for the beginning and end of the sorted order of the keys
@@ -112,7 +120,8 @@ end
 ## deletionchild and deletionleftkey are two work-arrays
 ## for the delete function.
 
-type BalancedTree{K,D}
+type BalancedTree{K, D, Ord <: Ordering}
+    ord::Ord
     data::Array{KDRec{K,D}, 1}
     tree::Array{TreeNode{K}, 1}
     rootloc::Int
@@ -120,11 +129,11 @@ type BalancedTree{K,D}
     freetreeinds::Array{Int,1}
     freedatainds::Array{Int,1}
     useddatacells::IntSet 
-    # The next four arrays are used as a workspace by the delete!
+    # The next two arrays are used as a workspace by the delete!
     # function.
     deletionchild::Array{Int,1}
     deletionleftkey::Array{K,1}
-    function BalancedTree()
+    function BalancedTree(ord1::Ord)
         tree1 = Array(TreeNode{K}, 1)
         initializeTree!(tree1)
         data1 = Array(KDRec{K,D}, 2)
@@ -132,7 +141,7 @@ type BalancedTree{K,D}
         u1 = IntSet()
         push!(u1, 1)
         push!(u1, 2)
-        new(data1, tree1, 1, 1, Array(Int,0), Array(Int,0), 
+        new(ord1, data1, tree1, 1, 1, Array(Int,0), Array(Int,0), 
             u1, 
             Array(Int,3), Array(K,3))
     end
@@ -145,9 +154,12 @@ end
 ## if the node is a leaf and its right child is the end
 ## of the sorted order.
 
-function cmp2{K}(treenode::TreeNode{K}, k::K, isleaf::Bool)
+function cmp2{K, Ord <: Ordering}(o::Ord, 
+                                  treenode::TreeNode{K}, 
+                                  k::K, 
+                                  isleaf::Bool)
     ((isleaf && treenode.child2 == 2) || 
-     isless(k, treenode.splitkey1))? 1 : 2
+     lt(o, k, treenode.splitkey1))? 1 : 2
 end
 
 
@@ -157,9 +169,12 @@ end
 ## if the node is a leaf and its right child is the end
 ## of the sorted order.
 
-function cmp2le{K}(treenode::TreeNode{K}, k::K, isleaf::Bool)
+function cmp2le{K, Ord <: Ordering}(o::Ord, 
+                                    treenode::TreeNode{K}, 
+                                    k::K, 
+                                    isleaf::Bool)
     ((isleaf && treenode.child2 == 2) || 
-     !isless(treenode.splitkey1,k))? 1 : 2
+     !lt(o,treenode.splitkey1,k))? 1 : 2
 end
 
 
@@ -171,10 +186,13 @@ end
 ## if the node is a leaf and its right child is the end
 ## of the sorted order.
 
-function cmp3{K}(treenode::TreeNode{K}, k::K, isleaf::Bool)
-    (isless(k, treenode.splitkey1))? 1 :
+function cmp3{K, Ord <: Ordering}(o::Ord,
+                                  treenode::TreeNode{K}, 
+                                  k::K, 
+                                  isleaf::Bool)
+    (lt(o, k, treenode.splitkey1))? 1 :
     (((isleaf && treenode.child3 == 2) || 
-      isless(k, treenode.splitkey2))? 2 : 3)
+      lt(o, k, treenode.splitkey2))? 2 : 3)
 end
 
 ## Function cmp3le checks a tree node with three children
@@ -185,17 +203,20 @@ end
 ## if the node is a leaf and its right child is the end
 ## of the sorted order.
 
-function cmp3le{K}(treenode::TreeNode{K}, k::K, isleaf::Bool)
-    (!isless(treenode.splitkey1,k))? 1 :
+function cmp3le{K, Ord <: Ordering}(o::Ord,
+                                    treenode::TreeNode{K}, 
+                                    k::K, 
+                                    isleaf::Bool)
+    (!lt(o,treenode.splitkey1,k))? 1 :
     (((isleaf && treenode.child3 == 2) || 
-      !isless(treenode.splitkey2,k))? 2 : 3)
+      !lt(o,treenode.splitkey2,k))? 2 : 3)
 end
 
 
 ## The empty! function deletes all data in the balanced tree.
 ## Therefore, it invalidates all indices.
 
-function empty!{K,D}(t::BalancedTree{K,D})
+function empty!{K,D,Ord <: Ordering}(t::BalancedTree{K,D,Ord})
     resize!(t.data,2)
     initializeData!(t.data)
     resize!(t.tree,1)
@@ -209,19 +230,12 @@ function empty!{K,D}(t::BalancedTree{K,D})
     push!(t.useddatacells,2)
 end
 
-## Default implementation of isequal_l.  For many built-in
-## key types, isequal_l should be redefined by the user
-## to be isequal, which is more efficient than the 
-## default implementation below.
-## However, Julia does not guarantee the logical
-## relationship:
-##   isequal(a,b)  <==>  !isless(a,b) && !isless(b,a)
-## so isequal cannot be the default implementation of isequal_l.
+## Default implementations of eq for Forward, Reverse
+## and default ordering
 
-function isequal_l(x::Any, y::Any)
-    !isless(x,y) && !isless(y,x)
-end
-
+eq(::ForwardOrdering, a, b) = isequal(a,b)
+eq(::ReverseOrdering{ForwardOrdering}, a, b) = isequal(a,b)
+eq(o::Ordering, a, b) = !lt(o, a, b) && !lt(o, b, a)
 
 
 ## The findkey function finds the index of a (key,data) pair in the tree that
@@ -230,18 +244,18 @@ end
 ## i.e., the data item that comes immediately before it.
 ## If there are multiple equal keys, then it finds the last one.
 
-function findkey{K,D}(t::BalancedTree{K,D}, k::K)
+function findkey{K,D, Ord <: Ordering}(t::BalancedTree{K,D,Ord}, k::K)
     curnode = t.rootloc
     for depthcount = 1 : t.depth
         isleaf = (depthcount == t.depth)
         cmp = (t.tree[curnode].child3 == 0)?
-        cmp2(t.tree[curnode], k, isleaf) :
-        cmp3(t.tree[curnode], k, isleaf)
+        cmp2(t.ord, t.tree[curnode], k, isleaf) :
+        cmp3(t.ord, t.tree[curnode], k, isleaf)
         curnode = (cmp == 1)? t.tree[curnode].child1 :
         ((cmp == 2)? t.tree[curnode].child2 : t.tree[curnode].child3)
 
     end
-    return curnode, (curnode > 2 && isequal_l(t.data[curnode].k, k))
+    return curnode, (curnode > 2 && eq(t.ord, t.data[curnode].k, k))
 end
 
 
@@ -249,13 +263,13 @@ end
 ## with the greatest key that is less than the given key.  If there is no
 ## key less than the given key, then it returns 1 (the before-start node).
 
-function findkeyless{K,D}(t::BalancedTree{K,D}, k::K)
+function findkeyless{K, D, Ord <: Ordering}(t::BalancedTree{K,D,Ord}, k::K)
     curnode = t.rootloc
     for depthcount = 1 : t.depth
         isleaf = (depthcount == t.depth)
         cmp = (t.tree[curnode].child3 == 0)?
-        cmp2le(t.tree[curnode], k, isleaf) :
-        cmp3le(t.tree[curnode], k, isleaf)
+        cmp2le(t.ord, t.tree[curnode], k, isleaf) :
+        cmp3le(t.ord, t.tree[curnode], k, isleaf)
         curnode = (cmp == 1)? t.tree[curnode].child1 :
         ((cmp == 2)? t.tree[curnode].child2 : t.tree[curnode].child3)
     end
@@ -277,7 +291,10 @@ end
 ## done whether the iterm
 ## is already in the tree, so insertion of a new item always succeeds.
 
-function insert!{K,D}(t::BalancedTree{K,D}, k::K, d::D, allowdups::Bool)
+function insert!{K,D, Ord <: Ordering}(t::BalancedTree{K,D,Ord}, 
+                                       k::K, 
+                                       d::D, 
+                                       allowdups::Bool)
     
     ## First we find the greatest data node that is <= k.
     leafind, exactfound = findkey(t, k)
@@ -312,6 +329,7 @@ function insert!{K,D}(t::BalancedTree{K,D}, k::K, d::D, allowdups::Bool)
     # that duplicates are allowed.
     # In this case we insert a new node.
     depth = t.depth
+    ord = t.ord
 
     ## Check if there is a free space in the 
     ## data array (due to previous deletions);
@@ -355,7 +373,7 @@ function insert!{K,D}(t::BalancedTree{K,D}, k::K, d::D, allowdups::Bool)
         ## has a new index called newparentnum.
 
         if oldtreenode.child3 > 0
-            cmp = cmp3(oldtreenode, minkeynewchild, isleaf)
+            cmp = cmp3(ord, oldtreenode, minkeynewchild, isleaf)
             if cmp == 1
                 lefttreenodenew = TreeNode{K}(oldtreenode.child1, newchild, 0,
                                               oldtreenode.parent,
@@ -445,7 +463,7 @@ function insert!{K,D}(t::BalancedTree{K,D}, k::K, d::D, allowdups::Bool)
             ## a 3-node by giving it a child3 field that is >0.
             ## Encountering a 2-node halts the ascent up the tree.
 
-            t.tree[p1] = (cmp2(oldtreenode, minkeynewchild, isleaf) == 1)?
+            t.tree[p1] = (cmp2(ord,oldtreenode, minkeynewchild, isleaf) == 1)?
                 TreeNode{K}(oldtreenode.child1, newchild, oldtreenode.child2,
                             oldtreenode.parent,
                             minkeynewchild, oldtreenode.splitkey1) :
@@ -501,7 +519,7 @@ end
 ## The routine returns 2 if there is no next item (i.e., we started
 ## from the last one in the sorted order).
 
-function nextloc0{K,D}(t::BalancedTree{K,D}, i::Int)
+function nextloc0{K, D, Ord <: Ordering}(t::BalancedTree{K,D,Ord}, i::Int)
     ii = i
     @assert(i != 2 && in(i,t.useddatacells))
     p = t.data[i].parent
@@ -543,7 +561,7 @@ end
 ## from the first one in the sorted order).
 
 
-function prevloc0{K,D}(t::BalancedTree{K,D}, i::Int)
+function prevloc0{K,D, Ord <: Ordering}(t::BalancedTree{K,D,Ord}, i::Int)
     @assert(i != 1 && in(i,t.useddatacells))
     ii = i
     p = t.data[i].parent
@@ -578,16 +596,54 @@ function prevloc0{K,D}(t::BalancedTree{K,D}, i::Int)
     end
 end
 
+## This function takes two indices into t.data and checks which
+## one comes first in the sorted order by chasing them both
+## up the tree.  The return value is -1 if i1 precedes i2, 0 if i1 == i2
+##, 1 if i2 precedes i1.
+
+function compareInd{K, D, ord <: Ordering}(t::BalancedTree{K,D,Ord},
+                                           i1::Int,
+                                           i2::Int)
+    @assert(in(i1, t.useddatacells) && in(i2, t.useddatacells))
+    if i1 == i2
+        return 0
+    end
+    i1a = i1
+    i2a = i2
+    p1 = t.data[i1].parent
+    p2 = t.data[i2].parent
+    curdepth = t.depth
+    while true
+        @assert(curdepth > 0)
+        curdepth -= 1
+        if p1 == p2
+            if i1a == t.tree[p1].child1
+                @assert(t.tree[p1].child2 == i2a || t.tree[p1].child3 == i2a)
+                return -1
+            elseif i1a == t.tree[p1].child2
+                if (t.tree[p1].child1 == i2a)
+                    return 1
+                end
+                @assert(t.tree[p1].child3 == i2a)
+                return -1
+            elseif i1a == t.tree[p1].child3
+                @assert(t.tree[p1].child1 == i2a || t.tree[p1].child2 == i2a)
+                return 1
+            end
+
+            
+
+
 
 ## beginloc, endloc return the index (into t.data) of the first, last item in the 
 ## sorted order of the tree.  beginloc works by going to the before-start marker
 ## (data node 1) and executing a next operation on it.  endloc is the opposite.
 
-function beginloc{K,D}(t::BalancedTree{K,D})
+function beginloc{K, D, Ord <: Ordering}(t::BalancedTree{K,D,Ord})
     nextloc0(t,1)
 end
 
-function endloc{K,D}(t::BalancedTree{K,D})
+function endloc{K, D, Ord <: Ordering }(t::BalancedTree{K,D,Ord})
     prevloc0(t,2)
 end
 
@@ -609,7 +665,7 @@ end
 
 ## delete! routine deletes an entry from the balanced tree.
 
-function delete!{K,D}(t::BalancedTree{K,D}, it::Int)
+function delete!{K, D, Ord <: Ordering}(t::BalancedTree{K,D,Ord}, it::Int)
     
     ## Put the cell indexed by 'it' into the deletion list.
     ##
@@ -624,7 +680,7 @@ function delete!{K,D}(t::BalancedTree{K,D}, it::Int)
     ## are stored in t.deletionleftkey[..]
     ## There is a special case for t.deletionleftkey[1]; the
     ## flag deletionleftkey1_valid indicates that the left key
-    ## for the for the immediate right neighbor of the 
+    ## for the immediate right neighbor of the 
     ## deleted node has not yet been been stored in the tree.
     ## Once it is stored, t.deletionleftkey[1] is no longer needed
     ## or used.
@@ -663,7 +719,7 @@ function delete!{K,D}(t::BalancedTree{K,D}, it::Int)
     pparent = -1
     
 
-    ## The following loop ascends the tree and contracts nodes (reduced their
+    ## The following loop ascends the tree and contracts nodes (reduces their
     ## number of children) as
     ## needed.  If newchildcount == 2 or 3, then the ascent is terminated
     ## and a node is created with 2 or 3 children.
@@ -939,1616 +995,6 @@ function delete!{K,D}(t::BalancedTree{K,D}, it::Int)
         end
     end                                  
 end
-
-
-
-
-
-## A SortedDict is a wrapper around balancedTree with
-## methods similiar to those of Julia container Dict.
-
-type SortedDict{K,D} <: Associative{K,D}
-    bt::BalancedTree{K,D}
-end
-
-
-function SortedDict{K,D}(d::Dict{K,D})
-    bt1 = BalancedTree{K,D}()
-    for pr in d
-        insert!(bt1, pr[1], pr[2], false)
-    end
-    SortedDict(bt1)
-end
-
-
-## A SortedDictIndex is a small structure for iterating
-## over the items in a tree in sorted order.  It is
-## a wrapper around an Int; the int is the index
-## of the current item in t.data.  An iterator
-## should never point to a deleted item.  An iterator
-## that points to the before-start item (=1)
-## or the after-end item (=2) cannot be  dereferenced.
-
-
-immutable SortedDictIndex{K,D}
-    address::Int
-end
-
-
-## This function implements m[k]; it returns the
-## data item associated with key k.
-
-function getindex{K,D}(m::SortedDict{K,D}, k::K)
-    i, exactfound = findkey(m.bt, k)
-    if !exactfound
-        throw(KeyError(k))
-    end
-    return m.bt.data[i].d
-end
-
-## This function implements m[k]=d; it sets the 
-## data item associated with key k equal to d.
-
-function setindex!{K,D}(m::SortedDict{K,D}, d::D, k::K)
-    insert!(m.bt, k, d, false)
-end
-
-## This function looks up a key in the tree;
-## if not found, then it returns a marker for the
-## end of the tree.
-        
-function ind_find{K,D}(m::SortedDict{K,D}, k::K)
-    ll, exactfound = findkey(m.bt, k)
-    exactfound?
-    SortedDictIndex{K,D}(ll) :
-    SortedDictIndex{K,D}(2)
-end
-
-## This function inserts an item into the tree.
-## Unlike m[k]=d, it also returns a bool and a Index.
-## The bool is true if the inserted item is new.
-## It is false if there was already an item
-## with that key.
-## The index points to the newly inserted item.
-
-function ind_insert!{K,D}(m::SortedDict{K,D}, k::K, d::D)
-    b, i = insert!(m.bt, k, d, false)
-    b, SortedDictIndex{K,D}(i)
-end
-
-
-## delete_ind! deletes an item given an index.
-
-function delete_ind!{K,D}(m::SortedDict{K,D}, ii::SortedDictIndex{K,D})
-    if !in(ii.address, m.bt.useddatacells)
-        throw(BoundsError())
-    end
-    if ii.address < 3
-        throw(BoundsError())
-    end
-    delete!(m.bt, ii.address)
-end
-    
-
-
-## Function ind_first returns the index that points
-## to the first sorted order of the tree.  It returns
-## the past-end index (i.e., 2) if the tree is empty.
-
-function ind_first{K,D}(m::SortedDict{K,D})
-    SortedDictIndex{K,D}(beginloc(m.bt))
-end
-
-## Function is_ind_past_end tests whether an index is at the
-## end marker.
-
-function is_ind_past_end{K,D}(m::SortedDict{K,D}, ii::SortedDictIndex{K,D})
-    ii.address == 2
-end
-
-## Function past_end returns the index past the end of the data.
-
-function past_end{K,D}(m::SortedDict{K,D})
-    SortedDictIndex{K,D}(2)
-end
-
-## Function before_start returns the index past the end of the data.
-
-function before_start{K,D}(m::SortedDict{K,D})
-    SortedDictIndex{K,D}(1)
-end
-
-## Function is_ind_before_start tests whether an index is before
-## the start marker.
-
-function is_ind_before_start{K,D}(m::SortedDict{K,D}, ii::SortedDictIndex{K,D})
-    ii.address == 1
-end
-
-
-## Function advance_ind takes an index and returns the
-## next index in the sorted order. 
-
-function advance_ind{K,D}(m::SortedDict{K,D}, 
-                         ii::SortedDictIndex{K,D})
-    if !in(ii.address, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("advance_ind invoked on deleted index")
-    end
-    if ii.address == 2
-        throw(BoundsError())
-        #error("advance_ind invoked on past-end data item")
-    end
-
-    SortedDictIndex{K,D}(nextloc0(m.bt, ii.address))
-end
-
-
-## Function regress_ind takes an index and returns the
-## previous index in the sorted order. 
-
-function regress_ind{K,D}(m::SortedDict{K,D}, 
-                         ii::SortedDictIndex{K,D})
-    if !in(ii.address, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("regress_ind invoked on deleted index")
-    end
-    if ii.address == 1
-        throw(BoundsError())
-        #error("regress_ind invoked on before-start data item")
-    end
-    SortedDictIndex{K,D}(prevloc0(m.bt, ii.address))
-end
-
-## Endof returns the index of the last item in the sorted order,
-## or the before-start marker if the SortedDict is empty.
-
-function endof{K,D}(m::SortedDict{K,D})
-    SortedDictIndex{K,D}(endloc(m.bt))
-end
-
-## First and last return the first and last (key,data) pairs
-## in the SortedDict.  It is an error to invoke them on an
-## empty SortedDict.
-
-function first{K,D}(m::SortedDict{K,D})
-    i = beginloc(m.bt)
-    if i == 2
-        throw(BoundsError())
-    end
-    return m.bt.data[i].k, m.bt.data[i].d
-end
-
-
-function last{K,D}(m::SortedDict{K,D})
-    i = endloc(m.bt)
-    if i == 1
-        throw(BoundsError())
-    end
-    return m.bt.data[i].k, m.bt.data[i].d
-end
-
-
-
-
-## Function deref_ind(m,ii), where ii is an index, returns the
-## (k,d) pair indexed by ii.
-
-function deref_ind{K,D}(m::SortedDict{K,D}, 
-                       ii::SortedDictIndex{K,D})
-    addr = ii.address
-    if addr < 3
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(addr, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return m.bt.data[addr].k, m.bt.data[addr].d
-end
-
-## Function deref_key_only_ind(m,ii), where ii is an index, returns the
-## key indexed by ii.
-
-function deref_key_only_ind{K,D}(m::SortedDict{K,D}, 
-                                 ii::SortedDictIndex{K,D})
-    addr = ii.address
-    if addr < 3
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(addr, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry $ii")
-    end
-    return m.bt.data[addr].k
-end
-
-## This function takes a key and returns the index
-## of the first item in the tree that is >= the given
-## key in the sorted order.  It returns the end marker
-## if there is none.
-
-function ind_equal_or_greater{K,D}(m::SortedDict{K,D}, k::K)
-    i, exactfound = findkey(m.bt, k)
-    exactfound?
-    SortedDictIndex{K,D}(i) :
-    SortedDictIndex{K,D}(nextloc0(m.bt, i))
-end
-
-## This function takes a key and returns an index
-## to the first item in the tree that is > the given
-## key in the sorted order.  It returns the end marker
-## if there is none.
-
-function ind_greater{K,D}(m::SortedDict{K,D}, k::K)
-    i, exactfound = findkey(m.bt, k)
-    SortedDictIndex{K,D}(nextloc0(m.bt, i))
-end
-
-
-
-## The next three functions are for iterating over a SortedDict
-## with a for-loop.
-
-function start{K,D}(m::SortedDict{K,D})
-    nextloc0(m.bt,1)
-end
-
-
-function done{K,D}(m::SortedDict{K,D}, state::Int)
-    state == 2
-end
-
-function next{K,D}(m::SortedDict{K,D}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return ((m.bt.data[state].k, m.bt.data[state].d), nextloc0(m.bt, state))
-end
-
-
-
-    
-type SortedDictRangeIteration{K,D}
-    m::SortedDict{K,D}
-    startit::Int
-    endit::Int
-end
-
-
-
-## The next three functions are for iterating over a range of a
-## SortedDict with a for-loop; the range is specified by a start
-## and end index.
-
-
-function sorted_dict_range_iteration{K,D}(m1::SortedDict{K,D},
-                                           startit1::SortedDictIndex{K,D},
-                                           endit1::SortedDictIndex{K,D})
-    SortedDictRangeIteration(m1, startit1.address, endit1.address)
-end
-
-
-
-
-function start{K,D}(sodri::SortedDictRangeIteration{K,D})
-    sodri.startit
-end
-
-function done{K,D}(sodri::SortedDictRangeIteration{K,D}, state::Int)
-    state == 2 || state == sodri.endit
-end
-
-function next{K,D}(sodri::SortedDictRangeIteration{K,D}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, sodri.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return ((sodri.m.bt.data[state].k, sodri.m.bt.data[state].d),
-     nextloc0(sodri.m.bt, state))
-end
-
-
-
-type EnumerateSOD{K,D}
-    m::SortedDict{K,D}
-end
-
-
-## The next three functions support "for p = enumerated_ind(m)... end"
-## where m is a SortedDict.
-
-
-function enumerate_ind{K,D}(m::SortedDict{K,D})
-    EnumerateSOD{K,D}(m)
-end
-
-function start{K,D}(esod::EnumerateSOD{K,D})
-    nextloc0(esod.m.bt,1)
-end
-
-function done{K,D}(esod::EnumerateSOD{K,D}, state::Int)
-    state == 2
-end
-
-function next{K,D}(esod::EnumerateSOD{K,D}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, esod.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return ((SortedDictIndex{K,D}(state), 
-      (esod.m.bt.data[state].k,esod.m.bt.data[state].d)),
-      nextloc0(esod.m.bt, state))
-end
-
-## These functions support "for p = enumerate_ind(sorted_dict_range_iteration(m,i1,i2))"
-
-type EnumerateSODRI{K,D}
-    sodri::SortedDictRangeIteration{K,D}
-end
-
-function enumerate_ind{K,D}(m::SortedDictRangeIteration{K,D})
-    EnumerateSODRI{K,D}(m)
-end
-
-
-function start{K,D}(esodri::EnumerateSODRI{K,D})
-    esodri.sodri.startit
-end
-
-function done{K,D}(esodri::EnumerateSODRI{K,D}, state::Int)
-    state == 2 || state == esodri.sodri.endit
-end
-
-function next{K,D}(esodri::EnumerateSODRI{K,D}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, esodri.sodri.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return (SortedDictIndex{K,D}(state), 
-     (esodri.sodri.m.bt.data[state].k, esodri.sodri.m.bt.data[state].d)),
-    nextloc0(esodri.sodri.m.bt, state)
-end
-
-
-function isempty{K,D}(m::SortedDict{K,D})
-    size(m.bt.data,1) - size(m.bt.freedatainds, 1) == 2
-end
-
-
-## This function clears a SortedDict -- all items deleted.
-
-function empty!{K,D}(m::SortedDict{K,D})
-    empty!(m.bt)
-end
-
-function length{K,D}(m::SortedDict{K,D})
-   size(m.bt.data,1) - size(m.bt.freedatainds, 1) - 2
-end
-
-function in{K,D}(p::(K,D), m::SortedDict{K,D})
-    @inbounds i, exactfound = findkey(m.bt,p[1])
-    @inbounds return exactfound && isequal(m.bt.data[i].d,p[2])
-end
-
-function eltype{K,D}(m::SortedDict{K,D})
-    (K,D)
-end
-
-function haskey{K,D}(m::SortedDict{K,D}, k::K)
-    i, exactfound = findkey(m.bt,k)
-    exactfound
-end
-
-function get{K,D}(m::SortedDict{K,D}, k::K, default::D)
-    i, exactfound = findkey(m.bt, k)
-   return  exactfound? m.bt.data[i].d : default
-end
-
-
-function get!{K,D}(m::SortedDict{K,D}, k::K, default::D)
-    i, exactfound = findkey(m.bt, k)
-    if exactfound
-        return m.bt.data[i].d
-    else
-        insert!(m.bt, k, default, false)
-        return default
-    end
-end
-
-
-function getkey{K,D}(m::SortedDict{K,D}, k::K, default::K)
-    i, exactfound = findkey(m.bt, k)
-    exactfound? k : default
-end
-
-## Function delete! deletes an item at a given 
-## key
-
-function delete!{K,D}(m::SortedDict{K,D}, k::K)
-    i, exactfound = findkey(m.bt,k)
-    if !exactfound
-        throw(KeyError(k))
-        #error("Key not in SortedDict in delete!")
-    end
-    delete!(m.bt, i)
-    m
-end
-
-function pop!{K,D}(m::SortedDict{K,D}, k::K)
-    i, exactfound = findkey(m.bt,k)
-    if !exactfound
-        throw(KeyeError(k))
-        #error("Key not in SortedDict in pop!")
-    end
-    d = m.bt.data[i].d
-    delete!(m.bt, i)
-    d
-end
-
-
-## The next three function support "for k = keys(m)" where m is
-## a SortedDict.
-
-type KeySOD{K,D}
-    m::SortedDict{K,D}
-end
-
-function keys{K,D}(m::SortedDict{K,D})
-    KeySOD(m)
-end
-
-function start{K,D}(ksod::KeySOD{K,D})
-    nextloc0(ksod.m.bt, 1)
-end
-
-function done{K,D}(ksod::KeySOD{K,D}, state::Int)
-    state == 2
-end
-
-function next{K,D}(ksod::KeySOD{K,D}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, ksod.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return ksod.m.bt.data[state].k, nextloc0(ksod.m.bt, state)
-end
-
-
-# The functions support "for p = enumerate_ind(keys(m))"
-
-
-type EKeySOD{K,D}
-    m::SortedDict{K,D}
-end
-
-function enumerate_ind{K,D}(ksod::KeySOD{K,D})
-    EKeySOD(ksod.m)
-end
-
-function start{K,D}(eksod::EKeySOD{K,D})
-    nextloc0(eksod.m.bt, 1)
-end
-
-function done{K,D}(eksod::EKeySOD{K,D}, state::Int)
-    state == 2
-end
-
-function next{K,D}(eksod::EKeySOD{K,D}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, eksod.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return (SortedDictIndex{K,D}(state),eksod.m.bt.data[state].k), 
-    nextloc0(eksod.m.bt, state)
-end
-
-
-# These functions support "for p = values(m)"
-
-
-type ValueSOD{K,D}
-    m::SortedDict{K,D}
-end
-
-function values{K,D}(m::SortedDict{K,D})
-    ValueSOD(m)
-end
-
-function start{K,D}(vsod::ValueSOD{K,D})
-    nextloc0(vsod.m.bt, 1)
-end
-
-function done{K,D}(vsod::ValueSOD{K,D}, state::Int)
-    state == 2
-end
-
-function next{K,D}(vsod::ValueSOD{K,D}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, vsod.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return vsod.m.bt.data[state].d, nextloc0(vsod.m.bt, state)
-end
-
-
-# These functions support "for p = enumerate_ind(values(m))"
-
-
-type EValueSOD{K,D}
-    m::SortedDict{K,D}
-end
-
-function enumerate_ind{K,D}(vsod::ValueSOD{K,D})
-    EValueSOD(vsod.m)
-end
-
-function start{K,D}(evsod::EValueSOD{K,D})
-    nextloc0(evsod.m.bt, 1)
-end
-
-function done{K,D}(evsod::EValueSOD{K,D}, state::Int)
-    state == 2
-end
-
-function next{K,D}(evsod::EValueSOD{K,D}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, evsod.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return (SortedDictIndex{K,D}(state), evsod.m.bt.data[state].d), 
-    nextloc0(evsod.m.bt, state)
-end
-
-
-## Check if two SortedDicts are equal in the sense of containing
-## the same (K,D) pairs.  This sense of equality does not mean
-## that indices valid for one are also valid for the other.
-
-function isequal{K,D}(m1::SortedDict{K,D},
-                      m2::SortedDict{K,D})
-    p1 = ind_first(m1)
-    p2 = ind_first(m2)
-    while true
-        if is_ind_past_end(m1,p1)
-            return is_ind_past_end(m2,p2)
-        end
-        if is_ind_past_end(m2,p2)
-            return false
-        end
-        k1,d1 = deref_ind(m1,p1)
-        k2,d2 = deref_ind(m2,p2)
-        if !isequal_l(k1,k2) || !isequal(d1,d2)
-            return false
-        end
-        p1 = advance_ind(m1,p1)
-        p2 = advance_ind(m2,p2)
-    end
-end
-
-
-function mergetwo!{K,D}(m::SortedDict{K,D}, m2::SortedDict{K,D})
-    for p = m2
-        @inbounds m[p[1]] = p[2]
-    end
-end
-
-function packcopy{K,D}(m::SortedDict{K,D})
-    w = SortedDict((K=>D)[])
-    mergetwo!(w,m)
-    w
-end
-
-function packdeepcopy{K,D}(m::SortedDict{K,D})
-    w = SortedDict((K=>D)[])
-    for p in m
-        newk = deepcopy(p[1])
-        newv = deepcopy(p[2])
-        w[newk] = newv
-    end
-    w
-end
-
-    
-
-function merge!{K,D}(m::SortedDict{K,D}, 
-                     others::SortedDict{K,D}...)
-    apply(others) do m2
-        mergetwo!(m, m2)
-    end
-end
-
-function merge{K,D}(m::SortedDict{K,D}, 
-                    others::SortedDict{K,D}...)
-    result = packcopy(m)
-    merge!(result, others...)
-    result
-end
-
-
-## A MultiMap is similar to a SortedDict except the same
-## key can occur multiple times.
-
-type MultiMap{K,D}
-    bt::BalancedTree{K,D}
-end
-
-function MultiMap{K,D}(keys::AbstractArray{K,1}, values::AbstractArray{D,1})
-    n = size(keys,1)
-    if size(values,1) != n
-        error("MultiMap initializer should have same number of keys and values")
-    end
-    bt1 = BalancedTree{K,D}()
-    for i = 1 : n
-        insert!(bt1, keys[i], values[i], true)
-    end
-    MultiMap(bt1)
-end
-
-        
-
-immutable MultiMapIndex{K,D}
-    address::Int
-end
-
-    
-
-
-function ind_insert!{K,D}(m::MultiMap{K,D}, k::K, d::D)
-    scrap, i = insert!(m.bt, k, d, true)
-    MultiMapIndex{K,D}(i)
-end
-
-function delete_ind!{K,D}(m::MultiMap{K,D}, ii::MultiMapIndex{K,D})
-    if !in(ii.address, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("delete_ind! invoked on deleted index")
-    end
-    if ii.address < 3
-        throw(BoundsError())
-        #error("delete_ind! invoked on before-start or past-end iterator")
-    end
-    delete!(m.bt, ii.address)
-end
-
-
-## This function looks up a key in the tree;
-## If found, it returns a pair of indices: the
-## first index with that key and and the
-## first index of the following key.
-## if not found, then it returns a pair in which
-## both indices are past-end markers.
-        
-function ind_findrange{K,D}(m::MultiMap{K,D}, k::K)
-    i1 = findkeyless(m.bt, k)
-    i2, exactfound = findkey(m.bt, k)
-    if exactfound
-        i1a = nextloc0(m.bt, i1)
-        i2a = nextloc0(m.bt, i2)
-        @assert(m.bt.data[i1a].k == k)
-        return MultiMapIndex{K,D}(i1a), MultiMapIndex{K,D}(i2a)
-    else
-        return MultiMapIndex{K,D}(2), MultiMapIndex{K,D}(2)
-    end
-end
-
-
-## Function ind_first returns the index of
-## the first sorted order of the tree.  It returns
-## the end marker if the tree is empty.
-
-function ind_first{K,D}(m::MultiMap{K,D})
-    MultiMapIndex{K,D}(beginloc(m.bt))
-end
-
-## Function is_ind_past_end tests whether an index is at the
-## end marker.
-
-function is_ind_past_end{K,D}(m::MultiMap{K,D}, ii::MultiMapIndex{K,D})
-    ii.address == 2
-end
-
-## Function past_end returns the index past the end of the data.
-
-function past_end{K,D}(m::MultiMap{K,D})
-    MultiMapIndex{K,D}(2)
-end
-
-## Function before_start returns the index before the start of the data.
-
-function before_start{K,D}(m::MultiMap{K,D})
-    MultiMapIndex{K,D}(1)
-end
-
-## Function is_ind_before_start tests whether an index is before
-## the start marker.
-
-function is_ind_before_start{K,D}(m::MultiMap{K,D}, ii::MultiMapIndex{K,D})
-    ii.address == 1
-end
-
-
-## Function advance_ind takes an index and returns the
-## next index in the sorted order. 
-
-function advance_ind{K,D}(m::MultiMap{K,D}, 
-                         ii::MultiMapIndex{K,D})
-    if !in(ii.address, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("advance_ind invoked on deleted index")
-    end
-    if ii.address == 2
-        throw(BoundsError())
-        #error("advance_ind invoked on past-end data item")
-    end
-    MultiMapIndex{K,D}(nextloc0(m.bt, ii.address))
-end
-
-
-## Function regress_ind takes an index and returns the
-## previous index in the sorted order. 
-
-function regress_ind{K,D}(m::MultiMap{K,D}, 
-                         ii::MultiMapIndex{K,D})
-    if !in(ii.address, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("regress_ind invoked on deleted index")
-    end
-    if ii.address == 1
-        throw(BoundsError())
-        #error("regress_ind invoked on before-start data item")
-    end
-    MultiMapIndex{K,D}(prevloc0(m.bt, ii.address))
-end
-
-
-function endof{K,D}(m::MultiMap{K,D})
-    MultiMapIndex{K,D}(endloc(m.bt))
-end
-
-
-function first{K,D}(m::MultiMap{K,D})
-    i = beginloc(m.bt)
-    if i == 2
-        throw(BoundsError())
-    end
-    return m.bt.data[i].k, m.bt.data[i].d
-end
-
-
-function last{K,D}(m::MultiMap{K,D})
-    i = endloc(m.bt)
-    if i == 1
-        throw(BoundsError())
-    end
-    return m.bt.data[i].k, m.bt.data[i].d
-end
-
-
-
-
-## Function deref_ind(m,ii), where ii is an index, returns the
-## (k,d) pair indexed by ii.
-
-function deref_ind{K,D}(m::MultiMap{K,D}, 
-                       ii::MultiMapIndex{K,D})
-    addr = ii.address
-    if addr < 3
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of MultiMap")
-    end
-    if !in(addr, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return m.bt.data[addr].k, m.bt.data[addr].d
-end
-
-
-
-## Function deref_key_only_ind(m,ii), where ii is an index, returns the
-## key indexed by ii.
-
-function deref_key_only_ind{K,D}(m::MultiMap{K,D}, 
-                                 ii::MultiMapIndex{K,D})
-    addr = ii.address
-    if addr < 3
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of MultiMap")
-    end
-    if !in(addr, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry $ii")
-    end
-    return m.bt.data[addr].k
-end
-
-## This function takes a key and returns the index of
-## the first item in the tree that is >= the given
-## key in the sorted order.  It returns the end marker
-## if there is none.
-
-function ind_equal_or_greater{K,D}(m::MultiMap{K,D}, k::K)
-    i = findkeyless(m.bt, k)
-    MultiMapIndex{K,D}(nextloc0(m.bt, i))
-end
-
-## This function takes a key and returns the index of
-## the first item in the tree that is > the given
-## key in the sorted order.  It returns the end marker
-## if there is none.
-
-function ind_greater{K,D}(m::MultiMap{K,D}, k::K)
-    i, exactfound = findkey(m.bt, k)
-    MultiMapIndex{K,D}(nextloc0(m.bt, i))
-end
-
-## These functions support "for p = m", where m is a MultiMap.
-
-function start{K,D}(m::MultiMap{K,D})
-    nextloc0(m.bt,1)
-end
-
-
-function done{K,D}(m::MultiMap{K,D}, state::Int)
-    state == 2
-end
-
-function next{K,D}(m::MultiMap{K,D}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of MultiMap")
-    end
-    if !in(state, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return ((m.bt.data[state].k, m.bt.data[state].d), nextloc0(m.bt, state))
-end
-    
-
-type MultiMapRangeIteration{K,D}
-    m::MultiMap{K,D}
-    startit::Int
-    endit::Int
-end
-
-
-## These functions support "for p = multimap_range_iteration(m,starti,endi)", 
-## where m is a MultiMap, starti is the starting index and endi is the
-## ending index.
-
-
-function multimap_range_iteration{K,D}(m1::MultiMap{K,D},
-                                       startit1::MultiMapIndex{K,D},
-                                       endit1::MultiMapIndex{K,D})
-    MultiMapRangeIteration(m1, startit1.address, endit1.address)
-end
-
-
-
-function start{K,D}(mmri::MultiMapRangeIteration{K,D})
-    mmri.startit
-end
-
-function done{K,D}(mmri::MultiMapRangeIteration{K,D}, state::Int)
-    state == 2 || state == mmri.endit
-end
-
-function next{K,D}(mmri::MultiMapRangeIteration{K,D}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of MultiMap")
-    end
-    if !in(state, mmri.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return ((mmri.m.bt.data[state].k, mmri.m.bt.data[state].d),
-     nextloc0(mmri.m.bt, state))
-end
-
-type EnumerateMM{K,D}
-    m::MultiMap{K,D}
-end
-
-## These support the loop "for p = enumerate_ind(m)", 
-## where m is a MultiMap.
-
-function enumerate_ind{K,D}(m::MultiMap{K,D})
-    EnumerateMM{K,D}(m)
-end
-
-function start{K,D}(emm::EnumerateMM{K,D})
-    nextloc0(emm.m.bt,1)
-end
-
-function done{K,D}(emm::EnumerateMM{K,D}, state::Int)
-    state == 2
-end
-
-function next{K,D}(emm::EnumerateMM{K,D}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of MultiMap")
-    end
-    if !in(state, emm.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return ((MultiMapIndex{K,D}(state), 
-      (emm.m.bt.data[state].k,emm.m.bt.data[state].d)),
-      nextloc0(emm.m.bt, state))
-end
-
-type EnumerateMMRI{K,D}
-    mmri::MultiMapRangeIteration{K,D}
-end
-
-# These functions support 
-# "for p = enumerate_ind(multimap_range_iteration(m, starti, endi))"
-
-
-function enumerate_ind{K,D}(m::MultiMapRangeIteration{K,D})
-    EnumerateMMRI{K,D}(m)
-end
-
-
-function start{K,D}(emmri::EnumerateMMRI{K,D})
-    emmri.mmri.startit
-end
-
-function done{K,D}(emmri::EnumerateMMRI{K,D}, state::Int)
-    state == 2 || state == emmri.mmri.endit
-end
-
-function next{K,D}(emmri::EnumerateMMRI{K,D}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of MultiMap")
-    end
-    if !in(state, emmri.mmri.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return (MultiMapIndex{K,D}(state), 
-     (emmri.mmri.m.bt.data[state].k, emmri.mmri.m.bt.data[state].d)),
-    nextloc0(emmri.mmri.m.bt, state)
-end
-
-
-function isempty{K,D}(m::MultiMap{K,D})
-    size(m.bt.data,1) - size(m.bt.freedatainds, 1) == 2
-end
-
-
-## This function clears a multimap -- all items deleted.
-
-function empty!{K,D}(m::MultiMap{K,D})
-    empty!(m.bt)
-end
-
-function length{K,D}(m::MultiMap{K,D})
-   size(m.bt.data,1) - size(m.bt.freedatainds, 1) - 2
-end
-
-function eltype{K,D}(m::MultiMap{K,D})
-    (K,D)
-end
-
-function haskey{K,D}(m::MultiMap{K,D}, k::K)
-    i, exactfound = findkey(m.bt,k)
-    exactfound
-end
-    
-
-
-function isequal{K,D}(m1::MultiMap{K,D},
-                      m2::MultiMap{K,D})
-    p1 = ind_first(m1)
-    p2 = ind_first(m2)
-    while true
-        if is_ind_past_end(m1,p1)
-            return is_ind_past_end(m2,p2)
-        end
-        if is_ind_past_end(m2,p2)
-            return false
-        end
-        k1,d1 = deref_ind(m1,p1)
-        k2,d2 = deref_ind(m2,p2)
-        if !isequal_l(k1,k2) || !isequal(d1,d2)
-            return false
-        end
-        p1 = advance_ind(m1,p1)
-        p2 = advance_ind(m2,p2)
-    end
-end
-
-
-function packcopy{K,D}(m::MultiMap{K,D})
-    w = MultiMap(K[], D[])
-    for p in m
-        ind_insert!(w, p[1], p[2])
-    end
-    w
-end
-
-function packdeepcopy{K,D}(m::MultiMap{K,D})
-    w = MultiMap(K[], D[])
-    for p in m
-        newk = deepcopy(p[1])
-        newv = deepcopy(p[2])
-        ind_insert!(w, newk, newv)
-    end
-    w
-end
-
-
-## A SortedSet is a wrapper around balancedTree
-## in which the data type is None.
-
-type SortedSet{K}
-    bt::BalancedTree{K,Nothing}
-end
-
-
-function SortedSet{K}(d::AbstractArray{K,1})
-    bt1 = BalancedTree{K,Nothing}()
-    for pr in d
-        insert!(bt1, pr, nothing, true)
-    end
-    SortedSet(bt1)
-end
-
-
-## A SortedSetIndex is a small structure for iterating
-## over the items in a tree in sorted order.  It is
-## a wrapper around an Int; the int is the index
-## of the current item in t.data.  An iterator
-## should never point to a deleted item; a deferenceable
-## iterator cannot point to the before-start or past-end items.
-
-
-immutable SortedSetIndex{K}
-    address::Int
-end
-
-## This function looks up a key in the tree;
-## if not found, then it returns a marker for the
-## end of the tree.
-        
-function ind_find{K}(m::SortedSet{K}, k::K)
-    ll, exactfound = findkey(m.bt, k)
-    exactfound?
-    SortedSetIndex{K}(ll) :
-    SortedSetIndex{K}(2)
-end
-
-## This function inserts an item into the tree.
-## Unlike push!(m, k), it returns a bool and index.
-## The bool is true if the inserted item is new.
-## It is false if there was already an item
-## with that key.
-## The Index points to the newly inserted item.
-
-function ind_insert!{K}(m::SortedSet{K}, k::K)
-    b, i = insert!(m.bt, k, nothing, false)
-    b, SortedSetIndex{K}(i)
-end
-
-function push!{K}(m::SortedSet{K}, k::K)
-    b, i = insert!(m.bt, k, nothing, false)
-    m
-end
-
-
-## delete_ind! deletes an item given an index.
-
-function delete_ind!{K}(m::SortedSet{K}, ii::SortedSetIndex{K})
-    if !in(ii.address, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("delete_ind! invoked on deleted index")
-    end
-    if ii.address < 3
-        throw(BoundsError())
-        #error("delete_ind! invoked on before-start or past-end iterator")
-    end
-    delete!(m.bt, ii.address)
-end
-    
-
-
-## Function ind_first returns the index of 
-## the first sorted order of the tree.  It returns
-## the end marker if the tree is empty.
-
-function ind_first{K}(m::SortedSet{K})
-    SortedSetIndex{K}(beginloc(m.bt))
-end
-
-## Function is_ind_past_end tests whether an index is at the
-## end marker.
-
-function is_ind_past_end{K}(m::SortedSet{K}, ii::SortedSetIndex{K})
-    ii.address == 2
-end
-
-## Function past_end returns the index past the end of the data.
-
-function past_end{K}(m::SortedSet{K})
-    SortedSetIndex{K}(2)
-end
-
-## Function before_start returns the index before the start of the data.
-
-function before_start{K}(m::SortedSet{K})
-    SortedSetIndex{K}(1)
-end
-
-## Function is_ind_before_start tests whether an iterator is before
-## the start marker.
-
-function is_ind_before_start{K}(m::SortedSet{K}, ii::SortedSetIndex{K})
-    ii.address == 1
-end
-
-## Function advance_ind takes an iterator and returns the
-## next iterator in the sorted order. 
-
-function advance_ind{K}(m::SortedSet{K}, 
-                        ii::SortedSetIndex{K})
-    if !in(ii.address, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("advance_ind invoked on deleted index")
-    end
-    if ii.address == 2
-        throw(BoundsError())
-        #error("advance_ind invoked on past-end data item")
-    end
-
-    SortedSetIndex{K}(nextloc0(m.bt, ii.address))
-end
-
-
-## Function regress_ind takes an iterator and returns the
-## previous iterator in the sorted order. 
-
-function regress_ind{K}(m::SortedSet{K}, 
-                        ii::SortedSetIndex{K})
-    if !in(ii.address, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("regress_ind invoked on deleted index")
-    end
-    if ii.address == 1
-        throw(BoundsError())
-        #error("regress_ind invoked on before-start data item")
-    end
-    SortedSetIndex{K}(prevloc0(m.bt, ii.address))
-end
-
-
-function endof{K}(m::SortedSet{K})
-    SortedSetIndex{K}(endloc(m.bt))
-end
-
-
-function first{K}(m::SortedSet{K})
-    i = beginloc(m.bt)
-    if i == 2
-        throw(BoundsError())
-    end
-    return m.bt.data[i].k
-end
-
-
-function last{K}(m::SortedSet{K})
-    i = endloc(m.bt)
-    if i == 1
-        throw(BoundsError())
-    end
-    return m.bt.data[i].k
-end
-
-
-
-## Function deref_ind(m,ii), where ii is an index, returns the
-## (k,d) pair indexed by ii.
-
-function deref_ind{K}(m::SortedSet{K}, 
-                      ii::SortedSetIndex{K})
-    addr = ii.address
-    if addr < 3
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(addr, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return m.bt.data[addr].k
-end
-
-deref_key_only_ind{K}(m::SortedSet{K}, ii::SortedSetIndex{K}) = deref_ind(m,ii)
-
-
-## This function takes a key and returns the index
-## of the first item in the tree that is >= the given
-## key in the sorted order.  It returns the end marker
-## if there is none.
-
-function ind_equal_or_greater{K}(m::SortedSet{K}, k::K)
-    i, exactfound = findkey(m.bt, k)
-    exactfound?
-    SortedSetIndex{K}(i) :
-    SortedSetIndex{K}(nextloc0(m.bt, i))
-end
-
-
-## This function takes a key and returns the index
-## of the first item in the tree that is > the given
-## key in the sorted order.  It returns the end marker
-## if there is none.
-
-function ind_greater{K}(m::SortedSet{K}, k::K)
-    i, exactfound = findkey(m.bt, k)
-    SortedSetIndex{K}(nextloc0(m.bt, i))
-end
-
-
-function start{K}(m::SortedSet{K})
-    nextloc0(m.bt,1)
-end
-
-
-function done{K}(m::SortedSet{K}, state::Int)
-    state == 2
-end
-
-function next{K}(m::SortedSet{K}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedSet")
-    end
-    if !in(state, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return (m.bt.data[state].k, nextloc0(m.bt, state))
-end
-    
-type SortedSetRangeIteration{K}
-    m::SortedSet{K}
-    startit::Int
-    endit::Int
-end
-
-
-function sorted_set_range_iteration{K}(m1::SortedSet{K},
-                                        startit1::SortedSetIndex{K},
-                                        endit1::SortedSetIndex{K})
-    SortedSetRangeIteration(m1, startit1.address, endit1.address)
-end
-
-function start{K}(sosri::SortedSetRangeIteration{K})
-    sosri.startit
-end
-
-function done{K}(sosri::SortedSetRangeIteration{K}, state::Int)
-    state == 2 || state == sosri.endit
-end
-
-function next{K}(sosri::SortedSetRangeIteration{K}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedSet")
-    end
-    if !in(state, sosri.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return (sosri.m.bt.data[state].k, nextloc0(sosri.m.bt, state))
-end
-
-type EnumerateSOS{K}
-    m::SortedSet{K}
-end
-
-function enumerate_ind{K}(m::SortedSet{K})
-    EnumerateSOS{K}(m)
-end
-
-function start{K}(esod::EnumerateSOS{K})
-    nextloc0(esod.m.bt,1)
-end
-
-function done{K}(esos::EnumerateSOS{K}, state::Int)
-    state == 2
-end
-
-function next{K}(esos::EnumerateSOS{K}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedSet")
-    end
-    if !in(state, esos.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return (SortedSetIndex{K}(state), 
-      esos.m.bt.data[state].k), nextloc0(esos.m.bt, state)
-end
-
-type EnumerateSOSRI{K}
-    sosri::SortedSetRangeIteration{K}
-end
-
-function enumerate_ind{K}(m::SortedSetRangeIteration{K})
-    EnumerateSOSRI{K}(m)
-end
-
-
-function start{K}(esosri::EnumerateSOSRI{K})
-    esosri.sosri.startit
-end
-
-function done{K}(esosri::EnumerateSOSRI{K}, state::Int)
-    state == 2 || state == esosri.sosri.endit
-end
-
-function next{K}(esosri::EnumerateSOSRI{K}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, esosri.sosri.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return (SortedSetIndex{K}(state), 
-     esosri.sosri.m.bt.data[state].k),
-    nextloc0(esosri.sosri.m.bt, state)
-end
-
-
-function isempty{K}(m::SortedSet{K})
-    size(m.bt.data,1) - size(m.bt.freedatainds, 1) == 2
-end
-
-
-## This function clears a SortedSet -- all items deleted.
-
-function empty!{K}(m::SortedSet{K})
-    empty!(m.bt)
-end
-
-function length{K}(m::SortedSet{K})
-   size(m.bt.data,1) - size(m.bt.freedatainds, 1) - 2
-end
-
-function in{K}(p::K, m::SortedSet{K})
-    i, exactfound = findkey(m.bt,p)
-    return exactfound 
-end
-
-function eltype{K}(m::SortedSet{K})
-    K
-end
-
-## Function delete! deletes an item at a given 
-## key
-
-function delete!{K}(m::SortedSet{K}, k::K)
-    i, exactfound = findkey(m.bt,k)
-    if !exactfound
-        throw(KeyError(k))
-        #error("Key not in SortedSet in delete!")
-    end
-    delete!(m.bt, i)
-    m
-end
-
-
-
-function isequal{K}(m1::SortedSet{K},
-                    m2::SortedSet{K})
-    p1 = ind_first(m1)
-    p2 = ind_first(m2)
-    while true
-        if is_ind_past_end(m1,p1)
-            return is_ind_past_end(m2,p2)
-        end
-        if is_ind_past_end(m2,p2)
-            return false
-        end
-        k1 = deref_ind(m1,p1)
-        k2 = deref_ind(m2,p2)
-        if !isequal_l(k1,k2)
-            return false
-        end
-        p1 = advance_ind(m1,p1)
-        p2 = advance_ind(m2,p2)
-    end
-end
-
-function union!{K}(m1::SortedSet{K}, iterable_item)
-    for k = iterable_item
-        push!(m1,k)
-    end
-end
-
-function union{K}(m1::SortedSet{K}, others::SortedSet{K}...)
-    mr = packcopy(m1)
-    apply(others) do m2
-        union!(mr, m2)
-    end
-    return mr
-end
-
-function intersect2{K}(m1::SortedSet{K}, m2::SortedSet{K})
-    mi = SortedSet(K[])
-    p1 = ind_first(m1)
-    p2 = ind_first(m2)
-    while true
-        if is_ind_past_end(m1,p1) || is_ind_past_end(m2,p2)
-            return mi
-        end
-        k1 = deref_ind(m1,p1)
-        k2 = deref_ind(m2,p2)
-        if isless(k1,k2)
-            p1 = advance_ind(m1,p1)
-        elseif isless(k2,k1)
-            p2 = advance_ind(m2,p2)
-        else
-            push!(mi,k1)
-            p1 = advance_ind(m1,p1)
-            p2 = advance_ind(m2,p2)
-        end
-    end
-end
-
-            
-function intersect{K}(m1::SortedSet{K}, others::SortedSet{K}...)
-    if length(others) == 0
-        return m1
-    else
-        mi = intersect2(m1, others[1])
-        for pr = others[2:end]
-            mi = intersect2(mi, s2)
-        end
-        return mi
-    end
-end
-    
-
-function symdiff{K}(m1::SortedSet{K}, m2::SortedSet{K})
-    mi = SortedSet(K[])
-    p1 = ind_first(m1)
-    p2 = ind_first(m2)
-    while true
-        if is_ind_past_end(m1,p1) && is_ind_past_end(m2,p2)
-            return mi
-        elseif is_ind_past_end(m1,p1)
-            push!(mi, deref_ind(m2,p2))
-            p2 = advance_ind(m2,p2)
-        elseif is_ind_past_end(m2,p2)
-            push!(mi, deref_ind(m1,p1))
-            p1 = advance_ind(m1,p1)
-        else
-            k1 = deref_ind(m1,p1)
-            k2 = deref_ind(m2,p2)
-            if isless(k1,k2)
-                push!(mi, deref_ind(m1,p1))
-                p1 = advance_ind(m1,p1)
-            elseif isless(k2,k1)
-                push!(mi, deref_ind(m2,p2))
-                p2 = advance_ind(m2,p2)
-            else
-                p1 = advance_ind(m1,p1)
-                p2 = advance_ind(m2,p2)
-            end
-        end
-    end
-end
-    
-function setdiff{K}(m1::SortedSet{K}, m2::SortedSet{K})
-    mi = SortedSet(K[])
-    p1 = ind_first(m1)
-    p2 = ind_first(m2)
-    while true
-        if is_ind_past_end(m1,p1)
-            return mi
-        elseif is_ind_past_end(m2,p2)
-            push!(mi, deref_ind(m1,p1))
-            p1 = advance_ind(m1,p1)
-        else
-            k1 = deref_ind(m1,p1)
-            k2 = deref_ind(m2,p2)
-            if isless(k1,k2)
-                push!(mi, deref_ind(m1,p1))
-                p1 = advance_ind(m1,p1)
-            elseif isless(k2,k1)
-                p2 = advance_ind(m2,p2)
-            else
-                p1 = advance_ind(m1,p1)
-                p2 = advance_ind(m2,p2)
-            end
-        end
-    end
-end
-
-function setdiff!{K}(m1::SortedSet{K}, iterable_item)
-    for p = iterable_item
-        i = ind_find(m1, p)
-        if !is_ind_past_end(m1,i)
-            delete_ind!(m1,i)
-        end
-    end
-end
-
-
-    
-function issubset{K}(m1::SortedSet{K}, m2::SortedSet{K})
-    for k = m1
-        if !in(k, m2)
-            return false
-        end
-    end
-    return true
-end
-
-
-function packcopy{K}(m::SortedSet{K})
-    w = SortedSet(K[])
-    for k in m
-        push!(w, k)
-    end
-    w
-end
-
-function packdeepcopy{K}(m::SortedSet{K})
-    w = SortedSet(K[])
-    for k in m
-        newk = deepcopy(k)
-        push!(w, newk)
-    end
-    w
-end
-
 
 
 
