@@ -203,7 +203,7 @@ end
 
 function cmp3le(o::Ordering,
                 treenode::TreeNode,
-                k::K, 
+                k,
                 isleaf::Bool)
     (!lt(o,treenode.splitkey1,k))? 1 :
     (((isleaf && treenode.child3 == 2) || 
