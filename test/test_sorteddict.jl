@@ -293,7 +293,7 @@ function test2()
         @assert(pr[1] == expected[1][j] && pr[2] == expected[2][j])
         checkcorrectness(m1.bt)
         oldii = ii
-        ii = advance(m1, ii)
+        ii = advance(ii)
         delete!(oldii)
     end
     checkcorrectness(m1.bt)
@@ -343,7 +343,7 @@ function test2()
         end
         j = deref_key(ii)
         for k = j * 2 : j : N
-            p = find(m1, k)
+            p = findtoken(m1, k)
             if p != pastendtoken(m1)
                 delete!(p)
                 checkcorrectness(m1.bt)
@@ -353,7 +353,7 @@ function test2()
     end
     @assert(ii == pastendtoken(m1))
     @assert(validtoken(ii) == 3)
-    h = assembletoken(m1, extractsemi(ii))
+    h = assembletoken(m1, semiextract(ii))
     @assert(validtoken(h) == 3)
     h2 = assembletoken(m1, 0)
     @assert(validtoken(h2) == 0)
@@ -368,8 +368,7 @@ function test2()
     @assert(t == sum(pn))
     @assert(u == sum(pn.^2))
     ij = endof(m1)
-    @assert(deref_key(ij) == last(pn) && convert(Float64,last(pn))==  deref_value(ij))
-
+    @assert(deref_key(ij) == last(pn) && convert(Float64, last(pn)^2) ==  deref_value(ij))
     count = 0
     for p in m1
         pt = itertoken(p)
