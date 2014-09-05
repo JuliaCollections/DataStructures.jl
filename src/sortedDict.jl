@@ -166,7 +166,7 @@ end
 
 function deref(ii::SDToken)
     token_has_data(ii)
-    return ii.m.bt.data[ii.address].k, ii.m.bt.data[address].d
+    return ii.m.bt.data[ii.address].k, ii.m.bt.data[ii.address].d
 end
 
 ## Function deref_key(ii), where ii is a token, returns the
