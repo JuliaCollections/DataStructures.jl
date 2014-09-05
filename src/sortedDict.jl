@@ -237,6 +237,27 @@ SDIterationState{K, D, Ord <: Ordering}(m1::SortedDict{K,D,Ord},
 
 start(m::SortedDict) = SDIterationState(m, nextloc0(m.bt,1), 2)
 
+
+immutable ExcludeLast{K, D, Ord <: Ordering}
+    m::SortedDict{K, D, Ord}
+    first::Int
+    pastlast::Int
+end
+
+immutable IncludeLast{K, D, Ord <: Ordering}
+    m::SortedDict{K, D, Ord}
+    first::Int
+    last::Int
+end
+
+ExcludeLast{K, D, Ord <: Ordering}(m1::SortedDict{K, D, Ord}, 
+                                   first1::Int, 
+                                   pastlast1::Int) = 
+                                   ExcludeLast{K,D,Ord}(m1, first1, pastlast1)
+
+IncludeLast{K, D, Ord <: Ordering}(m1::SortedDict{K, D, Ord}, first1::Int, last1::Int) = 
+            IncludeLast{K,D,Ord}(m1, first1, last1)
+
 typealias SDIterableTypes Union{SortedDict,ExcludeLast,IncludeLast}
 
 done(::SDIterableTypes, state::SDIterationState) = state.next == state.final
@@ -270,24 +291,6 @@ function isequal(s::SDToken, t::SDToken)
 end
 
 
-immutable ExcludeLast{K, D, Ord <: Ordering}
-    m::SortedDict{K, D, Ord}
-    first::Int
-    pastlast::Int
-end
-
-immutable IncludeLast{K, D, Ord <: Ordering}
-    m::SortedDict{K, D, Ord}
-    first::Int
-    last::Int
-end
-
-
-ExcludeLast{K, D, Ord <: Ordering}(m1::SortedDict{K, D, Ord}, 
-                                   first1::Int, 
-                                   pastlast1::Int) = 
-                                   ExcludeLast{K,D,Ord}(m1, first1, pastlast1)
-
 
 function excludelast(i1::SDToken, i2::SDToken)
     if !(i1.m === i2.m)
@@ -296,8 +299,6 @@ function excludelast(i1::SDToken, i2::SDToken)
     ExcludeLast(i1.m, i1.address, i2.address)
 end
 
-IncludeLast{K, D, Ord <: Ordering}(m1::SortedDict{K, D, Ord}, first1::Int, last1::Int) = 
-            IncludeLast{K,D,Ord}(m1, first1, last1)
 
 
 function colon(i1::SDToken, i2::SDToken)
