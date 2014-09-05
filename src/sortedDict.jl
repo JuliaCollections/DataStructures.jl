@@ -432,7 +432,7 @@ start(vsod::ValueSOD) = nextloc0(vsod.m.bt, 1)
 
 done(vsod::ValueSOD, state::Int) = state == 2
 
-function next(vsod::ValueSOD{K,D,Ord}, state::Int)
+function next(vsod::ValueSOD, state::Int)
     if state == 2 || !in(state, vsod.m.bt.useddatacells)
         throw(BoundsError())
     end
