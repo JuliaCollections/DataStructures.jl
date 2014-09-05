@@ -242,7 +242,7 @@ eq(o::Ordering, a, b) = !lt(o, a, b) && !lt(o, b, a)
 ## i.e., the data item that comes immediately before it.
 ## If there are multiple equal keys, then it finds the last one.
 
-function findkey{K,D, Ord <: Ordering}(t::BalancedTree{K,D,Ord}, k::K)
+function findkey(t::BalancedTree, k)
     curnode = t.rootloc
     for depthcount = 1 : t.depth
         isleaf = (depthcount == t.depth)
@@ -261,7 +261,7 @@ end
 ## with the greatest key that is less than the given key.  If there is no
 ## key less than the given key, then it returns 1 (the before-start node).
 
-function findkeyless{K, D, Ord <: Ordering}(t::BalancedTree{K,D,Ord}, k::K)
+function findkeyless(t::BalancedTree, k)
     curnode = t.rootloc
     for depthcount = 1 : t.depth
         isleaf = (depthcount == t.depth)
@@ -289,10 +289,7 @@ end
 ## done whether the iterm
 ## is already in the tree, so insertion of a new item always succeeds.
 
-function insert!{K,D, Ord <: Ordering}(t::BalancedTree{K,D,Ord}, 
-                                       k::K, 
-                                       d::D, 
-                                       allowdups::Bool)
+function insert!(t::BalancedTree, k, d, allowdups::Bool)
     
     ## First we find the greatest data node that is <= k.
     leafind, exactfound = findkey(t, k)
@@ -517,7 +514,7 @@ end
 ## The routine returns 2 if there is no next item (i.e., we started
 ## from the last one in the sorted order).
 
-function nextloc0{K, D, Ord <: Ordering}(t::BalancedTree{K,D,Ord}, i::Int)
+function nextloc0(t, i::Int)
     ii = i
     @assert(i != 2 && in(i,t.useddatacells))
     p = t.data[i].parent
@@ -559,7 +556,7 @@ end
 ## from the first one in the sorted order).
 
 
-function prevloc0{K,D, Ord <: Ordering}(t::BalancedTree{K,D,Ord}, i::Int)
+function prevloc0(t::BalancedTree, i::Int)
     @assert(i != 1 && in(i,t.useddatacells))
     ii = i
     p = t.data[i].parent
@@ -600,9 +597,7 @@ end
 ## The return value is -1 if i1 precedes i2, 0 if i1 == i2
 ##, 1 if i2 precedes i1.
 
-function compareInd(t::BalancedTree,
-                    i1::Int,
-                    i2::Int)
+function compareInd(t::BalancedTree, i1::Int, i2::Int)
     @assert(in(i1, t.useddatacells) && in(i2, t.useddatacells))
     if i1 == i2
         return 0
@@ -646,11 +641,11 @@ end
 ## sorted order of the tree.  beginloc works by going to the before-start marker
 ## (data node 1) and executing a next operation on it.  endloc is the opposite.
 
-function beginloc{K, D, Ord <: Ordering}(t::BalancedTree{K,D,Ord})
+function beginloc(t::BalancedTree)
     nextloc0(t,1)
 end
 
-function endloc{K, D, Ord <: Ordering }(t::BalancedTree{K,D,Ord})
+function endloc(t::BalancedTree)
     prevloc0(t,2)
 end
 
@@ -672,7 +667,7 @@ end
 
 ## delete! routine deletes an entry from the balanced tree.
 
-function delete!{K, D, Ord <: Ordering}(t::BalancedTree{K,D,Ord}, it::Int)
+function delete!(t::BalancedTree, it::Int)
     
     ## Put the cell indexed by 'it' into the deletion list.
     ##
@@ -1002,6 +997,4 @@ function delete!{K, D, Ord <: Ordering}(t::BalancedTree{K,D,Ord}, it::Int)
         end
     end                                  
 end
-
-
 

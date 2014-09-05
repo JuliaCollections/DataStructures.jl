@@ -1,3 +1,4 @@
+
 =================
 DataStructures.jl
 =================
@@ -321,13 +322,90 @@ SortedDict.
 *SortedDict* is similar to the built-in Julia type Dict
 except with the additional feature that the keys are stored in
 sorted order and can be efficiently iterated in this order.
-SortedDict is a subtype of Associative.
+SortedDict is a subtype of Associative.  Formally, SortedDict is
+a parametrized type with three parameters, the key type ``K``, the
+value type ``V``, and the ordering type ``O``.
 
 SortedDict internally uses a 2-3 tree.  A 2-3 tree is a
 kind of balanced tree and is described in many elementary data
 structure textbook.
 
+This container requires two functions to compare keys: a *less-than* and
+*equals* function.  With the
+default ordering argument, the comparison
+functions are ``isless(a,b)`` and ``isequal(a,b)`` where ``a`` and ``b``
+are keys.
+It is a requirement of the container that ``isequal(a,b)`` is true if and
+only if ``!isless(a,b)`` and ``!isless(b,a)`` are both true.  This relationship
+between ``isequal`` and ``isless`` holds for common built-in types, but
+it may not hold for all types, especially user-defined types.
+If it does not hold for a certain type, then the a custom ordering
+argument must be defined as discussed in the next few paragraphs.
 
+The name for this default ordering (i.e., using ``isless`` and
+``isequal``) is ``Forward``.  Another possible
+choice is ``Reverse``, which reverses the usual sorted order.  
+Finally, the user of the
+container can define a custom ordering. 
+
+For example, suppose the keys
+are of type ``ASCIIString``, and the user wishes to order the keys ignoring
+case: *APPLE*, *berry* and *Cherry* would appear in that
+order, and *APPLE* and *aPPlE* would be indistinguishable in this
+ordering.
+
+The simplest way to accomplish this is to define an ordering object
+of the form ``Lt(my_isless)``, where ``Lt`` is a built-in type
+(see ``ordering.jl``) and ``my_isless`` is the comparison function.
+In the above example, the ordering object would be::
+
+     Lt(x->isless(lowercase(x)))
+
+The ordering object is the second argument to
+the ``SortedDict`` constructor (see below for constructor syntax)
+
+This approach suffers from a performance hit (10%-50% depending on the
+container) because the compiler cannot inline or compute the
+correct dispatch for the function in parentheses, so the dispatch
+takes place at run-time.
+A more complicated but higher-performance method to implement
+a custom ordering is as follows.
+First, the user should create a singleton type that is a subtype of
+``Ordering`` as follows::
+
+    immutable CaseInsensitive <: Ordering
+    end
+
+Next, the user needs to define a method named ``lt`` for less-than 
+in this ordering::
+
+    lt(::CaseInsensitive, a, b) = isless(lowercase(a), lowercase(b))
+
+The first argument to ``lt`` is an object of the ``CaseInsensitive``
+type (there is only one such object since it is a singleton type).
+The container also needs an equal-to function; the default is::
+
+    eq(o::Ordering, a, b) = !lt(o, a, b) && !lt(o, b, a)
+
+For a further slight performance boost, the user can also customize 
+this function with a more efficient
+implementation.  In the above example, an appropriate customization would
+be::
+
+    eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
+
+Finally, the user specifies the unique element of ``CaseInsensitive``, namely
+the object ``CaseInsensitive()``, as the ordering object to the
+``SortedDict`` constructor.
+
+For the above code to work, the module must make the following declarations,
+typically near the beginning::
+
+    import Base.lt
+    import DataStructures.eq
+
+because of Julia's rule that, in order to extend a function defined
+in another module, the function name must first be imported.
 
 
 ------------------------------
@@ -335,33 +413,35 @@ Tokens for Sorted Containers
 ------------------------------
 
 The SortedDict type is accompanied by an auxiliary type called the *token*
-and is defined as type ``token{K,V}``.  A token is a data item that stores
+and is defined as type ``SDToken{K,V,O}``.  A token is an item that stores
 the address of a single data item in the SortedDict and can be
-quickly
-dereferenced (i.e., in time O(1)) .
+dereferenced in time O(1).
 For readers familiar with C++ standard
 containers, this notion of token is similar to the C++ iterator.
 Tokens can be explicitly advanced or regressed through the data in
 the sorted order; they are implicitly advanced or regressed via
 iteration loops defined below.
-There are two special values that
-a token may take: the *before-start* value and the *past-end* value.  These special
+A token may taken two 
+special values:
+the *before-start* value and the *past-end* value.  These
 values act as lower and upper bounds
 on the actual data.  The before-start token can be advanced,
 while the past-end token can be regressed.  A dereferencing operation on either
 leads to an error.  
 
-A token has two parts: one part refers to the container overall and the
+A token has two parts: one part refers to the container as a whole and the
 second part refers to the particular item.  The second part is called a
 *semitoken*.  In some applications, one might need an auxiliary data structure
 that contains thousands of tokens addressing the same container.  In this
 case, it may be more efficient to store semitokens rather than tokens
 and reconstruct the full tokens as needed.  In the current implementation,
-semitokens are integers. These integers do not have any direct interpretation
+semitokens are integers. However, for the purpose of future compatibility,
+semitokens should be declared as type Semitoken rather than Int.
+
+These integers do not have any direct interpretation
 in terms of the container (e.g., their order does not necessarily correspond
 to the sorted order of the container) and so are mostly unsuitable for
-direct modification.
-
+direct manipulation.
 
 ----------------------------------
 Constructors for sorted containers
@@ -380,9 +460,9 @@ Constructors for sorted containers
 
 ``SortedDict(d,o)``
   Argument ``d`` is an ordinary Julia dict (or any associative type)
-  used to initialize the container and ``o`` is an Ordering object
+  used to initialize the container and ``o`` is an ordering object
   used for ordering the keys as discussed above.  The default value
-  for ``o`` if not specified is ``Forward``.
+  for ``o`` is ``Forward``.
 
 
 ---------------------------------
@@ -430,7 +510,7 @@ Navigating the containers using tokens
   to by the token.
   Time: O(1)
 
-``firsttoken(m)``
+``startof(m)``
   Argument ``m`` is a SortedDict.  This function
   returns the token of the first item according
   to the sorted order in the container.  If the container is empty,
@@ -447,7 +527,7 @@ Navigating the containers using tokens
   returns the first item (a ``(k,v)`` pair)
   according
   to the sorted order in the container.  Thus, ``first(m)`` is
-  equivalent to ``deref(firsttoken(m))``.
+  equivalent to ``deref(startof(m))``.
   It is an error to call this
   function on an empty container. Time: O(log *n*)
 
@@ -475,7 +555,7 @@ Navigating the containers using tokens
   token.  It is an error to invoke this function if ``i`` is the
   past-end token.  If ``i`` is the before-start token, then this
   routine returns the token of the first item in the sort order (i.e., the
-  same token returned by the ``firsttoken`` function).
+  same token returned by the ``startof`` function).
   Time: O(log *n*)
 
 ``regress(i)``
@@ -577,13 +657,20 @@ Token manipulation
   function reassembles the complete token. In other words, if ``i``
   is a valid token, then 
   ``assembletoken(containerextract(i), semiextract(i))``
-  yields ``i``.  Time: O(1)
+  yields ``i``.  The validity of the token returned 
+  is not checked by this function.  Time: O(1)
 
 ``isless(i1,i2)``
   Here, ``i1`` and ``i2`` are tokens for the same container; this
   function determines whether the (k,v) pair addressed by
   ``i1`` precedes that of ``i2`` in the sorted order.  An error is
   thrown if ``i1`` and ``i2`` refer to different containers.
+  This function compares the tokens by determining their relative
+  position within the tree and without dereferencing them.  It is mostly
+  equivalent to ``lt(o, deref_key(i1), deref_key(i2))`` except in the
+  case that either ``i1`` or ``i2`` is the before-start or past-end token,
+  in which case the latter will fail.  Which one is more efficient
+  depends on the time-complexity of comparing two keys.
   Time: O(log *n*)
 
 ``isequal(i1,i2)``
@@ -592,6 +679,11 @@ Token manipulation
   An error is
   thrown if ``i1`` and ``i2`` refer to different containers.
   Time: O(l)
+
+``validtoken(i1)``
+  This function returns 0 if the token is invalid (e.g., points to a
+  deleted item), 1 if the token is valid and points to data, 2 if the
+  token is the before-start token and 3 if it is the past-end token.
 
 
 --------------------------------
@@ -608,9 +700,6 @@ that are advanced via the ``advance`` operation.  Each iteration
 of these loops requires O(log *n*) operations to advance the
 token.  
 
------------------------------------
-Iteration
------------------------------------
 The following loops over the entire container ``m``, where
 ``m`` is a SortedDict::
 
@@ -628,6 +717,22 @@ third entry of the tuple is used for the ``itertoken`` function.
   body, the result is a token that refers to the current item of
   the loop.
 
+Therefore, there are two other ways to implement the above loop.
+The first way retrieves ``(k,v)`` without explicitly taking apart ``p``,
+but it precludes the possibility of calling ``itertoken``::
+
+   for (k,v) in m
+      < body >
+   end
+
+Finally, to extract ``(k,v)`` in the header
+and call ``itertoken`` later one writes::
+
+   for (k,v,extra) in m
+      i = itertoken((k,v,extra))
+      < remainder of body >
+   end
+
 
 There are two ways to iterate over a subrange of a container.
 The first is the inclusive iteration::
@@ -637,14 +742,12 @@ The first is the inclusive iteration::
   end
 
 Here, ``i1`` and ``i2`` are tokens that refer to the same container.
-If ``isless(i2,i1)`` then the body is not executed.  If
-``i1`` is the past-end token then the body is not executed.  If
-``i1`` is the before-start token or ``i2`` is the past-end token, then
-an error results (since these tokens cannot be dereferenced), except in
-the special case when both are before-start or both are past-end (in
-which case the body does not execute).
+It is acceptable for ``i1`` to be the past-end token 
+or ``i2`` to be the before-start token (in these cases, the body
+is not executed).
+If ``isless(i2,i1)`` then the body is not executed. 
 
-One can also loop, excluding the final item::
+One can also define a loop that excludes the final item::
 
   for p in excludelast(i1,i2)
     <body>
@@ -652,13 +755,16 @@ One can also loop, excluding the final item::
 
 In this case, all the data addressed by tokens from ``i1`` up to but excluding
 ``i2`` are executed.  The body is not executed at all if ``!isless(i1,i2)``.
+In this setting, either or both can be the past-end token, and ``i2`` can
+be the before-start token.
 
---------------------------
-Keys and values iteration
---------------------------
+Both the ``excludelast`` and colon operators return objects that can be 
+saved and used later for iteration.  At the time of construction of these object,
+it is checked that the start and end tokens refer to the same container.
+The validity of the tokens is not checked until the loop initiates.
 
 In order to be compatible with associative types, SortedDict also has
-keys and values iterations which are as follows.  In all of these,
+keys and values iterations which are as follows.  In both of these,
 ``m`` is a SortedDict::
 
    for k in keys(m)
@@ -677,7 +783,6 @@ in the loop body.
 Other functions
 ----------------
 
-
 ``isempty(m)``
   Returns ``true`` if the container is empty (no items).
   Time: O(1)
@@ -695,7 +800,7 @@ Other functions
   Time: O(1)
 
 ``orderobject(m)``
-  Returns the order object used to construct the container.
+  Returns the order object used to construct the container.  Time: O(1)
 
 ``haskey(m,k)``
   Returns true if ``k`` is present for SortedDict ``m``.  
@@ -715,8 +820,8 @@ Other functions
 
 ``getkey(m,k,defaultk)``
   Returns key ``k`` where ``m`` is a SortedDict, if ``k`` is in ``m``
-  else it returns ``defaultk``.  Note the following subtlety with this
-  function: if the container uses in its ordering
+  else it returns ``defaultk``. 
+  If the container uses in its ordering
   an ``eq`` method different from
   isequal (e.g., case-insensitive ASCII strings illustrated above), then the
   return value is the actual key stored in the SortedDict that is equivalent
@@ -748,9 +853,10 @@ Other functions
 ``deepcopy(m)``
   This returns a copy of ``m`` in which the data is
   deep-copied, i.e., the keys and values are replicated
-  if they are mutable types.  A semitoken for the original
+  if they are mutable types.  A semitoken for the original ``m``
   can be composed with the deep-copy output to make a valid 
-  token for the copy.
+  token for the copy because this operation preserves the
+  relative positions of the data in memory.
   Time O(*maxn*), where *maxn* denotes the maximum size
   that ``m`` has attained in the past.
 
@@ -790,4 +896,4 @@ Timing tests indicate that the code is about 1.5 to
 library container ``map``.
 and compiled with /O2 optimization.  These tests were
 conducted on a Windows 8.1 64-bit machine with the
-Visual Studio  12.0 compiler.
+Microsoft Visual Studio 12.0 compiler.
