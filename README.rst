@@ -471,12 +471,12 @@ Complexity of sorted containers
 ---------------------------------
 
 In the list of functions below, the complexity of the various
-operations is given.  For example, O(log *n*) means that the function
+operations is given.  For example, O(*c* log *n*) means that the function
 requires a number of operations
 logarithmic in *n*, where *n* is the current size 
 (number of items) of the
-container at the time of the function call.  Note that comparing
-two keys is considered one 'operation' in this context.
+container at the time of the function call and *c* denotes the
+time needed to compare two keys.
 
 
 --------------------------------------
@@ -487,19 +487,20 @@ Navigating the containers using tokens
   of an expression, this retrieves the value associated with the key
   (or ``KeyError`` if none).  On the left-hand side, this assigns or
   reassigns the value associated with the key.  (For assigning and reassigning,
-  see also ``ind_insert!`` below.)  Time: O(log *n*)
+  see also ``ind_insert!`` below.)  Time: O(*c* log *n*)
 
 ``findtoken(m,k)``
   Argument ``m`` is a SortedDict and argument ``k`` is a key.
   This function returns a token that refers to the item whose key
   is ``k``, or 
-  past-end marker if ``k`` is absent. Time: O(log *n*)
+  past-end marker if ``k`` is absent. Time: O(*c* log *n*)
 
 
 ``deref(i)``
   Argument ``i``
   is a token.  This returns the (key,value) pair 
   pointed to by the token.  Time: O(1)
+
 
 ``deref_key(i)``
   Argument ``i`` is a token.  This returns the key pointed
@@ -576,7 +577,7 @@ Navigating the containers using tokens
   of the first item in the container whose key is greater than or equal to
   ``k``.  If there is no such key, then the past-end token
   is returned.
-  Time: O(log *n*)
+  Time: O(*c* log *n*)
 
 ``searchsortedlast(m,k)``
   Argument ``m`` is a SortedDict and
@@ -584,7 +585,7 @@ Navigating the containers using tokens
   of the first item in the container whose key is less than or equal to
   ``k``.  If there is no such key, then the before-start token
   is returned.
-  Time: O(log *n*)
+  Time: O(*c* log *n*)
 
 ``searchsortedafter(m,k)``
   Argument ``m`` is a SortedDict and
@@ -592,7 +593,7 @@ Navigating the containers using tokens
   of the first item in the container whose key is greater than
   ``k``.  If there is no such key, then the past-end token
   is returned.
-  Time: O(log *n*)
+  Time: O(*c* log *n*)
 
 
 --------------------------------------------
@@ -611,7 +612,7 @@ Inserting & Deleting for sorted containers
   value is a pair whose first entry is boolean and indicates whether
   the insertion was new (i.e., the key was not previously present) and
   the second entry is the token of the new entry.
-  Time: O(log *n*)
+  Time: O(*c* log *n*)
 
 
 ``delete!(i)``
@@ -622,7 +623,7 @@ Inserting & Deleting for sorted containers
   before-start or past-end tokens.  After this operation is 
   complete, ``i`` is an invalid token and cannot be used in
   any further operations.
-  Time: O(log *n*)
+  Time: O(*c* log *n*)
 
 ``delete!(m,k)``
   Argument ``m`` is a SortedDict and
@@ -631,13 +632,13 @@ Inserting & Deleting for sorted containers
   if ``k`` is not a key of an item in the container.
   After this operation is 
   complete, any token addressing the deleted item is invalid.
-  Time: O(log *n*)
+  Time: O(*c* log *n*)
 
 ``pop!(m,k)``
   Deletes the item with key ``k`` in SortedDict ``m`` and returns
   the value that was associated with ``k``.  A ``KeyError`` results
   if ``k`` is not in ``m``.
-  Time: O(log *n*)
+  Time: O(*c* log *n*)
 
 
 ------------------------
@@ -685,6 +686,7 @@ Token manipulation
   This function returns 0 if the token is invalid (e.g., points to a
   deleted item), 1 if the token is valid and points to data, 2 if the
   token is the before-start token and 3 if it is the past-end token.
+   Time: O(1)
 
 
 --------------------------------
@@ -733,6 +735,11 @@ and call ``itertoken`` later one writes::
       i = itertoken((k,v,extra))
       < remainder of body >
    end
+
+Note that it is acceptable for the loop body above to invoke
+``delete!(i)``.  This is because the for-loop state already
+stores the next token at the beginning of the body, so
+``i`` does not need to be advanced at the end of the body.
 
 
 There are two ways to iterate over a subrange of a container.
@@ -794,7 +801,7 @@ Other functions
 
 ``in(p,m)``
   Returns true if ``p`` is in ``m``, where ``m`` is a SortedDict 
-  and ``p`` is a (key,value) pair.  Time: O(log *n*)
+  and ``p`` is a (key,value) pair.  Time: O(*c* log *n*)
 
 ``eltype(m)``
   Returns the (key,value) type for SortedDict.
@@ -811,13 +818,13 @@ Other functions
 ``get(m,k,v)``
   Returns the value associated with key ``k`` where ``m`` is a SortedDict,
   or else returns ``v`` if ``k`` is not in ``m``.
-  Time: O(log *n*)
+  Time: O(*c* log *n*)
 
 ``get!(m,k,v)``
   Returns the value associated with key ``k`` where ``m`` is a SortedDict,
   or else returns ``v`` if ``k`` is not in ``m``, and in the latter case,
   inserts ``(k,v)`` into ``m``.
-  Time: O(log *n*)
+  Time: O(*c* log *n*)
 
 ``getkey(m,k,defaultk)``
   Returns key ``k`` where ``m`` is a SortedDict, if ``k`` is in ``m``
@@ -831,7 +838,7 @@ Other functions
   call (e.g., the container has keys that are floats, but the ``k`` argument
   to ``getkey`` is an Int), then the returned key is the actual stored
   key rather than ``k``.
-  Time: O(log *n*)
+  Time: O(*c* log *n*)
 
 
 ``isequal(m1,m2)``
@@ -841,7 +848,7 @@ Other functions
   the ``isequal`` function.  Note that ``isequal`` in this sense
   does not imply any correspondence between tokens for items
   in ``m1`` with those for ``m2``.
-  Time: O(*n* log *n*)
+  Time: O(*c* *n* + *n* log *n*)
 
 ``packcopy(m)``
   This returns a copy of ``m`` in which the data is
@@ -849,7 +856,7 @@ Other functions
   place, the previously allocated memory is not returned.
   This function can be used to reclaim memory after
   many deletions.  
-  Time: O(*n* log *n*)
+  Time: O(*c* *n* log *n*)
 
 ``deepcopy(m)``
   This returns a copy of ``m`` in which the data is
@@ -866,7 +873,7 @@ Other functions
   and values are deep-copied.
   This function can be used to reclaim memory after
   many deletions.  
-  Time: O(*n* log *n*)
+  Time: O(*c* *n* log *n*)
 
 
 ``merge(s, t...)``
@@ -875,7 +882,7 @@ Other functions
   key-value types.  In the case of keys duplicated among
   the arguments, the rightmost argument that owns the
   key gets its value stored.
-  Time:  O(*N* log *N*), where *N* is the total size
+  Time:  O(*c* *N* log *N*), where *N* is the total size
   of all the arguments.
 
 ``merge!(s, t...)``
@@ -885,7 +892,7 @@ Other functions
   key-value types.  In the case of keys duplicated among
   the arguments, the rightmost argument that owns the
   key gets its value stored.
-  Time:  O(*N* log *N*), where *N* is the total size
+  Time:  O(*c*  *N* log *N*), where *N* is the total size
   of all the arguments.
 
 
