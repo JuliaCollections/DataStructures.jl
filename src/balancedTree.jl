@@ -289,7 +289,7 @@ end
 ## done whether the iterm
 ## is already in the tree, so insertion of a new item always succeeds.
 
-function insert!(t::BalancedTree23, k, d, allowdups::Bool)
+function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdups::Bool)
     
     ## First we find the greatest data node that is <= k.
     leafind, exactfound = findkey(t, k)
@@ -667,7 +667,7 @@ end
 
 ## delete! routine deletes an entry from the balanced tree.
 
-function delete!(t::BalancedTree23, it::Int)
+function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
     
     ## Put the cell indexed by 'it' into the deletion list.
     ##

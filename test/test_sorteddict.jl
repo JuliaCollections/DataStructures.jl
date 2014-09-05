@@ -365,7 +365,7 @@ function test2()
     end
     numprimes = length(m1)
     pn = primes(N)
-    @assert(t == sum(pn)))
+    @assert(t == sum(pn))
     @assert(u == sum(pn.^2))
     ij = endof(m1)
     @assert(deref_key(ij) == last(pn) && convert(Float64,last(pn))==  deref_value(ij))
@@ -661,7 +661,7 @@ function test6a(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
 end
 
 function SDConstruct(a::Associative; lt::Function=isless, by::Function=identity)
-    if by == identity and lt == isless
+    if by == identity && lt == isless
         return SortedDict(a, Forward)
     elseif by == identity
         return SortedDict(a, Lt(lt))
