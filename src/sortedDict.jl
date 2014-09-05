@@ -446,26 +446,26 @@ end
 
 function isequal{K,D,Ord <: Ordering}(m1::SortedDict{K,D,Ord},
                                       m2::SortedDict{K,D,Ord})
-    p1 = ind_first(m1)
-    p2 = ind_first(m2)
+    p1 = startof(m1)
+    p2 = startof(m2)
     ord = orderobject(m1)
     if !isequal(ord, orderobject(m2))
         error("Cannot use isequal for two SortedDicts unless their ordering objects are equal")
     end
     while true
-        if p1 == past_end(m1)
-            return p2 == past_end(m2)
+        if p1 == pastendtoken(m1)
+            return p2 == pastendtoken(m2)
         end
-        if p2 == past_end(m2)
+        if p2 == pastendtoken(m2)
             return false
         end
-        k1,d1 = deref_ind(m1,p1)
-        k2,d2 = deref_ind(m2,p2)
+        k1,d1 = deref(p1)
+        k2,d2 = deref(p2)
         if !eq(ord,k1,k2) || !isequal(d1,d2)
             return false
         end
-        p1 = advance_ind(m1,p1)
-        p2 = advance_ind(m2,p2)
+        p1 = advance(p1)
+        p2 = advance(p2)
     end
 end
 
