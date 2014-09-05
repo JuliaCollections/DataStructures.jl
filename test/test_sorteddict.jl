@@ -372,7 +372,7 @@ function test2()
     count = 0
     for p in m1
         pt = itertoken(p)
-        for q in m2 
+        for q in m1
             count += 1
             qt = itertoken(q)
             if isless(pt,qt)

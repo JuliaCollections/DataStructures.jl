@@ -277,15 +277,15 @@ itertoken(p) = p[3]
 
 function isless(s::SDToken, t::SDToken)
     if !(s.m === t.m)
-        throw(ArgumentError())
+        throw(ArgumentError("SDToken isless requires tokens for the same container"))
     end
-    return compareInd(m.bt, s.address, t. address) < 0
+    return compareInd(s.m.bt, s.address, t. address) < 0
 end
 
 
 function isequal(s::SDToken, t::SDToken)
     if !(s.m === t.m)
-        throw(ArgumentError())
+        throw(ArgumentError("SDToken isequal requires tokens for the same container"))
     end
     return s.address == t.address
 end
@@ -294,7 +294,7 @@ end
 
 function excludelast(i1::SDToken, i2::SDToken)
     if !(i1.m === i2.m)
-        throw(ArgumentError())
+        throw(ArgumentError("SDToken range constructor requires tokens for the same container"))
     end
     ExcludeLast(i1.m, i1.address, i2.address)
 end
@@ -303,7 +303,7 @@ end
 
 function colon(i1::SDToken, i2::SDToken)
     if !(i1.m === i2.m)
-        throw(ArgumentError())
+        throw(ArgumentError("SDToken range constructor requires tokens for the same container"))
     end
     IncludeLast(i1.m, i1.address, i2.address)
 end
