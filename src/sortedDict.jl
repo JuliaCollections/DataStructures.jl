@@ -272,7 +272,7 @@ function next(::SDIterableTypes, state::SDIterationState)
            SDIterationState(m, nextloc0(m.bt, sn), state.final)
 end
 
-itertoken((k,v,t)) = t
+itertoken(p) = p[3]
 
 
 function isless(s::SDToken, t::SDToken)
