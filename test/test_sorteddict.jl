@@ -370,9 +370,9 @@ function test2()
     ij = endof(m1)
     @assert(deref_key(ij) == last(pn) && convert(Float64, last(pn)^2) ==  deref_value(ij))
     count = 0
-    for p in m1
+    for p in startof(m1) : endof(m1)
         pt = itertoken(p)
-        for q in m1
+        for q in excludelast(startof(m1), pastendtoken(m1))
             count += 1
             qt = itertoken(q)
             if isless(pt,qt)

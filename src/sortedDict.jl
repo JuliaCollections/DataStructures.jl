@@ -322,8 +322,8 @@ function start(e::ExcludeLast)
 end
 
 function start(e::IncludeLast) 
-    if !in(e.first, e.m.bt.useddatcells) || e.first == 1 ||
-        !in(e.last, e.m.bt.usdedatacells) || e.last == 2
+    if !in(e.first, e.m.bt.useddatacells) || e.first == 1 ||
+        !in(e.last, e.m.bt.useddatacells) || e.last == 2
         throw(BoundsError())
     end
     if compareInd(e.m.bt, e.first, e.pastlast) <= 0
