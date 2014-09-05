@@ -346,7 +346,8 @@ The name for this default ordering (i.e., using ``isless`` and
 ``isequal``) is ``Forward``.  Another possible
 choice is ``Reverse``, which reverses the usual sorted order.  
 Finally, the user of the
-container can define a custom ordering. 
+container can define a custom ordering.   (This name must be
+imported: ``import Base.Reverse``.)
 
 For example, suppose the keys
 are of type ``ASCIIString``, and the user wishes to order the keys ignoring
@@ -402,11 +403,10 @@ the object ``CaseInsensitive()``, as the ordering object to the
 For the above code to work, the module must make the following declarations,
 typically near the beginning::
 
+    import Base.Ordering
     import Base.lt
     import DataStructures.eq
 
-because of Julia's rule that, in order to extend a function defined
-in another module, the function name must first be imported.
 
 
 ------------------------------
