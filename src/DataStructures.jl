@@ -41,7 +41,7 @@ module DataStructures
     export deref, deref_key, deref_value,  searchsortedafter
     export enumerate_ind, packcopy, packdeepcopy, itertoken
     export excludelast, semiextract, containerextract, assembletoken
-    export orderobject
+    export orderobject, Lt
     
 
 

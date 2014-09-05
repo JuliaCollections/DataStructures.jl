@@ -2,8 +2,7 @@ using DataStructures
 import Base.Ordering
 import Base.Forward
 import Base.Reverse
-import Base.lt
-import DataStructures.eq
+#import Base.Lt
 
 
 ## Function fulldump dumps the entire tree; helpful for debugging.
@@ -570,7 +569,7 @@ function test5()
                 p[2] == vallist[expectedord3[count]])
     end
     @assert(count == 5)
-    m4 = SortedDict((ASCIIString=>Int)[], Lt(x -> isless(lowercase(x))))
+    m4 = SortedDict((ASCIIString=>Int)[], Lt((x,y) -> isless(lowercase(x),lowercase(y))))
     for j = 1 : 6
         m4[keylist[j]] = vallist[j]
     end
@@ -606,15 +605,15 @@ function test6(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
         end
         delct = div(NSTRINGPAIR, 6)
         for j = 1 : delct
-            l = ind_find(m1, strlist[j * 2 + 1])
-            delete_ind!(m1,l)
+            l = findtoken(m1, strlist[j * 2 + 1])
+            delete!(l)
         end
         spec = div(NSTRINGPAIR * 3,4)
-        l = ind_first(m1)
+        l = startof(m1)
         for j = 1 : spec
-            l = advance_ind(m1,l)
+            l = advance(l)
         end
-        k,d = deref_ind(m1,l)
+        k,d = deref(l)
         ekn = expectedk
         edn = expectedd
         @assert(k == ekn && d == edn)

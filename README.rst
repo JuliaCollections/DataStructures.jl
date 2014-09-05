@@ -359,7 +359,8 @@ of the form ``Lt(my_isless)``, where ``Lt`` is a built-in type
 (see ``ordering.jl``) and ``my_isless`` is the comparison function.
 In the above example, the ordering object would be::
 
-     Lt(x->isless(lowercase(x)))
+     Lt((x,y) -> isless(lowercase(x),lowercase(y)))
+
 
 The ordering object is the second argument to
 the ``SortedDict`` constructor (see below for constructor syntax)
