@@ -258,7 +258,7 @@ ExcludeLast{K, D, Ord <: Ordering}(m1::SortedDict{K, D, Ord},
 IncludeLast{K, D, Ord <: Ordering}(m1::SortedDict{K, D, Ord}, first1::Int, last1::Int) = 
             IncludeLast{K,D,Ord}(m1, first1, last1)
 
-typealias SDIterableTypes Union{SortedDict,ExcludeLast,IncludeLast}
+typealias SDIterableTypes Union(SortedDict,ExcludeLast,IncludeLast)
 
 done(::SDIterableTypes, state::SDIterationState) = state.next == state.final
 
