@@ -445,7 +445,7 @@ to the sorted order of the container) and so are mostly unsuitable for
 direct manipulation.
 
 ----------------------------------
-Constructors for sorted containers
+Constructors for Sorted Containers
 ----------------------------------
 
 ``SortedDict(d)``
@@ -467,7 +467,7 @@ Constructors for sorted containers
 
 
 ---------------------------------
-Complexity of sorted containers
+Complexity of Sorted Containers
 ---------------------------------
 
 In the list of functions below, the complexity of the various
@@ -480,7 +480,7 @@ time needed to compare two keys.
 
 
 --------------------------------------
-Navigating the containers using tokens
+Navigating the Containers Using Tokens
 --------------------------------------
 ``m[k]``
   Argument ``m`` is a SortedDict and ``k`` is a key.  On the right-hand side
@@ -597,7 +597,7 @@ Navigating the containers using tokens
 
 
 --------------------------------------------
-Inserting & Deleting for sorted containers
+Inserting & Deleting in Sorted Containers
 --------------------------------------------
 
 ``empty!(m)``
@@ -623,7 +623,7 @@ Inserting & Deleting for sorted containers
   before-start or past-end tokens.  After this operation is 
   complete, ``i`` is an invalid token and cannot be used in
   any further operations.
-  Time: O(*c* log *n*)
+  Time: O(log *n*)
 
 ``delete!(m,k)``
   Argument ``m`` is a SortedDict and
@@ -642,7 +642,7 @@ Inserting & Deleting for sorted containers
 
 
 ------------------------
-Token manipulation
+Token Manipulation
 ------------------------
 
 ``semiextract(i)``
@@ -686,11 +686,11 @@ Token manipulation
   This function returns 0 if the token is invalid (e.g., points to a
   deleted item), 1 if the token is valid and points to data, 2 if the
   token is the before-start token and 3 if it is the past-end token.
-   Time: O(1)
+  Time: O(1)
 
 
 --------------------------------
-Iteration over sorted containers
+Iteration Over Sorted Containers
 --------------------------------
 
 As is standard in Julia, iteration over the containers is
@@ -788,7 +788,7 @@ in the loop body.
 
 
 ----------------
-Other functions
+Other Functions
 ----------------
 
 ``isempty(m)``
@@ -812,7 +812,7 @@ Other functions
 
 ``haskey(m,k)``
   Returns true if ``k`` is present for SortedDict ``m``.  
-  Time: O(log *n*)
+  Time: O(*c* log *n*)
 
 
 ``get(m,k,v)``
@@ -848,7 +848,7 @@ Other functions
   the ``isequal`` function.  Note that ``isequal`` in this sense
   does not imply any correspondence between tokens for items
   in ``m1`` with those for ``m2``.
-  Time: O(*c* *n* + *n* log *n*)
+  Time: O(*cn* + *n* log *n*)
 
 ``packcopy(m)``
   This returns a copy of ``m`` in which the data is
@@ -856,7 +856,7 @@ Other functions
   place, the previously allocated memory is not returned.
   This function can be used to reclaim memory after
   many deletions.  
-  Time: O(*c* *n* log *n*)
+  Time: O(*cn* log *n*)
 
 ``deepcopy(m)``
   This returns a copy of ``m`` in which the data is
@@ -873,7 +873,7 @@ Other functions
   and values are deep-copied.
   This function can be used to reclaim memory after
   many deletions.  
-  Time: O(*c* *n* log *n*)
+  Time: O(*cn* log *n*)
 
 
 ``merge(s, t...)``
@@ -882,7 +882,7 @@ Other functions
   key-value types.  In the case of keys duplicated among
   the arguments, the rightmost argument that owns the
   key gets its value stored.
-  Time:  O(*c* *N* log *N*), where *N* is the total size
+  Time:  O(*cN* log *N*), where *N* is the total size
   of all the arguments.
 
 ``merge!(s, t...)``
@@ -892,12 +892,12 @@ Other functions
   key-value types.  In the case of keys duplicated among
   the arguments, the rightmost argument that owns the
   key gets its value stored.
-  Time:  O(*c*  *N* log *N*), where *N* is the total size
+  Time:  O(*cN* log *N*), where *N* is the total size
   of all the arguments.
 
 
 -----------------------------------
-Performance of sorted containers
+Performance of Sorted Containers
 -----------------------------------
 Timing tests indicate that the code is about 1.5 to
 2 times slower than equivalent C++ code that uses the C++ standard
