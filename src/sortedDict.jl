@@ -277,7 +277,7 @@ itertoken(p) = p[3]
 
 function isless(s::SDToken, t::SDToken)
     if !(s.m === t.m)
-        throw(AgumentError())
+        throw(ArgumentError())
     end
     return compareInd(m.bt, s.address, t. address) < 0
 end
@@ -285,7 +285,7 @@ end
 
 function isequal(s::SDToken, t::SDToken)
     if !(s.m === t.m)
-        throw(AgumentError())
+        throw(ArgumentError())
     end
     return s.address == t.address
 end
