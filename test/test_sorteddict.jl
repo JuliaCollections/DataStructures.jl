@@ -407,7 +407,7 @@ function test2()
     @assert(p[1] == 2 && p[2] == 4.0)
     @assert(i8 != beforestarttoken(m1))
     @assert(validtoken(i8) == 1)
-    i9 = regress_ind(i8)
+    i9 = regress(i8)
     @assert(i9 == beforestarttoken(m1))
     @assert(validtoken(i9) == 2)
     i10 = findtoken(m1, 17)
@@ -435,7 +435,7 @@ function test2()
         end
     end
     count = 0
-    for pr = excludelast(m1, searchsortedfirst(m1, lb),
+    for pr = excludelast(searchsortedfirst(m1, lb),
                          searchsortedfirst(m1, ub))
         count += 1
         @assert(pr[1] == ww2[count] && pr[2] == convert(Float64,ww2[count])^2)

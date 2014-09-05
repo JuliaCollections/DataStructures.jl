@@ -310,8 +310,8 @@ end
 
 
 function start(e::ExcludeLast) 
-    if !in(e.first, e.m.bt.useddatcells) || e.first == 1 ||
-        !in(e.last, e.m.bt.usdedatacells)
+    if !in(e.first, e.m.bt.useddatacells) || e.first == 1 ||
+        !in(e.last, e.m.bt.useddatacells)
         throw(BoundsError())
     end
     if compareInd(e.m.bt, e.first, e.pastlast) < 0
