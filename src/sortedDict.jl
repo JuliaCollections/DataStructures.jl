@@ -334,9 +334,9 @@ function start(e::IncludeLast)
 end
 
 
-function in{K,D,Ord <: Ordering}((k_,d_)::(Any,Any), m::SortedDict{K,D,Ord})
-    i, exactfound = findkey(m.bt,convert(K,k_))
-    return exactfound && isequal(m.bt.data[i].d,convert(D,d_))
+function in{K,D,Ord <: Ordering}(pr, m::SortedDict{K,D,Ord})
+    i, exactfound = findkey(m.bt,convert(K,pr[1]))
+    return exactfound && isequal(m.bt.data[i].d,convert(D,pr[2]))
 end
 
 function eltype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
