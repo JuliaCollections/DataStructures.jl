@@ -326,7 +326,7 @@ function start(e::IncludeLast)
         !in(e.last, e.m.bt.useddatacells) || e.last == 2
         throw(BoundsError())
     end
-    if compareInd(e.m.bt, e.first, e.pastlast) <= 0
+    if compareInd(e.m.bt, e.first, e.last) <= 0
         return SDIterationState(e.m, e.first, nextloc0(e.m.bt, e.last)) 
     else
         return SDIterationState(e.m, 2, 2)
