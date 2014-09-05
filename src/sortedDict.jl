@@ -334,7 +334,7 @@ function start(e::IncludeLast)
 end
 
 
-function in{K,D,Ord <: Ordering}(pr, m::SortedDict{K,D,Ord})
+function in{K,D,Ord <: Ordering}(pr::(Any,Any), m::SortedDict{K,D,Ord})
     i, exactfound = findkey(m.bt,convert(K,pr[1]))
     return exactfound && isequal(m.bt.data[i].d,convert(D,pr[2]))
 end
