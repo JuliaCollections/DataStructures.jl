@@ -172,7 +172,7 @@ end
 ## Function deref_key(ii), where ii is a token, returns the
 ## key indexed by ii.
 
-function deref_key(ii:SDToken)
+function deref_key(ii::SDToken)
     token_has_data(ii)
     return ii.m.bt.data[ii.address].k
 end
@@ -180,7 +180,7 @@ end
 ## Function deref_value(ii), where ii is a token, returns the
 ## value indexed by ii.
 
-function deref_value(ii:SDToken)
+function deref_value(ii::SDToken)
     token_has_data(ii)
     return ii.m.bt.data[ii.address].d
 end
