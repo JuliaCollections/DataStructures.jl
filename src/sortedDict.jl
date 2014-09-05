@@ -233,15 +233,15 @@ SDIterationState{K, D, Ord <: Ordering}(m1::SortedDict{K,D,Ord},
                                         SDIterationState{K,D,Ord}(m1, next1, final1)
 
 ## The next three functions are for iterating over a SortedDict
-## with a for-loop.  We define done and next with a first argument of
-## Any because the SortedDict object itself is carried in the state, and we
-## want to reuse these functions range iterations
-## (below)
+## with a for-loop.  
 
 start(m::SortedDict) = SDIterationState(m, nextloc0(m.bt,1), 2)
-done(::Any, state::SDIterationState) = state.next == state.final
 
-function next(::Any, state:SDIterationState)
+typealias SDIterableTypes Union{SortedDict,ExcludeLast,IncludeLast}
+
+done(::SDIterableTypes, state::SDIterationState) = state.next == state.final
+
+function next(::SDIterableTypes, state::SDIterationState)
     m = state.m
     sn = state.next
     if sn < 3 || !in(sn, m.bt.useddatacells)
