@@ -3,14 +3,14 @@
 
 
 type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
-    bt::BalancedTree{K,D,Ord}
+    bt::BalancedTree23{K,D,Ord}
 end
 
 ## Constructor takes an ordering object which defaults
 ## to Forward
 
 function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
-    bt1 = BalancedTree{K,D,Ord}(o)
+    bt1 = BalancedTree23{K,D,Ord}(o)
     for pr in d
         insert!(bt1, pr[1], pr[2], false)
     end

@@ -9,7 +9,8 @@ module DataStructures
                  map, reverse,
                  endof, first, last, eltype, getkey, values,
                  merge!,lt, Ordering, ForwardOrdering, Forward,
-                 ReverseOrdering, Reverse, Lt, colon
+                 ReverseOrdering, Reverse, Lt, colon,
+                 searchsortedfirst, searchsortedlast
 
 
     
@@ -34,12 +35,12 @@ module DataStructures
 
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
            reverse
-    export SortedDict, SortedDictIndex
-    export ind_find, ind_insert!, delete_ind!, ind_first
-    export past_end, before_start
-    export advance_ind, regress_ind, deref_ind, deref_key_only_ind
-    export ind_equal_or_greater, ind_greater, sorted_dict_range_iteration
-    export enumerate_ind, packcopy, packdeepcopy
+    export SortedDict, SDToken, Semitoken
+    export validtoken, findtoken, insert!, delete!, startof
+    export pastendtoken, beforestarttoken, advance, regress
+    export deref, deref_key, deref_value,  searchsortedafter
+    export enumerate_ind, packcopy, packdeepcopy, itertoken
+    export excludelast, semiextract, containerextract, assembletoken
     
 
 
