@@ -414,7 +414,7 @@ Tokens for Sorted Containers
 ------------------------------
 
 The SortedDict type is accompanied by an auxiliary type called the *token*
-and is defined as type ``SDToken{K,V,O}``.  A token is an item that stores
+and is defined as type ``SDToken``.  A token is an item that stores
 the address of a single data item in the SortedDict and can be
 dereferenced in time O(1).
 For readers familiar with C++ standard
