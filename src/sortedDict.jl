@@ -28,10 +28,12 @@ end
 ## or the after-end item (=2) cannot be  dereferenced.
 
 
-typealias Semitoken Int
+immutable Semitoken 
+    address::Int
+end
 
 immutable SDToken
-    address::Semitoken
+    address::Int
     m::SortedDict
 end
 
@@ -67,6 +69,23 @@ end
 function setindex!{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, d_, k_)
     insert!(m.bt, convert(K,k_), convert(D,d_), false)
 end
+
+## Functions setindex! and getindex for semitokens:
+
+function getindex(m::SortedDict, i::Semitoken)
+    addr = i.address
+    token_has_data(SDToken(addr,m))
+    return m.bt.data[addr].d
+end
+
+function setindex!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, 
+                                        d_, 
+                                        i::Semitoken)
+    addr = i.address
+    token_has_data(SDToken(addr,m))
+    m.bt.data[addr] = convert(D,d_)
+end
+
 
 ## This function looks up a key in the tree;
 ## if not found, then it returns a marker for the
@@ -506,6 +525,7 @@ function merge{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},
 end
 
 
-semiextract(s::SDToken) = s.address
+semiextract(s::SDToken) = Semitoken(s.address)
 containerextract(s::SDToken) = s.m
-assembletoken(m,s) = SDToken(s,m)
+assembletoken(m,s) = SDToken(s.address,m)
+

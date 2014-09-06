@@ -436,13 +436,11 @@ second part refers to the particular item.  The second part is called a
 that contains thousands of tokens addressing the same container.  In this
 case, it may be more efficient to store semitokens rather than tokens
 and reconstruct the full tokens as needed.  In the current implementation,
-semitokens are integers. However, for the purpose of future compatibility,
-semitokens should be declared as type Semitoken rather than Int.
-
-These integers do not have any direct interpretation
-in terms of the container (e.g., their order does not necessarily correspond
-to the sorted order of the container) and so are mostly unsuitable for
-direct manipulation.
+semitokens are internally stored as integers. However, 
+for the purpose of future compatibility,
+the user should  not extract this internal representation;
+these integers do not have any direct interpretation
+in terms of the container.
 
 ----------------------------------
 Constructors for Sorted Containers
@@ -640,6 +638,14 @@ Inserting & Deleting in Sorted Containers
   if ``k`` is not in ``m``.
   Time: O(*c* log *n*)
 
+``m[st]``
+  If ``st`` is a semitoken (extracted from a token for 
+  SortedDict ``m`` via the ``semiextract`` function
+  below), then ``m[st]`` refers to
+  the value field of the (key,value) pair that the full
+  token refers to.  This expression occur on either side of an
+  assignment statement.  Time: O(1)
+
 
 ------------------------
 Token Manipulation
@@ -649,6 +655,8 @@ Token Manipulation
   Extracts a semitoken from a token.  The semitoken is an integer
   (in the current implementation).  See the above discussion of semitokens.
   Time: O(1)
+
+``
 
 ``containerextract(i)``
   Extracts the container from a token.   See the above discussion.

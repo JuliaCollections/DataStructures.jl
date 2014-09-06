@@ -2,13 +2,14 @@ using DataStructures
 import Base.Ordering
 import Base.Forward
 import Base.Reverse
-import Base.lt
 import DataStructures.eq
+import Base.lt
+#import Base.Lt
 
 
 ## Function fulldump dumps the entire tree; helpful for debugging.
 
-function fulldump{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree{K,D,Ord})
+function fulldump(t::DataStructures.BalancedTree23)
     thislevstack = Int[]
     rl = t.rootloc
     dpth = t.depth
@@ -72,7 +73,7 @@ end
 
 
 
-function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree{K,D,Ord})
+function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree23{K,D,Ord})
     dsz = size(t.data, 1)
     tsz = size(t.tree, 1)
     r = t.rootloc
@@ -214,7 +215,7 @@ function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree{K,
         end
         push!(freedata, fdi)
     end
-    if in(:useddatacells, names(DataStructures.BalancedTree))
+    if in(:useddatacells, names(DataStructures.BalancedTree23))
         if last(t.useddatacells) > dsz
             error("t.useddatacells has indices larger than t.data size")
         end
@@ -264,13 +265,16 @@ function test1()
         checkcorrectness(m1.bt)
         # fulldump(m1.bt)
     end
-    i1 = ind_first(m1)
-    while i1 != past_end(m1)
-        k,d = deref_ind(m1,i1)
+    i1 = startof(m1)
+    count = 0
+    while i1 != pastendtoken(m1)
+        count += 1
+        k,d = deref(i1)
         #println("+ reading: k = $k, d = $d")
-        i1 = advance_ind(m1,i1)
+        i1 = advance(i1)
         checkcorrectness(m1.bt)
     end
+    @assert(count == 4)
 end
 
 function test2()
@@ -279,37 +283,37 @@ function test2()
     m1 = SortedDict([8=>32.0, 12=>33.1, 6=>18.2])
     expected = ([6,8,12], [18.2, 32.0, 33.1])
     checkcorrectness(m1.bt)
-    ii = ind_first(m1)
+    ii = startof(m1)
     m2 = packdeepcopy(m1)
     m3 = packcopy(m1)
     p = first(m1)
     @assert(p[1] == 6 && p[2] == 18.2)
     for j = 1 : 3
-        @assert(ii != past_end(m1))
-        pr = deref_ind(m1, ii)
+        @assert(ii != pastendtoken(m1))
+        pr = deref(ii)
         @assert(pr[1] == expected[1][j] && pr[2] == expected[2][j])
         checkcorrectness(m1.bt)
         oldii = ii
-        ii = advance_ind(m1, ii)
-        delete_ind!(m1, oldii)
+        ii = advance(ii)
+        delete!(oldii)
     end
     checkcorrectness(m1.bt)
     checkcorrectness(m2.bt)
     @assert(length(m2) == 3)
-    ii = ind_first(m2)
+    ii = startof(m2)
     for j = 1 : 3
-        pr = deref_ind(m2, ii)
+        pr = deref(ii)
         @assert(pr[1] == expected[1][j] && pr[2] == expected[2][j])
-        ii = advance_ind(m2, ii)
+        ii = advance(ii)
     end
 
     checkcorrectness(m3.bt)
     @assert(length(m3) == 3)
-    ii = ind_first(m3)
+    ii = startof(m3)
     for j = 1 : 3
-        pr = deref_ind(m3, ii)
+        pr = deref(ii)
         @assert(pr[1] == expected[1][j] && pr[2] == expected[2][j])
-        ii = advance_ind(m3, ii)
+        ii = advance(ii)
     end
 
     @assert(isempty(m1))
@@ -322,7 +326,8 @@ function test2()
     @assert(!isempty(m1))
     assert(length(m1) == N - 1)
     for i = 2 : N
-        pop!(m1, i)
+        d = pop!(m1, i)
+        @assert(d == convert(Float64,i)^2)
         checkcorrectness(m1.bt)
     end
     @assert(isempty(m1))
@@ -333,20 +338,26 @@ function test2()
     end
     lastprime = 1
     while true
-        ii = ind_greater(m1, lastprime)
-        if ii == past_end(m1)
+        ii = searchsortedafter(m1, lastprime)
+        if ii == pastendtoken(m1)
             break
         end
-        j = deref_key_only_ind(m1, ii)
+        j = deref_key(ii)
         for k = j * 2 : j : N
-            p = ind_find(m1, k)
-            if p != past_end(m1)
-                delete_ind!(m1, p)
+            p = findtoken(m1, k)
+            if p != pastendtoken(m1)
+                delete!(p)
                 checkcorrectness(m1.bt)
             end
         end
         lastprime = j
     end
+    @assert(ii == pastendtoken(m1))
+    @assert(validtoken(ii) == 3)
+    h = assembletoken(m1, semiextract(ii))
+    @assert(validtoken(h) == 3)
+    h2 = assembletoken(m1, 0)
+    @assert(validtoken(h2) == 0)
     t = 0
     u = 0.0
     for pr = m1
@@ -354,42 +365,67 @@ function test2()
         u += pr[2]
     end
     numprimes = length(m1)
-    @assert(t == sum(primes(N)))
-    @assert(u == sum(primes(N).^2))
+    pn = primes(N)
+    @assert(t == sum(pn))
+    @assert(u == sum(pn.^2))
+    ij = endof(m1)
+    @assert(deref_key(ij) == last(pn) && convert(Float64, last(pn)^2) ==  deref_value(ij))
+    count = 0
+    for p in startof(m1) : endof(m1)
+        pt = itertoken(p)
+        for q in excludelast(startof(m1), pastendtoken(m1))
+            count += 1
+            qt = itertoken(q)
+            if isless(pt,qt)
+                @assert(deref_key(pt) < deref_key(qt))
+            elseif isequal(pt,qt)
+                @assert(deref_key(pt) == deref_key(qt))
+            else
+                @assert(deref_key(pt) > deref_key(qt))
+            end
+        end
+    end
+    @assert(count == length(pn)^2)
     m1[6] = 49.0
     @assert(length(m1) == numprimes + 1)
     @assert(m1[6] == 49.0)
-    b, i6 = ind_insert!(m1, 6, 50.0)
+    b, i6 = insert!(m1, 6, 50.0)
     @assert(length(m1) == numprimes + 1)
     @assert(!b)
-    p = deref_ind(m1, i6)
+    p = deref(i6)
     @assert(p[1] == 6 && p[2] == 50.0)
-    b2, i7 = ind_insert!(m1, 8, 51.0)
+    b2, i7 = insert!(m1, 8, 51.0)
     @assert(length(m1) == numprimes + 2)
     @assert(b2)
-    p = deref_ind(m1, i7)
+    p = deref(i7)
     @assert(p[1] == 8 && p[2] == 51.0)
-    delete_ind!(m1, i7)
+    delete!(i7)
     z = pop!(m1, 6)
     checkcorrectness(m1.bt)
     @assert(z == 50.0)
-    i8 = ind_first(m1)
-    p = deref_ind(m1, i8)
+    i8 = startof(m1)
+    p = deref(i8)
     @assert(p[1] == 2 && p[2] == 4.0)
-    @assert(i8 != before_start(m1))
-    i9 = regress_ind(m1, i8)
-    @assert(i9 == before_start(m1))
-    i10 = ind_find(m1, 17)
-    i11 = regress_ind(m1, i10)
-    @assert(deref_key_only_ind(m1, i11) == 13)
-    i12 = ind_equal_or_greater(m1, 47)
-    i13 = ind_equal_or_greater(m1, 48)
-    @assert(deref_key_only_ind(m1, i12) == 47)
-    @assert(deref_key_only_ind(m1, i13) == 53)
-    i14 = ind_greater(m1, 47)
-    i15 = ind_greater(m1, 48)
-    @assert(deref_key_only_ind(m1, i14) == 53)
-    @assert(deref_key_only_ind(m1, i15) == 53)
+    @assert(i8 != beforestarttoken(m1))
+    @assert(validtoken(i8) == 1)
+    i9 = regress(i8)
+    @assert(i9 == beforestarttoken(m1))
+    @assert(validtoken(i9) == 2)
+    i10 = findtoken(m1, 17)
+    i11 = regress(i10)
+    @assert(deref_key(i11) == 13)
+    i12 = searchsortedfirst(m1, 47)
+    i13 = searchsortedfirst(m1, 48)
+    @assert(deref_key(i12) == 47)
+    @assert(deref_key(i13) == 53)
+    i14 = searchsortedafter(m1, 47)
+    i15 = searchsortedafter(m1, 48)
+    @assert(deref_key(i14) == 53)
+    @assert(deref_key(i15) == 53)
+    i16 = searchsortedlast(m1, 47)
+    i17 = searchsortedlast(m1, 48)
+    @assert(deref_key(i16) == 47)
+    @assert(deref_key(i17) == 47)
     ww = primes(N)
     ww2 = Array(Int, 0)
     lb = 50
@@ -399,76 +435,42 @@ function test2()
             push!(ww2, i)
         end
     end
-    count = 1
-    for pr = sorted_dict_range_iteration(m1, ind_equal_or_greater(m1, lb),
-                                          ind_equal_or_greater(m1, ub))
+    count = 0
+    for pr = excludelast(searchsortedfirst(m1, lb),
+                         searchsortedfirst(m1, ub))
+        count += 1
         @assert(pr[1] == ww2[count] && pr[2] == convert(Float64,ww2[count])^2)
-        count += 1
+        @assert(deref_key(itertoken(pr)) == ww2[count])
     end
-    @assert(length(ww2) == count - 1)
+    @assert(length(ww2) == count)
+    count = 0
+    for (k,v) = searchsortedfirst(m1,lb) : searchsortedlast(m1,ub-1)
+        count += 1
+        @assert(k == ww2[count])
+        @assert(v == convert(Float64,ww2[count])^2)
+    end
+    @assert(length(ww2) == count)
+    count = 0
     pp = primes(N)
-    count = 1
-    for pr2 = enumerate_ind(m1)
-        dr = deref_ind(m1, pr2[1])
-        @assert(dr[1] == pp[count])
-        @assert(pr2[2][1] == pp[count])
-        @assert(pr2[2][2] == convert(Float64,pp[count])^2)
-        count += 1
-    end
-    @assert(length(pp) == count - 1)
-    count = 1
-    for pt = enumerate_ind(sorted_dict_range_iteration(m1, 
-                                                        ind_equal_or_greater(m1, lb),
-                                                        ind_equal_or_greater(m1, ub)))
-        pa = pt[1]
-        pr = pt[2]
-        @assert(pr[1] == ww2[count] && pr[2] == convert(Float64,ww2[count])^2)
-        @assert(deref_key_only_ind(m1, pa) == pr[1])
-        count += 1
-    end
-    @assert(length(ww2) == count - 1)
-    pp = primes(N)
-    count = 1
-    for pr2 = enumerate_ind(m1)
-        dr = deref_ind(m1, pr2[1])
-        @assert(dr[1] == pp[count])
-        @assert(pr2[2][1] == pp[count])
-        @assert(pr2[2][2] == convert(Float64,pp[count])^2)
-        count += 1
-    end
-    @assert(length(pp) == count - 1)
-    count = 1
     for j = keys(m1)
+        count += 1
         @assert(j == pp[count])
-        count += 1
     end
-    @assert(length(pp) == count - 1)
-    count = 1
-    for pj = enumerate_ind(keys(m1))
-        @assert(deref_key_only_ind(m1,pj[1]) == pj[2])
-        @assert(pj[2] == pp[count])
-        count += 1
-    end
-    @assert(length(pp) == count - 1)
-    count = 1
+    @assert(length(pp) == count)
+    count = 0
     for q = values(m1)
+        count += 1
         @assert(q == convert(Float64,pp[count])^2)
-        count += 1
     end
-    @assert(length(pp) == count - 1)
-    count = 1
-    for qj = enumerate_ind(values(m1))
-        @assert(convert(Float64,deref_key_only_ind(m1,qj[1]))^2 == qj[2])
-        @assert(qj[2] == convert(Float64,pp[count])^2)
-        count += 1
-    end
-    @assert(length(pp) == count - 1)
+    @assert(length(pp) == count)
     cc = last(m1)
     assert(cc[1] == last(pp))
     ww = first(m1)
     assert(ww[1] == 2)
     tpr = eltype(m1)
     @assert(tpr[1] == Int && tpr[2] == Float64)
+    co = orderobject(m1)
+    @assert(co == Forward)
     @assert(haskey(m1, 71))
     @assert(!haskey(m1, 77))
     @assert(get(m1, 70, -45.2) == -45.2)
@@ -481,27 +483,27 @@ function test2()
     @assert(length(m1) == length(pp) + 1)
     pop!(m1, 6)
     @assert(getkey(m1,7, 9) == 7)
+    @assert(getkey(m1,7.0, 9) == 7)
     @assert(getkey(m1,12, 9) == 9)
     delete!(m1, 17)
     @assert(length(m1) == length(pp) - 1)
-    @assert(deref_key_only_ind(m1, advance_ind(m1, ind_find(m1,13))) == 19)
-
+    @assert(deref_key(advance(findtoken(m1,13))) == 19)
     empty!(m1)
     checkcorrectness(m1.bt)
     @assert(isempty(m1))
-    c1 = SortedDict(["England"=>3, 
-                        "France"=>9, 
-                        "Albania"=>7])
-    c2 = SortedDict(["England"=>6, 
-                        "Hungary"=>19, 
-                        "Moldova"=>11])
+    c1 = SortedDict(["Eggplants"=>3, 
+                        "Figs"=>9, 
+                        "Apples"=>7])
+    c2 = SortedDict(["Eggplants"=>6, 
+                        "Honeydews"=>19, 
+                        "Melons"=>11])
     c3 = merge(c1, c2)
     checkcorrectness(c3.bt)
-    c4 = SortedDict(["Albania"=>7, 
-                        "France"=>9,
-                        "England"=>6,
-                        "Moldova"=>11,
-                        "Hungary"=>19])
+    c4 = SortedDict(["Apples"=>7, 
+                        "Figs"=>9,
+                        "Eggplants"=>6,
+                        "Melons"=>11,
+                        "Honeydews"=>19])
     @assert(isequal(c3,c4))
     merge!(c1,c2)
     checkcorrectness(c1.bt)
@@ -510,9 +512,6 @@ function test2()
     @assert(isequal(c3,c1))
     checkcorrectness(c3.bt)
 end
-
-
-    
 
 
 
@@ -572,6 +571,18 @@ function test5()
                 p[2] == vallist[expectedord3[count]])
     end
     @assert(count == 5)
+    m4 = SortedDict((ASCIIString=>Int)[], Lt((x,y) -> isless(lowercase(x),lowercase(y))))
+    for j = 1 : 6
+        m4[keylist[j]] = vallist[j]
+    end
+    checkcorrectness(m4.bt)
+    count = 0
+    for p in m4
+        count += 1
+        @assert(p[1] == keylist[expectedord3[count]] &&
+                p[2] == vallist[expectedord3[count]])
+    end
+    @assert(count == 5)
 end
     
 
@@ -579,6 +590,93 @@ end
 function test6(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
     NSTRINGPAIR = 50000
     m1 = SortedDict((ASCIIString=>ASCIIString)[])
+    strlist = ASCIIString[]
+    open(seekfile("wordsScram.txt"), "r") do inio
+        for j = 1 : NSTRINGPAIR * 2
+            push!(strlist, chomp(readline(inio)))
+        end
+    end
+    for trial = 1 : numtrial
+        empty!(m1)
+        count = 1
+        for j = 1 : NSTRINGPAIR
+            k = strlist[count]
+            d = strlist[count + 1]
+            m1[k] = d
+            count += 2
+        end
+        delct = div(NSTRINGPAIR, 6)
+        for j = 1 : delct
+            l = findtoken(m1, strlist[j * 2 + 1])
+            delete!(l)
+        end
+        spec = div(NSTRINGPAIR * 3,4)
+        l = startof(m1)
+        for j = 1 : spec
+            l = advance(l)
+        end
+        k,d = deref(l)
+        ekn = expectedk
+        edn = expectedd
+        @assert(k == ekn && d == edn)
+    end
+end
+
+
+
+function test6a(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
+    NSTRINGPAIR = 50000
+    m1 = SortedDict((ASCIIString=>ASCIIString)[], Lt(isless))
+    strlist = ASCIIString[]
+    open(seekfile("wordsScram.txt"), "r") do inio
+        for j = 1 : NSTRINGPAIR * 2
+            push!(strlist, chomp(readline(inio)))
+        end
+    end
+    for trial = 1 : numtrial
+        empty!(m1)
+        count = 1
+        for j = 1 : NSTRINGPAIR
+            k = strlist[count]
+            d = strlist[count + 1]
+            m1[k] = d
+            count += 2
+        end
+        delct = div(NSTRINGPAIR, 6)
+        for j = 1 : delct
+            l = ind_find(m1, strlist[j * 2 + 1])
+            delete_ind!(m1,l)
+        end
+        spec = div(NSTRINGPAIR * 3,4)
+        l = ind_first(m1)
+        for j = 1 : spec
+            l = advance_ind(m1,l)
+        end
+        k,d = deref_ind(m1,l)
+        ekn = expectedk
+        edn = expectedd
+        @assert(k == ekn && d == edn)
+    end
+end
+
+function SDConstruct(a::Associative; lt::Function=isless, by::Function=identity)
+    if by == identity && lt == isless
+        return SortedDict(a, Forward)
+    elseif by == identity
+        return SortedDict(a, Lt(lt))
+    elseif lt == isless
+        return SortedDict(a, By(by))
+    else
+        error("having both by and lt not both implemented")
+    end
+end
+
+    
+
+
+function test6b(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
+    NSTRINGPAIR = 50000
+    m1 = SDConstruct((ASCIIString=>ASCIIString)[], lt=isless)
     strlist = ASCIIString[]
     open(seekfile("wordsScram.txt"), "r") do inio
         for j = 1 : NSTRINGPAIR * 2
@@ -612,9 +710,10 @@ function test6(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
 end
 
 
+
+
 test1()
 test2()
 test5()
 test6(2, "soothingly", "compere")
-test5()
 
