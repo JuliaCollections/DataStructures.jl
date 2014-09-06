@@ -83,7 +83,7 @@ function setindex!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},
                                         i::Semitoken)
     addr = i.address
     token_has_data(SDToken(addr,m))
-    m.bt.data[addr] = convert(D,d_)
+    m.bt.data[addr].d = convert(D,d_)
 end
 
 

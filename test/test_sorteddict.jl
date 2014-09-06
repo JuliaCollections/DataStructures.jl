@@ -356,7 +356,7 @@ function test2()
     @assert(validtoken(ii) == 3)
     h = assembletoken(m1, semiextract(ii))
     @assert(validtoken(h) == 3)
-    h2 = assembletoken(m1, 0)
+    h2 = assembletoken(m1, Semitoken(0))
     @assert(validtoken(h2) == 0)
     t = 0
     u = 0.0
