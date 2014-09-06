@@ -1,19 +1,16 @@
-
-
-
-
 ## A SortedDict is a wrapper around balancedTree with
 ## methods similiar to those of Julia container Dict.
-## QUESTION: better to make this type ... or immutable... ??
-## I'm not sure what the tradeoffs are.
+
 
 type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
-    bt::BalancedTree{K,D,Ord}
+    bt::BalancedTree23{K,D,Ord}
 end
 
+## Constructor takes an ordering object which defaults
+## to Forward
 
 function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
-    bt1 = BalancedTree{K,D,Ord}(o)
+    bt1 = BalancedTree23{K,D,Ord}(o)
     for pr in d
         insert!(bt1, pr[1], pr[2], false)
     end
@@ -22,25 +19,46 @@ end
 
 
 
-## A SortedDictIndex is a small structure for iterating
-## over the items in a tree in sorted order.  It is
-## a wrapper around an Int; the int is the index
+## An SDToken is a small structure for iterating
+## over the items in a sorted dict order.  It is
+## a wrapper around an (SortedDict,Int) pair; the int is the index
 ## of the current item in t.data.  An iterator
 ## should never point to a deleted item.  An iterator
 ## that points to the before-start item (=1)
 ## or the after-end item (=2) cannot be  dereferenced.
 
 
-immutable SortedDictIndex{K,D, Ord <: Ordering}
-    address::Int
+typealias Semitoken Int
+
+immutable SDToken{K,D, Ord <: Ordering}
+    address::Semitoken
+    m::SortedDict{K,D,Ord}
 end
+
+SDToken{K,D, Ord <: Ordering}(a::Semitoken, 
+                              m1::SortedDict{K,D,Ord}) = SDToken{K,D,Ord}(a,m1)
+
+
+validtoken(i::SDToken) = !in(i.address, i.m.bt.useddatacells)? 0 :
+          (i.address == 1? 2 : (i.address == 2? 3 : 1))
+
+token_not_beforestart(i::SDToken) =
+    (!in(i.address, i.m.bt.useddatacells) || i.address == 1) && throw(BoundsError())
+
+token_not_pastend(i::SDToken) =
+    (!in(i.address, i.m.bt.useddatacells) || i.address == 2) && throw(BoundsError())
+
+token_has_data(i::SDToken) =
+    (!in(i.address, i.m.bt.useddatacells) || i.address < 3) && throw(BoundsError())
+
+
 
 
 ## This function implements m[k]; it returns the
 ## data item associated with key k.
 
-function getindex{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, k::K)
-    i, exactfound = findkey(m.bt, k)
+function getindex{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
+    i, exactfound = findkey(m.bt, convert(K,k_))
     if !exactfound
         throw(KeyError(k))
     end
@@ -50,118 +68,82 @@ end
 ## This function implements m[k]=d; it sets the 
 ## data item associated with key k equal to d.
 
-function setindex!{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, d::D, k::K)
-    insert!(m.bt, k, d, false)
+function setindex!{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, d_, k_)
+    insert!(m.bt, convert(K,k_), convert(D,d_), false)
 end
 
 ## This function looks up a key in the tree;
 ## if not found, then it returns a marker for the
 ## end of the tree.
         
-function ind_find{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, k::K)
-    ll, exactfound = findkey(m.bt, k)
-    exactfound?
-    SortedDictIndex{K,D,Ord}(ll) :
-    SortedDictIndex{K,D,Ord}(2)
+function findtoken{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
+    ll, exactfound = findkey(m.bt, convert(K,k_))
+    exactfound? SDToken(ll,m) :  SDToken(2,m)
 end
 
 ## This function inserts an item into the tree.
-## Unlike m[k]=d, it also returns a bool and a Index.
+## Unlike m[k]=d, it also returns a bool and a token.
 ## The bool is true if the inserted item is new.
 ## It is false if there was already an item
 ## with that key.
-## The index points to the newly inserted item.
+## The token points to the newly inserted item.
 
-function ind_insert!{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, k::K, d::D)
-    b, i = insert!(m.bt, k, d, false)
-    b, SortedDictIndex{K,D,Ord}(i)
+function insert!{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_, d_)
+    b, i = insert!(m.bt, convert(K,k_), convert(D,d_), false)
+    b, SDToken(i,m)
 end
 
 
-## delete_ind! deletes an item given an index.
+## delete! deletes an item given a token.
 
-function delete_ind!{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, 
-                                           ii::SortedDictIndex{K,D,Ord})
-    if !in(ii.address, m.bt.useddatacells)
-        throw(BoundsError())
-    end
-    if ii.address < 3
-        throw(BoundsError())
-    end
-    delete!(m.bt, ii.address)
+function delete!(ii::SDToken)
+    token_has_data(ii)
+    delete!(ii.m.bt, ii.address)
 end
     
 
 
-## Function ind_first returns the index that points
+## Function startof returns the token that points
 ## to the first sorted order of the tree.  It returns
-## the past-end index (i.e., 2) if the tree is empty.
+## the past-end token if the tree is empty.
 
-function ind_first{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord})
-    SortedDictIndex{K,D,Ord}(beginloc(m.bt))
+startof(m::SortedDict) = SDToken(beginloc(m.bt), m)
+
+## Function pastendtoken returns the otken past the end of the data.
+
+pastendtoken(m::SortedDict) = SDToken(2,m)
+
+## Function beforestarttoken returns the token before the start of the data.
+
+beforestarttoken(m::SortedDict) = SDToken(1,m)
+
+## Function advance takes a token and returns the
+## next token in the sorted order. 
+
+function advance(ii::SDToken)
+    token_not_pastend(ii)
+    SDToken(nextloc0(ii.m.bt, ii.address), ii.m)
 end
 
 
-## Function past_end returns the index past the end of the data.
+## Function regress takes a token and returns the
+## previous token in the sorted order. 
 
-function past_end{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord})
-    SortedDictIndex{K,D,Ord}(2)
+function regress(ii::SDToken)
+    token_not_beforestart(ii)
+    SDToken(prevloc0(ii.m.bt, ii.address), ii.m)
 end
 
-## Function before_start returns the index past the end of the data.
-
-function before_start{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord})
-    SortedDictIndex{K,D,Ord}(1)
-end
-
-
-
-## Function advance_ind takes an index and returns the
-## next index in the sorted order. 
-
-function advance_ind{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, 
-                                           ii::SortedDictIndex{K,D,Ord})
-    if !in(ii.address, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("advance_ind invoked on deleted index")
-    end
-    if ii.address == 2
-        throw(BoundsError())
-        #error("advance_ind invoked on past-end data item")
-    end
-
-    SortedDictIndex{K,D,Ord}(nextloc0(m.bt, ii.address))
-end
-
-
-## Function regress_ind takes an index and returns the
-## previous index in the sorted order. 
-
-function regress_ind{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, 
-                                           ii::SortedDictIndex{K,D,Ord})
-    if !in(ii.address, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("regress_ind invoked on deleted index")
-    end
-    if ii.address == 1
-        throw(BoundsError())
-        #error("regress_ind invoked on before-start data item")
-    end
-    SortedDictIndex{K,D,Ord}(prevloc0(m.bt, ii.address))
-end
-
-## Endof returns the index of the last item in the sorted order,
+## Endof returns the token of the last item in the sorted order,
 ## or the before-start marker if the SortedDict is empty.
 
-function endof{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord})
-    SortedDictIndex{K,D,Ord}(endloc(m.bt))
-end
+endof(m::SortedDict) = SDToken(endloc(m.bt),m)
 
 ## First and last return the first and last (key,data) pairs
 ## in the SortedDict.  It is an error to invoke them on an
 ## empty SortedDict.
 
-function first{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord})
+function first(m::SortedDict)
     i = beginloc(m.bt)
     if i == 2
         throw(BoundsError())
@@ -170,7 +152,7 @@ function first{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord})
 end
 
 
-function last{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord})
+function last(m::SortedDict)
     i = endloc(m.bt)
     if i == 1
         throw(BoundsError())
@@ -179,225 +161,182 @@ function last{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord})
 end
 
 
-
-
-## Function deref_ind(m,ii), where ii is an index, returns the
+## Function deref(ii), where ii is a token, returns the
 ## (k,d) pair indexed by ii.
 
-function deref_ind{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, 
-                                         ii::SortedDictIndex{K,D,Ord})
-    addr = ii.address
-    if addr < 3
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(addr, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return m.bt.data[addr].k, m.bt.data[addr].d
+function deref(ii::SDToken)
+    token_has_data(ii)
+    return ii.m.bt.data[ii.address].k, ii.m.bt.data[ii.address].d
 end
 
-## Function deref_key_only_ind(m,ii), where ii is an index, returns the
+## Function deref_key(ii), where ii is a token, returns the
 ## key indexed by ii.
 
-function deref_key_only_ind{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, 
-                                                  ii::SortedDictIndex{K,D,Ord})
-    addr = ii.address
-    if addr < 3
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(addr, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry $ii")
-    end
-    return m.bt.data[addr].k
+function deref_key(ii::SDToken)
+    token_has_data(ii)
+    return ii.m.bt.data[ii.address].k
 end
 
-## This function takes a key and returns the index
+## Function deref_value(ii), where ii is a token, returns the
+## value indexed by ii.
+
+function deref_value(ii::SDToken)
+    token_has_data(ii)
+    return ii.m.bt.data[ii.address].d
+end
+
+## This function takes a key and returns the token
 ## of the first item in the tree that is >= the given
-## key in the sorted order.  It returns the end marker
+## key in the sorted order.  It returns the past-end marker
 ## if there is none.
 
-function ind_equal_or_greater{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k::K)
-    i, exactfound = findkey(m.bt, k)
-    exactfound?
-    SortedDictIndex{K,D,Ord}(i) :
-    SortedDictIndex{K,D,Ord}(nextloc0(m.bt, i))
+function searchsortedfirst{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
+    i, exactfound = findkey(m.bt, convert(K,k_))
+    exactfound?  SDToken(i,m) : SDToken(nextloc0(m.bt, i), m)
 end
 
-## This function takes a key and returns an index
+## This function takes a key and returns a token
 ## to the first item in the tree that is > the given
-## key in the sorted order.  It returns the end marker
+## key in the sorted order.  It returns the past-end marker
 ## if there is none.
 
-function ind_greater{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k::K)
-    i, exactfound = findkey(m.bt, k)
-    SortedDictIndex{K,D,Ord}(nextloc0(m.bt, i))
+function searchsortedafter{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
+    i, exactfound = findkey(m.bt, convert(K,k_))
+    SDToken(nextloc0(m.bt, i), m)
 end
 
+## This function takes a key and returns a token
+## to the last item in the tree that is <= the given
+## key in the sorted order.  It returns the before-start marker
+## if there is none.
 
+function searchsortedlast{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
+    i, exactfound = findkey(m.bt, convert(K,k_))
+    SDToken(i, m)
+end
+
+isempty(m::SortedDict) = size(m.bt.data,1) - size(m.bt.freedatainds, 1) == 2
+
+empty!(m::SortedDict) =  empty!(m.bt)
+
+length(m::SortedDict) = size(m.bt.data,1) - size(m.bt.freedatainds, 1) - 2
+
+
+immutable SDIterationState{K, D, Ord <: Ordering}
+    m::SortedDict{K,D,Ord}
+    next::Int
+    final::Int
+end
+
+SDIterationState{K, D, Ord <: Ordering}(m1::SortedDict{K,D,Ord},
+                                        next1::Int, final1::Int) = 
+                                        SDIterationState{K,D,Ord}(m1, next1, final1)
 
 ## The next three functions are for iterating over a SortedDict
-## with a for-loop.
+## with a for-loop.  
 
-function start{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
-    nextloc0(m.bt,1)
-end
+start(m::SortedDict) = SDIterationState(m, nextloc0(m.bt,1), 2)
 
 
-function done{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, state::Int)
-    state == 2
-end
-
-function next{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return ((m.bt.data[state].k, m.bt.data[state].d), nextloc0(m.bt, state))
-end
-
-
-
-    
-type SortedDictRangeIteration{K,D,Ord <: Ordering}
-    m::SortedDict{K,D,Ord}
-    startit::Int
-    endit::Int
-end
-
-
-
-## The next three functions are for iterating over a range of a
-## SortedDict with a for-loop; the range is specified by a start
-## and end index.
-
-
-function sorted_dict_range_iteration{K,D,Ord <: Ordering}(m1::SortedDict{K,D,Ord},
-                                                          startit1::SortedDictIndex{K,D,Ord},
-                                                          endit1::SortedDictIndex{K,D,Ord})
-    SortedDictRangeIteration(m1, startit1.address, endit1.address)
-end
-
-
-
-
-function start{K,D,Ord <: Ordering}(sodri::SortedDictRangeIteration{K,D,Ord})
-    sodri.startit
-end
-
-function done{K,D,Ord <: Ordering}(sodri::SortedDictRangeIteration{K,D,Ord}, state::Int)
-    state == 2 || state == sodri.endit
-end
-
-function next{K,D,Ord <: Ordering}(sodri::SortedDictRangeIteration{K,D,Ord}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, sodri.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return ((sodri.m.bt.data[state].k, sodri.m.bt.data[state].d),
-     nextloc0(sodri.m.bt, state))
-end
-
-
-
-type EnumerateSOD{K, D, Ord <: Ordering}
+immutable ExcludeLast{K, D, Ord <: Ordering}
     m::SortedDict{K, D, Ord}
+    first::Int
+    pastlast::Int
 end
 
-
-## The next three functions support "for p in enumerate_ind(m)... end"
-## where m is a SortedDict.
-
-
-function enumerate_ind{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord})
-    EnumerateSOD{K,D,Ord}(m)
+immutable IncludeLast{K, D, Ord <: Ordering}
+    m::SortedDict{K, D, Ord}
+    first::Int
+    last::Int
 end
 
-function start{K,D, Ord <: Ordering}(esod::EnumerateSOD{K,D,Ord})
-    nextloc0(esod.m.bt,1)
-end
+ExcludeLast{K, D, Ord <: Ordering}(m1::SortedDict{K, D, Ord}, 
+                                   first1::Int, 
+                                   pastlast1::Int) = 
+                                   ExcludeLast{K,D,Ord}(m1, first1, pastlast1)
 
-function done{K, D, Ord <: Ordering}(esod::EnumerateSOD{K,D,Ord}, state::Int)
-    state == 2
-end
+IncludeLast{K, D, Ord <: Ordering}(m1::SortedDict{K, D, Ord}, first1::Int, last1::Int) = 
+            IncludeLast{K,D,Ord}(m1, first1, last1)
 
-function next{K, D, Ord <: Ordering}(esod::EnumerateSOD{K,D,Ord}, state::Int)
-    if state == 2
+typealias SDIterableTypes Union(SortedDict,ExcludeLast,IncludeLast)
+
+done(::SDIterableTypes, state::SDIterationState) = state.next == state.final
+
+function next(::SDIterableTypes, state::SDIterationState)
+    m = state.m
+    sn = state.next
+    if sn < 3 || !in(sn, m.bt.useddatacells)
         throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
     end
-    if !in(state, esod.m.bt.useddatacells)
+    return (m.bt.data[sn].k, m.bt.data[sn].d, SDToken(sn, m)),
+           SDIterationState(m, nextloc0(m.bt, sn), state.final)
+end
+
+itertoken(p) = p[3]
+
+
+function isless(s::SDToken, t::SDToken)
+    if !(s.m === t.m)
+        throw(ArgumentError("SDToken isless requires tokens for the same container"))
+    end
+    return compareInd(s.m.bt, s.address, t. address) < 0
+end
+
+
+function isequal(s::SDToken, t::SDToken)
+    if !(s.m === t.m)
+        throw(ArgumentError("SDToken isequal requires tokens for the same container"))
+    end
+    return s.address == t.address
+end
+
+
+
+function excludelast(i1::SDToken, i2::SDToken)
+    if !(i1.m === i2.m)
+        throw(ArgumentError("SDToken range constructor requires tokens for the same container"))
+    end
+    ExcludeLast(i1.m, i1.address, i2.address)
+end
+
+
+
+function colon(i1::SDToken, i2::SDToken)
+    if !(i1.m === i2.m)
+        throw(ArgumentError("SDToken range constructor requires tokens for the same container"))
+    end
+    IncludeLast(i1.m, i1.address, i2.address)
+end
+
+
+function start(e::ExcludeLast) 
+    if !in(e.first, e.m.bt.useddatacells) || e.first == 1 ||
+        !in(e.pastlast, e.m.bt.useddatacells)
         throw(BoundsError())
-        #error("Attempt to access deleted entry")
     end
-    return ((SortedDictIndex{K,D,Ord}(state), 
-      (esod.m.bt.data[state].k,esod.m.bt.data[state].d)),
-      nextloc0(esod.m.bt, state))
+    if compareInd(e.m.bt, e.first, e.pastlast) < 0
+        return SDIterationState(e.m, e.first, e.pastlast) 
+    else
+        return SDIterationState(e.m, 2, 2)
+    end
 end
 
-## These functions support "for p in enumerate_ind(sorted_dict_range_iteration(m,i1,i2))"
-
-type EnumerateSODRI{K,D,Ord <: Ordering}
-    sodri::SortedDictRangeIteration{K,D,Ord}
-end
-
-function enumerate_ind{K,D,Ord <: Ordering}(m::SortedDictRangeIteration{K,D,Ord})
-    EnumerateSODRI{K,D,Ord}(m)
-end
-
-
-function start{K,D,Ord <: Ordering}(esodri::EnumerateSODRI{K,D,Ord})
-    esodri.sodri.startit
-end
-
-function done{K,D,Ord <: Ordering}(esodri::EnumerateSODRI{K,D,Ord}, state::Int)
-    state == 2 || state == esodri.sodri.endit
-end
-
-function next{K,D,Ord <: Ordering}(esodri::EnumerateSODRI{K,D,Ord}, state::Int)
-    if state == 2
+function start(e::IncludeLast) 
+    if !in(e.first, e.m.bt.useddatacells) || e.first == 1 ||
+        !in(e.last, e.m.bt.useddatacells) || e.last == 2
         throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
     end
-    if !in(state, esodri.sodri.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
+    if compareInd(e.m.bt, e.first, e.last) <= 0
+        return SDIterationState(e.m, e.first, nextloc0(e.m.bt, e.last)) 
+    else
+        return SDIterationState(e.m, 2, 2)
     end
-    return (SortedDictIndex{K,D,Ord}(state), 
-     (esodri.sodri.m.bt.data[state].k, esodri.sodri.m.bt.data[state].d)),
-    nextloc0(esodri.sodri.m.bt, state)
 end
 
 
-function isempty{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
-    size(m.bt.data,1) - size(m.bt.freedatainds, 1) == 2
-end
-
-
-## This function clears a SortedDict -- all items deleted.
-
-function empty!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
-    empty!(m.bt)
-end
-
-function length{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
-   size(m.bt.data,1) - size(m.bt.freedatainds, 1) - 2
-end
-
-function in{K,D,Ord <: Ordering}(p::(K,D), m::SortedDict{K,D,Ord})
-    @inbounds i, exactfound = findkey(m.bt,p[1])
-    @inbounds return exactfound && isequal(m.bt.data[i].d,p[2])
+function in{K,D,Ord <: Ordering}(pr::(Any,Any), m::SortedDict{K,D,Ord})
+    i, exactfound = findkey(m.bt,convert(K,pr[1]))
+    return exactfound && isequal(m.bt.data[i].d,convert(D,pr[2]))
 end
 
 function eltype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
@@ -408,51 +347,51 @@ function orderobject{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
     m.bt.ord
 end
 
-function haskey{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k::K)
-    i, exactfound = findkey(m.bt,k)
+function haskey{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
+    i, exactfound = findkey(m.bt,convert(K,k_))
     exactfound
 end
 
-function get{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k::K, default::D)
-    i, exactfound = findkey(m.bt, k)
-   return  exactfound? m.bt.data[i].d : default
+function get{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_, default_)
+    i, exactfound = findkey(m.bt, convert(K,k_))
+   return  exactfound? m.bt.data[i].d : convert(D,default_)
 end
 
 
-function get!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k::K, default::D)
+function get!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_, default_)
+    k = convert(K,k_)
     i, exactfound = findkey(m.bt, k)
     if exactfound
         return m.bt.data[i].d
     else
-        insert!(m.bt, k, default, false)
+        default = convert(D,default_)
+        insert!(m.bt,k, default, false)
         return default
     end
 end
 
 
-function getkey{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k::K, default::K)
-    i, exactfound = findkey(m.bt, k)
-    exactfound? m.bt.data[i].k : default
+function getkey{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_, default_)
+    i, exactfound = findkey(m.bt, convert(K,k_))
+    exactfound? m.bt.data[i].k : convert(K,default_)
 end
 
 ## Function delete! deletes an item at a given 
 ## key
 
-function delete!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k::K)
-    i, exactfound = findkey(m.bt,k)
+function delete!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
+    i, exactfound = findkey(m.bt,convert(K,k_))
     if !exactfound
         throw(KeyError(k))
-        #error("Key not in SortedDict in delete!")
     end
     delete!(m.bt, i)
     m
 end
 
-function pop!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k::K)
-    i, exactfound = findkey(m.bt,k)
+function pop!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
+    i, exactfound = findkey(m.bt,convert(K,k_))
     if !exactfound
         throw(KeyeError(k))
-        #error("Key not in SortedDict in pop!")
     end
     d = m.bt.data[i].d
     delete!(m.bt, i)
@@ -460,133 +399,44 @@ function pop!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k::K)
 end
 
 
-## The next three function support "for k in keys(m)" where m is
+## The next three functions support "for k in keys(m)" where m is
 ## a SortedDict.
 
 type KeySOD{K,D,Ord <: Ordering}
     m::SortedDict{K,D,Ord}
 end
 
-function keys{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
-    KeySOD(m)
-end
+keys(m::SortedDict) = KeySOD(m)
 
-function start{K,D,Ord <: Ordering}(ksod::KeySOD{K,D,Ord})
-    nextloc0(ksod.m.bt, 1)
-end
+start(ksod::KeySOD) = nextloc0(ksod.m.bt, 1)
 
-function done{K,D,Ord <: Ordering}(ksod::KeySOD{K,D,Ord}, state::Int)
-    state == 2
-end
+done(ksod::KeySOD, state) = state == 2
 
-function next{K,D,Ord <: Ordering}(ksod::KeySOD{K,D,Ord}, state::Int)
-    if state == 2
+function next(ksod::KeySOD, state::Int)
+    if state == 2 || !in(state, ksod.m.bt.useddatacells)
         throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, ksod.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
     end
     return ksod.m.bt.data[state].k, nextloc0(ksod.m.bt, state)
 end
 
 
-# The functions support "for p in enumerate_ind(keys(m))"
-
-
-type EKeySOD{K,D,Ord <: Ordering}
-    m::SortedDict{K,D,Ord}
-end
-
-function enumerate_ind{K,D,Ord <: Ordering}(ksod::KeySOD{K,D,Ord})
-    EKeySOD(ksod.m)
-end
-
-function start{K,D,Ord <: Ordering}(eksod::EKeySOD{K,D,Ord})
-    nextloc0(eksod.m.bt, 1)
-end
-
-function done{K,D,Ord <: Ordering}(eksod::EKeySOD{K,D,Ord}, state::Int)
-    state == 2
-end
-
-function next{K,D,Ord <: Ordering}(eksod::EKeySOD{K,D,Ord}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, eksod.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return (SortedDictIndex{K,D,Ord}(state),eksod.m.bt.data[state].k), 
-    nextloc0(eksod.m.bt, state)
-end
-
-
 # These functions support "for p in values(m)"
-
 
 type ValueSOD{K,D,Ord <: Ordering}
     m::SortedDict{K,D,Ord}
 end
 
-function values{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
-    ValueSOD(m)
-end
+values(m::SortedDict) = ValueSOD(m)
 
-function start{K,D,Ord <: Ordering}(vsod::ValueSOD{K,D,Ord})
-    nextloc0(vsod.m.bt, 1)
-end
+start(vsod::ValueSOD) = nextloc0(vsod.m.bt, 1)
 
-function done{K,D,Ord <: Ordering}(vsod::ValueSOD{K,D,Ord}, state::Int)
-    state == 2
-end
+done(vsod::ValueSOD, state::Int) = state == 2
 
-function next{K,D,Ord <: Ordering}(vsod::ValueSOD{K,D,Ord}, state::Int)
-    if state == 2
+function next(vsod::ValueSOD, state::Int)
+    if state == 2 || !in(state, vsod.m.bt.useddatacells)
         throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, vsod.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
     end
     return vsod.m.bt.data[state].d, nextloc0(vsod.m.bt, state)
-end
-
-
-# These functions support "for p in enumerate_ind(values(m))"
-
-
-type EValueSOD{K,D,Ord <: Ordering}
-    m::SortedDict{K,D,Ord}
-end
-
-function enumerate_ind{K,D,Ord <: Ordering}(vsod::ValueSOD{K,D,Ord})
-    EValueSOD(vsod.m)
-end
-
-function start{K,D,Ord <: Ordering}(evsod::EValueSOD{K,D,Ord})
-    nextloc0(evsod.m.bt, 1)
-end
-
-function done{K,D,Ord <: Ordering}(evsod::EValueSOD{K,D,Ord}, state::Int)
-    state == 2
-end
-
-function next{K,D,Ord <: Ordering}(evsod::EValueSOD{K,D,Ord}, state::Int)
-    if state == 2
-        throw(BoundsError())
-        #error("Attempt to retrieve data before start or past end of SortedDict")
-    end
-    if !in(state, evsod.m.bt.useddatacells)
-        throw(BoundsError())
-        #error("Attempt to access deleted entry")
-    end
-    return (SortedDictIndex{K,D,Ord}(state), evsod.m.bt.data[state].d), 
-    nextloc0(evsod.m.bt, state)
 end
 
 
@@ -596,26 +446,26 @@ end
 
 function isequal{K,D,Ord <: Ordering}(m1::SortedDict{K,D,Ord},
                                       m2::SortedDict{K,D,Ord})
-    p1 = ind_first(m1)
-    p2 = ind_first(m2)
+    p1 = startof(m1)
+    p2 = startof(m2)
     ord = orderobject(m1)
     if !isequal(ord, orderobject(m2))
         error("Cannot use isequal for two SortedDicts unless their ordering objects are equal")
     end
     while true
-        if p1 == past_end(m1)
-            return p2 == past_end(m2)
+        if p1 == pastendtoken(m1)
+            return p2 == pastendtoken(m2)
         end
-        if p2 == past_end(m2)
+        if p2 == pastendtoken(m2)
             return false
         end
-        k1,d1 = deref_ind(m1,p1)
-        k2,d2 = deref_ind(m2,p2)
+        k1,d1 = deref(p1)
+        k2,d2 = deref(p2)
         if !eq(ord,k1,k2) || !isequal(d1,d2)
             return false
         end
-        p1 = advance_ind(m1,p1)
-        p2 = advance_ind(m2,p2)
+        p1 = advance(p1)
+        p2 = advance(p2)
     end
 end
 
@@ -660,3 +510,6 @@ function merge{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},
 end
 
 
+semiextract(s::SDToken) = s.address
+containerextract(s::SDToken) = s.m
+assembletoken(m,s) = SDToken(s,m)

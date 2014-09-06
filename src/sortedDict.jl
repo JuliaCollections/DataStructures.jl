@@ -30,9 +30,9 @@ end
 
 typealias Semitoken Int
 
-immutable SDToken{K,D, Ord <: Ordering}
+immutable SDToken
     address::Semitoken
-    m::SortedDict{K,D,Ord}
+    m::SortedDict
 end
 
 SDToken{K,D, Ord <: Ordering}(a::Semitoken, 
