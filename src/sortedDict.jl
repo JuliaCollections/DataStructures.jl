@@ -35,8 +35,8 @@ immutable SDToken
     m::SortedDict
 end
 
-SDToken{K,D, Ord <: Ordering}(a::Semitoken, 
-                              m1::SortedDict{K,D,Ord}) = SDToken{K,D,Ord}(a,m1)
+#SDToken{K,D, Ord <: Ordering}(a::Semitoken, 
+#                              m1::SortedDict{K,D,Ord}) = SDToken{K,D,Ord}(a,m1)
 
 
 validtoken(i::SDToken) = !in(i.address, i.m.bt.useddatacells)? 0 :
