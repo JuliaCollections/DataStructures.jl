@@ -1,6 +1,8 @@
 # DataStructures.jl
 
 [![Build Status](https://travis-ci.org/JuliaLang/DataStructures.jl.svg?branch=master)](https://travis-ci.org/JuliaLang/DataStructures.jl)
+[![Coverage Status](https://img.shields.io/coveralls/JuliaLang/DataStructures.jl.svg)](https://coveralls.io/r/JuliaLang/DataStructures.jl)
+[![DataStructures](http://pkg.julialang.org/badges/DataStructures_release.svg)](http://pkg.julialang.org/?pkg=DataStructures&ver=release)
 
 This package implements a variety of data structures, including
 
