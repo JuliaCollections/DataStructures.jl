@@ -12,7 +12,7 @@ tests = ["deque",
 		 "list"]
 
 for t in tests
-	fp = joinpath("test", "test_$t.jl")
+	fp = joinpath(Pkg.dir("DataStructures"), "test", "test_$t.jl")
 	println("$fp ...")
 	include(fp)
 end
