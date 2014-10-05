@@ -63,9 +63,9 @@ module DataStructures
     
     include("list.jl")
     include("balancedTree.jl")
-    include("sortedDict.jl")
     include("tokens.jl")
-
+    import Tokens: SDSemiToken, SDToken, semi, container, assemble, status
+    include("sortedDict.jl")
     @deprecate stack Stack
     @deprecate queue Queue
     @deprecate add! push!
