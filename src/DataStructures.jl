@@ -10,7 +10,7 @@ module DataStructures
                  endof, first, last, eltype, getkey, values,
                  merge!,lt, Ordering, ForwardOrdering, Forward,
                  ReverseOrdering, Reverse, Lt, colon,
-                 searchsortedfirst, searchsortedlast, isless
+                 searchsortedfirst, searchsortedlast, isless, find
 
 
     
@@ -35,14 +35,14 @@ module DataStructures
 
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
            reverse
-    export SortedDict, SDToken, Semitoken
-    export validtoken, findtoken, insert!, delete!, startof
+    export SortedDict, SDToken, SDSemiToken
+    export insert!, delete!, startof
     export pastendtoken, beforestarttoken, advance, regress
     export deref, deref_key, deref_value,  searchsortedafter
     export enumerate_ind, packcopy, packdeepcopy, itertoken
-    export excludelast, semiextract, containerextract, assembletoken
+    export excludelast 
     export orderobject, Lt
-    
+    export semi, container, assemble
 
 
     include("delegate.jl")
@@ -64,6 +64,7 @@ module DataStructures
     include("list.jl")
     include("balancedTree.jl")
     include("sortedDict.jl")
+    include("tokens.jl")
 
     @deprecate stack Stack
     @deprecate queue Queue

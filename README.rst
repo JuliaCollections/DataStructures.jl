@@ -581,20 +581,20 @@ Inserting & Deleting in Sorted Containers
 Token Manipulation
 ------------------------
 
-``semiextract(i)``
-  Extracts a semitoken from a token.  The semitoken is an integer
+``semi(i)``
+  Extracts a semitoken from a token.  The semitoken is wrapper around an integer
   (in the current implementation).  See the above discussion of semitokens.
   Time: O(1)
 
-``containerextract(i)``
+``container(i)``
   Extracts the container from a token.   See the above discussion.
   Time: O(1)
 
-``assembletoken(m,s)``
+``assemble(m,s)``
   Here, ``m`` is a sorted container and ``s`` is a semitoken; this
   function reassembles the complete token. In other words, if ``i``
   is a valid token, then 
-  ``assembletoken(containerextract(i), semiextract(i))``
+  ``assemble(container(i), semi(i))``
   yields ``i``.  The validity of the token returned 
   is not checked by this function.  Time: O(1)
 
@@ -618,7 +618,7 @@ Token Manipulation
   thrown if ``i1`` and ``i2`` refer to different containers.
   Time: O(l)
 
-``validtoken(i1)``
+``status(i1)``
   This function returns 0 if the token ``i1`` is invalid (e.g., refers to a
   deleted item), 1 if the token is valid and points to data, 2 if the
   token is the before-start token and 3 if it is the past-end token.

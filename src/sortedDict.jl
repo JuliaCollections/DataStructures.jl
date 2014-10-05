@@ -63,7 +63,7 @@ sdtoken_construct(m,int1) = SDToken(m,SDSemiToken(int1))
 ## if not found, then it returns a marker for the
 ## end of the tree.
         
-function findtoken{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
+function find{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
     ll, exactfound = findkey(m.bt, convert(K,k_))
     sdtoken_construct(m, exactfound? ll : 2)
 end

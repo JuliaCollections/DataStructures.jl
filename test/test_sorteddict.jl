@@ -344,7 +344,7 @@ function test2()
         end
         j = deref_key(ii)
         for k = j * 2 : j : N
-            p = findtoken(m1, k)
+            p = find(m1, k)
             if p != pastendtoken(m1)
                 delete!(p)
                 checkcorrectness(m1.bt)
@@ -353,11 +353,11 @@ function test2()
         lastprime = j
     end
     @assert(ii == pastendtoken(m1))
-    @assert(validtoken(ii) == 3)
-    h = assembletoken(m1, semiextract(ii))
-    @assert(validtoken(h) == 3)
-    h2 = assembletoken(m1, Semitoken(0))
-    @assert(validtoken(h2) == 0)
+    @assert(status(ii) == 3)
+    h = assemble(m1, semi(ii))
+    @assert(status(h) == 3)
+    h2 = assemble(m1, SDSemiToken(0))
+    @assert(status(h2) == 0)
     t = 0
     u = 0.0
     for pr = m1
@@ -414,11 +414,11 @@ function test2()
     p = deref(i8)
     @assert(p[1] == 2 && p[2] == 4.0)
     @assert(i8 != beforestarttoken(m1))
-    @assert(validtoken(i8) == 1)
+    @assert(status(i8) == 1)
     i9 = regress(i8)
     @assert(i9 == beforestarttoken(m1))
-    @assert(validtoken(i9) == 2)
-    i10 = findtoken(m1, 17)
+    @assert(status(i9) == 2)
+    i10 = find(m1, 17)
     i11 = regress(i10)
     @assert(deref_key(i11) == 13)
     i12 = searchsortedfirst(m1, 47)
@@ -494,7 +494,7 @@ function test2()
     @assert(getkey(m1,12, 9) == 9)
     delete!(m1, 17)
     @assert(length(m1) == length(pp) - 1)
-    @assert(deref_key(advance(findtoken(m1,13))) == 19)
+    @assert(deref_key(advance(find(m1,13))) == 19)
     empty!(m1)
     checkcorrectness(m1.bt)
     @assert(isempty(m1))
@@ -611,7 +611,7 @@ function test6(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
         end
         delct = div(NSTRINGPAIR, 6)
         for j = 1 : delct
-            l = findtoken(m1, strlist[j * 2 + 1])
+            l = find(m1, strlist[j * 2 + 1])
             delete!(l)
         end
         spec = div(NSTRINGPAIR * 3,4)
@@ -648,7 +648,7 @@ function test6a(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
         end
         delct = div(NSTRINGPAIR, 6)
         for j = 1 : delct
-            l = findtoken(m1, strlist[j * 2 + 1])
+            l = find(m1, strlist[j * 2 + 1])
             delete!(l)
         end
         spec = div(NSTRINGPAIR * 3,4)
@@ -696,7 +696,7 @@ function test6b(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
         end
         delct = div(NSTRINGPAIR, 6)
         for j = 1 : delct
-            l = findtoken(m1, strlist[j * 2 + 1])
+            l = find(m1, strlist[j * 2 + 1])
             delete!(l)
         end
         spec = div(NSTRINGPAIR * 3,4)
