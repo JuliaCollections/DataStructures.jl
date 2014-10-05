@@ -1,3 +1,8 @@
+
+typealias SDSemiToken Tokens.IntSemiToken
+typealias SDToken Token{SortedDict, SDSemiToken}
+
+
 ## A SortedDict is a wrapper around balancedTree with
 ## methods similiar to those of Julia container Dict.
 
