@@ -527,11 +527,8 @@ function seekfile(fname)
     fullname = joinpath(Pkg.dir("DataStructures"), "test", fname)
 end
 
-
-
 immutable CaseInsensitive <: Ordering
 end
-
 
 lt(::CaseInsensitive, a, b) = isless(lowercase(a), lowercase(b))
 eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
@@ -651,15 +648,15 @@ function test6a(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
         end
         delct = div(NSTRINGPAIR, 6)
         for j = 1 : delct
-            l = ind_find(m1, strlist[j * 2 + 1])
-            delete_ind!(m1,l)
+            l = findtoken(m1, strlist[j * 2 + 1])
+            delete!(l)
         end
         spec = div(NSTRINGPAIR * 3,4)
-        l = ind_first(m1)
+        l = startof(m1)
         for j = 1 : spec
-            l = advance_ind(m1,l)
+            l = advance(l)
         end
-        k,d = deref_ind(m1,l)
+        k,d = deref(l)
         ekn = expectedk
         edn = expectedd
         @assert(k == ekn && d == edn)
@@ -667,9 +664,7 @@ function test6a(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
 end
 
 function SDConstruct(a::Associative; lt::Function=isless, by::Function=identity)
-    if by == identity && lt == isless
-        return SortedDict(a, Forward)
-    elseif by == identity
+    if by == identity
         return SortedDict(a, Lt(lt))
     elseif lt == isless
         return SortedDict(a, By(by))
@@ -701,15 +696,15 @@ function test6b(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
         end
         delct = div(NSTRINGPAIR, 6)
         for j = 1 : delct
-            l = ind_find(m1, strlist[j * 2 + 1])
-            delete_ind!(m1,l)
+            l = findtoken(m1, strlist[j * 2 + 1])
+            delete!(l)
         end
         spec = div(NSTRINGPAIR * 3,4)
-        l = ind_first(m1)
+        l = startof(m1)
         for j = 1 : spec
-            l = advance_ind(m1,l)
+            l = advance(l)
         end
-        k,d = deref_ind(m1,l)
+        k,d = deref(l)
         ekn = expectedk
         edn = expectedd
         @assert(k == ekn && d == edn)

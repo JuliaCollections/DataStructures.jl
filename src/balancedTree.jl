@@ -29,12 +29,8 @@ immutable KDRec{K,D}
     parent::Int
     k::K
     d::D
-    function KDRec(p::Int, k1::K, d1::D)
-        new(p,k1,d1)
-    end
-    function KDRec(p::Int)
-        new(p)
-    end
+    KDRec(p::Int, k1::K, d1::D) = new(p,k1,d1)
+    KDRec(p::Int) = new(p)
 end
 
 ## TreeNode is an internal node of the tree.
@@ -58,15 +54,10 @@ immutable TreeNode{K}
     parent::Int
     splitkey1::K
     splitkey2::K
-    function TreeNode(::Type{K}, c1::Int, c2::Int, c3::Int, p::Int)
-        new(c1, c2, c3, p)
-    end
-    function TreeNode(c1::Int, c2::Int, c3::Int,
-                      p::Int, sk1::K, sk2::K)
+    TreeNode(::Type{K}, c1::Int, c2::Int, c3::Int, p::Int) = new(c1, c2, c3, p)
+    TreeNode(c1::Int, c2::Int, c3::Int, p::Int, sk1::K, sk2::K) = 
         new(c1, c2, c3, p, sk1, sk2)
-    end
 end
-
 
 
 ## The next two functions are called to initialize the tree
@@ -77,12 +68,14 @@ end
 function initializeTree!{K}(tree::Array{TreeNode{K},1})
     resize!(tree,1)
     tree[1] = TreeNode{K}(K, 1, 2, 0, 0)
+    nothing
 end
 
 function initializeData!{K,D}(data::Array{KDRec{K,D},1})
     resize!(data, 2)
     data[1] = KDRec{K,D}(1)
     data[2] = KDRec{K,D}(1)
+    nothing
 end
 
 
@@ -137,8 +130,7 @@ type BalancedTree23{K, D, Ord <: Ordering}
         data1 = Array(KDRec{K,D}, 2)
         initializeData!(data1)
         u1 = IntSet()
-        push!(u1, 1)
-        push!(u1, 2)
+        push!(u1, 1, 2)
         new(ord1, data1, tree1, 1, 1, Array(Int,0), Array(Int,0), 
             u1, 
             Array(Int,3), Array(K,3))
@@ -161,22 +153,6 @@ function cmp2(o::Ordering,
 end
 
 
-## Function cmp2le checks a tree node with two children
-## against a given key, and returns 1 if the given key is
-## less than or equal to the node's splitkey or 2 else.  Special case
-## if the node is a leaf and its right child is the end
-## of the sorted order.
-
-function cmp2le(o::Ordering, 
-                treenode::TreeNode,
-                k,
-                isleaf::Bool)
-    ((isleaf && treenode.child2 == 2) || 
-     !lt(o,treenode.splitkey1,k))? 1 : 2
-end
-
-
-
 ## Function cmp3 checks a tree node with three children
 ## against a given key, and returns 1 if the given key is
 ## less than the node's splitkey1, 2 if less than splitkey2, or
@@ -193,23 +169,6 @@ function cmp3(o::Ordering,
       lt(o, k, treenode.splitkey2))? 2 : 3)
 end
 
-## Function cmp3le checks a tree node with three children
-## against a given key, and returns 1 if the given key is
-## less than or equal to the node's splitkey1, 2 if less than or equal 
-## to splitkey2, or
-## 3 else. Special case
-## if the node is a leaf and its right child is the end
-## of the sorted order.
-
-function cmp3le(o::Ordering,
-                treenode::TreeNode,
-                k,
-                isleaf::Bool)
-    (!lt(o,treenode.splitkey1,k))? 1 :
-    (((isleaf && treenode.child3 == 2) || 
-      !lt(o,treenode.splitkey2,k))? 2 : 3)
-end
-
 
 ## The empty! function deletes all data in the balanced tree.
 ## Therefore, it invalidates all indices.
@@ -224,8 +183,8 @@ function empty!(t::BalancedTree23)
     t.freetreeinds = Array(Int,0)
     t.freedatainds = Array(Int,0)
     empty!(t.useddatacells)
-    push!(t.useddatacells,1)
-    push!(t.useddatacells,2)
+    push!(t.useddatacells, 1, 2)
+    nothing
 end
 
 ## Default implementations of eq for Forward, Reverse
@@ -257,24 +216,21 @@ function findkey(t::BalancedTree23, k)
 end
 
 
-## The findkeyless function finds the index of a (key,data) pair in the tree that
-## with the greatest key that is less than the given key.  If there is no
-## key less than the given key, then it returns 1 (the before-start node).
 
-function findkeyless(t::BalancedTree23, k)
-    curnode = t.rootloc
-    for depthcount = 1 : t.depth
-        isleaf = (depthcount == t.depth)
-        cmp = (t.tree[curnode].child3 == 0)?
-        cmp2le(t.ord, t.tree[curnode], k, isleaf) :
-        cmp3le(t.ord, t.tree[curnode], k, isleaf)
-        curnode = (cmp == 1)? t.tree[curnode].child1 :
-        ((cmp == 2)? t.tree[curnode].child2 : t.tree[curnode].child3)
-    end
-    curnode
+## The following are helper routines for the insert! and delete! functions.
+
+function replaceparent!{K,D}(data::Array{KDRec{K,D},1}, whichind::Int, newparent::Int)
+    data[whichind] = KDRec{K,D}(newparent, data[whichind].k, data[whichind].d)
+    nothing
 end
 
-
+function replaceparent!{K}(tree::Array{TreeNode{K},1}, whichind::Int, newparent::Int)
+    tree[whichind] = TreeNode{K}(tree[whichind].child1, tree[whichind].child2,
+                                 tree[whichind].child3, newparent,
+                                 tree[whichind].splitkey1, 
+                                 tree[whichind].splitkey2)
+    nothing
+end
 
 
 
@@ -423,23 +379,30 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
                 # have a new parent (newparentnum instead of p1)
                 # so we have to fix them.
 
-                for childind = 1 : 2
-                    procchild = (childind == 1)? righttreenodenew.child1 : righttreenodenew.child2
-                    olddata = t.data[procchild]
-                    @inbounds t.data[procchild] = KDRec{K,D}(newparentnum, olddata.k, olddata.d)
-                end
+                #for childind = 1 : 2
+                #    procchild = (childind == 1)? righttreenodenew.child1 : righttreenodenew.child2
+                #    olddata = t.data[procchild]
+                #    @inbounds t.data[procchild] = KDRec{K,D}(newparentnum, olddata.k, olddata.d)
+                #end
+
+                replaceparent!(t.data, righttreenodenew.child1, newparentnum)
+                replaceparent!(t.data, righttreenodenew.child2, newparentnum)
+
             else
 
                 # If this is not a leaf, we still have to fix the
                 # parent fields of the two nodes that are now children
                 ## of the newparent.
-                for childind = 1 : 2
-                    procchild = (childind == 1)? righttreenodenew.child1 : righttreenodenew.child2
-                    oldtreenode = t.tree[procchild]
-                    @inbounds t.tree[procchild] = TreeNode{K}(oldtreenode.child1, oldtreenode.child2,
-                                                    oldtreenode.child3, newparentnum,
-                                                    oldtreenode.splitkey1, oldtreenode.splitkey2)
-                end
+                #for childind = 1 : 2
+                #    procchild = (childind == 1)? righttreenodenew.child1 : righttreenodenew.child2
+                #    oldtreenode = t.tree[procchild]
+                #    @inbounds t.tree[procchild] = TreeNode{K}(oldtreenode.child1, oldtreenode.child2,
+                #                                    oldtreenode.child3, newparentnum,
+                #                                    oldtreenode.splitkey1, oldtreenode.splitkey2)
+                #end
+                replaceparent!(t.tree, righttreenodenew.child1, newparentnum)
+                replaceparent!(t.tree, righttreenodenew.child2, newparentnum)
+
             end
             ## If p1 is the root (i.e., we have encountered only 3-nodes during
             ## our ascent of the tree), then the root must be split.
@@ -516,7 +479,7 @@ end
 
 function nextloc0(t, i::Int)
     ii = i
-    @assert(i != 2 && in(i,t.useddatacells))
+    @assert(i != 2 && i in t.useddatacells)
     p = t.data[i].parent
     nextchild = 0
     depthp = t.depth
@@ -557,7 +520,7 @@ end
 
 
 function prevloc0(t::BalancedTree23, i::Int)
-    @assert(i != 1 && in(i,t.useddatacells))
+    @assert(i != 1 && i in t.useddatacells)
     ii = i
     p = t.data[i].parent
     prevchild = 0
@@ -598,7 +561,7 @@ end
 ##, 1 if i2 precedes i1.
 
 function compareInd(t::BalancedTree23, i1::Int, i2::Int)
-    @assert(in(i1, t.useddatacells) && in(i2, t.useddatacells))
+    @assert(i1 in t.useddatacells && i2 in t.useddatacells)
     if i1 == i2
         return 0
     end
@@ -641,27 +604,10 @@ end
 ## sorted order of the tree.  beginloc works by going to the before-start marker
 ## (data node 1) and executing a next operation on it.  endloc is the opposite.
 
-function beginloc(t::BalancedTree23)
-    nextloc0(t,1)
-end
-
-function endloc(t::BalancedTree23)
-    prevloc0(t,2)
-end
+beginloc(t::BalancedTree23) = nextloc0(t,1)
+endloc(t::BalancedTree23) = prevloc0(t,2)
 
 
-## The following are helper routines for the delete! function.
-
-function replaceparent!{K,D}(data::Array{KDRec{K,D},1}, whichind::Int, newparent::Int)
-    data[whichind] = KDRec{K,D}(newparent, data[whichind].k, data[whichind].d)
-end
-
-function replaceparent!{K}(tree::Array{TreeNode{K},1}, whichind::Int, newparent::Int)
-    tree[whichind] = TreeNode{K}(tree[whichind].child1, tree[whichind].child2,
-                                 tree[whichind].child3, newparent,
-                                 tree[whichind].splitkey1, 
-                                 tree[whichind].splitkey2)
-end
  
 
 
@@ -996,5 +942,6 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
             end
         end
     end                                  
+    nothing
 end
 

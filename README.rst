@@ -335,79 +335,7 @@ This container requires two functions to compare keys: a *less-than* and
 default ordering argument, the comparison
 functions are ``isless(a,b)`` and ``isequal(a,b)`` where ``a`` and ``b``
 are keys.
-It is a requirement of the container that ``isequal(a,b)`` is true if and
-only if ``!isless(a,b)`` and ``!isless(b,a)`` are both true.  This relationship
-between ``isequal`` and ``isless`` holds for common built-in types, but
-it may not hold for all types, especially user-defined types.
-If it does not hold for a certain type, then the a custom ordering
-argument must be defined as discussed in the next few paragraphs.
-
-The name for this default ordering (i.e., using ``isless`` and
-``isequal``) is ``Forward``.  Another possible
-choice is ``Reverse``, which reverses the usual sorted order.  
-Finally, the user of the
-container can define a custom ordering.   (This name must be
-imported: ``import Base.Reverse``.)
-
-For example, suppose the keys
-are of type ``ASCIIString``, and the user wishes to order the keys ignoring
-case: *APPLE*, *berry* and *Cherry* would appear in that
-order, and *APPLE* and *aPPlE* would be indistinguishable in this
-ordering.
-
-The simplest way to accomplish this is to define an ordering object
-of the form ``Lt(my_isless)``, where ``Lt`` is a built-in type
-(see ``ordering.jl``) and ``my_isless`` is the comparison function.
-In the above example, the ordering object would be::
-
-     Lt((x,y) -> isless(lowercase(x),lowercase(y)))
-
-
-The ordering object is the second argument to
-the ``SortedDict`` constructor (see below for constructor syntax)
-
-This approach suffers from a performance hit (10%-50% depending on the
-container) because the compiler cannot inline or compute the
-correct dispatch for the function in parentheses, so the dispatch
-takes place at run-time.
-A more complicated but higher-performance method to implement
-a custom ordering is as follows.
-First, the user should create a singleton type that is a subtype of
-``Ordering`` as follows::
-
-    immutable CaseInsensitive <: Ordering
-    end
-
-Next, the user needs to define a method named ``lt`` for less-than 
-in this ordering::
-
-    lt(::CaseInsensitive, a, b) = isless(lowercase(a), lowercase(b))
-
-The first argument to ``lt`` is an object of the ``CaseInsensitive``
-type (there is only one such object since it is a singleton type).
-The container also needs an equal-to function; the default is::
-
-    eq(o::Ordering, a, b) = !lt(o, a, b) && !lt(o, b, a)
-
-For a further slight performance boost, the user can also customize 
-this function with a more efficient
-implementation.  In the above example, an appropriate customization would
-be::
-
-    eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
-
-Finally, the user specifies the unique element of ``CaseInsensitive``, namely
-the object ``CaseInsensitive()``, as the ordering object to the
-``SortedDict`` constructor.
-
-For the above code to work, the module must make the following declarations,
-typically near the beginning::
-
-    import Base.Ordering
-    import Base.lt
-    import DataStructures.eq
-
-
+User-specified ordering functions are discussed below.
 
 ------------------------------
 Tokens for Sorted Containers
@@ -460,8 +388,10 @@ Constructors for Sorted Containers
 ``SortedDict(d,o)``
   Argument ``d`` is an ordinary Julia dict (or any associative type)
   used to initialize the container and ``o`` is an ordering object
-  used for ordering the keys as discussed above.  The default value
+  used for ordering the keys.  The default value
   for ``o`` is ``Forward``.
+
+
 
 
 ---------------------------------
@@ -485,7 +415,7 @@ Navigating the Containers Using Tokens
   of an expression, this retrieves the value associated with the key
   (or ``KeyError`` if none).  On the left-hand side, this assigns or
   reassigns the value associated with the key.  (For assigning and reassigning,
-  see also ``ind_insert!`` below.)  Time: O(*c* log *n*)
+  see also ``insert!`` below.)  Time: O(*c* log *n*)
 
 ``findtoken(m,k)``
   Argument ``m`` is a SortedDict and argument ``k`` is a key.
@@ -656,8 +586,6 @@ Token Manipulation
   (in the current implementation).  See the above discussion of semitokens.
   Time: O(1)
 
-``
-
 ``containerextract(i)``
   Extracts the container from a token.   See the above discussion.
   Time: O(1)
@@ -691,7 +619,7 @@ Token Manipulation
   Time: O(l)
 
 ``validtoken(i1)``
-  This function returns 0 if the token is invalid (e.g., points to a
+  This function returns 0 if the token ``i1`` is invalid (e.g., refers to a
   deleted item), 1 if the token is valid and points to data, 2 if the
   token is the before-start token and 3 if it is the past-end token.
   Time: O(1)
@@ -839,7 +767,7 @@ Other Functions
   else it returns ``defaultk``. 
   If the container uses in its ordering
   an ``eq`` method different from
-  isequal (e.g., case-insensitive ASCII strings illustrated above), then the
+  isequal (e.g., case-insensitive ASCII strings illustrated below), then the
   return value is the actual key stored in the SortedDict that is equivalent
   to ``k`` according to the ``eq`` method, which might not be equal to ``k``.
   Similarly, if the user performs an implicit conversion as part of the
@@ -902,6 +830,83 @@ Other Functions
   key gets its value stored.
   Time:  O(*cN* log *N*), where *N* is the total size
   of all the arguments.
+
+----------------------
+Ordering of keys
+----------------------
+As mentioned earlier, the default ordering of keys uses 
+``isless`` and ``isequal`` functions.  Customized ordering can
+also be specified.  If the default ordering is used,
+it is a requirement of the container that ``isequal(a,b)`` is true if and
+only if ``!isless(a,b)`` and ``!isless(b,a)`` are both true.  This relationship
+between ``isequal`` and ``isless`` holds for common built-in types, but
+it may not hold for all types, especially user-defined types.
+If it does not hold for a certain type, then a custom ordering
+argument must be defined as discussed in the next few paragraphs.
+
+The name for this default ordering (i.e., using ``isless`` and
+``isequal``) is ``Forward``.  Another possible
+choice is ``Reverse``, which reverses the usual sorted order.  
+This name must be
+imported ``import Base.Reverse`` if it is used.
+
+As an example of a custom ordering, suppose the keys
+are of type ``ASCIIString``, and the user wishes to order the keys ignoring
+case: *APPLE*, *berry* and *Cherry* would appear in that
+order, and *APPLE* and *aPPlE* would be indistinguishable in this
+ordering.
+
+The simplest approach is to define an ordering object
+of the form ``Lt(my_isless)``, where ``Lt`` is a built-in type
+(see ``ordering.jl``) and ``my_isless`` is the user's comparison function.
+In the above example, the ordering object would be::
+
+     Lt((x,y) -> isless(lowercase(x),lowercase(y)))
+
+
+The ordering object is the second argument to
+the ``SortedDict`` constructor (see above for constructor syntax).
+
+This approach suffers from a performance hit (10%-50% depending on the
+container) because the compiler cannot inline or compute the
+correct dispatch for the function in parentheses, so the dispatch
+takes place at run-time.
+A more complicated but higher-performance method to implement
+a custom ordering is as follows.
+First, the user creates a singleton type that is a subtype of
+``Ordering`` as follows::
+
+    immutable CaseInsensitive <: Ordering
+    end
+
+Next, the user defines a method named ``lt`` for less-than 
+in this ordering::
+
+    lt(::CaseInsensitive, a, b) = isless(lowercase(a), lowercase(b))
+
+The first argument to ``lt`` is an object of the ``CaseInsensitive``
+type (there is only one such object since it is a singleton type).
+The container also needs an equal-to function; the default is::
+
+    eq(o::Ordering, a, b) = !lt(o, a, b) && !lt(o, b, a)
+
+For a further slight performance boost, the user can also customize 
+this function with a more efficient
+implementation.  In the above example, an appropriate customization would
+be::
+
+    eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
+
+Finally, the user specifies the unique element of ``CaseInsensitive``, namely
+the object ``CaseInsensitive()``, as the ordering object to the
+``SortedDict`` constructor.
+
+For the above code to work, the module must make the following declarations,
+typically near the beginning::
+
+    import Base.Ordering
+    import Base.lt
+    import DataStructures.eq
 
 
 -----------------------------------
