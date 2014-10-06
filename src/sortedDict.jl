@@ -11,7 +11,7 @@ end
 
 
 typealias SDSemiToken IntSemiToken
-typealias SDToken Token{SortedDict, SDSemiToken}
+typealias SDToken{K,D, Ord <: Ordering} Token{SortedDict{K,D,Ord}, SDSemiToken}
 
 
 ## This constructor takes an ordering object which defaults
