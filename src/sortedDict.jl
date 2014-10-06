@@ -1,10 +1,6 @@
 import .Tokens.Token
 import .Tokens.IntSemiToken
 
-typealias SDToken Token{SortedDict, SDSemiToken}
-typealias SDSemiToken IntSemiToken
-
-
 ## A SortedDict is a wrapper around balancedTree with
 ## methods similiar to those of Julia container Dict.
 
@@ -12,6 +8,11 @@ typealias SDSemiToken IntSemiToken
 type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
     bt::BalancedTree23{K,D,Ord}
 end
+
+
+typealias SDToken Token{SortedDict, SDSemiToken}
+typealias SDSemiToken IntSemiToken
+
 
 ## This constructor takes an ordering object which defaults
 ## to Forward
