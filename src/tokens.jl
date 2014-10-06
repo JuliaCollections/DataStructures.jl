@@ -15,8 +15,7 @@ end
 semi(i::Token) = i.semitoken
 container(i::Token) = i.container
 assemble(m, s::AbstractSemiToken) = Token(m,s)
-status(i::Token) = 0
 
-export semi, container, assemble, status
+export semi, container, assemble
 
 end
