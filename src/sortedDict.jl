@@ -10,8 +10,8 @@ type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
 end
 
 
-typealias SDToken Token{SortedDict, SDSemiToken}
 typealias SDSemiToken IntSemiToken
+typealias SDToken Token{SortedDict, SDSemiToken}
 
 
 ## This constructor takes an ordering object which defaults
