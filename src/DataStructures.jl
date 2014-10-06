@@ -42,7 +42,7 @@ module DataStructures
     export enumerate_ind, packcopy, packdeepcopy, itertoken
     export excludelast 
     export orderobject, Lt
-    export semi, container, assemble
+    export semi, container, assemble, status
 
 
     include("delegate.jl")
