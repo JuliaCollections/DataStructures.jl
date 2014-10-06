@@ -502,10 +502,12 @@ not_beforestart(i::SDToken) =
      i.semitoken.address == 1) && throw(BoundsError())
 
 not_pastend(i::SDToken) =
-    (!(i.semitoken.address in i.container.bt.useddatacells) || i.address == 2) && 
+    (!(i.semitoken.address in i.container.bt.useddatacells) || 
+     i.semitoken.address == 2) && 
        throw(BoundsError())
 
 has_data(i::SDToken) =
-    (!(i.semitoken.address in i.container.bt.useddatacells) || i.address < 3) && 
+    (!(i.semitoken.address in i.container.bt.useddatacells) || 
+     i.semitoken.address < 3) && 
        throw(BoundsError())
 
