@@ -1,3 +1,10 @@
+import .Tokens.Token
+import .Tokens.IntSemiToken
+
+typealias SDToken Token{SortedDict, SDSemiToken}
+typealias SDSemiToken IntSemiToken
+
+
 ## A SortedDict is a wrapper around balancedTree with
 ## methods similiar to those of Julia container Dict.
 
@@ -17,8 +24,6 @@ function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
     SortedDict(bt1)
 end
 
-typealias SDSemiToken .Tokens.IntSemiToken
-
 
 
 ## This function implements m[k]; it returns the
@@ -31,7 +36,6 @@ function getindex{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
 end
 
 
-typealias SDToken .Tokens.Token{SortedDict, SDSemiToken}
 
 ## This function implements m[k]=d; it sets the 
 ## data item associated with key k equal to d.
