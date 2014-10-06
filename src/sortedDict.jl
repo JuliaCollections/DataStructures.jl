@@ -103,7 +103,7 @@ end
 ## to the first sorted order of the tree.  It returns
 ## the past-end token if the tree is empty.
 
-startof(m::SortedDict) = SDToken(beginloc(m.bt), m)
+startof(m::SortedDict) = sdtoken_construct(m, beginloc(m.bt))
 
 ## Function pastendtoken returns the otken past the end of the data.
 
