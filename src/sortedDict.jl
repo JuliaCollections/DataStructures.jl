@@ -1,6 +1,5 @@
-import Tokens
-typealias SDSemiToken Tokens.IntSemiToken
-typealias SDToken Token{SortedDict, SDSemiToken}
+typealias SDSemiToken .Tokens.IntSemiToken
+typealias SDToken .Tokens.Token{SortedDict, SDSemiToken}
 
 
 ## A SortedDict is a wrapper around balancedTree with
