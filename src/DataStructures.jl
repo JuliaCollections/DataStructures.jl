@@ -42,7 +42,6 @@ module DataStructures
     export enumerate_ind, packcopy, packdeepcopy, itertoken
     export excludelast 
     export orderobject, Lt
-    export semi, container, assemble, status
 
 
     include("delegate.jl")
@@ -66,6 +65,7 @@ module DataStructures
     include("tokens.jl")
     import .Tokens: semi, container, assemble, status
     include("sortedDict.jl")
+    export semi, container, assemble, status
     @deprecate stack Stack
     @deprecate queue Queue
     @deprecate add! push!
