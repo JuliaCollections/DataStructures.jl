@@ -265,6 +265,8 @@ function test1()
         checkcorrectness(m1.bt)
         # fulldump(m1.bt)
     end
+    println("typeof(m1) = ", typeof(m1))
+    println("methods(startof) = ", methods(startof))
     i1 = startof(m1)
     count = 0
     while i1 != pastendtoken(m1)
