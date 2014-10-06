@@ -10,7 +10,7 @@ type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
     bt::BalancedTree23{K,D,Ord}
 end
 
-## Constructor takes an ordering object which defaults
+## This constructor takes an ordering object which defaults
 ## to Forward
 
 function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
