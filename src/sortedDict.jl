@@ -18,7 +18,6 @@ function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
 end
 
 typealias SDSemiToken .Tokens.IntSemiToken
-typealias SDToken .Tokens.Token{SortedDict, SDSemiToken}
 
 
 
@@ -30,6 +29,9 @@ function getindex{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
     !exactfound && throw(KeyError(k))
     return m.bt.data[i].d
 end
+
+
+typealias SDToken .Tokens.Token{SortedDict, SDSemiToken}
 
 ## This function implements m[k]=d; it sets the 
 ## data item associated with key k equal to d.
