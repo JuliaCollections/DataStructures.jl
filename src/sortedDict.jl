@@ -507,7 +507,7 @@ not_pastend(i::SDToken) =
      i.semitoken.address == 2) && 
        throw(BoundsError())
 
-has_data(i::SDToken) =
+has_data{K,D,Ord<:Ordering}(i::SDToken{K,D,Ord}) =
     (!(i.semitoken.address in i.container.bt.useddatacells) || 
      i.semitoken.address < 3) && 
        throw(BoundsError())
