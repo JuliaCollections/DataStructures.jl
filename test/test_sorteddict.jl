@@ -271,6 +271,8 @@ function test1()
     count = 0
     while i1 != pastendtoken(m1)
         count += 1
+        println("typeof(i1) = ", typeof(i1))
+        println("methods(deref) = ", methods(deref))
         k,d = deref(i1)
         #println("+ reading: k = $k, d = $d")
         i1 = advance(i1)

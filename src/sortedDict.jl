@@ -157,7 +157,7 @@ end
 ## Function deref(ii), where ii is a token, returns the
 ## (k,d) pair indexed by ii.
 
-function deref(ii::SDToken)
+function deref{K,D,Ord <: Ordering}(ii::SDToken{K,D,Ord})
     has_data(ii)
     return ii.container.bt.data[ii.semitoken.address].k, 
            ii.container.bt.data[ii.semitoken.address].d
