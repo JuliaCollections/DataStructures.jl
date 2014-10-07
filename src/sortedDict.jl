@@ -157,7 +157,7 @@ end
 ## Function deref(ii), where ii is a token, returns the
 ## (k,d) pair indexed by ii.
 
-function deref{K,D,Ord <: Ordering}(ii::SDToken{K,D,Ord})
+function deref(ii::SDToken)
     has_data(ii)
     return ii.container.bt.data[ii.semitoken.address].k, 
            ii.container.bt.data[ii.semitoken.address].d
@@ -507,7 +507,7 @@ not_pastend(i::SDToken) =
      i.semitoken.address == 2) && 
        throw(BoundsError())
 
-has_data{K,D,Ord<:Ordering}(i::SDToken{K,D,Ord}) =
+has_data(i::SDToken) =
     (!(i.semitoken.address in i.container.bt.useddatacells) || 
      i.semitoken.address < 3) && 
        throw(BoundsError())
