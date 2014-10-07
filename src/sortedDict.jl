@@ -66,8 +66,11 @@ function setindex!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},
 end
 
 
-sdtoken_construct{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},int1::Int) = 
-    SDToken{K,D,Ord}(m, SDSemiToken(int1))
+#sdtoken_construct{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},int1::Int) = 
+#    SDToken{K,D,Ord}(m, SDSemiToken(int1))
+
+sdtoken_construct(m::SortedDict,int1::Int) = 
+    SDToken(m, SDSemiToken(int1))
 
 ## This function looks up a key in the tree;
 ## if not found, then it returns a marker for the
