@@ -308,8 +308,8 @@ end
 
 
 function start(e::ExcludeLast) 
-    (e.first in e.m.bt.useddatacells || e.first == 1 ||
-        e.pastlast in e.m.bt.useddatacells) &&
+    (!(e.first in e.m.bt.useddatacells) || e.first == 1 ||
+        !(e.pastlast in e.m.bt.useddatacells)) &&
         throw(BoundsError())
     if compareInd(e.m.bt, e.first, e.pastlast) < 0
         return SDIterationState(e.m, e.first, e.pastlast) 
