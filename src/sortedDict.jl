@@ -70,7 +70,7 @@ end
 #    SDToken{K,D,Ord}(m, SDSemiToken(int1))
 
 sdtoken_construct{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord},int1::Int) = 
-    SDToken(m, SDSemiToken(int1))
+    SDToken{K,D,Ord}(m, SDSemiToken(int1))
 
 ## This function looks up a key in the tree;
 ## if not found, then it returns a marker for the
@@ -108,7 +108,7 @@ end
 ## the past-end token if the tree is empty.
 
 startof{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}) = 
-    sdtoken_construct{K,D,Ord}(m, beginloc(m.bt))
+    sdtoken_construct(m, beginloc(m.bt))
 
 ## Function pastendtoken returns the otken past the end of the data.
 
