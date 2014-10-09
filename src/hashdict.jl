@@ -71,7 +71,7 @@ function deserialize{K,V,O}(s, T::Type{HashDict{K,V,O}})
     return t
 end
 
-hashindex(key, sz) = (int(hash(key)) & (sz-1)) + 1
+hashindex(key, sz) = (reinterpret(Int,(hash(key))) & (sz-1)) + 1
 
 isslotempty(h::HashDict, i::Int) = h.slots[i] == 0x0
 isslotfilled(h::HashDict, i::Int) = h.slots[i] == 0x1
