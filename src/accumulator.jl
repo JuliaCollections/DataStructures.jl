@@ -6,7 +6,7 @@ end
 
 ## constructors
 
-Accumulator{T,V<:Number}(::Type{T}, ::Type{V}) = Accumulator{T,V}((T=>V)[])
+Accumulator{T,V<:Number}(::Type{T}, ::Type{V}) = Accumulator{T,V}(Dict{T,V}())
 counter(T::Type) = Accumulator(T,Int)
 
 Accumulator{T,V<:Number}(dct::Dict{T,V}) = Accumulator{T,V}(copy(dct))

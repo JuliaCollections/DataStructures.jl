@@ -10,7 +10,7 @@ end
 
 ## constructors
 
-ClassifiedCollections(K::Type, C::Type) = ClassifiedCollections{K, C}((K=>C)[])
+ClassifiedCollections(K::Type, C::Type) = ClassifiedCollections{K, C}(Dict{K,C}())
 
 classified_lists(K::Type, V::Type) = ClassifiedCollections(K, Vector{V})
 classified_sets(K::Type, V::Type) = ClassifiedCollections(K, Set{V})
