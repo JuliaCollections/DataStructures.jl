@@ -108,7 +108,7 @@ end
 ## the past-end token if the tree is empty.
 
 startof{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}) = 
-    sdtoken_construct(m, beginloc(m.bt))
+    sdtoken_construct{K,D,Ord}(m, beginloc(m.bt))
 
 ## Function pastendtoken returns the otken past the end of the data.
 
