@@ -11,8 +11,8 @@ end
 
 
 typealias SDSemiToken IntSemiToken
-#typealias SDToken{K,D, Ord <: Ordering} Token{SortedDict{K,D,Ord}, SDSemiToken}
-typealias SDToken Token{SortedDict, SDSemiToken}
+
+typealias SDToken{K,D, Ord <: Ordering} Token{SortedDict{K,D,Ord}, SDSemiToken}
 
 ## This constructor takes an ordering object which defaults
 ## to Forward
@@ -41,14 +41,14 @@ end
 ## This function implements m[k]=d; it sets the 
 ## data item associated with key k equal to d.
 
-function setindex!{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, d_, k_)
+function setindex!{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, d_, k_)
     insert!(m.bt, convert(K,k_), convert(D,d_), false)
     m
 end
 
 ## Functions setindex! and getindex for semitokens:
 
-function getindex(m::SortedDict, i::SDSemiToken)
+function getindex{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, i::SDSemiToken)
     addr = i.address
     has_data(SDToken(m,i))
     return m.bt.data[addr].d
@@ -69,7 +69,7 @@ end
 #sdtoken_construct{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},int1::Int) = 
 #    SDToken{K,D,Ord}(m, SDSemiToken(int1))
 
-sdtoken_construct(m::SortedDict,int1::Int) = 
+sdtoken_construct{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord},int1::Int) = 
     SDToken(m, SDSemiToken(int1))
 
 ## This function looks up a key in the tree;
@@ -96,7 +96,7 @@ end
 
 ## delete! deletes an item given a token.
 
-function delete!(ii::SDToken)
+function delete!{K, D, Ord <: Ordering}(ii::SDToken{K,D,Ord})
     has_data(ii)
     delete!(ii.container.bt, ii.semitoken.address)
 end
@@ -107,20 +107,23 @@ end
 ## to the first sorted order of the tree.  It returns
 ## the past-end token if the tree is empty.
 
-startof(m::SortedDict) = sdtoken_construct(m, beginloc(m.bt))
+startof{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}) = 
+    sdtoken_construct(m, beginloc(m.bt))
 
 ## Function pastendtoken returns the otken past the end of the data.
 
-pastendtoken(m::SortedDict) = sdtoken_construct(m,2)
+pastendtoken{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}) = 
+    sdtoken_construct(m,2)
 
 ## Function beforestarttoken returns the token before the start of the data.
 
-beforestarttoken(m::SortedDict) = sdtoken_construct(m,1)
+beforestarttoken{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}) = 
+    sdtoken_construct(m,1)
 
 ## Function advance takes a token and returns the
 ## next token in the sorted order. 
 
-function advance(ii::SDToken)
+function advance{K, D, Ord <: Ordering}(ii::SDToken{K,D,Ord})
     not_pastend(ii)
     sdtoken_construct(ii.container, nextloc0(ii.container.bt, ii.semitoken.address))
 end
@@ -129,7 +132,7 @@ end
 ## Function regress takes a token and returns the
 ## previous token in the sorted order. 
 
-function regress(ii::SDToken)
+function regress{K, D, Ord <: Ordering}(ii::SDToken{K,D,Ord})
     not_beforestart(ii)
     sdtoken_construct(ii.container, prevloc0(ii.container.bt, ii.semitoken.address))
 end
@@ -137,20 +140,20 @@ end
 ## Endof returns the token of the last item in the sorted order,
 ## or the before-start marker if the SortedDict is empty.
 
-endof(m::SortedDict) = sdtoken_construct(m,endloc(m.bt))
+endof{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}) = sdtoken_construct(m,endloc(m.bt))
 
 ## First and last return the first and last (key,data) pairs
 ## in the SortedDict.  It is an error to invoke them on an
 ## empty SortedDict.
 
-function first(m::SortedDict)
+function first{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord})
     i = beginloc(m.bt)
     i == 2 && throw(BoundsError())
     return m.bt.data[i].k, m.bt.data[i].d
 end
 
 
-function last(m::SortedDict)
+function last{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord})
     i = endloc(m.bt)
     i == 1 && throw(BoundsError())
     return m.bt.data[i].k, m.bt.data[i].d
@@ -160,7 +163,7 @@ end
 ## Function deref(ii), where ii is a token, returns the
 ## (k,d) pair indexed by ii.
 
-function deref(ii::SDToken)
+function deref{K, D, Ord <: Ordering}(ii::SDToken{K,D,Ord})
     has_data(ii)
     return ii.container.bt.data[ii.semitoken.address].k, 
            ii.container.bt.data[ii.semitoken.address].d
@@ -169,7 +172,7 @@ end
 ## Function deref_key(ii), where ii is a token, returns the
 ## key indexed by ii.
 
-function deref_key(ii::SDToken)
+function deref_key{K, D, Ord <: Ordering}(ii::SDToken{K,D,Ord})
     has_data(ii)
     return ii.container.bt.data[ii.semitoken.address].k
 end
@@ -177,7 +180,7 @@ end
 ## Function deref_value(ii), where ii is a token, returns the
 ## value indexed by ii.
 
-function deref_value(ii::SDToken)
+function deref_value{K, D, Ord <: Ordering}(ii::SDToken{K,D,Ord})
     has_data(ii)
     return ii.container.bt.data[ii.semitoken.address].d
 end
@@ -187,7 +190,7 @@ end
 ## key in the sorted order.  It returns the past-end marker
 ## if there is none.
 
-function searchsortedfirst{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
+function searchsortedfirst{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
     i, exactfound = findkey(m.bt, convert(K,k_))
     sdtoken_construct(m, exactfound? i : nextloc0(m.bt, i))
 end
@@ -197,7 +200,7 @@ end
 ## key in the sorted order.  It returns the past-end marker
 ## if there is none.
 
-function searchsortedafter{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
+function searchsortedafter{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
     i, exactfound = findkey(m.bt, convert(K,k_))
     sdtoken_construct(m, nextloc0(m.bt, i))
 end
@@ -272,7 +275,7 @@ end
 itertoken(p) = p[3]
 
 
-function isless(s::SDToken, t::SDToken)
+function isless{K, D, Ord <: Ordering}(s::SDToken{K,D,Ord}, t::SDToken{K,D,Ord})
     !(s.container === t.container) &&  
         throw(ArgumentError("SDToken isless requires tokens for the same container"))
     return compareInd(s.container.bt, 
@@ -281,7 +284,7 @@ function isless(s::SDToken, t::SDToken)
 end
 
 
-function isequal(s::SDToken, t::SDToken)
+function isequal{K, D, Ord <: Ordering}(s::SDToken{K,D,Ord}, t::SDToken{K,D,Ord})
     !(s.container === t.container) && 
         throw(ArgumentError("SDToken isequal requires tokens for the same container"))
     return s.semitoken.address == t.semitoken.address
@@ -289,7 +292,7 @@ end
 
 
 
-function excludelast(i1::SDToken, i2::SDToken)
+function excludelast{K, D, Ord <: Ordering}(i1::SDToken{K,D,Ord}, i2::SDToken{K,D,Ord})
     !(i1.container === i2.container) && 
         throw(ArgumentError("SDToken range constructor requires tokens for the same container"))
     ExcludeLast(i1.container, i1.semitoken.address, i2.semitoken.address)
@@ -297,7 +300,7 @@ end
 
 
 
-function colon(i1::SDToken, i2::SDToken)
+function colon{K, D, Ord <: Ordering}(i1::SDToken{K,D,Ord}, i2::SDToken{K,D,Ord})
     !(i1.container === i2.container) &&
         throw(ArgumentError("SDToken range constructor requires tokens for the same container"))
     IncludeLast(i1.container, i1.semitoken.address, i2.semitoken.address)
@@ -498,19 +501,20 @@ end
 
 
 
-status(i::SDToken) = !(i.semitoken.address in i.container.bt.useddatacells)? 0 :
+status{K, D, Ord <: Ordering}(i::SDToken{K,D,Ord}) = 
+       !(i.semitoken.address in i.container.bt.useddatacells)? 0 :
                         (i.semitoken.address == 1? 2 : (i.semitoken.address == 2? 3 : 1))
 
-not_beforestart(i::SDToken) =
+not_beforestart{K, D, Ord <: Ordering}(i::SDToken{K,D,Ord}) =
     (!(i.semitoken.address in i.container.bt.useddatacells) || 
      i.semitoken.address == 1) && throw(BoundsError())
 
-not_pastend(i::SDToken) =
+not_pastend{K, D, Ord <: Ordering}(i::SDToken{K,D,Ord}) =
     (!(i.semitoken.address in i.container.bt.useddatacells) || 
      i.semitoken.address == 2) && 
        throw(BoundsError())
 
-has_data(i::SDToken) =
+has_data{K, D, Ord <: Ordering}(i::SDToken{K,D,Ord}) =
     (!(i.semitoken.address in i.container.bt.useddatacells) || 
      i.semitoken.address < 3) && 
        throw(BoundsError())
