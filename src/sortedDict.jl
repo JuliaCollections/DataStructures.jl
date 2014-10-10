@@ -25,6 +25,12 @@ function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
     SortedDict(bt1)
 end
 
+function SortedDict{K,D, Ord <: Ordering}(o::Ord=Forward)
+    bt1 = BalancedTree23{K,D,Ord}(o)
+    SortedDict(bt1)
+end
+
+
 
 
 ## This function implements m[k]; it returns the

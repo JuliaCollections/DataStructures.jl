@@ -391,6 +391,10 @@ Constructors for Sorted Containers
   used for ordering the keys.  The default value
   for ``o`` is ``Forward``.
 
+``SortedDict{K,V,Ord}()``
+  Construct an empty SortedDict by explicitly specifying
+  the parameters of the type.
+
 
 
 

@@ -279,7 +279,8 @@ end
 
 function test2()
     # test all the methods here
-    m0 = SortedDict((Int=>Float64)[])
+    #m0 = SortedDict((Int=>Float64)[])
+    m0 = SortedDict{Int, Float64, ForwardOrdering}()
     m1 = SortedDict([8=>32.0, 12=>33.1, 6=>18.2])
     expected = ([6,8,12], [18.2, 32.0, 33.1])
     checkcorrectness(m1.bt)
@@ -396,7 +397,7 @@ function test2()
     @assert(p[1] == 6 && p[2] == 50.0)
     b2, i7 = insert!(m1, 8, 51.0)
 
-    st = semiextract(i6)
+    st = semi(i6)
     m1[st] = 9.0
     p = deref(i6)
     @assert(p[1] == 6 && p[2] == 9.0)
