@@ -7,6 +7,10 @@ import .Tokens.IntSemiToken
 
 type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
     bt::BalancedTree23{K,D,Ord}
+    function SortedDict(ord1::Ordering) 
+        bt1 = BalancedTree23(ord1)
+        new(bt1)
+    end
 end
 
 
@@ -18,11 +22,11 @@ typealias SDToken{K,D, Ord <: Ordering} Token{SortedDict{K,D,Ord}, SDSemiToken}
 ## to Forward
 
 function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
-    bt1 = BalancedTree23{K,D,Ord}(o)
+    s = SortedDict(o)
     for pr in d
-        insert!(bt1, pr[1], pr[2], false)
+        insert!(s.bt1, pr[1], pr[2], false)
     end
-    SortedDict(bt1)
+    s
 end
 
 function SortedDict{K,D, Ord <: Ordering}(o::Ord=Forward)

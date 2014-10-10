@@ -4,6 +4,7 @@ import Base.Forward
 import Base.Reverse
 import DataStructures.eq
 import Base.lt
+import Base.ForwardOrdering
 #import Base.Lt
 
 
