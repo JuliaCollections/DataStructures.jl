@@ -22,7 +22,7 @@ function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
     for pr in d
         insert!(bt1, pr[1], pr[2], false)
     end
-    SortedDict(bt)
+    SortedDict(bt1)
 end
 
 
