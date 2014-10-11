@@ -51,15 +51,15 @@ end
 
 function getindex{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, i::SDSemiToken)
     addr = i.address
-    has_data(SDToken(m,i))
+    has_data(SDToken{K,D,Ord}(m,i))
     return m.bt.data[addr].d
 end
 
 function setindex!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, 
                                         d_, 
-                                        i::SDSemiToken{K,D,Ord})
+                                        i::SDSemiToken)
     addr = i.address
-    has_data(SDToken(m,i))
+    has_data(SDToken{K,D,Ord}(m,i))
     m.bt.data[addr] = KDRec{K,D}(m.bt.data[addr].parent,
                                  m.bt.data[addr].k, 
                                  convert(D,d_))
