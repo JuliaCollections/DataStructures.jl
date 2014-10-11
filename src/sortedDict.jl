@@ -57,7 +57,7 @@ end
 
 function setindex!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, 
                                         d_, 
-                                        i::SDSemiToken)
+                                        i::SDSemiToken{K,D,Ord})
     addr = i.address
     has_data(SDToken(m,i))
     m.bt.data[addr] = KDRec{K,D}(m.bt.data[addr].parent,
