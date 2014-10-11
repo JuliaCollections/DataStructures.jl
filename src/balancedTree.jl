@@ -261,11 +261,11 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
 
     if size(t.data,1) == 2
         @assert(t.rootloc == 1 && t.depth == 1)
-        #t.tree[1] = TreeNode{K}(t.tree[1].child1, t.tree[1].child2,
-        #                        t.tree[1].child3, t.tree[1].parent,
-        #                        k, k)
-        #t.data[1] = KDRec{K,D}(t.data[1].parent, k, d)
-        #t.data[2] = KDRec{K,D}(t.data[2].parent, k, d)
+        t.tree[1] = TreeNode{K}(t.tree[1].child1, t.tree[1].child2,
+                                t.tree[1].child3, t.tree[1].parent,
+                                k, k)
+        t.data[1] = KDRec{K,D}(t.data[1].parent, k, d)
+        t.data[2] = KDRec{K,D}(t.data[2].parent, k, d)
     end
     
     ## If we have found exactly k in the tree, then we
@@ -455,13 +455,15 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
             newrootloc = pop!(t.freetreeinds)
             t.tree[newrootloc] = newroot
         end
-        for whichchild = 1 : 2
-            procchild = (whichchild == 1)? oldchild : newchild
-            childrec = t.tree[procchild]
-            @inbounds t.tree[procchild] = TreeNode{K}(childrec.child1, childrec.child2,
-                                            childrec.child3, newrootloc,
-                                            childrec.splitkey1, childrec.splitkey2)
-        end
+        #for whichchild = 1 : 2
+        #    procchild = (whichchild == 1)? oldchild : newchild
+        #    childrec = t.tree[procchild]
+        #    @inbounds t.tree[procchild] = TreeNode{K}(childrec.child1, childrec.child2,
+        #                                    childrec.child3, newrootloc,
+        #                                    childrec.splitkey1, childrec.splitkey2)
+        #end
+        replaceparent!(t.tree, oldchild, newrootloc)
+        replaceparent!(t.tree, newchild, newrootloc)
         t.rootloc = newrootloc
         t.depth += 1
     end
