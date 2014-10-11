@@ -29,9 +29,8 @@ function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
     s
 end
 
-function SortedDict{K,D, Ord <: Ordering}(o::Ord=Forward)
-    bt1 = BalancedTree23{K,D,Ord}(o)
-    SortedDict(bt1)
+function SortedDict{K,D, Ord <: Ordering}()
+    SortedDict(Forward)
 end
 
 
