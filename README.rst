@@ -381,19 +381,18 @@ Constructors for Sorted Containers
      c = SortedDict(["New York" => 1788, "Illinois" => 1818])
 
   In this example the key-type is deduced to be ASCIIString, while the
-  value-type is Int. An
-  empty SortedDict is created by using an empty but typed value of ``d``
-  as the argument, e.g., ``t = SortedDict((ASCIIString=>Int)[])``.
+  value-type is Int.
 
 ``SortedDict(d,o)``
   Argument ``d`` is an ordinary Julia dict (or any associative type)
-  used to initialize the container and ``o`` is an ordering object
+  used to initialize the container and ``o`` is an optional ordering object
   used for ordering the keys.  The default value
   for ``o`` is ``Forward``.
 
-``SortedDict{K,V,Ord}()``
+``SortedDict(Dict{K,V}(),o)``
   Construct an empty SortedDict by explicitly specifying
-  the parameters of the type.
+  the parameters of the type.  Ordering argument ``o`` is
+  optional and defaults to ``Forward``.
 
 
 

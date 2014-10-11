@@ -254,7 +254,7 @@ end
 
 function test1()
     # a few basic tests to start
-    m1 = SortedDict((ASCIIString=>ASCIIString)[], Forward)
+    m1 = SortedDict(Dict{ASCIIString,ASCIIString}(), Forward)
     kdarray = ["hello", "jello", "alpha", "beta", "fortune", "random",
                "july", "wednesday"]
     checkcorrectness(m1.bt)
@@ -280,8 +280,7 @@ end
 
 function test2()
     # test all the methods here
-    #m0 = SortedDict((Int=>Float64)[])
-    m0 = SortedDict{Int, Float64, ForwardOrdering}()
+    m0 = SortedDict(Dict{Int, Float64}())
     m1 = SortedDict([8=>32.0, 12=>33.1, 6=>18.2])
     expected = ([6,8,12], [18.2, 32.0, 33.1])
     checkcorrectness(m1.bt)
@@ -538,7 +537,7 @@ eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
 function test5()
     keylist = ["Apple", "aPPle", "berry", "CHerry", "Dairy", "diary"]
     vallist = [6,9,-4,2,1,8]
-    m = SortedDict((ASCIIString=>Int)[])
+    m = SortedDict(Dict{ASCIIString,Int}())
     for j = 1:6
         m[keylist[j]] = vallist[j]
     end
@@ -551,7 +550,7 @@ function test5()
                 p[2] == vallist[expectedord1[count]])
     end
     @assert(count == 6)
-    m2 = SortedDict((ASCIIString=>Int)[], Reverse)
+    m2 = SortedDict(Dict{ASCIIString, Int}(), Reverse)
     for j = 1 : 6
         m2[keylist[j]] = vallist[j]
     end
@@ -564,7 +563,7 @@ function test5()
                 p[2] == vallist[expectedord2[count]])
     end
     @assert(count == 6)
-    m3 = SortedDict((ASCIIString=>Int)[], CaseInsensitive())
+    m3 = SortedDict(Dict{ASCIIString, Int}(), CaseInsensitive())
     for j = 1 : 6
         m3[keylist[j]] = vallist[j]
     end
@@ -577,7 +576,7 @@ function test5()
                 p[2] == vallist[expectedord3[count]])
     end
     @assert(count == 5)
-    m4 = SortedDict((ASCIIString=>Int)[], Lt((x,y) -> isless(lowercase(x),lowercase(y))))
+    m4 = SortedDict(Dict{ASCIIString,Int}(), Lt((x,y) -> isless(lowercase(x),lowercase(y))))
     for j = 1 : 6
         m4[keylist[j]] = vallist[j]
     end
@@ -595,7 +594,7 @@ end
 
 function test6(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
     NSTRINGPAIR = 50000
-    m1 = SortedDict((ASCIIString=>ASCIIString)[])
+    m1 = SortedDict(Dict{ASCIIString,ASCIIString}())
     strlist = ASCIIString[]
     open(seekfile("wordsScram.txt"), "r") do inio
         for j = 1 : NSTRINGPAIR * 2
@@ -632,7 +631,7 @@ end
 
 function test6a(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
     NSTRINGPAIR = 50000
-    m1 = SortedDict((ASCIIString=>ASCIIString)[], Lt(isless))
+    m1 = SortedDict(Dict{ASCIIString, ASCIIString}(), Lt(isless))
     strlist = ASCIIString[]
     open(seekfile("wordsScram.txt"), "r") do inio
         for j = 1 : NSTRINGPAIR * 2
