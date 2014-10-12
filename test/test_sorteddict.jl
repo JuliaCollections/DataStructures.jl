@@ -419,18 +419,10 @@ function test2()
     @assert(deref_key(i16) == 47)
     @assert(deref_key(i17) == 47)
     ww = primes(N)
-    ww2 = Array(Int, 0)
-    lb = 50
-    ub = 70
-    for i in ww
-        if lb <= i < ub
-            push!(ww2, i)
-        end
-    end
     cc = last(m1)
-    assert(cc[1] == last(pp))
-    ww = first(m1)
-    assert(ww[1] == 2)
+    @assert(cc[1] == last(ww))
+    wwx = first(m1)
+    assert(wwx[1] == 2)
     tpr = eltype(m1)
     @assert(tpr[1] == Int && tpr[2] == Float64)
     co = orderobject(m1)
@@ -444,13 +436,13 @@ function test2()
     h = get!(m1, 6, 27.0)
     @assert(h == 27.0)
     @assert(m1[6] == 27.0)
-    @assert(length(m1) == length(pp) + 1)
+    @assert(length(m1) == length(ww) + 1)
     pop!(m1, 6)
     @assert(getkey(m1,7, 9) == 7)
     @assert(getkey(m1,7.0, 9) == 7)
     @assert(getkey(m1,12, 9) == 9)
     delete!(m1, 17)
-    @assert(length(m1) == length(pp) - 1)
+    @assert(length(m1) == length(ww) - 1)
     @assert(deref_key(advance(find(m1,13))) == 19)
     empty!(m1)
     checkcorrectness(m1.bt)
@@ -481,8 +473,9 @@ end
 function bitreverse(i::Uint32)
     r = 0x00000000
     for j = 1 : 32
-        r *= 2
+        r *= 0x00000002
         r += (i & 0x00000001)
+        i = div(i,0x00000002)
     end
     r
 end
@@ -493,7 +486,8 @@ function test3()
     m1 = SortedDict(Dict{Uint32,Uint32}())
     N = 10000
     for l = 1 : N
-        m1[bitreverse[l]] = l
+        lUi = convert(Uint32, l)
+        m1[bitreverse(lUi)] = lUi
     end
     count = 0
     for (tok,(k,v)) in tokens(startof(m1) : endof(m1))
@@ -505,42 +499,41 @@ function test3()
             else
                 @assert(deref_key(tok) > deref_key(tok2))
             end
+            count += 1
         end
     end
     @assert(count == N^2)
     N = 1000000
     sk = 0x00000000
+    sv = 0x00000000
     for l = 1 : N
         lUi = convert(Uint32, l)
-        brl = bitreverse[lUi]
+        brl = bitreverse(lUi)
         sk += brl
         m1[brl] = lUi
+        sv += lUi
     end
     count = 0
     sk2 = 0x00000000
-    sv = 0x00000000
+    sv2 = 0x00000000
     for (k,v) in m1
         sk2 += k
-        sv += v
+        sv2 += v
+        count += 1
     end
     @assert(count == N)
     @assert(sk2 == sk)
-    @assert(sv == N * (N + 0x00000001) / 2)
-    sk2 = 0x00000000
-    for k in m1
-        sk2 += k
-    end
-    @assert(sk2 == sk)
+    @assert(sv == sv2)
     sk2 = 0x00000000
     for k in keys(m1)
         sk2 += k
     end
     @assert(sk2 == sk)
-    sv = 0x00000000
+    sv2 = 0x00000000
     for v in values(m1)
-        sv += v
+        sv2 += v
     end
-    @assert(xv == N * (N + 0x00000001) / 2)
+    @assert(sv == sv2)
     count = 0
     for (t,k) in tokens(keys(m1))
         @assert(deref_key(t) == k)

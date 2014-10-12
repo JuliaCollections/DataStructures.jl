@@ -449,44 +449,6 @@ function pop!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
 end
 
 
-## The next three functions support "for k in keys(m)" where m is
-## a SortedDict.
-
-immutable KeySOD{K,D,Ord <: Ordering}
-    m::SortedDict{K,D,Ord}
-end
-
-keys(m::SortedDict) = KeySOD(m)
-
-start(ksod::KeySOD) = nextloc0(ksod.m.bt, 1)
-
-done(ksod::KeySOD, state) = state == 2
-
-function next(ksod::KeySOD, state::Int)
-    (state == 2 || !(state in ksod.m.bt.useddatacells)) && 
-         throw(BoundsError())
-     return ksod.m.bt.data[state].k, nextloc0(ksod.m.bt, state)
-end
-
-
-# These functions support "for p in values(m)"
-
-immutable ValueSOD{K,D,Ord <: Ordering}
-    m::SortedDict{K,D,Ord}
-end
-
-values(m::SortedDict) = ValueSOD(m)
-
-start(vsod::ValueSOD) = nextloc0(vsod.m.bt, 1)
-
-done(vsod::ValueSOD, state::Int) = state == 2
-
-function next(vsod::ValueSOD, state::Int)
-    (state == 2 || !(state in vsod.m.bt.useddatacells)) && 
-        throw(BoundsError())
-    return vsod.m.bt.data[state].d, nextloc0(vsod.m.bt, state)
-end
-
 
 ## Check if two SortedDicts are equal in the sense of containing
 ## the same (K,D) pairs.  This sense of equality does not mean
