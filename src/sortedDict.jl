@@ -284,6 +284,7 @@ function nextbase(state::SDIterationState)
     (sn < 3 || !(sn in m.bt.useddatacells)) && throw(BoundsError())
     (m.bt.data[sn].k, m.bt.data[sn].d, sdtoken_construct(m, sn)),
     SDIterationState(m, nextloc0(m.bt, sn), state.final)
+end
 
 function next(::SDIterableTypesBase, state::SDIterationState)
     c = nextbase(state)
