@@ -260,11 +260,11 @@ immutable SDTokenIteration{T <: SDIterableTypesBase}
     base::T
 end
 
-immutable STokenKeyIteration{T <: SDIterableTypesBase}
+immutable SDTokenKeyIteration{T <: SDIterableTypesBase}
     base::T
 end
 
-immutable STokenValIteration{T <: SDIterableTypesBase}
+immutable SDTokenValIteration{T <: SDIterableTypesBase}
     base::T
 end
 
