@@ -301,17 +301,17 @@ function next(::SDValIteration, state::SDIterationState)
 end
 
 
-function next{::SDTokenIteration, state::SDIterationState)
+function next(::SDTokenIteration, state::SDIterationState)
     c = nextbase(state)
     return (c[1][3], (c[1][1], c[1][2])), c[2]
 end
 
-function next{::SDTokenKeyIteration, state::SDIterationState)
+function next(::SDTokenKeyIteration, state::SDIterationState)
     c = nextbase(state)
     return (c[1][3], c[1][1]), c[2]
 end
 
-function next{::SDTokenValIteration, state::SDIterationState)
+function next(::SDTokenValIteration, state::SDIterationState)
     c = nextbase(state)
     return (c[1][3], c[1][2]), c[2]
 end
