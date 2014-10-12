@@ -65,10 +65,11 @@ module DataStructures
     include("tokens.jl")
 
     import .Tokens: Token, IntSemiToken, semi, container, assemble
-    import .Tokens: deref_key, deref_value, deref, status, delete!
+    import .Tokens: deref_key, deref_value, deref, status
     import .Tokens: advance, regress
     include("sortedDict.jl")
     export semi, container, assemble, status
+    export deref_key, deref_value, deref, advance, regress
     @deprecate stack Stack
     @deprecate queue Queue
     @deprecate add! push!

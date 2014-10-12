@@ -334,6 +334,9 @@ function colon{K, D, Ord <: Ordering}(i1::SDToken{K,D,Ord}, i2::SDToken{K,D,Ord}
 end
 
 
+# need the next two to resolve ambiguity with keys(Associative)
+keys(m::SortedDict) = SDKeyIteration(m)
+values(m::SortedDict) = SDValIteration(m)
 keys{T <: SDIterableTypesBase}(ba::T) = SDKeyIteration(ba)
 values{T <: SDIterableTypesBase}(ba::T) = SDValIteration(ba)
 tokens{T <: SDIterableTypesBase}(ba::T) = SDTokenIteration(ba)
