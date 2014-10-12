@@ -484,7 +484,7 @@ end
 
 function test3()
     m1 = SortedDict(Dict{Uint32,Uint32}())
-    N = 10000
+    N = 5000
     for l = 1 : N
         lUi = convert(Uint32, l)
         m1[bitreverse(lUi)] = lUi
