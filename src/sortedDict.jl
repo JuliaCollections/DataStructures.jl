@@ -363,7 +363,7 @@ end
 
 function next(::SDTokenValIteration, state::SDIterationState)
     dt, t, ni = nextbase(state)
-    (t,dt.v), ni
+    (t,dt.d), ni
     #c = nextbase(state)
     #return (c[1][3], c[1][2]), c[2]
     #m = state.m
