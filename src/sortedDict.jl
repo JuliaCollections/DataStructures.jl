@@ -1,15 +1,3 @@
-import .Tokens.Token
-import .Tokens.IntSemiToken
-import .Tokens.semi
-import .Tokens.container
-import .Tokens.assemble
-import .Tokens.deref_key
-import .Tokens.deref_value
-import .Tokens.deref
-import .Tokens.status
-import .Tokens.delete!
-import .Tokens.advance
-import .Tokens.regress
 
 
 
@@ -243,16 +231,7 @@ immutable SDIterationState{K, D, Ord <: Ordering}
     final::Int
 end
 
-#SDIterationState{K, D, Ord <: Ordering}(m1::SortedDict{K,D,Ord},
-#                                        next1::Int, final1::Int) = 
-#                                        SDIterationState{K,D,Ord}(m1, next1, final1)
 
-
-
-## The next three functions are for iterating over a SortedDict
-## with a for-loop.  
-
-start(m::SortedDict) = SDIterationState(m, nextloc0(m.bt,1), 2)
 
 
 immutable ExcludeLast{K, D, Ord <: Ordering}
@@ -267,42 +246,74 @@ immutable IncludeLast{K, D, Ord <: Ordering}
     last::Int
 end
 
-#ExcludeLast{K, D, Ord <: Ordering}(m1::SortedDict{K, D, Ord}, 
-#                                   first1::Int, 
-#                                   pastlast1::Int) = 
-#                                   ExcludeLast{K,D,Ord}(m1, first1, pastlast1)
+typealias SDIterableTypesBase Union(SortedDict,ExcludeLast,IncludeLast)
 
-#IncludeLast{K, D, Ord <: Ordering}(m1::SortedDict{K, D, Ord}, first1::Int, last1::Int) = 
-#            IncludeLast{K,D,Ord}(m1, first1, last1)
+immutable SDKeyIteration{T <: SDIterableTypesBase}
+    base::T
+end
 
-typealias SDIterableTypes Union(SortedDict,ExcludeLast,IncludeLast)
+immutable SDValIteration{T <: SDIterableTypesBase}
+    base::T
+end
 
-done(::SDIterableTypes, state::SDIterationState) = state.next == state.final
+immutable SDTokenIteration{T <: SDIterableTypesBase}
+    base::T
+end
 
-function next(::SDIterableTypes, state::SDIterationState)
+immutable STokenKeyIteration{T <: SDIterableTypesBase}
+    base::T
+end
+
+immutable STokenValIteration{T <: SDIterableTypesBase}
+    base::T
+end
+
+
+typealias SDCompoundIterable Union(SDKeyIteration,
+                                   SDValIteration, SDTokenIteration,
+                                   SDTokenKeyIteration, SDTokenValIteration)
+                                   
+typealias SDAllIterable Union(SDIterableTypesBase, SDCompoundIterable)
+
+
+done(::SDAllIterable, state::SDIterationState) = state.next == state.final
+
+function nextbase(state::SDIterationState) 
     m = state.m
     sn = state.next
     (sn < 3 || !(sn in m.bt.useddatacells)) && throw(BoundsError())
-    return (m.bt.data[sn].k, m.bt.data[sn].d, sdtoken_construct(m, sn)),
-           SDIterationState(m, nextloc0(m.bt, sn), state.final)
+    (m.bt.data[sn].k, m.bt.data[sn].d, sdtoken_construct(m, sn)),
+    SDIterationState(m, nextloc0(m.bt, sn), state.final)
+
+function next(::SDIterableTypesBase, state::SDIterationState)
+    c = nextbase(state)
+    return (c[1][1], c[1][2]), c[2]
 end
 
-itertoken(p) = p[3]
+function next(::SDKeyIteration, state::SDIterationState)
+    c = nextbase(state)
+    return c[1][1], c[2]
+end
 
-
-function isless{K, D, Ord <: Ordering}(s::SDToken{K,D,Ord}, t::SDToken{K,D,Ord})
-    !(s.container === t.container) &&  
-        throw(ArgumentError("SDToken isless requires tokens for the same container"))
-    return compareInd(s.container.bt, 
-                      s.semitoken.address, 
-                      t.semitoken.address) < 0
+function next(::SDValIteration, state::SDIterationState)
+    c = nextbase(state)
+    return c[1][2], c[2]
 end
 
 
-function isequal{K, D, Ord <: Ordering}(s::SDToken{K,D,Ord}, t::SDToken{K,D,Ord})
-    !(s.container === t.container) && 
-        throw(ArgumentError("SDToken isequal requires tokens for the same container"))
-    return s.semitoken.address == t.semitoken.address
+function next{::SDTokenIteration, state::SDIterationState)
+    c = nextbase(state)
+    return (c[1][3], (c[1][1], c[1][2])), c[2]
+end
+
+function next{::SDTokenKeyIteration, state::SDIterationState)
+    c = nextbase(state)
+    return (c[1][3], c[1][1]), c[2]
+end
+
+function next{::SDTokenValIteration, state::SDIterationState)
+    c = nextbase(state)
+    return (c[1][3], c[1][2]), c[2]
 end
 
 
@@ -321,6 +332,14 @@ function colon{K, D, Ord <: Ordering}(i1::SDToken{K,D,Ord}, i2::SDToken{K,D,Ord}
     IncludeLast(i1.container, i1.semitoken.address, i2.semitoken.address)
 end
 
+
+keys{T <: SDIterableTypesBase}(ba::T) = SDKeyIteration(ba)
+values{T <: SDIterableTypesBase}(ba::T) = SDValIteration(ba)
+tokens{T <: SDIterableTypesBase}(ba::T) = SDTokenIteration(ba)
+tokens{T <: SDIterableTypesBase}(ki::SDKeyIteration{T}) = SDTokenKeyIteration(ki.base)
+tokens{T <: SDIterableTypesBase}(vi::SDValIteration{T}) = SDTokenValIteration(vi.base)
+
+start(m::SortedDict) = SDIterationState(m, nextloc0(m.bt,1), 2)
 
 function start(e::ExcludeLast) 
     (!(e.first in e.m.bt.useddatacells) || e.first == 1 ||
@@ -343,6 +362,26 @@ function start(e::IncludeLast)
         return SDIterationState(e.m, 2, 2)
     end
 end
+
+start(e::SDCompoundIterable) = start(e.base)
+
+
+function isless{K, D, Ord <: Ordering}(s::SDToken{K,D,Ord}, t::SDToken{K,D,Ord})
+    !(s.container === t.container) &&  
+        throw(ArgumentError("SDToken isless requires tokens for the same container"))
+    return compareInd(s.container.bt, 
+                      s.semitoken.address, 
+                      t.semitoken.address) < 0
+end
+
+
+function isequal{K, D, Ord <: Ordering}(s::SDToken{K,D,Ord}, t::SDToken{K,D,Ord})
+    !(s.container === t.container) && 
+        throw(ArgumentError("SDToken isequal requires tokens for the same container"))
+    return s.semitoken.address == t.semitoken.address
+end
+
+
 
 
 function in{K,D,Ord <: Ordering}(pr::(Any,Any), m::SortedDict{K,D,Ord})

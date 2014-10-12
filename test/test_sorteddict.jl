@@ -279,7 +279,7 @@ function test1()
 end
 
 function test2()
-    # test all the methods here
+    # test all the methods here except loops
     m0 = SortedDict(Dict{Int, Float64}())
     m1 = SortedDict([8=>32.0, 12=>33.1, 6=>18.2])
     expected = ([6,8,12], [18.2, 32.0, 33.1])
@@ -371,22 +371,6 @@ function test2()
     @assert(u == sum(pn.^2))
     ij = endof(m1)
     @assert(deref_key(ij) == last(pn) && convert(Float64, last(pn)^2) ==  deref_value(ij))
-    count = 0
-    for p in startof(m1) : endof(m1)
-        pt = itertoken(p)
-        for q in excludelast(startof(m1), pastendtoken(m1))
-            count += 1
-            qt = itertoken(q)
-            if isless(pt,qt)
-                @assert(deref_key(pt) < deref_key(qt))
-            elseif isequal(pt,qt)
-                @assert(deref_key(pt) == deref_key(qt))
-            else
-                @assert(deref_key(pt) > deref_key(qt))
-            end
-        end
-    end
-    @assert(count == length(pn)^2)
     m1[6] = 49.0
     @assert(length(m1) == numprimes + 1)
     @assert(m1[6] == 49.0)
@@ -443,34 +427,6 @@ function test2()
             push!(ww2, i)
         end
     end
-    count = 0
-    for pr = excludelast(searchsortedfirst(m1, lb),
-                         searchsortedfirst(m1, ub))
-        count += 1
-        @assert(pr[1] == ww2[count] && pr[2] == convert(Float64,ww2[count])^2)
-        @assert(deref_key(itertoken(pr)) == ww2[count])
-    end
-    @assert(length(ww2) == count)
-    count = 0
-    for (k,v) = searchsortedfirst(m1,lb) : searchsortedlast(m1,ub-1)
-        count += 1
-        @assert(k == ww2[count])
-        @assert(v == convert(Float64,ww2[count])^2)
-    end
-    @assert(length(ww2) == count)
-    count = 0
-    pp = primes(N)
-    for j = keys(m1)
-        count += 1
-        @assert(j == pp[count])
-    end
-    @assert(length(pp) == count)
-    count = 0
-    for q = values(m1)
-        count += 1
-        @assert(q == convert(Float64,pp[count])^2)
-    end
-    @assert(length(pp) == count)
     cc = last(m1)
     assert(cc[1] == last(pp))
     ww = first(m1)
@@ -522,6 +478,82 @@ function test2()
 end
 
 
+function bitreverse(i::Uint32)
+    r = 0x00000000
+    for j = 1 : 32
+        r *= 2
+        r += (i & 0x00000001)
+    end
+    r
+end
+
+
+
+function test3()
+    m1 = SortedDict(Dict{Uint32,Uint32}())
+    N = 10000
+    for l = 1 : N
+        m1[bitreverse[l]] = l
+    end
+    count = 0
+    for (tok,(k,v)) in tokens(startof(m1) : endof(m1))
+        for (tok2,(k2,v2)) in tokens(excludelast(startof(m1), pastendtoken(m1)))
+            if isless(tok,tok2)
+                @assert(deref_key(tok) < deref_key(tok2))
+            elseif isequal(tok,tok2)
+                @assert(deref_key(tok) == deref_key(tok2))
+            else
+                @assert(deref_key(tok) > deref_key(tok2))
+            end
+        end
+    end
+    @assert(count == N^2)
+    N = 1000000
+    sk = 0x00000000
+    for l = 1 : N
+        lUi = convert(Uint32, l)
+        brl = bitreverse[lUi]
+        sk += brl
+        m1[brl] = lUi
+    end
+    count = 0
+    sk2 = 0x00000000
+    sv = 0x00000000
+    for (k,v) in m1
+        sk2 += k
+        sv += v
+    end
+    @assert(count == N)
+    @assert(sk2 == sk)
+    @assert(sv == N * (N + 0x00000001) / 2)
+    sk2 = 0x00000000
+    for k in m1
+        sk2 += k
+    end
+    @assert(sk2 == sk)
+    sk2 = 0x00000000
+    for k in keys(m1)
+        sk2 += k
+    end
+    @assert(sk2 == sk)
+    sv = 0x00000000
+    for v in values(m1)
+        sv += v
+    end
+    @assert(xv == N * (N + 0x00000001) / 2)
+    count = 0
+    for (t,k) in tokens(keys(m1))
+        @assert(deref_key(t) == k)
+        count += 1
+    end
+    @assert(count == N)
+    count = 0
+    for (t,v) in tokens(values(m1))
+        @assert(deref_value(t) == v)
+        count += 1
+    end
+    @assert(count == N)
+end    
 
 
 function seekfile(fname)
@@ -717,6 +749,7 @@ end
 
 test1()
 test2()
+test3()
 test5()
 test6(2, "soothingly", "compere")
 

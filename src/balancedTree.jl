@@ -379,27 +379,14 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
                 # have a new parent (newparentnum instead of p1)
                 # so we have to fix them.
 
-                #for childind = 1 : 2
-                #    procchild = (childind == 1)? righttreenodenew.child1 : righttreenodenew.child2
-                #    olddata = t.data[procchild]
-                #    @inbounds t.data[procchild] = KDRec{K,D}(newparentnum, olddata.k, olddata.d)
-                #end
-
                 replaceparent!(t.data, righttreenodenew.child1, newparentnum)
                 replaceparent!(t.data, righttreenodenew.child2, newparentnum)
 
             else
-
                 # If this is not a leaf, we still have to fix the
                 # parent fields of the two nodes that are now children
                 ## of the newparent.
-                #for childind = 1 : 2
-                #    procchild = (childind == 1)? righttreenodenew.child1 : righttreenodenew.child2
-                #    oldtreenode = t.tree[procchild]
-                #    @inbounds t.tree[procchild] = TreeNode{K}(oldtreenode.child1, oldtreenode.child2,
-                #                                    oldtreenode.child3, newparentnum,
-                #                                    oldtreenode.splitkey1, oldtreenode.splitkey2)
-                #end
+
                 replaceparent!(t.tree, righttreenodenew.child1, newparentnum)
                 replaceparent!(t.tree, righttreenodenew.child2, newparentnum)
 
@@ -455,13 +442,6 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
             newrootloc = pop!(t.freetreeinds)
             t.tree[newrootloc] = newroot
         end
-        #for whichchild = 1 : 2
-        #    procchild = (whichchild == 1)? oldchild : newchild
-        #    childrec = t.tree[procchild]
-        #    @inbounds t.tree[procchild] = TreeNode{K}(childrec.child1, childrec.child2,
-        #                                    childrec.child3, newrootloc,
-        #                                    childrec.splitkey1, childrec.splitkey2)
-        #end
         replaceparent!(t.tree, oldchild, newrootloc)
         replaceparent!(t.tree, newchild, newrootloc)
         t.rootloc = newrootloc

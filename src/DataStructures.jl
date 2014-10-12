@@ -36,11 +36,11 @@ module DataStructures
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
            reverse
     export SortedDict, SDToken, SDSemiToken
-    export insert!, delete!, startof
-    export pastendtoken, beforestarttoken, advance, regress
-    export deref, deref_key, deref_value,  searchsortedafter
-    export enumerate_ind, packcopy, packdeepcopy, itertoken
-    export excludelast 
+    export insert!, startof
+    export pastendtoken, beforestarttoken
+    export searchsortedafter
+    export enumerate_ind, packcopy, packdeepcopy
+    export excludelast, tokens
     export orderobject, Lt
 
 
@@ -63,7 +63,10 @@ module DataStructures
     include("list.jl")
     include("balancedTree.jl")
     include("tokens.jl")
-    import .Tokens: semi, container, assemble
+
+    import .Tokens: Token, IntSemiToken, semi, container, assemble
+    import .Tokens: deref_key, deref_value, deref, status, delete!
+    import .Tokens: advance, regress
     include("sortedDict.jl")
     export semi, container, assemble, status
     @deprecate stack Stack
