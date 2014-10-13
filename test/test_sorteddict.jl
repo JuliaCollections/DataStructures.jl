@@ -453,6 +453,7 @@ function test2()
     c2 = SortedDict(["Eggplants"=>6, 
                         "Honeydews"=>19, 
                         "Melons"=>11])
+    @assert(!samecontainer(c1,c2))
     c3 = merge(c1, c2)
     checkcorrectness(c3.bt)
     c4 = SortedDict(["Apples"=>7, 
@@ -460,12 +461,12 @@ function test2()
                         "Eggplants"=>6,
                         "Melons"=>11,
                         "Honeydews"=>19])
-    @assert(isequal(c3,c4))
+    @assert(samecontainer(c3,c4))
     merge!(c1,c2)
     checkcorrectness(c1.bt)
-    @assert(isequal(c3,c1))
+    @assert(samecontainer(c3,c1))
     merge!(c3,c3)
-    @assert(isequal(c3,c1))
+    @assert(samecontainer(c3,c1))
     checkcorrectness(c3.bt)
 end
 

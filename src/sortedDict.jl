@@ -1,8 +1,4 @@
 
-
-
-
-
 ## A SortedDict is a wrapper around balancedTree with
 ## methods similiar to those of Julia container Dict.
 
@@ -463,7 +459,7 @@ end
 ## the same (K,D) pairs.  This sense of equality does not mean
 ## that indices valid for one are also valid for the other.
 
-function isequal{K,D,Ord <: Ordering}(m1::SortedDict{K,D,Ord},
+function samecontents{K,D,Ord <: Ordering}(m1::SortedDict{K,D,Ord},
                                       m2::SortedDict{K,D,Ord})
     p1 = startof(m1)
     p2 = startof(m2)
@@ -497,13 +493,13 @@ function mergetwo!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},
 end
 
 function packcopy{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
-    w = SortedDict((K=>D)[],orderobject(m))
+    w = SortedDict(Dict{K,D}(),orderobject(m))
     mergetwo!(w,m)
     w
 end
 
 function packdeepcopy{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
-    w = SortedDict((K=>D)[],orderobject(m))
+    w = SortedDict(Dict{K,D}(),orderobject(m))
     for p in m
         newk = deepcopy(p[1])
         newv = deepcopy(p[2])

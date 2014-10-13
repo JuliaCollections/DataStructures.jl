@@ -10,7 +10,8 @@ module DataStructures
                  endof, first, last, eltype, getkey, values,
                  merge!,lt, Ordering, ForwardOrdering, Forward,
                  ReverseOrdering, Reverse, Lt, colon,
-                 searchsortedfirst, searchsortedlast, isless, find
+                 searchsortedfirst, searchsortedlast, isless, find,
+                 samecontents
 
 
     

@@ -780,13 +780,15 @@ Other Functions
   Time: O(*c* log *n*)
 
 
-``isequal(m1,m2)``
+``samecontents(m1,m2)``
   Checks if two containers are equal in the sense
   that they contain the same items; the keys are compared
   using the ``eq`` method, while the values are compared with
-  the ``isequal`` function.  Note that ``isequal`` in this sense
-  does not imply any correspondence between tokens for items
-  in ``m1`` with those for ``m2``.
+  the ``isequal`` function.  Note that ``samecontents`` in this sense
+  does not imply any correspondence between semitokens for items
+  in ``m1`` with those for ``m2``, nor does it imply hash-equivalence
+  in the case that the user creates a ``Dict`` whose keys are 
+  SortedDict's.
   Time: O(*cn* + *n* log *n*)
 
 ``packcopy(m)``
@@ -834,6 +836,7 @@ Other Functions
   Time:  O(*cN* log *N*), where *N* is the total size
   of all the arguments.
 
+
 ----------------------
 Ordering of keys
 ----------------------
@@ -847,7 +850,7 @@ it may not hold for all types, especially user-defined types.
 If it does not hold for a certain type, then a custom ordering
 argument must be defined as discussed in the next few paragraphs.
 
-The name for this default ordering (i.e., using ``isless`` and
+The name for the default ordering (i.e., using ``isless`` and
 ``isequal``) is ``Forward``.  Another possible
 choice is ``Reverse``, which reverses the usual sorted order.  
 This name must be
@@ -921,3 +924,9 @@ library container ``map``.
 and compiled with /O2 optimization.  These tests were
 conducted on a Windows 8.1 64-bit machine with the
 Microsoft Visual Studio 12.0 compiler.
+
+There is a minor performance issue as follows:
+the container may hold onto two or three keys even after the
+data records containing those keys have been deleted, which
+may cause a memory drain in the case of large keys.
+All keys are released completely by the ``empty!`` function.
