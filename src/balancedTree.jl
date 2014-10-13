@@ -408,6 +408,9 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
         curdepth -= 1
     end
 
+    ## big loop terminated either because a 2-node was reached
+    ## (splitroot == false) or we went up the whole tree seeing
+    ## only 3-nodes (splitroot == true).  
     if !splitroot
         
         ## If our ascent reached a 2-node, then we convert it to
@@ -422,7 +425,7 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
           TreeNode{K}(oldtreenode.child1, oldtreenode.child2, newchild,
                       oldtreenode.parent,
                       oldtreenode.splitkey1, minkeynewchild)
-        if isleaf
+        if curdepth == depth
             replaceparent!(t.data, newind, p1)
             push!(t.useddatacells, newind)
         end
