@@ -10,9 +10,7 @@ module DataStructures
                  endof, first, last, eltype, getkey, values,
                  merge!,lt, Ordering, ForwardOrdering, Forward,
                  ReverseOrdering, Reverse, Lt, colon,
-                 searchsortedfirst, searchsortedlast, isless, find,
-                 samecontents
-
+                 searchsortedfirst, searchsortedlast, isless, find
 
     
     export Deque, Stack, Queue
@@ -42,7 +40,7 @@ module DataStructures
     export searchsortedafter
     export enumerate_ind, packcopy, packdeepcopy
     export excludelast, tokens
-    export orderobject, Lt
+    export orderobject, Lt, samecontents
 
 
     include("delegate.jl")

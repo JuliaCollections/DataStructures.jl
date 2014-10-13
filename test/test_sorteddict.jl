@@ -281,7 +281,7 @@ end
 function test2()
     # test all the methods here except loops
     m0 = SortedDict(Dict{Int, Float64}())
-    m1 = SortedDict([8=>32.0, 12=>33.1, 6=>18.2])
+    m1 = SortedDict(Dict(8=>32.0, 12=>33.1, 6=>18.2))
     expected = ([6,8,12], [18.2, 32.0, 33.1])
     checkcorrectness(m1.bt)
     ii = startof(m1)
@@ -447,20 +447,20 @@ function test2()
     empty!(m1)
     checkcorrectness(m1.bt)
     @assert(isempty(m1))
-    c1 = SortedDict(["Eggplants"=>3, 
+    c1 = SortedDict(Dict("Eggplants"=>3, 
                         "Figs"=>9, 
-                        "Apples"=>7])
-    c2 = SortedDict(["Eggplants"=>6, 
+                        "Apples"=>7))
+    c2 = SortedDict(Dict("Eggplants"=>6, 
                         "Honeydews"=>19, 
-                        "Melons"=>11])
+                        "Melons"=>11))
     @assert(!samecontainer(c1,c2))
     c3 = merge(c1, c2)
     checkcorrectness(c3.bt)
-    c4 = SortedDict(["Apples"=>7, 
+    c4 = SortedDict(Dict("Apples"=>7, 
                         "Figs"=>9,
                         "Eggplants"=>6,
                         "Melons"=>11,
-                        "Honeydews"=>19])
+                        "Honeydews"=>19))
     @assert(samecontainer(c3,c4))
     merge!(c1,c2)
     checkcorrectness(c1.bt)
@@ -711,7 +711,7 @@ end
 
 function test6b(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
     NSTRINGPAIR = 50000
-    m1 = SDConstruct((ASCIIString=>ASCIIString)[], lt=isless)
+    m1 = SDConstruct(Dict{ASCIIString,ASCIIString}(), lt=isless)
     strlist = ASCIIString[]
     open(seekfile("wordsScram.txt"), "r") do inio
         for j = 1 : NSTRINGPAIR * 2
