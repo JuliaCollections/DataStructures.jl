@@ -337,12 +337,9 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
     ##     minkeynewchild:  This is the key that is the minimum value in
     ##         the subtree rooted at newchild.
 
-    while true
+    while t.tree[p1].child3 > 0
         isleaf = (curdepth == depth)
         oldtreenode = t.tree[p1]
-        if oldtreenode.child3 == 0
-            break #Ascent has reached a 2-node- end the loop
-        end
 
         ## If we hit a 3-node, then there are three cases for how to
         ## insert new child; all three cases involve splitting the
@@ -417,6 +414,7 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
         ## a 3-node by giving it a child3 field that is >0.
         ## Encountering a 2-node halts the ascent up the tree.
 
+        oldtreenode = t.tree[p1]
         t.tree[p1] = (cmp2(ord,oldtreenode, minkeynewchild, isleaf) == 1)?
           TreeNode{K}(oldtreenode.child1, newchild, oldtreenode.child2,
                       oldtreenode.parent,
