@@ -214,11 +214,10 @@ function searchsortedlast{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
     sdtoken_construct(m, i)
 end
 
-isempty(m::SortedDict) = size(m.bt.data,1) - size(m.bt.freedatainds, 1) == 2
 
 empty!(m::SortedDict) =  empty!(m.bt)
-
-length(m::SortedDict) = size(m.bt.data,1) - size(m.bt.freedatainds, 1) - 2
+length(m::SortedDict) = length(m.bt.data) - length(m.bt.freedatainds) - 2
+isempty(m::SortedDict) = length(m) == 0
 
 
 immutable SDIterationState{K, D, Ord <: Ordering}

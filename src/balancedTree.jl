@@ -304,18 +304,6 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
     ## go back and fix the parent.
 
     newind = push_or_reuse!(t.data, t.freedatainds, KDRec{K,D}(0,k,d))
-
-    ## Check if there is a free space in the 
-    ## data array (due to previous deletions);
-    ## if so, use it, else create a new space.
-    #if isempty(t.freedatainds)
-    #    newind = size(t.data, 1) + 1
-    #    pushdata = true
-    #else
-    #    newind = pop!(t.freedatainds)
-    #    pushdata = false
-    #end
-
     p1 = parent
     oldchild = leafind
     newchild = newind
