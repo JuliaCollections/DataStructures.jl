@@ -234,6 +234,24 @@ end
 
 
 
+
+## Helper function for either grabbing a brand new location in an
+## array (if there are no free locations) or else grabbing a free
+## location and marking it as used.
+
+function push_or_reuse!(a::Vector, freelocs::Array{Int,1}, item)
+    if isempty(freelocs)
+        push!(a, item)
+        return length(a)
+    end
+    loc = pop!(freelocs)
+    a[loc] = item
+    return loc
+end
+
+
+
+
 ## Function insert! inserts a new data item into the tree.
 ## The arguments are the (K,D) pair to insert.
 ## The return values are a bool and an index.  The
@@ -282,16 +300,22 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
     depth = t.depth
     ord = t.ord
 
+    ## Store the new data item in the tree's data array.  Later
+    ## go back and fix the parent.
+
+    newind = push_or_reuse!(t.data, t.freedatainds, KDRec{K,D}(0,k,d))
+
     ## Check if there is a free space in the 
     ## data array (due to previous deletions);
     ## if so, use it, else create a new space.
-    if isempty(t.freedatainds)
-        newind = size(t.data, 1) + 1
-        pushdata = true
-    else
-        newind = pop!(t.freedatainds)
-        pushdata = false
-    end
+    #if isempty(t.freedatainds)
+    #    newind = size(t.data, 1) + 1
+    #    pushdata = true
+    #else
+    #    newind = pop!(t.freedatainds)
+    #    pushdata = false
+    #end
+
     p1 = parent
     oldchild = leafind
     newchild = newind
@@ -357,22 +381,25 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
             # Replace p1 with a new 2-node and insert another 2-node at
             # index newparentnum.
             t.tree[p1] = lefttreenodenew
-            if isempty(t.freetreeinds)
-                push!(t.tree, righttreenodenew)
-                newparentnum = size(t.tree,1)
-            else
-                newparentnum = pop!(t.freetreeinds)
-                t.tree[newparentnum] = righttreenodenew
-            end
+            newparentnum = push_or_reuse!(t.tree, t.freetreeinds, rightreenodenew)
+            #if isempty(t.freetreeinds)
+            #    push!(t.tree, righttreenodenew)
+            #    newparentnum = size(t.tree,1)
+            #else
+            #    newparentnum = pop!(t.freetreeinds)
+            #    t.tree[newparentnum] = righttreenodenew
+            #end
             if isleaf
+                par = (whichp == 1)? p1 : newparentnum
+                # fix the parent of the new datanode.
+                replaceparent!(t.data, newind, par)
                 # If we inserted the leaf above the new data, then
                 # we should also insert the new data itself.
-                par = (whichp == 1)? p1 : newparentnum
-                if pushdata
-                    push!(t.data, KDRec{K,D}(par, k,d))
-                else
-                    t.data[newind] = KDRec{K,D}(par, k,d)
-                end
+                #if pushdata
+                #    push!(t.data, KDRec{K,D}(par, k,d))
+                #else
+                #    t.data[newind] = KDRec{K,D}(par, k,d)
+                #end
                 push!(t.useddatacells, newind)
 
                 # The two children of the node at newparentnum (data nodes) 
@@ -416,11 +443,12 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
                             oldtreenode.parent,
                             oldtreenode.splitkey1, minkeynewchild)
             if isleaf
-                if pushdata
-                    push!(t.data,KDRec{K,D}(p1, k, d))
-                else
-                    t.data[newind] = KDRec{K,D}(p1, k,d)
-                end
+                replaceparent!(t.data, newind, p1)
+                #if pushdata
+                #    push!(t.data,KDRec{K,D}(p1, k, d))
+                #else
+                #    t.data[newind] = KDRec{K,D}(p1, k,d)
+                #end
                 push!(t.useddatacells, newind)
             end
             break
@@ -435,13 +463,14 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
     if splitroot
         newroot = TreeNode{K}(oldchild, newchild, 0, 0,
                               minkeynewchild, minkeynewchild)
-        if isempty(t.freetreeinds)
-            push!(t.tree, newroot)
-            newrootloc = size(t.tree,1)
-        else
-            newrootloc = pop!(t.freetreeinds)
-            t.tree[newrootloc] = newroot
-        end
+        newrootloc = push_or_reuse!(t.tree, t.freetreeinds, newroot)
+        #if isempty(t.freetreeinds)
+        #    push!(t.tree, newroot)
+        #    newrootloc = size(t.tree,1)
+        #else
+        #    newrootloc = pop!(t.freetreeinds)
+        #    t.tree[newrootloc] = newroot
+        #end
         replaceparent!(t.tree, oldchild, newrootloc)
         replaceparent!(t.tree, newchild, newrootloc)
         t.rootloc = newrootloc
