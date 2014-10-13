@@ -644,7 +644,6 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
     mustdeleteroot = false
     pparent = -1
     
-
     ## The following loop ascends the tree and contracts nodes (reduces their
     ## number of children) as
     ## needed.  If newchildcount == 2 or 3, then the ascent is terminated
@@ -684,8 +683,8 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
         ## We now branch on three cases depending on whether p is child1,
         ## child2 or child3 of its parent.
 
-        if t.tree[pparent].child1 == p
-            @inbounds rightsib = t.tree[pparent].child2
+        @inbounds if t.tree[pparent].child1 == p
+            rightsib = t.tree[pparent].child2
             
             ## Here p is child1 and rightsib is child2.  
             ## If rightsib has 2 children, then p and 
@@ -696,9 +695,9 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
             ## two children.
 
             if t.tree[rightsib].child3 == 0
-                @inbounds rc1 = t.tree[rightsib].child1
-                @inbounds rc2 = t.tree[rightsib].child2
-                @inbounds t.tree[p] = TreeNode{K}(t.deletionchild[1],
+                rc1 = t.tree[rightsib].child1
+                rc2 = t.tree[rightsib].child2
+                t.tree[p] = TreeNode{K}(t.deletionchild[1],
                                         rc1, rc2,
                                         pparent,
                                         t.tree[pparent].splitkey1, 
@@ -712,15 +711,15 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
                 end
                 push!(t.freetreeinds, rightsib)
                 newchildcount = 1
-                @inbounds t.deletionchild[1] = p
+                t.deletionchild[1] = p
             else
-                @inbounds rc1 = t.tree[rightsib].child1
-                @inbounds t.tree[p] = TreeNode{K}(t.deletionchild[1], rc1, 0,
+                rc1 = t.tree[rightsib].child1
+                t.tree[p] = TreeNode{K}(t.deletionchild[1], rc1, 0,
                                         pparent,
                                         t.tree[pparent].splitkey1, 
                                         defaultKey)
-                @inbounds sk1 = t.tree[rightsib].splitkey1
-                @inbounds t.tree[rightsib] = TreeNode{K}(t.tree[rightsib].child2,
+                sk1 = t.tree[rightsib].splitkey1
+                t.tree[rightsib] = TreeNode{K}(t.tree[rightsib].child2,
                                                t.tree[rightsib].child3,
                                                0,
                                                pparent,
@@ -732,15 +731,15 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
                     replaceparent!(t.tree, rc1, p)
                 end
                 newchildcount = 2
-                @inbounds t.deletionchild[1] = p
-                @inbounds t.deletionchild[2] = rightsib
-                @inbounds t.deletionleftkey[2] = sk1
+                t.deletionchild[1] = p
+                t.deletionchild[2] = rightsib
+                t.deletionleftkey[2] = sk1
             end 
             
             ## If pparent had a third child (besides p and rightsib)
             ## then we add this to t.deletionchild
             
-            @inbounds c3 = t.tree[pparent].child3
+            c3 = t.tree[pparent].child3
             if c3 > 0
                 newchildcount += 1
                 t.deletionchild[newchildcount] = c3
@@ -757,13 +756,13 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
             ## leftsib are reformed so that each has
             ## two children.
 
-            @inbounds leftsib = t.tree[pparent].child1
-            @inbounds lk = deletionleftkey1_valid? 
+            leftsib = t.tree[pparent].child1
+            lk = deletionleftkey1_valid? 
             t.deletionleftkey[1] : t.tree[pparent].splitkey1
             if t.tree[leftsib].child3 == 0
-                @inbounds lc1 = t.tree[leftsib].child1
-                @inbounds lc2 = t.tree[leftsib].child2
-                @inbounds t.tree[p] = TreeNode{K}(lc1, lc2,
+                lc1 = t.tree[leftsib].child1
+                lc2 = t.tree[leftsib].child2
+                t.tree[p] = TreeNode{K}(lc1, lc2,
                                         t.deletionchild[1],
                                         pparent,
                                         t.tree[leftsib].splitkey1,
@@ -779,11 +778,11 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
                 newchildcount = 1
                 t.deletionchild[1] = p
             else
-                @inbounds lc3 = t.tree[leftsib].child3
-                @inbounds t.tree[p] = TreeNode{K}(lc3, t.deletionchild[1], 0,
+                lc3 = t.tree[leftsib].child3
+                t.tree[p] = TreeNode{K}(lc3, t.deletionchild[1], 0,
                                         pparent, lk, defaultKey)
-                @inbounds sk2 = t.tree[leftsib].splitkey2
-                @inbounds t.tree[leftsib] = TreeNode{K}(t.tree[leftsib].child1,
+                sk2 = t.tree[leftsib].splitkey2
+                t.tree[leftsib] = TreeNode{K}(t.tree[leftsib].child1,
                                               t.tree[leftsib].child2,
                                               0, pparent,
                                               t.tree[leftsib].splitkey1,
@@ -794,19 +793,19 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
                     replaceparent!(t.tree, lc3, p)
                 end
                 newchildcount = 2
-                @inbounds t.deletionchild[1] = leftsib
-                @inbounds t.deletionchild[2] = p
-                @inbounds t.deletionleftkey[2] = sk2
+                t.deletionchild[1] = leftsib
+                t.deletionchild[2] = p
+                t.deletionleftkey[2] = sk2
             end
             
             ## If pparent had a third child (besides p and leftsib)
             ## then we add this to t.deletionchild
             
-            @inbounds c3 = t.tree[pparent].child3
+            c3 = t.tree[pparent].child3
             if c3 > 0
                 newchildcount += 1
                 t.deletionchild[newchildcount] = c3
-                @inbounds t.deletionleftkey[newchildcount] = t.tree[pparent].splitkey2
+                t.deletionleftkey[newchildcount] = t.tree[pparent].splitkey2
             end
             p = pparent
             deletionleftkey1_valid = false
@@ -820,13 +819,13 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
             ## two children.
             
             @assert(t.tree[pparent].child3 == p)
-            @inbounds leftsib = t.tree[pparent].child2
-            @inbounds lk = deletionleftkey1_valid? 
+            leftsib = t.tree[pparent].child2
+            lk = deletionleftkey1_valid? 
             t.deletionleftkey[1] : t.tree[pparent].splitkey2
-            @inbounds if t.tree[leftsib].child3 == 0
-                @inbounds lc1 = t.tree[leftsib].child1
-                @inbounds lc2 = t.tree[leftsib].child2
-                @inbounds t.tree[p] = TreeNode{K}(lc1, lc2,
+            if t.tree[leftsib].child3 == 0
+                lc1 = t.tree[leftsib].child1
+                lc2 = t.tree[leftsib].child2
+                t.tree[p] = TreeNode{K}(lc1, lc2,
                                         t.deletionchild[1],
                                         pparent,
                                         t.tree[leftsib].splitkey1,
@@ -840,15 +839,15 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
                 end
                 push!(t.freetreeinds, leftsib)
                 newchildcount = 2
-                @inbounds t.deletionchild[1] = t.tree[pparent].child1
-                @inbounds t.deletionleftkey[2] = t.tree[pparent].splitkey1
-                @inbounds t.deletionchild[2] = p
+                t.deletionchild[1] = t.tree[pparent].child1
+                t.deletionleftkey[2] = t.tree[pparent].splitkey1
+                t.deletionchild[2] = p
             else
-                @inbounds lc3 = t.tree[leftsib].child3
-                @inbounds t.tree[p] = TreeNode{K}(lc3, t.deletionchild[1], 0,
+                lc3 = t.tree[leftsib].child3
+                t.tree[p] = TreeNode{K}(lc3, t.deletionchild[1], 0,
                                         pparent, lk, defaultKey)
-                @inbounds sk2 = t.tree[leftsib].splitkey2
-                @inbounds t.tree[leftsib] = TreeNode{K}(t.tree[leftsib].child1,
+                sk2 = t.tree[leftsib].splitkey2
+                t.tree[leftsib] = TreeNode{K}(t.tree[leftsib].child1,
                                               t.tree[leftsib].child2,
                                               0, pparent,
                                               t.tree[leftsib].splitkey1,
@@ -859,11 +858,11 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
                     replaceparent!(t.tree, lc3, p)
                 end
                 newchildcount = 3
-                @inbounds t.deletionchild[1] = t.tree[pparent].child1
-                @inbounds t.deletionchild[2] = leftsib
-                @inbounds t.deletionchild[3] = p
-                @inbounds t.deletionleftkey[2] = t.tree[pparent].splitkey1
-                @inbounds t.deletionleftkey[3] = sk2
+                t.deletionchild[1] = t.tree[pparent].child1
+                t.deletionchild[2] = leftsib
+                t.deletionchild[3] = p
+                t.deletionleftkey[2] = t.tree[pparent].splitkey1
+                t.deletionleftkey[3] = sk2
             end
             p = pparent
             deletionleftkey1_valid = false
@@ -892,11 +891,10 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
     ## node is the leftmost placeholder, which
     ## cannot be deleted.
 
-
-    if deletionleftkey1_valid
+    @inbounds if deletionleftkey1_valid
         while true
-            @inbounds pparentnode = t.tree[pparent]
-            @inbounds if pparentnode.child2 == p
+            pparentnode = t.tree[pparent]
+            if pparentnode.child2 == p
                 t.tree[pparent] = TreeNode{K}(pparentnode.child1,
                                               pparentnode.child2,
                                               pparentnode.child3,
