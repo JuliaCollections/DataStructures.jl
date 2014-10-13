@@ -381,7 +381,7 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
             # Replace p1 with a new 2-node and insert another 2-node at
             # index newparentnum.
             t.tree[p1] = lefttreenodenew
-            newparentnum = push_or_reuse!(t.tree, t.freetreeinds, rightreenodenew)
+            newparentnum = push_or_reuse!(t.tree, t.freetreeinds, righttreenodenew)
             #if isempty(t.freetreeinds)
             #    push!(t.tree, righttreenodenew)
             #    newparentnum = size(t.tree,1)
