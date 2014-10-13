@@ -470,23 +470,29 @@ function test2()
 end
 
 
-function bitreverse(i::Uint32)
-    r = 0x00000000
+function bitreverse(i)
+    zeroi = zero(i)
+    onei = one(i)
+    twoi = onei + onei
+    r = zeroi
     for j = 1 : 32
-        r *= 0x00000002
-        r += (i & 0x00000001)
-        i = div(i,0x00000002)
+        r *= twoi
+        r += (i & onei)
+        i = div(i,twoi)
     end
     r
 end
 
 
 
-function test3()
-    m1 = SortedDict(Dict{Uint32,Uint32}())
+function test3{T}(z::T)
+    zero1 = zero(z)
+    one1 = one(z)
+    two1 = one1 + one1
+    m1 = SortedDict(Dict{T,T}())
     N = 5000
     for l = 1 : N
-        lUi = convert(Uint32, l)
+        lUi = convert(T, l)
         m1[bitreverse(lUi)] = lUi
     end
     count = 0
@@ -504,18 +510,18 @@ function test3()
     end
     @assert(count == N^2)
     N = 1000000
-    sk = 0x00000000
-    sv = 0x00000000
+    sk = zero1
+    sv = zero1
     for l = 1 : N
-        lUi = convert(Uint32, l)
+        lUi = convert(T, l)
         brl = bitreverse(lUi)
         sk += brl
         m1[brl] = lUi
         sv += lUi
     end
     count = 0
-    sk2 = 0x00000000
-    sv2 = 0x00000000
+    sk2 = zero1
+    sv2 = zero1
     for (k,v) in m1
         sk2 += k
         sv2 += v
@@ -524,12 +530,12 @@ function test3()
     @assert(count == N)
     @assert(sk2 == sk)
     @assert(sv == sv2)
-    sk2 = 0x00000000
+    sk2 = zero1
     for k in keys(m1)
         sk2 += k
     end
     @assert(sk2 == sk)
-    sv2 = 0x00000000
+    sv2 = zero1
     for v in values(m1)
         sv2 += v
     end
@@ -742,7 +748,7 @@ end
 
 test1()
 test2()
-test3()
+test3(0x00000000)
 test5()
 test6(2, "soothingly", "compere")
 

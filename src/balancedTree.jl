@@ -285,7 +285,7 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
     ## Check if there is a free space in the 
     ## data array (due to previous deletions);
     ## if so, use it, else create a new space.
-    if size(t.freedatainds,1) == 0
+    if isempty(t.freedatainds)
         newind = size(t.data, 1) + 1
         pushdata = true
     else
@@ -357,7 +357,7 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
             # Replace p1 with a new 2-node and insert another 2-node at
             # index newparentnum.
             t.tree[p1] = lefttreenodenew
-            if size(t.freetreeinds,1) == 0
+            if isempty(t.freetreeinds) == 0
                 push!(t.tree, righttreenodenew)
                 newparentnum = size(t.tree,1)
             else
@@ -435,7 +435,7 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
     if splitroot
         newroot = TreeNode{K}(oldchild, newchild, 0, 0,
                               minkeynewchild, minkeynewchild)
-        if size(t.freetreeinds,1) == 0
+        if isempty(t.freetreeinds)
             push!(t.tree, newroot)
             newrootloc = size(t.tree,1)
         else

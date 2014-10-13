@@ -298,79 +298,32 @@ end
 function next(::SDIterableTypesBase, state::SDIterationState)
     dt, t, ni = nextbase(state)
     (dt.k, dt.d), ni
-
-    #c = nextbase(state)
-    #return (c[1][1], c[1][2]), c[2]
-   
-    #m = state.m
-    #sn = state.next
-    #(sn < 3 || !(sn in m.bt.useddatacells)) && throw(BoundsError())
-    #(m.bt.data[sn].k, m.bt.data[sn].d),
-    #SDIterationState(m, nextloc0(m.bt, sn), state.final)
-
 end
 
 function next(::SDKeyIteration, state::SDIterationState)
     dt, t, ni = nextbase(state)
     dt.k, ni
-
-    #c = nextbase(state)
-    #return c[1][1], c[2]
-    #m = state.m
-    #sn = state.next
-    #(sn < 3 || !(sn in m.bt.useddatacells)) && throw(BoundsError())
-    #m.bt.data[sn].k,
-    #SDIterationState(m, nextloc0(m.bt, sn), state.final)
 end
 
 function next(::SDValIteration, state::SDIterationState)
     dt, t, ni = nextbase(state)
     dt.d, ni
-
-    #c = nextbase(state)
-    #return c[1][2], c[2]
-    #m = state.m
-    #sn = state.next
-    #(sn < 3 || !(sn in m.bt.useddatacells)) && throw(BoundsError())
-    #m.bt.data[sn].d,
-    #SDIterationState(m, nextloc0(m.bt, sn), state.final)
 end
 
 
 function next(::SDTokenIteration, state::SDIterationState)
     dt, t, ni = nextbase(state)
-    (t,(dt.k, dt.d)), ni
-    #c = nextbase(state)
-    #return (c[1][3], (c[1][1], c[1][2])), c[2]
-    #m = state.m
-    #sn = state.next
-    #(sn < 3 || !(sn in m.bt.useddatacells)) && throw(BoundsError())
-    #(sdtoken_construct(m, sn),(m.bt.data[sn].k, m.bt.data[sn].d)),
-    #SDIterationState(m, nextloc0(m.bt, sn), state.final)
+    (t, (dt.k, dt.d)), ni
 end
 
 function next(::SDTokenKeyIteration, state::SDIterationState)
     dt, t, ni = nextbase(state)
-    (t,dt.k), ni
-    #c = nextbase(state)
-    #return (c[1][3], c[1][1]), c[2]
-    #m = state.m
-    #sn = state.next
-    #(sn < 3 || !(sn in m.bt.useddatacells)) && throw(BoundsError())
-    #(sdtoken_construct(m, sn), m.bt.data[sn].k), 
-    #SDIterationState(m, nextloc0(m.bt, sn), state.final)
+    (t, dt.k), ni
 end
 
 function next(::SDTokenValIteration, state::SDIterationState)
     dt, t, ni = nextbase(state)
-    (t,dt.d), ni
-    #c = nextbase(state)
-    #return (c[1][3], c[1][2]), c[2]
-    #m = state.m
-    #sn = state.next
-    #(sn < 3 || !(sn in m.bt.useddatacells)) && throw(BoundsError())
-    #(sdtoken_construct(m, sn), m.bt.data[sn].d), 
-    #SDIterationState(m, nextloc0(m.bt, sn), state.final)
+    (t, dt.d), ni
 end
 
 
