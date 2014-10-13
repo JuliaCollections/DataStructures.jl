@@ -417,6 +417,7 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
         ## a 3-node by giving it a child3 field that is >0.
         ## Encountering a 2-node halts the ascent up the tree.
 
+        isleaf = curdepth == depth
         oldtreenode = t.tree[p1]
         t.tree[p1] = (cmp2(ord,oldtreenode, minkeynewchild, isleaf) == 1)?
           TreeNode{K}(oldtreenode.child1, newchild, oldtreenode.child2,
@@ -425,7 +426,7 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
           TreeNode{K}(oldtreenode.child1, oldtreenode.child2, newchild,
                       oldtreenode.parent,
                       oldtreenode.splitkey1, minkeynewchild)
-        if curdepth == depth
+        if isleaf
             replaceparent!(t.data, newind, p1)
             push!(t.useddatacells, newind)
         end
