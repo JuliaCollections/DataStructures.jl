@@ -196,15 +196,17 @@ end
 
 
 function _compact_order{K,V}(h::HashDict{K,V,Ordered})
-    if h.count == length(h.order)
-        return
+    h.count == length(h.order) && return
+
+    local i,j
+
+    for i = 1:length(h.order)-1
+        h.order[i] == 0 && break
     end
 
-    i = 1
-    while h.order[i] > 0;  i += 1; end
-
-    j = i+1
-    while h.order[j] == 0; j += 1; end
+    for j = i+1:length(h.order)
+        h.order[j] != 0 && break
+    end
 
     for k = j:length(h.order)
         idx = h.order[k]
