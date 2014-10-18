@@ -1,9 +1,10 @@
-tests = ["deque", 
-		 "stack_and_queue", 
+tests = ["deque",
+		 "stack_and_queue",
 		 "accumulator",
+                 "indexer",
 		 "classifiedcollections",
-		 "disjoint_set", 
-		 "binheap", 
+		 "disjoint_set",
+		 "binheap",
 		 "mutable_binheap",
 		 "defaultdict",
 		 "ordereddict",
@@ -16,4 +17,3 @@ for t in tests
 	println("$fp ...")
 	include(fp)
 end
-

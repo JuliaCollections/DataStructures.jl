@@ -13,6 +13,7 @@ module DataStructures
     export capacity, num_blocks, front, back, top, sizehint
 
     export Accumulator, counter
+    export Indexer, get_index, reverse_index
     export ClassifiedCollections
     export classified_lists, classified_sets, classified_counters
 
@@ -36,6 +37,7 @@ module DataStructures
     include("stack.jl")
     include("queue.jl")
     include("accumulator.jl")
+    include("indexer.jl")
     include("classifiedcollections.jl")
     include("disjoint_set.jl")
     include("heaps.jl")

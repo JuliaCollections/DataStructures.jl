@@ -10,6 +10,7 @@ This package implements a variety of data structures, including
 * Stack
 * Queue
 * Accumulators and Counters
+* Indexer
 * Disjoint Sets
 * Binary Heap
 * Mutable Binary Heap
@@ -104,7 +105,28 @@ pop!(a, x)       # remove a key x from a, and returns its current value
 merge(a, a2)     # return a new accumulator/counter that combines the
                  # values/counts in both a and a2
 ```
+## Indexer
 
+An `Indexer` is a simple tool to construct arrays that correspond to non-integer objects. For example, suppose we wanted to construct a permutation matrix mapping "foo" -> "bar", "bar" -> "baz", "baz" -> "foo". The `Indexer` is used simply to track the correspondence "foo" -> 1, "bar" -> 2, etc.
+
+```julia
+idx = Indexer()
+m = zeros(Float64,(3,3))
+m[get_index(idx, "foo"), get_index(idx, "bar")] = 1
+m[get_index(idx, "bar"), get_index(idx, "baz")] = 1
+m[get_index(idx, "baz"), get_index(idx, "foo")] = 1
+```
+
+After this, `m` is:
+
+```
+3x3 Array{Float64,2}:
+ 0.0  1.0  0.0
+ 0.0  0.0  1.0
+ 1.0  0.0  0.0
+```
+
+An indexer can be created with a non-zero index if desired (e.g. `Indexer(3)` will start at 3), and can be prepopulated with a collection (e.g. `Indexer(["foo", "bar", "baz"])`).
 
 ## Disjoint Sets
 
