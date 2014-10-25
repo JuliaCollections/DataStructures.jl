@@ -81,7 +81,7 @@ hmin = mutable_binary_minheap(Int)
 @test length(hmin) == 0
 @test isempty(hmin)
 
-ss = {
+ss = Any[
     [4],
     [1, 4],
     [1, 4, 3],
@@ -91,7 +91,7 @@ ss = {
     [1, 2, 3, 4, 16, 9, 10],
     [1, 2, 3, 4, 16, 9, 10, 14],
     [1, 2, 3, 4, 16, 9, 10, 14, 8],
-    [1, 2, 3, 4, 7, 9, 10, 14, 8, 16]}
+    [1, 2, 3, 4, 7, 9, 10, 14, 8, 16]]
 
 for i = 1 : length(vs)
     ia = push!(hmin, vs[i])
@@ -106,7 +106,7 @@ hmax = mutable_binary_maxheap(Int)
 @test length(hmax) == 0
 @test isempty(hmax)
 
-ss = {
+ss = Any[
     [4],
     [4, 1],
     [4, 1, 3],
@@ -116,7 +116,7 @@ ss = {
     [16, 4, 10, 1, 2, 3, 9],
     [16, 14, 10, 4, 2, 3, 9, 1],
     [16, 14, 10, 8, 2, 3, 9, 1, 4],
-    [16, 14, 10, 8, 7, 3, 9, 1, 4, 2]}
+    [16, 14, 10, 8, 7, 3, 9, 1, 4, 2]]
 
 for i = 1 : length(vs)
     ia = push!(hmax, vs[i])
