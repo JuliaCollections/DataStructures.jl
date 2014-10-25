@@ -14,15 +14,17 @@
 # subclassed.
 #
 
-immutable DefaultDictBase{K,V,F,D<:Associative{K,V}} <: Associative{K,V}
+immutable DefaultDictBase{K,V,F,D} <: Associative{K,V}
     default::F
     d::D
 
-    DefaultDictBase(x::F, kv::AbstractArray{(K,V)}) = new(x, D(kv))
-    DefaultDictBase(x::F, d::DefaultDictBase) = DefaultDictBase(x, d.d)
-    DefaultDictBase(x::F, d::D=D()) = new(x, d)
-    DefaultDictBase(x, ks, vs) = new(x, D(ks,vs))
+    check_D(D,K,V) = (D <: Associative{K,V}) ||
+        error("Default dict must be <: Associative{K,V}")
 
+    DefaultDictBase(x::F, kv::AbstractArray{(K,V)}) = (check_D(D,K,V); new(x, D(kv)))
+    DefaultDictBase(x::F, d::DefaultDictBase) = (check_D(D,K,V); DefaultDictBase(x, d.d))
+    DefaultDictBase(x::F, d::D=D()) = (check_D(D,K,V); new(x, d))
+    DefaultDictBase(x, ks, vs) = (check_D(D,K,V); new(x, D(ks,vs)))
 end
 
 # Constructors
@@ -60,19 +62,19 @@ getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 if !applicable(get!, (Dict,))
     global getindex
     function getindex{K,V,F<:Base.Callable}(d::DefaultDictBase{K,V,F,Dict}, key)
-        if !haskey(d.d, key) 
+        if !haskey(d.d, key)
             return (d.d[key] = d.default())
         end
         return d.d[key]
-    end    
+    end
 
     function getindex{K,V,F}(d::DefaultDictBase{K,V,F,Dict}, key)
-        if !haskey(d.d, key) 
+        if !haskey(d.d, key)
             return (d.d[key] = d.default)
         end
         return d.d[key]
     end
-end    
+end
 
 
 ################
@@ -163,4 +165,3 @@ end
 
 # similar{K,V,F}(d::DefaultSortedDict{K,V,F}) = DefaultSortedDict{K,V,F}(d.d.default)
 # in{T<:DefaultSortedDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
-

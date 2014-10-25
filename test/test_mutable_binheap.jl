@@ -41,7 +41,7 @@ function verify_heap{VT,Comp}(h::MutableBinaryHeap{VT,Comp})
         if lc <= n
             if compare(comp, nodes[lc].value, v)
                 return false
-            end            
+            end
         end
         rc = lc + 1
         if rc <= n
@@ -81,8 +81,8 @@ hmin = mutable_binary_minheap(Int)
 @test length(hmin) == 0
 @test isempty(hmin)
 
-ss = {
-    [4], 
+ss = Any[
+    [4],
     [1, 4],
     [1, 4, 3],
     [1, 2, 3, 4],
@@ -91,7 +91,7 @@ ss = {
     [1, 2, 3, 4, 16, 9, 10],
     [1, 2, 3, 4, 16, 9, 10, 14],
     [1, 2, 3, 4, 16, 9, 10, 14, 8],
-    [1, 2, 3, 4, 7, 9, 10, 14, 8, 16]}
+    [1, 2, 3, 4, 7, 9, 10, 14, 8, 16]]
 
 for i = 1 : length(vs)
     ia = push!(hmin, vs[i])
@@ -106,7 +106,7 @@ hmax = mutable_binary_maxheap(Int)
 @test length(hmax) == 0
 @test isempty(hmax)
 
-ss = {
+ss = Any[
     [4],
     [4, 1],
     [4, 1, 3],
@@ -116,7 +116,7 @@ ss = {
     [16, 4, 10, 1, 2, 3, 9],
     [16, 14, 10, 4, 2, 3, 9, 1],
     [16, 14, 10, 8, 2, 3, 9, 1, 4],
-    [16, 14, 10, 8, 7, 3, 9, 1, 4, 2]}
+    [16, 14, 10, 8, 7, 3, 9, 1, 4, 2]]
 
 for i = 1 : length(vs)
     ia = push!(hmax, vs[i])
@@ -169,7 +169,7 @@ hmax = mutable_binary_maxheap(xs)
 @test verify_heap(hmin)
 @test verify_heap(hmax)
 
-for t = 1 : 1000    
+for t = 1 : 1000
     i = rand(1:100)
     v = rand()
     xs[i] = v
@@ -182,4 +182,3 @@ for t = 1 : 1000
     @test isequal(list_values(hmin), xs)
     @test isequal(list_values(hmax), xs)
 end
-
