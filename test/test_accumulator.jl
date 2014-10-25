@@ -61,6 +61,3 @@ ctm = merge(ct2, ct3)
 @test pop!(ctm, "b") == 22
 @test !haskey(ctm, "b")
 @test ctm["b"] == 0
-
-
-

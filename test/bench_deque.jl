@@ -5,9 +5,9 @@ using DataStructures
 # push_back
 
 function batch_pushback!{Container,T}(v::Container, n::Int, e::T)
-	for i = 1 : n
-		push!(v, e)
-	end
+    for i = 1 : n
+        push!(v, e)
+    end
 end
 
 v = Int[]
@@ -27,9 +27,9 @@ println("push back 10^7 integers:")
 # push_front
 
 function batch_pushfront!{Container,T}(v::Container, n::Int, e::T)
-	for i = 1 : n
-		unshift!(v, e)
-	end
+    for i = 1 : n
+        unshift!(v, e)
+    end
 end
 
 v = Int[]
@@ -49,8 +49,8 @@ println("push front 10^7 integers:")
 # traverse
 
 function traverse(container)
-	for e in container
-	end
+    for e in container
+    end
 end
 
 traverse(v)
@@ -62,4 +62,3 @@ t2 = @elapsed traverse(q)
 println("traverse 10^7 integers:")
 @printf("    Vector:   elapsed = %8.4fs\n", t1)
 @printf("    Deque:    elapsed = %8.4fs\n", t2)
-

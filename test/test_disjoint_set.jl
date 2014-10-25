@@ -84,5 +84,3 @@ r0 = [1, 1, 1, 1, 1, 1, 7, 7, 7, 7, 11]
 r = [find_root(s, i) for i in [1 : 10, 17] ]
 @test isa(r, Vector{Int})
 @test isequal(r, r0)
-
-

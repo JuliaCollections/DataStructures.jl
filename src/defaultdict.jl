@@ -60,19 +60,19 @@ getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 if !applicable(get!, (Dict,))
     global getindex
     function getindex{K,V,F<:Base.Callable}(d::DefaultDictBase{K,V,F,Dict}, key)
-        if !haskey(d.d, key) 
+        if !haskey(d.d, key)
             return (d.d[key] = d.default())
         end
         return d.d[key]
-    end    
+    end
 
     function getindex{K,V,F}(d::DefaultDictBase{K,V,F,Dict}, key)
-        if !haskey(d.d, key) 
+        if !haskey(d.d, key)
             return (d.d[key] = d.default)
         end
         return d.d[key]
     end
-end    
+end
 
 
 ################
@@ -163,4 +163,3 @@ end
 
 # similar{K,V,F}(d::DefaultSortedDict{K,V,F}) = DefaultSortedDict{K,V,F}(d.d.default)
 # in{T<:DefaultSortedDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
-

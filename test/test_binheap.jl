@@ -28,7 +28,7 @@ hmin = binary_minheap(Int)
 @test isempty(hmin)
 
 ss = {
-    [4], 
+    [4],
     [1, 4],
     [1, 4, 3],
     [1, 2, 3, 4],
@@ -63,7 +63,7 @@ ss = {
     [16, 14, 10, 8, 7, 3, 9, 1, 4, 2]}
 
 for i = 1 : length(vs)
-    push!(hmax, vs[i])    
+    push!(hmax, vs[i])
     @test length(hmax) == i
     @test !isempty(hmax)
     @test isequal(hmax.valtree, ss[i])

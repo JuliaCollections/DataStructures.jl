@@ -9,9 +9,9 @@ const T0 = 10
 const T = 10^6
 
 function batch_union!(s::IntDisjointSets, x::Vector{Int}, y::Vector{Int})
-	for i = 1 : length(x)
-		@inbounds union!(s, x[i], y[i])
-	end
+    for i = 1 : length(x)
+        @inbounds union!(s, x[i], y[i])
+    end
 end
 
 s = IntDisjointSets(n)
@@ -29,4 +29,3 @@ x = rand(1:n, T)
 y = rand(1:n, T)
 
 @time batch_union!(s, x, y)
-

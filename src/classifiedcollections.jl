@@ -5,7 +5,7 @@
 #
 
 type ClassifiedCollections{K, Collection}
-	map::Dict{K, Collection}
+    map::Dict{K, Collection}
 end
 
 ## constructors
@@ -35,19 +35,18 @@ keys(cc::ClassifiedCollections) = keys(cc.map)
 ## iteration
 
 start(cc::ClassifiedCollections) = start(cc.map)
-next(cc::ClassifiedCollections, state) = next(cc.map, state) 
+next(cc::ClassifiedCollections, state) = next(cc.map, state)
 done(cc::ClassifiedCollections, state) = done(cc.map, state)
 
 # manipulation
 
 function push!{K, C}(cc::ClassifiedCollections{K, C}, key::K, e)
-	c = get(cc.map, key, nothing)
-	if is(c, nothing)
-		c = _create_empty(C)
-		cc.map[key] = c
-	end
-	push!(c, e)
+    c = get(cc.map, key, nothing)
+    if is(c, nothing)
+        c = _create_empty(C)
+        cc.map[key] = c
+    end
+    push!(c, e)
 end
 
 pop!{K}(cc::Accumulator{K}, key::K) = pop!(cc.map, key)
-
