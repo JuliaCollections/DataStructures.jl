@@ -42,7 +42,7 @@ push!(ct, ct2)
 @test ct["b"] == 7
 @test ct["c"] == 2
 
-ct3 = counter((ASCIIString=>Int)["a"=>10, "b"=>20])
+ct3 = counter(Dict([("a",10), ("b",20)]))
 @test isa(ct3, Accumulator{ASCIIString,Int})
 @test haskey(ct3, "a")
 @test haskey(ct3, "b")
@@ -61,6 +61,3 @@ ctm = merge(ct2, ct3)
 @test pop!(ctm, "b") == 22
 @test !haskey(ctm, "b")
 @test ctm["b"] == 0
-
-
-

@@ -5,7 +5,7 @@
 #   Heap interface specification
 #
 #   Each heap is associated with a handle type (H), and
-#   a value type v. 
+#   a value type v.
 #
 #   Here, the value type must be comparable, and a handle
 #   is an object through which one can refer to a specific
@@ -29,18 +29,18 @@
 #   - pop!(h)           removes the top value, and
 #                       returns it
 #
-#  For mutable heaps, it should also support 
+#  For mutable heaps, it should also support
 #
 #   - push!(h, v)       adds a value to the heap and
 #                       returns a handle to v
 #
-#   - update!(h, i, v)  updates the value of an element 
+#   - update!(h, i, v)  updates the value of an element
 #                       (referred to by the handle i)
-#   
+#
 ###########################################################
 
 # HT: handle type
-# VT: value type  
+# VT: value type
 
 abstract AbstractHeap{VT}
 

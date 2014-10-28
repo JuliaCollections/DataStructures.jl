@@ -87,7 +87,7 @@ function reverse{T}(l::LinkedList{T})
     l2 = nil(T)
     for h in l
         l2 = cons(h, l2)
-    end    
+    end
     l2
 end
 

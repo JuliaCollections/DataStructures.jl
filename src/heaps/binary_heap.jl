@@ -6,23 +6,23 @@
 #
 #################################################
 
-function _heap_bubble_up!{Comp,T}(comp::Comp, valtree::Array{T}, i::Int) 
+function _heap_bubble_up!{Comp,T}(comp::Comp, valtree::Array{T}, i::Int)
     i0::Int = i
     @inbounds v = valtree[i]
-    
+
     while i > 1  # nd is not root
         p = i >> 1
         @inbounds vp = valtree[p]
-        
+
         if compare(comp, v, vp)
             # move parent downward
             @inbounds valtree[i] = vp
             i = p
-        else  
+        else
             break
         end
     end
-    
+
     if i != i0
         @inbounds valtree[i] = v
     end
@@ -33,7 +33,7 @@ function _heap_bubble_down!{Comp,T}(comp::Comp, valtree::Array{T}, i::Int)
     swapped = true
     n = length(valtree)
     last_parent = n >> 1
-    
+
     while swapped && i <= last_parent
         lc = i << 1
         if lc < n   # contains both left and right children
@@ -54,7 +54,7 @@ function _heap_bubble_down!{Comp,T}(comp::Comp, valtree::Array{T}, i::Int)
                 else
                     swapped = false
                 end
-            end                        
+            end
         else        # contains only left child
             @inbounds lv = valtree[lc]
             if compare(comp, lv, v)
@@ -64,8 +64,8 @@ function _heap_bubble_down!{Comp,T}(comp::Comp, valtree::Array{T}, i::Int)
                 swapped = false
             end
         end
-    end    
-    
+    end
+
     valtree[i] = v
 end
 
@@ -73,7 +73,7 @@ end
 function _binary_heap_pop!{Comp,T}(comp::Comp, valtree::Array{T})
     # extract root
     v = valtree[1]
-    
+
     if length(valtree) == 1
         empty!(valtree)
     else
@@ -105,11 +105,11 @@ end
 type BinaryHeap{T,Comp} <: AbstractHeap{T}
     comparer::Comp
     valtree::Array{T}
-    
+
     function BinaryHeap(comp::Comp)
         new(comp, Array(T,0))
     end
-    
+
     function BinaryHeap(comp::Comp, xs)  # xs is an iterable collection of values
         valtree = _make_binary_heap(comp, T, xs)
         new(comp, valtree)
@@ -143,4 +143,3 @@ end
 top(h::BinaryHeap) = h.valtree[1]
 
 pop!{T}(h::BinaryHeap{T}) = _binary_heap_pop!(h.comparer, h.valtree)
-

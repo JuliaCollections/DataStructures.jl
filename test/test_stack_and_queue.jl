@@ -53,7 +53,7 @@ end
 
 for i = 1 : n
     x = dequeue!(s)
-    @test x == i 
+    @test x == i
     if i < n
         @test front(s) == i + 1
         @test back(s) == n

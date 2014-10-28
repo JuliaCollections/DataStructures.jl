@@ -35,3 +35,20 @@ end
 @test collect(values(d)) == [2:26]
 @test collect(d) == [(a,i) for (a,i) in zip('b':'z', 2:26)]
 
+# Test for #60
+
+od60 = OrderedDict{Int,Int}()
+od60[1] = 2
+
+ranges = [2:5,6:9,10:13]
+for range in ranges
+    for i = range
+        od60[i] = i+1
+    end
+    for i = range
+        delete!( od60, i )
+    end
+end
+od60[14]=15
+
+@test od60[14] == 15

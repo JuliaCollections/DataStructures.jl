@@ -74,4 +74,3 @@ ch = c["high"]
 @test cl[3.] == 1
 @test ch[4.] == 1
 @test ch[5.] == 2
-
