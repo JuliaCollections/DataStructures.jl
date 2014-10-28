@@ -28,4 +28,3 @@ for c in 'a':'z'
 end
 
 @test collect(d) == ['a':'z']
-

@@ -8,7 +8,7 @@
 
 type DequeBlock{T}
     data::Vector{T}  # only data[front:back] is valid
-    capa::Int   
+    capa::Int
     front::Int
     back::Int
     prev::DequeBlock{T}  # ref to previous block
@@ -62,12 +62,12 @@ type Deque{T}
     len::Int
     head::DequeBlock{T}
     rear::DequeBlock{T}
-    
+
     function Deque(blksize::Int)
         head = rear = rear_deque_block(T, blksize)
         new(1, blksize, 0, head, rear)
     end
-    
+
     Deque() = Deque{T}(DEFAULT_DEQUEUE_BLOCKSIZE)
 end
 
@@ -104,9 +104,9 @@ function next{T}(q::Deque{T}, s::DequeIterator{T})
     cb = s.cblock
     i::Int = s.i
     x::T = cb.data[i]
-    
+
     is_done = false
-    
+
     i += 1
     if i > cb.back
         cb_next = cb.next
@@ -116,8 +116,8 @@ function next{T}(q::Deque{T}, s::DequeIterator{T})
             cb = cb_next
             i = 1
         end
-    end 
-    
+    end
+
     (x, DequeIterator{T}(is_done, cb, i))
 end
 
@@ -150,10 +150,10 @@ function dump(io::IO, q::Deque)
             print(io, ' ')
         end
         println(io)
-        
+
         cb_next::DequeBlock = cb.next
         if !is(cb, cb_next)
-            cb = cb_next            
+            cb = cb_next
             i += 1
         else
             break
@@ -173,10 +173,10 @@ function empty!{T}(q::Deque{T})
             cb = cb.prev
         end
     end
-    
+
     # clean the head block (but retain the block itself)
     reset!(q.head, 1)
-    
+
     # reset queue fields
     q.nblocks = 1
     q.len = 0
@@ -187,12 +187,12 @@ end
 
 function push!{T}(q::Deque{T}, x)  # push back
     rear = q.rear
-    
+
     if isempty(rear)
         rear.front = 1
         rear.back = 0
     end
-    
+
     if rear.back < rear.capa
         @inbounds rear.data[rear.back += 1] = convert(T, x)
     else
@@ -201,7 +201,7 @@ function push!{T}(q::Deque{T}, x)  # push back
         new_rear.data[1] = convert(T, x)
         new_rear.prev = rear
         q.rear = rear.next = new_rear
-        q.nblocks += 1 
+        q.nblocks += 1
     end
     q.len += 1
     q
@@ -209,13 +209,13 @@ end
 
 function unshift!{T}(q::Deque{T}, x)   # push front
     head = q.head
-    
+
     if isempty(head)
         n = head.capa
         head.front = n + 1
         head.back = n
     end
-    
+
     if head.front > 1
         @inbounds head.data[head.front -= 1] = convert(T, x)
     else
@@ -226,7 +226,7 @@ function unshift!{T}(q::Deque{T}, x)   # push front
         new_head.next = head
         q.head = head.prev = new_head
         q.nblocks += 1
-    end 
+    end
     q.len += 1
     q
 end
@@ -245,8 +245,8 @@ function pop!{T}(q::Deque{T})   # pop back
             q.rear = rear.prev::DequeBlock{T}
             q.rear.next = q.rear
             q.nblocks -= 1
-        end        
-    end 
+        end
+    end
     q.len -= 1
     x
 end
@@ -256,7 +256,7 @@ function shift!{T}(q::Deque{T})  # pop front
     isempty(q) && error("Attempted to pop from an empty deque.")
     head = q.head
     @assert head.back >= head.front
-    
+
     @inbounds x = head.data[head.front]
     head.front += 1
     if head.back < head.front
@@ -271,4 +271,3 @@ function shift!{T}(q::Deque{T})  # pop front
     q.len -= 1
     x
 end
-

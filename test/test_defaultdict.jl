@@ -47,7 +47,7 @@ end
 
 # Starting from an existing dictionary
 # Note: dictionary is copied upon construction
-e = ['a'=>1, 'b'=>3, 'c'=>5]
+e = Dict([('a',1), ('b',3), ('c',5)])
 f = DefaultDict(0, e)
 @test f['d'] == 0
 @test_throws KeyError e['d']

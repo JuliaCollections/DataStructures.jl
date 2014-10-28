@@ -10,7 +10,7 @@ import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
 # implementation of the Dict implementation in Base allowing ordering
 # information to be maintained.
 
-# In particular, the HashDict stored in an OrderedDict is a 
+# In particular, the HashDict stored in an OrderedDict is a
 # HashDict{K,V,Ordered}
 
 # A HashDict{K,V,Unordered} would be equivalent to Base.Dict

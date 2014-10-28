@@ -1,23 +1,23 @@
-# A counter type 
+# A counter type
 
 type Accumulator{T, V<:Number}
-	map::Dict{T,V}
+    map::Dict{T,V}
 end
 
 ## constructors
 
-Accumulator{T,V<:Number}(::Type{T}, ::Type{V}) = Accumulator{T,V}((T=>V)[])
+Accumulator{T,V<:Number}(::Type{T}, ::Type{V}) = Accumulator{T,V}(Dict{T,V}())
 counter(T::Type) = Accumulator(T,Int)
 
 Accumulator{T,V<:Number}(dct::Dict{T,V}) = Accumulator{T,V}(copy(dct))
 counter{T}(dct::Dict{T,Int}) = Accumulator{T,Int}(copy(dct))
 
 function counter{T}(seq::AbstractArray{T})
-	ct = counter(T)
-	for x in seq
-		push!(ct, x)
-	end
-	return ct
+    ct = counter(T)
+    for x in seq
+        push!(ct, x)
+    end
+    return ct
 end
 
 copy{T,V<:Number}(ct::Accumulator{T,V}) = Accumulator{T,V}(copy(ct.map))
@@ -36,7 +36,7 @@ keys(ct::Accumulator) = keys(ct.map)
 ## iteration
 
 start(ct::Accumulator) = start(ct.map)
-next(ct::Accumulator, state) = next(ct.map, state) 
+next(ct::Accumulator, state) = next(ct.map, state)
 done(ct::Accumulator, state) = done(ct.map, state)
 
 
@@ -47,13 +47,12 @@ push!{T,V<:Number,V2<:Number}(ct::Accumulator{T,V}, x::T, a::V2) = push!(ct, x, 
 push!{T,V<:Number}(ct::Accumulator{T,V}, x::T) = push!(ct, x, one(V))
 
 function push!{T,V<:Number,V2<:Number}(ct::Accumulator{T,V}, r::Accumulator{T,V2})
-	for (x::T, v::V2) in r
-		push!(ct, x, v)
-	end
-	ct
+    for (x::T, v::V2) in r
+        push!(ct, x, v)
+    end
+    ct
 end
 
 pop!{T,V<:Number}(ct::Accumulator{T,V}, x::T) = pop!(ct.map, x)
 
 merge{T,V<:Number}(ct1::Accumulator{T,V}, ct2::Accumulator{T,V}) = push!(copy(ct1), ct2)
-
