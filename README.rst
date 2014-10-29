@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/JuliaLang/DataStructures.jl.svg?branch=master)](https://travis-ci.org/JuliaLang/DataStructures.jl)
+[![Coverage Status](https://img.shields.io/coveralls/JuliaLang/DataStructures.jl.svg)](https://coveralls.io/r/JuliaLang/DataStructures.jl)
+[![DataStructures](http://pkg.julialang.org/badges/DataStructures_release.svg)](http://pkg.julialang.org/?pkg=DataStructures&ver=release)
 
 =================
 DataStructures.jl
@@ -320,13 +323,13 @@ Sorted Containers: Overview & Orderings
 Currently one sorted container is provided:
 SortedDict. 
 *SortedDict* is similar to the built-in Julia type Dict
-except with the additional feature that the keys are stored in
+with the additional feature that the keys are stored in
 sorted order and can be efficiently iterated in this order.
-SortedDict is a subtype of Associative.  Formally, SortedDict is
+SortedDict is a subtype of Associative.  SortedDict is
 a parametrized type with three parameters, the key type ``K``, the
 value type ``V``, and the ordering type ``O``.
 
-SortedDict internally uses a 2-3 tree.  A 2-3 tree is a
+SortedDict internally uses a 2-3 tree, which is a
 kind of balanced tree and is described in many elementary data
 structure textbook.
 
@@ -345,8 +348,8 @@ The SortedDict type is accompanied by an auxiliary type called the *token*
 and is defined as type ``SDToken``.  A token is an item that stores
 the address of a single data item in the SortedDict and can be
 dereferenced in time O(1).
-For readers familiar with C++ standard
-containers, this notion of token is similar to the C++ iterator.
+This notion of token is similar to the concept of iterators used
+by C++ standard containers.
 Tokens can be explicitly advanced or regressed through the data in
 the sorted order; they are implicitly advanced or regressed via
 iteration loops defined below.
@@ -358,7 +361,7 @@ on the actual data.  The before-start token can be advanced,
 while the past-end token can be regressed.  A dereferencing operation on either
 leads to an error.  
 
-A token has two parts: one part refers to the container as a whole and the
+A token has two parts: the first part refers to the container as a whole and the
 second part refers to the particular item.  The second part is called a
 *semitoken*.  In some applications, one might need an auxiliary data structure
 that contains thousands of tokens addressing the same container.  In this
@@ -645,47 +648,19 @@ token.
 The following loops over the entire container ``m``, where
 ``m`` is a SortedDict::
 
-  for p in m
+  for (k,v) in m
      < body >
   end
 
-In this loop, ``p`` takes on successive (key,value) pairs (or
-keys in the case of SortedSet) according to 
-the sort order of the key.  In fact, ``p`` is a 3-tuple; the
-third entry of the tuple is used for the ``itertoken`` function.
-
-``itertoken(p)``
-  In the above loop, if ``itertoken(p)`` is called from within the
-  body, the result is a token that refers to the current item of
-  the loop.
-
-Therefore, there are two other ways to implement the above loop.
-The first way retrieves ``(k,v)`` without explicitly taking apart ``p``,
-but it precludes the possibility of calling ``itertoken``::
-
-   for (k,v) in m
-      < body >
-   end
-
-Finally, to extract ``(k,v)`` in the header
-and call ``itertoken`` later one writes::
-
-   for (k,v,extra) in m
-      i = itertoken((k,v,extra))
-      < remainder of body >
-   end
-
-Note that it is acceptable for the loop body above to invoke
-``delete!(i)``.  This is because the for-loop state already
-stores the next token at the beginning of the body, so
-``i`` does not need to be advanced at the end of the body.
-
+In this loop, ``(k,v)`` takes on successive (key,value) pairs 
+according to 
+the sort order of the key.  
 
 There are two ways to iterate over a subrange of a container.
 The first is the inclusive iteration::
 
-  for p in i1 : i2
-    <body>
+  for (k,v) in i1 : i2
+    < body >
   end
 
 Here, ``i1`` and ``i2`` are tokens that refer to the same container.
@@ -696,8 +671,8 @@ If ``isless(i2,i1)`` then the body is not executed.
 
 One can also define a loop that excludes the final item::
 
-  for p in excludelast(i1,i2)
-    <body>
+  for (k,v) in excludelast(i1,i2)
+    < body >
   end
 
 In this case, all the data addressed by tokens from ``i1`` up to but excluding
@@ -710,9 +685,7 @@ saved and used later for iteration.  At the time of construction of these object
 it is checked that the start and end tokens refer to the same container.
 The validity of the tokens is not checked until the loop initiates.
 
-In order to be compatible with associative types, SortedDict also has
-keys and values iterations which are as follows.  In both of these,
-``m`` is a SortedDict::
+One can iterate over just keys or just values::
 
    for k in keys(m)
       < body >
@@ -722,8 +695,32 @@ keys and values iterations which are as follows.  In both of these,
       < body >
    end
 
-The syntax of these loops does not allow for the extraction of a token
-in the loop body.
+In place of ``m`` in the above two examples, one may also write
+``i1:i2`` or ``excludelast(i1,i2)``.
+
+Finally, one can retrieve tokens during any of these iterations::
+
+   for (t,(k,v)) in tokens(m)
+       < body >
+   end
+
+   for (t,k) in tokens(keys(m))
+       < body >
+   end
+
+   for (t,v) in tokens(values(m))
+       < body >
+   end
+
+
+In each successive iteration, ``t`` is a token referring to the 
+current ``(k,v)`` pair.  In place of ``m`` in the above three snippets,
+one could also use ``i1:i2`` or ``excludelast(i1,i2)``.
+
+Note that it is acceptable for the loop body above to invoke
+``delete!(t)``.  This is because the for-loop state already
+stores the next token at the beginning of the body, so
+``t`` does not need to be advanced at the end of the body.
 
 
 ----------------
@@ -788,7 +785,9 @@ Other Functions
   does not imply any correspondence between semitokens for items
   in ``m1`` with those for ``m2``, nor does it imply hash-equivalence
   in the case that the user creates a ``Dict`` whose keys are 
-  SortedDict's.
+  SortedDict's.  (Hash equivalence is implied if the sort-order
+  used by the keys has the property that sort-equivalence implies
+  hash equivalence of keys.)
   Time: O(*cn* + *n* log *n*)
 
 ``packcopy(m)``
@@ -914,6 +913,26 @@ typically near the beginning::
     import Base.lt
     import DataStructures.eq
 
+--------------------------------
+Cautionary note on mutable keys
+--------------------------------
+As with ordinary Dicts, keys for SortedDict
+can be either mutable or immutable.  In the
+case of mutable keys, it is important that the keys should not be mutated
+once they are in the SortedDict else the indexing structure will be 
+corrupted.  For example, suppose a SortedDict ``m`` is defined in which the
+keys are of type ``Array{Int,1}.``  (For this to be possible, the user
+must provide an ``isless`` function or order object for ``Array{Int,1}`` since
+none is built into Julia.)  Suppose the values of ``m`` are of type ``Int``.
+Then the following statements may leave ``m`` in
+a corrupted state::
+
+   a = [1,2,3]
+   m[a] = 19
+   b = [4,5,6]
+   m[b] = 20
+   a[1] = 7
+
 
 -----------------------------------
 Performance of Sorted Containers
@@ -926,7 +945,8 @@ conducted on a Windows 8.1 64-bit machine with the
 Microsoft Visual Studio 12.0 compiler.
 
 There is a minor performance issue as follows:
-the container may hold onto two or three keys even after the
-data records containing those keys have been deleted, which
-may cause a memory drain in the case of large keys.
+the container may hold onto a small number of keys even after the
+data records containing those keys have been deleted.  This
+may cause a memory drain in the case of large keys or a failure
+of finalizers to be called when expected.
 All keys are released completely by the ``empty!`` function.
