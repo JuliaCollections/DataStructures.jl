@@ -23,18 +23,14 @@ function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
     SortedDict(bt1)
 end
 
-
-
-
 ## This function implements m[k]; it returns the
 ## data item associated with key k.
 
 function getindex{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
     i, exactfound = findkey(m.bt, convert(K,k_))
-    !exactfound && throw(KeyError(k))
+    !exactfound && throw(KeyError(k_))
     return m.bt.data[i].d
 end
-
 
 
 ## This function implements m[k]=d; it sets the 
@@ -64,9 +60,6 @@ function setindex!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},
     m
 end
 
-
-#sdtoken_construct{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},int1::Int) = 
-#    SDToken{K,D,Ord}(m, SDSemiToken(int1))
 
 sdtoken_construct{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord},int1::Int) = 
     SDToken{K,D,Ord}(m, SDSemiToken(int1))
@@ -227,8 +220,6 @@ immutable SDIterationState{K, D, Ord <: Ordering}
 end
 
 
-
-
 immutable ExcludeLast{K, D, Ord <: Ordering}
     m::SortedDict{K, D, Ord}
     first::Int
@@ -273,15 +264,8 @@ typealias SDAllIterable Union(SDIterableTypesBase, SDCompoundIterable)
 
 done(::SDAllIterable, state::SDIterationState) = state.next == state.final
 
-#function nextbase(state::SDIterationState) 
-#    m = state.m
-#    sn = state.next
-#    (sn < 3 || !(sn in m.bt.useddatacells)) && throw(BoundsError())
-#    (m.bt.data[sn].k, m.bt.data[sn].d, sdtoken_construct(m, sn)),
-#    SDIterationState(m, nextloc0(m.bt, sn), state.final)
-#end
 
-function nextbase(state::SDIterationState)
+function nexthelper(state::SDIterationState)
     m = state.m
     sn = state.next
     (sn < 3 || !(sn in m.bt.useddatacells)) && throw(BoundsError())
@@ -291,33 +275,33 @@ end
 
 
 function next(::SDIterableTypesBase, state::SDIterationState)
-    dt, t, ni = nextbase(state)
+    dt, t, ni = nexthelper(state)
     (dt.k, dt.d), ni
 end
 
 function next(::SDKeyIteration, state::SDIterationState)
-    dt, t, ni = nextbase(state)
+    dt, t, ni = nexthelper(state)
     dt.k, ni
 end
 
 function next(::SDValIteration, state::SDIterationState)
-    dt, t, ni = nextbase(state)
+    dt, t, ni = nexthelper(state)
     dt.d, ni
 end
 
 
 function next(::SDTokenIteration, state::SDIterationState)
-    dt, t, ni = nextbase(state)
+    dt, t, ni = nexthelper(state)
     (t, (dt.k, dt.d)), ni
 end
 
 function next(::SDTokenKeyIteration, state::SDIterationState)
-    dt, t, ni = nextbase(state)
+    dt, t, ni = nexthelper(state)
     (t, dt.k), ni
 end
 
 function next(::SDTokenValIteration, state::SDIterationState)
-    dt, t, ni = nextbase(state)
+    dt, t, ni = nexthelper(state)
     (t, dt.d), ni
 end
 
@@ -458,7 +442,7 @@ end
 ## the same (K,D) pairs.  This sense of equality does not mean
 ## that indices valid for one are also valid for the other.
 
-function samecontents{K,D,Ord <: Ordering}(m1::SortedDict{K,D,Ord},
+function isequal{K,D,Ord <: Ordering}(m1::SortedDict{K,D,Ord},
                                       m2::SortedDict{K,D,Ord})
     p1 = startof(m1)
     p2 = startof(m2)

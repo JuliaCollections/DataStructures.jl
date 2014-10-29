@@ -39,7 +39,7 @@ module DataStructures
     export searchsortedafter
     export enumerate_ind, packcopy, packdeepcopy
     export excludelast, tokens
-    export orderobject, Lt, samecontents
+    export orderobject, Lt
 
 
     include("delegate.jl")

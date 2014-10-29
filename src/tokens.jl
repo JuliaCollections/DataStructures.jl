@@ -1,9 +1,10 @@
 module Tokens
 
-abstract AbstractSemiToken
 import Base.isless
 import Base.isequal
 import Base.colon
+
+abstract AbstractSemiToken
 
 immutable IntSemiToken <: AbstractSemiToken
     address::Int
@@ -18,16 +19,16 @@ end
 semi(i::Token) = i.semitoken
 container(i::Token) = i.container
 assemble(m, s::AbstractSemiToken) = Token(m,s)
-deref_key(i::Token) = error("undefined operation")
-deref_value(i::Token) = error("undefined operation")
-deref(i::Token) = error("undefined operation")
-status(i::Token) = error("undefined operation")
-delete!(i::Token) = error("undefined operation")
-advance(i::Token) = error("undefined operation")
-regress(i::Token) = error("undefined operation")
-isless(i::Token, j::Token) = error("undefined operation")
-isequal(i::Token, j::Token) = error("undefined operation")
-colon(i::Token, j::Token) = error("undefined operation")
+deref_key(i::Token) = nothing
+deref_value(i::Token) = nothing
+deref(i::Token) = nothing
+status(i::Token) = nothing
+delete!(i::Token) = nothing
+advance(i::Token) = nothing
+regress(i::Token) = nothing
+isless(i::Token, j::Token) = nothing
+isequal(i::Token, j::Token) = nothing
+colon(i::Token, j::Token) = nothing
 
 
 export semi, container, assemble, deref_key, deref_value

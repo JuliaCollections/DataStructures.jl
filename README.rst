@@ -361,7 +361,7 @@ on the actual data.  The before-start token can be advanced,
 while the past-end token can be regressed.  A dereferencing operation on either
 leads to an error.  
 
-A token has two parts: the first part refers to the container as a whole and the
+A token has two parts: the first part refers to the container as a whole, and the
 second part refers to the particular item.  The second part is called a
 *semitoken*.  In some applications, one might need an auxiliary data structure
 that contains thousands of tokens addressing the same container.  In this
@@ -399,31 +399,29 @@ Constructors for Sorted Containers
 
 
 
-
 ---------------------------------
 Complexity of Sorted Containers
 ---------------------------------
 
 In the list of functions below, the complexity of the various
-operations is given.  For example, O(*c* log *n*) means that the function
-requires a number of operations
-logarithmic in *n*, where *n* is the current size 
-(number of items) of the
+operations is given.  In these measures,
+*n* is the current size 
+(number of items) in the
 container at the time of the function call and *c* denotes the
 time needed to compare two keys.
-
 
 --------------------------------------
 Navigating the Containers Using Tokens
 --------------------------------------
 ``m[k]``
-  Argument ``m`` is a SortedDict and ``k`` is a key.  On the right-hand side
-  of an expression, this retrieves the value associated with the key
-  (or ``KeyError`` if none).  On the left-hand side, this assigns or
+  Argument ``m`` is a SortedDict and ``k`` is a key.  In an 
+  expression, this retrieves the value associated with the key
+  (or ``KeyError`` if none).  On the left-hand side of an
+  assignment, this assigns or
   reassigns the value associated with the key.  (For assigning and reassigning,
   see also ``insert!`` below.)  Time: O(*c* log *n*)
 
-``findtoken(m,k)``
+``find(m,k)``
   Argument ``m`` is a SortedDict and argument ``k`` is a key.
   This function returns a token that refers to the item whose key
   is ``k``, or 
@@ -496,7 +494,7 @@ Navigating the Containers Using Tokens
 
 ``regress(i)``
   Argument 
-  ``i`` is a token.  This function returns the token  the
+  ``i`` is a token.  This function returns the token of the
   previous entry in the container according to the sort order of the
   keys.  If ``i`` indexes the first item, this routine returns the before-start
   token.  It is an error to invoke this function if ``i`` is the
@@ -576,10 +574,10 @@ Inserting & Deleting in Sorted Containers
 
 ``m[st]``
   If ``st`` is a semitoken (extracted from a token for 
-  SortedDict ``m`` via the ``semiextract`` function
+  SortedDict ``m`` via the ``semi`` function
   below), then ``m[st]`` refers to
   the value field of the (key,value) pair that the full
-  token refers to.  This expression occur on either side of an
+  token refers to.  This expression may occur on either side of an
   assignment statement.  Time: O(1)
 
 
@@ -641,7 +639,8 @@ implemented via calls to three functions, ``start``,
 call these functions implicitly with a for-loop rather than
 explicitly, so they are presented here in for-loop notation.
 Internally, all of these iterations are implemented with tokens
-that are advanced via the ``advance`` operation.  Each iteration
+that are advanced via the ``advance`` operation and
+``start``, ``next`` and ``done`` functions.  Each iteration
 of these loops requires O(log *n*) operations to advance the
 token.  
 
@@ -695,7 +694,8 @@ One can iterate over just keys or just values::
       < body >
    end
 
-In place of ``m`` in the above two examples, one may also write
+The arguments to ``keys`` and ``values`` may also be ranges of the
+form
 ``i1:i2`` or ``excludelast(i1,i2)``.
 
 Finally, one can retrieve tokens during any of these iterations::
@@ -720,7 +720,8 @@ one could also use ``i1:i2`` or ``excludelast(i1,i2)``.
 Note that it is acceptable for the loop body above to invoke
 ``delete!(t)``.  This is because the for-loop state already
 stores the next token at the beginning of the body, so
-``t`` does not need to be advanced at the end of the body.
+``t`` is not necessarily referred to in the loop body (unless the
+user so chooses).
 
 
 ----------------
@@ -777,17 +778,15 @@ Other Functions
   Time: O(*c* log *n*)
 
 
-``samecontents(m1,m2)``
+``isequal(m1,m2)``
   Checks if two containers are equal in the sense
   that they contain the same items; the keys are compared
   using the ``eq`` method, while the values are compared with
   the ``isequal`` function.  Note that ``samecontents`` in this sense
   does not imply any correspondence between semitokens for items
-  in ``m1`` with those for ``m2``, nor does it imply hash-equivalence
-  in the case that the user creates a ``Dict`` whose keys are 
-  SortedDict's.  (Hash equivalence is implied if the sort-order
-  used by the keys has the property that sort-equivalence implies
-  hash equivalence of keys.)
+  in ``m1`` with those for ``m2``.  If the equality-testing method associated
+  with the keys and values implies hash-equivalence, then ``isequal`` of the 
+  entire containers implies hash-equivalence of the containers.
   Time: O(*cn* + *n* log *n*)
 
 ``packcopy(m)``
@@ -818,8 +817,8 @@ Other Functions
 
 ``merge(s, t...)``
   This returns a SortedDict that results from merging
-  SortedDicts s, t, etc., which all must have the same
-  key-value types.  In the case of keys duplicated among
+  SortedDicts ``s``, ``t``, etc., which all must have the same
+  key-value-ordering types.  In the case of keys duplicated among
   the arguments, the rightmost argument that owns the
   key gets its value stored.
   Time:  O(*cN* log *N*), where *N* is the total size
@@ -840,8 +839,7 @@ Other Functions
 Ordering of keys
 ----------------------
 As mentioned earlier, the default ordering of keys uses 
-``isless`` and ``isequal`` functions.  Customized ordering can
-also be specified.  If the default ordering is used,
+``isless`` and ``isequal`` functions.  If the default ordering is used,
 it is a requirement of the container that ``isequal(a,b)`` is true if and
 only if ``!isless(a,b)`` and ``!isless(b,a)`` are both true.  This relationship
 between ``isequal`` and ``isless`` holds for common built-in types, but
@@ -918,13 +916,14 @@ Cautionary note on mutable keys
 --------------------------------
 As with ordinary Dicts, keys for SortedDict
 can be either mutable or immutable.  In the
-case of mutable keys, it is important that the keys should not be mutated
+case of mutable keys, it is important that the keys not be mutated
 once they are in the SortedDict else the indexing structure will be 
-corrupted.  For example, suppose a SortedDict ``m`` is defined in which the
+corrupted. (The same restriction applies to Dict.)
+For example, suppose a SortedDict ``m`` is defined in which the
 keys are of type ``Array{Int,1}.``  (For this to be possible, the user
 must provide an ``isless`` function or order object for ``Array{Int,1}`` since
 none is built into Julia.)  Suppose the values of ``m`` are of type ``Int``.
-Then the following statements may leave ``m`` in
+Then the following sequence of statements leave ``m`` in
 a corrupted state::
 
    a = [1,2,3]
@@ -945,8 +944,9 @@ conducted on a Windows 8.1 64-bit machine with the
 Microsoft Visual Studio 12.0 compiler.
 
 There is a minor performance issue as follows:
-the container may hold onto a small number of keys even after the
-data records containing those keys have been deleted.  This
-may cause a memory drain in the case of large keys or a failure
-of finalizers to be called when expected.
-All keys are released completely by the ``empty!`` function.
+the container may hold onto a small number of keys and values even after the
+data records containing those keys and values have been deleted.  This
+may cause a memory drain in the case of large keys and values.
+It may also lead to a delay
+in the invocation of finalizers.
+All keys and values are released completely by the ``empty!`` function.
