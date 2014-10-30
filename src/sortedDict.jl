@@ -495,8 +495,8 @@ end
 
 function merge!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, 
                                      others::SortedDict{K,D,Ord}...)
-    apply(others) do m2
-        mergetwo!(m, m2)
+    for o in others
+        mergetwo!(m,o)
     end
 end
 
