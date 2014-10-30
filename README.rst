@@ -317,7 +317,7 @@ A list of sequentially linked nodes. This allows efficient insertion of nodes to
   246
 
 ----------------------------------------
-Sorted Containers: Overview & Orderings
+Overview of Sorted Containers
 ----------------------------------------
 
 Currently one sorted container is provided:
@@ -353,7 +353,7 @@ by C++ standard containers.
 Tokens can be explicitly advanced or regressed through the data in
 the sorted order; they are implicitly advanced or regressed via
 iteration loops defined below.
-A token may taken two 
+A token may take two 
 special values:
 the *before-start* value and the *past-end* value.  These
 values act as lower and upper bounds
@@ -403,11 +403,11 @@ Constructors for Sorted Containers
 Complexity of Sorted Containers
 ---------------------------------
 
-In the list of functions below, the complexity of the various
-operations is given.  In these measures,
-*n* is the current size 
+In the list of functions below, the running time of the various
+operations is provided.  In these running times,
+*n* denotes the current size 
 (number of items) in the
-container at the time of the function call and *c* denotes the
+container at the time of the function call, and *c* denotes the
 time needed to compare two keys.
 
 --------------------------------------
@@ -717,11 +717,12 @@ In each successive iteration, ``t`` is a token referring to the
 current ``(k,v)`` pair.  In place of ``m`` in the above three snippets,
 one could also use ``i1:i2`` or ``excludelast(i1,i2)``.
 
-Note that it is acceptable for the loop body above to invoke
-``delete!(t)``.  This is because the for-loop state already
-stores the next token at the beginning of the body, so
+Note that it is acceptable for the loop body in the above
+code snippets to invoke
+``delete!(t)``.  This is because the for-loop internal state variable
+is already advanced to the next token at the beginning of the body, so
 ``t`` is not necessarily referred to in the loop body (unless the
-user so chooses).
+user refers to it).
 
 
 ----------------
