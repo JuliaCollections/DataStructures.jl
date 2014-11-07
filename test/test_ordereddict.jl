@@ -6,7 +6,7 @@ using Base.Test
 @test typeof(OrderedDict()) == OrderedDict{Any,Any}
 @test typeof(OrderedDict(1,2.0)) == OrderedDict{Int,Float64}
 @test typeof(OrderedDict([("a",1),("b",2)])) == OrderedDict{ASCIIString,Int}
-if VERSION >= v"0.4-"
+if VERSION >= v"0.4.0-dev+980"
     @test typeof(OrderedDict(1 => 1.0)) == OrderedDict{Int,Float64}
     @test typeof(OrderedDict(1 => 1.0, 2 => 2.0)) == OrderedDict{Int,Float64}
     @test typeof(OrderedDict(1 => 1.0, 2 => 2.0, 3 => 3.0)) == OrderedDict{Int,Float64}

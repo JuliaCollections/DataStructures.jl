@@ -20,7 +20,7 @@ immutable OrderedDict{K,V} <: Associative{K,V}
 
     OrderedDict() = new(HashDict{K,V,Ordered}())
     OrderedDict(kv::AbstractArray{(K,V)}) = new(HashDict{K,V,Ordered}(kv))
-    if VERSION >= v"0.4-"
+    if VERSION >= v"0.4.0-dev+980"
         OrderedDict(ps::Pair{K,V}...) = new(HashDict{K,V,Ordered}(ps...))
     end
     OrderedDict(ks,vs) = new(HashDict{K,V,Ordered}(ks,vs))
@@ -31,7 +31,7 @@ OrderedDict() = OrderedDict{Any,Any}()
 OrderedDict{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V}) = OrderedDict{K,V}(ks,vs)
 OrderedDict{K,V}(::Type{K},::Type{V}) = OrderedDict{K,V}()
 OrderedDict(ks,vs) = OrderedDict{eltype(ks),eltype(vs)}(ks, vs)
-if VERSION >= v"0.4-"
+if VERSION >= v"0.4.0-dev+980"
     OrderedDict{K,V}(ps::Pair{K,V}...) = OrderedDict{K,V}(ps...)
 end
 

@@ -22,7 +22,7 @@ immutable DefaultDictBase{K,V,F,D} <: Associative{K,V}
         error("Default dict must be <: Associative{K,V}")
 
     DefaultDictBase(x::F, kv::AbstractArray{(K,V)}) = (check_D(D,K,V); new(x, D(kv)))
-    if VERSION >= v"0.4-"
+    if VERSION >= v"0.4.0-dev+980"
         DefaultDictBase(x::F, ps::Pair{K,V}...) = (check_D(D,K,V); new(x, D(ps...)))
     end
 
@@ -46,7 +46,7 @@ DefaultDictBase{F}(default::F) = DefaultDictBase{Any,Any,F,Dict}(default)
 DefaultDictBase{K,V,F}(::Type{K}, ::Type{V}, default::F) = DefaultDictBase{K,V,F,Dict}(default)
 DefaultDictBase{K,V,F}(default::F, kv::AbstractArray{(K,V)}) = DefaultDictBase{K,V,F,Dict}(default, kv)
 
-if VERSION >= v"0.4-"
+if VERSION >= v"0.4.0-dev+980"
     DefaultDictBase{K,V,F}(default::F, ps::Pair{K,V}...) = DefaultDictBase{K,V,F,Dict}(default, ps...)
 end
 
@@ -97,7 +97,7 @@ for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Order
         immutable $DefaultDict{K,V,F} <: Associative{K,V}
             d::DefaultDictBase{K,V,F,HashDict{K,V,$O}}
 
-            if VERSION >= v"0.4-"
+            if VERSION >= v"0.4.0-dev+980"
                 $DefaultDict(x, ps::Pair{K,V}...) = new(DefaultDictBase{K,V,F,HashDict{K,V,$O}}(x, ps...))
             end
             $DefaultDict(x, kv::AbstractArray{(K,V)}) = new(DefaultDictBase{K,V,F,HashDict{K,V,$O}}(x, kv))
@@ -120,7 +120,7 @@ for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Order
         $DefaultDict{F}(default::F) = $DefaultDict{Any,Any,F}(default)
         $DefaultDict{K,V,F}(::Type{K}, ::Type{V}, default::F) = $DefaultDict{K,V,F}(default)
         $DefaultDict{K,V,F}(default::F, kv::AbstractArray{(K,V)}) = $DefaultDict{K,V,F}(default, kv)
-        if VERSION >= v"0.4-"
+        if VERSION >= v"0.4.0-dev+980"
             $DefaultDict{K,V,F}(default::F, ps::Pair{K,V}...) = $DefaultDict{K,V,F}(default, ps...)
         end
 
