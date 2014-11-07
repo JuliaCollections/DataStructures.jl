@@ -34,7 +34,7 @@ type HashDict{K,V,O<:Union(Ordered,Unordered)} <: Associative{K,V}
     end
     function HashDict(ks, vs)
         if VERSION >= v"0.4-"
-            warn("HashDict(kv,vs) is deprecated, use HashDict(zip(ks,vs)) instead")
+            Base.warn_once("HashDict(kv,vs) is deprecated, use HashDict(collect(zip(ks,vs))) instead")
         end
         n = length(ks)
         h = HashDict{K,V,O}()
