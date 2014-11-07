@@ -4,7 +4,7 @@ using Base.Test
 # construction
 
 @test typeof(OrderedDict()) == OrderedDict{Any,Any}
-@test typeof(OrderedDict('a',1)) == OrderedDict{Char,Int}
+@test typeof(OrderedDict(1,2.0)) == OrderedDict{Int,Float64}
 @test typeof(OrderedDict([("a",1),("b",2)])) == OrderedDict{ASCIIString,Int}
 
 # empty dictionary
