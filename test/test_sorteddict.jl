@@ -510,7 +510,7 @@ function test3{T}(z::T)
         end
     end
     @assert(count == N^2)
-    N = 1000000
+    N = 50000
     sk = zero1
     sv = zero1
     for l = 1 : N
