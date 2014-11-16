@@ -491,7 +491,7 @@ function test3{T}(z::T)
     one1 = one(z)
     two1 = one1 + one1
     m1 = SortedDict(Dict{T,T}())
-    N = 5000
+    N = 1000
     for l = 1 : N
         lUi = convert(T, l)
         m1[bitreverse(lUi)] = lUi
