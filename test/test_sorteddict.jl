@@ -751,5 +751,5 @@ test1()
 test2()
 test3(0x00000000)
 test5()
-test6(2, "soothingly", "compere")
+#test6(2, "soothingly", "compere")
 
