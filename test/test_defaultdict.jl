@@ -9,6 +9,10 @@ using Base.Test
 @test_throws ErrorException DefaultDict()
 @test_throws ErrorException DefaultDict(String, Int)
 
+if VERSION >= v"0.4.0-dev+980"
+    @test typeof(DefaultDict(0.0, 1 => 1.0)) == DefaultDict{Int,Float64,Float64}
+end
+
 # empty dictionary
 d = DefaultDict(Char, Int, 1)
 @test length(d) == 0

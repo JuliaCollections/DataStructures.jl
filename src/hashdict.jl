@@ -22,7 +22,20 @@ type HashDict{K,V,O<:Union(Ordered,Unordered)} <: Associative{K,V}
         n = 16
         new(zeros(Uint8,n), Array(K,n), Array(V,n), Array(O,n), Array(O,0), 0, 0, identity)
     end
+    if VERSION >= v"0.4.0-dev+980"
+        function HashDict(ps::Pair{K,V}...)
+            h = HashDict{K,V,O}()
+            sizehint(h, length(ps))
+            for p in ps
+                h[p.first] = p.second
+            end
+            return h
+        end
+    end
     function HashDict(ks, vs)
+        if VERSION >= v"0.4.0-dev+980"
+            Base.warn_once("HashDict(kv,vs) is deprecated, use HashDict(collect(zip(ks,vs))) instead")
+        end
         n = length(ks)
         h = HashDict{K,V,O}()
         for i=1:n
@@ -30,8 +43,9 @@ type HashDict{K,V,O<:Union(Ordered,Unordered)} <: Associative{K,V}
         end
         return h
     end
-    function HashDict(kv)
+    function HashDict(kv::AbstractArray{(K,V)})
         h = HashDict{K,V,O}()
+        sizehint(h, length(kv))
         for (k,v) in kv
             h[k] = v
         end
@@ -44,6 +58,9 @@ HashDict() = HashDict{Any,Any,Unordered}()
 HashDict{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V}) = HashDict{K,V,Unordered}(ks,vs)
 HashDict(ks, vs) = HashDict{Any,Any,Unordered}(ks, vs)
 HashDict{K,V}(kv::AbstractArray{(K,V)}) = HashDict{K,V,Unordered}(kv)
+if VERSION >= v"0.4.0-dev+980"
+    HashDict{K,V}(ps::Pair{K,V}...) = HashDict{K,V,Unordered}(ps...)
+end
 
 # TODO: these could be more efficient
 HashDict{K,V,O}(d::HashDict{K,V,O}) = HashDict{K,V,O}(collect(kv))
