@@ -1,21 +1,10 @@
-language: cpp
-compiler:
-    - clang
+language: julia
+os:
+    - linux
+julia: 
+    - release
+    - nightly
 notifications:
     email: false
-env:
-    - JULIAVERSION="juliareleases"
-    - JULIAVERSION="julianightlies"
-before_install:
-    - sudo add-apt-repository ppa:staticfloat/julia-deps -y
-    - sudo add-apt-repository ppa:staticfloat/${JULIAVERSION} -y
-    - sudo apt-get update -qq -y
-    - sudo apt-get install libpcre3-dev julia -y
-    - git config --global user.name "Travis User"
-    - git config --global user.email "travis@example.net"
-    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-script:
-    - julia -e 'versioninfo(); Pkg.init(); Pkg.clone(pwd())'
-    - julia -e 'Pkg.test("DataStructures", coverage=true)'
 after_success:
     - julia -e 'cd(Pkg.dir("DataStructures")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
