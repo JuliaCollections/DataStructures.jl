@@ -337,6 +337,12 @@ function test2()
         m1[i] = convert(Float64,i) ^ 2
         checkcorrectness(m1.bt)
     end
+    ii = endof(m1)
+    for i = 1 : N - 1
+        pr = deref(ii)
+        @assert(pr[1] == N + 1 - i && pr[2] == convert(Float64,pr[1]) ^ 2)
+        ii = regress(ii)
+    end
     lastprime = 1
     while true
         ii = searchsortedafter(m1, lastprime)

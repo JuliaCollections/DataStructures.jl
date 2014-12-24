@@ -461,9 +461,6 @@ function nextloc0(t, i::Int)
             nextchild = t.tree[p].child3
             break
         end
-        if p == t.rootloc
-            return 2
-        end
         ii = p
         depthp -= 1
     end
@@ -502,9 +499,6 @@ function prevloc0(t::BalancedTree23, i::Int)
         if t.tree[p].child2 == ii
             prevchild = t.tree[p].child1
             break
-        end
-        if p == t.rootloc
-            return 1
         end
         ii = p
         depthp -= 1
