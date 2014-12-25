@@ -319,10 +319,12 @@ function test2()
 
     @assert(isempty(m1))
     @assert(length(m1) == 0)
-    N = 1000
+    N = 5000
     for i = N : -1 : 2
         m1[i] = convert(Float64,i) ^ 2
-        checkcorrectness(m1.bt)
+        if i % 50 == 0
+            checkcorrectness(m1.bt)
+        end
     end
     @assert(!isempty(m1))
     assert(length(m1) == N - 1)
