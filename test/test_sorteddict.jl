@@ -529,7 +529,7 @@ function test3{T}(z::T)
         sk += brl
         m1[brl] = lUi
         sv += lUi
-        if l < N div 2
+        if l < div(N, 2)
             skhalf += brl
             svhalf += lUi
         end
@@ -568,7 +568,7 @@ function test3{T}(z::T)
     end
     @assert(count == N)
 
-    pos1 = searchsortedfirst(m1, N div 2)
+    pos1 = searchsortedfirst(m1, div(N,2))
     sk2 = zero1
     for k in keys(excludelast(startof(m1), pos1))
         sk2 += k
