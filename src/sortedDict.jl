@@ -442,14 +442,13 @@ end
 ## the same (K,D) pairs.  This sense of equality does not mean
 ## that indices valid for one are also valid for the other.
 
-function isequal{K,D,Ord <: Ordering}(m1::SortedDict{K,D,Ord},
-                                      m2::SortedDict{K,D,Ord})
+function isequal(m1::SortedDict, m2::SortedDict)
+    ord = orderobject(m1)
+    if !isequal(ord, orderobject(m2)) || !isequal(eltype(m1), eltype(m2))
+        error("Cannot use isequal for two SortedDicts unless their element types and ordering objects are equal")
+    end
     p1 = startof(m1)
     p2 = startof(m2)
-    ord = orderobject(m1)
-    if !isequal(ord, orderobject(m2))
-        error("Cannot use isequal for two SortedDicts unless their ordering objects are equal")
-    end
     while true
         if p1 == pastendtoken(m1)
             return p2 == pastendtoken(m2)
