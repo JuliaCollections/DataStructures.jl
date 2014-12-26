@@ -518,7 +518,7 @@ function test3{T}(z::T)
         end
     end
     @assert(count == N^2)
-    N = 50000
+    N = 10000
     sk = zero1
     sv = zero1
     skhalf = zero1
@@ -529,7 +529,7 @@ function test3{T}(z::T)
         sk += brl
         m1[brl] = lUi
         sv += lUi
-        if l < div(N, 2)
+        if brl < div(N, 2)
             skhalf += brl
             svhalf += lUi
         end
