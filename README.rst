@@ -411,7 +411,7 @@ container at the time of the function call, and *c* denotes the
 time needed to compare two keys.
 
 --------------------------------------
-Navigating the Containers Using Tokens
+Navigating the Containers 
 --------------------------------------
 ``m[k]``
   Argument ``m`` is a SortedDict and ``k`` is a key.  In an 
@@ -783,7 +783,7 @@ Other Functions
   Checks if two containers are equal in the sense
   that they contain the same items; the keys are compared
   using the ``eq`` method, while the values are compared with
-  the ``isequal`` function.  Note that ``samecontents`` in this sense
+  the ``isequal`` function.  Note that ``isequal`` in this sense
   does not imply any correspondence between semitokens for items
   in ``m1`` with those for ``m2``.  If the equality-testing method associated
   with the keys and values implies hash-equivalence, then ``isequal`` of the 
@@ -792,7 +792,7 @@ Other Functions
 
 ``packcopy(m)``
   This returns a copy of ``m`` in which the data is
-  packed.  In all of the containers, when deletions take
+  packed.  When deletions take
   place, the previously allocated memory is not returned.
   This function can be used to reclaim memory after
   many deletions.  
