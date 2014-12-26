@@ -617,7 +617,6 @@ function test4()
     @test_throws KeyError delete!(m,"a")
     @test_throws KeyError pop!(m,"a")
     m3 = SortedDict(Dict{ASCIIString, Int}(), Reverse)
-    println("isequal1 = ", isequal(m2,m3))
     @test_throws ErrorException isequal(m2, m3)
     i1semi = semi(i1)
     @test_throws BoundsError m[i1semi]
