@@ -596,6 +596,36 @@ function test3{T}(z::T)
 end    
 
 
+# test all the errors
+function test4()
+    m = SortedDict(Dict("a" => 6, "bb" => 9))
+    @test_throws KeyError println(m["b"])
+    m2 = SortedDict(Dict{ASCIIString, Int}())
+    @test_throws BoundsError println(first(m2))
+    @test_throws BoundsError println(last(m2))
+    state1 = start(m2)
+    @test_throws BoundsError next(state1)
+    @test_throws ArgumentError beforestarttoken(m) : pastendtoken(m2)
+    @test_throws ArgumentError excludelast(beforestarttoken(m), pastendtoken(m2))
+    @test_throws ArgumentError isless(beforestarttoken(m), pastendtoken(m2))
+    @test_throws ArgumentError isequal(beforestarttoken(m), pastendtoken(m2))
+    i1 = find(m,"a")
+    delete!(i1)
+    i2 = find(m,"bb")
+    @test_throws BoundsError(start(i1:i2))
+    @test_throws BoundsError(excludelast(i1,i2))
+    @test_throws KeyError(delete!(m,"a"))
+    @test_throws KeyError(pop!(m,"a"))
+    m3 = SortedDict(Dict{ASCIIString, Int)(), Reverse)
+    @test_throws ErrorException(isequal(m2, m3))
+    i1semi = semi(i1)
+    @test_throws BoundsError(m[i1semi])
+    @test_throws BoundsError(regress(beforesstarttoken(m)))
+    @test_throws BoundsError(advance(pastendtoken(m)))
+end
+
+
+
 function seekfile(fname)
     fullname = joinpath(Pkg.dir("DataStructures"), "test", fname)
 end
@@ -790,6 +820,7 @@ end
 test1()
 test2()
 test3(0x00000000)
+test4()
 test5()
 #test6(2, "soothingly", "compere")
 
