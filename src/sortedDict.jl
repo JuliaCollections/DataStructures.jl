@@ -423,14 +423,14 @@ end
 
 function delete!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
     i, exactfound = findkey(m.bt,convert(K,k_))
-    !exactfound && throw(KeyError(k))
+    !exactfound && throw(KeyError(k_))
     delete!(m.bt, i)
     m
 end
 
 function pop!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_)
     i, exactfound = findkey(m.bt,convert(K,k_))
-    !exactfound && throw(KeyeError(k))
+    !exactfound && throw(KeyeError(k_))
     d = m.bt.data[i].d
     delete!(m.bt, i)
     d
