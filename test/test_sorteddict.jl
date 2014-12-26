@@ -521,12 +521,18 @@ function test3{T}(z::T)
     N = 50000
     sk = zero1
     sv = zero1
+    skhalf = zero1
+    svhalf = zero1
     for l = 1 : N
         lUi = convert(T, l)
         brl = bitreverse(lUi)
         sk += brl
         m1[brl] = lUi
         sv += lUi
+        if l < N div 2
+            skhalf += brl
+            svhalf += lUi
+        end
     end
     count = 0
     sk2 = zero1
@@ -561,6 +567,28 @@ function test3{T}(z::T)
         count += 1
     end
     @assert(count == N)
+
+    pos1 = searchsortedfirst(m1, N div 2)
+    sk2 = zero1
+    for k in keys(excludelast(startof(m1), pos1))
+        sk2 += k
+    end
+    @assert(sk2 == skhalf)
+    sv2 = zero1
+    for v in values(excludelast(startof(m1), pos1))
+        sv2 += v
+    end
+    @assert(sv2 == svhalf)
+    count = 0
+    for (k,v) in excludelast(pastendtoken(m1), pastendtoken(m1))
+        count += 1
+    end
+    @assert(count == 0)
+    count = 0
+    for (k,v) in startof(m1) :  beforestarttoken(m1)
+        count += 1
+    end
+    @assert(count == 0)
 end    
 
 
