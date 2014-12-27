@@ -620,7 +620,7 @@ function test4()
     @test_throws ErrorException isequal(m2, m3)
     i1semi = semi(i1)
     @test_throws BoundsError m[i1semi]
-    @test_throws BoundsError regress(beforesstarttoken(m))
+    @test_throws BoundsError regress(beforestarttoken(m))
     @test_throws BoundsError advance(pastendtoken(m))
 end
 
