@@ -26,7 +26,7 @@ module DataStructures
     export push!
 
     export AbstractHeap, compare, extract_all!
-    export BinaryHeap, binary_minheap, binary_maxheap
+    export BinaryHeap, binary_minheap, binary_maxheap, nlargest, nsmallest
     export MutableBinaryHeap, mutable_binary_minheap, mutable_binary_maxheap
 
     export OrderedDict, OrderedSet
@@ -43,6 +43,10 @@ module DataStructures
     export excludelast, tokens
     export orderobject, Lt
 
+
+    if VERSION < v"0.4.0-dev"
+        using Docile
+    end
 
     include("delegate.jl")
 
