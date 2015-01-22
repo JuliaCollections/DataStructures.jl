@@ -1,4 +1,5 @@
 tests = ["deque",
+         "sorteddict",
          "stack_and_queue",
          "accumulator",
          "classifiedcollections",
