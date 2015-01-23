@@ -6,7 +6,11 @@ module DataStructures
                  push!, pop!, shift!, unshift!,
                  union!, delete!, similar, sizehint,
                  isequal, hash,
-                 map, reverse
+                 map, reverse,
+                 endof, first, last, eltype, getkey, values,
+                 merge!,lt, Ordering, ForwardOrdering, Forward,
+                 ReverseOrdering, Reverse, Lt, colon,
+                 searchsortedfirst, searchsortedlast, isless, find
 
     export Deque, Stack, Queue
     export deque, enqueue!, dequeue!, update!
@@ -29,6 +33,14 @@ module DataStructures
 
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
            reverse
+    export SortedDict, SDToken, SDSemiToken
+    export insert!, startof
+    export pastendtoken, beforestarttoken
+    export searchsortedafter
+    export enumerate_ind, packcopy, packdeepcopy
+    export excludelast, tokens
+    export orderobject, Lt
+
 
     include("delegate.jl")
 
@@ -47,7 +59,15 @@ module DataStructures
     include("trie.jl")
 
     include("list.jl")
+    include("balancedTree.jl")
+    include("tokens.jl")
 
+    import .Tokens: Token, IntSemiToken, semi, container, assemble
+    import .Tokens: deref_key, deref_value, deref, status
+    import .Tokens: advance, regress
+    include("sortedDict.jl")
+    export semi, container, assemble, status
+    export deref_key, deref_value, deref, advance, regress
     @deprecate stack Stack
     @deprecate queue Queue
     @deprecate add! push!
