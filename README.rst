@@ -396,7 +396,7 @@ Constructors for Sorted Containers
   Argument ``d`` is an ordinary Julia dict (or any associative type)
   used to initialize the container, e.g.::
 
-     c = SortedDict(["New York" => 1788, "Illinois" => 1818])
+     c = SortedDict(Dict("New York" => 1788, "Illinois" => 1818))
 
   In this example the key-type is deduced to be ASCIIString, while the
   value-type is Int.
@@ -412,7 +412,9 @@ Constructors for Sorted Containers
   the parameters of the type.  Ordering argument ``o`` is
   optional and defaults to ``Forward``.
 
-
+Note that the code snippets in this section are based on the Julia
+version 0.4.0 Dict-constructor
+syntax.  There are equivalent statements for 0.3.0
 
 ---------------------------------
 Complexity of Sorted Containers
@@ -529,7 +531,7 @@ Navigating the Containers
 ``searchsortedlast(m,k)``
   Argument ``m`` is a SortedDict and
   ``k`` is an element of the key type.  This routine returns the token
-  of the first item in the container whose key is less than or equal to
+  of the last item in the container whose key is less than or equal to
   ``k``.  If there is no such key, then the before-start token
   is returned.
   Time: O(*c* log *n*)
