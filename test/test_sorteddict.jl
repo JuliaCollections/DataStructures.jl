@@ -1,4 +1,5 @@
 using DataStructures
+using Compat
 import Base.Ordering
 import Base.Forward
 import Base.Reverse
@@ -252,7 +253,7 @@ end
 
 function test1()
     # a few basic tests to start
-    m1 = SortedDict(Dict{ASCIIString,ASCIIString}(), Forward)
+    m1 = SortedDict((@compat Dict{ASCIIString,ASCIIString}()), Forward)
     kdarray = ["hello", "jello", "alpha", "beta", "fortune", "random",
                "july", "wednesday"]
     checkcorrectness(m1.bt)
@@ -278,8 +279,8 @@ end
 
 function test2()
     # test all the methods here except loops
-    m0 = SortedDict(Dict{Int, Float64}())
-    m1 = SortedDict(Dict(8=>32.0, 12=>33.1, 6=>18.2))
+    m0 = SortedDict(@compat Dict{Int, Float64}())
+    m1 = SortedDict(@compat Dict(8=>32.0, 12=>33.1, 6=>18.2))
     expected = ([6,8,12], [18.2, 32.0, 33.1])
     checkcorrectness(m1.bt)
     ii = startof(m1)
@@ -453,22 +454,22 @@ function test2()
     empty!(m1)
     checkcorrectness(m1.bt)
     @test isempty(m1)
-    c1 = SortedDict(Dict("Eggplants"=>3, 
+    c1 = SortedDict(@compat Dict("Eggplants"=>3, 
                         "Figs"=>9, 
                         "Apples"=>7))
-    c2 = SortedDict(Dict("Eggplants"=>6, 
+    c2 = SortedDict(@compat Dict("Eggplants"=>6, 
                         "Honeydews"=>19, 
                         "Melons"=>11))
     @test !isequal(c1,c2)
     c3 = merge(c1, c2)
     checkcorrectness(c3.bt)
-    c4 = SortedDict(Dict("Apples"=>7, 
+    c4 = SortedDict(@compat Dict("Apples"=>7, 
                         "Figs"=>9,
                         "Eggplants"=>6,
                         "Melons"=>11,
                         "Honeydews"=>19))
     @test isequal(c3,c4)
-    c5 = SortedDict(Dict("Apples"=>7))
+    c5 = SortedDict(@compat Dict("Apples"=>7))
     @test !isequal(c4,c5)
     merge!(c1,c2)
     checkcorrectness(c1.bt)
@@ -499,7 +500,7 @@ function test3{T}(z::T)
     zero1 = zero(z)
     one1 = one(z)
     two1 = one1 + one1
-    m1 = SortedDict(Dict{T,T}())
+    m1 = SortedDict(@compat Dict{T,T}())
     N = 1000
     for l = 1 : N
         lUi = convert(T, l)
@@ -595,9 +596,9 @@ end
 
 # test all the errors
 function test4()
-    m = SortedDict(Dict("a" => 6, "bb" => 9))
+    m = SortedDict(@compat Dict("a" => 6, "bb" => 9))
     @test_throws KeyError println(m["b"])
-    m2 = SortedDict(Dict{ASCIIString, Int}())
+    m2 = SortedDict(@compat Dict{ASCIIString, Int}())
     @test_throws BoundsError println(first(m2))
     @test_throws BoundsError println(last(m2))
     state1 = start(m2)
@@ -613,7 +614,7 @@ function test4()
     @test_throws BoundsError start(excludelast(i1,i2))
     @test_throws KeyError delete!(m,"a")
     @test_throws KeyError pop!(m,"a")
-    m3 = SortedDict(Dict{ASCIIString, Int}(), Reverse)
+    m3 = SortedDict((@compat Dict{ASCIIString, Int}()), Reverse)
     @test_throws ErrorException isequal(m2, m3)
     i1semi = semi(i1)
     @test_throws BoundsError m[i1semi]
@@ -641,7 +642,7 @@ eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
 function test5()
     keylist = ["Apple", "aPPle", "berry", "CHerry", "Dairy", "diary"]
     vallist = [6,9,-4,2,1,8]
-    m = SortedDict(Dict{ASCIIString,Int}())
+    m = SortedDict(@compat Dict{ASCIIString,Int}())
     for j = 1:6
         m[keylist[j]] = vallist[j]
     end
@@ -654,7 +655,7 @@ function test5()
                 p[2] == vallist[expectedord1[count]]
     end
     @test count == 6
-    m2 = SortedDict(Dict{ASCIIString, Int}(), Reverse)
+    m2 = SortedDict((@compat Dict{ASCIIString, Int}()), Reverse)
     for j = 1 : 6
         m2[keylist[j]] = vallist[j]
     end
@@ -667,7 +668,7 @@ function test5()
                 p[2] == vallist[expectedord2[count]]
     end
     @test count == 6
-    m3 = SortedDict(Dict{ASCIIString, Int}(), CaseInsensitive())
+    m3 = SortedDict((@compat Dict{ASCIIString, Int}()), CaseInsensitive())
     for j = 1 : 6
         m3[keylist[j]] = vallist[j]
     end
@@ -680,7 +681,7 @@ function test5()
                 p[2] == vallist[expectedord3[count]]
     end
     @test count == 5
-    m4 = SortedDict(Dict{ASCIIString,Int}(), Lt((x,y) -> isless(lowercase(x),lowercase(y))))
+    m4 = SortedDict((@compat Dict{ASCIIString,Int}()), Lt((x,y) -> isless(lowercase(x),lowercase(y))))
     for j = 1 : 6
         m4[keylist[j]] = vallist[j]
     end
@@ -701,7 +702,7 @@ end
 
 function test6(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
     NSTRINGPAIR = 50000
-    m1 = SortedDict(Dict{ASCIIString,ASCIIString}())
+    m1 = SortedDict(@compat Dict{ASCIIString,ASCIIString}())
     strlist = ASCIIString[]
     open(seekfile("wordsScram.txt"), "r") do inio
         for j = 1 : NSTRINGPAIR * 2
@@ -738,7 +739,7 @@ end
 
 function test6a(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
     NSTRINGPAIR = 50000
-    m1 = SortedDict(Dict{ASCIIString, ASCIIString}(), Lt(isless))
+    m1 = SortedDict((@compat Dict{ASCIIString, ASCIIString}()), Lt(isless))
     strlist = ASCIIString[]
     open(seekfile("wordsScram.txt"), "r") do inio
         for j = 1 : NSTRINGPAIR * 2
@@ -786,7 +787,7 @@ end
 
 function test6b(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
     NSTRINGPAIR = 50000
-    m1 = SDConstruct(Dict{ASCIIString,ASCIIString}(), lt=isless)
+    m1 = SDConstruct((@compat Dict{ASCIIString,ASCIIString}()), lt=isless)
     strlist = ASCIIString[]
     open(seekfile("wordsScram.txt"), "r") do inio
         for j = 1 : NSTRINGPAIR * 2
