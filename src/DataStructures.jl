@@ -1,5 +1,7 @@
 module DataStructures
 
+    using Compat
+
     import Base: length, isempty, start, next, done,
                  show, dump, empty!, getindex, setindex!, get, get!,
                  in, haskey, keys, merge, copy, cat,

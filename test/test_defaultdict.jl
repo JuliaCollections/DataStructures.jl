@@ -46,8 +46,8 @@ for (k,v) in d
     @test v == k-'a'+1
 end
 
-@test sort(collect(keys(d))) == ['a':'z']
-@test sort(collect(values(d))) == [1:26]
+@test sort(collect(keys(d))) == collect('a':'z')
+@test sort(collect(values(d))) == collect(1:26)
 
 # Starting from an existing dictionary
 # Note: dictionary is copied upon construction
@@ -105,8 +105,8 @@ for (k,v) in d
     @test v == k-'a'+1
 end
 
-@test collect(keys(d)) == ['a':'z']
-@test collect(values(d)) == [1:26]
+@test collect(keys(d)) == collect('a':'z')
+@test collect(values(d)) == collect(1:26)
 
 s = similar(d)
 @test typeof(s) == typeof(d)
