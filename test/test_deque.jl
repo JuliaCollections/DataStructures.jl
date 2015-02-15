@@ -1,5 +1,6 @@
 using DataStructures
 using Base.Test
+using Compat
 
 
 # empty dequeue
@@ -36,7 +37,7 @@ for i = 1 : n
 
     cq = collect(q)
     @test isa(cq, Vector{Int})
-    @test cq == [1:i]
+    @test cq == collect(1:i)
 end
 
 # pop back
@@ -57,7 +58,7 @@ for i = 1 : n
     end
 
     cq = collect(q)
-    @test cq == [1:n-i]
+    @test cq == collect(1:n-i)
 end
 
 # push front
@@ -75,7 +76,7 @@ for i = 1 : n
 
     cq = collect(q)
     @test isa(cq, Vector{Int})
-    @test cq == [i:-1:1]
+    @test cq == collect(i:-1:1)
 end
 
 # pop front
@@ -96,7 +97,7 @@ for i = 1 : n
     end
 
     cq = collect(q)
-    @test cq == [n-i:-1:1]
+    @test cq == collect(n-i:-1:1)
 end
 
 # random operations
@@ -110,7 +111,7 @@ for k = 1 : m
     x = rand(1:1000, la)
 
     for i = 1 : la
-        if randbool()
+        if rand(Bool)
             push!(r, x[i])
             push!(q, x[i])
         else
@@ -124,7 +125,7 @@ for k = 1 : m
 
     lr = rand(1:length(r))
     for i = 1 : lr
-        if randbool()
+        if rand(Bool)
             pop!(r)
             pop!(q)
         else

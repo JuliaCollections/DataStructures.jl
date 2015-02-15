@@ -27,4 +27,4 @@ for c in 'a':'z'
     @test c in d
 end
 
-@test collect(d) == ['a':'z']
+@test collect(d) == collect('a':'z')

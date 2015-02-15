@@ -19,7 +19,7 @@ type IntDisjointSets
     ngroups::Int
 
     # creates a disjoint set comprised of n singletons
-    IntDisjointSets(n::Integer) = new(Int[1:n], zeros(Int, n), n)
+    IntDisjointSets(n::Integer) = new(collect(1:n), zeros(Int, n), n)
 end
 
 length(s::IntDisjointSets) = length(s.parents)
@@ -103,7 +103,7 @@ type DisjointSets{T}
     function DisjointSets(xs)    # xs must be iterable
         imap = Dict{T,Int}()
         n = length(xs)
-        sizehint(imap, n)
+        sizehint!(imap, n)
         id = 0
         for x in xs
             imap[x] = (id += 1)

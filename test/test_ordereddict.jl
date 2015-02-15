@@ -36,8 +36,8 @@ end
 @test !haskey(d, 'B')
 @test pop!(d, 'a') == 2
 
-@test collect(keys(d)) == ['b':'z']
-@test collect(values(d)) == [2:26]
+@test collect(keys(d)) == collect('b':'z')
+@test collect(values(d)) == collect(2:26)
 @test collect(d) == [(a,i) for (a,i) in zip('b':'z', 2:26)]
 
 # Test for #60
@@ -45,7 +45,7 @@ end
 od60 = OrderedDict{Int,Int}()
 od60[1] = 2
 
-ranges = [2:5,6:9,10:13]
+ranges = Ranges[2:5,6:9,10:13]
 for range in ranges
     for i = range
         od60[i] = i+1

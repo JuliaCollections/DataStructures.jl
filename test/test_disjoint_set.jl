@@ -47,7 +47,7 @@ s = DisjointSets{Int}(1:10)
 
 r = [find_root(s, i) for i in 1 : 10]
 @test isa(r, Vector{Int})
-@test isequal(r, [1:10])
+@test isequal(r, collect(1:10))
 
 for i = 1 : 5
     x = 2 * i - 1
@@ -81,6 +81,6 @@ push!(s, 17)
 @test num_groups(s) == 3
 
 r0 = [1, 1, 1, 1, 1, 1, 7, 7, 7, 7, 11]
-r = [find_root(s, i) for i in [1 : 10, 17] ]
+r = [find_root(s, i) for i in [1 : 10; 17] ]
 @test isa(r, Vector{Int})
 @test isequal(r, r0)
