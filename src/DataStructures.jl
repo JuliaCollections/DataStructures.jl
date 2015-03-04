@@ -42,6 +42,8 @@ module DataStructures
     export enumerate_ind, packcopy, packdeepcopy
     export excludelast, tokens
     export orderobject, Lt
+    
+    export Tree, EmptyTree, BinaryTreeNode, BinaryTree
 
 
     include("delegate.jl")
@@ -63,6 +65,7 @@ module DataStructures
     include("list.jl")
     include("balancedTree.jl")
     include("tokens.jl")
+    include("tree.jl")
 
     import .Tokens: Token, IntSemiToken, semi, container, assemble
     import .Tokens: deref_key, deref_value, deref, status
