@@ -79,7 +79,7 @@ function setdiff(a::OrderedSet, b)
     d
 end
 
-isequal(l::OrderedSet, r::OrderedSet) = (length(l) == length(r)) && (l <= r)
+==(l::OrderedSet, r::OrderedSet) = (length(l) == length(r)) && (l <= r)
 <(l::OrderedSet, r::OrderedSet) = (length(l) < length(r)) && (l <= r)
 <=(l::OrderedSet, r::OrderedSet) = issubset(l, r)
 
