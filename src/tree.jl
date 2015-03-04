@@ -1,13 +1,9 @@
-import Base: haskey, getindex, setindex!, delete!
-
-export Tree, EmptyTree, TreeNode, BinaryTree
-
 abstract Tree{K,V}
 
 type EmptyTree{K,V} <: Tree{K,V}
 end
 
-type TreeNode{K,V} <: Tree{K,V}
+type BinaryTreeNode{K,V} <: Tree{K,V}
     key::  K
     data:: V
     left:: Tree{K,V}
@@ -23,7 +19,7 @@ end
 haskey(t::EmptyTree, key) = false
 haskey(t::BinaryTree, key) = haskey(t.root, key)
 
-function haskey(t::TreeNode, key)
+function haskey(t::BinaryTreeNode, key)
     if t.key == key
         true
     elseif key < t.key
@@ -36,7 +32,7 @@ end
 getindex(t::EmptyTree, k) = throw(KeyError(k))
 getindex(t::BinaryTree, k) = t.root[k]
 
-function getindex(t::TreeNode, key)
+function getindex(t::BinaryTreeNode, key)
     if t.key == key
         t.data
     elseif key < t.key
@@ -46,10 +42,10 @@ function getindex(t::TreeNode, key)
     end
 end
 
-setindex!{K,V}(t::EmptyTree{K,V}, v, k) = TreeNode{K,V}(k, v, t, t)
+setindex!{K,V}(t::EmptyTree{K,V}, v, k) = BinaryTreeNode{K,V}(k, v, t, t)
 setindex!(t::BinaryTree, v, k) = (t.root = setindex!(t.root, v, k); t)
 
-function setindex!(t::TreeNode, v, k)
+function setindex!(t::BinaryTreeNode, v, k)
     if t.key == k
         t.data = v
     elseif k < t.key
@@ -63,7 +59,7 @@ end
 delete!(t::EmptyTree, k) = throw(KeyError(k))
 delete!(t::BinaryTree, k) = (t.root = delete!(t.root, k); t)
 
-function delete!(t::TreeNode, k)
+function delete!(t::BinaryTreeNode, k)
     if t.key == k
         if isa(t.right,EmptyTree)
             t = t.left
@@ -82,9 +78,9 @@ function delete!(t::TreeNode, k)
     t
 end
 
-treeinsert!(t::EmptyTree, r::TreeNode) = r
+treeinsert!(t::EmptyTree, r::BinaryTreeNode) = r
 
-function treeinsert!(t::TreeNode, r::TreeNode)
+function treeinsert!(t::BinaryTreeNode, r::BinaryTreeNode)
     if r.key < t.key
         t.left = treeinsert!(t.left, r)
     else
