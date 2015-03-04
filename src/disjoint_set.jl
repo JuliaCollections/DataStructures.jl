@@ -103,7 +103,7 @@ type DisjointSets{T}
     function DisjointSets(xs)    # xs must be iterable
         imap = Dict{T,Int}()
         n = length(xs)
-        sizehint!(imap, n)
+        sizehint(imap, n)
         id = 0
         for x in xs
             imap[x] = (id += 1)

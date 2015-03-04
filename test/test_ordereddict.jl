@@ -4,7 +4,7 @@ using Base.Test
 # construction
 
 @test typeof(OrderedDict()) == OrderedDict{Any,Any}
-@test typeof(OrderedDict(1,2.0)) == OrderedDict{Int,Float64}
+@test typeof(OrderedDict([(1,2.0)])) == OrderedDict{Int,Float64}
 @test typeof(OrderedDict([("a",1),("b",2)])) == OrderedDict{ASCIIString,Int}
 if VERSION >= v"0.4.0-dev+980"
     @test typeof(OrderedDict(1 => 1.0)) == OrderedDict{Int,Float64}
@@ -13,7 +13,7 @@ if VERSION >= v"0.4.0-dev+980"
 end
 
 # empty dictionary
-d = OrderedDict(Char, Int)
+d = OrderedDict{Char, Int}()
 @test length(d) == 0
 @test isempty(d)
 @test_throws KeyError d['c'] == 1

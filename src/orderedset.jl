@@ -9,16 +9,17 @@ immutable OrderedSet{T}
     dict::HashDict{T,Nothing,Ordered}
 
     OrderedSet() = new(HashDict{T,Nothing,Ordered}())
-    OrderedSet(x...) = union!(new(HashDict{T,Nothing,Ordered}()), x)
+    OrderedSet(xs) = union!(new(HashDict{T,Nothing,Ordered}()), xs)
 end
 OrderedSet() = OrderedSet{Any}()
-OrderedSet(x...) = OrderedSet{Any}(x...)
-OrderedSet{T}(x::T...) = OrderedSet{T}(x...)
+OrderedSet(xs) = OrderedSet{eltype(xs)}(xs)
 
-show(io::IO, s::OrderedSet) = (show(io, typeof(s)); Base.show_comma_array(io, s,'(',')'))
 
-@delegate OrderedSet.dict [isempty, length, sizehint]
+show(io::IO, s::OrderedSet) = (show(io, typeof(s)); print(io, "("); !isempty(s) && Base.show_vector(io, s,'[',']'); print(io, ")"))
 
+@delegate OrderedSet.dict [isempty, length]
+
+sizehint(s::OrderedSet, sz::Integer) = (sizehint(s.dict, sz); s)
 eltype{T}(s::OrderedSet{T}) = T
 
 in(x, s::OrderedSet) = haskey(s.dict, x)
@@ -43,7 +44,7 @@ done(s::OrderedSet, state) = done(s.dict, state)
 next(s::OrderedSet, i)     = (s.dict.keys[s.dict.order[i]], skip_deleted(s.dict,i+1))
 
 # TODO: simplify me?
-pop!(s::OrderedSet) = (val = s.dict.keys[start(s.dict)]; delete!(s.dict, val); val)
+pop!(s::OrderedSet) = (val = s.dict.keys[s.dict.order[start(s.dict)]]; delete!(s.dict, val); val)
 
 union(s::OrderedSet) = copy(s)
 function union(s::OrderedSet, sets...)

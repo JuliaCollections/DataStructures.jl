@@ -4,8 +4,8 @@ using Base.Test
 # construction
 
 @test typeof(OrderedSet()) == OrderedSet{Any}
-@test typeof(OrderedSet('a')) == OrderedSet{Char}
-@test typeof(OrderedSet(1,2,3,4)) == OrderedSet{Int}
+@test typeof(OrderedSet(['a'])) == OrderedSet{Char}
+@test typeof(OrderedSet([1,2,3,4])) == OrderedSet{Int}
 
 # empty set
 d = OrderedSet{Char}()
