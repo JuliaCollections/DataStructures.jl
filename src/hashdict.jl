@@ -530,3 +530,13 @@ next(v::ValueIterator{HashDict}, i) = (v.dict.vals[i], skip_deleted(v.dict,i+1))
 
 next{K,V}(v::KeyIterator{HashDict{K,V,Ordered}}, i) = (v.dict.keys[v.dict.order[i]], skip_deleted(v.dict,i+1))
 next{K,V}(v::ValueIterator{HashDict{K,V,Ordered}}, i) = (v.dict.vals[v.dict.order[i]], skip_deleted(v.dict,i+1))
+
+if VERSION >= v"0.4.0-dev+980"
+    push!(t::HashDict, p::Pair) = setindex!(t, p.second, p.first)
+    push!(t::HashDict, p::Pair, q::Pair) = push!(push!(t, p), q)
+    push!(t::HashDict, p::Pair, q::Pair, r::Pair...) = push!(push!(push!(t, p), q), r...)
+end
+
+push!(d::HashDict, p) = setindex!(d, p[2], p[1])
+push!(d::HashDict, p, q) = push!(push!(d, p), q)
+push!(d::HashDict, p, q, r...) = push!(push!(push!(d, p), q), r...)

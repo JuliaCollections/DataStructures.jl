@@ -1,7 +1,7 @@
 # ordered dict
 
 import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
-             setindex!, getindex, sizehint, length, isempty, start,
+             setindex!, getindex, length, isempty, start,
              next, done, keys, values, setdiff, setdiff!,
              union, union!, intersect, isequal, filter, filter!,
              hash, eltype
@@ -51,10 +51,22 @@ copy(d::OrderedDict) = OrderedDict(d)
 
 ## Most functions are simply delegated to the wrapped HashDict
 
-@compat @delegate OrderedDict.d [ haskey, get, get!, getkey, delete!, pop!,
-                                 empty!, setindex!, getindex, sizehint,
-                                 length, isempty, start, next, done, keys,
-                                 values ]
+@delegate OrderedDict.d [ haskey, get, get!, getkey, delete!, pop!,
+                         empty!, setindex!, getindex,
+                         length, isempty, start, next, done, keys,
+                         values ]
+
+sizehint(d::OrderedDict, sz::Integer) = (sizehint(d.d, sz); d)
+
+if VERSION >= v"0.4.0-dev+980"
+    push!(d::OrderedDict, kv::Pair) = (push!(d.d, kv); d)
+    push!(d::OrderedDict, kv::Pair, kv2::Pair) = (push!(d.d, kv, kv2); d)
+    push!(d::OrderedDict, kv::Pair, kv2::Pair, kv3::Pair...) = (push!(d.d, kv, kv2, kv3...); d)
+end
+
+push!(d::OrderedDict, kv) = (push!(d.d, kv); d)
+push!(d::OrderedDict, kv, kv2...) = (push!(d.d, kv, kv2...); d)
+
 
 similar{K,V}(d::OrderedDict{K,V}) = OrderedDict{K,V}()
 in{T<:OrderedDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
