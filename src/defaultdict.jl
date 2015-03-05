@@ -56,8 +56,8 @@ DefaultDictBase{F,D<:Associative}(default::F, d::D) = ((K,V)=eltype(d); DefaultD
 
 # most functions are simply delegated to the wrapped dictionary
 @delegate DefaultDictBase.d [ sizehint, empty!, setindex!, get, haskey,
-                              getkey, pop!, delete!, start, done, next,
-                              isempty, length ]
+                             getkey, pop!, delete!, start, done, next,
+                             isempty, length ]
 
 similar{K,V,F}(d::DefaultDictBase{K,V,F}) = DefaultDictBase{K,V,F}(d.default)
 in{T<:DefaultDictBase}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d)
@@ -132,7 +132,7 @@ for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Order
         @delegate $DefaultDict.d [ sizehint, empty!, setindex!,
                                    getindex, get, get!, haskey,
                                    getkey, pop!, delete!, start, next,
-                                   done, next, isempty, length]
+                                   done, next, isempty, length ]
 
         similar{K,V,F}(d::$DefaultDict{K,V,F}) = $DefaultDict{K,V,F}(d.d.default)
         in{T<:$DefaultDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
