@@ -186,6 +186,19 @@ Examples of constructing a heap::
   h = mutable_binary_minheap([1,4,3,2])
   h = mutable_binary_maxheap([1,4,3,2])    # create a mutable min/max heap from a vector
 
+---------------------
+Functions using heaps
+---------------------
+
+Heaps can be used to extract the largest or smallest elements of an array
+without sorting the entire array first::
+
+  nlargest(3, [0,21,-12,68,-25,14]) # => [68,21,14]
+  nsmallest(3, [0,21,-12,68,-25,14]) # => [-25,-12,0]
+
+``nlargest(n, a)`` is equivalent to ``sort(a, lt = >)[1:min(n, end)]``, and
+``nsmallest(n, a)`` is equivalent to ``sort(a, lt = <)[1:min(n, end)]``.
+
 -----------------------------
 OrderedDicts and OrderedSets
 -----------------------------
