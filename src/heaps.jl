@@ -72,3 +72,58 @@ function extract_all!{VT}(h::AbstractHeap{VT})
     end
     r
 end
+
+function extract_all_rev!{VT}(h::AbstractHeap{VT})
+    n = length(h)
+    r = Array(VT, n)
+    for i = 1 : n
+        r[n + 1 - i] = pop!(h)
+    end
+    r
+end
+
+# Array functions using heaps
+
+function nextreme{T, Comp}(comp::Comp, n::Int, arr::AbstractVector{T})
+    if n <= 0
+        return T[] # sort(arr)[1:n] returns [] for n <= 0
+    elseif n >= length(arr)
+        return sort(arr, lt = (x, y) -> compare(comp, y, x))
+    end
+    
+    buffer = BinaryHeap{T,Comp}(comp)
+    
+    for i = 1 : n
+        @inbounds xi = arr[i]
+        push!(buffer, xi)
+    end
+    
+    for i = n + 1 : length(arr)
+        @inbounds xi = arr[i]
+        if compare(comp, top(buffer), xi)
+            # This could use a pushpop method
+            pop!(buffer)
+            push!(buffer, xi)
+        end
+    end
+
+    return extract_all_rev!(buffer)
+end
+
+@doc """
+Returns the `n` largest elements of `arr`.
+
+Equivalent to `sort(arr, lt = >)[1:min(n, end)]`
+""" ->
+function nlargest{T}(n::Int, arr::AbstractVector{T})
+    return nextreme(LessThan(), n, arr)
+end
+
+@doc """
+Returns the `n` smallest elements of `arr`.
+
+Equivalent to `sort(arr, lt = <)[1:min(n, end)]`
+""" ->
+function nsmallest{T}(n::Int, arr::AbstractVector{T})
+    return nextreme(GreaterThan(), n, arr)
+end

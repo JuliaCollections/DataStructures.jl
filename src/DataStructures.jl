@@ -5,7 +5,7 @@ module DataStructures
     import Base: length, isempty, start, next, done,
                  show, dump, empty!, getindex, setindex!, get, get!,
                  in, haskey, keys, merge, copy, cat,
-                 push!, pop!, shift!, unshift!,
+                 push!, pop!, shift!, unshift!, insert!,
                  union!, delete!, similar, sizehint,
                  isequal, hash,
                  map, reverse,
@@ -26,7 +26,7 @@ module DataStructures
     export push!
 
     export AbstractHeap, compare, extract_all!
-    export BinaryHeap, binary_minheap, binary_maxheap
+    export BinaryHeap, binary_minheap, binary_maxheap, nlargest, nsmallest
     export MutableBinaryHeap, mutable_binary_minheap, mutable_binary_maxheap
 
     export OrderedDict, OrderedSet
@@ -36,7 +36,7 @@ module DataStructures
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
            reverse
     export SortedDict, SDToken, SDSemiToken
-    export insert!, startof
+    export startof
     export pastendtoken, beforestarttoken
     export searchsortedafter
     export enumerate_ind, packcopy, packdeepcopy
@@ -45,6 +45,10 @@ module DataStructures
     
     export Tree, EmptyTree, BinaryTreeNode, BinaryTree
 
+
+    if VERSION < v"0.4.0-dev"
+        using Docile
+    end
 
     include("delegate.jl")
 
@@ -70,10 +74,21 @@ module DataStructures
     import .Tokens: Token, IntSemiToken, semi, container, assemble
     import .Tokens: deref_key, deref_value, deref, status
     import .Tokens: advance, regress
+
     include("sortedDict.jl")
     export semi, container, assemble, status
     export deref_key, deref_value, deref, advance, regress
+
     @deprecate stack Stack
     @deprecate queue Queue
     @deprecate add! push!
+
+    @deprecate HashDict{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V}) HashDict{K,V,Unordered}(ks,vs)
+    @deprecate HashDict(ks, vs) HashDict{Any,Any,Unordered}(ks, vs)
+
+    @deprecate OrderedDict(ks, vs) OrderedDict(zip(ks,vs))
+    @deprecate OrderedDict{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V}) OrderedDict{K,V}(zip(ks,vs))
+    @deprecate OrderedDict{K,V}(::Type{K},::Type{V}) OrderedDict{K,V}()
+
+    @deprecate OrderedSet(a, b...) OrderedSet({a, b...})
 end

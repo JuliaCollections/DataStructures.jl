@@ -94,3 +94,13 @@ push!(h, 2)
 
 @test pop!(h) == 2
 @test isequal(h.valtree, [7, 10])
+
+# Tests for nlargest and nsmallest
+ss = [100,103,-12,-109,67,4,65,-52,-97,-32,-24,114,-128,
+      102,-56,-17,-41,25,-30,-84,26,-84,48,49,-5,-38,28,
+      114,-54,96,-55,67,74,127,-61,124,11,-7,93,-51,110,
+      -106,-84,-90,-18,-12,-116,21,115,50]
+for n = -1:length(ss) + 1
+    @test sort(ss, lt = >)[1:min(n, end)] == nlargest(n, ss)
+    @test sort(ss, lt = <)[1:min(n, end)] == nsmallest(n, ss)
+end

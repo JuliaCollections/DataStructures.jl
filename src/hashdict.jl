@@ -23,6 +23,7 @@ type HashDict{K,V,O<:Union(Ordered,Unordered)} <: Associative{K,V}
         new(zeros(Uint8,n), Array(K,n), Array(V,n), Array(O,n), Array(O,0), 0, 0, identity)
     end
     if VERSION >= v"0.4.0-dev+980"
+        HashDict(p::Pair) = setindex!(HashDict{K,V,O}(), p.second, p.first)
         function HashDict(ps::Pair{K,V}...)
             h = HashDict{K,V,O}()
             sizehint(h, length(ps))
@@ -31,10 +32,11 @@ type HashDict{K,V,O<:Union(Ordered,Unordered)} <: Associative{K,V}
             end
             return h
         end
+        HashDict(p::Pair{K,V}) = invoke(HashDict, (Pair{K,V}...), p)
     end
     function HashDict(ks, vs)
         if VERSION >= v"0.4.0-dev+980"
-            Base.warn_once("HashDict(kv,vs) is deprecated, use HashDict(collect(zip(ks,vs))) instead")
+            Base.warn_once("HashDict(kv,vs) is deprecated, use HashDict(zip(ks,vs)) instead")
         end
         n = length(ks)
         h = HashDict{K,V,O}()
@@ -43,7 +45,7 @@ type HashDict{K,V,O<:Union(Ordered,Unordered)} <: Associative{K,V}
         end
         return h
     end
-    function HashDict(kv::AbstractArray{(K,V)})
+    function HashDict(kv)
         h = HashDict{K,V,O}()
         sizehint(h, length(kv))
         for (k,v) in kv
@@ -54,16 +56,27 @@ type HashDict{K,V,O<:Union(Ordered,Unordered)} <: Associative{K,V}
 end
 
 HashDict() = HashDict{Any,Any,Unordered}()
+HashDict(kv::()) = HashDict()
+HashDict(kv) = hash_dict_with_eltype(kv, eltype(kv))
 
-HashDict{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V}) = HashDict{K,V,Unordered}(ks,vs)
-HashDict(ks, vs) = HashDict{Any,Any,Unordered}(ks, vs)
+hash_dict_with_eltype{K,V}(kv, ::Type{(K,V)}) = HashDict{K,V}(kv)
+hash_dict_with_eltype(kv, t) = HashDict{Any,Any}(kv)
+
 HashDict{K,V}(kv::AbstractArray{(K,V)}) = HashDict{K,V,Unordered}(kv)
 if VERSION >= v"0.4.0-dev+980"
     HashDict{K,V}(ps::Pair{K,V}...) = HashDict{K,V,Unordered}(ps...)
+    HashDict{K,V}(kv::(Pair{K,V}...,))           = HashDict{K,V}(kv)
+    HashDict{K}  (kv::(Pair{K}...,))             = HashDict{K,Any}(kv)
+    HashDict{V}  (kv::(Pair{TypeVar(:K),V}...,)) = HashDict{Any,V}(kv)
+    HashDict     (kv::(Pair...,))                = HashDict{Any,Any}(kv)
+
+    HashDict{K,V}(kv::AbstractArray{Pair{K,V}})  = HashDict{K,V}(kv)
+
+    hash_dict_with_eltype{K,V}(kv, ::Type{Pair{K,V}})    = HashDict{K,V}(kv)
 end
 
 # TODO: these could be more efficient
-HashDict{K,V,O}(d::HashDict{K,V,O}) = HashDict{K,V,O}(collect(kv))
+HashDict{K,V,O}(d::HashDict{K,V,O}) = HashDict{K,V,O}(collect(d))
 HashDict{K,V}(d::Associative{K,V}) = HashDict{K,V,Unordered}(collect(d))
 
 similar{K,V,O}(d::HashDict{K,V,O}) = HashDict{K,V,O}()
@@ -517,3 +530,13 @@ next(v::ValueIterator{HashDict}, i) = (v.dict.vals[i], skip_deleted(v.dict,i+1))
 
 next{K,V}(v::KeyIterator{HashDict{K,V,Ordered}}, i) = (v.dict.keys[v.dict.order[i]], skip_deleted(v.dict,i+1))
 next{K,V}(v::ValueIterator{HashDict{K,V,Ordered}}, i) = (v.dict.vals[v.dict.order[i]], skip_deleted(v.dict,i+1))
+
+if VERSION >= v"0.4.0-dev+980"
+    push!(t::HashDict, p::Pair) = setindex!(t, p.second, p.first)
+    push!(t::HashDict, p::Pair, q::Pair) = push!(push!(t, p), q)
+    push!(t::HashDict, p::Pair, q::Pair, r::Pair...) = push!(push!(push!(t, p), q), r...)
+end
+
+push!(d::HashDict, p) = setindex!(d, p[2], p[1])
+push!(d::HashDict, p, q) = push!(push!(d, p), q)
+push!(d::HashDict, p, q, r...) = push!(push!(push!(d, p), q), r...)

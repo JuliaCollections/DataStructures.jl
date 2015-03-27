@@ -75,8 +75,8 @@ Usage of Queue::
 Accumulators and Counters
 --------------------------
 
-A accumulator, as defined below, is a data structure that maintains an accumulated number for each key. This is a counter when the accumulated values refl
-ect the counts::
+A accumulator, as defined below, is a data structure that maintains an accumulated number for each key. This is a counter when the accumulated values
+reflect the counts::
 
   type Accumulator{K, V<:Number}
       map::Dict{K, V}
@@ -148,7 +148,7 @@ Heaps
 
 Heaps are data structures that efficiently maintain the minimum (or maximum) for a set of data that may dynamically change.
 
-All heaps in this package are derived from ``AbstractHeap``, and provides the following interface::
+All heaps in this package are derived from ``AbstractHeap``, and provide the following interface::
 
   # Let h be a heap, i be a handle, and v be a value.
 
@@ -185,6 +185,19 @@ Examples of constructing a heap::
 
   h = mutable_binary_minheap([1,4,3,2])
   h = mutable_binary_maxheap([1,4,3,2])    # create a mutable min/max heap from a vector
+
+---------------------
+Functions using heaps
+---------------------
+
+Heaps can be used to extract the largest or smallest elements of an array
+without sorting the entire array first::
+
+  nlargest(3, [0,21,-12,68,-25,14]) # => [68,21,14]
+  nsmallest(3, [0,21,-12,68,-25,14]) # => [-25,-12,0]
+
+``nlargest(n, a)`` is equivalent to ``sort(a, lt = >)[1:min(n, end)]``, and
+``nsmallest(n, a)`` is equivalent to ``sort(a, lt = <)[1:min(n, end)]``.
 
 -----------------------------
 OrderedDicts and OrderedSets
@@ -341,7 +354,7 @@ SortedDict.
 with the additional feature that the keys are stored in
 sorted order and can be efficiently iterated in this order.
 SortedDict is a subtype of Associative.  SortedDict is
-a parametrized type with three parameters, the key type ``K``, the
+a parameterized type with three parameters, the key type ``K``, the
 value type ``V``, and the ordering type ``O``.
 
 SortedDict internally uses a 2-3 tree, which is a
