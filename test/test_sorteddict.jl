@@ -215,7 +215,7 @@ function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree23{
         end
         push!(freedata, fdi)
     end
-    if in(:useddatacells, names(DataStructures.BalancedTree23))
+    if in(:useddatacells, fieldnames(DataStructures.BalancedTree23))
         if last(t.useddatacells) > dsz
             error("t.useddatacells has indices larger than t.data size")
         end
