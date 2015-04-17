@@ -34,7 +34,7 @@ function verify_heap{VT,Comp}(h::MutableBinaryHeap{VT,Comp})
     comp = h.comparer
     nodes = h.nodes
     n = length(h)
-    m = n / 2
+    m = div(n,2)
     for i = 1 : m
         v = nodes[i].value
         lc = i * 2

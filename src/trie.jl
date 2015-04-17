@@ -29,7 +29,7 @@ end
 
 Trie() = Trie{Any}()
 Trie{K<:String,V}(ks::AbstractVector{K}, vs::AbstractVector{V}) = Trie{V}(ks, vs)
-Trie{K<:String,V}(kv::AbstractVector{(K,V)}) = Trie{V}(kv)
+Trie{K<:String,V}(kv::AbstractVector{@compat Tuple{K,V}}) = Trie{V}(kv)
 Trie{K<:String,V}(kv::Associative{K,V}) = Trie{V}(kv)
 Trie{K<:String}(ks::AbstractVector{K}) = Trie{Nothing}(ks, similar(ks, Nothing))
 

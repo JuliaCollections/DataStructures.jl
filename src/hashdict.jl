@@ -56,19 +56,19 @@ type HashDict{K,V,O<:Union(Ordered,Unordered)} <: Associative{K,V}
 end
 
 HashDict() = HashDict{Any,Any,Unordered}()
-HashDict(kv::()) = HashDict()
+HashDict(kv::@compat Tuple{}) = HashDict()
 HashDict(kv) = hash_dict_with_eltype(kv, eltype(kv))
 
-hash_dict_with_eltype{K,V}(kv, ::Type{(K,V)}) = HashDict{K,V}(kv)
+hash_dict_with_eltype{K,V}(kv, ::Type{@compat Tuple{K,V}}) = HashDict{K,V}(kv)
 hash_dict_with_eltype(kv, t) = HashDict{Any,Any}(kv)
 
-HashDict{K,V}(kv::AbstractArray{(K,V)}) = HashDict{K,V,Unordered}(kv)
+HashDict{K,V}(kv::AbstractArray{@compat Tuple{K,V}}) = HashDict{K,V,Unordered}(kv)
 if VERSION >= v"0.4.0-dev+980"
     HashDict{K,V}(ps::Pair{K,V}...) = HashDict{K,V,Unordered}(ps...)
-    HashDict{K,V}(kv::(Pair{K,V}...,))           = HashDict{K,V}(kv)
-    HashDict{K}  (kv::(Pair{K}...,))             = HashDict{K,Any}(kv)
-    HashDict{V}  (kv::(Pair{TypeVar(:K),V}...,)) = HashDict{Any,V}(kv)
-    HashDict     (kv::(Pair...,))                = HashDict{Any,Any}(kv)
+    HashDict{K,V}(kv::@compat Tuple{Vararg{Pair{K,V}}})           = HashDict{K,V}(kv)
+    HashDict{K}  (kv::@compat Tuple{Vararg{Pair{K}}})             = HashDict{K,Any}(kv)
+    HashDict{V}  (kv::@compat Tuple{Vararg{Pair{TypeVar(:K),V}}}) = HashDict{Any,V}(kv)
+    HashDict     (kv::@compat Tuple{Vararg{Pair}})                = HashDict{Any,Any}(kv)
 
     HashDict{K,V}(kv::AbstractArray{Pair{K,V}})  = HashDict{K,V}(kv)
 
