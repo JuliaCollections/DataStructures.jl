@@ -87,5 +87,5 @@ module DataStructures
     @deprecate OrderedDict{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V}) OrderedDict{K,V}(zip(ks,vs))
     @deprecate OrderedDict{K,V}(::Type{K},::Type{V}) OrderedDict{K,V}()
 
-    @deprecate OrderedSet(a, b...) OrderedSet({a, b...})
+    @deprecate OrderedSet(a, b...) OrderedSet(Any[a, b...])
 end
