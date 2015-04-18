@@ -88,4 +88,5 @@ module DataStructures
     @deprecate OrderedDict{K,V}(::Type{K},::Type{V}) OrderedDict{K,V}()
 
     @deprecate OrderedSet(a, b...) OrderedSet(Any[a, b...])
+    @deprecate OrderedSet{T<:Number}(xs::T...)  OrderedSet{T}(xs)      # (almost) mimic Set deprecation in Base
 end
