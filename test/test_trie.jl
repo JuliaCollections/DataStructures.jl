@@ -1,7 +1,7 @@
 using DataStructures
 using Base.Test
 
-t=Trie{Int}()
+t=Trie{Char,Int}()
 
 t["amy"]=56
 t["ann"]=15
@@ -15,6 +15,7 @@ t["roger"]=52
 @test t["rob"] == 27
 @test sort(keys_with_prefix(t,"ro")) == ["rob", "roger"]
 
+@test true == false
 
 # constructors
 ks = ["amy", "ann", "emma", "rob", "roger"]
