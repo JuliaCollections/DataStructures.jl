@@ -1,11 +1,11 @@
-type Trie{T}
+type Trie{K,T}
     value::T
-    children::Dict{Char,Trie{T}}
+    children::Dict{K,Trie{K,T}}
     is_key::Bool
 
     function Trie()
         self = new()
-        self.children = Dict{Char,Trie{T}}()
+        self.children = Dict{K,Trie{K,T}}()
         self.is_key = false
         self
     end
@@ -13,31 +13,31 @@ type Trie{T}
     function Trie(ks, vs)
         t = Trie{T}()
         for (k, v) in zip(ks, vs)
-            t[k] = v
+            setindex!(t, v, k)
         end
         return t
     end
 
     function Trie(kv)
-        t = Trie{T}()
+        t = Trie{K,T}()
         for (k,v) in kv
-            t[k] = v
+            setindex!(t, v, k)
         end
         return t
     end
 end
 
-Trie() = Trie{Any}()
-Trie{K<:String,V}(ks::AbstractVector{K}, vs::AbstractVector{V}) = Trie{V}(ks, vs)
-Trie{K<:String,V}(kv::AbstractVector{(K,V)}) = Trie{V}(kv)
-Trie{K<:String,V}(kv::Associative{K,V}) = Trie{V}(kv)
-Trie{K<:String}(ks::AbstractVector{K}) = Trie{Nothing}(ks, similar(ks, Nothing))
+Trie() = Trie{Any,Any}()
+Trie{K<:String,V}(ks::AbstractVector{K}, vs::AbstractVector{V}) = Trie{K,V}(ks, vs)
+Trie{K<:String,V}(kv::AbstractVector{(K,V)}) = Trie{K,V}(kv)
+Trie{K<:String,V}(kv::Associative{K,V}) = Trie{K,V}(kv)
+Trie{K<:String}(ks::AbstractVector{K}) = Trie{K,Nothing}(ks, similar(ks, Nothing))
 
-function setindex!{T}(t::Trie{T}, val::T, key::String)
+function setindex!{T}(t::Trie{Char,T}, val::T, key::String)
     node = t
     for char in key
         if !haskey(node.children, char)
-            node.children[char] = Trie{T}()
+            node.children[char] = Trie{Char,T}()
         end
         node = node.children[char]
     end
@@ -53,7 +53,7 @@ function getindex(t::Trie, key::String)
     throw(KeyError("key not found: $key"))
 end
 
-function subtrie(t::Trie, prefix::String)
+function subtrie{T}(t::Trie{Char,T}, prefix::String)
     node = t
     for char in prefix
         if !haskey(node.children, char)
@@ -78,7 +78,7 @@ function get(t::Trie, key::String, notfound)
     notfound
 end
 
-function keys(t::Trie, prefix::String="", found=String[])
+function keys{T}(t::Trie{Char, T}, prefix::String="", found=String[])
     if t.is_key
         push!(found, prefix)
     end
