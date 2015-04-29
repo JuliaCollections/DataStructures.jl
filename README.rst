@@ -26,6 +26,7 @@ This package implements a variety of data structures, including
 * Dictionaries with Defaults
 * Trie
 * Linked List
+* Sorted Dict, Sorted Multi-Dict and Sorted Set
 
 ------
 Deque
@@ -185,6 +186,7 @@ Examples of constructing a heap::
 
   h = mutable_binary_minheap([1,4,3,2])
   h = mutable_binary_maxheap([1,4,3,2])    # create a mutable min/max heap from a vector
+
 
 ---------------------
 Functions using heaps
@@ -365,39 +367,99 @@ A list of sequentially linked nodes. This allows efficient insertion of nodes to
 Overview of Sorted Containers
 ----------------------------------------
 
-Currently one sorted container is provided:
-SortedDict. 
-*SortedDict* is similar to the built-in Julia type Dict
+Three sorted containers are provided:
+SortedDict, SortedMultiDict and SortedSet.
+*SortedDict* is similar to the built-in Julia type ``Dict``
 with the additional feature that the keys are stored in
 sorted order and can be efficiently iterated in this order.
-SortedDict is a subtype of Associative.  SortedDict is
-a parameterized type with three parameters, the key type ``K``, the
+SortedDict is a subtype of Associative.  It is slower than ``Dict``
+because looking up a key requires an O(log *n*) tree search rather than
+an expected O(1) hash-table lookup time as with Dict.
+SortedDict is
+a parametrized type with three parameters, the key type ``K``, the
 value type ``V``, and the ordering type ``O``.
+SortedSet has
+only keys; it is an alternative to the built-in
+``Set`` container.  Internally,
+SortedSet is implemented as a SortedDict in which the value type
+is ``Nothing``.  
+Finally, SortedMultiDict is similar to SortedDict except that each key
+can be associated with multiple values.  The (key,value) pairs in
+a SortedMultiDict are stored according to the sorted order for keys,
+and (key,value) pairs with the same
+key are stored in order of insertion. 
 
-SortedDict internally uses a 2-3 tree, which is a
+The containers internally use a 2-3 tree, which is a
 kind of balanced tree and is described in many elementary data
-structure textbook.
+structure textbooks.
 
-This container requires two functions to compare keys: a *less-than* and
+The containers require two functions to compare keys: a *less-than* and
 *equals* function.  With the
 default ordering argument, the comparison
-functions are ``isless(a,b)`` and ``isequal(a,b)`` where ``a`` and ``b``
+functions are ``isless(key1,key2)`` (true when ``key1 < key2``)
+and ``isequal(key1,key2)`` (true when ``key1 == key2``) where ``key1`` and ``key2``
 are keys.
-User-specified ordering functions are discussed below.
+More details are provided below.
 
 ------------------------------
 Tokens for Sorted Containers
 ------------------------------
 
-The SortedDict type is accompanied by an auxiliary type called the *token*
-and is defined as type ``SDToken``.  A token is an item that stores
-the address of a single data item in the SortedDict and can be
+The sorted container objects use a special type for indexing 
+called a *token*
+defined as a two-entry tuple and aliased as
+``SDToken``, ``SMDToken``, and ``SetToken`` for SortedDict, SortedMultiDict
+and SortedSet respectively.
+A token is the
+address of a single data item in the container and can be
 dereferenced in time O(1).
-This notion of token is similar to the concept of iterators used
+
+The first entry of a Token tuple is the container as a whole, and the
+second refers to the particular item.  The second part is called a
+*semitoken*.  The types for a semitoken are ``SDSemiToken``, ``SMDSemiToken``,
+and ``SetSemiToken`` for the three types of containers SortedDict, SortedMultiDict
+and SortedSet.  These types are
+all aliases of ``IntSemiToken``.
+
+A restriction for the sorted containers is that
+``IntSemiToken`` or its aliases cannot used as the key-type.  
+This is because
+ambiguity would result between the
+two subscripting calls ``sc[k]`` and ``sc[st]`` described below.  In the
+rare scenario that a sorted container whose key-type is ``IntSemiToken``
+is required,
+a workaround is to wrap the key inside another immutable
+structure.
+
+In the current
+version of Julia, it is costly to operate on tuples whose entries are not bits-types
+because such tuples are allocated on the heap.
+For example, the first entry of a token is a pointer to a container
+(a non-bits type), so
+a new token is allocated on the heap rather than the
+stack.  In order to avoid performance loss, the package uses tokens
+less frequently than semitokens.  For a function 
+taking a token as an argument like
+``deref`` described below, if it is invoked by explicitly naming
+the token like this::
+
+    tok = (sc,st)   # sc is a sorted container, st is a semitoken
+    k,v = deref(tok)
+
+then there may be a loss of performance
+compared to::
+
+    k,v = deref((sc,st))
+
+because the former needs an extra heap allocation step for ``tok``.
+
+
+The notion of token is similar to the concept of iterators used
 by C++ standard containers.
 Tokens can be explicitly advanced or regressed through the data in
 the sorted order; they are implicitly advanced or regressed via
 iteration loops defined below.
+
 A token may take two 
 special values:
 the *before-start* value and the *past-end* value.  These
@@ -406,16 +468,11 @@ on the actual data.  The before-start token can be advanced,
 while the past-end token can be regressed.  A dereferencing operation on either
 leads to an error.  
 
-A token has two parts: the first part refers to the container as a whole, and the
-second part refers to the particular item.  The second part is called a
-*semitoken*.  In some applications, one might need an auxiliary data structure
-that contains thousands of tokens addressing the same container.  In this
-case, it may be more efficient to store semitokens rather than tokens
-and reconstruct the full tokens as needed.  In the current implementation,
+In the current implementation,
 semitokens are internally stored as integers. However, 
 for the purpose of future compatibility,
 the user should  not extract this internal representation;
-these integers do not have any direct interpretation
+these integers do not have a documented interpretation
 in terms of the container.
 
 ----------------------------------
@@ -442,9 +499,27 @@ Constructors for Sorted Containers
   the parameters of the type.  Ordering argument ``o`` is
   optional and defaults to ``Forward``.
 
+``SortedMultiDict(k,v,o)``
+  Construct a SortedMultiDict using keys given by ``k``, values
+  given by ``v`` and ordering object ``o``.  The ordering object
+  defaults to ``Forward`` if not specified.  The two arguments
+  ``k`` and ``v`` are 1-dimensional arrays of the same length in 
+  which ``k`` holds keys and ``v`` holds the corresponding values.
+  To construct an empty SortedMultiDict with given types ``K`` and
+  ``V``, use
+  ``SortedMultiDict(K[], V[], o)``.
+
+``SortedSet(k,o)``
+  Construct a SortedSet using keys given by ``k``,
+  and ordering object ``o``.  The ordering object
+  defaults to ``Forward`` if not specified.  The argument
+  ``k``is a 1-dimensional array.  To create an empty set of type ``K``,
+  use ``SortedSet(K[],o)``.
+
 Note that the code snippets in this section are based on the Julia
 version 0.4.0 Dict-constructor
-syntax.  There are equivalent statements for 0.3.0
+syntax.  There are equivalent statements for 0.3.0.
+
 
 ---------------------------------
 Complexity of Sorted Containers
@@ -460,217 +535,262 @@ time needed to compare two keys.
 --------------------------------------
 Navigating the Containers 
 --------------------------------------
-``m[k]``
-  Argument ``m`` is a SortedDict and ``k`` is a key.  In an 
+``sd[k]``
+  Argument ``sd`` is a SortedDict and ``k`` is a key.  In an 
   expression, this retrieves the value associated with the key
   (or ``KeyError`` if none).  On the left-hand side of an
   assignment, this assigns or
   reassigns the value associated with the key.  (For assigning and reassigning,
   see also ``insert!`` below.)  Time: O(*c* log *n*)
 
-``find(m,k)``
-  Argument ``m`` is a SortedDict and argument ``k`` is a key.
-  This function returns a token that refers to the item whose key
+``find(sd,k)``
+  Argument ``sd`` is a SortedDict and argument ``k`` is a key.
+  This function returns the semitoken that refers to the item whose key
   is ``k``, or 
-  past-end marker if ``k`` is absent. Time: O(*c* log *n*)
+  past-end semitoken if ``k`` is absent. Time: O(*c* log *n*)
+
+``deref((sc,st))``
+  Argument ``(sc,st)``
+  is a token (i.e., ``sc`` is a container and ``st`` is a semitoken).
+  Note the double-parentheses in the calling syntax: the argument of ``deref``
+  is  a token, which is defined to be a 2-tuple.
+  This returns the (key, value) pair 
+  pointed to by the token for SortedDict and SortedMultiDict.  
+  For SortedSet this returns a key.  Time: O(1)
 
 
-``deref(i)``
-  Argument ``i``
-  is a token.  This returns the (key,value) pair 
-  pointed to by the token.  Time: O(1)
-
-
-``deref_key(i)``
-  Argument ``i`` is a token.  This returns the key pointed
-  to by the token.
+``deref_key((sc,st))``
+  Argument ``(sc,st)`` is a token for SortedMultiDict or SortedDict.  
+  This returns the key (i.e., the first half of a (key,value) pair) 
+  pointed to by the token.  This functionality is available as plain ``deref``
+  for SortedSet.
   Time: O(1)
 
-``deref_value(i)``
-  Argument ``i`` is a token.  This returns the value pointed
-  to by the token.
+
+``deref_value((sc,st))``
+  Argument ``(sc,st)`` is a token for SortedMultiDict or SortedDict.  
+  This returns the value (i.e., the second half of a (key,value) pair)
+  pointed to by the token.
   Time: O(1)
 
-``startof(m)``
-  Argument ``m`` is a SortedDict.  This function
-  returns the token of the first item according
-  to the sorted order in the container.  If the container is empty,
-  it returns the past-end token. Time: O(log *n*)
 
-``endof(m)``
-  Argument ``m`` is a SortedDict.  This function
-  returns the token of the last item according
+``startof(sc)``
+  Argument ``sc`` is SortedDict, SortedMultiDict or SortedSet.  This function
+  returns the semitoken of the first item according
   to the sorted order in the container.  If the container is empty,
-  it returns the before-start token.  Time: O(log *n*)
+  it returns the past-end semitoken. Time: O(log *n*)
 
-``first(m)``
-  Argument ``m`` is a SortedDict.  This function
-  returns the first item (a ``(k,v)`` pair)
+``endof(sc)``
+  Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet.  This function
+  returns the semitoken of the last item according
+  to the sorted order in the container.  If the container is empty,
+  it returns the before-start semitoken.  Time: O(log *n*)
+
+``first(sc)``
+  Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet  This function
+  returns the first item (a ``k,v`` pair for SortedDict and SortedMultiDict;
+  a key for SortedSet)
   according
-  to the sorted order in the container.  Thus, ``first(m)`` is
-  equivalent to ``deref(startof(m))``.
+  to the sorted order in the container.  Thus, ``first(sc)`` is
+  equivalent to ``deref((sc,startof(sc)))``.
   It is an error to call this
   function on an empty container. Time: O(log *n*)
 
-``last(m)``
-  Argument ``m`` is a SortedDict.  This function
-  returns the last item (a ``(k,v)`` pair)
+``last(sc)``
+  Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet.  This function
+  returns the last item (a ``k,v`` pair for SortedDict and SortedMultiDict; 
+  a key for SortedSet)
   according
-  to the sorted order in the container.  Thus, ``last(m)`` is
-  equivalent to ``deref(endof(m))``.
+  to the sorted order in the container.  Thus, ``last(sc)`` is
+  equivalent to ``deref((sc,endof(sc)))``.
   It is an error to call this
   function on an empty container.  Time: O(log *n*)
 
-``pastendtoken(m)``
-  Argument ``m`` is a SortedDict.  This
-  function returns the past-end token.  Time: O(1)
+``pastendsemitoken(sc)``
+  Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet.  This
+  function returns the past-end semitoken.  Time: O(1)
 
-``beforestarttoken(m)``
-  Argument ``m`` is a SortedDict.  This
-  function returns the before-start token.  Time: O(1)
+``beforestartsemitoken(sc)``
+  Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet.  This
+  function returns the before-start semitoken.  Time: O(1)
 
-``advance(i)``
-  Argument   ``i`` is a token.  This function returns the token of the
+``advance((sc,st))``
+  Argument   ``(sc,st)`` is a token.  This function returns the semitoken of the
   next entry in the container according to the sort order of the
   keys.  After the last item, this routine returns the past-end
-  token.  It is an error to invoke this function if ``i`` is the
-  past-end token.  If ``i`` is the before-start token, then this
-  routine returns the token of the first item in the sort order (i.e., the
-  same token returned by the ``startof`` function).
+  semitoken.  It is an error to invoke this function if ``(sc,st)`` is the
+  past-end token.  If ``(sc,st)`` is the before-start token, then this
+  routine returns the semitoken of the first item in the sort order (i.e., the
+  same semitoken returned by the ``startof`` function).
   Time: O(log *n*)
 
-``regress(i)``
+
+``regress((sc,st))``
   Argument 
-  ``i`` is a token.  This function returns the token of the
+  ``(sc,st)`` is a token.  This function returns the semitoken of the
   previous entry in the container according to the sort order of the
-  keys.  If ``i`` indexes the first item, this routine returns the before-start
-  token.  It is an error to invoke this function if ``i`` is the
-  before-start token.  If ``i`` is the past-end token, then this
-  routine returns the token of the last item in the sort order (i.e., the
-  same token returned by the ``endof`` function).
+  keys.  If ``(sc,st)`` indexes the first item, this routine returns the before-start
+  semitoken.  It is an error to invoke this function if ``(sc,st)`` is the
+  before-start token.  If ``(sc,st)`` is the past-end token, then this
+  routine returns the smitoken of the last item in the sort order (i.e., the
+  same semitoken returned by the ``endof`` function).  
   Time: O(log *n*)
 
-``searchsortedfirst(m,k)``
-  Argument ``m`` is a SortedDict and
-  ``k`` is an element of the key type.  This routine returns the token
+``searchsortedfirst(sc,k)``
+  Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet and
+  ``k`` is a key.  This routine returns the semitoken
   of the first item in the container whose key is greater than or equal to
-  ``k``.  If there is no such key, then the past-end token
+  ``k``.  If there is no such key, then the past-end semitoken
   is returned.
   Time: O(*c* log *n*)
 
-``searchsortedlast(m,k)``
-  Argument ``m`` is a SortedDict and
-  ``k`` is an element of the key type.  This routine returns the token
+``searchsortedlast(sc,k)``
+  Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet and
+  ``k`` is a key.  This routine returns the semitoken
   of the last item in the container whose key is less than or equal to
-  ``k``.  If there is no such key, then the before-start token
+  ``k``.  If there is no such key, then the before-start semitoken
   is returned.
   Time: O(*c* log *n*)
 
-``searchsortedafter(m,k)``
-  Argument ``m`` is a SortedDict and
-  ``k`` is an element of the key type.  This routine returns the token
+
+``searchsortedafter(sc,k)``
+  Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet and
+  ``k`` is an element of the key type.  This routine returns the semitoken
   of the first item in the container whose key is greater than
-  ``k``.  If there is no such key, then the past-end token
+  ``k``.  If there is no such key, then the past-end semitoken
   is returned.
   Time: O(*c* log *n*)
 
 
+``searchequalrange(sc,k)``
+   Argument ``sc`` is a SortedMultiDict and ``k`` is an element of the
+   key type.  This routine returns a pair of semitokens; the first 
+   of the pair is the semitoken addressing the first item in the container
+   with key ``k`` and the second is the semitoken addressing the
+   last item in the container with key ``k``.  If no item matches
+   the given key, then the pair (past-end-semitoken, before-start-semitoken)
+   is returned.
+   Time: O(*c* log *n*)
+   
 --------------------------------------------
 Inserting & Deleting in Sorted Containers
 --------------------------------------------
 
-``empty!(m)``
-    Argument ``m`` is a SortedDict.  This
+``empty!(sc)``
+    Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet.  This
     empties the container.  Time: O(1).
 
-``insert!(m,k,v)``
-  Argument ``m`` is a SortedDict, ``k`` is a key and ``v``
+``insert!(sc,k,v)``
+  Argument ``sc`` is a SortedDict or SortedMultiDict, ``k`` is a key and ``v``
   is the corresponding value.  This inserts the ``(k,v)`` pair into
-  the container.  If the key is already present, SortedDict overwrites
-  the old value.  The return
+  the container.  If the key is already present in a
+  SortedDict or SortedSet, this overwrites
+  the old value.  In the case of SortedMultiDict, no overwriting takes place
+  (since SortedMultiDict allows the same key to associate with multiple values).
+  In the case of SortedDict, the return
   value is a pair whose first entry is boolean and indicates whether
   the insertion was new (i.e., the key was not previously present) and
-  the second entry is the token of the new entry.
+  the second entry is the semitoken of the new entry.  In the case of SortedMultiDict,
+  a semitoken is returned (but no boolean).
+  Time: O(*c* log *n*)
+
+``insert!(sc,k)``
+  Argument ``sc`` is a SortedSet and ``k`` is a key.
+  This inserts the key into
+  the container.  If the key is already present in a
+  this overwrites
+  the old value.  (This is not necessarily a no-op; see below for 
+  remarks about the customizing the sort order.)
+  The return
+  value is a pair whose first entry is boolean and indicates whether
+  the insertion was new (i.e., the key was not previously present) and
+  the second entry is the semitoken of the new entry. 
+  Time: O(*c* log *n*)
+
+``push!(sc,k)``
+  Argument ``sc`` is a SortedSet and ``k`` is a key.
+  This inserts the key into
+  the container.  If the key is already present in a
+  this overwrites
+  the old value.  (This is not necessarily a no-op; see below for 
+  remarks about the customizing the sort order.)
+  The return
+  value is ``sc``.
   Time: O(*c* log *n*)
 
 
-``delete!(i)``
-  Argument ``i`` is a token.
-  This operation deletes the item addressed by ``i``.
+``delete!((sc,st))``
+  Argument ``(sc,st)`` is a token for a SortedDict, SortedMultiDict or SortedSet.
+  This operation deletes the item addressed by ``(sc,st)``.
   It is an error to call
   this on an entry that has already been deleted or on the
   before-start or past-end tokens.  After this operation is 
-  complete, ``i`` is an invalid token and cannot be used in
+  complete, ``(sc,st)`` is an invalid token and cannot be used in
   any further operations.
   Time: O(log *n*)
 
-``delete!(m,k)``
-  Argument ``m`` is a SortedDict and
+``delete!(sc,k)``
+  Argument ``sc`` is a SortedDict or SortedSet and
   ``k`` is a key.  This operation deletes the item
   whose key is ``k``.  It is a  ``KeyError``
   if ``k`` is not a key of an item in the container.
   After this operation is 
   complete, any token addressing the deleted item is invalid.
+  Returns ``sc``.
   Time: O(*c* log *n*)
 
-``pop!(m,k)``
-  Deletes the item with key ``k`` in SortedDict ``m`` and returns
-  the value that was associated with ``k``.  A ``KeyError`` results
-  if ``k`` is not in ``m``.
+
+``pop!(sc,k)``
+  Deletes the item with key ``k`` in SortedDict or SortedSet ``sc`` 
+  and returns
+  the value that was associated with ``k`` in the
+  case of SortedDict or ``k`` itself in the case of SortedSet.
+  A ``KeyError`` results
+  if ``k`` is not in ``sc``.
   Time: O(*c* log *n*)
 
-``m[st]``
-  If ``st`` is a semitoken (extracted from a token for 
-  SortedDict ``m`` via the ``semi`` function
-  below), then ``m[st]`` refers to
+``pop!(ss)``
+  Deletes the item with first key in SortedSet ``ss`` and
+  returns the key.  A ``BoundsError`` results if ``ss`` is empty.
+  Time: O(*c* log *n*)
+
+``sc[st]``
+  If ``st`` is a semitoken and ``sc`` is a SortedDict or SortedMultiDict,
+  then ``sc[st]`` refers to
   the value field of the (key,value) pair that the full
-  token refers to.  This expression may occur on either side of an
-  assignment statement.  Time: O(1)
+  token ``(sc,st)`` refers to.  This expression may occur on either side of an
+  assignment statement.  
+  Time: O(1)
 
 
 ------------------------
 Token Manipulation
 ------------------------
 
-``semi(i)``
-  Extracts a semitoken from a token.  The semitoken is wrapper around an integer
-  (in the current implementation).  See the above discussion of semitokens.
-  Time: O(1)
 
-``container(i)``
-  Extracts the container from a token.   See the above discussion.
-  Time: O(1)
-
-``assemble(m,s)``
-  Here, ``m`` is a sorted container and ``s`` is a semitoken; this
-  function reassembles the complete token. In other words, if ``i``
-  is a valid token, then 
-  ``assemble(container(i), semi(i))``
-  yields ``i``.  The validity of the token returned 
-  is not checked by this function.  Time: O(1)
-
-``isless(i1,i2)``
-  Here, ``i1`` and ``i2`` are tokens for the same container; this
-  function determines whether the (k,v) pair addressed by
-  ``i1`` precedes that of ``i2`` in the sorted order.  An error is
-  thrown if ``i1`` and ``i2`` refer to different containers.
+``compare(sc,st1,st2)``
+  Here, ``st1`` and ``st2`` are semitokens for the same container ``sc``; this
+  function determines the relative positions of the data items indexed by
+  ``(sc,st1)`` and ``(sc,st2)`` in the sorted order.   The
+  return value is -1 if ``(sc,st1)`` precedes ``(sc,st2)``, 0
+  if they are equal, and 1 if ``(sc,st1)`` succeeds ``(sc,st2)``.
   This function compares the tokens by determining their relative
-  position within the tree and without dereferencing them.  It is mostly
-  equivalent to ``lt(o, deref_key(i1), deref_key(i2))`` except in the
-  case that either ``i1`` or ``i2`` is the before-start or past-end token,
-  in which case the latter will fail.  Which one is more efficient
+  position within the tree without dereferencing them.  For 
+  SortedDict it is mostly
+  equivalent to comparing ``deref_key((sc,st1))`` to ``deref_key((sc,st2))`` 
+  using the ordering of the SortedDict
+  except in the
+  case that either ``(sc,st1)`` or ``(sc,st2)`` is the before-start or past-end token,
+  in which case the ``deref`` operation will fail.  Which one is more efficient
   depends on the time-complexity of comparing two keys.
+  Similarly, for SortedSet it is mostly equivalent to comparing
+  ``deref((sc,st1))`` to ``deref((sc,st2))``.  For SortedMultiDict, this function
+  is not equivalent to a key comparison since two items in a SortedMultiDict
+  with the same key are not necessarily the same item.
   Time: O(log *n*)
 
-``isequal(i1,i2)``
-  Here, ``i1`` and ``i2`` are tokens for the same container; this
-  function determines whether they address the same item.
-  An error is
-  thrown if ``i1`` and ``i2`` refer to different containers.
-  Time: O(l)
-
-``status(i1)``
-  This function returns 0 if the token ``i1`` is invalid (e.g., refers to a
+``status((sc,st))``
+  This function returns 0 if the token ``(sc,st)`` is invalid (e.g., refers to a
   deleted item), 1 if the token is valid and points to data, 2 if the
   token is the before-start token and 3 if it is the past-end token.
   Time: O(1)
@@ -685,134 +805,182 @@ implemented via calls to three functions, ``start``,
 ``next`` and ``done``.  It is usual practice, however, to
 call these functions implicitly with a for-loop rather than
 explicitly, so they are presented here in for-loop notation.
-Internally, all of these iterations are implemented with tokens
-that are advanced via the ``advance`` operation and
-``start``, ``next`` and ``done`` functions.  Each iteration
+Internally, all of these iterations are implemented with semitokens
+that are advanced via the ``advance`` operation.
+Each iteration
 of these loops requires O(log *n*) operations to advance the
-token.  
+semitoken.   If one loops over an entire container, then the amortized
+cost of advancing the semitoken drops to O(1).
 
-The following loops over the entire container ``m``, where
-``m`` is a SortedDict::
+The following snippet loops over the entire container ``sc``, where
+``sc`` is a SortedDict or SortedMultiDict::
 
-  for (k,v) in m
+  for (k,v) in sc
      < body >
   end
 
 In this loop, ``(k,v)`` takes on successive (key,value) pairs 
 according to 
 the sort order of the key.  
+For SortedSet one uses::
+
+  for k in ss
+     < body >
+  end
+
 
 There are two ways to iterate over a subrange of a container.
-The first is the inclusive iteration::
+The first is the inclusive iteration for SortedDict and SortedMultiDict::
 
-  for (k,v) in i1 : i2
+  for (k,v) in inclusive(sc,st1,st2)
     < body >
   end
 
-Here, ``i1`` and ``i2`` are tokens that refer to the same container.
-It is acceptable for ``i1`` to be the past-end token 
-or ``i2`` to be the before-start token (in these cases, the body
+Here, ``st1`` and ``st2`` are semitokens that refer to the container ``sc``.
+It is acceptable for ``(sc,st1)`` to be the past-end token 
+or ``(sc,st2)`` to be the before-start token (in these cases, the body
 is not executed).
-If ``isless(i2,i1)`` then the body is not executed. 
+If ``compare(sc,st1,st2)==1`` then the body is not executed. 
+A second calling format for ``inclusive`` is 
+``inclusive(sc,(st1,st2))``.  One purpose for second format is so that
+the return value of ``searchequalrange`` may be used directly
+as the second argument to ``inclusive``.  
+
 
 One can also define a loop that excludes the final item::
 
-  for (k,v) in excludelast(i1,i2)
+  for (k,v) in exclusive(sc,st1,st2)
     < body >
   end
 
-In this case, all the data addressed by tokens from ``i1`` up to but excluding
-``i2`` are executed.  The body is not executed at all if ``!isless(i1,i2)``.
-In this setting, either or both can be the past-end token, and ``i2`` can
-be the before-start token.
+In this case, all the data addressed by tokens from ``(sc,st1)`` up to but excluding
+``(sc,st2)`` are executed.  The body is not executed at all if ``compare(sc,st1,st2)>=0``.
+In this setting, either or both can be the past-end token, and ``(sc,st2)`` can
+be the before-start token. For the sake
+of consistency, ``exclusive`` also supports the calling format
+``exclusive(sc,(st1,st2))``.
 
-Both the ``excludelast`` and colon operators return objects that can be 
-saved and used later for iteration.  At the time of construction of these object,
-it is checked that the start and end tokens refer to the same container.
+
+Both the ``inclusive`` and ``exclusive`` functions return objects that can be 
+saved and used later for iteration.  
 The validity of the tokens is not checked until the loop initiates.
 
-One can iterate over just keys or just values::
+For SortedSet the usage is::
 
-   for k in keys(m)
+  for k in inclusive(ss,st1,st2)
+    < body >
+  end
+
+  for k in exclusive(ss,st1,st2)
+    < body >
+  end
+
+
+If ``sc`` is a SortedDict or SortedMultiDict,
+one can iterate over just keys or just values::
+
+   for k in keys(sc)
       < body >
    end
 
-   for v in values(m)
+   for v in values(sc)
       < body >
    end
 
-The arguments to ``keys`` and ``values`` may also be ranges of the
-form
-``i1:i2`` or ``excludelast(i1,i2)``.
+Finally, one can retrieve 
+semitokens during any of these iterations.  In the case
+of SortedDict and SortedMultiDict, one uses::
 
-Finally, one can retrieve tokens during any of these iterations::
-
-   for (t,(k,v)) in tokens(m)
+   for (st,k,v) in semitokens(sc)
        < body >
    end
 
-   for (t,k) in tokens(keys(m))
+   for (st,k) in semitokens(keys(sc))
        < body >
    end
 
-   for (t,v) in tokens(values(m))
+   for (st,v) in semitokens(values(sc))
        < body >
    end
 
+In each of the above three iterations, ``st`` is a
+semitoken referring to the 
+current ``(k,v)`` pair.  
+In the case of SortedSet, the following iteration may be used::
 
-In each successive iteration, ``t`` is a token referring to the 
-current ``(k,v)`` pair.  In place of ``m`` in the above three snippets,
-one could also use ``i1:i2`` or ``excludelast(i1,i2)``.
+   for (st,k) in semitokens(ss)
+       < body >
+   end
+
+In place of ``sc`` in the above ``keys``, ``values`` and
+``semitokens``, snippets,
+one could also use ``inclusive(sc,st1,st2)`` or ``exclusive(sc,st1,st2)``.
+Similarly, for SortedSet, one can iterate over
+``semitokens(inclusive(ss,st1,st2))`` or ``semitokens(exclusive(ss,st1,st2))``
 
 Note that it is acceptable for the loop body in the above
-code snippets to invoke
-``delete!(t)``.  This is because the for-loop internal state variable
+``semitokens``  code snippets to invoke
+``delete!((sc,st))`` or ``delete!((ss,st))``.
+This is because the for-loop internal state variable
 is already advanced to the next token at the beginning of the body, so
-``t`` is not necessarily referred to in the loop body (unless the
+``st`` is not necessarily referred to in the loop body (unless the
 user refers to it).
-
 
 ----------------
 Other Functions
 ----------------
 
-``isempty(m)``
+``isempty(sc)``
   Returns ``true`` if the container is empty (no items).
   Time: O(1)
 
-``length(m)``
+``length(sc)``
   Returns the length, i.e., number of items, in the container.
   Time: O(1)
 
-``in(p,m)``
-  Returns true if ``p`` is in ``m``, where ``m`` is a SortedDict 
-  and ``p`` is a (key,value) pair.  Time: O(*c* log *n*)
+``in(p,sc)``
+  Returns true if ``p`` is in ``sc``.  In the
+  case that ``sc`` is a SortedDict or SortedMultiDict,
+  ``p`` is a (key,value) pair.  In the case that ``sc``
+  is a SortedSet, ``p`` should be a key.
+  Time: O(*c* log *n*) for SortedDict and SortedSet.
+  In the case of SortedMultiDict, the time is
+  O(*cl* log *n*), where *l* stands for the number
+  of entries that have the key of the given pair.
+  (So therefore this call is inefficient if the same key
+  addresses a large number of values, and an alternative
+  should be considered.)
 
-``eltype(m)``
-  Returns the (key,value) type for SortedDict.
+``eltype(sc)``
+  Returns the (key,value) type (a 2-entry tuple)
+  for SortedDict and SortedMultiDict.
+  Returns the key type for SortedSet.  This function may
+  also be applied to the type itself.
   Time: O(1)
 
-``orderobject(m)``
+``orderobject(sc)``
   Returns the order object used to construct the container.  Time: O(1)
 
-``haskey(m,k)``
-  Returns true if ``k`` is present for SortedDict ``m``.  
+``haskey(sc,k)``
+  Returns true if key ``k`` is present for SortedDict, SortedMultiDict
+  or SortedSet ``sc``.  For SortedSet, ``haskey(sc,k)`` is
+  a synonym for ``in(k,sc)``.
   Time: O(*c* log *n*)
 
 
-``get(m,k,v)``
-  Returns the value associated with key ``k`` where ``m`` is a SortedDict,
-  or else returns ``v`` if ``k`` is not in ``m``.
+``get(sd,k,v)``
+  Returns the value associated with key ``k`` where ``sd`` is a SortedDict,
+  or else returns ``v`` if ``k`` is not in ``sd``.
   Time: O(*c* log *n*)
 
-``get!(m,k,v)``
-  Returns the value associated with key ``k`` where ``m`` is a SortedDict,
-  or else returns ``v`` if ``k`` is not in ``m``, and in the latter case,
-  inserts ``(k,v)`` into ``m``.
+``get!(sd,k,v)``
+  Returns the value associated with key ``k`` where ``sd`` is a SortedDict,
+  or else returns ``v`` if ``k`` is not in ``sd``, and in the latter case,
+  inserts ``(k,v)`` into ``sd``.
   Time: O(*c* log *n*)
 
-``getkey(m,k,defaultk)``
-  Returns key ``k`` where ``m`` is a SortedDict, if ``k`` is in ``m``
+``getkey(sd,k,defaultk)``
+  Returns key ``k`` where ``sd`` is a SortedDict, if ``k`` is in ``sd``
   else it returns ``defaultk``. 
   If the container uses in its ordering
   an ``eq`` method different from
@@ -826,61 +994,131 @@ Other Functions
   Time: O(*c* log *n*)
 
 
-``isequal(m1,m2)``
+``isequal(sc1,sc2)``
   Checks if two containers are equal in the sense
   that they contain the same items; the keys are compared
   using the ``eq`` method, while the values are compared with
-  the ``isequal`` function.  Note that ``isequal`` in this sense
+  the ``isequal`` function.   In the case of SortedMultiDict,
+  equality requires that the values associated with a particular
+  key have same order (that is, the same insertion order).
+  Note that ``isequal`` in this sense
   does not imply any correspondence between semitokens for items
-  in ``m1`` with those for ``m2``.  If the equality-testing method associated
-  with the keys and values implies hash-equivalence, then ``isequal`` of the 
+  in ``sc1`` with those for ``sc2``.  If the equality-testing method associated
+  with the keys and values implies hash-equivalence in the
+  case of SortedDict, then ``isequal`` of the 
   entire containers implies hash-equivalence of the containers.
   Time: O(*cn* + *n* log *n*)
 
-``packcopy(m)``
-  This returns a copy of ``m`` in which the data is
+``packcopy(sc)``
+  This returns a copy of ``sc`` in which the data is
   packed.  When deletions take
   place, the previously allocated memory is not returned.
   This function can be used to reclaim memory after
   many deletions.  
   Time: O(*cn* log *n*)
 
-``deepcopy(m)``
-  This returns a copy of ``m`` in which the data is
+``deepcopy(sc)``
+  This returns a copy of ``sc`` in which the data is
   deep-copied, i.e., the keys and values are replicated
-  if they are mutable types.  A semitoken for the original ``m``
-  can be composed with the deep-copy output to make a valid 
-  token for the copy because this operation preserves the
+  if they are mutable types.  A semitoken for the original ``sc``
+  is a valid 
+  semitoken for the copy because this operation preserves the
   relative positions of the data in memory.
   Time O(*maxn*), where *maxn* denotes the maximum size
-  that ``m`` has attained in the past.
+  that ``sc`` has attained in the past.
 
-``packdeepcopy(m)``
-  This returns a packed copy of ``m`` in which the keys
+``packdeepcopy(sc)``
+  This returns a packed copy of ``sc`` in which the keys
   and values are deep-copied.
   This function can be used to reclaim memory after
   many deletions.  
   Time: O(*cn* log *n*)
 
 
-``merge(s, t...)``
-  This returns a SortedDict that results from merging
-  SortedDicts ``s``, ``t``, etc., which all must have the same
+``merge(sc1, sc2...)``
+  This returns a SortedDict or SortedMultiDict that results from merging
+  SortedDicts or SortedMultiDicts ``sc1``, ``sc2``, etc., which all must have the same
   key-value-ordering types.  In the case of keys duplicated among
   the arguments, the rightmost argument that owns the
-  key gets its value stored.
+  key gets its value stored for SortedDict. In the case of SortedMultiDict
+  all the key-value pairs are stored, and for  keys shared between ``sc1`` and ``sc2`` the
+  ordering is left-to-right.  This function is not available for SortedSet,
+  but the ``union`` function (see below) provides equivalent functionality.
   Time:  O(*cN* log *N*), where *N* is the total size
   of all the arguments.
 
-``merge!(s, t...)``
-  This updates ``s`` by merging
-  SortedDicts ``t``, etc. into ``s``.
+``merge!(sc, sc1...)``
+  This updates ``sc`` by merging
+  SortedDicts or SortedMultiDicts ``sc1``, etc. into ``sc``.
   These must all must have the same
   key-value types.  In the case of keys duplicated among
   the arguments, the rightmost argument that owns the
-  key gets its value stored.
+  key gets its value stored for SortedDict.
+  In the case of SortedMultiDict
+  all the key-value pairs are stored, and for overlapping keys the
+  ordering is left-to-right.  This function is not available for SortedSet,
+  but the ``union!`` function (see below) provides equivalent functionality.
   Time:  O(*cN* log *N*), where *N* is the total size
   of all the arguments.
+
+----------------------
+Set operations
+----------------------
+
+The SortedSet container supports the following set operations.  Note that
+in the case of intersect, symdiff and setdiff, the two SortedSets should
+have the same key and ordering object.  If they have different key or ordering
+types, no error
+message is produced; instead, the built-in default versions of these functions
+(that can be applied to ``Any`` iterables and that return arrays) are invoked.
+
+
+``union!(ss, iterable)``
+  This function inserts each item from the second argument
+  (which must iterable) into the SortedSet ``ss``.  The items
+  must be convertible to the key-type of ``ss``.
+  Time: O(*ci* log *n*) where *i* is the number of items
+  in the iterable argument.
+
+``union(ss, iterable...)``
+  This function creates a new SortedSet (the return argument) and
+  inserts each item from ``ss`` and each item from each iterable argument
+  into the returned SortedSet.  Time:  O(*cn* log *n*) where *n* is the
+  total number of items in all the arguments.
+   
+``intersect(ss, others...)``
+  Each argument is a SortedSet with the same key and order type.
+  The return variable is a new SortedSet that is the intersection of
+  all the sets that are input.  Time: O(*cn* log *n*), where *n* is the
+  total number of items in all the arguments.
+
+``symdiff(ss1, ss2)``
+  The two argument are sorted sets with the same key and order type.  This operation
+  computes the symmetric difference, i.e., a sorted set containing
+  entries that are in one of
+  ``ss1``, ``ss2`` but not both.  
+  Time: O(*cn* log *n*), where *n* is the
+  total size of the two containers.  
+
+``setdiff(ss1, ss2)``
+  The two arguments are sorted sets with the same key and order type.  This operation
+  computes the difference, i.e., a sorted set containing entries that in
+  are in ``ss1`` but not ``ss2``.  
+  Time: O(*cn* log *n*), where *n* is the
+  total size of the two containers.  
+
+``setdiff!(ss, iterable)``
+  This function deletes items in ``ss`` that appear in the second argument.
+  The second argument must be iterable and its entries must be
+  convertible to the key type of m1.
+  Time: O(*cm* log *n*), where *n* is the size of ``ss`` and *m* is
+  the number of items in ``iterable``.
+
+``issubset(iterable, ss)``
+  This function checks whether each item of the first argument
+  is an element of the SortedSet ``ss``.  The entries must be
+  convertible to the key-type of ``ss``.  Time: O(*cm* log *n*), where
+  *n* is the sizes of ``ss`` and *m* is the number of items in ``iterable``.
 
 
 ----------------------
@@ -914,9 +1152,10 @@ In the above example, the ordering object would be::
 
      Lt((x,y) -> isless(lowercase(x),lowercase(y)))
 
-
 The ordering object is the second argument to
-the ``SortedDict`` constructor (see above for constructor syntax).
+the ``SortedDict`` and ``SortedSet``  constructors, or the
+third argument to the ``SortedMultiDict`` constructor 
+(see above for constructor syntax).
 
 This approach suffers from a performance hit (10%-50% depending on the
 container) because the compiler cannot inline or compute the
@@ -962,39 +1201,35 @@ typically near the beginning::
 --------------------------------
 Cautionary note on mutable keys
 --------------------------------
-As with ordinary Dicts, keys for SortedDict
+As with ordinary Dicts, keys for the sorted containers
 can be either mutable or immutable.  In the
 case of mutable keys, it is important that the keys not be mutated
-once they are in the SortedDict else the indexing structure will be 
+once they are in the container else the indexing structure will be 
 corrupted. (The same restriction applies to Dict.)
-For example, suppose a SortedDict ``m`` is defined in which the
+For example, suppose a SortedDict ``sd`` is defined in which the
 keys are of type ``Array{Int,1}.``  (For this to be possible, the user
 must provide an ``isless`` function or order object for ``Array{Int,1}`` since
-none is built into Julia.)  Suppose the values of ``m`` are of type ``Int``.
-Then the following sequence of statements leave ``m`` in
+none is built into Julia.)  Suppose the values of ``sd`` are of type ``Int``.
+Then the following sequence of statements leaves ``sd`` in
 a corrupted state::
 
-   a = [1,2,3]
-   m[a] = 19
-   b = [4,5,6]
-   m[b] = 20
-   a[1] = 7
+   k = [1,2,3]
+   sd[k] = 19
+   k[1] = 7
 
 
 -----------------------------------
 Performance of Sorted Containers
 -----------------------------------
-Timing tests indicate that the code is about 1.5 to
-2 times slower than equivalent C++ code that uses the C++ standard
-library container ``map``.
-and compiled with /O2 optimization.  These tests were
-conducted on a Windows 8.1 64-bit machine with the
-Microsoft Visual Studio 12.0 compiler.
+
+The sorted containers are currently not optimized for cache performance.
+This will be addressed in the future.
 
 There is a minor performance issue as follows:
 the container may hold onto a small number of keys and values even after the
 data records containing those keys and values have been deleted.  This
 may cause a memory drain in the case of large keys and values.
-It may also lead to a delay
+It may also lead to a
+delay
 in the invocation of finalizers.
 All keys and values are released completely by the ``empty!`` function.
