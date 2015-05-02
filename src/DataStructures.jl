@@ -43,7 +43,7 @@ module DataStructures
     export excludelast, tokens
     export orderobject, Lt
 
-    export MultiDict
+    export MultiDict, enumerateall
 
 
     if VERSION < v"0.4.0-dev"
