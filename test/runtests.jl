@@ -10,7 +10,8 @@ tests = ["deque",
          "ordereddict",
          "orderedset",
          "trie",
-         "list"]
+         "list",
+         "multidict"]
 
 for t in tests
     fp = joinpath(Pkg.dir("DataStructures"), "test", "test_$t.jl")
