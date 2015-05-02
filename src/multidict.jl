@@ -3,7 +3,7 @@
 import Base: haskey, get, get!, getkey, delete!, pop!, empty!,
              setindex!, getindex, length, isempty, start,
              next, done, keys, values, copy, similar,  push!,
-             count
+             count, size
 
 immutable MultiDict{K,V} <: Associative{K,V}
     d::Dict{K,Vector{V}}
@@ -96,6 +96,7 @@ push!(d::MultiDict, kv) = setindex!(d, kv[2], kv[1])
 #push!(d::MultiDict, kv, kv2...) = (push!(d.d, kv, kv2...); d)
 
 count(d::MultiDict) = length(keys(d)) == 0 ? 0 : mapreduce(k -> length(d[k]), +, keys(d))
+size(d::MultiDict) = (length(keys(d)), count(d::MultiDict))
 
 # enumerate
 

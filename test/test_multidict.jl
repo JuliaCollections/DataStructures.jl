@@ -107,6 +107,7 @@ for i in 1:15
     d[rand('a':'f')] = rand()>0.5 ? rand(1:10) : rand(1:10, rand(1:3))
 end
 @test 15 <= count(d) <=45
+@test size(d) == (length(d), count(d))
 
 allvals = [kv for kv in enumerateall(d)]
 @test length(allvals) == count(d)
