@@ -12,7 +12,7 @@ module DataStructures
                  first, last, eltype, getkey, values,
                  merge!, lt, Ordering, ForwardOrdering, Forward,
                  ReverseOrdering, Reverse, Lt,
-                 isless, 
+                 isless,
                  union, intersect, symdiff, setdiff, issubset,
                  find, searchsortedfirst, searchsortedlast, endof
 
@@ -38,14 +38,18 @@ module DataStructures
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
            reverse
     export SortedDict, SortedMultiDict, SortedSet
-    export SDToken, SDSemiToken, SMDToken, SMDSemiToken 
+    export SDToken, SDSemiToken, SMDToken, SMDSemiToken
     export SetToken, SetSemiToken
     export startof
+
     export pastendsemitoken, beforestartsemitoken
     export searchsortedafter, searchequalrange
     export packcopy, packdeepcopy
     export exclusive, inclusive, semitokens
     export orderobject, Lt, compare
+
+    export MultiDict, enumerateall
+
 
     if VERSION < v"0.4.0-dev"
         using Docile
@@ -73,6 +77,7 @@ module DataStructures
 
     import .Tokens: IntSemiToken
 
+    include("multidict.jl")
     include("sortedDict.jl")
     include("sortedMultiDict.jl")
     include("sortedSet.jl")
@@ -81,7 +86,7 @@ module DataStructures
 
     export status
     export deref_key, deref_value, deref, advance, regress
-    
+
 
     @deprecate stack Stack
     @deprecate queue Queue
