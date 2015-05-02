@@ -1,14 +1,11 @@
-workspace()
 using DataStructures
 using Base.Test
-using Compat
 
 # construction
 KVS = ('a',[1])
 KV = ('a',1)
 @test typeof(MultiDict()) == MultiDict{Any,Any}
 @test typeof(MultiDict(())) == MultiDict{Any,Any}
-@test eltype(MultiDict{Char,Int}()) == @compat Tuple{Char,Int}
 @test typeof(MultiDict([KVS])) == MultiDict{Char,Int}
 @test typeof(MultiDict([KV])) == MultiDict{Char,Int}
 @test typeof(MultiDict([KV, KVS])) == MultiDict{Char,Any}
@@ -16,6 +13,7 @@ KV = ('a',1)
 if VERSION >= v"0.4.0-dev+980"
     PVS = 1 => [1.0]
     PV = 1 => 1.0
+    @test eltype(MultiDict{Char,Int}()) == Tuple{Char,Int}
     @test typeof(MultiDict(PVS)) == MultiDict{Int,Float64}
     @test typeof(MultiDict(PVS, PVS)) == MultiDict{Int,Float64}
     @test typeof(MultiDict([PVS, PVS])) == MultiDict{Int,Float64}
