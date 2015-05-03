@@ -3,7 +3,13 @@
 import Base: KeyIterator, ValueIterator, haskey, get, getkey, delete!,
              pop!, empty!, filter!, setindex!, getindex, similar,
              sizehint, length, filter, isempty, start, next, done,
-             keys, values, _tablesz, skip_deleted, serialize, deserialize, serialize_type
+             keys, values, _tablesz, skip_deleted, serialize, deserialize
+
+if VERSION < v"0.4.0-dev"
+    import Base: serialize_type
+else
+    import Base.Serializer: serialize_type
+end
 
 typealias Unordered Nothing
 typealias Ordered   Int
