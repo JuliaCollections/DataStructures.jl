@@ -14,7 +14,7 @@ tests = ["deque",
          "multidict"]
 
 for t in tests
-    fp = joinpath(Pkg.dir("DataStructures"), "test", "test_$t.jl")
+    fp = joinpath(dirname(@__FILE__), "test_$t.jl")
     println("$fp ...")
     include(fp)
 end
