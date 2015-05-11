@@ -1,4 +1,4 @@
-using DataStructures
+include("../src/trie.jl")
 using Base.Test
 
 t=Trie{Char,Int}()
