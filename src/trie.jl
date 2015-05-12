@@ -1,4 +1,4 @@
-import Base.haskey
+import Base.haskey, Base.keys, Base.done, Base.next, Base.start
 
 type Trie{K,T}
     value::T
@@ -13,7 +13,7 @@ type Trie{K,T}
     end
 
     function Trie(ks, vs)
-        t = Trie{T}()
+        t = Trie{K, T}()
         for (k, v) in zip(ks, vs)
             setindex!(t, v, k)
         end
@@ -21,7 +21,7 @@ type Trie{K,T}
     end
 
     function Trie(kv)
-        t = Trie{K,T}()
+        t = Trie{K, T}()
         for (k,v) in kv
             setindex!(t, v, k)
         end
@@ -30,10 +30,10 @@ type Trie{K,T}
 end
 
 Trie() = Trie{Any,Any}()
-Trie{K<:String,V}(ks::AbstractVector{K}, vs::AbstractVector{V}) = Trie{K,V}(ks, vs)
-Trie{K<:String,V}(kv::AbstractVector{(K,V)}) = Trie{K,V}(kv)
-Trie{K<:String,V}(kv::Associative{K,V}) = Trie{K,V}(kv)
-Trie{K<:String}(ks::AbstractVector{K}) = Trie{K,Nothing}(ks, similar(ks, Nothing))
+Trie{K<:String,V}(ks::AbstractVector{K}, vs::AbstractVector{V}) = Trie{Char,V}(ks, vs)
+Trie{K<:String,V}(kv::AbstractVector{(K,V)}) = Trie{Char,V}(kv)
+Trie{K<:String,V}(kv::Associative{K,V}) = Trie{Char,V}(kv)
+Trie{K<:String}(ks::AbstractVector{K}) = Trie{Char,Nothing}(ks, similar(ks, Nothing))
 
 function setindex!{T}(t::Trie{Char,T}, val::T, key::String)
     node = t
