@@ -1,3 +1,5 @@
+import Base.haskey
+
 type Trie{K,T}
     value::T
     children::Dict{K,Trie{K,T}}
