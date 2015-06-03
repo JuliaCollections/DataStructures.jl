@@ -1,7 +1,7 @@
 # FIFO queue
 
-type Queue{S}   # S is the type of internal deque
-    store::S
+type Queue{T}
+    store::Deque{T}
 end
 
 Queue{T}(ty::Type{T}) = Queue(Deque{T}())

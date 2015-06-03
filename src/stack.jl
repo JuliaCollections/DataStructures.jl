@@ -1,7 +1,7 @@
 # stacks
 
-type Stack{S}   # S is the type of the internal dequeue instance
-    store::S
+type Stack{T}
+    store::Deque{T}
 end
 
 Stack{T}(ty::Type{T}) = Stack(Deque{T}())
