@@ -8,6 +8,7 @@ using Base.Test
 s = Stack(Int, 5)
 n = 100
 
+@test typeof(s) == Stack{Int}
 @test length(s) == 0
 @test isempty(s)
 @test_throws ErrorException top(s)
@@ -52,6 +53,7 @@ iterated = iter(stk)
 s = Queue(Int, 5)
 n = 100
 
+@test typeof(s) == Queue{Int}
 @test length(s) == 0
 @test isempty(s)
 @test_throws ErrorException front(s)
