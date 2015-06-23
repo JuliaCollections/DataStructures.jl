@@ -5,10 +5,12 @@ import Base: KeyIterator, ValueIterator, haskey, get, getkey, delete!,
              sizehint, length, filter, isempty, start, next, done,
              keys, values, _tablesz, skip_deleted, serialize, deserialize
 
-if VERSION < v"0.4.0-dev"
+if VERSION < v"0.4.0-dev+5152"
     import Base: serialize_type
+    const SerState = IO
 else
     import Base.Serializer: serialize_type
+    const SerState =  Base.Serializer.SerializationState
 end
 
 typealias Unordered Nothing
@@ -87,7 +89,7 @@ HashDict{K,V}(d::Associative{K,V}) = HashDict{K,V,Unordered}(collect(d))
 
 similar{K,V,O}(d::HashDict{K,V,O}) = HashDict{K,V,O}()
 
-function serialize(s, t::HashDict)
+function serialize(s::SerState, t::HashDict)
     serialize_type(s, typeof(t))
     write(s, int32(length(t)))
     for (k,v) in t
@@ -96,7 +98,7 @@ function serialize(s, t::HashDict)
     end
 end
 
-function deserialize{K,V,O}(s, T::Type{HashDict{K,V,O}})
+function deserialize{K,V,O}(s::SerState, T::Type{HashDict{K,V,O}})
     n = read(s, Int32)
     t = T(); sizehint(t, n)
     for i = 1:n
