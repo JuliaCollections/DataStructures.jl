@@ -244,15 +244,15 @@ with a default value.  A ``DefaultOrderedDict`` does the same for an ``OrderedDi
 
 Constructors::
 
-  DefaultDict(default, kv)                        # create a DefaultDict with a default value or function,
-                                                  # optionally wrapping an existing dictionary
- 										         # or array of key-value pairs
+  DefaultDict(default, kv)    # create a DefaultDict with a default value or function,
+                              # optionally wrapping an existing dictionary
+                              # or array of key-value pairs
 
-  DefaultDict(KeyType, ValueType, default)        # create a DefaultDict with Dict type (KeyType,ValueType)
+  DefaultDict(KeyType, ValueType, default)   # create a DefaultDict with Dict type (KeyType,ValueType)
 
-  DefaultOrderedDict(default, kv)                 # create a DefaultOrderedDict with a default value or function,
-                                                  # optionally wrapping an existing dictionary
-  							  	                # or array of key-value pairs
+  DefaultOrderedDict(default, kv)     # create a DefaultOrderedDict with a default value or function,
+                                      # optionally wrapping an existing dictionary
+                                      # or array of key-value pairs
 
   DefaultOrderedDict(KeyType, ValueType, default) # create a DefaultOrderedDict with Dict type (KeyType,ValueType)
 
@@ -272,9 +272,26 @@ Examples using ``DefaultDict``::
                                     # Dict() is called to provide the default value
   dd = DefaultDict(()->myfunc())    # call function myfunc to provide the default value
 
+  # These all create the same default dict
+  dd = @compat DefaultDict(String, Vector{Int},        # Vector{Int}() is Julia v0.4 notation
+                           () -> Vector{Int}())        # @compat allows it to be used on v0.3
+  dd = DefaultDict(String, Vector{Int}, () -> Int[])
+
+  # dd = DefaultDict(String, Vector{Int},     # **Note! Julia v0.4 and later only!
+  #                  Vector{Int})             # the second Vector{Int} is called as a function
+
+  push!(dd["A"], 1)
+  push!(dd["B"], 2)
+
+  julia> dd
+  DefaultDict{String,Array{Int64,1},Function} with 2 entries:
+    "B" => [2]
+    "A" => [1]
+
   # create a Dictionary of type String=>DefaultDict{String, Int}, where the default of the
   # inner set of DefaultDicts is zero
-  dd = DefaultDict(String, DefaultDict, ()->DefaultDict(String,Int,0))
+  dd = DefaultDict(String, DefaultDict, () -> DefaultDict(String,Int,0))
+
 ```
 
 Note that in the last example, we need to use a function to create each new ``DefaultDict``.
