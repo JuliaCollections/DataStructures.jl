@@ -196,7 +196,7 @@ filter!(isodd, s)
 # first
 # TODO: throws BoundsError in v0.3, ArgumentError in v0.4
 #@test_throws ArgumentError first(OrderedSet())
-@test first(OrderedSet(2)) == 2
+@test first(OrderedSet([2])) == 2
 
 #####################
 
