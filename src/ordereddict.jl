@@ -21,7 +21,7 @@ immutable OrderedDict{K,V} <: Associative{K,V}
     OrderedDict() = new(HashDict{K,V,Ordered}())
     OrderedDict(kv) = new(HashDict{K,V,Ordered}(kv))
     if VERSION >= v"0.4.0-dev+980"
-        OrderedDict(ps::Pair{K,V}...) = new(HashDict{K,V,Ordered}(ps...))
+        OrderedDict(ps::Pair...) = new(HashDict{K,V,Ordered}(ps...))
     end
     #OrderedDict(ks,vs) = new(HashDict{K,V,Ordered}(ks,vs))
 end
@@ -34,7 +34,12 @@ ordered_dict_with_eltype{K,V}(kv, ::Type{@compat Tuple{K,V}}) = OrderedDict{K,V}
 ordered_dict_with_eltype(kv, t) = OrderedDict{Any,Any}(kv)
 
 if VERSION >= v"0.4.0-dev+980"
-    OrderedDict{K,V}(ps::Pair{K,V}...)              = OrderedDict{K,V}(ps...)
+    OrderedDict{K,V}(ps::Pair{K,V}...)              = OrderedDict{K,V}(    ps...)
+    OrderedDict{K}(  ps::Pair{K}...)                = OrderedDict{K,Any}(  ps...)
+    # TODO: this doesn't work
+    #OrderedDict{V}(  ps::Pair{Any,V}...)            = OrderedDict{Any,V}(  ps...)
+    OrderedDict(     ps::Pair...)                   = OrderedDict{Any,Any}(ps...)
+
     OrderedDict{K,V}(kv::@compat Tuple{Vararg{Pair{K,V}}})         = OrderedDict{K,V}(kv)
     OrderedDict{K}(kv::@compat Tuple{Vararg{Pair{K}}})             = OrderedDict{K,Any}(kv)
     OrderedDict{V}(kv::@compat Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv)

@@ -129,6 +129,11 @@ end
 _d = OrderedDict([("a", 0)])
 @test isa([k for k in filter(x->length(x)==1, collect(keys(_d)))], Vector{Any})
 
+# issue 105
+d = @compat OrderedDict{Any,Any}('a' => 1, "b" => [2,3])
+@test typeof(@compat OrderedDict('a' => 1, "b" => [2,3])) == OrderedDict{Any,Any}
+@test typeof(@compat OrderedDict('a' => 1, 'b' => [2,3])) == OrderedDict{Char,Any}
+
 let
     ## TODO: this should work, but inference seems to be working incorrectly
     #d = OrderedDict(((1, 2), (3, 4)))
@@ -177,7 +182,7 @@ end
 #@test_throws ArgumentError first(OrderedDict())
 @test first(OrderedDict([(:f, 2)])) == (:f,2)
 
-# issue #1821
+# julia issue #1821
 let
     d = OrderedDict{UTF8String, Vector{Int}}()
     d["a"] = [1, 2]
@@ -185,7 +190,7 @@ let
     @test isa(repr(d), AbstractString)  # check that printable without error
 end
 
-# issue #2344
+# julia issue #2344
 let
     local bar
     bestkey(d, key) = key
@@ -268,7 +273,7 @@ d4[1001] = randstring(3)
 # end
 
 
-# issue #5886
+# julia issue #5886
 d5886 = OrderedDict()
 for k5886 in 1:11
    d5886[k5886] = 1
@@ -278,7 +283,7 @@ for k5886 in keys(d5886)
    d5886[k5886] += 1
 end
 
-# issue #8877
+# julia issue #8877
 ## TODO: merge not implemented for OrderedDict
 # let
 #     a = OrderedDict("foo"  => 0.0, "bar" => 42.0)
@@ -286,7 +291,7 @@ end
 #     @test is(typeof(merge(a, b)), OrderedDict{UTF8String,Float64})
 # end
 
-# issue 9295
+# julia issue 9295
 let
     d = OrderedDict()
     @test is(push!(d, ('a', 1)), d)

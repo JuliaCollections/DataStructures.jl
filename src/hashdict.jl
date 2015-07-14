@@ -32,7 +32,7 @@ type HashDict{K,V,O<:Union(Ordered,Unordered)} <: Associative{K,V}
     end
     if VERSION >= v"0.4.0-dev+980"
         HashDict(p::Pair) = setindex!(HashDict{K,V,O}(), p.second, p.first)
-        function HashDict(ps::Pair{K,V}...)
+        function HashDict(ps::Pair...)
             h = HashDict{K,V,O}()
             sizehint(h, length(ps))
             for p in ps
