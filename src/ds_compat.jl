@@ -7,14 +7,13 @@ function rewrite_ordereddict(ex)
     length(ex.args) == 1 && return ex
 
     f = ex.args[1]
+    newex = Expr(:call, f, :[])
 
-    args = Any[]
     for i = 2:length(ex.args)
         pair = ex.args[i]
         !isexpr(pair, :(=>)) && return ex
-        push!(args, tuple(pair.args...))
+        push!(newex.args[2].args, Expr(:tuple, pair.args...))
     end
-    newex = Expr(:call, f, tuple(args...))
 
     newex
 end

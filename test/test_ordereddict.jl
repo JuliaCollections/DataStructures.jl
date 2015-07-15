@@ -133,60 +133,37 @@ _d = OrderedDict([("a", 0)])
 # issue 105
 d = @dcompat OrderedDict{Any,Any}('a' => 1, "b" => [2,3])
 @test typeof(@dcompat OrderedDict('a' => 1, "b" => [2,3])) == OrderedDict{Any,Any}
-# TODO: produces OrderedDict{Any,Any} on Julia v0.3
-#@test typeof(@dcompat OrderedDict('a' => 1, 'b' => [2,3])) == OrderedDict{Char,Any}
+@test typeof(@dcompat OrderedDict('a' => 1, 'b' => [2,3])) == OrderedDict{Char,Any}
 
 let
-    ## TODO: this should work, but inference seems to be working incorrectly
-    d = OrderedDict(((1, 2), (3, 4)))
-    #d = OrderedDict([(1, 2), (3, 4)])
+    d = OrderedDict([(1, 2), (3, 4)])
     @test d[1] === 2
     @test d[3] === 4
     d2 = @dcompat OrderedDict(1 => 2, 3 => 4)
     @test d == d2
     @test typeof(d) == typeof(d2) == OrderedDict{Int,Int}
 
-    # d3 = @dcompat OrderedDict((1 => 2, 3 => 4))
-    # @test d == d2 == d3
-    # @test typeof(d) == typeof(d2) == typeof(d3) == OrderedDict{Int,Int}
-
-    d = OrderedDict(((1, 2), (3, "b")))
-    #d = OrderedDict([(1, 2), (3, "b")])
+    d = OrderedDict([(1, 2), (3, "b")])
     @test d[1] === 2
     @test d[3] == "b"
     d2 = @dcompat OrderedDict(1 => 2, 3 => "b")
     @test d == d2
-    #@test typeof(d) == OrderedDict{Int,Any}
+    @test typeof(d) == OrderedDict{Int,Any}
 
-    #d3 = @dcompat OrderedDict((1 => 2, 3 => "b"))
-    #@test d == d2 == d3
-    # TODO: this does not work for d2 or d3 on Julia v0.3
-    #@test typeof(d) == typeof(d2) == typeof(d3) == OrderedDict{Int,Any}
-
-    d = OrderedDict(((1, 2), ("a", 4)))
-    #d = OrderedDict([(1, 2), ("a", 4)])
+    d = OrderedDict([(1, 2), ("a", 4)])
     @test d[1] === 2
     @test d["a"] === 4
     d2 = @dcompat OrderedDict(1 => 2, "a" => 4)
     @test d == d2
+    # TODO: Currently produces an OrderedDict{Any,Any}
     #@test typeof(d) == OrderedDict{Any,Int}
 
-    #d3 = @dcompat OrderedDict((1 => 2, "a" => 4))
-    #@test d == d2 == d3
-    # TODO: this doesn't work for d2 and d3 yet
-    #@test typeof(d) == typeof(d2) == typeof(d3) == OrderedDict{Any,Int}
-
-    d = OrderedDict(((1, 2), ("a", "b")))
-    #d = OrderedDict([(1, 2), ("a", "b")])
+    d = OrderedDict([(1, 2), ("a", "b")])
     @test d[1] === 2
     @test d["a"] == "b"
     d2 = @dcompat OrderedDict(1 => 2, "a" => "b")
     @test d == d2
     @test typeof(d) == typeof(d2) == OrderedDict{Any,Any}
-
-    # d3 = @dcompat OrderedDict((1 => 2, "a" => "b"))
-    # @test d == d2 == d3
-    # @test typeof(d) == typeof(d2) == typeof(d3) == OrderedDict{Any,Any}
 end
 
 # TODO: this is a BoundsError on v0.3, ArgumentError on v0.4
