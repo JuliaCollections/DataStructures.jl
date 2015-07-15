@@ -6,6 +6,10 @@ type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
     bt::BalancedTree23{K,D,Ord}
 end
 
+if VERSION >= v"0.4-"
+    Base.call{K,D,Ord <: Ordering}(::Type{SortedDict{K, D}}, o::Ord = Forward) =
+        SortedDict{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
+end
 
 typealias SDSemiToken IntSemiToken
 
