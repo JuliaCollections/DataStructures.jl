@@ -231,6 +231,8 @@ immutable ExcludeLast{K, D, Ord <: Ordering}
     pastlast::Int
 end
 
+eltype(e::ExcludeLast) = eltype(e.m)
+
 
 ## This holds an object describing an include-last
 ## (i.e., colon operator) iteration.
@@ -240,6 +242,8 @@ immutable IncludeLast{K, D, Ord <: Ordering}
     first::Int
     last::Int
 end
+
+eltype(e::IncludeLast) = eltype(e.m)
 
 
 ## The basic iterations are either over the whole sorted dict, an
@@ -256,21 +260,54 @@ immutable SDKeyIteration{T <: SDIterableTypesBase}
     base::T
 end
 
+eltype{K,D,Ord <: Ordering}(s::SDKeyIteration{SortedDict{K,D,Ord}}) = K
+eltype{K,D,Ord <: Ordering}(s::SDKeyIteration{ExcludeLast{K,D,Ord}}) = K
+eltype{K,D,Ord <: Ordering}(s::SDKeyIteration{IncludeLast{K,D,Ord}}) = K
+
 immutable SDValIteration{T <: SDIterableTypesBase}
     base::T
 end
+
+eltype{K,D,Ord <: Ordering}(s::SDValIteration{SortedDict{K,D,Ord}}) = D
+eltype{K,D,Ord <: Ordering}(s::SDValIteration{ExcludeLast{K,D,Ord}}) = D
+eltype{K,D,Ord <: Ordering}(s::SDValIteration{IncludeLast{K,D,Ord}}) = D
 
 immutable SDTokenIteration{T <: SDIterableTypesBase}
     base::T
 end
 
+eltype{K,D,Ord <: Ordering}(s::SDTokenIteration{SortedDict{K,D,Ord}}) = 
+        @compat Tuple{SDToken{K,D,Ord}, Tuple{K, D}}
+eltype{K,D,Ord <: Ordering}(s::SDTokenIteration{ExcludeLast{K,D,Ord}}) = 
+        @compat Tuple{SDToken{K,D,Ord}, Tuple{K, D}}
+eltype{K,D,Ord <: Ordering}(s::SDTokenIteration{IncludeLast{K,D,Ord}}) = 
+        @compat Tuple{SDToken{K,D,Ord}, Tuple{K, D}}
+
+
 immutable SDTokenKeyIteration{T <: SDIterableTypesBase}
     base::T
 end
 
+eltype{K,D,Ord <: Ordering}(s::SDTokenKeyIteration{SortedDict{K,D,Ord}}) = 
+        @compat Tuple{SDToken{K,D,Ord}, K}
+eltype{K,D,Ord <: Ordering}(s::SDTokenKeyIteration{ExcludeLast{K,D,Ord}}) = 
+        @compat Tuple{SDToken{K,D,Ord}, K}
+eltype{K,D,Ord <: Ordering}(s::SDTokenKeyIteration{IncludeLast{K,D,Ord}}) = 
+        @compat Tuple{SDToken{K,D,Ord}, K}
+
+
 immutable SDTokenValIteration{T <: SDIterableTypesBase}
     base::T
 end
+
+eltype{K,D,Ord <: Ordering}(s::SDTokenValIteration{SortedDict{K,D,Ord}}) = 
+        @compat Tuple{SDToken{K,D,Ord}, D}
+eltype{K,D,Ord <: Ordering}(s::SDTokenValIteration{ExcludeLast{K,D,Ord}}) = 
+        @compat Tuple{SDToken{K,D,Ord}, D}
+eltype{K,D,Ord <: Ordering}(s::SDTokenValIteration{IncludeLast{K,D,Ord}}) = 
+        @compat Tuple{SDToken{K,D,Ord}, D}
+
+
 
 typealias SDCompoundIterable Union(SDKeyIteration,
                                    SDValIteration, SDTokenIteration,
@@ -399,7 +436,10 @@ function in{K,D,Ord <: Ordering}(pr::(@compat Tuple{Any,Any}), m::SortedDict{K,D
     return exactfound && isequal(m.bt.data[i].d,convert(D,pr[2]))
 end
 
-eltype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = (K,D)
+eltype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = @compat Tuple{K,D}
+eltype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) = @compat Tuple{K,D}
+keytype{K,D,Ord <: Ordering}(::SortedDict{K,D,Ord}) = K
+datatype{K,D,Ord <: Ordering}(::SortedDict{K,D,Ord}) = D
 
 orderobject(m::SortedDict) = m.bt.ord
 

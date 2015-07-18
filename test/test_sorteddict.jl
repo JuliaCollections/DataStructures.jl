@@ -431,7 +431,7 @@ function test2()
     wwx = first(m1)
     @test wwx[1] == 2
     tpr = eltype(m1)
-    @test tpr[1] == Int && tpr[2] == Float64
+    @test tpr == @compat Tuple{Int,Float64}
     co = orderobject(m1)
     @test co == Forward
     @test haskey(m1, 71)
@@ -507,6 +507,8 @@ function test3{T}(z::T)
         m1[bitreverse(lUi)] = lUi
     end
     count = 0
+    @test eltype(tokens(startof(m1) : endof(m1))) == 
+         @compat Tuple{SDToken{T,T,ForwardOrdering}, Tuple{T, T}}
     for (tok,(k,v)) in tokens(startof(m1) : endof(m1))
         for (tok2,(k2,v2)) in tokens(excludelast(startof(m1), pastendtoken(m1)))
             if isless(tok,tok2)
@@ -558,12 +560,14 @@ function test3{T}(z::T)
     end
     @test sv == sv2
     count = 0
+    @test eltype(tokens(keys(m1))) == @compat Tuple{SDToken{T,T,ForwardOrdering}, T}
     for (t,k) in tokens(keys(m1))
         @test deref_key(t) == k
         count += 1
     end
     @test count == N
     count = 0
+    @test eltype(tokens(values(m1))) == @compat Tuple{SDToken{T,T,ForwardOrdering}, T}
     for (t,v) in tokens(values(m1))
         @test deref_value(t) == v
         count += 1
@@ -572,22 +576,26 @@ function test3{T}(z::T)
 
     pos1 = searchsortedfirst(m1, div(N,2))
     sk2 = zero1
+    @test eltype(keys(excludelast(startof(m1),pos1))) == T
     for k in keys(excludelast(startof(m1), pos1))
         sk2 += k
     end
     @test sk2 == skhalf
     sv2 = zero1
+    @test eltype(values(excludelast(startof(m1),pos1))) == T
     for v in values(excludelast(startof(m1), pos1))
         sv2 += v
     end
     @test sv2 == svhalf
     count = 0
+    @test eltype(excludelast(pastendtoken(m1), pastendtoken(m1))) == @compat Tuple{T,T}
     for (k,v) in excludelast(pastendtoken(m1), pastendtoken(m1))
         count += 1
     end
     @test count == 0
     count = 0
-    for (k,v) in startof(m1) :  beforestarttoken(m1)
+    @test eltype(startof(m1) : beforestarttoken(m1)) == @compat Tuple{T,T}
+    for (k,v) in startof(m1) : beforestarttoken(m1)
         count += 1
     end
     @test count == 0
