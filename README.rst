@@ -369,57 +369,57 @@ A circular buffer with a fixed capacity.  Items are pushed onto the end until ca
 Then the next push will overwrite the first item, then the second item, etc.  Iteration and 
 indexing are relative to the oldest item.
 
-```
-julia> cb = CircularBuffer(Int, 5)
-0-element DataStructures.CircularBuffer{Int64}
 
-julia> length(cb)
-0
+  julia> cb = CircularBuffer(Int, 5)
+  0-element DataStructures.CircularBuffer{Int64}
 
-julia> capacity(cb)
-5
+  julia> length(cb)
+  0
 
-julia> isfull(cb)
-false
+  julia> capacity(cb)
+  5
 
-julia> push!(cb, 1)
-1-element Array{Int64,1}:
- 1
+  julia> isfull(cb)
+  false
 
-julia> append!(cb, 2:10)
+  julia> push!(cb, 1)
+  1-element Array{Int64,1}:
+   1
 
-julia> cb
-5-element DataStructures.CircularBuffer{Int64}:
-  6
+  julia> append!(cb, 2:10)
+
+  julia> cb
+  5-element DataStructures.CircularBuffer{Int64}:
+    6
+    7
+    8
+    9
+   10
+
+  julia> [Float64(x) for x in cb]
+  5-element Array{Float64,1}:
+    6.0
+    7.0
+    8.0
+    9.0
+   10.0
+
+  julia> convert(Array, cb)
+  5-element Array{Int64,1}:
+    6
+    7
+    8
+    9
+   10
+
+  julia> cb[2]
   7
-  8
-  9
- 10
 
-julia> [Float64(x) for x in cb]
-5-element Array{Float64,1}:
-  6.0
-  7.0
-  8.0
-  9.0
- 10.0
-
-julia> convert(Array, cb)
-5-element Array{Int64,1}:
-  6
-  7
-  8
-  9
- 10
-
-julia> cb[2]
-7
-
-julia> cb[2:3]
-2-element Array{Int64,1}:
- 7
- 8
-```
+  julia> cb[2:3]
+  2-element Array{Int64,1}:
+   7
+   8
+ 
 
 
 ----------------------------------------
