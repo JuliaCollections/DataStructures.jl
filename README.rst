@@ -367,7 +367,7 @@ Circular Buffer
 
 A circular buffer with a fixed capacity.  Items are pushed onto the end until capacity is reached.
 Then the next push will overwrite the first item, then the second item, etc.  Iteration and 
-indexing are relative to the oldest item.
+indexing are relative to the oldest item::
 
 
   julia> cb = CircularBuffer(Int, 5)
@@ -419,7 +419,7 @@ indexing are relative to the oldest item.
   2-element Array{Int64,1}:
    7
    8
- 
+
 
 
 ----------------------------------------
