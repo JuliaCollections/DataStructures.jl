@@ -89,4 +89,11 @@ module DataStructures
 
     @deprecate OrderedSet(a, b...) OrderedSet(Any[a, b...])
     @deprecate OrderedSet{T<:Number}(xs::T...)  OrderedSet{T}(xs)      # (almost) mimic Set deprecation in Base
+
+    export
+        CircularBuffer,
+        capacity,
+        isfull
+    include("circularbuffer.jl")
+
 end
