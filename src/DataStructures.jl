@@ -43,6 +43,8 @@ module DataStructures
     export excludelast, tokens
     export orderobject, Lt
 
+    export MultiDict, enumerateall
+
 
     if VERSION < v"0.4.0-dev"
         using Docile
@@ -67,6 +69,8 @@ module DataStructures
     include("list.jl")
     include("balancedTree.jl")
     include("tokens.jl")
+
+    include("multidict.jl")
 
     import .Tokens: Token, IntSemiToken, semi, container, assemble
     import .Tokens: deref_key, deref_value, deref, status
