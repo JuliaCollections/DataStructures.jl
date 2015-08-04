@@ -525,10 +525,19 @@ end
 
 start(t::HashDict) = skip_deleted(t, 1)
 done(t::HashDict, i) = done(t.vals, i)
-next(t::HashDict, i) = ((t.keys[i],t.vals[i]), skip_deleted(t,i+1))
+if VERSION >= v"0.4.0-dev+980"
+    next(t::HashDict, i) = (Pair(t.keys[i],t.vals[i]), skip_deleted(t,i+1))
+else
+    next(t::HashDict, i) = ((t.keys[i],t.vals[i]), skip_deleted(t,i+1))
+end
+
 
 done{K,V}(t::HashDict{K,V,Ordered}, i) = done(t.order, i)
-next{K,V}(t::HashDict{K,V,Ordered}, i) = ((t.keys[t.order[i]],t.vals[t.order[i]]), skip_deleted(t,i+1))
+if VERSION >= v"0.4.0-dev+980"
+    next{K,V}(t::HashDict{K,V,Ordered}, i) = (Pair(t.keys[t.order[i]],t.vals[t.order[i]]), skip_deleted(t,i+1))
+else
+    next{K,V}(t::HashDict{K,V,Ordered}, i) = ((t.keys[t.order[i]],t.vals[t.order[i]]), skip_deleted(t,i+1))
+end
 
 isempty(t::HashDict) = (t.count == 0)
 length(t::HashDict) = t.count

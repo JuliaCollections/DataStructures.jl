@@ -136,7 +136,7 @@ for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Order
         @delegate $DefaultDict.d [ sizehint, empty!, setindex!,
                                    getindex, get, get!, haskey,
                                    getkey, pop!, delete!, start, next,
-                                   done, next, isempty, length ]
+                                   done, isempty, length ]
 
         similar{K,V,F}(d::$DefaultDict{K,V,F}) = $DefaultDict{K,V,F}(d.d.default)
         in{T<:$DefaultDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
@@ -179,7 +179,7 @@ end
 # @delegate DefaultSortedDict.d [ sizehint, empty!, setindex!,
 #                            getindex, get, get!, haskey,
 #                            getkey, pop!, delete!, start, next,
-#                            done, next, isempty, length]
+#                            done, isempty, length]
 
 # similar{K,V,F}(d::DefaultSortedDict{K,V,F}) = DefaultSortedDict{K,V,F}(d.d.default)
 # in{T<:DefaultSortedDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
