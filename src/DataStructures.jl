@@ -9,10 +9,12 @@ module DataStructures
                  union!, delete!, similar, sizehint,
                  isequal, hash,
                  map, reverse,
-                 endof, first, last, eltype, getkey, values,
-                 merge!,lt, Ordering, ForwardOrdering, Forward,
-                 ReverseOrdering, Reverse, Lt, colon,
-                 searchsortedfirst, searchsortedlast, isless, find
+                 first, last, eltype, getkey, values,
+                 merge!, lt, Ordering, ForwardOrdering, Forward,
+                 ReverseOrdering, Reverse, Lt,
+                 isless, 
+                 union, intersect, symdiff, setdiff, issubset,
+                 find, searchsortedfirst, searchsortedlast, endof
 
     export Deque, Stack, Queue
     export deque, enqueue!, dequeue!, update!
@@ -35,14 +37,15 @@ module DataStructures
 
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
            reverse
-    export SortedDict, SDToken, SDSemiToken
+    export SortedDict, SortedMultiDict, SortedSet
+    export SDToken, SDSemiToken, SMDToken, SMDSemiToken 
+    export SetToken, SetSemiToken
     export startof
-    export pastendtoken, beforestarttoken
-    export searchsortedafter
-    export enumerate_ind, packcopy, packdeepcopy
-    export excludelast, tokens
-    export orderobject, Lt
-
+    export pastendsemitoken, beforestartsemitoken
+    export searchsortedafter, searchequalrange
+    export packcopy, packdeepcopy
+    export exclusive, inclusive, semitokens
+    export orderobject, Lt, compare
 
     if VERSION < v"0.4.0-dev"
         using Docile
@@ -68,13 +71,17 @@ module DataStructures
     include("balancedTree.jl")
     include("tokens.jl")
 
-    import .Tokens: Token, IntSemiToken, semi, container, assemble
-    import .Tokens: deref_key, deref_value, deref, status
-    import .Tokens: advance, regress
+    import .Tokens: IntSemiToken
 
     include("sortedDict.jl")
-    export semi, container, assemble, status
+    include("sortedMultiDict.jl")
+    include("sortedSet.jl")
+    include("tokens2.jl")
+    include("containerloops.jl")
+
+    export status
     export deref_key, deref_value, deref, advance, regress
+    
 
     @deprecate stack Stack
     @deprecate queue Queue
