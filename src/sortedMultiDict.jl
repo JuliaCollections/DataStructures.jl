@@ -4,6 +4,13 @@
 
 type SortedMultiDict{K, D, Ord <: Ordering}
     bt::BalancedTree23{K,D,Ord}
+
+## Zero-argument constructor, or possibly one argument to specify order.
+
+    function SortedMultiDict(o::Ord=Forward)
+        bt1 = BalancedTree23{K,D,Ord}(o)
+        new(bt1)
+    end
 end
 
 
@@ -11,21 +18,78 @@ typealias SMDSemiToken IntSemiToken
 
 typealias SMDToken @compat Tuple{SortedMultiDict, IntSemiToken}
 
-## This constructor takes an ordering object which defaults
+## This constructor takes two arrays an ordering object which defaults
 ## to Forward
 
 function SortedMultiDict{K,D, Ord <: Ordering}(kk::AbstractArray{K,1},
                                                dd::AbstractArray{D,1}, 
                                                o::Ord=Forward)
-    bt1 = BalancedTree23{K,D,Ord}(o)
     if length(kk) != length(dd)
         throw(ArgumentError("SortedMultiDict K and D constructor array arguments must be the same length"))
     end
+    h = SortedMultiDict{K,D,Ord}(o)
     for i = 1 : length(kk)
-        insert!(bt1, kk[i], dd[i], true)
+        insert!(h, kk[i], dd[i])
     end
-    SortedMultiDict(bt1)
+    h
 end
+
+
+if VERSION >= v"0.4.0-dev"
+
+    ## Take pairs and infer argument
+    ## types.  Note:  this works only for the Forward ordering.
+
+    function SortedMultiDict{K,D}(ps::Pair{K,D}...)
+        h = SortedMultiDict{K,D,ForwardOrdering}()
+        for p in ps
+            insert!(h, p.first, p.second)
+        end
+        h 
+    end
+
+
+    ## Take pairs and infer argument
+    ## types.  Ordering parameter must be explicit first argument.
+
+
+    function SortedMultiDict{K,D, Ord <: Ordering}(o::Ord, ps::Pair{K,D}...)
+        h = SortedMultiDict{K,D,Ord}(o)
+        for p in ps
+            insert!(h, p.first, p.second)
+        end
+        h 
+    end
+
+
+    ## This one takes an iterable; ordering type is optional.
+
+    SortedMultiDict{Ord <: Ordering}(kv, o::Ord=Forward) = 
+    sortedmultidict_with_eltype(kv, eltype(kv), o)
+
+    function sortedmultidict_with_eltype{K,D,Ord}(kv, ::Type{Tuple{K,D}}, o::Ord)
+        h = SortedMultiDict{K,D,Ord}(o)
+        for (k,v) in kv
+            insert!(h, k, v)
+        end
+        h
+    end
+
+
+else # if VERSION < v"0.4.0-dev"
+
+    function SortedMultiDict{K,D,Ord <: Ordering}(kv::AbstractArray{(K,D),1},
+                                                  o::Ord = Forward)
+        h = SortedMultiDict{K,D,Ord}(o)
+        for pr in kv
+            insert!(h, pr[1], pr[2])
+        end
+        h
+    end
+end
+
+
+
 
 
 
@@ -90,6 +154,7 @@ end
  
 
 @inline eltype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) = @compat Tuple{K,D}
+@inline eltype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) = @compat Tuple{K,D}
 @inline keytype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) = K
 @inline datatype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) = D
 @inline orderobject(m::SortedMultiDict) = m.bt.ord
@@ -169,16 +234,16 @@ end
 
 function Base.show{K,D,Ord <: Ordering}(io::IO, m::SortedMultiDict{K,D,Ord})
     print(io, "SortedMultiDict(")
-    keys = K[]
-    vals = D[]
-    for (k,v) in m
-        push!(keys, k)
-        push!(vals, v)
+    print(io, orderobject(m), ",")
+    l = length(m)
+    for (count,(k,v)) in enumerate(m)
+        print(io, k, " => ", v)
+        if count < l
+            print(io, ", ")
+        end
     end
-    print(io, keys)
-    println(io, ",")
-    print(io, vals)
-    println(io, ",")
-    print(io, orderobject(m))
     print(io, ")")
 end
+
+similar{K,D,Ord<:Ordering}(m::SortedMultiDict{K,D,Ord}) = 
+   SortedMultiDict(K[], D[], orderobject(m))

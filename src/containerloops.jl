@@ -5,7 +5,7 @@ import Base.values
 ## The prefix SDM is for SortedDict and SortedMultiDict
 ## The prefix SS is for SortedSet.  The prefix SA
 ## is for all sorted containers.  
-## These definitions now appear in tokens2.jl
+## The following two definitions now appear in tokens2.jl
 
 #typealias SDMContainer Union(SortedDict, SortedMultiDict)
 #typealias SAContainer Union(SDMContainer, SortedSet)
@@ -23,6 +23,8 @@ immutable SDMExcludeLast{ContainerType <: SDMContainer} <:
     first::Int
     pastlast::Int
 end
+
+
 
 immutable SSExcludeLast{ContainerType <: SortedSet} <: 
                               AbstractExcludeLast{ContainerType}
@@ -177,8 +179,18 @@ end
 
 
 # Next definition needed to break ambiguity with keys(Associative) from Dict.jl
+
 @inline keys{K, D, Ord <: Ordering}(ba::SortedDict{K,D,Ord}) = SDMKeyIteration(ba)
 @inline keys{T <: SDMIterableTypesBase}(ba::T) = SDMKeyIteration(ba)
+
+
+in{K,D,Ord <: Ordering}(k, keyit::SDMKeyIteration{SortedDict{K,D,Ord}}) =
+    haskey(extractcontainer(keyit.base), k)
+
+in{K,D,Ord <: Ordering}(k, keyit::SDMKeyIteration{SortedMultiDict{K,D,Ord}}) = 
+    haskey(extractcontainer(keyit.base), k)
+
+    
 
 # Next definition needed to break ambiguity with values(Associative) from Dict.jl
 @inline values{K, D, Ord <: Ordering}(ba::SortedDict{K,D,Ord}) = SDMValIteration(ba)

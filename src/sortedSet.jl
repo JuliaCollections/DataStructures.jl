@@ -4,6 +4,15 @@
 
 type SortedSet{K, Ord <: Ordering}
     bt::BalancedTree23{K,Nothing,Ord}
+
+## Zero-argument constructor, or possibly one argument to specify order.
+
+    function SortedSet(o::Ord=Forward)
+        bt1 = BalancedTree23{K,Nothing,Ord}(o)
+        new(bt1)
+    end
+
+
 end
 
 
@@ -12,16 +21,23 @@ typealias SetSemiToken IntSemiToken
 # The following definition was moved to tokens2.jl
 #typealias SetToken Tuple{SortedSet, IntSemiToken}
 
-## This constructor takes a set ordering object which defaults
+## This constructor takes an iterable; order defaults
 ## to Forward
 
-function SortedSet{K,Ord <: Ordering}(d::AbstractArray{K,1}, o::Ord=Forward)
-    bt1 = BalancedTree23{K, Nothing, Ord}(o)
-    for pr in d
-        insert!(bt1, pr, nothing, false)
+## This one takes an iterable; ordering type is optional.
+
+SortedSet{Ord <: Ordering}(iter, o::Ord=Forward) = 
+sortedset_with_eltype(iter, eltype(iter), o)
+
+function sortedset_with_eltype{K,Ord}(iter, ::Type{K}, o::Ord)
+    h = SortedSet{K,Ord}(o)
+    for k in iter
+        insert!(h, k)
     end
-    SortedSet(bt1)
+    h
 end
+
+
 
 ## This function looks up a key in the tree;
 ## if not found, then it returns a marker for the
@@ -77,6 +93,7 @@ end
 end
 
 @inline eltype{K,Ord <: Ordering}(m::SortedSet{K,Ord}) = K
+@inline eltype{K,Ord <: Ordering}(::Type{SortedSet{K,Ord}}) = K
 @inline keytype{K,Ord <: Ordering}(m::SortedSet{K,Ord}) = K
 @inline orderobject(m::SortedSet) = m.bt.ord
 
@@ -313,3 +330,6 @@ function Base.show{K,Ord <: Ordering}(io::IO, m::SortedSet{K,Ord})
     print(io, orderobject(m))
     print(io, ")")
 end
+
+similar{K,Ord<:Ordering}(m::SortedSet{K,Ord}) = 
+SortedSet{K,Ord}(orderobject(m))

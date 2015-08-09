@@ -481,44 +481,119 @@ Constructors for Sorted Containers
 
 ``SortedDict(d)``
   Argument ``d`` is an ordinary Julia dict (or any associative type)
-  used to initialize the container, e.g.::
+  used to initialize the container, e.g., for Julia 0.4::
 
      c = SortedDict(Dict("New York" => 1788, "Illinois" => 1818))
 
+  or for 0.3::
+
+     c = SortedDict(["New York" => 1788, "Illinois" => 1818])
+
+
   In this example the key-type is deduced to be ASCIIString, while the
-  value-type is Int.
+  value-type is Int.  The default ordering object ``Forward`` is used.
+  See below for more information about ordering.
 
 ``SortedDict(d,o)``
   Argument ``d`` is an ordinary Julia dict (or any associative type)
-  used to initialize the container and ``o`` is an optional ordering object
-  used for ordering the keys.  The default value
-  for ``o`` is ``Forward``.
+  used to initialize the container and ``o`` is an ordering object
+  used for ordering the keys. 
 
-``SortedDict(Dict{K,V}(),o)``
-  Construct an empty SortedDict by explicitly specifying
-  the parameters of the type.  Ordering argument ``o`` is
-  optional and defaults to ``Forward``.
+``SortedDict(k1=>v1, k2=>v2, ...)``
+  Arguments are key-value pairs for insertion into the 
+  dictionary.  
+  The keys must be of the same type as one another; the
+  values must also be of one type.  (Julia 0.4 only.)
 
-``SortedMultiDict(k,v,o)``
-  Construct a SortedMultiDict using keys given by ``k``, values
-  given by ``v`` and ordering object ``o``.  The ordering object
+``SortedDict(o, k1=>v1, k2=>v2, ...)``
+  The first argument ``o`` is an ordering object.  The remaining
+  arguments are key-value pairs for insertion into the 
+  dictionary.  
+  The keys must be of the same type as one another; the
+  values must also be of one type. (Julia 0.4 only.)
+
+``SortedDict(iter)``
+  Takes an arbitrary iterable object of (key,value) pairs.
+  The default Forward ordering is used.  In Julia 0.3,
+  the ``iter`` argument must be an ``AbstractArray`` of
+  key-value pairs.
+
+``SortedDict(iter,o)``
+  Takes an arbitrary iterable object of (key,value) pairs.
+  The ordering object ``o`` is explicitly given.  In Julia 0.3,
+  the ``iter`` argument must be an ``AbstractArray`` of
+  key-value pairs.
+
+``SortedDict{K,V,Ord}(o)``
+  Construct an empty SortedDict in which type parameters
+  are explicitly listed; ordering object is explicitly specified.
+  (See below for discussion of ordering.)  An empty SortedDict
+  may also be constructed using ``SortedDict(Dict{K,V}(),o)`` 
+  in Julia 0.4, where the ``o`` argument is optional, or 
+  ``SortedDict((K=>V)[],o)`` in Julia 0.3.
+
+``SortedDict(ks,vs,o)``
+  Here, ``ks`` is an array of keys, ``vs`` is an array of values
+  of the same length, and ``o`` is the optional ordering argument.
+  This syntax is available in Julia 0.3 only.  In Julia 0.4,
+  use ``SortedDict(zip(ks,vs),o).``
+
+``SortedMultiDict(ks,vs,o)``
+  Construct a SortedMultiDict using keys given by ``ks``, values
+  given by ``vs`` and ordering object ``o``.  The ordering object
   defaults to ``Forward`` if not specified.  The two arguments
-  ``k`` and ``v`` are 1-dimensional arrays of the same length in 
-  which ``k`` holds keys and ``v`` holds the corresponding values.
-  To construct an empty SortedMultiDict with given types ``K`` and
-  ``V``, use
-  ``SortedMultiDict(K[], V[], o)``.
+  ``ks`` and ``vs`` are 1-dimensional arrays of the same length in 
+  which ``ks`` holds keys and ``vs`` holds the corresponding values.
 
-``SortedSet(k,o)``
-  Construct a SortedSet using keys given by ``k``,
+
+``SortedMultiDict(k1=>v1, k2=>v2, ...)``
+  Arguments are key-value pairs for insertion into the 
+  multidict.  
+  The keys must be of the same type as one another; the
+  values must also be of one type.  Julia 0.4 only.
+
+
+``SortedMultiDict(o, k1=>v1, k2=>v2, ...)``
+  The first argument ``o`` is an ordering object.  The remaining
+  arguments are key-value pairs for insertion into the 
+  multidict.
+  The keys must be of the same type as one another; the
+  values must also be of one type. Julia 0.4 only.
+
+
+``SortedMultiDict(iter)``
+  Takes an arbitrary iterable object of (key,value) pairs.
+  The default Forward ordering is used.  In Julia 0.3, 
+  the ``iter`` argument must be an ``AbstractArray.``
+
+``SortedMultiDict(iter,o)``
+  Takes an arbitrary iterable object of (key,value) pairs.
+  The ordering object ``o`` is explicitly given.
+  In Julia 0.3, 
+  the ``iter`` argument must be an ``AbstractArray.``
+
+
+``SortedMultiDict{K,V,Ord}(o)``
+  Construct an empty sorted multidict in which type parameters
+  are explicitly listed; ordering object is explicitly specified.
+  (See below for discussion of ordering.)  An empty SortedMultiDict
+  may also be constructed via ``SortedMultiDict(K[], V[], o)`` where
+  the ``o`` argument is optional.
+
+``SortedSet(iter,o)``
+  Construct a SortedSet using keys given by iterable ``iter`` (e.g.,
+  an array)
   and ordering object ``o``.  The ordering object
-  defaults to ``Forward`` if not specified.  The argument
-  ``k``is a 1-dimensional array.  To create an empty set of type ``K``,
-  use ``SortedSet(K[],o)``.
+  defaults to ``Forward`` if not specified.  
 
-Note that the code snippets in this section are based on the Julia
-version 0.4.0 Dict-constructor
-syntax.  There are equivalent statements for 0.3.0.
+``SortedSet{K,Ord}(o)``
+  Construct an empty sorted set in which type parameter
+  is explicitly listed; ordering object is explicitly specified.
+  (See below for discussion of ordering.)  An alternate way
+  to create an empty set of type ``K`` is ``SortedSet(K[], o)``;
+  again, the order argument defaults to ``Forward`` if not
+  specified.
+
 
 
 ---------------------------------
@@ -951,6 +1026,51 @@ Other Functions
   addresses a large number of values, and an alternative
   should be considered.)
 
+``in(x,iter)``
+  Returns true if ``x`` is in ``iter``, where
+  ``iter`` refers to any of the iterable objects described
+  above in the discussion of container loops and ``x``
+  is of the appropriate type.
+  For all of the iterables except the five listed below,
+  the algorithm used 
+  is a linear-time search.  For example, the call::
+     
+    (k,v) in exclusive(sd,st1,st2)
+
+  where ``sd`` is a SortedDict, ``st1`` and ``st2`` are
+  semitokens, ``k`` is a key, and ``v`` is a value, will
+  loop over all entries in the dictionary between
+  the two tokens and a compare for equality using ``isequal`` between the
+  indexed item and ``(k,v)``.  
+
+  The five exceptions are::
+
+       (k,v) in sd
+       (k,v) in smd
+       k in ss
+       k in keys(sd)
+       k in keys(smd)
+
+  These five invocations of ``in`` (where ``sd`` is a SortedDict,
+  ``smd`` is a SortedMultiDict, and ``ss`` is a SortedSet)
+  use the index structure
+  of the sorted container and test equality
+  based on the order object of the keys rather than ``isequal``.
+  Therefore, these five are all faster than linear-time looping.
+  The first three were already discussed in the previous entry.
+  The last two are equivalent to ``haskey(sd,k)`` and ``haskey(smd,k)``
+  respectively.  To force the use of ``isequal``
+  test on the keys rather than the order object (thus
+  slowing the execution from logarithmic to linear time), replace
+  the above five constructs with these::
+
+       (k,v) in collect(sd)
+       (k,v) in collect(smd)
+       k in collect(ss)
+       k in collect(keys(sd))
+       k in collect(keys(smd))
+
+
 ``eltype(sc)``
   Returns the (key,value) type (a 2-entry tuple)
   for SortedDict and SortedMultiDict.
@@ -958,13 +1078,19 @@ Other Functions
   also be applied to the type itself.
   Time: O(1)
 
+``similar(sc)``
+  Returns a new SortedDict, SortedMultiDict, or SortedSet 
+  of the same type and with the same ordering
+  as ``sc`` but with no entries (i.e., empty).  Time: O(1)
+
 ``orderobject(sc)``
   Returns the order object used to construct the container.  Time: O(1)
 
 ``haskey(sc,k)``
   Returns true if key ``k`` is present for SortedDict, SortedMultiDict
   or SortedSet ``sc``.  For SortedSet, ``haskey(sc,k)`` is
-  a synonym for ``in(k,sc)``.
+  a synonym for ``in(k,sc)``.  For SortedDict and SortedMultiDict,
+  ``haskey(sc,k)`` is equivalent to ``in(k,keys(sc))``.
   Time: O(*c* log *n*)
 
 
@@ -1134,8 +1260,10 @@ If it does not hold for a certain type, then a custom ordering
 argument must be defined as discussed in the next few paragraphs.
 
 The name for the default ordering (i.e., using ``isless`` and
-``isequal``) is ``Forward``.  Another possible
-choice is ``Reverse``, which reverses the usual sorted order.  
+``isequal``) is ``Forward``.  Note: this is the name of the
+ordering object; its type is ``ForwardOrdering.``
+Another possible
+ordering object is ``Reverse``, which reverses the usual sorted order.  
 This name must be
 imported ``import Base.Reverse`` if it is used.
 
@@ -1152,9 +1280,8 @@ In the above example, the ordering object would be::
 
      Lt((x,y) -> isless(lowercase(x),lowercase(y)))
 
-The ordering object is the second argument to
-the ``SortedDict`` and ``SortedSet``  constructors, or the
-third argument to the ``SortedMultiDict`` constructor 
+The ordering object is indicated in the above list of constructors
+in the ``o`` position
 (see above for constructor syntax).
 
 This approach suffers from a performance hit (10%-50% depending on the
@@ -1189,7 +1316,7 @@ be::
 
 Finally, the user specifies the unique element of ``CaseInsensitive``, namely
 the object ``CaseInsensitive()``, as the ordering object to the
-``SortedDict`` constructor.
+``SortedDict``, ``SortedMultiDict`` or ``SortedSet`` constructor.
 
 For the above code to work, the module must make the following declarations,
 typically near the beginning::

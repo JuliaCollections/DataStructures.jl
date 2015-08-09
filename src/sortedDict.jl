@@ -4,23 +4,101 @@
 
 type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
     bt::BalancedTree23{K,D,Ord}
+
+## Zero-argument constructor, or possibly one argument to specify order.
+
+    function SortedDict(o::Ord=Forward)
+        bt1 = BalancedTree23{K,D,Ord}(o)
+        new(bt1)
+    end
+
 end
+
+## external constructor to take an associative and infer
+## argument types
+
+function SortedDict{K, D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
+    h = SortedDict{K,D,Ord}(o)
+    for (k,v) in d
+        h[k] = v
+    end
+    h
+end
+
+
+if VERSION >= v"0.4.0-dev"
+
+    ## More constructors based on those in dict.jl:
+    ## Take pairs and infer argument
+    ## types.  Note:  this works only for the Forward ordering.
+
+    function SortedDict{K,D}(ps::Pair{K,D}...)
+        h = SortedDict{K,D,ForwardOrdering}()
+        for p in ps
+            h[p.first] = p.second
+        end
+        h 
+    end
+
+
+    ## Take pairs and infer argument
+    ## types.  Ordering parameter must be explicit first argument.
+
+
+    function SortedDict{K,D, Ord <: Ordering}(o::Ord, ps::Pair{K,D}...)
+        h = SortedDict{K,D,Ord}(o)
+        for p in ps
+            h[p.first] = p.second
+        end
+        h 
+    end
+
+    ## This one takes an iterable; ordering type is optional.
+
+    SortedDict{Ord <: Ordering}(kv, o::Ord=Forward) = 
+    sorteddict_with_eltype(kv, eltype(kv), o)
+
+    function sorteddict_with_eltype{K,D,Ord}(kv, ::Type{Tuple{K,D}}, o::Ord)
+        h = SortedDict{K,D,Ord}(o)
+        for (k,v) in kv
+            h[k] = v
+        end
+        h
+    end
+
+else   #if VERSION < v"0.4.0-dev"
+    function SortedDict{K,D,Ord <: Ordering}(ks::AbstractArray{K},
+                                             vs::AbstractArray{D},
+                                             o::Ord = Forward) 
+        h = SortedDict{K,D,Ord}(o)
+        l = length(ks)
+        if length(vs) != l
+            error("ks and vs arrays in two-array SortedDict constructor must have the same length")
+        end
+        for i = 1 : l
+            h[ks[i]] = vs[i]
+        end
+        h
+    end
+
+    function SortedDict{K,D,Ord <: Ordering}(kv::AbstractArray{(K,D),1},
+                                             o::Ord = Forward)
+        h = SortedDict{K,D,Ord}(o)
+        for pr in kv
+            h[pr[1]] = pr[2]
+        end
+        h
+    end
+end
+
+
 
 typealias SDSemiToken IntSemiToken
 
 typealias SDToken @compat Tuple{SortedDict,IntSemiToken}
 
 
-## This constructor takes an ordering object which defaults
-## to Forward
 
-function SortedDict{K,D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
-    bt1 = BalancedTree23{K,D,Ord}(o)
-    for pr in d
-        insert!(bt1, pr[1], pr[2], false)
-    end
-    SortedDict(bt1)
-end
 
 ## This function implements m[k]; it returns the
 ## data item associated with key k.
@@ -91,6 +169,7 @@ end
 end
 
 @inline eltype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = @compat Tuple{K,D}
+@inline eltype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) = @compat Tuple{K,D}
 @inline orderobject(m::SortedDict) = m.bt.ord
 @inline keytype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = K
 @inline datatype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = D
@@ -213,3 +292,5 @@ end
 
 
 
+similar{K,D,Ord<:Ordering}(m::SortedDict{K,D,Ord}) = 
+SortedDict{K,D,Ord}(orderobject(m))
