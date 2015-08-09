@@ -76,6 +76,8 @@ c4 = complement(s1)
 @test c1 == c2 == c3 == c4
 @test c4 === sizehint(c4, 100)
 @test c1 == c4
+@test last(c1) == typemax(Int)-1
+@test last(complement(IntSet())) == typemax(Int)-1
 
 # Push, union
 s1 = IntSet()
