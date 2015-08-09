@@ -1,4 +1,5 @@
-tests = ["deque",
+tests = ["intset",
+         "deque",
          "sortedcontainers",
          "stack_and_queue",
          "accumulator",
