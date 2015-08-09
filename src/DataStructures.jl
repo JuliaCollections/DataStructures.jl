@@ -67,6 +67,8 @@ module DataStructures
     include("defaultdict.jl")
     include("trie.jl")
 
+    include("intset.jl")
+
     include("list.jl")
     include("balancedTree.jl")
     include("tokens.jl")
@@ -81,7 +83,6 @@ module DataStructures
 
     export status
     export deref_key, deref_value, deref, advance, regress
-    
 
     @deprecate stack Stack
     @deprecate queue Queue
