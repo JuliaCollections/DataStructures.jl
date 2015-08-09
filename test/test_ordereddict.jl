@@ -38,7 +38,11 @@ end
 
 @test collect(keys(d)) == collect('b':'z')
 @test collect(values(d)) == collect(2:26)
-@test collect(d) == [(a,i) for (a,i) in zip('b':'z', 2:26)]
+if VERSION >= v"0.4.0-dev+980"
+    @test collect(d) == [Pair(a,i) for (a,i) in zip('b':'z', 2:26)]
+else
+    @test collect(d) == [(a,i) for (a,i) in zip('b':'z', 2:26)]
+end
 
 # Test for #60
 
@@ -63,11 +67,16 @@ od60[14]=15
 # Copied and modified from Base/test/dict.jl
 
 # OrderedDict
-h = OrderedDict()
+h = OrderedDict{Int,Int}()
 for i=1:10000
     h[i] = i+1
 end
-@test collect(h) == collect(zip(1:10000, 2:10001))
+
+if VERSION >= v"0.4.0-dev+980"
+    @test collect(h) == [Pair(x,y) for (x,y) in zip(1:10000, 2:10001)]
+else
+    @test collect(h) == collect(zip(1:10000, 2:10001))
+end
 
 for i=1:2:10000
     delete!(h, i)
@@ -175,7 +184,12 @@ end
 
 # TODO: this is a BoundsError on v0.3, ArgumentError on v0.4
 #@test_throws ArgumentError first(OrderedDict())
-@test first(OrderedDict([(:f, 2)])) == (:f,2)
+
+if VERSION >= v"0.4.0-dev+980"
+    @test first(OrderedDict([(:f, 2)])) == Pair(:f,2)
+else
+    @test first(OrderedDict([(:f, 2)])) == (:f,2)
+end
 
 # issue #1821
 let
@@ -206,7 +220,7 @@ end
 data_in = [ (rand(1:1000), randstring(2)) for _ in 1:1001 ]
 
 # Populate the first dict
-d1 = OrderedDict{Int, AbstractString}()
+d1 = OrderedDict{Int, ASCIIString}()
 for (k,v) in data_in
     d1[k] = v
 end
