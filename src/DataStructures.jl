@@ -41,7 +41,6 @@ module DataStructures
     export SDToken, SDSemiToken, SMDToken, SMDSemiToken
     export SetToken, SetSemiToken
     export startof
-
     export pastendsemitoken, beforestartsemitoken
     export searchsortedafter, searchequalrange
     export packcopy, packdeepcopy
@@ -49,7 +48,6 @@ module DataStructures
     export orderobject, Lt, compare
 
     export MultiDict, enumerateall
-
 
     if VERSION < v"0.4.0-dev"
         using Docile

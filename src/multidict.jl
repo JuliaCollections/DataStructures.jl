@@ -1,11 +1,11 @@
 #  multi-value dictionary (multidict)
 
 import Base: haskey, get, get!, getkey, delete!, pop!, empty!,
-             setindex!, getindex, length, isempty, start,
+             insert!, getindex, length, isempty, start,
              next, done, keys, values, copy, similar,  push!,
-             count, size
+             count, size, eltype, ==
 
-immutable MultiDict{K,V} <: Associative{K,V}
+immutable MultiDict{K,V}
     d::Dict{K,Vector{V}}
 
     MultiDict() = new(Dict{K,Vector{V}}())
@@ -23,7 +23,7 @@ multi_dict_with_eltype{K,V}(kvs, ::Type{@compat Tuple{K,Vector{V}}}) = MultiDict
 function multi_dict_with_eltype{K,V}(kvs, ::Type{@compat Tuple{K,V}})
     md = MultiDict{K,V}()
     for (k,v) in kvs
-        setindex!(md, v, k)
+        insert!(md, k, v)
     end
     return md
 end
@@ -35,7 +35,7 @@ if VERSION >= v"0.4.0-dev+980"
     function  MultiDict{K,V}(ps::Pair{K,V}...)
         md = MultiDict{K,V}()
         for (k,v) in ps
-            setindex!(md, v, k)
+            insert!(md, k, v)
         end
         return md
     end
@@ -45,15 +45,18 @@ end
 
 ## Most functions are simply delegated to the wrapped Dict
 
-@delegate MultiDict.d [ haskey, get, get!, getkey, delete!,
-                         empty!, getindex, length, isempty,
-                         start, next, done, keys, values ]
+@delegate MultiDict.d [ haskey, get, get!, getkey,
+                        getindex, length, isempty, eltype,
+                        start, next, done, keys, values]
 
 sizehint(d::MultiDict, sz::Integer) = (sizehint(d.d, sz); d)
 copy(d::MultiDict) = MultiDict(d)
 similar{K,V}(d::MultiDict{K,V}) = MultiDict{K,V}()
+==(d1::MultiDict, d2::MultiDict) = d1.d == d2.d
+delete!(d::MultiDict, key) = (delete!(d.d, key); d)
+empty!(d::MultiDict) = (empty!(d.d); d)
 
-function setindex!{K,V}(d::MultiDict{K,V}, v, k)
+function insert!{K,V}(d::MultiDict{K,V}, k, v)
     if !haskey(d.d, k)
         d.d[k] = isa(v, AbstractArray) ? eltype(v)[] : V[]
     end
@@ -87,12 +90,12 @@ end
 pop!(d::MultiDict, key) = pop!(d, key, Base.secret_table_token)
 
 if VERSION >= v"0.4.0-dev+980"
-    push!(d::MultiDict, kv::Pair) = setindex!(d, kv[2], kv[1])
+    push!(d::MultiDict, kv::Pair) = insert!(d, kv[1], kv[2])
     #push!(d::MultiDict, kv::Pair, kv2::Pair) = (push!(d.d, kv, kv2); d)
     #push!(d::MultiDict, kv::Pair, kv2::Pair, kv3::Pair...) = (push!(d.d, kv, kv2, kv3...); d)
 end
 
-push!(d::MultiDict, kv) = setindex!(d, kv[2], kv[1])
+push!(d::MultiDict, kv) = insert!(d, kv[1], kv[2])
 #push!(d::MultiDict, kv, kv2...) = (push!(d.d, kv, kv2...); d)
 
 count(d::MultiDict) = length(keys(d)) == 0 ? 0 : mapreduce(k -> length(d[k]), +, keys(d))
