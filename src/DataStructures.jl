@@ -17,7 +17,7 @@ module DataStructures
                  find, searchsortedfirst, searchsortedlast, endof
 
     export Deque, Stack, Queue
-    export deque, enqueue!, dequeue!, update!
+    export deque, enqueue!, dequeue!, update!,iter
     export capacity, num_blocks, front, back, top, sizehint
 
     export Accumulator, counter
