@@ -2,9 +2,9 @@
 .. image:: https://travis-ci.org/JuliaLang/DataStructures.jl.svg?branch=master
    :target: https://travis-ci.org/JuliaLang/DataStructures.jl
    :alt: Build Status
-.. image:: https://img.shields.io/coveralls/JuliaLang/DataStructures.jl.svg
-   :target: https://coveralls.io/r/JuliaLang/DataStructures.jl
-   :alt: Coverage Status
+.. image:: https://coveralls.io/repos/JuliaLang/DataStructures.jl/badge.svg?branch=master&service=github
+   :target: https://coveralls.io/github/JuliaLang/DataStructures.jl?branch=master
+   :alt: Test Coverage
 .. image:: http://pkg.julialang.org/badges/DataStructures_release.svg
    :target: http://pkg.julialang.org/?pkg=DataStructures&ver=release
    :alt: PkgEval.jl Status
