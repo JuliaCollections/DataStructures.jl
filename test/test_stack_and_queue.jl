@@ -32,6 +32,21 @@ for i = 1 : n
     @test length(s) == n - i
 end
 
+#test that iter returns a LIFO collection 
+
+stk = Stack(Int, 10)
+#an array to check iteration sequence against
+arr = Int64[] 
+
+for i = 1:n
+    push!(stk,i)
+    push!(arr,i)
+end
+
+iterated = iter(stk)
+@test(reverse(arr) == iterated)
+
+
 # Queue
 
 s = Queue(Int, 5)
@@ -64,3 +79,17 @@ for i = 1 : n
     @test isempty(s) == (i == n)
     @test length(s) == n - i
 end
+
+#test that iter returns a FIFO collection 
+
+q = Queue(Int, 10)
+#an array to check iteration sequence against
+arr = Int64[] 
+
+for i = 1:n
+    enqueue!(q,i)
+    push!(arr,i)
+end
+
+iterated = iter(q)
+@test(arr == iterated)
