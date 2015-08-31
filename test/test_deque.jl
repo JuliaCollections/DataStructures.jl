@@ -12,6 +12,13 @@ q = Deque{Int}()
 @test_throws ErrorException front(q)
 @test_throws ErrorException back(q)
 
+@test typeof(deque(Int)) == typeof(Deque{Int}())
+
+q = DataStructures.DequeBlock{Int}(0,0)
+@test length(q) == 0
+@test capacity(q) == 0
+@test isempty(q)
+
 q = Deque{Int}(3)
 @test length(q) == 0
 @test isempty(q)
@@ -34,10 +41,16 @@ for i = 1 : n
 
     @test front(q) == 1
     @test back(q) == i
-
+    
+    k = 1
+    for j in q
+        @test j == k
+        k += 1
+    end
     cq = collect(q)
     @test isa(cq, Vector{Int})
     @test cq == collect(1:i)
+    @test sprint(show,q) == "Deque [$cq]"
 end
 
 # pop back
