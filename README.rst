@@ -5,9 +5,12 @@
 .. image:: https://coveralls.io/repos/JuliaLang/DataStructures.jl/badge.svg?branch=master&service=github
    :target: https://coveralls.io/github/JuliaLang/DataStructures.jl?branch=master
    :alt: Test Coverage
-.. image:: http://pkg.julialang.org/badges/DataStructures_release.svg
-   :target: http://pkg.julialang.org/?pkg=DataStructures&ver=release
-   :alt: PkgEval.jl Status
+.. image:: http://pkg.julialang.org/badges/DataStructures_0.3.svg
+   :target: http://pkg.julialang.org/?pkg=DataStructures&ver=0.3
+   :alt: PkgEval.jl Status on Julia 0.3
+.. image:: http://pkg.julialang.org/badges/DataStructures_0.4.svg
+   :target: http://pkg.julialang.org/?pkg=DataStructures&ver=0.4
+   :alt: PkgEval.jl Status on Julia 0.4
 
 ====================
 DataStructures.jl
