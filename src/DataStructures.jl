@@ -16,7 +16,8 @@ module DataStructures
                  ReverseOrdering, Reverse, Lt,
                  isless,
                  union, intersect, symdiff, setdiff, issubset,
-                 find, searchsortedfirst, searchsortedlast, endof
+                 find, searchsortedfirst, searchsortedlast, endof, in
+
 
     export Deque, Stack, Queue
     export deque, enqueue!, dequeue!, update!,iter
@@ -47,13 +48,16 @@ module DataStructures
     export searchsortedafter, searchequalrange
     export packcopy, packdeepcopy
     export exclusive, inclusive, semitokens
-    export orderobject, Lt, compare
+    export orderobject, Lt, compare, onlysemitokens
 
     export MultiDict, enumerateall
 
     if VERSION < v"0.4.0-dev"
         using Docile
+    else
+        import Base: eachindex, keytype, valtype
     end
+
 
     include("delegate.jl")
 
