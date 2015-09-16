@@ -137,7 +137,7 @@ Usage::
 
 One may also use other element types::
 
-  a = DisjointSets{String}(["a", "b", "c", "d"])
+  a = DisjointSets{AbstractString}(["a", "b", "c", "d"])
   union!(a, "a", "b")
   in_same_set(a, "c", "d")
   push!(a, "f")
@@ -235,7 +235,7 @@ Note that to create an OrderedSet of a particular type, you must
 specify the type in curly-braces::
 
   # create an OrderedSet of Strings
-  strs = OrderedSet{String}()
+  strs = OrderedSet{AbstractString}()
 
 
 ----------------------------------
@@ -265,7 +265,7 @@ Constructors::
 Examples using ``DefaultDict``::
 
   dd = DefaultDict(1)               # create an (Any=>Any) DefaultDict with a default value of 1
-  dd = DefaultDict(String, Int, 0)  # create a (String=>Int) DefaultDict with a default value of 0
+  dd = DefaultDict(AbstractString, Int, 0)  # create a (AbstractString=>Int) DefaultDict with a default value of 0
 
   d = ['a'=>1, 'b'=>2]
   dd = DefaultDict(0, d)            # provide a default value to an existing dictionary
@@ -278,34 +278,34 @@ Examples using ``DefaultDict``::
   dd = DefaultDict(()->myfunc())    # call function myfunc to provide the default value
 
   # These all create the same default dict
-  dd = @compat DefaultDict(String, Vector{Int},        # Vector{Int}() is Julia v0.4 notation
+  dd = @compat DefaultDict(AbstractString, Vector{Int},        # Vector{Int}() is Julia v0.4 notation
                            () -> Vector{Int}())        # @compat allows it to be used on v0.3
-  dd = DefaultDict(String, Vector{Int}, () -> Int[])
+  dd = DefaultDict(AbstractString, Vector{Int}, () -> Int[])
 
-  # dd = DefaultDict(String, Vector{Int},     # **Note! Julia v0.4 and later only!
+  # dd = DefaultDict(AbstractString, Vector{Int},     # **Note! Julia v0.4 and later only!
   #                  Vector{Int})             # the second Vector{Int} is called as a function
 
   push!(dd["A"], 1)
   push!(dd["B"], 2)
 
   julia> dd
-  DefaultDict{String,Array{Int64,1},Function} with 2 entries:
+  DefaultDict{AbstractString,Array{Int64,1},Function} with 2 entries:
     "B" => [2]
     "A" => [1]
 
-  # create a Dictionary of type String=>DefaultDict{String, Int}, where the default of the
+  # create a Dictionary of type AbstractString=>DefaultDict{AbstractString, Int}, where the default of the
   # inner set of DefaultDicts is zero
-  dd = DefaultDict(String, DefaultDict, () -> DefaultDict(String,Int,0))
+  dd = DefaultDict(AbstractString, DefaultDict, () -> DefaultDict(AbstractString,Int,0))
 
 ```
 
 Note that in the last example, we need to use a function to create each new ``DefaultDict``.
 If we forget, we will end up using the same ``DefaultDict`` for all default values::
 
-  julia> dd = DefaultDict(String, DefaultDict, DefaultDict(String,Int,0));
+  julia> dd = DefaultDict(AbstractString, DefaultDict, DefaultDict(AbstractString,Int,0));
 
   julia> dd["a"]
-  DefaultDict{String,Int64,Int64,Dict{K,V}}()
+  DefaultDict{AbstractString,Int64,Int64,Dict{K,V}}()
 
   julia> dd["b"]["a"] = 1
   1
@@ -318,7 +318,7 @@ If we forget, we will end up using the same ``DefaultDict`` for all default valu
 Trie
 ----
 
-An implementation of the `Trie` data structure. This is an associative structure, with `String` keys::
+An implementation of the `Trie` data structure. This is an associative structure, with `AbstractString` keys::
 
   t=Trie{Int}()
   t["Rob"]=42
@@ -330,7 +330,7 @@ An implementation of the `Trie` data structure. This is an associative structure
 Constructors::
 
   Trie(keys, values)                  # construct a Trie with the given keys and values
-  Trie(keys)                          # construct a Trie{Nothing} with the given keys and with values = nothing
+  Trie(keys)                          # construct a Trie{Void} with the given keys and with values = nothing
   Trie(kvs::AbstractVector{(K, V)})   # construct a Trie from the given vector of (key, value) pairs
   Trie(kvs::Associative{K, V})        # construct a Trie from the given associative structure
 
@@ -385,12 +385,12 @@ SortedSet has
 only keys; it is an alternative to the built-in
 ``Set`` container.  Internally,
 SortedSet is implemented as a SortedDict in which the value type
-is ``Nothing``.  
+is ``Void``.
 Finally, SortedMultiDict is similar to SortedDict except that each key
 can be associated with multiple values.  The (key,value) pairs in
 a SortedMultiDict are stored according to the sorted order for keys,
 and (key,value) pairs with the same
-key are stored in order of insertion. 
+key are stored in order of insertion.
 
 The containers internally use a 2-3 tree, which is a
 kind of balanced tree and is described in many elementary data

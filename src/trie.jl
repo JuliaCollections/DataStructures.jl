@@ -28,12 +28,12 @@ type Trie{T}
 end
 
 Trie() = Trie{Any}()
-Trie{K<:String,V}(ks::AbstractVector{K}, vs::AbstractVector{V}) = Trie{V}(ks, vs)
-Trie{K<:String,V}(kv::AbstractVector{@compat Tuple{K,V}}) = Trie{V}(kv)
-Trie{K<:String,V}(kv::Associative{K,V}) = Trie{V}(kv)
-Trie{K<:String}(ks::AbstractVector{K}) = Trie{Nothing}(ks, similar(ks, Nothing))
+Trie{K<:AbstractString,V}(ks::AbstractVector{K}, vs::AbstractVector{V}) = Trie{V}(ks, vs)
+Trie{K<:AbstractString,V}(kv::AbstractVector{@compat Tuple{K,V}}) = Trie{V}(kv)
+Trie{K<:AbstractString,V}(kv::Associative{K,V}) = Trie{V}(kv)
+@compat Trie{K<:AbstractString}(ks::AbstractVector{K}) = Trie{Void}(ks, similar(ks, Void))
 
-function setindex!{T}(t::Trie{T}, val::T, key::String)
+function setindex!{T}(t::Trie{T}, val::T, key::AbstractString)
     node = t
     for char in key
         if !haskey(node.children, char)
@@ -45,7 +45,7 @@ function setindex!{T}(t::Trie{T}, val::T, key::String)
     node.value = val
 end
 
-function getindex(t::Trie, key::String)
+function getindex(t::Trie, key::AbstractString)
     node = subtrie(t, key)
     if node != nothing && node.is_key
         return node.value
@@ -53,7 +53,7 @@ function getindex(t::Trie, key::String)
     throw(KeyError("key not found: $key"))
 end
 
-function subtrie(t::Trie, prefix::String)
+function subtrie(t::Trie, prefix::AbstractString)
     node = t
     for char in prefix
         if !haskey(node.children, char)
@@ -65,12 +65,12 @@ function subtrie(t::Trie, prefix::String)
     node
 end
 
-function haskey(t::Trie, key::String)
+function haskey(t::Trie, key::AbstractString)
     node = subtrie(t, key)
     node != nothing && node.is_key
 end
 
-function get(t::Trie, key::String, notfound)
+function get(t::Trie, key::AbstractString, notfound)
     node = subtrie(t, key)
     if node != nothing && node.is_key
         return node.value
@@ -78,7 +78,7 @@ function get(t::Trie, key::String, notfound)
     notfound
 end
 
-function keys(t::Trie, prefix::String="", found=String[])
+function keys(t::Trie, prefix::AbstractString="", found=AbstractString[])
     if t.is_key
         push!(found, prefix)
     end
@@ -88,7 +88,7 @@ function keys(t::Trie, prefix::String="", found=String[])
     found
 end
 
-function keys_with_prefix(t::Trie, prefix::String)
+function keys_with_prefix(t::Trie, prefix::AbstractString)
     st = subtrie(t, prefix)
     st != nothing ? keys(st,prefix) : []
 end
@@ -100,7 +100,7 @@ end
 # see the comments and implementation below for details.
 immutable TrieIterator
     t::Trie
-    str::String
+    str::AbstractString
 end
 
 # At the start, there is no previous iteration,
@@ -125,4 +125,4 @@ function done(it::TrieIterator, state)
     return !(it.str[i] in keys(t.children))
 end
 
-path(t::Trie, str::String) = TrieIterator(t, str)
+path(t::Trie, str::AbstractString) = TrieIterator(t, str)
