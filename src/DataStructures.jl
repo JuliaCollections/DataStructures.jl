@@ -55,6 +55,7 @@ module DataStructures
         using Docile
     end
 
+    include("ds_compat.jl")
     include("delegate.jl")
 
     include("deque.jl")

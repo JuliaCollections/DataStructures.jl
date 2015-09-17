@@ -1,5 +1,6 @@
 using DataStructures
 using Base.Test
+using Compat
 
 # construction
 
@@ -138,48 +139,40 @@ end
 _d = OrderedDict([("a", 0)])
 @test isa([k for k in filter(x->length(x)==1, collect(keys(_d)))], Vector{Any})
 
+# issue 105
+d = @dcompat OrderedDict{Any,Any}('a' => 1, "b" => [2,3])
+@test typeof(@dcompat OrderedDict('a' => 1, "b" => [2,3])) == OrderedDict{Any,Any}
+@test typeof(@dcompat OrderedDict('a' => 1, 'b' => [2,3])) == OrderedDict{Char,Any}
+
 let
-    ## TODO: this should work, but inference seems to be working incorrectly
-    #d = OrderedDict(((1, 2), (3, 4)))
     d = OrderedDict([(1, 2), (3, 4)])
     @test d[1] === 2
     @test d[3] === 4
-    ## TODO: @compat only rewrites Dict, not OrderedDict
-    # d2 = OrderedDict(1 => 2, 3 => 4)
-    # d3 = OrderedDict((1 => 2, 3 => 4))
-    # @test d == d2 == d3
-    # @test typeof(d) == typeof(d2) == typeof(d3) == OrderedDict{Int,Int}
-    @test typeof(d) == OrderedDict{Int,Int}
+    d2 = @dcompat OrderedDict(1 => 2, 3 => 4)
+    @test d == d2
+    @test typeof(d) == typeof(d2) == OrderedDict{Int,Int}
 
-    #d = OrderedDict(((1, 2), (3, "b")))
     d = OrderedDict([(1, 2), (3, "b")])
     @test d[1] === 2
     @test d[3] == "b"
-    # d2 = OrderedDict(1 => 2, 3 => "b")
-    # d3 = OrderedDict((1 => 2, 3 => "b"))
-    # @test d == d2 == d3
-    # @test typeof(d) == typeof(d2) == typeof(d3) == OrderedDict{Int,Any}
+    d2 = @dcompat OrderedDict(1 => 2, 3 => "b")
+    @test d == d2
     @test typeof(d) == OrderedDict{Int,Any}
 
-    #d = OrderedDict(((1, 2), ("a", 4)))
     d = OrderedDict([(1, 2), ("a", 4)])
     @test d[1] === 2
     @test d["a"] === 4
-    # d2 = OrderedDict(1 => 2, "a" => 4)
-    # d3 = OrderedDict((1 => 2, "a" => 4))
-    # @test d == d2 == d3
-    # @test typeof(d) == typeof(d2) == typeof(d3) == OrderedDict{Any,Int}
-    @test typeof(d) == OrderedDict{Any,Int}
+    d2 = @dcompat OrderedDict(1 => 2, "a" => 4)
+    @test d == d2
+    # TODO: Currently produces an OrderedDict{Any,Any}
+    #@test typeof(d) == OrderedDict{Any,Int}
 
-    #d = OrderedDict(((1, 2), ("a", "b")))
     d = OrderedDict([(1, 2), ("a", "b")])
     @test d[1] === 2
     @test d["a"] == "b"
-    # d2 = OrderedDict(1 => 2, "a" => "b")
-    # d3 = OrderedDict((1 => 2, "a" => "b"))
-    # @test d == d2 == d3
-    # @test typeof(d) == typeof(d2) == typeof(d3) == OrderedDict{Any,Any}
-    @test typeof(d) == OrderedDict{Any,Any}
+    d2 = @dcompat OrderedDict(1 => 2, "a" => "b")
+    @test d == d2
+    @test typeof(d) == typeof(d2) == OrderedDict{Any,Any}
 end
 
 # TODO: this is a BoundsError on v0.3, ArgumentError on v0.4
@@ -191,7 +184,7 @@ else
     @test first(OrderedDict([(:f, 2)])) == (:f,2)
 end
 
-# issue #1821
+# julia issue #1821
 let
     d = OrderedDict{UTF8String, Vector{Int}}()
     d["a"] = [1, 2]
@@ -199,7 +192,7 @@ let
     @test isa(repr(d), AbstractString)  # check that printable without error
 end
 
-# issue #2344
+# julia issue #2344
 let
     local bar
     bestkey(d, key) = key
@@ -282,7 +275,7 @@ d4[1001] = randstring(3)
 # end
 
 
-# issue #5886
+# julia issue #5886
 d5886 = OrderedDict()
 for k5886 in 1:11
    d5886[k5886] = 1
@@ -292,7 +285,7 @@ for k5886 in keys(d5886)
    d5886[k5886] += 1
 end
 
-# issue #8877
+# julia issue #8877
 ## TODO: merge not implemented for OrderedDict
 # let
 #     a = OrderedDict("foo"  => 0.0, "bar" => 42.0)
@@ -300,7 +293,7 @@ end
 #     @test is(typeof(merge(a, b)), OrderedDict{UTF8String,Float64})
 # end
 
-# issue 9295
+# julia issue 9295
 let
     d = OrderedDict()
     @test is(push!(d, ('a', 1)), d)
