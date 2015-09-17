@@ -13,11 +13,11 @@ else
     const SerState =  Base.Serializer.SerializationState
 end
 
-typealias Unordered Nothing
+@compat typealias Unordered Void
 typealias Ordered   Int
 
 type HashDict{K,V,O<:Union(Ordered,Unordered)} <: Associative{K,V}
-    slots::Array{Uint8,1}
+    slots::Array{UInt8,1}
     keys::Array{K,1}
     vals::Array{V,1}
     idxs::Array{O,1}
@@ -28,7 +28,7 @@ type HashDict{K,V,O<:Union(Ordered,Unordered)} <: Associative{K,V}
 
     function HashDict()
         n = 16
-        new(zeros(Uint8,n), Array(K,n), Array(V,n), Array(O,n), Array(O,0), 0, 0, identity)
+        new(zeros(UInt8,n), Array(K,n), Array(V,n), Array(O,n), Array(O,0), 0, 0, identity)
     end
     if VERSION >= v"0.4.0-dev+980"
         HashDict(p::Pair) = setindex!(HashDict{K,V,O}(), p.second, p.first)
@@ -132,7 +132,7 @@ function rehash{K,V}(h::HashDict{K,V,Unordered}, newsz)
     oldv = h.vals
     sz = length(olds)
 
-    slots = zeros(Uint8,newsz)
+    slots = zeros(UInt8,newsz)
     keys = Array(K, newsz)
     vals = Array(V, newsz)
     count0 = h.count
@@ -190,7 +190,7 @@ function rehash{K,V}(h::HashDict{K,V,Ordered}, newsz)
     oldo = h.order
     sz = length(olds)
 
-    slots = zeros(Uint8,newsz)
+    slots = zeros(UInt8,newsz)
     keys = Array(K, newsz)
     vals = Array(V, newsz)
     idxs = Array(Int, newsz)
@@ -484,8 +484,8 @@ end
 
 function _delete!(h::HashDict, index)
     h.slots[index] = 0x2
-    ccall(:jl_arrayunset, Void, (Any, Uint), h.keys, index-1)
-    ccall(:jl_arrayunset, Void, (Any, Uint), h.vals, index-1)
+    ccall(:jl_arrayunset, Void, (Any, UInt), h.keys, index-1)
+    ccall(:jl_arrayunset, Void, (Any, UInt), h.vals, index-1)
     h.ndel += 1
     h.count -= 1
     return h
@@ -493,8 +493,8 @@ end
 
 function _delete!{K,V}(h::HashDict{K,V,Ordered}, index)
     h.slots[index] = 0x2
-    ccall(:jl_arrayunset, Void, (Any, Uint), h.keys, index-1)
-    ccall(:jl_arrayunset, Void, (Any, Uint), h.vals, index-1)
+    ccall(:jl_arrayunset, Void, (Any, UInt), h.keys, index-1)
+    ccall(:jl_arrayunset, Void, (Any, UInt), h.vals, index-1)
     h.order[h.idxs[index]] = 0
     h.ndel += 1
     h.count -= 1

@@ -5,11 +5,11 @@
 # TODO: Most of these functions should be removed once AbstractSet is introduced there
 # (see https://github.com/JuliaLang/julia/issues/5533)
 
-immutable OrderedSet{T}
-    dict::HashDict{T,Nothing,Ordered}
+@compat immutable OrderedSet{T}
+    dict::HashDict{T,Void,Ordered}
 
-    OrderedSet() = new(HashDict{T,Nothing,Ordered}())
-    OrderedSet(xs) = union!(new(HashDict{T,Nothing,Ordered}()), xs)
+    OrderedSet() = new(HashDict{T,Void,Ordered}())
+    OrderedSet(xs) = union!(new(HashDict{T,Void,Ordered}()), xs)
 end
 OrderedSet() = OrderedSet{Any}()
 OrderedSet(xs) = OrderedSet{eltype(xs)}(xs)

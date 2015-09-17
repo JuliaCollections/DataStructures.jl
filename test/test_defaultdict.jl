@@ -7,7 +7,7 @@ using Base.Test
 
 # construction
 @test_throws ErrorException DefaultDict()
-@test_throws ErrorException DefaultDict(String, Int)
+@test_throws ErrorException DefaultDict(AbstractString, Int)
 
 if VERSION >= v"0.4.0-dev+980"
     @test typeof(DefaultDict(0.0, 1 => 1.0)) == DefaultDict{Int,Float64,Float64}
@@ -70,7 +70,7 @@ s = similar(d)
 
 # construction
 @test_throws ErrorException DefaultOrderedDict()
-@test_throws ErrorException DefaultOrderedDict(String, Int)
+@test_throws ErrorException DefaultOrderedDict(AbstractString, Int)
 
 # empty dictionary
 d = DefaultOrderedDict(Char, Int, 1)

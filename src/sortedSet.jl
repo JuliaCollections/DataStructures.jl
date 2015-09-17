@@ -2,17 +2,15 @@
 ## methods similiar to those of the julia Set.
 
 
-type SortedSet{K, Ord <: Ordering}
-    bt::BalancedTree23{K,Nothing,Ord}
+@compat type SortedSet{K, Ord <: Ordering}
+    bt::BalancedTree23{K,Void,Ord}
 
-## Zero-argument constructor, or possibly one argument to specify order.
+    ## Zero-argument constructor, or possibly one argument to specify order.
 
     function SortedSet(o::Ord=Forward)
-        bt1 = BalancedTree23{K,Nothing,Ord}(o)
+        bt1 = BalancedTree23{K,Void,Ord}(o)
         new(bt1)
     end
-
-
 end
 
 
@@ -26,8 +24,8 @@ typealias SetSemiToken IntSemiToken
 
 ## This one takes an iterable; ordering type is optional.
 
-SortedSet{Ord <: Ordering}(iter, o::Ord=Forward) = 
-sortedset_with_eltype(iter, eltype(iter), o)
+SortedSet{Ord <: Ordering}(iter, o::Ord=Forward) =
+    sortedset_with_eltype(iter, eltype(iter), o)
 
 function sortedset_with_eltype{K,Ord}(iter, ::Type{K}, o::Ord)
     h = SortedSet{K,Ord}(o)
@@ -42,7 +40,7 @@ end
 ## This function looks up a key in the tree;
 ## if not found, then it returns a marker for the
 ## end of the tree.
-        
+
 @inline function find(m::SortedSet, k_)
     ll, exactfound = findkey(m.bt, convert(keytype(m),k_))
     IntSemiToken(exactfound? ll : 2)
