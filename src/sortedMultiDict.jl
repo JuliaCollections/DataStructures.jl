@@ -22,7 +22,7 @@ typealias SMDToken @compat Tuple{SortedMultiDict, IntSemiToken}
 ## to Forward
 
 function SortedMultiDict{K,D, Ord <: Ordering}(kk::AbstractArray{K,1},
-                                               dd::AbstractArray{D,1}, 
+                                               dd::AbstractArray{D,1},
                                                o::Ord=Forward)
     if length(kk) != length(dd)
         throw(ArgumentError("SortedMultiDict K and D constructor array arguments must be the same length"))
@@ -194,9 +194,9 @@ function isequal(m1::SortedMultiDict, m2::SortedMultiDict)
     end
 end
 
-typealias SDorAssociative Union(Associative, SortedMultiDict)
+@compat typealias SDorAssociative Union{Associative,SortedMultiDict}
 
-function mergetwo!{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}, 
+function mergetwo!{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord},
                                         m2::SDorAssociative)
     for (k,v) in m2
         insert!(m.bt, convert(K,k), convert(D,v), true)

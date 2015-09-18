@@ -3,8 +3,8 @@ import Base.isequal
 import Base.colon
 import Base.endof
 
-typealias SDMContainer Union(SortedDict, SortedMultiDict)
-typealias SAContainer Union(SDMContainer, SortedSet)
+@compat typealias SDMContainer Union{SortedDict, SortedMultiDict}
+@compat typealias SAContainer Union{SDMContainer, SortedSet}
 
 typealias Token @compat Tuple{SAContainer, IntSemiToken}
 typealias SDMToken @compat Tuple{SDMContainer, IntSemiToken}
@@ -38,7 +38,7 @@ typealias SetToken @compat Tuple{SortedSet, IntSemiToken}
 end
 
 ## Function advances takes a token and returns the
-## next token in the sorted order. 
+## next token in the sorted order.
 
 @inline function advance(ii::Token)
     not_pastend(ii)

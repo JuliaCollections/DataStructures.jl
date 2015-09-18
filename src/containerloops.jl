@@ -4,11 +4,11 @@ import Base.values
 ## These are the containers that can be looped over
 ## The prefix SDM is for SortedDict and SortedMultiDict
 ## The prefix SS is for SortedSet.  The prefix SA
-## is for all sorted containers.  
+## is for all sorted containers.
 ## The following two definitions now appear in tokens2.jl
 
-#typealias SDMContainer Union(SortedDict, SortedMultiDict)
-#typealias SAContainer Union(SDMContainer, SortedSet)
+#typealias SDMContainer Union{SortedDict, SortedMultiDict}
+#typealias SAContainer Union{SDMContainer, SortedSet}
 
 @inline extractcontainer(s::SAContainer) = s
 
@@ -17,7 +17,7 @@ import Base.values
 
 abstract AbstractExcludeLast{ContainerType <: SAContainer}
 
-immutable SDMExcludeLast{ContainerType <: SDMContainer} <: 
+immutable SDMExcludeLast{ContainerType <: SDMContainer} <:
                               AbstractExcludeLast{ContainerType}
     m::ContainerType
     first::Int
@@ -26,7 +26,7 @@ end
 
 
 
-immutable SSExcludeLast{ContainerType <: SortedSet} <: 
+immutable SSExcludeLast{ContainerType <: SortedSet} <:
                               AbstractExcludeLast{ContainerType}
     m::ContainerType
     first::Int
@@ -65,18 +65,18 @@ eltype(s::AbstractIncludeLast) = eltype(s.m)
 ## The basic iterations are either over the whole sorted container, an
 ## exclude-last object or include-last object.
 
-typealias SDMIterableTypesBase Union(SDMContainer,
+@compat typealias SDMIterableTypesBase Union{SDMContainer,
                                      SDMExcludeLast,
-                                     SDMIncludeLast)
+                                     SDMIncludeLast}
 
-typealias SSIterableTypesBase Union(SortedSet,
+@compat typealias SSIterableTypesBase Union{SortedSet,
                                     SSExcludeLast,
-                                    SSIncludeLast)
+                                    SSIncludeLast}
 
 
-typealias SAIterableTypesBase Union(SAContainer,
+@compat typealias SAIterableTypesBase Union{SAContainer,
                                     AbstractExcludeLast,
-                                    AbstractIncludeLast)
+                                    AbstractIncludeLast}
 
 
 ## The compound iterations are obtained by applying keys(..) or values(..)
@@ -111,7 +111,7 @@ immutable SSSemiTokenIteration{T <: SSIterableTypesBase}
     base::T
 end
 
-eltype(s::SSSemiTokenIteration) = @compat Tuple{IntSemiToken, 
+eltype(s::SSSemiTokenIteration) = @compat Tuple{IntSemiToken,
                                         eltype(extractcontainer(s.base))}
 
 
@@ -119,7 +119,7 @@ immutable SDMSemiTokenKeyIteration{T <: SDMIterableTypesBase}
     base::T
 end
 
-eltype(s::SDMSemiTokenKeyIteration) = @compat Tuple{IntSemiToken, 
+eltype(s::SDMSemiTokenKeyIteration) = @compat Tuple{IntSemiToken,
                                             keytype(extractcontainer(s.base))}
 
 
@@ -128,20 +128,20 @@ immutable SDMSemiTokenValIteration{T <: SDMIterableTypesBase}
     base::T
 end
 
-eltype(s::SDMSemiTokenValIteration) = @compat Tuple{IntSemiToken, 
+eltype(s::SDMSemiTokenValIteration) = @compat Tuple{IntSemiToken,
                                             datatype(extractcontainer(s.base))}
 
-typealias SACompoundIterable Union(SDMKeyIteration,
-                                   SDMValIteration, 
+@compat typealias SACompoundIterable Union{SDMKeyIteration,
+                                   SDMValIteration,
                                    SDMSemiTokenIteration,
                                    SSSemiTokenIteration,
-                                   SDMSemiTokenKeyIteration, 
-                                   SDMSemiTokenValIteration)
+                                   SDMSemiTokenKeyIteration,
+                                   SDMSemiTokenValIteration}
 
 @inline extractcontainer(s::SACompoundIterable) = extractcontainer(s.base)
 
-                                   
-typealias SAIterable Union(SAIterableTypesBase, SACompoundIterable)
+
+@compat typealias SAIterable Union{SAIterableTypesBase, SACompoundIterable}
 
 
 ## All the loops maintain a state which is an object of the
