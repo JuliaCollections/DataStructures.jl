@@ -16,7 +16,7 @@ end
 @compat typealias Unordered Void
 typealias Ordered   Int
 
-type HashDict{K,V,O<:Union(Ordered,Unordered)} <: Associative{K,V}
+@compat type HashDict{K,V,O<:Union{Ordered,Unordered}} <: Associative{K,V}
     slots::Array{UInt8,1}
     keys::Array{K,1}
     vals::Array{V,1}
