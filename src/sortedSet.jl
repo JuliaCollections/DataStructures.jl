@@ -93,6 +93,7 @@ end
 @inline eltype{K,Ord <: Ordering}(m::SortedSet{K,Ord}) = K
 @inline eltype{K,Ord <: Ordering}(::Type{SortedSet{K,Ord}}) = K
 @inline keytype{K,Ord <: Ordering}(m::SortedSet{K,Ord}) = K
+@inline keytype{K,Ord <: Ordering}(::Type{SortedSet{K,Ord}}) = K
 @inline orderobject(m::SortedSet) = m.bt.ord
 
 haskey(m::SortedSet, k_) = in(k_, m)

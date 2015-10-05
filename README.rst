@@ -387,10 +387,10 @@ only keys; it is an alternative to the built-in
 SortedSet is implemented as a SortedDict in which the value type
 is ``Void``.
 Finally, SortedMultiDict is similar to SortedDict except that each key
-can be associated with multiple values.  The (key,value) pairs in
+can be associated with multiple values.  The key=>value pairs in
 a SortedMultiDict are stored according to the sorted order for keys,
-and (key,value) pairs with the same
-key are stored in order of insertion.
+and key=>value pairs with the same
+key are stored in order of insertion. 
 
 The containers internally use a 2-3 tree, which is a
 kind of balanced tree and is described in many elementary data
@@ -484,7 +484,7 @@ Constructors for Sorted Containers
 
 ``SortedDict(d)``
   Argument ``d`` is an ordinary Julia dict (or any associative type)
-  used to initialize the container, e.g., for Julia 0.4::
+  used to initialize the container, e.g., for Julia 0.4/0.5::
 
      c = SortedDict(Dict("New York" => 1788, "Illinois" => 1818))
 
@@ -506,39 +506,39 @@ Constructors for Sorted Containers
   Arguments are key-value pairs for insertion into the 
   dictionary.  
   The keys must be of the same type as one another; the
-  values must also be of one type.  (Julia 0.4 only.)
+  values must also be of one type.  (Julia 0.4/0.5 only.)
 
 ``SortedDict(o, k1=>v1, k2=>v2, ...)``
   The first argument ``o`` is an ordering object.  The remaining
   arguments are key-value pairs for insertion into the 
   dictionary.  
   The keys must be of the same type as one another; the
-  values must also be of one type. (Julia 0.4 only.)
+  values must also be of one type. (Julia 0.4/0.5 only.)
 
 ``SortedDict(iter)``
-  Takes an arbitrary iterable object of (key,value) pairs.
+  Takes an arbitrary iterable object of key=>value pairs.
   The default Forward ordering is used.  In Julia 0.3,
   the ``iter`` argument must be an ``AbstractArray`` of
-  key-value pairs.
+  key-value two-entry tuples.
 
 ``SortedDict(iter,o)``
-  Takes an arbitrary iterable object of (key,value) pairs.
+  Takes an arbitrary iterable object of key=>value pairs.
   The ordering object ``o`` is explicitly given.  In Julia 0.3,
   the ``iter`` argument must be an ``AbstractArray`` of
-  key-value pairs.
+  key-value two-entry tuples.
 
 ``SortedDict{K,V,Ord}(o)``
   Construct an empty SortedDict in which type parameters
   are explicitly listed; ordering object is explicitly specified.
   (See below for discussion of ordering.)  An empty SortedDict
   may also be constructed using ``SortedDict(Dict{K,V}(),o)`` 
-  in Julia 0.4, where the ``o`` argument is optional, or 
+  in Julia 0.4/0.5, where the ``o`` argument is optional, or 
   ``SortedDict((K=>V)[],o)`` in Julia 0.3.
 
 ``SortedDict(ks,vs,o)``
   Here, ``ks`` is an array of keys, ``vs`` is an array of values
   of the same length, and ``o`` is the optional ordering argument.
-  This syntax is available in Julia 0.3 only.  In Julia 0.4,
+  This syntax is available in Julia 0.3 only.  In Julia 0.4/0.5,
   use ``SortedDict(zip(ks,vs),o).``
 
 ``SortedMultiDict(ks,vs,o)``
@@ -553,7 +553,7 @@ Constructors for Sorted Containers
   Arguments are key-value pairs for insertion into the 
   multidict.  
   The keys must be of the same type as one another; the
-  values must also be of one type.  Julia 0.4 only.
+  values must also be of one type.  Julia 0.4/0.5 only.
 
 
 ``SortedMultiDict(o, k1=>v1, k2=>v2, ...)``
@@ -561,19 +561,21 @@ Constructors for Sorted Containers
   arguments are key-value pairs for insertion into the 
   multidict.
   The keys must be of the same type as one another; the
-  values must also be of one type. Julia 0.4 only.
+  values must also be of one type. Julia 0.4/0.5 only.
 
 
 ``SortedMultiDict(iter)``
-  Takes an arbitrary iterable object of (key,value) pairs.
+  Takes an arbitrary iterable object of key=>value pairs.
   The default Forward ordering is used.  In Julia 0.3, 
-  the ``iter`` argument must be an ``AbstractArray.``
+  the ``iter`` argument must be an ``AbstractArray``
+  of (key,value) tuples.
 
 ``SortedMultiDict(iter,o)``
-  Takes an arbitrary iterable object of (key,value) pairs.
+  Takes an arbitrary iterable object of key=>value pairs.
   The ordering object ``o`` is explicitly given.
   In Julia 0.3, 
-  the ``iter`` argument must be an ``AbstractArray.``
+  the ``iter`` argument must be an ``AbstractArray``
+  of (key,value) tuples.
 
 
 ``SortedMultiDict{K,V,Ord}(o)``
@@ -632,14 +634,18 @@ Navigating the Containers
   is a token (i.e., ``sc`` is a container and ``st`` is a semitoken).
   Note the double-parentheses in the calling syntax: the argument of ``deref``
   is  a token, which is defined to be a 2-tuple.
-  This returns the (key, value) pair 
+  This returns the (key, value) 2-entry tuple in Julia 0.3 and a key=>value
+  pair in Julia 0.4/0.5
   pointed to by the token for SortedDict and SortedMultiDict.  
+  Note that in any one of Julia 0.3/0.4/0.5, the syntax
+  ``k,v=deref((sc,st))`` is valid because Julia automatically iterates
+  over the two entries of the Pair in order to assign ``k`` and ``v``.
   For SortedSet this returns a key.  Time: O(1)
 
 
 ``deref_key((sc,st))``
   Argument ``(sc,st)`` is a token for SortedMultiDict or SortedDict.  
-  This returns the key (i.e., the first half of a (key,value) pair) 
+  This returns the key (i.e., the first half of a key=>value pair) 
   pointed to by the token.  This functionality is available as plain ``deref``
   for SortedSet.
   Time: O(1)
@@ -647,7 +653,7 @@ Navigating the Containers
 
 ``deref_value((sc,st))``
   Argument ``(sc,st)`` is a token for SortedMultiDict or SortedDict.  
-  This returns the value (i.e., the second half of a (key,value) pair)
+  This returns the value (i.e., the second half of a key=>value pair)
   pointed to by the token.
   Time: O(1)
 
@@ -666,7 +672,8 @@ Navigating the Containers
 
 ``first(sc)``
   Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet  This function
-  returns the first item (a ``k,v`` pair for SortedDict and SortedMultiDict;
+  returns the first item (a ``k=>v`` pair for SortedDict and SortedMultiDict in 
+  Julia 0.4/0.5 or a ``(k,v)`` tuple in Julia 0.3;
   a key for SortedSet)
   according
   to the sorted order in the container.  Thus, ``first(sc)`` is
@@ -676,7 +683,8 @@ Navigating the Containers
 
 ``last(sc)``
   Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet.  This function
-  returns the last item (a ``k,v`` pair for SortedDict and SortedMultiDict; 
+  returns the last item (a ``k=>v`` pair for SortedDict and SortedMultiDict in
+  Julia 0.4/0.5 or a ``(k,v)`` tuple in Julia 0.3; 
   a key for SortedSet)
   according
   to the sorted order in the container.  Thus, ``last(sc)`` is
@@ -796,6 +804,19 @@ Inserting & Deleting in Sorted Containers
   value is ``sc``.
   Time: O(*c* log *n*)
 
+``push!(sc, k=>v)``
+  Argument ``sc`` is a SortedDict or SortedMultiDict and ``k=>v`` is a 
+  key-value pair.
+  This inserts the key-value pair into
+  the container.  If the key is already present in a
+  this overwrites
+  the old value. 
+  The return
+  value is ``sc``.  In Julia 0.3, the syntax for this call
+  is ``push!(sc, k, v)``.
+  Time: O(*c* log *n*)
+
+
 
 ``delete!((sc,st))``
   Argument ``(sc,st)`` is a token for a SortedDict, SortedMultiDict or SortedSet.
@@ -899,7 +920,16 @@ The following snippet loops over the entire container ``sc``, where
 
 In this loop, ``(k,v)`` takes on successive (key,value) pairs 
 according to 
-the sort order of the key.  
+the sort order of the key.  If one uses::
+
+  for p in sc
+     < body >
+  end
+
+where ``sc`` is a SortedDict or SortedMultiDict, then ``p`` is
+a ``k=>v`` pair in Julia 0.4/0.5 or a ``(k,v)`` tuple in Julia 0.3.
+
+
 For SortedSet one uses::
 
   for k in ss
@@ -936,7 +966,10 @@ In this case, all the data addressed by tokens from ``(sc,st1)`` up to but exclu
 In this setting, either or both can be the past-end token, and ``(sc,st2)`` can
 be the before-start token. For the sake
 of consistency, ``exclusive`` also supports the calling format
-``exclusive(sc,(st1,st2))``.
+``exclusive(sc,(st1,st2))``.  In the previous few snippets, if the loop
+object is ``p`` instead of ``(k,v)``, then ``p`` is a ``k=>v`` pair in Julia
+0.4/0.5 and a ``(k,v)`` tuple in Julia 0.3.
+
 
 
 Both the ``inclusive`` and ``exclusive`` functions return objects that can be 
@@ -990,6 +1023,28 @@ In the case of SortedSet, the following iteration may be used::
        < body >
    end
 
+If one wishes to retrieve only semitokens, the following may be used::
+
+   for st in onlysemitokens(sc)
+       < body >
+   end
+
+   
+
+In this case, ``sc`` is a SortedDict, SortedMultiDict, or SortedSet.
+To be compatible with standard containers, the package also offers
+``eachindex`` iteration (Julia 0.4/0.5 only)::
+
+
+   for ind in eachindex(sc)
+       < body >
+   end
+
+This iteration function ``eachindex`` is equivalent to ``keys`` in the case
+of SortedDict.  It is equivalent to ``onlysemitokens`` in the case of SortedMultiDict
+and SortedMultiSet.
+
+
 In place of ``sc`` in the above ``keys``, ``values`` and
 ``semitokens``, snippets,
 one could also use ``inclusive(sc,st1,st2)`` or ``exclusive(sc,st1,st2)``.
@@ -1019,7 +1074,8 @@ Other Functions
 ``in(p,sc)``
   Returns true if ``p`` is in ``sc``.  In the
   case that ``sc`` is a SortedDict or SortedMultiDict,
-  ``p`` is a (key,value) pair.  In the case that ``sc``
+  ``p`` is a (key,value) tuple in Julia 0.3 or a key=>value
+  pair in Julia 0.4/0.5.  In the case that ``sc``
   is a SortedSet, ``p`` should be a key.
   Time: O(*c* log *n*) for SortedDict and SortedSet.
   In the case of SortedMultiDict, the time is
@@ -1038,24 +1094,28 @@ Other Functions
   the algorithm used 
   is a linear-time search.  For example, the call::
      
-    (k,v) in exclusive(sd,st1,st2)
+    (k=>v) in exclusive(sd,st1,st2)
 
   where ``sd`` is a SortedDict, ``st1`` and ``st2`` are
   semitokens, ``k`` is a key, and ``v`` is a value, will
   loop over all entries in the dictionary between
   the two tokens and a compare for equality using ``isequal`` between the
-  indexed item and ``(k,v)``.  
+  indexed item and ``k=>v``.  (In Julia 0.3, the syntax would be
+  ``(k,v) in exclusive(sd, st1, st2)``.)
 
   The five exceptions are::
 
-       (k,v) in sd
-       (k,v) in smd
+       (k=>v) in sd
+       (k=>v) in smd
        k in ss
        k in keys(sd)
        k in keys(smd)
 
-  These five invocations of ``in`` (where ``sd`` is a SortedDict,
-  ``smd`` is a SortedMultiDict, and ``ss`` is a SortedSet)
+  Here, ``sd`` is a SortedDict,
+  ``smd`` is a SortedMultiDict, and ``ss`` is a SortedSet.
+  In the first two items, one uses ``(k,v)`` for Julia 0.3 rather than ``k=>v``.
+
+  These five invocations of ``in``
   use the index structure
   of the sorted container and test equality
   based on the order object of the keys rather than ``isequal``.
@@ -1067,19 +1127,39 @@ Other Functions
   slowing the execution from logarithmic to linear time), replace
   the above five constructs with these::
 
-       (k,v) in collect(sd)
-       (k,v) in collect(smd)
+       (k=>v) in collect(sd)
+       (k=>v) in collect(smd)
        k in collect(ss)
        k in collect(keys(sd))
        k in collect(keys(smd))
 
 
 ``eltype(sc)``
-  Returns the (key,value) type (a 2-entry tuple)
+  Returns the (key,value) type (a 2-entry pair, i.e., ``Pair{K,V}`` in
+  Julia 0.4/0.5; a 2-tuple type ``(K,V)`` in Julia 0.3)
   for SortedDict and SortedMultiDict.
   Returns the key type for SortedSet.  This function may
   also be applied to the type itself.
   Time: O(1)
+
+``keytype(sc)``
+  Returns the key type 
+  for SortedDict, SortedMultiDict and SortedSet.
+  This function may
+  also be applied to the type itself.  Julia 0.4/0.5 only.
+  Time: O(1)
+
+
+``valtype(sc)``
+  Returns the value type 
+  for SortedDict and SortedMultiDict.
+  This function may
+  also be applied to the type itself. Julia 0.4/0.5 only.
+  Time: O(1)
+
+
+
+
 
 ``similar(sc)``
   Returns a new SortedDict, SortedMultiDict, or SortedSet 

@@ -58,7 +58,7 @@ if VERSION >= v"0.4.0-dev"
     SortedDict{Ord <: Ordering}(kv, o::Ord=Forward) = 
     sorteddict_with_eltype(kv, eltype(kv), o)
 
-    function sorteddict_with_eltype{K,D,Ord}(kv, ::Type{Tuple{K,D}}, o::Ord)
+    function sorteddict_with_eltype{K,D,Ord}(kv, ::Type{Pair{K,D}}, o::Ord)
         h = SortedDict{K,D,Ord}(o)
         for (k,v) in kv
             h[k] = v
@@ -118,6 +118,26 @@ end
     m
 end
 
+## push! is an alternative to insert!; it returns the container.
+
+if VERSION >= v"0.4.0-dev"
+
+@inline function push!{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, pr::Pair{K,D})
+    insert!(m.bt, convert(K,pr[1]), convert(D,pr[2]), false)
+    m
+end
+
+else
+
+@inline function push!{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_, d_)
+    insert!(m.bt, convert(K,k_), convert(D,d_), false)
+    m
+end
+
+end
+
+
+
 
 ## This function looks up a key in the tree;
 ## if not found, then it returns a marker for the
@@ -143,6 +163,35 @@ end
 end
 
 
+if VERSION >= v"0.4.0-dev"
+
+@inline eltype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) =  Pair{K,D}
+@inline eltype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) =  Pair{K,D}
+@inline function in{K,D,Ord <: Ordering}(pr::Pair, m::SortedDict{K,D,Ord})
+    i, exactfound = findkey(m.bt,convert(K,pr[1]))
+    return exactfound && isequal(m.bt.data[i].d,convert(D,pr[2]))
+end
+
+@inline in(::Tuple{Any,Any}, ::SortedDict) =
+    throw(ArgumentError("'(k,v) in sorteddict' not supported in Julia 0.4 or 0.5.  See documentation"))
+
+
+else
+
+@inline function in{K,D,Ord <: Ordering}(pr::(Any,Any), m::SortedDict{K,D,Ord})
+    i, exactfound = findkey(m.bt,convert(K,pr[1]))
+    return exactfound && isequal(m.bt.data[i].d,convert(D,pr[2]))
+end
+
+@inline eltype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) =  (K,D)
+@inline eltype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) =  (K,D)
+
+end
+
+@inline keytype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = K
+@inline keytype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) = K
+@inline valtype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = D
+@inline valtype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) = D
 
 
 ## First and last return the first and last (key,data) pairs
@@ -153,26 +202,19 @@ end
 @inline function first(m::SortedDict)
     i = beginloc(m.bt)
     i == 2 && throw(BoundsError())
-    return m.bt.data[i].k, m.bt.data[i].d
+    return tuple_or_pair(m.bt.data[i].k, m.bt.data[i].d)
 end
 
 @inline function last(m::SortedDict)
     i = endloc(m.bt)
     i == 1 && throw(BoundsError())
-    return m.bt.data[i].k, m.bt.data[i].d
+    return tuple_or_pair(m.bt.data[i].k, m.bt.data[i].d)
 end
 
 
-@inline function in{K,D,Ord <: Ordering}(pr::(@compat Tuple{Any,Any}), m::SortedDict{K,D,Ord})
-    i, exactfound = findkey(m.bt,convert(K,pr[1]))
-    return exactfound && isequal(m.bt.data[i].d,convert(D,pr[2]))
-end
 
-@inline eltype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = @compat Tuple{K,D}
-@inline eltype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) = @compat Tuple{K,D}
+
 @inline orderobject(m::SortedDict) = m.bt.ord
-@inline keytype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = K
-@inline datatype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = D
 
 
 @inline function haskey(m::SortedDict, k_)

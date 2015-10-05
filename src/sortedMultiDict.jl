@@ -67,7 +67,7 @@ if VERSION >= v"0.4.0-dev"
     SortedMultiDict{Ord <: Ordering}(kv, o::Ord=Forward) = 
     sortedmultidict_with_eltype(kv, eltype(kv), o)
 
-    function sortedmultidict_with_eltype{K,D,Ord}(kv, ::Type{Tuple{K,D}}, o::Ord)
+    function sortedmultidict_with_eltype{K,D,Ord}(kv, ::Type{Pair{K,D}}, o::Ord)
         h = SortedMultiDict{K,D,Ord}(o)
         for (k,v) in kv
             insert!(h, k, v)
@@ -102,6 +102,27 @@ end
     IntSemiToken(i)
 end
 
+## push! is an alternative to insert!; it returns the container.
+
+if VERSION >= v"0.4.0-dev"
+
+@inline function push!{K, D, Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}, pr::Pair{K,D})
+    insert!(m.bt, convert(K,pr[1]), convert(D,pr[2]), true)
+    m
+end
+
+else
+
+@inline function push!{K, D, Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}, k_, d_)
+    insert!(m.bt, convert(K,k_), convert(D,d_), true)
+    m
+end
+
+end
+
+
+
+
 
 ## First and last return the first and last (key,data) pairs
 ## in the SortedMultiDict.  It is an error to invoke them on an
@@ -111,13 +132,13 @@ end
 @inline function first(m::SortedMultiDict)
     i = beginloc(m.bt)
     i == 2 && throw(BoundsError())
-    return m.bt.data[i].k, m.bt.data[i].d
+    return tuple_or_pair(m.bt.data[i].k, m.bt.data[i].d)
 end
 
 @inline function last(m::SortedMultiDict)
     i = endloc(m.bt)
     i == 1 && throw(BoundsError())
-    return m.bt.data[i].k, m.bt.data[i].d
+    return tuple_or_pair(m.bt.data[i].k, m.bt.data[i].d)
 end
 
 
@@ -134,29 +155,55 @@ function searchequalrange(m::SortedMultiDict, k_)
 end
 
 
-## (k,d) in m checks whether a key-data pair is in 
+
+## '(k,d) in m' checks whether a key-data pair is in 
 ## a sorted multidict.  This requires a loop over
 ## all data items whose key is equal to k. 
 
-function in(pr::(@compat Tuple{Any,Any}), m::SortedMultiDict)
-    k = convert(keytype(m), pr[1])
+
+function in_(k_, d_, m::SortedMultiDict)
+    k = convert(keytype(m), k_)
+    d = convert(valtype(m), d_)
     i1 = findkeyless(m.bt, k)
     i2,exactfound = findkey(m.bt,k)
     !exactfound && return false
     ord = m.bt.ord
     while true
         i1 = nextloc0(m.bt, i1)
-        i1 == i2 && return false
         @assert(eq(ord, m.bt.data[i1].k, k))
-        m.bt.data[i1].d == pr[2] && return true
+        m.bt.data[i1].d == d && return true
+        i1 == i2 && return false
     end
 end
+
+
  
 
-@inline eltype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) = @compat Tuple{K,D}
-@inline eltype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) = @compat Tuple{K,D}
+if VERSION >= v"0.4.0-dev"
+
+@inline eltype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) =  Pair{K,D}
+@inline eltype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) =  Pair{K,D}
+@inline in(pr::Pair, m::SortedMultiDict) =
+    in_(pr[1], pr[2], m)
+@inline in(::Tuple{Any,Any}, ::SortedMultiDict) = 
+    throw(ArgumentError("'(k,v) in sortedmultidict' not supported in Julia 0.4 or 0.5.  See documentation"))
+
+
+
+else
+
+
+@inline eltype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) =  (K,D)
+@inline eltype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) =  (K,D)
+@inline in{K,D,Ord <: Ordering}(pr::(Any,Any), m::SortedMultiDict{K,D,Ord}) =
+    in_(pr[1], pr[2], m)
+
+end
+
 @inline keytype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) = K
-@inline datatype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) = D
+@inline keytype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) = K
+@inline valtype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) = D
+@inline valtype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) = D
 @inline orderobject(m::SortedMultiDict) = m.bt.ord
 
 @inline function haskey(m::SortedMultiDict, k_)

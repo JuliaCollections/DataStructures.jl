@@ -76,6 +76,24 @@ function fulldump(t::DataStructures.BalancedTree23)
 end
 
 
+if VERSION >= v"0.4.0-dev"
+
+tuple_or_pair(K::DataType, V::DataType) = Pair{K,V}
+tuple_or_pair(k,v) = k=>v
+push_test!(m, k, v) = push!(m, k=>v)
+
+else
+
+tuple_or_pair(K::DataType, V::DataType) = (K,V)
+tuple_or_pair(k,v) = (k,v)
+push_test!(m, k, v) = push!(m, k, v)
+
+
+end
+
+
+
+
 ## Function checkcorrectness checks a balanced tree for correctness.
 
 function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree23{K,D,Ord},
@@ -286,6 +304,7 @@ function test1()
         checkcorrectness(m1.bt, false)
     end
     @test count == 4
+    nothing
 end
 
 function test2()
@@ -299,8 +318,15 @@ function test2()
     m3 = packcopy(m1)
     p = first(m1)
     @test p[1] == 6 && p[2] == 18.2
-    @test in((8,32.0),m3)
-    @test !in((8,32.1),m3)
+    @test in(tuple_or_pair(8,32.0),m3)
+    @test !in(tuple_or_pair(8,32.1),m3)
+    push_test!(m1, 12, 33.2)
+    checkcorrectness(m1.bt, false)
+    @test length(m1) == 3
+    @test m1[12] == 33.2
+    push_test!(m1, 12, 33.1)
+    @test length(m1) == 3
+    @test m1[12] == 33.1
     for j = 1 : 3
         @test ii != pastendsemitoken(m1)
         pr = deref((m1,ii))
@@ -379,7 +405,7 @@ function test2()
     checkcorrectness(m1.bt, false)
     @test ii == pastendsemitoken(m1)
     @test status((m1,ii)) == 3
-    @test status((m1,SDSemiToken(0))) == 0
+    @test status((m1,SDSemiToken(-1))) == 0
     t = 0
     u = 0.0
     for pr in m1
@@ -443,9 +469,21 @@ function test2()
     wwx = first(m1)
     @test wwx[1] == 2
     tpr = eltype(m1)
-    @test tpr == @compat Tuple{Int,Float64}
+    @test tpr == tuple_or_pair(Int,Float64)
     tpr2 = eltype(typeof(m1))
-    @test tpr2 == @compat Tuple{Int,Float64}
+    @test tpr2 == tuple_or_pair(Int,Float64)
+    if VERSION >= v"0.4.0-dev"
+        kt = keytype(m1)
+        @test kt == Int
+        kt2 = keytype(typeof(m1))
+        @test kt2 == Int
+        vt = valtype(m1)
+        @test vt == Float64
+        vt2 = valtype(typeof(m1))
+        @test vt2 == Float64
+    end
+    
+
     co = orderobject(m1)
     @test co == Forward
     @test haskey(m1, 71)
@@ -491,6 +529,7 @@ function test2()
     merge!(c3,c3)
     @test isequal(c3,c1)
     checkcorrectness(c3.bt, false)
+    nothing
 end
 
 
@@ -535,7 +574,7 @@ function test3{T}(z::T)
         end
     end
     @test eltype(semitokens(exclusive(m1, startof(m1), pastendsemitoken(m1)))) ==
-       @compat Tuple{IntSemiToken, T, T}
+    @compat Tuple{IntSemiToken, T, T}
     @test count == N^2
     N = 10000
     sk = zero1
@@ -569,14 +608,33 @@ function test3{T}(z::T)
         sk2 += k
     end
     @test eltype(keys(m1)) == T
-
     @test sk2 == sk
+    
+    sk2a = zero1
+
+    if VERSION >= v"0.4.0-dev"
+
+        for k in eachindex(m1)
+            sk2a += k
+        end
+        @test eltype(eachindex(m1)) == T
+        @test sk2a == sk
+
+    end
+
+
+    sk2b = zero1
+    for st in onlysemitokens(m1)
+        sk2b += deref_key((m1,st))
+    end
+    @test sk2b == sk
+    
     sv2 = zero1
     for v in values(m1)
         sv2 += v
     end
     @test eltype(values(m1)) == T
-
+    
     @test sv == sv2
     count = 0
     for (st,k) in semitokens(keys(m1))
@@ -584,7 +642,7 @@ function test3{T}(z::T)
         count += 1
     end
     @test eltype(semitokens(keys(m1))) == @compat Tuple{IntSemiToken, T}
-                 
+    
     @test count == N
     count = 0
     for (st,v) in semitokens(values(m1))
@@ -603,6 +661,17 @@ function test3{T}(z::T)
     @test eltype(keys(exclusive(m1, startof(m1), pos1))) == T
 
 
+    if VERSION >= v"0.4.0-dev"
+        sk2a = zero1
+        for k in eachindex(exclusive(m1, startof(m1), pos1))
+            sk2a += k
+        end
+        @test sk2a == skhalf
+        @test eltype(eachindex(exclusive(m1, startof(m1), pos1))) == T
+    end
+
+
+
     sv2 = zero1
     for v in values(exclusive(m1, startof(m1), pos1))
         sv2 += v
@@ -614,6 +683,8 @@ function test3{T}(z::T)
     end
     @test eltype(keys(exclusive(m1, startof(m1), pos1))) == T
     @test count == 0
+
+
     count = 0
     for (k,v) in inclusive(m1, startof(m1), beforestartsemitoken(m1))
         count += 1
@@ -621,6 +692,18 @@ function test3{T}(z::T)
     @test count == 0
     @test eltype(keys(inclusive(m1, startof(m1), beforestartsemitoken(m1)))) == 
        T
+
+
+    if VERSION >= v"0.4.0-dev"
+        count = 0
+        sk5 = zero1
+        for k in eachindex(inclusive(m1, startof(m1), startof(m1)))
+            sk5 += k
+            count += 1
+        end
+        @test count == 1 && sk5 == deref_key((m1,startof(m1)))
+        @test eltype(eachindex(inclusive(m1, startof(m1), startof(m1)))) == T
+    end
 
     factors = SortedMultiDict(Int[], Int[])
     N = 1000
@@ -645,6 +728,31 @@ function test3{T}(z::T)
     end
     @test sum1a == sum1 && sum2a == sum2
 
+
+
+
+
+    if VERSION >= v"0.4.0-dev"
+        sum1a = 0
+        sum2a = 0
+        for st in eachindex(factors)
+            (k,v) = deref((factors,st))
+            sum1a += k
+            sum2a += v
+        end
+        @test sum1a == sum1 && sum2a == sum2
+    end
+
+    sum1a = 0
+    sum2a = 0
+    for st in onlysemitokens(factors)
+        (k,v) = deref((factors,st))
+        sum1a += k
+        sum2a += v
+    end
+    @test sum1a == sum1 && sum2a == sum2
+    @test eltype(onlysemitokens(factors)) == IntSemiToken
+
     sum2 = 0
     for (k,v) in inclusive(factors, 
                            searchsortedfirst(factors,70),
@@ -655,7 +763,25 @@ function test3{T}(z::T)
     @test sum2 == 1 + 2 + 5 + 7 + 10 + 14 + 35 + 70
     @test eltype(inclusive(factors, 
                            searchsortedfirst(factors,70),
-                           searchsortedlast(factors,70))) == @compat Tuple{Int,Int}
+                           searchsortedlast(factors,70))) == tuple_or_pair(Int,Int)
+
+    if VERSION >= v"0.4.0-dev"
+
+        sum2 = 0
+        for st in eachindex(inclusive(factors, 
+                                      searchsortedfirst(factors,70),
+                                      searchsortedlast(factors,70)))
+            v = deref_value((factors,st))
+            sum2 += v
+        end
+
+        @test sum2 == 1 + 2 + 5 + 7 + 10 + 14 + 35 + 70
+        @test eltype(eachindex(inclusive(factors, 
+                                         searchsortedfirst(factors,70),
+                                         searchsortedlast(factors,70)))) == IntSemiToken
+    end
+
+
     
     sum3 = 0
     for (k,v) in exclusive(factors,
@@ -666,7 +792,23 @@ function test3{T}(z::T)
     @test sum3 == 1 + 2 + 3 + 4 + 5 + 6 + 10 + 12 + 15 + 20 + 30 + 60
     @test eltype(exclusive(factors, 
                            searchsortedfirst(factors,70),
-                           searchsortedlast(factors,70))) == @compat Tuple{Int,Int}
+                           searchsortedlast(factors,70))) == tuple_or_pair(Int,Int)
+
+
+    if VERSION >= v"0.4.0-dev"
+        sum3 = 0
+        for st in eachindex(exclusive(factors,
+                                      searchsortedfirst(factors,60), 
+                                      searchsortedfirst(factors,61)))
+            v = deref_value((factors,st))
+            sum3 += v
+        end
+        @test sum3 == 1 + 2 + 3 + 4 + 5 + 6 + 10 + 12 + 15 + 20 + 30 + 60
+        @test eltype(eachindex(exclusive(factors, 
+                                         searchsortedfirst(factors,70),
+                                         searchsortedlast(factors,70)))) == IntSemiToken
+    end
+
 
     sum4 = 0
     for k in keys(factors)
@@ -674,6 +816,9 @@ function test3{T}(z::T)
     end
     @test sum4 == sum1
     @test eltype(keys(factors)) == Int
+
+
+
 
     sum5 = 0
     for v in values(factors)
@@ -834,8 +979,6 @@ function test3{T}(z::T)
                                               searchsortedfirst(factors,61))))) ==
        @compat Tuple{IntSemiToken, Int}
     
-    
-
     s = SortedSet([39, 24, 2, 14, 45, 107, 66])
     sum1 = 0
     for k in s
@@ -851,6 +994,27 @@ function test3{T}(z::T)
     @test sum1 == sum([39, 24, 2, 14, 45, 107, 66])
     @test eltype(semitokens(s)) == @compat Tuple{IntSemiToken, Int}
 
+
+    sum1 = 0
+    for st in onlysemitokens(s)
+        k = deref((s,st))
+        sum1 += k
+    end
+    @test sum1 == sum([39, 24, 2, 14, 45, 107, 66])
+    @test eltype(onlysemitokens(s)) == IntSemiToken
+
+    if VERSION >= v"0.4.0-dev"
+
+        sum1 = 0
+        for st in eachindex(s)
+            k = deref((s,st))
+            sum1 += k
+        end
+        @test sum1 == sum([39, 24, 2, 14, 45, 107, 66])
+        @test eltype(eachindex(s)) == IntSemiToken
+    end
+
+
     sum2 = 0
     for k in inclusive(s,
                        searchsortedfirst(s, 24), 
@@ -861,6 +1025,20 @@ function test3{T}(z::T)
     @test eltype(inclusive(s,
                        searchsortedfirst(s, 24), 
                        searchsortedfirst(s, 66))) == Int
+
+
+    if VERSION >= v"0.4.0-dev"
+        sum2 = 0
+        for st in eachindex(inclusive(s,
+                                      searchsortedfirst(s, 24), 
+                                      searchsortedfirst(s, 66)))
+            sum2 += deref((s,st))
+        end
+        @test sum2 == 24 + 39 + 45 + 66
+        @test eltype(eachindex(inclusive(s,
+                                         searchsortedfirst(s, 24), 
+                                         searchsortedfirst(s, 66)))) == IntSemiToken
+    end
 
 
 
@@ -878,6 +1056,21 @@ function test3{T}(z::T)
                                        searchsortedfirst(s, 66)))) ==
       @compat Tuple{IntSemiToken, Int}
 
+
+    sum2 = 0
+    for st in onlysemitokens(inclusive(s,
+                                       searchsortedfirst(s, 24),
+                                       searchsortedfirst(s, 66)))
+        sum2 += deref((s,st))
+    end
+    @test sum2 == 24 + 39 + 45 + 66
+    @test eltype(onlysemitokens(inclusive(s,
+                                          searchsortedfirst(s, 24),
+                                          searchsortedfirst(s, 66)))) == IntSemiToken
+
+
+
+
     sum3 = 0
     for k in exclusive(s,
                        searchsortedfirst(s, 24), 
@@ -889,8 +1082,8 @@ function test3{T}(z::T)
                        searchsortedfirst(s, 24), 
                        searchsortedfirst(s, 66))) == Int
         
-    sum3 = 0
 
+    sum3 = 0
     for (st,k) in semitokens(exclusive(s,
                                        searchsortedfirst(s, 24), 
                                        searchsortedfirst(s, 66)))
@@ -902,18 +1095,28 @@ function test3{T}(z::T)
                                        searchsortedfirst(s, 24), 
                                        searchsortedfirst(s, 66)))) ==
      @compat Tuple{IntSemiToken, Int}
+
+    if VERSION >= v"0.4.0-dev"
+
+        sum3 = 0
+        for st in eachindex(exclusive(s,
+                                      searchsortedfirst(s, 24), 
+                                      searchsortedfirst(s, 66)))
+            sum3 += deref((s,st))
+        end
+        @test sum3 == 24 + 39 + 45
+        @test eltype(eachindex(exclusive(s,
+                                         searchsortedfirst(s, 24), 
+                                         searchsortedfirst(s, 66)))) == IntSemiToken
+    end
+    nothing
 end
 
 
 
 
-
-
-
-
-
 function test4()
-    # test all the errors of SortedDict
+    # test all the errors of sorted containers
     m = SortedDict(@compat Dict("a" => 6, "bb" => 9))
     @test_throws KeyError println(m["b"])
     m2 = SortedDict(@compat Dict{ASCIIString, Int}())
@@ -949,6 +1152,11 @@ function test4()
     @test_throws BoundsError last(s)
     @test_throws ArgumentError isequal(SortedSet(["a"]), SortedSet([1]))
     @test_throws ArgumentError isequal(SortedSet(["a"]), SortedSet(["b"],Reverse))
+    if VERSION >= v"0.4.0-dev"
+        @test_throws ArgumentError (("a",6) in m)
+        @test_throws ArgumentError ((2,5) in m1)
+    end
+    nothing
 end
 
 
@@ -1012,7 +1220,7 @@ function test5()
     end
     @test count == 5
     m3empty = similar(m3)
-    @test (eltype(m3empty) == @compat Tuple{ASCIIString, Int}) &&
+    @test eltype(m3empty) == tuple_or_pair(ASCIIString, Int) &&
        orderobject(m3empty) == CaseInsensitive() &&
        length(m3empty) == 0
     m4 = SortedDict((@compat Dict{ASCIIString,Int}()), Lt((x,y) -> isless(lowercase(x),lowercase(y))))
@@ -1027,6 +1235,7 @@ function test5()
                 p[2] == vallist[expectedord3[count]]
     end
     @test count == 5
+    nothing
 end
     
 
@@ -1166,12 +1375,35 @@ function test7()
         end
     end
     @test length(factors) == len
-    @test (70,2) in factors
-    @test (70,14) in factors
-    @test !((70,15) in factors)
-    @test !((N+1,15) in factors)
-    @test eltype(factors) == @compat Tuple{Int,Int}
-    @test eltype(typeof(factors)) == @compat Tuple{Int,Int}
+    @test tuple_or_pair(70,2) in factors
+    @test tuple_or_pair(70,14) in factors
+    @test !(tuple_or_pair(70,15) in factors)
+    @test !(tuple_or_pair(N+1,15) in factors)
+    @test eltype(factors) == tuple_or_pair(Int,Int)
+    @test eltype(typeof(factors)) == tuple_or_pair(Int,Int)
+
+    if VERSION >= v"0.4.0-dev"
+        @test keytype(factors) == Int
+        @test keytype(typeof(factors)) == Int
+        @test valtype(factors) == Int
+        @test valtype(typeof(factors)) == Int
+    end
+
+    push_test!(factors, 70,3)
+    @test length(factors) == len+1
+    @test tuple_or_pair(70,3) in factors
+    i = searchsortedfirst(factors, 70)
+    dcount = 0
+    for (s,k,v) in semitokens(inclusive(factors, i, endof(factors)))
+        @test k == 70
+        if v == 3
+            delete!((factors,s))
+            dcount += 1
+            break
+        end
+    end
+    @test dcount == 1
+
     @test orderobject(factors) == Forward
     @test haskey(factors, 60)
     @test !haskey(factors, -1)
@@ -1180,26 +1412,26 @@ function test7()
     checkcorrectness(factors.bt, true)
     i = startof(factors)
     i = advance((factors,i))
-    @test deref((factors,i)) == (2,1)
+    @test deref((factors,i)) == tuple_or_pair(2,1)
     @test deref_key((factors,i)) == 2
     @test deref_value((factors,i)) == 1
     @test factors[i] == 1
     factors[i] = 7
-    @test deref((factors,i)) == (2,7)
+    @test deref((factors,i)) == tuple_or_pair(2,7)
     factors[i] = 1
     i = regress((factors,i))
     i = regress((factors,i))
     @test i == beforestartsemitoken(factors)
     pr = first(factors)
-    @test pr == (1,1)
+    @test pr == tuple_or_pair(1,1)
     pr2 = last(factors)
-    @test pr2 == (N,N)
+    @test pr2 == tuple_or_pair(N,N)
     i = searchsortedfirst(factors,77)
-    @test deref((factors,i)) == (77,1)
+    @test deref((factors,i)) == tuple_or_pair(77,1)
     i = searchsortedlast(factors,77)
-    @test deref((factors,i)) == (77,77)
+    @test deref((factors,i)) == tuple_or_pair(77,77)
     i = searchsortedafter(factors,77)
-    @test deref((factors,i)) == (78,1)
+    @test deref((factors,i)) == tuple_or_pair(78,1)
     expected = [1,2,4,5,8,10,16,20,40,80]
     i1,i2 = searchequalrange(factors, 80)
     i = i1
@@ -1279,7 +1511,7 @@ function test7()
                           "oranges", "plums"],
                          [2.0, 6.0, 1.0, 9.0, 3.0, 4.0, 7.0, 8.0, 5.0, 10.0])
     m3empty = similar(m3)
-    @test (eltype(m3empty) == @compat Tuple{ASCIIString, Float64}) &&
+    @test (eltype(m3empty) == tuple_or_pair(ASCIIString, Float64)) &&
         orderobject(m3empty) == Forward &&
         length(m3empty) == 0
     m4 = merge(m1, m2)
@@ -1313,9 +1545,7 @@ function test7()
         end
         @test count == 2
     end
-
-
-
+    nothing
 end
     
 
@@ -1405,6 +1635,10 @@ function test8()
     @test !haskey(m,0.5)
     @test eltype(m) == Float64
     @test eltype(typeof(m)) == Float64
+    if VERSION >= v"0.4.0-dev"
+        @test keytype(m) == Float64
+        @test keytype(typeof(m)) == Float64
+    end
     @test orderobject(m) == Forward
     pop!(m, smallest)
     checkcorrectness(m.bt, false)
@@ -1465,6 +1699,7 @@ function test8()
     @test !issubset(["blue", "green"], m8)
     setdiff!(m8, SortedSet(["yellow", "red", "white"]))
     @test isequal(m8, SortedSet(["blue", "orange"]))
+    nothing
 end    
                
 
@@ -1474,29 +1709,30 @@ if VERSION >= v"0.4.0-dev"
     function test9()
 
         sd1 = SortedDict("w" => 64, "p" => 12)
-        @test length(sd1) == 2 && first(sd1) == ("p",12) &&
-            last(sd1) == ("w",64)
+        @test length(sd1) == 2 && first(sd1) == ("p"=>12) &&
+            last(sd1) == ("w"=>64)
         sd2 = SortedDict(Reverse, "w" => 64, "p" => 12)
-        @test length(sd2) == 2 && last(sd2) == ("p",12) &&
-            first(sd2) == ("w",64)
-        sd3 = SortedDict((("w",64), ("p",12)))
-        @test length(sd3) == 2 && first(sd3) == ("p",12) &&
-            last(sd3) == ("w",64)
-        sd4 = SortedDict((("w", 64), ("p",12)), Reverse)
-        @test length(sd4) == 2 && last(sd4) == ("p",12) &&
-            first(sd4) == ("w",64)
+        @test length(sd2) == 2 && last(sd2) == ("p"=>12) &&
+            first(sd2) == ("w"=>64)
+        sd3 = SortedDict(("w"=>64, "p"=>12))
+        @test length(sd3) == 2 && first(sd3) == ("p"=>12) &&
+            last(sd3) == ("w"=>64)
+        sd4 = SortedDict(("w"=>64, "p"=>12), Reverse)
+        @test length(sd4) == 2 && last(sd4) == ("p"=>12) &&
+            first(sd4) == ("w"=>64)
         sm1 = SortedMultiDict("w" => 64, "p" => 12, "p" => 9)
-        @test length(sm1) == 3 && first(sm1) == ("p",12) &&
-            last(sm1) == ("w",64)
+        @test length(sm1) == 3 && first(sm1) == ("p"=>12) &&
+            last(sm1) == ("w"=>64)
         sm2 = SortedMultiDict(Reverse, "w" => 64, "p" => 12, "p" => 9)
-        @test length(sm2) == 3 && last(sm2) == ("p",9) &&
-            first(sm2) == ("w",64)
-        sm3 = SortedMultiDict((("w",64), ("p",12), ("p", 9)))
-        @test length(sm3) == 3 && first(sm3) == ("p",12) &&
-            last(sm3) == ("w",64)
-        sm4 = SortedMultiDict((("w", 64), ("p",12), ("p", 9)), Reverse)
-        @test length(sm4) == 3 && last(sm4) == ("p",9) &&
-            first(sm4) == ("w",64)
+        @test length(sm2) == 3 && last(sm2) == ("p"=>9) &&
+            first(sm2) == ("w"=>64)
+        sm3 = SortedMultiDict(("w"=>64, "p"=>12, "p"=> 9))
+        @test length(sm3) == 3 && first(sm3) == ("p"=>12) &&
+            last(sm3) == ("w"=>64)
+        sm4 = SortedMultiDict(("w"=> 64, "p"=>12, "p"=>9), Reverse)
+        @test length(sm4) == 3 && last(sm4) == ("p"=>9) &&
+            first(sm4) == ("w"=>64)
+        nothing
     end
 else
     function test9()
@@ -1518,14 +1754,12 @@ else
         sm4 = SortedMultiDict([("w", 64), ("p",12), ("p", 9)], Reverse)
         @test length(sm4) == 3 && last(sm4) == ("p",9) &&
             first(sm4) == ("w",64)
+        nothing
     end
 end
 
 
 
-
-        
-    
 test1()
 test2()
 test3(0x00000000)
