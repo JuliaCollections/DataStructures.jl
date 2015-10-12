@@ -16,6 +16,9 @@ nil() = nil(Any)
 head(x::Cons) = x.head
 tail(x::Cons) = x.tail
 
+Base.(:(==))(x::Nil, y::Nil) = true
+Base.(:(==))(x::Cons, y::Cons) = (x.head == y.head) && (x.tail == y.tail)
+
 function show{T}(io::IO, l::LinkedList{T})
     if isa(l,Nil)
         if is(T,Any)
