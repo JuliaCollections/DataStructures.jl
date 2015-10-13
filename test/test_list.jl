@@ -3,10 +3,14 @@ using Base.Test
 
 l0 = nil(Char)
 @test length(l0) == 0
+@test l0 == nil(Char)
+@test l0 == nil()
 @test sprint(show,l0) == "nil(Char)"
 
 l1 = nil()
 @test length(l1) == 0
+@test l1 == nil()
+@test l1 == nil(Int)
 @test sprint(show,l1) == "nil()"
 @test typeof(list()) == typeof(l1)
 @test copy(l1) == l1
@@ -15,6 +19,8 @@ l1 = nil()
 l2 = cons(1, l1)
 @test length(l2) == 1
 @test head(l2) == 1
+@test l2 == cons(1, l1)
+@test l2 == list(1)
 @test sprint(show,l2) == "list(1)"
 @test cat(l2) == l2
 
@@ -23,12 +29,14 @@ l3 = list(2, 3)
 @test length(l3) == 2
 @test head(l3) == 2
 @test head(tail(l3)) == 3
+@test l3 == list(2,3)
 @test collect(l3) == [2; 3]
 @test collect(copy(l3)) == [2; 3]
 @test sprint(show,l3) == "list(2, 3)"
 
 l4 = cat(l1, l2, l3)
 @test length(l4) == 3
+@test l4 == list(1, 2, 3)
 @test collect(l4) == [1; 2; 3]
 @test collect(copy(l4)) == [1; 2; 3]
 @test sprint(show,l4) == "list(1, 2, 3)"
