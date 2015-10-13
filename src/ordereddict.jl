@@ -3,7 +3,7 @@
 import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
              setindex!, getindex, length, isempty, start,
              next, done, keys, values, setdiff, setdiff!,
-             union, union!, intersect, isequal, filter, filter!,
+             union, union!, intersect, filter, filter!,
              hash, eltype
 
 # This is just a simple wrapper around a HashDict, which is a modified
