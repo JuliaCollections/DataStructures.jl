@@ -3,7 +3,7 @@
 import Base: haskey, get, get!, getkey, delete!, pop!, empty!,
              insert!, getindex, length, isempty, start,
              next, done, keys, values, copy, similar,  push!,
-             count, size, eltype, ==
+             count, size, eltype
 
 immutable MultiDict{K,V}
     d::Dict{K,Vector{V}}
