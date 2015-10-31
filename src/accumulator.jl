@@ -34,6 +34,8 @@ keys(ct::Accumulator) = keys(ct.map)
 
 values(ct::Accumulator) = values(ct.map)
 
+sum(ct::Accumulator) = sum(values(ct.map))
+
 ## iteration
 
 start(ct::Accumulator) = start(ct.map)

@@ -11,7 +11,7 @@ module DataStructures
                  union!, delete!, similar, sizehint,
                  isequal, hash,
                  map, reverse,
-                 first, last, eltype, getkey, values,
+                 first, last, eltype, getkey, values, sum,
                  merge, merge!, lt, Ordering, ForwardOrdering, Forward,
                  ReverseOrdering, Reverse, Lt,
                  isless,
