@@ -32,6 +32,7 @@ haskey{T,V}(ct::Accumulator{T,V}, x::T) = haskey(ct.map, x)
 
 keys(ct::Accumulator) = keys(ct.map)
 
+values(ct::Accumulator) = values(ct.map)
 
 ## iteration
 
