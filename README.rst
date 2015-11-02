@@ -213,7 +213,6 @@ particular order.  For ``OrderedDicts`` (and ``OrderedSets``), order
 refers to *insertion order*, which allows deterministic iteration over
 the dictionary or set::
 
-  ```julia
   d = OrderedDict(Char,Int)
   for c in 'a':'e'
       d[c] = c-'a'+1
@@ -224,8 +223,8 @@ the dictionary or set::
   collect(s) # => [π = 3.1415926535897...,
              #     e = 2.7182818284590...,
              #     γ = 0.5772156649015...,
-  		   #     catalan = 0.9159655941772...,
-  		   #	 φ = 1.6180339887498...]
+             #     catalan = 0.9159655941772...,
+             #     φ = 1.6180339887498...]
 
 All standard ``Associative`` and ``Dict`` functions are available for
 ``OrderedDicts``, and all ``Set`` operations are available for
