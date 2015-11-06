@@ -314,3 +314,18 @@ let
     @test d['f'] == 6
     @test length(d) == 6
 end
+
+# Test serialization
+let
+    s = IOBuffer()
+    od = OrderedDict{Char,Int64}()
+    for c in 'a':'e'
+        od[c] = c-'a'+1
+    end
+    serialize(s, od)
+    seek(s, 0)
+    dd = deserialize(s)
+    @test typeof(dd) === DataStructures.OrderedDict{Char,Int64}
+    @test dd == od
+    close(s)
+end
