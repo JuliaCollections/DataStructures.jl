@@ -18,7 +18,8 @@ push!(ct, "b", 2)
 @test haskey(ct, "b")
 @test ct["b"] == 2
 
-push!(ct, "b", 3)
+# Test convert
+push!(ct, "b", 0x3)
 @test ct["b"] == 5
 
 @test !haskey(ct, "abc")
@@ -27,6 +28,7 @@ push!(ct, "b", 3)
 @test length(ct) == 2
 @test length(collect(ct)) == 2
 @test length(collect(keys(ct))) == 2
+@test length(collect(values(ct))) == 2
 
 ct2 = counter(["a", "a", "b", "b", "a", "c", "c"])
 @test isa(ct2, Accumulator{ASCIIString,Int})
