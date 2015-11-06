@@ -5,6 +5,8 @@ import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
              next, done, keys, values, setdiff, setdiff!,
              union, union!, intersect, filter, filter!,
              hash, eltype
+            
+import Compat: keytype, valtype
 
 # This is just a simple wrapper around a HashDict, which is a modified
 # implementation of the Dict implementation in Base allowing ordering
@@ -67,6 +69,15 @@ end
 push!(d::OrderedDict, kv) = (push!(d.d, kv); d)
 push!(d::OrderedDict, kv, kv2...) = (push!(d.d, kv, kv2...); d)
 
+function merge(d::OrderedDict, others::Associative...)
+    K, V = keytype(d), valtype(d)
+    for other in others
+        (Ko, Vo) = keytype(other), valtype(other)
+        K = promote_type(K, Ko)
+        V = promote_type(V, Vo)
+    end
+    merge!(OrderedDict{K,V}(), d, others...)
+end
 
 similar{K,V}(d::OrderedDict{K,V}) = OrderedDict{K,V}()
 in{T<:OrderedDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)

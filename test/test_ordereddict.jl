@@ -292,13 +292,12 @@ for k5886 in keys(d5886)
    d5886[k5886] += 1
 end
 
-# issue #8877
-## TODO: merge not implemented for OrderedDict
-# let
-#     a = OrderedDict("foo"  => 0.0, "bar" => 42.0)
-#     b = OrderedDict("フー" => 17, "バー" => 4711)
-#     @test is(typeof(merge(a, b)), OrderedDict{UTF8String,Float64})
-# end
+# Test merging
+let
+    a = @compat OrderedDict("foo"  => 0.0, "bar" => 42.0)
+    b = @compat OrderedDict("フー" => 17, "バー" => 4711)
+    @test is(typeof(merge(a, b)), OrderedDict{UTF8String,Float64})
+end
 
 # issue 9295
 let

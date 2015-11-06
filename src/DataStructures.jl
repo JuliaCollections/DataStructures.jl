@@ -12,7 +12,7 @@ module DataStructures
                  isequal, hash,
                  map, reverse,
                  first, last, eltype, getkey, values,
-                 merge!, lt, Ordering, ForwardOrdering, Forward,
+                 merge, merge!, lt, Ordering, ForwardOrdering, Forward,
                  ReverseOrdering, Reverse, Lt,
                  isless,
                  union, intersect, symdiff, setdiff, issubset,
