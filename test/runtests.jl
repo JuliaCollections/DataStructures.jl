@@ -11,7 +11,8 @@ tests = ["deque",
          "orderedset",
          "trie",
          "list",
-         "multidict"]
+         "multidict",
+         "circularbuffer"]
 
 for t in tests
     fp = joinpath(dirname(@__FILE__), "test_$t.jl")
