@@ -259,21 +259,12 @@ end
 
 
 
-if VERSION >= v"0.4.0-dev"
 
 @inline function next(u::SDMIterableTypesBase, state::SAIterationState)
     dt, t, ni = nexthelper(u, state)
     (dt.k => dt.d), ni
 end
 
-else 
-
-@inline function next(u::SDMIterableTypesBase, state::SAIterationState)
-    dt, t, ni = nexthelper(u, state)
-    (dt.k, dt.d), ni
-end
-
-end
 
 @inline function next(u::SSIterableTypesBase, state::SAIterationState)
     dt, t, ni = nexthelper(u, state)
@@ -326,14 +317,6 @@ eachindex{K,D,Ord <: Ordering}(sd::SDMIncludeLast{SortedDict{K,D,Ord}}) = keys(s
 eachindex{K,D,Ord <: Ordering}(smd::SDMIncludeLast{SortedMultiDict{K,D,Ord}}) = 
      onlysemitokens(smd)
 eachindex(ss::SSIncludeLast) = onlysemitokens(ss)
-
-
-
-
-
-
-
-
 
 
 empty!(m::SAContainer) =  empty!(m.bt)
