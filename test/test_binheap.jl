@@ -5,13 +5,30 @@ using Base.Test
 
 # test make heap
 
+function isheap{T}(xs::Array{T}, comp::Function)
+    last_parent = div(length(xs), 2)
+    has_all_right_children = length(xs) % 2 == 1
+
+    for i = 1 : last_parent
+        if !comp(xs[i], xs[i*2])
+            return false
+        end
+        # the right child could be missing for the last node
+        if has_all_right_children && !comp(xs[i], xs[i*2+1])
+            return false
+        end
+    end
+
+    return true
+end
+
 vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
 h = binary_minheap(vs)
 
 @test length(h) == 10
 @test !isempty(h)
 @test top(h) == 1
-@test isequal(h.valtree, [1, 2, 3, 4, 7, 9, 10, 14, 8, 16])
+@test isheap(h.valtree, <=)
 
 
 h = binary_maxheap(vs)
@@ -19,7 +36,7 @@ h = binary_maxheap(vs)
 @test length(h) == 10
 @test !isempty(h)
 @test top(h) == 16
-@test isequal(h.valtree, [16, 14, 10, 8, 7, 3, 9, 1, 4, 2])
+@test isheap(h.valtree, >=)
 
 # test push!
 

@@ -89,8 +89,9 @@ end
 function _make_binary_heap{Comp,T}(comp::Comp, ty::Type{T}, xs)
     n = length(xs)
     valtree = copy(xs)
-    for i = 2 : n
-        _heap_bubble_up!(comp, valtree, i)
+
+    for i = n >> 1 : -1 : 1
+        _heap_bubble_down!(comp, valtree, i)
     end
     valtree
 end
