@@ -71,7 +71,7 @@ end
 
 typealias SDSemiToken IntSemiToken
 
-typealias SDToken @compat Tuple{SortedDict,IntSemiToken}
+typealias SDToken Tuple{SortedDict,IntSemiToken}
 
 
 

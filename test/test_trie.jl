@@ -23,7 +23,7 @@ kvs = collect(zip(ks, vs))
 @test typeof(Trie(ks, vs)) == Trie{Int}
 @test typeof(Trie(kvs)) == Trie{Int}
 @test typeof(Trie(Dict(kvs))) == Trie{Int}
-@test typeof(Trie(ks)) == @compat Trie{Void}
+@test typeof(Trie(ks)) == Trie{Void}
 
 
 # path iterator

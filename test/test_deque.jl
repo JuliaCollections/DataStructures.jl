@@ -1,6 +1,5 @@
 using DataStructures
 using Base.Test
-using Compat
 
 
 # empty dequeue
@@ -43,7 +42,7 @@ for i = 1 : n
 
     @test front(q) == 1
     @test back(q) == i
-    
+
     k = 1
     for j in q
         @test j == k

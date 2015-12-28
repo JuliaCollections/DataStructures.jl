@@ -5,8 +5,6 @@ import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
              next, done, keys, values, setdiff, setdiff!,
              union, union!, intersect, filter, filter!,
              hash, eltype
-            
-import Compat: keytype, valtype
 
 # This is just a simple wrapper around a HashDict, which is a modified
 # implementation of the Dict implementation in Base allowing ordering
@@ -29,18 +27,18 @@ immutable OrderedDict{K,V} <: Associative{K,V}
 end
 
 OrderedDict() = OrderedDict{Any,Any}()
-OrderedDict(kv::@compat Tuple{}) = OrderedDict()
+OrderedDict(kv::Tuple{}) = OrderedDict()
 OrderedDict(kv) = ordered_dict_with_eltype(kv, eltype(kv))
 
-ordered_dict_with_eltype{K,V}(kv, ::Type{@compat Tuple{K,V}}) = OrderedDict{K,V}(kv)
+ordered_dict_with_eltype{K,V}(kv, ::Type{Tuple{K,V}}) = OrderedDict{K,V}(kv)
 ordered_dict_with_eltype(kv, t) = OrderedDict{Any,Any}(kv)
 
 if VERSION >= v"0.4.0-dev+980"
     OrderedDict{K,V}(ps::Pair{K,V}...)              = OrderedDict{K,V}(ps...)
-    OrderedDict{K,V}(kv::@compat Tuple{Vararg{Pair{K,V}}})         = OrderedDict{K,V}(kv)
-    OrderedDict{K}(kv::@compat Tuple{Vararg{Pair{K}}})             = OrderedDict{K,Any}(kv)
-    OrderedDict{V}(kv::@compat Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv)
-    OrderedDict(kv::@compat Tuple{Vararg{Pair}})                   = OrderedDict{Any,Any}(kv)
+    OrderedDict{K,V}(kv::Tuple{Vararg{Pair{K,V}}})         = OrderedDict{K,V}(kv)
+    OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})             = OrderedDict{K,Any}(kv)
+    OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv)
+    OrderedDict(kv::Tuple{Vararg{Pair}})                   = OrderedDict{Any,Any}(kv)
 
     OrderedDict{K,V}(kv::AbstractArray{Pair{K,V}}) = OrderedDict{K,V}(kv)
 

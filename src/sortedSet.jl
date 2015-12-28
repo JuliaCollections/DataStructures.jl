@@ -2,7 +2,7 @@
 ## methods similiar to those of the julia Set.
 
 
-@compat type SortedSet{K, Ord <: Ordering}
+type SortedSet{K, Ord <: Ordering}
     bt::BalancedTree23{K,Void,Ord}
 
     ## Zero-argument constructor, or possibly one argument to specify order.

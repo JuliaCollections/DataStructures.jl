@@ -16,11 +16,11 @@ immutable MultiDict{K,V}
 end
 
 MultiDict() = MultiDict{Any,Any}()
-MultiDict(kv::@compat Tuple{}) = MultiDict()
+MultiDict(kv::Tuple{}) = MultiDict()
 MultiDict(kvs) = multi_dict_with_eltype(kvs, eltype(kvs))
 
-multi_dict_with_eltype{K,V}(kvs, ::Type{@compat Tuple{K,Vector{V}}}) = MultiDict{K,V}(kvs)
-function multi_dict_with_eltype{K,V}(kvs, ::Type{@compat Tuple{K,V}})
+multi_dict_with_eltype{K,V}(kvs, ::Type{Tuple{K,Vector{V}}}) = MultiDict{K,V}(kvs)
+function multi_dict_with_eltype{K,V}(kvs, ::Type{Tuple{K,V}})
     md = MultiDict{K,V}()
     for (k,v) in kvs
         insert!(md, k, v)
@@ -68,7 +68,7 @@ function insert!{K,V}(d::MultiDict{K,V}, k, v)
     return d
 end
 
-function in{K,V}(pr::(@compat Tuple{Any,Any}), d::MultiDict{K,V})
+function in{K,V}(pr::(Tuple{Any,Any}), d::MultiDict{K,V})
     k = convert(K, pr[1])
     v = get(d,k,Base.secret_table_token)
     !is(v, Base.secret_table_token) && (isa(pr[2], AbstractArray) ? v == pr[2] : pr[2] in v)

@@ -16,7 +16,7 @@ end
 
 typealias SMDSemiToken IntSemiToken
 
-typealias SMDToken @compat Tuple{SortedMultiDict, IntSemiToken}
+typealias SMDToken Tuple{SortedMultiDict, IntSemiToken}
 
 ## This constructor takes two arrays an ordering object which defaults
 ## to Forward
@@ -44,7 +44,7 @@ function SortedMultiDict{K,D}(ps::Pair{K,D}...)
     for p in ps
         insert!(h, p.first, p.second)
     end
-    h 
+    h
 end
 
 
@@ -57,13 +57,13 @@ function SortedMultiDict{K,D, Ord <: Ordering}(o::Ord, ps::Pair{K,D}...)
     for p in ps
         insert!(h, p.first, p.second)
     end
-    h 
+    h
 end
 
 
 ## This one takes an iterable; ordering type is optional.
 
-SortedMultiDict{Ord <: Ordering}(kv, o::Ord=Forward) = 
+SortedMultiDict{Ord <: Ordering}(kv, o::Ord=Forward) =
 sortedmultidict_with_eltype(kv, eltype(kv), o)
 
 function sortedmultidict_with_eltype{K,D,Ord}(kv, ::Type{Pair{K,D}}, o::Ord)
@@ -126,9 +126,9 @@ end
 
 
 
-## '(k,d) in m' checks whether a key-data pair is in 
+## '(k,d) in m' checks whether a key-data pair is in
 ## a sorted multidict.  This requires a loop over
-## all data items whose key is equal to k. 
+## all data items whose key is equal to k.
 
 
 function in_(k_, d_, m::SortedMultiDict)
@@ -147,13 +147,13 @@ function in_(k_, d_, m::SortedMultiDict)
 end
 
 
- 
+
 
 @inline eltype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) =  Pair{K,D}
 @inline eltype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) =  Pair{K,D}
 @inline in(pr::Pair, m::SortedMultiDict) =
     in_(pr[1], pr[2], m)
-@inline in(::Tuple{Any,Any}, ::SortedMultiDict) = 
+@inline in(::Tuple{Any,Any}, ::SortedMultiDict) =
     throw(ArgumentError("'(k,v) in sortedmultidict' not supported in Julia 0.4 or 0.5.  See documentation"))
 
 
@@ -199,7 +199,7 @@ function isequal(m1::SortedMultiDict, m2::SortedMultiDict)
     end
 end
 
-@compat typealias SDorAssociative Union{Associative,SortedMultiDict}
+typealias SDorAssociative Union{Associative,SortedMultiDict}
 
 function mergetwo!{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord},
                                         m2::SDorAssociative)
@@ -223,14 +223,14 @@ function packdeepcopy{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord})
 end
 
 
-function merge!{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}, 
+function merge!{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord},
                                      others::SDorAssociative...)
     for o in others
         mergetwo!(m,o)
     end
 end
 
-function merge{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}, 
+function merge{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord},
                                     others::SDorAssociative...)
     result = packcopy(m)
     merge!(result, others...)
@@ -250,5 +250,5 @@ function Base.show{K,D,Ord <: Ordering}(io::IO, m::SortedMultiDict{K,D,Ord})
     print(io, ")")
 end
 
-similar{K,D,Ord<:Ordering}(m::SortedMultiDict{K,D,Ord}) = 
+similar{K,D,Ord<:Ordering}(m::SortedMultiDict{K,D,Ord}) =
    SortedMultiDict(K[], D[], orderobject(m))

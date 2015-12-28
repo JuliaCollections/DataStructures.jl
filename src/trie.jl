@@ -29,9 +29,9 @@ end
 
 Trie() = Trie{Any}()
 Trie{K<:AbstractString,V}(ks::AbstractVector{K}, vs::AbstractVector{V}) = Trie{V}(ks, vs)
-Trie{K<:AbstractString,V}(kv::AbstractVector{@compat Tuple{K,V}}) = Trie{V}(kv)
+Trie{K<:AbstractString,V}(kv::AbstractVector{Tuple{K,V}}) = Trie{V}(kv)
 Trie{K<:AbstractString,V}(kv::Associative{K,V}) = Trie{V}(kv)
-@compat Trie{K<:AbstractString}(ks::AbstractVector{K}) = Trie{Void}(ks, similar(ks, Void))
+Trie{K<:AbstractString}(ks::AbstractVector{K}) = Trie{Void}(ks, similar(ks, Void))
 
 function setindex!{T}(t::Trie{T}, val::T, key::AbstractString)
     node = t
