@@ -76,21 +76,10 @@ function fulldump(t::DataStructures.BalancedTree23)
 end
 
 
-if VERSION >= v"0.4.0-dev"
 
 tuple_or_pair(K::DataType, V::DataType) = Pair{K,V}
 tuple_or_pair(k,v) = k=>v
 push_test!(m, k, v) = push!(m, k=>v)
-
-else
-
-tuple_or_pair(K::DataType, V::DataType) = (K,V)
-tuple_or_pair(k,v) = (k,v)
-push_test!(m, k, v) = push!(m, k, v)
-
-
-end
-
 
 
 
@@ -472,16 +461,14 @@ function test2()
     @test tpr == tuple_or_pair(Int,Float64)
     tpr2 = eltype(typeof(m1))
     @test tpr2 == tuple_or_pair(Int,Float64)
-    if VERSION >= v"0.4.0-dev"
-        kt = keytype(m1)
-        @test kt == Int
-        kt2 = keytype(typeof(m1))
-        @test kt2 == Int
-        vt = valtype(m1)
-        @test vt == Float64
-        vt2 = valtype(typeof(m1))
-        @test vt2 == Float64
-    end
+    kt = keytype(m1)
+    @test kt == Int
+    kt2 = keytype(typeof(m1))
+    @test kt2 == Int
+    vt = valtype(m1)
+    @test vt == Float64
+    vt2 = valtype(typeof(m1))
+    @test vt2 == Float64
     
 
     co = orderobject(m1)
@@ -612,16 +599,14 @@ function test3{T}(z::T)
     
     sk2a = zero1
 
-    if VERSION >= v"0.4.0-dev"
 
-        for k in eachindex(m1)
-            sk2a += k
-        end
-        @test eltype(eachindex(m1)) == T
-        @test sk2a == sk
-
+    for k in eachindex(m1)
+        sk2a += k
     end
+    @test eltype(eachindex(m1)) == T
+    @test sk2a == sk
 
+    
 
     sk2b = zero1
     for st in onlysemitokens(m1)
@@ -661,14 +646,13 @@ function test3{T}(z::T)
     @test eltype(keys(exclusive(m1, startof(m1), pos1))) == T
 
 
-    if VERSION >= v"0.4.0-dev"
-        sk2a = zero1
-        for k in eachindex(exclusive(m1, startof(m1), pos1))
-            sk2a += k
-        end
-        @test sk2a == skhalf
-        @test eltype(eachindex(exclusive(m1, startof(m1), pos1))) == T
+
+    sk2a = zero1
+    for k in eachindex(exclusive(m1, startof(m1), pos1))
+        sk2a += k
     end
+    @test sk2a == skhalf
+    @test eltype(eachindex(exclusive(m1, startof(m1), pos1))) == T
 
 
 
@@ -694,16 +678,14 @@ function test3{T}(z::T)
        T
 
 
-    if VERSION >= v"0.4.0-dev"
-        count = 0
-        sk5 = zero1
-        for k in eachindex(inclusive(m1, startof(m1), startof(m1)))
-            sk5 += k
-            count += 1
-        end
-        @test count == 1 && sk5 == deref_key((m1,startof(m1)))
-        @test eltype(eachindex(inclusive(m1, startof(m1), startof(m1)))) == T
+    count = 0
+    sk5 = zero1
+    for k in eachindex(inclusive(m1, startof(m1), startof(m1)))
+        sk5 += k
+        count += 1
     end
+    @test count == 1 && sk5 == deref_key((m1,startof(m1)))
+    @test eltype(eachindex(inclusive(m1, startof(m1), startof(m1)))) == T
 
     factors = SortedMultiDict(Int[], Int[])
     N = 1000
@@ -732,16 +714,14 @@ function test3{T}(z::T)
 
 
 
-    if VERSION >= v"0.4.0-dev"
-        sum1a = 0
-        sum2a = 0
-        for st in eachindex(factors)
-            (k,v) = deref((factors,st))
-            sum1a += k
-            sum2a += v
-        end
-        @test sum1a == sum1 && sum2a == sum2
+    sum1a = 0
+    sum2a = 0
+    for st in eachindex(factors)
+        (k,v) = deref((factors,st))
+        sum1a += k
+        sum2a += v
     end
+    @test sum1a == sum1 && sum2a == sum2
 
     sum1a = 0
     sum2a = 0
@@ -765,24 +745,22 @@ function test3{T}(z::T)
                            searchsortedfirst(factors,70),
                            searchsortedlast(factors,70))) == tuple_or_pair(Int,Int)
 
-    if VERSION >= v"0.4.0-dev"
 
-        sum2 = 0
-        for st in eachindex(inclusive(factors, 
-                                      searchsortedfirst(factors,70),
-                                      searchsortedlast(factors,70)))
-            v = deref_value((factors,st))
-            sum2 += v
-        end
-
-        @test sum2 == 1 + 2 + 5 + 7 + 10 + 14 + 35 + 70
-        @test eltype(eachindex(inclusive(factors, 
-                                         searchsortedfirst(factors,70),
-                                         searchsortedlast(factors,70)))) == IntSemiToken
+    sum2 = 0
+    for st in eachindex(inclusive(factors, 
+                                  searchsortedfirst(factors,70),
+                                  searchsortedlast(factors,70)))
+        v = deref_value((factors,st))
+        sum2 += v
     end
-
-
     
+    @test sum2 == 1 + 2 + 5 + 7 + 10 + 14 + 35 + 70
+    @test eltype(eachindex(inclusive(factors, 
+                                     searchsortedfirst(factors,70),
+                                     searchsortedlast(factors,70)))) == IntSemiToken
+
+
+
     sum3 = 0
     for (k,v) in exclusive(factors,
                            searchsortedfirst(factors,60), 
@@ -795,19 +773,17 @@ function test3{T}(z::T)
                            searchsortedlast(factors,70))) == tuple_or_pair(Int,Int)
 
 
-    if VERSION >= v"0.4.0-dev"
-        sum3 = 0
-        for st in eachindex(exclusive(factors,
-                                      searchsortedfirst(factors,60), 
-                                      searchsortedfirst(factors,61)))
-            v = deref_value((factors,st))
-            sum3 += v
-        end
-        @test sum3 == 1 + 2 + 3 + 4 + 5 + 6 + 10 + 12 + 15 + 20 + 30 + 60
-        @test eltype(eachindex(exclusive(factors, 
-                                         searchsortedfirst(factors,70),
-                                         searchsortedlast(factors,70)))) == IntSemiToken
+    sum3 = 0
+    for st in eachindex(exclusive(factors,
+                                  searchsortedfirst(factors,60), 
+                                  searchsortedfirst(factors,61)))
+        v = deref_value((factors,st))
+        sum3 += v
     end
+    @test sum3 == 1 + 2 + 3 + 4 + 5 + 6 + 10 + 12 + 15 + 20 + 30 + 60
+    @test eltype(eachindex(exclusive(factors, 
+                                     searchsortedfirst(factors,70),
+                                     searchsortedlast(factors,70)))) == IntSemiToken
 
 
     sum4 = 0
@@ -1003,16 +979,14 @@ function test3{T}(z::T)
     @test sum1 == sum([39, 24, 2, 14, 45, 107, 66])
     @test eltype(onlysemitokens(s)) == IntSemiToken
 
-    if VERSION >= v"0.4.0-dev"
 
-        sum1 = 0
-        for st in eachindex(s)
-            k = deref((s,st))
-            sum1 += k
-        end
-        @test sum1 == sum([39, 24, 2, 14, 45, 107, 66])
-        @test eltype(eachindex(s)) == IntSemiToken
+    sum1 = 0
+    for st in eachindex(s)
+        k = deref((s,st))
+        sum1 += k
     end
+    @test sum1 == sum([39, 24, 2, 14, 45, 107, 66])
+    @test eltype(eachindex(s)) == IntSemiToken
 
 
     sum2 = 0
@@ -1027,18 +1001,16 @@ function test3{T}(z::T)
                        searchsortedfirst(s, 66))) == Int
 
 
-    if VERSION >= v"0.4.0-dev"
-        sum2 = 0
-        for st in eachindex(inclusive(s,
-                                      searchsortedfirst(s, 24), 
-                                      searchsortedfirst(s, 66)))
-            sum2 += deref((s,st))
-        end
-        @test sum2 == 24 + 39 + 45 + 66
-        @test eltype(eachindex(inclusive(s,
-                                         searchsortedfirst(s, 24), 
-                                         searchsortedfirst(s, 66)))) == IntSemiToken
+    sum2 = 0
+    for st in eachindex(inclusive(s,
+                                  searchsortedfirst(s, 24), 
+                                  searchsortedfirst(s, 66)))
+        sum2 += deref((s,st))
     end
+    @test sum2 == 24 + 39 + 45 + 66
+    @test eltype(eachindex(inclusive(s,
+                                     searchsortedfirst(s, 24), 
+                                     searchsortedfirst(s, 66)))) == IntSemiToken
 
 
 
@@ -1096,19 +1068,17 @@ function test3{T}(z::T)
                                        searchsortedfirst(s, 66)))) ==
      @compat Tuple{IntSemiToken, Int}
 
-    if VERSION >= v"0.4.0-dev"
 
-        sum3 = 0
-        for st in eachindex(exclusive(s,
-                                      searchsortedfirst(s, 24), 
-                                      searchsortedfirst(s, 66)))
-            sum3 += deref((s,st))
-        end
-        @test sum3 == 24 + 39 + 45
-        @test eltype(eachindex(exclusive(s,
-                                         searchsortedfirst(s, 24), 
-                                         searchsortedfirst(s, 66)))) == IntSemiToken
+    sum3 = 0
+    for st in eachindex(exclusive(s,
+                                  searchsortedfirst(s, 24), 
+                                  searchsortedfirst(s, 66)))
+        sum3 += deref((s,st))
     end
+    @test sum3 == 24 + 39 + 45
+    @test eltype(eachindex(exclusive(s,
+                                     searchsortedfirst(s, 24), 
+                                     searchsortedfirst(s, 66)))) == IntSemiToken
     nothing
 end
 
@@ -1152,10 +1122,8 @@ function test4()
     @test_throws BoundsError last(s)
     @test_throws ArgumentError isequal(SortedSet(["a"]), SortedSet([1]))
     @test_throws ArgumentError isequal(SortedSet(["a"]), SortedSet(["b"],Reverse))
-    if VERSION >= v"0.4.0-dev"
-        @test_throws ArgumentError (("a",6) in m)
-        @test_throws ArgumentError ((2,5) in m1)
-    end
+    @test_throws ArgumentError (("a",6) in m)
+    @test_throws ArgumentError ((2,5) in m1)
     nothing
 end
 
@@ -1382,12 +1350,10 @@ function test7()
     @test eltype(factors) == tuple_or_pair(Int,Int)
     @test eltype(typeof(factors)) == tuple_or_pair(Int,Int)
 
-    if VERSION >= v"0.4.0-dev"
-        @test keytype(factors) == Int
-        @test keytype(typeof(factors)) == Int
-        @test valtype(factors) == Int
-        @test valtype(typeof(factors)) == Int
-    end
+    @test keytype(factors) == Int
+    @test keytype(typeof(factors)) == Int
+    @test valtype(factors) == Int
+    @test valtype(typeof(factors)) == Int
 
     push_test!(factors, 70,3)
     @test length(factors) == len+1
@@ -1635,10 +1601,8 @@ function test8()
     @test !haskey(m,0.5)
     @test eltype(m) == Float64
     @test eltype(typeof(m)) == Float64
-    if VERSION >= v"0.4.0-dev"
-        @test keytype(m) == Float64
-        @test keytype(typeof(m)) == Float64
-    end
+    @test keytype(m) == Float64
+    @test keytype(typeof(m)) == Float64
     @test orderobject(m) == Forward
     pop!(m, smallest)
     checkcorrectness(m.bt, false)
@@ -1704,60 +1668,35 @@ end
                
 
 # test the constructors of SortedDict and SortedMultiDict
-if VERSION >= v"0.4.0-dev"
 
-    function test9()
+function test9()
 
-        sd1 = SortedDict("w" => 64, "p" => 12)
-        @test length(sd1) == 2 && first(sd1) == ("p"=>12) &&
-            last(sd1) == ("w"=>64)
-        sd2 = SortedDict(Reverse, "w" => 64, "p" => 12)
-        @test length(sd2) == 2 && last(sd2) == ("p"=>12) &&
-            first(sd2) == ("w"=>64)
-        sd3 = SortedDict(("w"=>64, "p"=>12))
-        @test length(sd3) == 2 && first(sd3) == ("p"=>12) &&
-            last(sd3) == ("w"=>64)
-        sd4 = SortedDict(("w"=>64, "p"=>12), Reverse)
-        @test length(sd4) == 2 && last(sd4) == ("p"=>12) &&
-            first(sd4) == ("w"=>64)
-        sm1 = SortedMultiDict("w" => 64, "p" => 12, "p" => 9)
-        @test length(sm1) == 3 && first(sm1) == ("p"=>12) &&
-            last(sm1) == ("w"=>64)
-        sm2 = SortedMultiDict(Reverse, "w" => 64, "p" => 12, "p" => 9)
-        @test length(sm2) == 3 && last(sm2) == ("p"=>9) &&
-            first(sm2) == ("w"=>64)
-        sm3 = SortedMultiDict(("w"=>64, "p"=>12, "p"=> 9))
-        @test length(sm3) == 3 && first(sm3) == ("p"=>12) &&
-            last(sm3) == ("w"=>64)
-        sm4 = SortedMultiDict(("w"=> 64, "p"=>12, "p"=>9), Reverse)
-        @test length(sm4) == 3 && last(sm4) == ("p"=>9) &&
-            first(sm4) == ("w"=>64)
-        nothing
-    end
-else
-    function test9()
-        sd1 = SortedDict(["w", "p"], [64,12])
-        @test length(sd1) == 2 && first(sd1) == ("p",12) &&
-            last(sd1) == ("w",64)
-        sd2 = SortedDict(["w", "p"], [64,12], Reverse)
-        @test length(sd2) == 2 && last(sd2) == ("p",12) &&
-            first(sd2) == ("w",64)
-        sd3 = SortedDict([("w",64), ("p",12)])
-        @test length(sd3) == 2 && first(sd3) == ("p",12) &&
-            last(sd3) == ("w",64)
-        sd4 = SortedDict([("w", 64), ("p",12)], Reverse)
-        @test length(sd4) == 2 && last(sd4) == ("p",12) &&
-            first(sd4) == ("w",64)
-        sm3 = SortedMultiDict([("w",64), ("p",12), ("p", 9)])
-        @test length(sm3) == 3 && first(sm3) == ("p",12) &&
-            last(sm3) == ("w",64)
-        sm4 = SortedMultiDict([("w", 64), ("p",12), ("p", 9)], Reverse)
-        @test length(sm4) == 3 && last(sm4) == ("p",9) &&
-            first(sm4) == ("w",64)
-        nothing
-    end
+    sd1 = SortedDict("w" => 64, "p" => 12)
+    @test length(sd1) == 2 && first(sd1) == ("p"=>12) &&
+        last(sd1) == ("w"=>64)
+    sd2 = SortedDict(Reverse, "w" => 64, "p" => 12)
+    @test length(sd2) == 2 && last(sd2) == ("p"=>12) &&
+        first(sd2) == ("w"=>64)
+    sd3 = SortedDict(("w"=>64, "p"=>12))
+    @test length(sd3) == 2 && first(sd3) == ("p"=>12) &&
+        last(sd3) == ("w"=>64)
+    sd4 = SortedDict(("w"=>64, "p"=>12), Reverse)
+    @test length(sd4) == 2 && last(sd4) == ("p"=>12) &&
+        first(sd4) == ("w"=>64)
+    sm1 = SortedMultiDict("w" => 64, "p" => 12, "p" => 9)
+    @test length(sm1) == 3 && first(sm1) == ("p"=>12) &&
+        last(sm1) == ("w"=>64)
+    sm2 = SortedMultiDict(Reverse, "w" => 64, "p" => 12, "p" => 9)
+    @test length(sm2) == 3 && last(sm2) == ("p"=>9) &&
+        first(sm2) == ("w"=>64)
+    sm3 = SortedMultiDict(("w"=>64, "p"=>12, "p"=> 9))
+    @test length(sm3) == 3 && first(sm3) == ("p"=>12) &&
+        last(sm3) == ("w"=>64)
+    sm4 = SortedMultiDict(("w"=> 64, "p"=>12, "p"=>9), Reverse)
+    @test length(sm4) == 3 && last(sm4) == ("p"=>9) &&
+        first(sm4) == ("w"=>64)
+    nothing
 end
-
 
 
 test1()

@@ -26,70 +26,46 @@ function SortedDict{K, D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
 end
 
 
-if VERSION >= v"0.4.0-dev"
 
-    ## More constructors based on those in dict.jl:
-    ## Take pairs and infer argument
-    ## types.  Note:  this works only for the Forward ordering.
+## More constructors based on those in dict.jl:
+## Take pairs and infer argument
+## types.  Note:  this works only for the Forward ordering.
 
-    function SortedDict{K,D}(ps::Pair{K,D}...)
-        h = SortedDict{K,D,ForwardOrdering}()
-        for p in ps
-            h[p.first] = p.second
-        end
-        h 
+function SortedDict{K,D}(ps::Pair{K,D}...)
+    h = SortedDict{K,D,ForwardOrdering}()
+    for p in ps
+        h[p.first] = p.second
     end
-
-
-    ## Take pairs and infer argument
-    ## types.  Ordering parameter must be explicit first argument.
-
-
-    function SortedDict{K,D, Ord <: Ordering}(o::Ord, ps::Pair{K,D}...)
-        h = SortedDict{K,D,Ord}(o)
-        for p in ps
-            h[p.first] = p.second
-        end
-        h 
-    end
-
-    ## This one takes an iterable; ordering type is optional.
-
-    SortedDict{Ord <: Ordering}(kv, o::Ord=Forward) = 
-    sorteddict_with_eltype(kv, eltype(kv), o)
-
-    function sorteddict_with_eltype{K,D,Ord}(kv, ::Type{Pair{K,D}}, o::Ord)
-        h = SortedDict{K,D,Ord}(o)
-        for (k,v) in kv
-            h[k] = v
-        end
-        h
-    end
-
-else   #if VERSION < v"0.4.0-dev"
-    function SortedDict{K,D,Ord <: Ordering}(ks::AbstractArray{K},
-                                             vs::AbstractArray{D},
-                                             o::Ord = Forward) 
-        h = SortedDict{K,D,Ord}(o)
-        l = length(ks)
-        if length(vs) != l
-            error("ks and vs arrays in two-array SortedDict constructor must have the same length")
-        end
-        for i = 1 : l
-            h[ks[i]] = vs[i]
-        end
-        h
-    end
-
-    function SortedDict{K,D,Ord <: Ordering}(kv::AbstractArray{(K,D),1},
-                                             o::Ord = Forward)
-        h = SortedDict{K,D,Ord}(o)
-        for pr in kv
-            h[pr[1]] = pr[2]
-        end
-        h
-    end
+    h 
 end
+
+
+## Take pairs and infer argument
+## types.  Ordering parameter must be explicit first argument.
+
+
+function SortedDict{K,D, Ord <: Ordering}(o::Ord, ps::Pair{K,D}...)
+    h = SortedDict{K,D,Ord}(o)
+    for p in ps
+        h[p.first] = p.second
+    end
+    h 
+end
+
+## This one takes an iterable; ordering type is optional.
+
+SortedDict{Ord <: Ordering}(kv, o::Ord=Forward) = 
+sorteddict_with_eltype(kv, eltype(kv), o)
+
+function sorteddict_with_eltype{K,D,Ord}(kv, ::Type{Pair{K,D}}, o::Ord)
+    h = SortedDict{K,D,Ord}(o)
+    for (k,v) in kv
+        h[k] = v
+    end
+    h
+end
+
+
 
 
 
@@ -120,20 +96,10 @@ end
 
 ## push! is an alternative to insert!; it returns the container.
 
-if VERSION >= v"0.4.0-dev"
 
 @inline function push!{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, pr::Pair{K,D})
     insert!(m.bt, convert(K,pr[1]), convert(D,pr[2]), false)
     m
-end
-
-else
-
-@inline function push!{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_, d_)
-    insert!(m.bt, convert(K,k_), convert(D,d_), false)
-    m
-end
-
 end
 
 
@@ -163,7 +129,6 @@ end
 end
 
 
-if VERSION >= v"0.4.0-dev"
 
 @inline eltype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) =  Pair{K,D}
 @inline eltype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) =  Pair{K,D}
@@ -175,18 +140,6 @@ end
 @inline in(::Tuple{Any,Any}, ::SortedDict) =
     throw(ArgumentError("'(k,v) in sorteddict' not supported in Julia 0.4 or 0.5.  See documentation"))
 
-
-else
-
-@inline function in{K,D,Ord <: Ordering}(pr::(Any,Any), m::SortedDict{K,D,Ord})
-    i, exactfound = findkey(m.bt,convert(K,pr[1]))
-    return exactfound && isequal(m.bt.data[i].d,convert(D,pr[2]))
-end
-
-@inline eltype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) =  (K,D)
-@inline eltype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) =  (K,D)
-
-end
 
 @inline keytype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = K
 @inline keytype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) = K

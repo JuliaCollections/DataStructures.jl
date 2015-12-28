@@ -35,62 +35,44 @@ function SortedMultiDict{K,D, Ord <: Ordering}(kk::AbstractArray{K,1},
 end
 
 
-if VERSION >= v"0.4.0-dev"
 
-    ## Take pairs and infer argument
-    ## types.  Note:  this works only for the Forward ordering.
+## Take pairs and infer argument
+## types.  Note:  this works only for the Forward ordering.
 
-    function SortedMultiDict{K,D}(ps::Pair{K,D}...)
-        h = SortedMultiDict{K,D,ForwardOrdering}()
-        for p in ps
-            insert!(h, p.first, p.second)
-        end
-        h 
+function SortedMultiDict{K,D}(ps::Pair{K,D}...)
+    h = SortedMultiDict{K,D,ForwardOrdering}()
+    for p in ps
+        insert!(h, p.first, p.second)
     end
-
-
-    ## Take pairs and infer argument
-    ## types.  Ordering parameter must be explicit first argument.
-
-
-    function SortedMultiDict{K,D, Ord <: Ordering}(o::Ord, ps::Pair{K,D}...)
-        h = SortedMultiDict{K,D,Ord}(o)
-        for p in ps
-            insert!(h, p.first, p.second)
-        end
-        h 
-    end
-
-
-    ## This one takes an iterable; ordering type is optional.
-
-    SortedMultiDict{Ord <: Ordering}(kv, o::Ord=Forward) = 
-    sortedmultidict_with_eltype(kv, eltype(kv), o)
-
-    function sortedmultidict_with_eltype{K,D,Ord}(kv, ::Type{Pair{K,D}}, o::Ord)
-        h = SortedMultiDict{K,D,Ord}(o)
-        for (k,v) in kv
-            insert!(h, k, v)
-        end
-        h
-    end
-
-
-else # if VERSION < v"0.4.0-dev"
-
-    function SortedMultiDict{K,D,Ord <: Ordering}(kv::AbstractArray{(K,D),1},
-                                                  o::Ord = Forward)
-        h = SortedMultiDict{K,D,Ord}(o)
-        for pr in kv
-            insert!(h, pr[1], pr[2])
-        end
-        h
-    end
+    h 
 end
 
 
+## Take pairs and infer argument
+## types.  Ordering parameter must be explicit first argument.
 
 
+function SortedMultiDict{K,D, Ord <: Ordering}(o::Ord, ps::Pair{K,D}...)
+    h = SortedMultiDict{K,D,Ord}(o)
+    for p in ps
+        insert!(h, p.first, p.second)
+    end
+    h 
+end
+
+
+## This one takes an iterable; ordering type is optional.
+
+SortedMultiDict{Ord <: Ordering}(kv, o::Ord=Forward) = 
+sortedmultidict_with_eltype(kv, eltype(kv), o)
+
+function sortedmultidict_with_eltype{K,D,Ord}(kv, ::Type{Pair{K,D}}, o::Ord)
+    h = SortedMultiDict{K,D,Ord}(o)
+    for (k,v) in kv
+        insert!(h, k, v)
+    end
+    h
+end
 
 
 ## This function inserts an item into the tree.
@@ -104,23 +86,11 @@ end
 
 ## push! is an alternative to insert!; it returns the container.
 
-if VERSION >= v"0.4.0-dev"
 
 @inline function push!{K, D, Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}, pr::Pair{K,D})
     insert!(m.bt, convert(K,pr[1]), convert(D,pr[2]), true)
     m
 end
-
-else
-
-@inline function push!{K, D, Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}, k_, d_)
-    insert!(m.bt, convert(K,k_), convert(D,d_), true)
-    m
-end
-
-end
-
-
 
 
 
@@ -179,8 +149,6 @@ end
 
  
 
-if VERSION >= v"0.4.0-dev"
-
 @inline eltype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) =  Pair{K,D}
 @inline eltype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) =  Pair{K,D}
 @inline in(pr::Pair, m::SortedMultiDict) =
@@ -189,16 +157,6 @@ if VERSION >= v"0.4.0-dev"
     throw(ArgumentError("'(k,v) in sortedmultidict' not supported in Julia 0.4 or 0.5.  See documentation"))
 
 
-
-else
-
-
-@inline eltype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) =  (K,D)
-@inline eltype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) =  (K,D)
-@inline in{K,D,Ord <: Ordering}(pr::(Any,Any), m::SortedMultiDict{K,D,Ord}) =
-    in_(pr[1], pr[2], m)
-
-end
 
 @inline keytype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) = K
 @inline keytype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) = K
