@@ -10,17 +10,15 @@ KV = ('a',1)
 @test typeof(MultiDict([KV])) == MultiDict{Char,Int}
 @test typeof(MultiDict([KV, KVS])) == MultiDict{Char,Any}
 
-if VERSION >= v"0.4.0-dev+980"
-    PVS = 1 => [1.0]
-    PV = 1 => 1.0
-    @test eltype(MultiDict{Char,Int}()) == Pair{Char,Vector{Int}}
-    @test typeof(MultiDict(PVS)) == MultiDict{Int,Float64}
-    @test typeof(MultiDict(PVS, PVS)) == MultiDict{Int,Float64}
-    @test typeof(MultiDict([PVS, PVS])) == MultiDict{Int,Float64}
-    @test typeof(MultiDict(PV)) == MultiDict{Int,Float64}
-    @test typeof(MultiDict(PV, PV)) == MultiDict{Int,Float64}
-    @test typeof(MultiDict([PV, PV])) == MultiDict{Int,Float64}
-end
+PVS = 1 => [1.0]
+PV = 1 => 1.0
+@test eltype(MultiDict{Char,Int}()) == Pair{Char,Vector{Int}}
+@test typeof(MultiDict(PVS)) == MultiDict{Int,Float64}
+@test typeof(MultiDict(PVS, PVS)) == MultiDict{Int,Float64}
+@test typeof(MultiDict([PVS, PVS])) == MultiDict{Int,Float64}
+@test typeof(MultiDict(PV)) == MultiDict{Int,Float64}
+@test typeof(MultiDict(PV, PV)) == MultiDict{Int,Float64}
+@test typeof(MultiDict([PV, PV])) == MultiDict{Int,Float64}
 
 # setindex!, getindex, length, isempty, empty!, in
 # copy, similar, get, haskey, getkey, start, next, done
@@ -50,11 +48,7 @@ insert!(d, 'c', 1)
 @test copy(d) == d
 @test similar(d) == MultiDict{Char,Int}()
 
-if VERSION >= v"0.4.0-dev+980"
-    @test [kv for kv in d] == [Pair('c', [1]), Pair('a', [1,2,3])]
-else
-    @test [kv for kv in d] == [('c', [1]), ('a', [1,2,3])]
-end
+@test [kv for kv in d] == [Pair('c', [1]), Pair('a', [1,2,3])]
 
 @test in(('c', 1), d)
 @test in(('a', 1), d)
@@ -92,11 +86,9 @@ empty!(d)
 @test push!(d, ('a',1)) == MultiDict{Char,Int}([('a', [1])])
 @test push!(d, ('a',1)) == MultiDict{Char,Int}([('a', [1,1])])
 
-if VERSION >= v"0.4.0-dev+980"
-    empty!(d)
-    @test push!(d,'a'=>[1]) == MultiDict{Char,Int}([('a', [1])])
-    @test push!(d, 'a'=>1) == MultiDict{Char,Int}([('a', [1,1])])
-end
+empty!(d)
+@test push!(d,'a'=>[1]) == MultiDict{Char,Int}([('a', [1])])
+@test push!(d, 'a'=>1) == MultiDict{Char,Int}([('a', [1,1])])
 
 # get!
 @test get!(d, 'a', []) == [1,1]

@@ -6,11 +6,9 @@ using Base.Test
 @test typeof(OrderedDict()) == OrderedDict{Any,Any}
 @test typeof(OrderedDict([(1,2.0)])) == OrderedDict{Int,Float64}
 @test typeof(OrderedDict([("a",1),("b",2)])) == OrderedDict{ASCIIString,Int}
-if VERSION >= v"0.4.0-dev+980"
-    @test typeof(OrderedDict(Pair(1, 1.0))) == OrderedDict{Int,Float64}
-    @test typeof(OrderedDict(Pair(1, 1.0), Pair(2, 2.0))) == OrderedDict{Int,Float64}
-    @test typeof(OrderedDict(Pair(1, 1.0), Pair(2, 2.0), Pair(3, 3.0))) == OrderedDict{Int,Float64}
-end
+@test typeof(OrderedDict(Pair(1, 1.0))) == OrderedDict{Int,Float64}
+@test typeof(OrderedDict(Pair(1, 1.0), Pair(2, 2.0))) == OrderedDict{Int,Float64}
+@test typeof(OrderedDict(Pair(1, 1.0), Pair(2, 2.0), Pair(3, 3.0))) == OrderedDict{Int,Float64}
 
 # empty dictionary
 d = OrderedDict{Char, Int}()
@@ -38,11 +36,7 @@ end
 
 @test collect(keys(d)) == collect('b':'z')
 @test collect(values(d)) == collect(2:26)
-if VERSION >= v"0.4.0-dev+980"
-    @test collect(d) == [Pair(a,i) for (a,i) in zip('b':'z', 2:26)]
-else
-    @test collect(d) == [(a,i) for (a,i) in zip('b':'z', 2:26)]
-end
+@test collect(d) == [Pair(a,i) for (a,i) in zip('b':'z', 2:26)]
 
 # Test for #60
 
@@ -72,11 +66,7 @@ for i=1:10000
     h[i] = i+1
 end
 
-if VERSION >= v"0.4.0-dev+980"
-    @test collect(h) == [Pair(x,y) for (x,y) in zip(1:10000, 2:10001)]
-else
-    @test collect(h) == collect(zip(1:10000, 2:10001))
-end
+@test collect(h) == [Pair(x,y) for (x,y) in zip(1:10000, 2:10001)]
 
 for i=1:2:10000
     delete!(h, i)
@@ -182,14 +172,9 @@ let
     @test typeof(d) == OrderedDict{Any,Any}
 end
 
-# TODO: this is a BoundsError on v0.3, ArgumentError on v0.4
-#@test_throws ArgumentError first(OrderedDict())
+@test_throws ArgumentError first(OrderedDict())
 
-if VERSION >= v"0.4.0-dev+980"
-    @test first(OrderedDict([(:f, 2)])) == Pair(:f,2)
-else
-    @test first(OrderedDict([(:f, 2)])) == (:f,2)
-end
+@test first(OrderedDict([(:f, 2)])) == Pair(:f,2)
 
 # issue #1821
 let

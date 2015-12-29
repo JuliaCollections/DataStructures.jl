@@ -20,9 +20,7 @@ immutable OrderedDict{K,V} <: Associative{K,V}
 
     OrderedDict() = new(HashDict{K,V,Ordered}())
     OrderedDict(kv) = new(HashDict{K,V,Ordered}(kv))
-    if VERSION >= v"0.4.0-dev+980"
-        OrderedDict(ps::Pair{K,V}...) = new(HashDict{K,V,Ordered}(ps...))
-    end
+    OrderedDict(ps::Pair{K,V}...) = new(HashDict{K,V,Ordered}(ps...))
     #OrderedDict(ks,vs) = new(HashDict{K,V,Ordered}(ks,vs))
 end
 
@@ -31,19 +29,15 @@ OrderedDict(kv::Tuple{}) = OrderedDict()
 OrderedDict(kv) = ordered_dict_with_eltype(kv, eltype(kv))
 
 ordered_dict_with_eltype{K,V}(kv, ::Type{Tuple{K,V}}) = OrderedDict{K,V}(kv)
-ordered_dict_with_eltype(kv, t) = OrderedDict{Any,Any}(kv)
+ordered_dict_with_eltype{K,V}(kv, ::Type{Pair{K,V}})  = OrderedDict{K,V}(kv)
+ordered_dict_with_eltype(kv, t)                       = OrderedDict{Any,Any}(kv)
 
-if VERSION >= v"0.4.0-dev+980"
-    OrderedDict{K,V}(ps::Pair{K,V}...)              = OrderedDict{K,V}(ps...)
-    OrderedDict{K,V}(kv::Tuple{Vararg{Pair{K,V}}})         = OrderedDict{K,V}(kv)
-    OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})             = OrderedDict{K,Any}(kv)
-    OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv)
-    OrderedDict(kv::Tuple{Vararg{Pair}})                   = OrderedDict{Any,Any}(kv)
-
-    OrderedDict{K,V}(kv::AbstractArray{Pair{K,V}}) = OrderedDict{K,V}(kv)
-
-    ordered_dict_with_eltype{K,V}(kv, ::Type{Pair{K,V}}) = OrderedDict{K,V}(kv)
-end
+OrderedDict{K,V}(ps::Pair{K,V}...)                     = OrderedDict{K,V}(ps...)
+OrderedDict{K,V}(kv::Tuple{Vararg{Pair{K,V}}})         = OrderedDict{K,V}(kv)
+OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})             = OrderedDict{K,Any}(kv)
+OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv)
+OrderedDict(kv::Tuple{Vararg{Pair}})                   = OrderedDict{Any,Any}(kv)
+OrderedDict{K,V}(kv::AbstractArray{Pair{K,V}})         = OrderedDict{K,V}(kv)
 
 copy(d::OrderedDict) = OrderedDict(d)
 
@@ -58,11 +52,9 @@ copy(d::OrderedDict) = OrderedDict(d)
 
 sizehint(d::OrderedDict, sz::Integer) = (sizehint(d.d, sz); d)
 
-if VERSION >= v"0.4.0-dev+980"
-    push!(d::OrderedDict, kv::Pair) = (push!(d.d, kv); d)
-    push!(d::OrderedDict, kv::Pair, kv2::Pair) = (push!(d.d, kv, kv2); d)
-    push!(d::OrderedDict, kv::Pair, kv2::Pair, kv3::Pair...) = (push!(d.d, kv, kv2, kv3...); d)
-end
+push!(d::OrderedDict, kv::Pair) = (push!(d.d, kv); d)
+push!(d::OrderedDict, kv::Pair, kv2::Pair) = (push!(d.d, kv, kv2); d)
+push!(d::OrderedDict, kv::Pair, kv2::Pair, kv3::Pair...) = (push!(d.d, kv, kv2, kv3...); d)
 
 push!(d::OrderedDict, kv) = (push!(d.d, kv); d)
 push!(d::OrderedDict, kv, kv2...) = (push!(d.d, kv, kv2...); d)
