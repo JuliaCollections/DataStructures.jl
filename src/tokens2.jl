@@ -3,12 +3,12 @@ import Base.isequal
 import Base.colon
 import Base.endof
 
-@compat typealias SDMContainer Union{SortedDict, SortedMultiDict}
-@compat typealias SAContainer Union{SDMContainer, SortedSet}
+typealias SDMContainer Union{SortedDict, SortedMultiDict}
+typealias SAContainer Union{SDMContainer, SortedSet}
 
-typealias Token @compat Tuple{SAContainer, IntSemiToken}
-typealias SDMToken @compat Tuple{SDMContainer, IntSemiToken}
-typealias SetToken @compat Tuple{SortedSet, IntSemiToken}
+typealias Token Tuple{SAContainer, IntSemiToken}
+typealias SDMToken Tuple{SDMContainer, IntSemiToken}
+typealias SetToken Tuple{SortedSet, IntSemiToken}
 
 
 if VERSION >= v"0.4.0-dev"

@@ -144,7 +144,7 @@ let
     d = OrderedDict([(1, 2), (3, 4)])
     @test d[1] === 2
     @test d[3] === 4
-    ## TODO: @compat only rewrites Dict, not OrderedDict
+    ## TODO: test this
     # d2 = OrderedDict(1 => 2, 3 => 4)
     # d3 = OrderedDict((1 => 2, 3 => 4))
     # @test d == d2 == d3
@@ -294,8 +294,8 @@ end
 
 # Test merging
 let
-    a = @compat OrderedDict("foo"  => 0.0, "bar" => 42.0)
-    b = @compat OrderedDict("フー" => 17, "バー" => 4711)
+    a = OrderedDict("foo"  => 0.0, "bar" => 42.0)
+    b = OrderedDict("フー" => 17, "バー" => 4711)
     @test is(typeof(merge(a, b)), OrderedDict{UTF8String,Float64})
 end
 

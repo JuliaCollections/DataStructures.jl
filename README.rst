@@ -277,8 +277,8 @@ Examples using ``DefaultDict``::
   dd = DefaultDict(()->myfunc())    # call function myfunc to provide the default value
 
   # These all create the same default dict
-  dd = @compat DefaultDict(AbstractString, Vector{Int},        # Vector{Int}() is Julia v0.4 notation
-                           () -> Vector{Int}())        # @compat allows it to be used on v0.3
+  dd = DefaultDict(AbstractString, Vector{Int},
+                           () -> Vector{Int}())
   dd = DefaultDict(AbstractString, Vector{Int}, () -> Int[])
 
   # dd = DefaultDict(AbstractString, Vector{Int},     # **Note! Julia v0.4 and later only!
@@ -389,7 +389,7 @@ Finally, SortedMultiDict is similar to SortedDict except that each key
 can be associated with multiple values.  The key=>value pairs in
 a SortedMultiDict are stored according to the sorted order for keys,
 and key=>value pairs with the same
-key are stored in order of insertion. 
+key are stored in order of insertion.
 
 The containers internally use a 2-3 tree, which is a
 kind of balanced tree and is described in many elementary data
@@ -407,7 +407,7 @@ More details are provided below.
 Tokens for Sorted Containers
 ------------------------------
 
-The sorted container objects use a special type for indexing 
+The sorted container objects use a special type for indexing
 called a *token*
 defined as a two-entry tuple and aliased as
 ``SDToken``, ``SMDToken``, and ``SetToken`` for SortedDict, SortedMultiDict
@@ -424,7 +424,7 @@ and SortedSet.  These types are
 all aliases of ``IntSemiToken``.
 
 A restriction for the sorted containers is that
-``IntSemiToken`` or its aliases cannot used as the key-type.  
+``IntSemiToken`` or its aliases cannot used as the key-type.
 This is because
 ambiguity would result between the
 two subscripting calls ``sc[k]`` and ``sc[st]`` described below.  In the
@@ -440,7 +440,7 @@ For example, the first entry of a token is a pointer to a container
 (a non-bits type), so
 a new token is allocated on the heap rather than the
 stack.  In order to avoid performance loss, the package uses tokens
-less frequently than semitokens.  For a function 
+less frequently than semitokens.  For a function
 taking a token as an argument like
 ``deref`` described below, if it is invoked by explicitly naming
 the token like this::
@@ -462,16 +462,16 @@ Tokens can be explicitly advanced or regressed through the data in
 the sorted order; they are implicitly advanced or regressed via
 iteration loops defined below.
 
-A token may take two 
+A token may take two
 special values:
 the *before-start* value and the *past-end* value.  These
 values act as lower and upper bounds
 on the actual data.  The before-start token can be advanced,
 while the past-end token can be regressed.  A dereferencing operation on either
-leads to an error.  
+leads to an error.
 
 In the current implementation,
-semitokens are internally stored as integers. However, 
+semitokens are internally stored as integers. However,
 for the purpose of future compatibility,
 the user should  not extract this internal representation;
 these integers do not have a documented interpretation
@@ -483,13 +483,9 @@ Constructors for Sorted Containers
 
 ``SortedDict(d)``
   Argument ``d`` is an ordinary Julia dict (or any associative type)
-  used to initialize the container, e.g., for Julia 0.4/0.5::
+  used to initialize the container::
 
      c = SortedDict(Dict("New York" => 1788, "Illinois" => 1818))
-
-  or for 0.3::
-
-     c = SortedDict(["New York" => 1788, "Illinois" => 1818])
 
 
   In this example the key-type is deduced to be ASCIIString, while the
@@ -499,82 +495,66 @@ Constructors for Sorted Containers
 ``SortedDict(d,o)``
   Argument ``d`` is an ordinary Julia dict (or any associative type)
   used to initialize the container and ``o`` is an ordering object
-  used for ordering the keys. 
+  used for ordering the keys.
 
 ``SortedDict(k1=>v1, k2=>v2, ...)``
-  Arguments are key-value pairs for insertion into the 
-  dictionary.  
+  Arguments are key-value pairs for insertion into the
+  dictionary.
   The keys must be of the same type as one another; the
-  values must also be of one type.  (Julia 0.4/0.5 only.)
+  values must also be of one type.
 
 ``SortedDict(o, k1=>v1, k2=>v2, ...)``
   The first argument ``o`` is an ordering object.  The remaining
-  arguments are key-value pairs for insertion into the 
-  dictionary.  
+  arguments are key-value pairs for insertion into the
+  dictionary.
   The keys must be of the same type as one another; the
-  values must also be of one type. (Julia 0.4/0.5 only.)
+  values must also be of one type.
 
 ``SortedDict(iter)``
   Takes an arbitrary iterable object of key=>value pairs.
-  The default Forward ordering is used.  In Julia 0.3,
-  the ``iter`` argument must be an ``AbstractArray`` of
-  key-value two-entry tuples.
+  The default Forward ordering is used.
 
 ``SortedDict(iter,o)``
   Takes an arbitrary iterable object of key=>value pairs.
-  The ordering object ``o`` is explicitly given.  In Julia 0.3,
-  the ``iter`` argument must be an ``AbstractArray`` of
-  key-value two-entry tuples.
+  The ordering object ``o`` is explicitly given.
 
 ``SortedDict{K,V,Ord}(o)``
   Construct an empty SortedDict in which type parameters
   are explicitly listed; ordering object is explicitly specified.
   (See below for discussion of ordering.)  An empty SortedDict
-  may also be constructed using ``SortedDict(Dict{K,V}(),o)`` 
-  in Julia 0.4/0.5, where the ``o`` argument is optional, or 
-  ``SortedDict((K=>V)[],o)`` in Julia 0.3.
-
-``SortedDict(ks,vs,o)``
-  Here, ``ks`` is an array of keys, ``vs`` is an array of values
-  of the same length, and ``o`` is the optional ordering argument.
-  This syntax is available in Julia 0.3 only.  In Julia 0.4/0.5,
-  use ``SortedDict(zip(ks,vs),o).``
+  may also be constructed using ``SortedDict(Dict{K,V}(),o)``
+  where the ``o`` argument is optional.
 
 ``SortedMultiDict(ks,vs,o)``
   Construct a SortedMultiDict using keys given by ``ks``, values
   given by ``vs`` and ordering object ``o``.  The ordering object
   defaults to ``Forward`` if not specified.  The two arguments
-  ``ks`` and ``vs`` are 1-dimensional arrays of the same length in 
+  ``ks`` and ``vs`` are 1-dimensional arrays of the same length in
   which ``ks`` holds keys and ``vs`` holds the corresponding values.
 
 
 ``SortedMultiDict(k1=>v1, k2=>v2, ...)``
-  Arguments are key-value pairs for insertion into the 
-  multidict.  
+  Arguments are key-value pairs for insertion into the
+  multidict.
   The keys must be of the same type as one another; the
-  values must also be of one type.  Julia 0.4/0.5 only.
+  values must also be of one type.
 
 
 ``SortedMultiDict(o, k1=>v1, k2=>v2, ...)``
   The first argument ``o`` is an ordering object.  The remaining
-  arguments are key-value pairs for insertion into the 
+  arguments are key-value pairs for insertion into the
   multidict.
   The keys must be of the same type as one another; the
-  values must also be of one type. Julia 0.4/0.5 only.
+  values must also be of one type.
 
 
 ``SortedMultiDict(iter)``
   Takes an arbitrary iterable object of key=>value pairs.
-  The default Forward ordering is used.  In Julia 0.3, 
-  the ``iter`` argument must be an ``AbstractArray``
-  of (key,value) tuples.
+  The default Forward ordering is used.
 
 ``SortedMultiDict(iter,o)``
   Takes an arbitrary iterable object of key=>value pairs.
   The ordering object ``o`` is explicitly given.
-  In Julia 0.3, 
-  the ``iter`` argument must be an ``AbstractArray``
-  of (key,value) tuples.
 
 
 ``SortedMultiDict{K,V,Ord}(o)``
@@ -588,7 +568,7 @@ Constructors for Sorted Containers
   Construct a SortedSet using keys given by iterable ``iter`` (e.g.,
   an array)
   and ordering object ``o``.  The ordering object
-  defaults to ``Forward`` if not specified.  
+  defaults to ``Forward`` if not specified.
 
 ``SortedSet{K,Ord}(o)``
   Construct an empty sorted set in which type parameter
@@ -606,16 +586,16 @@ Complexity of Sorted Containers
 
 In the list of functions below, the running time of the various
 operations is provided.  In these running times,
-*n* denotes the current size 
+*n* denotes the current size
 (number of items) in the
 container at the time of the function call, and *c* denotes the
 time needed to compare two keys.
 
 --------------------------------------
-Navigating the Containers 
+Navigating the Containers
 --------------------------------------
 ``sd[k]``
-  Argument ``sd`` is a SortedDict and ``k`` is a key.  In an 
+  Argument ``sd`` is a SortedDict and ``k`` is a key.  In an
   expression, this retrieves the value associated with the key
   (or ``KeyError`` if none).  On the left-hand side of an
   assignment, this assigns or
@@ -625,7 +605,7 @@ Navigating the Containers
 ``find(sd,k)``
   Argument ``sd`` is a SortedDict and argument ``k`` is a key.
   This function returns the semitoken that refers to the item whose key
-  is ``k``, or 
+  is ``k``, or
   past-end semitoken if ``k`` is absent. Time: O(*c* log *n*)
 
 ``deref((sc,st))``
@@ -633,25 +613,24 @@ Navigating the Containers
   is a token (i.e., ``sc`` is a container and ``st`` is a semitoken).
   Note the double-parentheses in the calling syntax: the argument of ``deref``
   is  a token, which is defined to be a 2-tuple.
-  This returns the (key, value) 2-entry tuple in Julia 0.3 and a key=>value
-  pair in Julia 0.4/0.5
-  pointed to by the token for SortedDict and SortedMultiDict.  
-  Note that in any one of Julia 0.3/0.4/0.5, the syntax
+  This returns a key=>value pair.
+  pointed to by the token for SortedDict and SortedMultiDict.
+  Note that the syntax
   ``k,v=deref((sc,st))`` is valid because Julia automatically iterates
   over the two entries of the Pair in order to assign ``k`` and ``v``.
   For SortedSet this returns a key.  Time: O(1)
 
 
 ``deref_key((sc,st))``
-  Argument ``(sc,st)`` is a token for SortedMultiDict or SortedDict.  
-  This returns the key (i.e., the first half of a key=>value pair) 
+  Argument ``(sc,st)`` is a token for SortedMultiDict or SortedDict.
+  This returns the key (i.e., the first half of a key=>value pair)
   pointed to by the token.  This functionality is available as plain ``deref``
   for SortedSet.
   Time: O(1)
 
 
 ``deref_value((sc,st))``
-  Argument ``(sc,st)`` is a token for SortedMultiDict or SortedDict.  
+  Argument ``(sc,st)`` is a token for SortedMultiDict or SortedDict.
   This returns the value (i.e., the second half of a key=>value pair)
   pointed to by the token.
   Time: O(1)
@@ -671,8 +650,7 @@ Navigating the Containers
 
 ``first(sc)``
   Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet  This function
-  returns the first item (a ``k=>v`` pair for SortedDict and SortedMultiDict in 
-  Julia 0.4/0.5 or a ``(k,v)`` tuple in Julia 0.3;
+  returns the first item (a ``k=>v`` pair for SortedDict and SortedMultiDict or
   a key for SortedSet)
   according
   to the sorted order in the container.  Thus, ``first(sc)`` is
@@ -682,9 +660,8 @@ Navigating the Containers
 
 ``last(sc)``
   Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet.  This function
-  returns the last item (a ``k=>v`` pair for SortedDict and SortedMultiDict in
-  Julia 0.4/0.5 or a ``(k,v)`` tuple in Julia 0.3; 
-  a key for SortedSet)
+  returns the last item (a ``k=>v`` pair for SortedDict and SortedMultiDict
+  or   a key for SortedSet)
   according
   to the sorted order in the container.  Thus, ``last(sc)`` is
   equivalent to ``deref((sc,endof(sc)))``.
@@ -711,14 +688,14 @@ Navigating the Containers
 
 
 ``regress((sc,st))``
-  Argument 
+  Argument
   ``(sc,st)`` is a token.  This function returns the semitoken of the
   previous entry in the container according to the sort order of the
   keys.  If ``(sc,st)`` indexes the first item, this routine returns the before-start
   semitoken.  It is an error to invoke this function if ``(sc,st)`` is the
   before-start token.  If ``(sc,st)`` is the past-end token, then this
   routine returns the smitoken of the last item in the sort order (i.e., the
-  same semitoken returned by the ``endof`` function).  
+  same semitoken returned by the ``endof`` function).
   Time: O(log *n*)
 
 ``searchsortedfirst(sc,k)``
@@ -749,14 +726,14 @@ Navigating the Containers
 
 ``searchequalrange(sc,k)``
    Argument ``sc`` is a SortedMultiDict and ``k`` is an element of the
-   key type.  This routine returns a pair of semitokens; the first 
+   key type.  This routine returns a pair of semitokens; the first
    of the pair is the semitoken addressing the first item in the container
    with key ``k`` and the second is the semitoken addressing the
    last item in the container with key ``k``.  If no item matches
    the given key, then the pair (past-end-semitoken, before-start-semitoken)
    is returned.
    Time: O(*c* log *n*)
-   
+
 --------------------------------------------
 Inserting & Deleting in Sorted Containers
 --------------------------------------------
@@ -784,12 +761,12 @@ Inserting & Deleting in Sorted Containers
   This inserts the key into
   the container.  If the key is already present in a
   this overwrites
-  the old value.  (This is not necessarily a no-op; see below for 
+  the old value.  (This is not necessarily a no-op; see below for
   remarks about the customizing the sort order.)
   The return
   value is a pair whose first entry is boolean and indicates whether
   the insertion was new (i.e., the key was not previously present) and
-  the second entry is the semitoken of the new entry. 
+  the second entry is the semitoken of the new entry.
   Time: O(*c* log *n*)
 
 ``push!(sc,k)``
@@ -797,22 +774,21 @@ Inserting & Deleting in Sorted Containers
   This inserts the key into
   the container.  If the key is already present in a
   this overwrites
-  the old value.  (This is not necessarily a no-op; see below for 
+  the old value.  (This is not necessarily a no-op; see below for
   remarks about the customizing the sort order.)
   The return
   value is ``sc``.
   Time: O(*c* log *n*)
 
 ``push!(sc, k=>v)``
-  Argument ``sc`` is a SortedDict or SortedMultiDict and ``k=>v`` is a 
+  Argument ``sc`` is a SortedDict or SortedMultiDict and ``k=>v`` is a
   key-value pair.
   This inserts the key-value pair into
   the container.  If the key is already present in a
   this overwrites
-  the old value. 
+  the old value.
   The return
-  value is ``sc``.  In Julia 0.3, the syntax for this call
-  is ``push!(sc, k, v)``.
+  value is ``sc``.
   Time: O(*c* log *n*)
 
 
@@ -822,7 +798,7 @@ Inserting & Deleting in Sorted Containers
   This operation deletes the item addressed by ``(sc,st)``.
   It is an error to call
   this on an entry that has already been deleted or on the
-  before-start or past-end tokens.  After this operation is 
+  before-start or past-end tokens.  After this operation is
   complete, ``(sc,st)`` is an invalid token and cannot be used in
   any further operations.
   Time: O(log *n*)
@@ -832,14 +808,14 @@ Inserting & Deleting in Sorted Containers
   ``k`` is a key.  This operation deletes the item
   whose key is ``k``.  It is a  ``KeyError``
   if ``k`` is not a key of an item in the container.
-  After this operation is 
+  After this operation is
   complete, any token addressing the deleted item is invalid.
   Returns ``sc``.
   Time: O(*c* log *n*)
 
 
 ``pop!(sc,k)``
-  Deletes the item with key ``k`` in SortedDict or SortedSet ``sc`` 
+  Deletes the item with key ``k`` in SortedDict or SortedSet ``sc``
   and returns
   the value that was associated with ``k`` in the
   case of SortedDict or ``k`` itself in the case of SortedSet.
@@ -857,7 +833,7 @@ Inserting & Deleting in Sorted Containers
   then ``sc[st]`` refers to
   the value field of the (key,value) pair that the full
   token ``(sc,st)`` refers to.  This expression may occur on either side of an
-  assignment statement.  
+  assignment statement.
   Time: O(1)
 
 
@@ -873,9 +849,9 @@ Token Manipulation
   return value is -1 if ``(sc,st1)`` precedes ``(sc,st2)``, 0
   if they are equal, and 1 if ``(sc,st1)`` succeeds ``(sc,st2)``.
   This function compares the tokens by determining their relative
-  position within the tree without dereferencing them.  For 
+  position within the tree without dereferencing them.  For
   SortedDict it is mostly
-  equivalent to comparing ``deref_key((sc,st1))`` to ``deref_key((sc,st2))`` 
+  equivalent to comparing ``deref_key((sc,st1))`` to ``deref_key((sc,st2))``
   using the ordering of the SortedDict
   except in the
   case that either ``(sc,st1)`` or ``(sc,st2)`` is the before-start or past-end token,
@@ -917,8 +893,8 @@ The following snippet loops over the entire container ``sc``, where
      < body >
   end
 
-In this loop, ``(k,v)`` takes on successive (key,value) pairs 
-according to 
+In this loop, ``(k,v)`` takes on successive (key,value) pairs
+according to
 the sort order of the key.  If one uses::
 
   for p in sc
@@ -926,8 +902,7 @@ the sort order of the key.  If one uses::
   end
 
 where ``sc`` is a SortedDict or SortedMultiDict, then ``p`` is
-a ``k=>v`` pair in Julia 0.4/0.5 or a ``(k,v)`` tuple in Julia 0.3.
-
+a ``k=>v`` pair.
 
 For SortedSet one uses::
 
@@ -944,14 +919,14 @@ The first is the inclusive iteration for SortedDict and SortedMultiDict::
   end
 
 Here, ``st1`` and ``st2`` are semitokens that refer to the container ``sc``.
-It is acceptable for ``(sc,st1)`` to be the past-end token 
+It is acceptable for ``(sc,st1)`` to be the past-end token
 or ``(sc,st2)`` to be the before-start token (in these cases, the body
 is not executed).
-If ``compare(sc,st1,st2)==1`` then the body is not executed. 
-A second calling format for ``inclusive`` is 
+If ``compare(sc,st1,st2)==1`` then the body is not executed.
+A second calling format for ``inclusive`` is
 ``inclusive(sc,(st1,st2))``.  One purpose for second format is so that
 the return value of ``searchequalrange`` may be used directly
-as the second argument to ``inclusive``.  
+as the second argument to ``inclusive``.
 
 
 One can also define a loop that excludes the final item::
@@ -966,13 +941,11 @@ In this setting, either or both can be the past-end token, and ``(sc,st2)`` can
 be the before-start token. For the sake
 of consistency, ``exclusive`` also supports the calling format
 ``exclusive(sc,(st1,st2))``.  In the previous few snippets, if the loop
-object is ``p`` instead of ``(k,v)``, then ``p`` is a ``k=>v`` pair in Julia
-0.4/0.5 and a ``(k,v)`` tuple in Julia 0.3.
+object is ``p`` instead of ``(k,v)``, then ``p`` is a ``k=>v`` pair.
 
 
-
-Both the ``inclusive`` and ``exclusive`` functions return objects that can be 
-saved and used later for iteration.  
+Both the ``inclusive`` and ``exclusive`` functions return objects that can be
+saved and used later for iteration.
 The validity of the tokens is not checked until the loop initiates.
 
 For SortedSet the usage is::
@@ -997,7 +970,7 @@ one can iterate over just keys or just values::
       < body >
    end
 
-Finally, one can retrieve 
+Finally, one can retrieve
 semitokens during any of these iterations.  In the case
 of SortedDict and SortedMultiDict, one uses::
 
@@ -1014,8 +987,8 @@ of SortedDict and SortedMultiDict, one uses::
    end
 
 In each of the above three iterations, ``st`` is a
-semitoken referring to the 
-current ``(k,v)`` pair.  
+semitoken referring to the
+current ``(k,v)`` pair.
 In the case of SortedSet, the following iteration may be used::
 
    for (st,k) in semitokens(ss)
@@ -1028,11 +1001,10 @@ If one wishes to retrieve only semitokens, the following may be used::
        < body >
    end
 
-   
 
 In this case, ``sc`` is a SortedDict, SortedMultiDict, or SortedSet.
 To be compatible with standard containers, the package also offers
-``eachindex`` iteration (Julia 0.4/0.5 only)::
+``eachindex`` iteration::
 
 
    for ind in eachindex(sc)
@@ -1073,8 +1045,8 @@ Other Functions
 ``in(p,sc)``
   Returns true if ``p`` is in ``sc``.  In the
   case that ``sc`` is a SortedDict or SortedMultiDict,
-  ``p`` is a (key,value) tuple in Julia 0.3 or a key=>value
-  pair in Julia 0.4/0.5.  In the case that ``sc``
+  ``p`` is a key=>value
+  pair.  In the case that ``sc``
   is a SortedSet, ``p`` should be a key.
   Time: O(*c* log *n*) for SortedDict and SortedSet.
   In the case of SortedMultiDict, the time is
@@ -1090,17 +1062,16 @@ Other Functions
   above in the discussion of container loops and ``x``
   is of the appropriate type.
   For all of the iterables except the five listed below,
-  the algorithm used 
+  the algorithm used
   is a linear-time search.  For example, the call::
-     
+
     (k=>v) in exclusive(sd,st1,st2)
 
   where ``sd`` is a SortedDict, ``st1`` and ``st2`` are
   semitokens, ``k`` is a key, and ``v`` is a value, will
   loop over all entries in the dictionary between
   the two tokens and a compare for equality using ``isequal`` between the
-  indexed item and ``k=>v``.  (In Julia 0.3, the syntax would be
-  ``(k,v) in exclusive(sd, st1, st2)``.)
+  indexed item and ``k=>v``.
 
   The five exceptions are::
 
@@ -1112,7 +1083,6 @@ Other Functions
 
   Here, ``sd`` is a SortedDict,
   ``smd`` is a SortedMultiDict, and ``ss`` is a SortedSet.
-  In the first two items, one uses ``(k,v)`` for Julia 0.3 rather than ``k=>v``.
 
   These five invocations of ``in``
   use the index structure
@@ -1134,34 +1104,31 @@ Other Functions
 
 
 ``eltype(sc)``
-  Returns the (key,value) type (a 2-entry pair, i.e., ``Pair{K,V}`` in
-  Julia 0.4/0.5; a 2-tuple type ``(K,V)`` in Julia 0.3)
+  Returns the (key,value) type (a 2-entry pair, i.e., ``Pair{K,V}``)
   for SortedDict and SortedMultiDict.
   Returns the key type for SortedSet.  This function may
   also be applied to the type itself.
   Time: O(1)
 
 ``keytype(sc)``
-  Returns the key type 
+  Returns the key type
   for SortedDict, SortedMultiDict and SortedSet.
   This function may
-  also be applied to the type itself.  Julia 0.4/0.5 only.
+  also be applied to the type itself.
   Time: O(1)
 
 
 ``valtype(sc)``
-  Returns the value type 
+  Returns the value type
   for SortedDict and SortedMultiDict.
   This function may
-  also be applied to the type itself. Julia 0.4/0.5 only.
+  also be applied to the type itself.
   Time: O(1)
 
 
 
-
-
 ``similar(sc)``
-  Returns a new SortedDict, SortedMultiDict, or SortedSet 
+  Returns a new SortedDict, SortedMultiDict, or SortedSet
   of the same type and with the same ordering
   as ``sc`` but with no entries (i.e., empty).  Time: O(1)
 
@@ -1189,7 +1156,7 @@ Other Functions
 
 ``getkey(sd,k,defaultk)``
   Returns key ``k`` where ``sd`` is a SortedDict, if ``k`` is in ``sd``
-  else it returns ``defaultk``. 
+  else it returns ``defaultk``.
   If the container uses in its ordering
   an ``eq`` method different from
   isequal (e.g., case-insensitive ASCII strings illustrated below), then the
@@ -1213,7 +1180,7 @@ Other Functions
   does not imply any correspondence between semitokens for items
   in ``sc1`` with those for ``sc2``.  If the equality-testing method associated
   with the keys and values implies hash-equivalence in the
-  case of SortedDict, then ``isequal`` of the 
+  case of SortedDict, then ``isequal`` of the
   entire containers implies hash-equivalence of the containers.
   Time: O(*cn* + *n* log *n*)
 
@@ -1222,14 +1189,14 @@ Other Functions
   packed.  When deletions take
   place, the previously allocated memory is not returned.
   This function can be used to reclaim memory after
-  many deletions.  
+  many deletions.
   Time: O(*cn* log *n*)
 
 ``deepcopy(sc)``
   This returns a copy of ``sc`` in which the data is
   deep-copied, i.e., the keys and values are replicated
   if they are mutable types.  A semitoken for the original ``sc``
-  is a valid 
+  is a valid
   semitoken for the copy because this operation preserves the
   relative positions of the data in memory.
   Time O(*maxn*), where *maxn* denotes the maximum size
@@ -1239,7 +1206,7 @@ Other Functions
   This returns a packed copy of ``sc`` in which the keys
   and values are deep-copied.
   This function can be used to reclaim memory after
-  many deletions.  
+  many deletions.
   Time: O(*cn* log *n*)
 
 
@@ -1293,7 +1260,7 @@ message is produced; instead, the built-in default versions of these functions
   inserts each item from ``ss`` and each item from each iterable argument
   into the returned SortedSet.  Time:  O(*cn* log *n*) where *n* is the
   total number of items in all the arguments.
-   
+
 ``intersect(ss, others...)``
   Each argument is a SortedSet with the same key and order type.
   The return variable is a new SortedSet that is the intersection of
@@ -1304,16 +1271,16 @@ message is produced; instead, the built-in default versions of these functions
   The two argument are sorted sets with the same key and order type.  This operation
   computes the symmetric difference, i.e., a sorted set containing
   entries that are in one of
-  ``ss1``, ``ss2`` but not both.  
+  ``ss1``, ``ss2`` but not both.
   Time: O(*cn* log *n*), where *n* is the
-  total size of the two containers.  
+  total size of the two containers.
 
 ``setdiff(ss1, ss2)``
   The two arguments are sorted sets with the same key and order type.  This operation
   computes the difference, i.e., a sorted set containing entries that in
-  are in ``ss1`` but not ``ss2``.  
+  are in ``ss1`` but not ``ss2``.
   Time: O(*cn* log *n*), where *n* is the
-  total size of the two containers.  
+  total size of the two containers.
 
 ``setdiff!(ss, iterable)``
   This function deletes items in ``ss`` that appear in the second argument.
@@ -1332,7 +1299,7 @@ message is produced; instead, the built-in default versions of these functions
 ----------------------
 Ordering of keys
 ----------------------
-As mentioned earlier, the default ordering of keys uses 
+As mentioned earlier, the default ordering of keys uses
 ``isless`` and ``isequal`` functions.  If the default ordering is used,
 it is a requirement of the container that ``isequal(a,b)`` is true if and
 only if ``!isless(a,b)`` and ``!isless(b,a)`` are both true.  This relationship
@@ -1345,7 +1312,7 @@ The name for the default ordering (i.e., using ``isless`` and
 ``isequal``) is ``Forward``.  Note: this is the name of the
 ordering object; its type is ``ForwardOrdering.``
 Another possible
-ordering object is ``Reverse``, which reverses the usual sorted order.  
+ordering object is ``Reverse``, which reverses the usual sorted order.
 This name must be
 imported ``import Base.Reverse`` if it is used.
 
@@ -1378,7 +1345,7 @@ First, the user creates a singleton type that is a subtype of
     immutable CaseInsensitive <: Ordering
     end
 
-Next, the user defines a method named ``lt`` for less-than 
+Next, the user defines a method named ``lt`` for less-than
 in this ordering::
 
     lt(::CaseInsensitive, a, b) = isless(lowercase(a), lowercase(b))
@@ -1389,7 +1356,7 @@ The container also needs an equal-to function; the default is::
 
     eq(o::Ordering, a, b) = !lt(o, a, b) && !lt(o, b, a)
 
-For a further slight performance boost, the user can also customize 
+For a further slight performance boost, the user can also customize
 this function with a more efficient
 implementation.  In the above example, an appropriate customization would
 be::
@@ -1413,7 +1380,7 @@ Cautionary note on mutable keys
 As with ordinary Dicts, keys for the sorted containers
 can be either mutable or immutable.  In the
 case of mutable keys, it is important that the keys not be mutated
-once they are in the container else the indexing structure will be 
+once they are in the container else the indexing structure will be
 corrupted. (The same restriction applies to Dict.)
 For example, suppose a SortedDict ``sd`` is defined in which the
 keys are of type ``Array{Int,1}.``  (For this to be possible, the user

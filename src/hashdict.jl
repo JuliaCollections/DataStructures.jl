@@ -13,10 +13,10 @@ else
     const SerState =  Base.Serializer.SerializationState
 end
 
-@compat typealias Unordered Void
+typealias Unordered Void
 typealias Ordered   Int
 
-@compat type HashDict{K,V,O<:Union{Ordered,Unordered}} <: Associative{K,V}
+type HashDict{K,V,O<:Union{Ordered,Unordered}} <: Associative{K,V}
     slots::Array{UInt8,1}
     keys::Array{K,1}
     vals::Array{V,1}
@@ -64,19 +64,19 @@ typealias Ordered   Int
 end
 
 HashDict() = HashDict{Any,Any,Unordered}()
-HashDict(kv::@compat Tuple{}) = HashDict()
+HashDict(kv::Tuple{}) = HashDict()
 HashDict(kv) = hash_dict_with_eltype(kv, eltype(kv))
 
-hash_dict_with_eltype{K,V}(kv, ::Type{@compat Tuple{K,V}}) = HashDict{K,V}(kv)
+hash_dict_with_eltype{K,V}(kv, ::Type{Tuple{K,V}}) = HashDict{K,V}(kv)
 hash_dict_with_eltype(kv, t) = HashDict{Any,Any}(kv)
 
-HashDict{K,V}(kv::AbstractArray{@compat Tuple{K,V}}) = HashDict{K,V,Unordered}(kv)
+HashDict{K,V}(kv::AbstractArray{Tuple{K,V}}) = HashDict{K,V,Unordered}(kv)
 if VERSION >= v"0.4.0-dev+980"
     HashDict{K,V}(ps::Pair{K,V}...) = HashDict{K,V,Unordered}(ps...)
-    HashDict{K,V}(kv::@compat Tuple{Vararg{Pair{K,V}}})         = HashDict{K,V}(kv)
-    HashDict{K}(kv::@compat Tuple{Vararg{Pair{K}}})             = HashDict{K,Any}(kv)
-    HashDict{V}(kv::@compat Tuple{Vararg{Pair{TypeVar(:K),V}}}) = HashDict{Any,V}(kv)
-    HashDict(kv::@compat Tuple{Vararg{Pair}})                   = HashDict{Any,Any}(kv)
+    HashDict{K,V}(kv::Tuple{Vararg{Pair{K,V}}})         = HashDict{K,V}(kv)
+    HashDict{K}(kv::Tuple{Vararg{Pair{K}}})             = HashDict{K,Any}(kv)
+    HashDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = HashDict{Any,V}(kv)
+    HashDict(kv::Tuple{Vararg{Pair}})                   = HashDict{Any,Any}(kv)
 
     HashDict{K,V}(kv::AbstractArray{Pair{K,V}}) = HashDict{K,V}(kv)
 
@@ -91,7 +91,7 @@ similar{K,V,O}(d::HashDict{K,V,O}) = HashDict{K,V,O}()
 
 function serialize(s::SerState, t::HashDict)
     serialize_type(s, typeof(t))
-    serialize(s, @compat Int32(length(t)))
+    serialize(s, Int32(length(t)))
     for (k,v) in t
         serialize(s, k)
         serialize(s, v)
