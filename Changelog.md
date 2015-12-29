@@ -1,4 +1,10 @@
 
+v0.4.1 / 2015-12-29
+==================
+
+  * More thorough removal of v0.3 support
+  * Replace tuple_or_pair with Pair() or Pair{}
+
 v0.4.0 / 2015-12-28
 ===================
 
