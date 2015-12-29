@@ -194,8 +194,7 @@ filter!(isodd, s)
 @test isequal(s, OrderedSet([1,3]))
 
 # first
-# TODO: throws BoundsError in v0.3, ArgumentError in v0.4
-#@test_throws ArgumentError first(OrderedSet())
+@test_throws ArgumentError first(OrderedSet())
 @test first(OrderedSet([2])) == 2
 
 #####################

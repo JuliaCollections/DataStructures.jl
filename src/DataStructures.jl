@@ -1,4 +1,4 @@
-VERSION >= v"0.4.0-dev+6521" && __precompile__()
+__precompile__()
 
 module DataStructures
 
@@ -50,11 +50,7 @@ module DataStructures
 
     export MultiDict, enumerateall
 
-    if VERSION < v"0.4.0-dev"
-        using Docile
-    else
-        import Base: eachindex, keytype, valtype
-    end
+    import Base: eachindex, keytype, valtype
 
 
     include("delegate.jl")

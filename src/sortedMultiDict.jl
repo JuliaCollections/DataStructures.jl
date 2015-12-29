@@ -102,13 +102,13 @@ end
 @inline function first(m::SortedMultiDict)
     i = beginloc(m.bt)
     i == 2 && throw(BoundsError())
-    return tuple_or_pair(m.bt.data[i].k, m.bt.data[i].d)
+    return Pair(m.bt.data[i].k, m.bt.data[i].d)
 end
 
 @inline function last(m::SortedMultiDict)
     i = endloc(m.bt)
     i == 1 && throw(BoundsError())
-    return tuple_or_pair(m.bt.data[i].k, m.bt.data[i].d)
+    return Pair(m.bt.data[i].k, m.bt.data[i].d)
 end
 
 

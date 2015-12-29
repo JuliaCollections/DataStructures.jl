@@ -36,7 +36,7 @@ function SortedDict{K,D}(ps::Pair{K,D}...)
     for p in ps
         h[p.first] = p.second
     end
-    h 
+    h
 end
 
 
@@ -49,12 +49,12 @@ function SortedDict{K,D, Ord <: Ordering}(o::Ord, ps::Pair{K,D}...)
     for p in ps
         h[p.first] = p.second
     end
-    h 
+    h
 end
 
 ## This one takes an iterable; ordering type is optional.
 
-SortedDict{Ord <: Ordering}(kv, o::Ord=Forward) = 
+SortedDict{Ord <: Ordering}(kv, o::Ord=Forward) =
 sorteddict_with_eltype(kv, eltype(kv), o)
 
 function sorteddict_with_eltype{K,D,Ord}(kv, ::Type{Pair{K,D}}, o::Ord)
@@ -86,7 +86,7 @@ typealias SDToken Tuple{SortedDict,IntSemiToken}
 end
 
 
-## This function implements m[k]=d; it sets the 
+## This function implements m[k]=d; it sets the
 ## data item associated with key k equal to d.
 
 @inline function setindex!{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, d_, k_)
@@ -108,7 +108,7 @@ end
 ## This function looks up a key in the tree;
 ## if not found, then it returns a marker for the
 ## end of the tree.
-        
+
 
 @inline function find(m::SortedDict, k_)
     ll, exactfound = findkey(m.bt, convert(keytype(m),k_))
@@ -155,13 +155,13 @@ end
 @inline function first(m::SortedDict)
     i = beginloc(m.bt)
     i == 2 && throw(BoundsError())
-    return tuple_or_pair(m.bt.data[i].k, m.bt.data[i].d)
+    return Pair(m.bt.data[i].k, m.bt.data[i].d)
 end
 
 @inline function last(m::SortedDict)
     i = endloc(m.bt)
     i == 1 && throw(BoundsError())
-    return tuple_or_pair(m.bt.data[i].k, m.bt.data[i].d)
+    return Pair(m.bt.data[i].k, m.bt.data[i].d)
 end
 
 
@@ -199,7 +199,7 @@ function getkey{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_, default_)
     exactfound? m.bt.data[i].k : convert(K, default_)
 end
 
-## Function delete! deletes an item at a given 
+## Function delete! deletes an item at a given
 ## key
 
 @inline function delete!(m::SortedDict, k_)
@@ -247,7 +247,7 @@ function isequal(m1::SortedDict, m2::SortedDict)
 end
 
 
-function mergetwo!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, 
+function mergetwo!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},
                                         m2::Associative{K,D})
     for (k,v) in m2
         m[convert(K,k)] = convert(D,v)
@@ -271,14 +271,14 @@ function packdeepcopy{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
 end
 
 
-function merge!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, 
+function merge!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},
                                      others::Associative{K,D}...)
     for o in others
         mergetwo!(m,o)
     end
 end
 
-function merge{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, 
+function merge{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},
                                     others::Associative{K,D}...)
     result = packcopy(m)
     merge!(result, others...)
@@ -287,5 +287,5 @@ end
 
 
 
-similar{K,D,Ord<:Ordering}(m::SortedDict{K,D,Ord}) = 
+similar{K,D,Ord<:Ordering}(m::SortedDict{K,D,Ord}) =
 SortedDict{K,D,Ord}(orderobject(m))
