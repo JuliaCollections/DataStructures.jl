@@ -11,17 +11,6 @@ typealias SDMToken Tuple{SDMContainer, IntSemiToken}
 typealias SetToken Tuple{SortedSet, IntSemiToken}
 
 
-if VERSION >= v"0.4.0-dev"
-
-@inline tuple_or_pair(k,v) = k=>v
-
-else
-
-@inline tuple_or_pair(k,v) = (k,v)
-
-end
-
-
 ## Function startof returns the semitoken that points
 ## to the first sorted order of the tree.  It returns
 ## the past-end token if the tree is empty.
@@ -59,7 +48,7 @@ end
 
 
 ## Function regresss takes a token and returns the
-## previous token in the sorted order. 
+## previous token in the sorted order.
 
 @inline function regress(ii::Token)
     not_beforestart(ii)
@@ -67,24 +56,24 @@ end
 end
 
 
-## status of a token is 0 if the token is invalid, 1 if it points to 
+## status of a token is 0 if the token is invalid, 1 if it points to
 ## ordinary data, 2 if it points to the before-start location and 3 if
 ## it points to the past-end location.
 
 
 @inline status(ii::Token) =
        !(ii[2].address in ii[1].bt.useddatacells)? 0 :
-         ii[2].address == 1?                       2 : 
+         ii[2].address == 1?                       2 :
          ii[2].address == 2?                       3 : 1
 
 
-@inline compare(m::SAContainer, s::IntSemiToken, t::IntSemiToken) = 
+@inline compare(m::SAContainer, s::IntSemiToken, t::IntSemiToken) =
       compareInd(m.bt, s.address, t.address)
 
 
 @inline function deref(ii::SDMToken)
     has_data(ii)
-    return tuple_or_pair(ii[1].bt.data[ii[2].address].k, ii[1].bt.data[ii[2].address].d)
+    return Pair(ii[1].bt.data[ii[2].address].k, ii[1].bt.data[ii[2].address].d)
 end
 
 @inline function deref(ii::SetToken)
@@ -109,33 +98,33 @@ end
 ## to spell it out otherwise there is an ambiguity.
 
 @inline function getindex(m::SortedDict,
-                          i::IntSemiToken)    
+                          i::IntSemiToken)
     has_data((m,i))
     return m.bt.data[i.address].d
 end
 
 @inline function getindex(m::SortedMultiDict,
-                          i::IntSemiToken)    
+                          i::IntSemiToken)
     has_data((m,i))
     return m.bt.data[i.address].d
 end
 
 @inline function setindex!(m::SortedDict,
-                           d_, 
+                           d_,
                            i::IntSemiToken)
     has_data((m,i))
     m.bt.data[i.address] = KDRec{keytype(m),valtype(m)}(m.bt.data[i.address].parent,
-                                                         m.bt.data[i.address].k, 
+                                                         m.bt.data[i.address].k,
                                                          convert(valtype(m),d_))
     m
 end
 
 @inline function setindex!(m::SortedMultiDict,
-                           d_, 
+                           d_,
                            i::IntSemiToken)
     has_data((m,i))
     m.bt.data[i.address] = KDRec{keytype(m),valtype(m)}(m.bt.data[i.address].parent,
-                                                         m.bt.data[i.address].k, 
+                                                         m.bt.data[i.address].k,
                                                          convert(valtype(m),d_))
     m
 end
@@ -177,15 +166,15 @@ end
 ## not exported.
 
 
-@inline not_beforestart(i::Token) = 
-    (!(i[2].address in i[1].bt.useddatacells) || 
+@inline not_beforestart(i::Token) =
+    (!(i[2].address in i[1].bt.useddatacells) ||
      i[2].address == 1) && throw(BoundsError())
 
 @inline not_pastend(i::Token) =
-    (!(i[2].address in i[1].bt.useddatacells) || 
+    (!(i[2].address in i[1].bt.useddatacells) ||
      i[2].address == 2) && throw(BoundsError())
 
 
 @inline has_data(i::Token) =
-    (!(i[2].address in i[1].bt.useddatacells) || 
+    (!(i[2].address in i[1].bt.useddatacells) ||
      i[2].address < 3) && throw(BoundsError())

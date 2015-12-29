@@ -76,8 +76,6 @@ end
 
 
 
-tuple_or_pair(K::DataType, V::DataType) = Pair{K,V}
-tuple_or_pair(k,v) = k=>v
 push_test!(m, k, v) = push!(m, k=>v)
 
 
@@ -306,8 +304,8 @@ function test2()
     m3 = packcopy(m1)
     p = first(m1)
     @test p[1] == 6 && p[2] == 18.2
-    @test in(tuple_or_pair(8,32.0),m3)
-    @test !in(tuple_or_pair(8,32.1),m3)
+    @test in(Pair(8,32.0),m3)
+    @test !in(Pair(8,32.1),m3)
     push_test!(m1, 12, 33.2)
     checkcorrectness(m1.bt, false)
     @test length(m1) == 3
@@ -457,9 +455,9 @@ function test2()
     wwx = first(m1)
     @test wwx[1] == 2
     tpr = eltype(m1)
-    @test tpr == tuple_or_pair(Int,Float64)
+    @test tpr == Pair{Int,Float64}
     tpr2 = eltype(typeof(m1))
-    @test tpr2 == tuple_or_pair(Int,Float64)
+    @test tpr2 == Pair{Int,Float64}
     kt = keytype(m1)
     @test kt == Int
     kt2 = keytype(typeof(m1))
@@ -742,7 +740,7 @@ function test3{T}(z::T)
     @test sum2 == 1 + 2 + 5 + 7 + 10 + 14 + 35 + 70
     @test eltype(inclusive(factors,
                            searchsortedfirst(factors,70),
-                           searchsortedlast(factors,70))) == tuple_or_pair(Int,Int)
+                           searchsortedlast(factors,70))) == Pair{Int,Int}
 
 
     sum2 = 0
@@ -769,7 +767,7 @@ function test3{T}(z::T)
     @test sum3 == 1 + 2 + 3 + 4 + 5 + 6 + 10 + 12 + 15 + 20 + 30 + 60
     @test eltype(exclusive(factors,
                            searchsortedfirst(factors,70),
-                           searchsortedlast(factors,70))) == tuple_or_pair(Int,Int)
+                           searchsortedlast(factors,70))) == Pair{Int,Int}
 
 
     sum3 = 0
@@ -1187,7 +1185,7 @@ function test5()
     end
     @test count == 5
     m3empty = similar(m3)
-    @test eltype(m3empty) == tuple_or_pair(ASCIIString, Int) &&
+    @test eltype(m3empty) == Pair{ASCIIString, Int} &&
        orderobject(m3empty) == CaseInsensitive() &&
        length(m3empty) == 0
     m4 = SortedDict((Dict{ASCIIString,Int}()), Lt((x,y) -> isless(lowercase(x),lowercase(y))))
@@ -1342,12 +1340,12 @@ function test7()
         end
     end
     @test length(factors) == len
-    @test tuple_or_pair(70,2) in factors
-    @test tuple_or_pair(70,14) in factors
-    @test !(tuple_or_pair(70,15) in factors)
-    @test !(tuple_or_pair(N+1,15) in factors)
-    @test eltype(factors) == tuple_or_pair(Int,Int)
-    @test eltype(typeof(factors)) == tuple_or_pair(Int,Int)
+    @test Pair(70,2) in factors
+    @test Pair(70,14) in factors
+    @test !(Pair(70,15) in factors)
+    @test !(Pair(N+1,15) in factors)
+    @test eltype(factors) == Pair{Int,Int}
+    @test eltype(typeof(factors)) == Pair{Int,Int}
 
     @test keytype(factors) == Int
     @test keytype(typeof(factors)) == Int
@@ -1356,7 +1354,7 @@ function test7()
 
     push_test!(factors, 70,3)
     @test length(factors) == len+1
-    @test tuple_or_pair(70,3) in factors
+    @test Pair(70,3) in factors
     i = searchsortedfirst(factors, 70)
     dcount = 0
     for (s,k,v) in semitokens(inclusive(factors, i, endof(factors)))
@@ -1377,26 +1375,26 @@ function test7()
     checkcorrectness(factors.bt, true)
     i = startof(factors)
     i = advance((factors,i))
-    @test deref((factors,i)) == tuple_or_pair(2,1)
+    @test deref((factors,i)) == Pair(2,1)
     @test deref_key((factors,i)) == 2
     @test deref_value((factors,i)) == 1
     @test factors[i] == 1
     factors[i] = 7
-    @test deref((factors,i)) == tuple_or_pair(2,7)
+    @test deref((factors,i)) == Pair(2,7)
     factors[i] = 1
     i = regress((factors,i))
     i = regress((factors,i))
     @test i == beforestartsemitoken(factors)
     pr = first(factors)
-    @test pr == tuple_or_pair(1,1)
+    @test pr == Pair(1,1)
     pr2 = last(factors)
-    @test pr2 == tuple_or_pair(N,N)
+    @test pr2 == Pair(N,N)
     i = searchsortedfirst(factors,77)
-    @test deref((factors,i)) == tuple_or_pair(77,1)
+    @test deref((factors,i)) == Pair(77,1)
     i = searchsortedlast(factors,77)
-    @test deref((factors,i)) == tuple_or_pair(77,77)
+    @test deref((factors,i)) == Pair(77,77)
     i = searchsortedafter(factors,77)
-    @test deref((factors,i)) == tuple_or_pair(78,1)
+    @test deref((factors,i)) == Pair(78,1)
     expected = [1,2,4,5,8,10,16,20,40,80]
     i1,i2 = searchequalrange(factors, 80)
     i = i1
@@ -1476,7 +1474,7 @@ function test7()
                           "oranges", "plums"],
                          [2.0, 6.0, 1.0, 9.0, 3.0, 4.0, 7.0, 8.0, 5.0, 10.0])
     m3empty = similar(m3)
-    @test (eltype(m3empty) == tuple_or_pair(ASCIIString, Float64)) &&
+    @test (eltype(m3empty) == Pair{ASCIIString, Float64}) &&
         orderobject(m3empty) == Forward &&
         length(m3empty) == 0
     m4 = merge(m1, m2)
