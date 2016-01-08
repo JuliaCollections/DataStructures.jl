@@ -8,9 +8,11 @@ import Base: KeyIterator, ValueIterator, haskey, get, getkey, delete!,
 if VERSION < v"0.4.0-dev+5152"
     import Base: serialize_type
     const SerState = IO
+    getio(io::SerState) = io
 else
     import Base.Serializer: serialize_type
     const SerState =  Base.Serializer.SerializationState
+    getio(ss::SerState) = ss.io
 end
 
 @compat typealias Unordered Void
@@ -91,7 +93,7 @@ similar{K,V,O}(d::HashDict{K,V,O}) = HashDict{K,V,O}()
 
 function serialize(s::SerState, t::HashDict)
     serialize_type(s, typeof(t))
-    write(s, int32(length(t)))
+    @compat write(getio(s), Int32(length(t)))
     for (k,v) in t
         serialize(s, k)
         serialize(s, v)
@@ -99,7 +101,7 @@ function serialize(s::SerState, t::HashDict)
 end
 
 function deserialize{K,V,O}(s::SerState, T::Type{HashDict{K,V,O}})
-    n = read(s, Int32)
+    n = read(getio(s), Int32)
     t = T(); sizehint(t, n)
     for i = 1:n
         k = deserialize(s)

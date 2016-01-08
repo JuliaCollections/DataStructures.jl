@@ -314,3 +314,12 @@ let
     @test d['f'] == 6
     @test length(d) == 6
 end
+
+# test serialize, deserialize
+let
+    io = IOBuffer()
+    od = OrderedDict("asdf"=>Int32)
+    serialize(io, od)
+    seekstart(io)
+    @test deserialize(io) == od
+end
