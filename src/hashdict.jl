@@ -5,13 +5,8 @@ import Base: KeyIterator, ValueIterator, haskey, get, getkey, delete!,
              sizehint, length, filter, isempty, start, next, done,
              keys, values, _tablesz, skip_deleted, serialize, deserialize
 
-if VERSION < v"0.4.0-dev+5152"
-    import Base: serialize_type
-    const SerState = IO
-else
-    import Base.Serializer: serialize_type
-    const SerState =  Base.Serializer.SerializationState
-end
+import Base.Serializer: serialize_type
+const SerState =  Base.Serializer.SerializationState
 
 typealias Unordered Void
 typealias Ordered   Int
@@ -30,22 +25,20 @@ type HashDict{K,V,O<:Union{Ordered,Unordered}} <: Associative{K,V}
         n = 16
         new(zeros(UInt8,n), Array(K,n), Array(V,n), Array(O,n), Array(O,0), 0, 0, identity)
     end
-    if VERSION >= v"0.4.0-dev+980"
-        HashDict(p::Pair) = setindex!(HashDict{K,V,O}(), p.second, p.first)
-        function HashDict(ps::Pair{K,V}...)
-            h = HashDict{K,V,O}()
-            sizehint(h, length(ps))
-            for p in ps
-                h[p.first] = p.second
-            end
-            return h
+
+    HashDict(p::Pair) = setindex!(HashDict{K,V,O}(), p.second, p.first)
+    function HashDict(ps::Pair...)
+        h = HashDict{K,V,O}()
+        sizehint(h, length(ps))
+        for p in ps
+            h[p.first] = p.second
         end
-        HashDict(p::Pair{K,V}) = invoke(HashDict, (Pair{K,V}...), p)
+        return h
     end
+
     function HashDict(ks, vs)
-        if VERSION >= v"0.4.0-dev+980"
-            Base.warn_once("HashDict(kv,vs) is deprecated, use HashDict(zip(ks,vs)) instead")
-        end
+        Base.warn_once("HashDict(kv,vs) is deprecated, use HashDict(zip(ks,vs)) instead")
+
         n = length(ks)
         h = HashDict{K,V,O}()
         for i=1:n
@@ -53,6 +46,7 @@ type HashDict{K,V,O<:Union{Ordered,Unordered}} <: Associative{K,V}
         end
         return h
     end
+
     function HashDict(kv)
         h = HashDict{K,V,O}()
         sizehint(h, length(kv))

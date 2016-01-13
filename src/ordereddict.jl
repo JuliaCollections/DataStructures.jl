@@ -21,6 +21,7 @@ immutable OrderedDict{K,V} <: Associative{K,V}
     OrderedDict() = new(HashDict{K,V,Ordered}())
     OrderedDict(kv) = new(HashDict{K,V,Ordered}(kv))
     OrderedDict(ps::Pair{K,V}...) = new(HashDict{K,V,Ordered}(ps...))
+    OrderedDict(ps::Pair...) = new(HashDict{K,V,Ordered}(ps...))
     #OrderedDict(ks,vs) = new(HashDict{K,V,Ordered}(ks,vs))
 end
 
@@ -33,6 +34,7 @@ ordered_dict_with_eltype{K,V}(kv, ::Type{Pair{K,V}})  = OrderedDict{K,V}(kv)
 ordered_dict_with_eltype(kv, t)                       = OrderedDict{Any,Any}(kv)
 
 OrderedDict{K,V}(ps::Pair{K,V}...)                     = OrderedDict{K,V}(ps...)
+OrderedDict(ps::Pair...)                               = OrderedDict{Any,Any}(ps...)
 OrderedDict{K,V}(kv::Tuple{Vararg{Pair{K,V}}})         = OrderedDict{K,V}(kv)
 OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})             = OrderedDict{K,Any}(kv)
 OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv)
