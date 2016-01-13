@@ -313,3 +313,20 @@ let
     @test dd == od
     close(s)
 end
+
+# #148
+
+let d148 = OrderedDict(
+                 :gps => [],
+                 :direction => 1:8,
+                 :weather => 1:10
+          ),
+    d148_2 = OrderedDict(
+           :time => 1:10,
+           :features => OrderedDict(
+               :gps => 1:5,
+               :direction => 1:8,
+               :weather => 1:10
+           )
+       )
+end
