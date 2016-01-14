@@ -152,6 +152,23 @@ for k = 1 : m
     @test collect(q) == r
 end
 
+# hash and ==
+a = Deque{Int64}(2)
+b = Deque{Int64}(3)
+# Note: blksize does not distinguish == or hash
+@test a == b
+@test hash(a) === hash(b)
+push!(a, 1)
+@test a != b
+push!(a, 2)
+push!(b, 2, 1)
+@test a != b
+@test hash(a) !== hash(b)
+shift!(b)
+push!(b, 2)
+@test a == b
+@test hash(a) == hash(b)
+
 # issue #38
 
 q = Deque{Int}(1)

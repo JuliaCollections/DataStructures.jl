@@ -271,3 +271,20 @@ function shift!{T}(q::Deque{T})  # pop front
     q.len -= 1
     x
 end
+
+const _deque_hashseed = UInt === UInt64 ? 0x950aa17a3246be82 : 0x4f26f881
+function hash(x::Deque, h::UInt)
+    h += _deque_hashseed
+    for (i, x) in enumerate(x)
+        h += i * hash(x)
+    end
+    h
+end
+
+function ==(x::Deque, y::Deque)
+    length(x) != length(y) && return false
+    for (i, j) in zip(x, y)
+        i == j || return false
+    end
+    true
+end
