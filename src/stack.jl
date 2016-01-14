@@ -1,7 +1,7 @@
 # stacks
 
-type Stack{S}   # S is the type of the internal dequeue instance
-    store::S
+type Stack{T}
+    store::Deque{T}
 end
 
 Stack{T}(ty::Type{T}) = Stack(Deque{T}())
@@ -18,7 +18,7 @@ function push!(s::Stack, x)
 end
 
 #returns a collection that can be used in a for loop
-function iter{T}(s::Stack{Deque{T}})
+function iter{T}(s::Stack{T})
     a = T[]
     for i in s.store
         unshift!(a,i)
@@ -27,5 +27,3 @@ function iter{T}(s::Stack{Deque{T}})
 end
 
 pop!(s::Stack) = pop!(s.store)
-
-

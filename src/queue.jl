@@ -1,7 +1,7 @@
 # FIFO queue
 
-type Queue{S}   # S is the type of internal deque
-    store::S
+type Queue{T}
+    store::Deque{T}
 end
 
 Queue{T}(ty::Type{T}) = Queue(Deque{T}())
@@ -20,7 +20,7 @@ end
 
 dequeue!(s::Queue) = shift!(s.store)
 
-function iter{T}(q::Queue{Deque{T}})
+function iter{T}(q::Queue{T})
     a = T[]
     for i in q.store
         push!(a,i)
