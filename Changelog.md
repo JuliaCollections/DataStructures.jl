@@ -1,4 +1,21 @@
 
+v0.4.2 / 2016-01-13
+==================
+
+  * Fix OrderedDict constructors (with tests)
+  * Add IntSet to DataStructures 
+    (see #114, https://github.com/JuliaLang/julia/pull/10065)
+  * Dead code, tree.jl removal
+
+v0.4.1 / 2015-12-29
+===================
+
+  * Updated Changelog
+  * Merge pull request #156 from JuliaLang/kms/remove-v0.3-part2
+  * Replace tuple_or_pair with Pair() or Pair{}
+  * More thorough removal of v0.3 support
+  * Updated Changelog.md
+
 v0.4.1 / 2015-12-29
 ==================
 
