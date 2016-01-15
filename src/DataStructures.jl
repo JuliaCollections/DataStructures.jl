@@ -87,17 +87,4 @@ module DataStructures
     export status
     export deref_key, deref_value, deref, advance, regress
 
-    @deprecate stack Stack
-    @deprecate queue Queue
-    @deprecate add! push!
-
-    @deprecate HashDict{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V}) HashDict{K,V,Unordered}(ks,vs)
-    @deprecate HashDict(ks, vs) HashDict{Any,Any,Unordered}(ks, vs)
-
-    @deprecate OrderedDict(ks, vs) OrderedDict(zip(ks,vs))
-    @deprecate OrderedDict{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V}) OrderedDict{K,V}(zip(ks,vs))
-    @deprecate OrderedDict{K,V}(::Type{K},::Type{V}) OrderedDict{K,V}()
-
-    @deprecate OrderedSet(a, b...) OrderedSet(Any[a, b...])
-    @deprecate OrderedSet{T<:Number}(xs::T...)  OrderedSet{T}(xs)      # (almost) mimic Set deprecation in Base
 end
