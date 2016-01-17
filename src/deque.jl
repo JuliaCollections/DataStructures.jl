@@ -78,13 +78,13 @@ length(q::Deque) = q.len
 num_blocks(q::Deque) = q.nblocks
 
 function front(q::Deque)
-    isempty(q) && error("Attempted to front at an empty deque.")
+    isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     blk = q.head
     blk.data[blk.front]
 end
 
 function back(q::Deque)
-    isempty(q) && error("Attempted to back at an empty deque.")
+    isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     blk = q.rear
     blk.data[blk.back]
 end
@@ -232,7 +232,7 @@ function unshift!{T}(q::Deque{T}, x)   # push front
 end
 
 function pop!{T}(q::Deque{T})   # pop back
-    isempty(q) && error("Attempted to pop from an empty deque.")
+    isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     rear = q.rear
     @assert rear.back >= rear.front
 
@@ -253,7 +253,7 @@ end
 
 
 function shift!{T}(q::Deque{T})  # pop front
-    isempty(q) && error("Attempted to pop from an empty deque.")
+    isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     head = q.head
     @assert head.back >= head.front
 

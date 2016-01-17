@@ -8,8 +8,8 @@ n = 100
 @test typeof(s) == Stack{Int}
 @test length(s) == 0
 @test isempty(s)
-@test_throws ErrorException top(s)
-@test_throws ErrorException pop!(s)
+@test_throws ArgumentError top(s)
+@test_throws ArgumentError pop!(s)
 
 for i = 1 : n
     push!(s, i)
@@ -24,7 +24,7 @@ for i = 1 : n
     if i < n
         @test top(s) == n - i
     else
-        @test_throws ErrorException top(s)
+        @test_throws ArgumentError top(s)
     end
     @test isempty(s) == (i == n)
     @test length(s) == n - i
@@ -53,9 +53,9 @@ n = 100
 @test typeof(s) == Queue{Int}
 @test length(s) == 0
 @test isempty(s)
-@test_throws ErrorException front(s)
-@test_throws ErrorException back(s)
-@test_throws ErrorException dequeue!(s)
+@test_throws ArgumentError front(s)
+@test_throws ArgumentError back(s)
+@test_throws ArgumentError dequeue!(s)
 
 for i = 1 : n
     enqueue!(s, i)
@@ -72,8 +72,8 @@ for i = 1 : n
         @test front(s) == i + 1
         @test back(s) == n
     else
-        @test_throws ErrorException front(s)
-        @test_throws ErrorException back(s)
+        @test_throws ArgumentError front(s)
+        @test_throws ArgumentError back(s)
     end
     @test isempty(s) == (i == n)
     @test length(s) == n - i

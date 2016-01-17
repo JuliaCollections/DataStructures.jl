@@ -114,7 +114,7 @@ s = IntSet(1:2:10)
 @test_throws KeyError pop!(s, 1)
 @test_throws ArgumentError pop!(s, -1)
 @test_throws ArgumentError pop!(s, -1, 1)
-@test_throws ArgumentError pop!(()->error(), s, -1)
+@test_throws ArgumentError pop!(()->throw(ErrorException()), s, -1)
 @test pop!(s, 1, 0) == 0
 @test s === delete!(s, 1)
 for i in s; pop!(s, i); end
@@ -123,7 +123,7 @@ x = 0
 @test 1 == pop!(()->(global x; x+=1), s, 100)
 @test x == 1
 push!(s, 100)
-@test pop!(()->error(), s, 100) == 100
+@test pop!(()->throw(ErrorException()), s, 100) == 100
 push!(s, 1:2:10...)
 @test pop!(s) == 9
 @test pop!(s) == 7
@@ -139,7 +139,7 @@ c = complement(IntSet())
 @test_throws KeyError pop!(c, 1)
 @test_throws ArgumentError pop!(c, -1)
 @test_throws ArgumentError pop!(c, -1, 1)
-@test_throws ArgumentError pop!(()->error(), c, -1)
+@test_throws ArgumentError pop!(()->throw(ErrorException()), c, -1)
 @test pop!(c, 1, 0) == 0
 @test c === delete!(c, 1)
 @test shift!(c) == 0

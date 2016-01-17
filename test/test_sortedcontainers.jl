@@ -100,20 +100,20 @@ function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree23{
             c1 = t.tree[anc].child1
             if in(c1, intree)
                 println("anc = $anc c1 = $c1")
-                error("Tree contains loops 1")
+                throw(ErrorException("Tree contains loops 1"))
             end
             push!(bfstreenodes, c1)
             push!(intree, c1)
             c2 = t.tree[anc].child2
             if in(c2, intree)
-                error("Tree contains loops 2")
+                throw(ErrorException("Tree contains loops 2"))
             end
             push!(bfstreenodes, c2)
             push!(intree, c2)
             c3 = t.tree[anc].child3
             if c3 > 0
                 if in(c3, intree)
-                    error("Tree contains loops 3")
+                    throw(ErrorException("Tree contains loops 3"))
                 end
                 push!(bfstreenodes, c3)
                 push!(intree, c3)
@@ -129,7 +129,7 @@ function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree23{
         c1 = t.tree[anc].child1
         if s == levstart[tdpth]
             if c1 != 1
-                error("Leftmost data descendant should be node 1")
+                throw(ErrorException("Leftmost data descendant should be node 1"))
             end
         else
             minkeys[s] = t.data[c1].k
@@ -139,7 +139,7 @@ function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree23{
         lastchild = c3 > 0? c3 : c2
         if s == bfstreesize
             if lastchild != 2
-                error("Rightmost data descendant should be node 2")
+                throw(ErrorException("Rightmost data descendant should be node 2"))
             end
         else
             maxkeys[s] = t.data[lastchild].k
@@ -150,16 +150,16 @@ function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree23{
             println("tdpth = ", tdpth, " s = ", s,
                     " maxkeys[s-1] = ", maxkeys[s-1],
                     " minkeys[s] = ", minkeys[s])
-            error("Data nodes out of order")
+            throw(ErrorException("Data nodes out of order"))
         end
         if s < bfstreesize || c3 > 0
             if !eq(t.ord, t.tree[anc].splitkey1, t.data[c2].k)
-                error("Splitkey1 of leaf should match key of 2nd child")
+                throw(ErrorException("Splitkey1 of leaf should match key of 2nd child"))
             end
         end
         if s < bfstreesize && c3 > 0
             if !eq(t.ord, t.tree[anc].splitkey2, t.data[c3].k)
-                error("Splitkey2 of leaf should match key of 1st child")
+                throw(ErrorException("Splitkey2 of leaf should match key of 1st child"))
             end
         end
         if t.data[c1].parent != anc || t.data[c2].parent != anc ||
@@ -169,7 +169,7 @@ function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree23{
             if c3 > 0
                 println("t.data[c3].parent = $(t.data[c3].parent)")
             end
-            error("Incorrect parent node for data child")
+            throw(ErrorException("Incorrect parent node for data child"))
         end
         push!(dataused, c1)
         push!(dataused, c2)
@@ -188,21 +188,21 @@ function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree23{
             end
             cp += 1
             if t.tree[c1].parent != anc
-                error("Parent/child1 links do not match")
+                throw(ErrorException("Parent/child1 links do not match"))
             end
             c2 = t.tree[anc].child2
             @assert(c2 == bfstreenodes[cp])
             mk2 = minkeys[cp]
             cp += 1
             if t.tree[c2].parent != anc
-                error("Parent/child2 links do not match")
+                throw(ErrorException("Parent/child2 links do not match"))
             end
             c3 = t.tree[anc].child3
             @assert(s == levstart[curdepth] ||
                     lt(t.ord,mk1,mk2) || (!lt(t.ord,mk2,mk1) && allowdups))
             if c3 > 0
                 if t.tree[c3].parent != anc
-                    error("Parent/child3 links do not match")
+                    throw(ErrorException("Parent/child3 links do not match"))
                 end
                 mk3 = minkeys[cp]
                 cp += 1
@@ -213,10 +213,10 @@ function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree23{
                 minkeys[s] = mk1
             end
             if !eq(t.ord, t.tree[anc].splitkey1, mk2)
-                error("Minkey2 not equal to minimum key among descendants of child2")
+                throw(ErrorException("Minkey2 not equal to minimum key among descendants of child2"))
             end
             if c3 > 0 && !eq(t.ord, t.tree[anc].splitkey2, mk3)
-                error("Minkey3 not equal to minimum key among descendants of child3")
+                throw(ErrorException("Minkey3 not equal to minimum key among descendants of child3"))
             end
         end
     end
@@ -224,41 +224,41 @@ function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree23{
     for i = 1 : size(t.freedatainds,1)
         fdi = t.freedatainds[i]
         if in(fdi, freedata)
-            error("t.freedatainds has repeated element $i")
+            throw(ErrorException("t.freedatainds has repeated element $i"))
         end
         if fdi < 1 || fdi > dsz
-            error("t.freedatainds entry out of range")
+            throw(ErrorException("t.freedatainds entry out of range"))
         end
         push!(freedata, fdi)
     end
     if last(t.useddatacells) > dsz
-        error("t.useddatacells has indices larger than t.data size")
+        throw(ErrorException("t.useddatacells has indices larger than t.data size"))
     end
     for i = 1 : dsz
         if (in(i, dataused) && !in(i, t.useddatacells)) ||
             (!in(i,dataused) && in(i, t.useddatacells))
-            error("Mismatch between actual data cells used and useddatacells array")
+            throw(ErrorException("Mismatch between actual data cells used and useddatacells array"))
         end
         if (in(i, freedata) && in(i, dataused)) ||
             (!in(i,freedata) && !in(i, dataused))
-            error("Mismatch between t.freedatainds and t.useddatacells")
+            throw(ErrorException("Mismatch between t.freedatainds and t.useddatacells"))
         end
     end
     freetree = IntSet()
     for i = 1 : size(t.freetreeinds,1)
         tfi = t.freetreeinds[i]
         if in(tfi, freetree)
-            error("Free tree index repeated twice")
+            throw(ErrorException("Free tree index repeated twice"))
         end
         if tfi < 1 || tfi > tsz
-            error("Free tree index out of range")
+            throw(ErrorException("Free tree index out of range"))
         end
         push!(freetree, tfi)
     end
     for i = 1 : tsz
         if (!in(i, intree) && !in(i, freetree)) ||
             (in(i, intree) && in(i, freetree))
-            error("Mismatch between t.freetreeinds and actual cells used")
+            throw(ErrorException("Mismatch between t.freetreeinds and actual cells used"))
         end
     end
 end
@@ -1098,7 +1098,7 @@ function test4()
     @test_throws KeyError delete!(m,"a")
     @test_throws KeyError pop!(m,"a")
     m3 = SortedDict((Dict{ASCIIString, Int}()), Reverse)
-    @test_throws ErrorException isequal(m2, m3)
+    @test_throws ArgumentError isequal(m2, m3)
     @test_throws BoundsError m[i1]
     @test_throws BoundsError regress((m,beforestartsemitoken(m)))
     @test_throws BoundsError advance((m,pastendsemitoken(m)))
@@ -1285,7 +1285,7 @@ function SDConstruct(a::Associative; lt::Function=isless, by::Function=identity)
     elseif lt == isless
         return SortedDict(a, By(by))
     else
-        error("having both by and lt not both implemented")
+        throw(ErrorException("having both by and lt not both implemented"))
     end
 end
 
