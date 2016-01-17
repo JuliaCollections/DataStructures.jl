@@ -192,7 +192,7 @@ function intersect2{K, Ord <: Ordering}(m1::SortedSet{K, Ord}, m2::SortedSet{K, 
     end
 end
 
-            
+
 function intersect{K, Ord <: Ordering}(m1::SortedSet{K,Ord}, others::SortedSet{K,Ord}...)
     ord = orderobject(m1)
     for s2 in others
@@ -210,7 +210,7 @@ function intersect{K, Ord <: Ordering}(m1::SortedSet{K,Ord}, others::SortedSet{K
         return mi
     end
 end
-    
+
 
 function symdiff{K, Ord <: Ordering}(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord})
     ord = orderobject(m1)
@@ -247,7 +247,7 @@ function symdiff{K, Ord <: Ordering}(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord})
         end
     end
 end
-    
+
 function setdiff{K, Ord <: Ordering}(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord})
     ord = orderobject(m1)
     if !isequal(ord, orderobject(m2))
@@ -288,7 +288,7 @@ function setdiff!(m1::SortedSet, iterable)
 end
 
 
-    
+
 function issubset(iterable, m2::SortedSet)
     for k in iterable
         if !in(k, m2)
@@ -330,5 +330,5 @@ function Base.show{K,Ord <: Ordering}(io::IO, m::SortedSet{K,Ord})
     print(io, ")")
 end
 
-similar{K,Ord<:Ordering}(m::SortedSet{K,Ord}) = 
+similar{K,Ord<:Ordering}(m::SortedSet{K,Ord}) =
 SortedSet{K,Ord}(orderobject(m))
