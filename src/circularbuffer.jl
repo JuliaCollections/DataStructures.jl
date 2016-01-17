@@ -13,7 +13,7 @@ end
 function _buffer_index(cb::CircularBuffer, i::Int)
     n = length(cb)
     if i < 1 || i > n
-        error("CircularBuffer out of range. cb=$cb i=$i")
+        throw(BoundsError("CircularBuffer out of range. cb=$cb i=$i"))
     end
     idx = cb.first + i - 1
     if idx > n
