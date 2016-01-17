@@ -34,7 +34,7 @@ s = IntSet([0,1,10,20,200,300,1000,10000,10002])
 @test_throws ArgumentError first(IntSet())
 @test_throws ArgumentError last(IntSet())
 t = copy(s)
-sizehint(t, 20000) #check that hash does not depend on size of internal Array{UInt32, 1}
+sizehint!(t, 20000) #check that hash does not depend on size of internal Array{UInt32, 1}
 @test hash(s) == hash(t)
 @test hash(complement(s)) == hash(complement(t))
 
@@ -73,7 +73,7 @@ copy!(c2, c1)
 c3 = copy(c2)
 c4 = complement(s1)
 @test c1 == c2 == c3 == c4
-@test c4 === sizehint(c4, 100)
+@test c4 === sizehint!(c4, 100)
 @test c1 == c4
 @test last(c1) == typemax(Int)-1
 @test last(complement(IntSet())) == typemax(Int)-1

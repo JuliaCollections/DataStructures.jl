@@ -2,7 +2,7 @@
 
 import Base: KeyIterator, ValueIterator, haskey, get, getkey, delete!,
              pop!, empty!, filter!, setindex!, getindex, similar,
-             sizehint, length, filter, isempty, start, next, done,
+             sizehint!, length, filter, isempty, start, next, done,
              keys, values, _tablesz, skip_deleted, serialize, deserialize
 
 import Base.Serializer: serialize_type
@@ -29,7 +29,7 @@ type HashDict{K,V,O<:Union{Ordered,Unordered}} <: Associative{K,V}
     HashDict(p::Pair) = setindex!(HashDict{K,V,O}(), p.second, p.first)
     function HashDict(ps::Pair...)
         h = HashDict{K,V,O}()
-        sizehint(h, length(ps))
+        sizehint!(h, length(ps))
         for p in ps
             h[p.first] = p.second
         end
@@ -49,7 +49,7 @@ type HashDict{K,V,O<:Union{Ordered,Unordered}} <: Associative{K,V}
 
     function HashDict(kv)
         h = HashDict{K,V,O}()
-        sizehint(h, length(kv))
+        sizehint!(h, length(kv))
         for (k,v) in kv
             h[k] = v
         end
@@ -94,7 +94,7 @@ end
 
 function deserialize{K,V,O}(s::SerState, T::Type{HashDict{K,V,O}})
     n = deserialize(s)
-    t = T(); sizehint(t, n)
+    t = T(); sizehint!(t, n)
     for i = 1:n
         k = deserialize(s)
         v = deserialize(s)
@@ -254,7 +254,7 @@ function _compact_order{K,V}(h::HashDict{K,V,Ordered})
     nothing
 end
 
-function sizehint(d::HashDict, newsz)
+function sizehint!(d::HashDict, newsz)
     oldsz = length(d.slots)
     if newsz <= oldsz
         # todo: shrink

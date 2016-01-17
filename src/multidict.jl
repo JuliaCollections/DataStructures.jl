@@ -49,7 +49,7 @@ end
                         getindex, length, isempty, eltype,
                         start, next, done, keys, values]
 
-sizehint(d::MultiDict, sz::Integer) = (sizehint(d.d, sz); d)
+sizehint!(d::MultiDict, sz::Integer) = (sizehint!(d.d, sz); d)
 copy(d::MultiDict) = MultiDict(d)
 similar{K,V}(d::MultiDict{K,V}) = MultiDict{K,V}()
 ==(d1::MultiDict, d2::MultiDict) = d1.d == d2.d

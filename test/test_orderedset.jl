@@ -84,9 +84,9 @@ push!(c,200)
 @test !in(100,c)
 @test !in(200,s)
 
-# sizehint, empty
+# sizehint!, empty
 s = OrderedSet([1])
-@test isequal(sizehint(s, 10), OrderedSet([1]))
+@test isequal(sizehint!(s, 10), OrderedSet([1]))
 @test isequal(empty!(s), OrderedSet())
 # TODO: rehash
 

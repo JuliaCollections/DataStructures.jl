@@ -19,7 +19,7 @@ show(io::IO, s::OrderedSet) = (show(io, typeof(s)); print(io, "("); !isempty(s) 
 
 @delegate OrderedSet.dict [isempty, length]
 
-sizehint(s::OrderedSet, sz::Integer) = (sizehint(s.dict, sz); s)
+sizehint!(s::OrderedSet, sz::Integer) = (sizehint!(s.dict, sz); s)
 eltype{T}(s::OrderedSet{T}) = T
 
 in(x, s::OrderedSet) = haskey(s.dict, x)
