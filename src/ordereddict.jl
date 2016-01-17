@@ -52,7 +52,7 @@ copy(d::OrderedDict) = OrderedDict(d)
                          length, isempty, start, next, done, keys,
                          values ]
 
-sizehint(d::OrderedDict, sz::Integer) = (sizehint(d.d, sz); d)
+sizehint!(d::OrderedDict, sz::Integer) = (sizehint!(d.d, sz); d)
 
 push!(d::OrderedDict, kv::Pair) = (push!(d.d, kv); d)
 push!(d::OrderedDict, kv::Pair, kv2::Pair) = (push!(d.d, kv, kv2); d)

@@ -22,7 +22,7 @@
 #
 #   - push!(h, v)       add a value to the heap
 #
-#   - sizehint(h)       set size hint to a heap
+#   - sizehint!(h)       set size hint to a heap
 #
 #   - top(h)            return the top value of a heap
 #

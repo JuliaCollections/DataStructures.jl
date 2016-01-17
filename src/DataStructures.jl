@@ -6,7 +6,7 @@ module DataStructures
                  show, dump, empty!, getindex, setindex!, get, get!,
                  in, haskey, keys, merge, copy, cat,
                  push!, pop!, shift!, unshift!, insert!,
-                 union!, delete!, similar, sizehint,
+                 union!, delete!, similar, sizehint!,
                  isequal, hash,
                  map, reverse,
                  first, last, eltype, getkey, values, sum,
@@ -19,7 +19,7 @@ module DataStructures
 
     export Deque, Stack, Queue
     export deque, enqueue!, dequeue!, update!,iter
-    export capacity, num_blocks, front, back, top, sizehint
+    export capacity, num_blocks, front, back, top, sizehint!
 
     export Accumulator, counter
     export ClassifiedCollections

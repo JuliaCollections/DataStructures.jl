@@ -49,7 +49,7 @@ DefaultDictBase{F,D<:Associative}(default::F, d::D) = ((K,V)=eltype(d); DefaultD
 # Functions
 
 # most functions are simply delegated to the wrapped dictionary
-@delegate DefaultDictBase.d [ sizehint, empty!, setindex!, get, haskey,
+@delegate DefaultDictBase.d [ sizehint!, empty!, setindex!, get, haskey,
                              getkey, pop!, delete!, start, done, next,
                              isempty, length ]
 
@@ -100,7 +100,7 @@ for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Order
         ## Functions
 
         # Most functions are simply delegated to the wrapped DefaultDictBase object
-        @delegate $DefaultDict.d [ sizehint, empty!, setindex!,
+        @delegate $DefaultDict.d [ sizehint!, empty!, setindex!,
                                    getindex, get, get!, haskey,
                                    getkey, pop!, delete!, start, next,
                                    done, isempty, length ]
@@ -143,7 +143,7 @@ end
 
 ## Most functions are simply delegated to the wrapped DefaultDictBase object
 
-# @delegate DefaultSortedDict.d [ sizehint, empty!, setindex!,
+# @delegate DefaultSortedDict.d [ sizehint!, empty!, setindex!,
 #                            getindex, get, get!, haskey,
 #                            getkey, pop!, delete!, start, next,
 #                            done, isempty, length]

@@ -235,7 +235,7 @@ d3[data_in[rand(1:length(data_in))][1]] = randstring(3)
 d4[1001] = randstring(3)
 @test !isequal(d1, d4)
 
-@test isequal(OrderedDict(), sizehint(OrderedDict(),96))
+@test isequal(OrderedDict(), sizehint!(OrderedDict(),96))
 
 # Here is what currently happens when dictionaries of different types
 # are compared. This is not necessarily desirable. These tests are

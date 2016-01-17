@@ -24,7 +24,7 @@ function copy!(to::IntSet, from::IntSet)
     to
 end
 eltype(s::IntSet) = Int
-sizehint(s::IntSet, n::Integer) = (_resize0!(s.bits, n+1); s)
+sizehint!(s::IntSet, n::Integer) = (_resize0!(s.bits, n+1); s)
 
 # only required on 0.3:
 function first(itr::IntSet)
