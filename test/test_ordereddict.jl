@@ -128,47 +128,62 @@ end
 _d = OrderedDict([("a", 0)])
 @test isa([k for k in filter(x->length(x)==1, collect(keys(_d)))], Vector{Any})
 
-let
-    ## TODO: this should work, but inference seems to be working incorrectly
-    #d = OrderedDict(((1, 2), (3, 4)))
-    d = OrderedDict([(1, 2), (3, 4)])
+let d = OrderedDict(((1, 2), (3, 4))),
+    d2 = OrderedDict([(1, 2), (3, 4)]),
+    d3 = OrderedDict(1 => 2, 3 => 4),
+    d4 = OrderedDict((1 => 2, 3 => 4))
+
     @test d[1] === 2
     @test d[3] === 4
-    ## TODO: test this
-    # d2 = OrderedDict(1 => 2, 3 => 4)
-    # d3 = OrderedDict((1 => 2, 3 => 4))
-    # @test d == d2 == d3
-    # @test typeof(d) == typeof(d2) == typeof(d3) == OrderedDict{Int,Int}
-    @test typeof(d) == OrderedDict{Int,Int}
 
-    #d = OrderedDict(((1, 2), (3, "b")))
-    d = OrderedDict([(1, 2), (3, "b")])
-    @test d[1] === 2
-    @test d[3] == "b"
-    # d2 = OrderedDict(1 => 2, 3 => "b")
-    # d3 = OrderedDict((1 => 2, 3 => "b"))
-    # @test d == d2 == d3
-    # @test typeof(d) == typeof(d2) == typeof(d3) == OrderedDict{Int,Any}
-    @test typeof(d) == OrderedDict{Int,Any}
+    @test d == d2 == d3 == d4
+    @test typeof(d) == typeof(d2) == typeof(d3) == typeof(d4) == OrderedDict{Int,Int}
+end
 
-    #d = OrderedDict(((1, 2), ("a", 4)))
-    d = OrderedDict([(1, 2), ("a", 4)])
-    @test d[1] === 2
-    @test d["a"] === 4
-    # d2 = OrderedDict(1 => 2, "a" => 4)
-    # d3 = OrderedDict((1 => 2, "a" => 4))
-    # @test d == d2 == d3
+let d = OrderedDict(((1, 2), (3, "b"))),
+    d2 = OrderedDict([(1, 2), (3, "b")]),
+    d3 = OrderedDict(1 => 2, 3 => "b"),
+    d4 = OrderedDict((1 => 2, 3 => "b"))
+
+    @test d2[1] === 2
+    @test d2[3] == "b"
+
+    ## TODO: tuple of tuples doesn't work for mixed tuple types
+    # @test d == d2 == d3 == d4
+    # @test typeof(d) == typeof(d2) == typeof(d3) == typeof(d4) == OrderedDict{Int,Any}
+    # @test typeof(d) == OrderedDict{Int,Any}
+    @test d2 == d3 == d4
+    @test typeof(d2) == typeof(d3) == typeof(d4) == OrderedDict{Int,Any}
+    @test typeof(d2) == OrderedDict{Int,Any}
+end
+
+let d = OrderedDict(((1, 2), ("a", 4))),
+    d2 = OrderedDict([(1, 2), ("a", 4)]),
+    d3 = OrderedDict(1 => 2, "a" => 4),
+    d4 = OrderedDict((1 => 2, "a" => 4))
+
+    @test d2[1] === 2
+    @test d2["a"] === 4
+
+    ## TODO: tuple of tuples doesn't work for mixed tuple types
+    # @test d == d2 == d3 == d4
     # @test typeof(d) == typeof(d2) == typeof(d3) == OrderedDict{Any,Int}
-    @test typeof(d) == OrderedDict{Any,Int}
+    # @test typeof(d) == OrderedDict{Any,Int}
+    @test d2 == d3 == d4
+    @test typeof(d2) == typeof(d3) == typeof(d4) == OrderedDict{Any,Int}
+    @test typeof(d2) == OrderedDict{Any,Int}
+end
 
-    #d = OrderedDict(((1, 2), ("a", "b")))
-    d = OrderedDict([(1, 2), ("a", "b")])
+let d = OrderedDict(((1, 2), ("a", "b"))),
+    d2 = OrderedDict([(1, 2), ("a", "b")]),
+    d3 = OrderedDict(1 => 2, "a" => "b"),
+    d4 = OrderedDict((1 => 2, "a" => "b"))
+
     @test d[1] === 2
     @test d["a"] == "b"
-    # d2 = OrderedDict(1 => 2, "a" => "b")
-    # d3 = OrderedDict((1 => 2, "a" => "b"))
-    # @test d == d2 == d3
-    # @test typeof(d) == typeof(d2) == typeof(d3) == OrderedDict{Any,Any}
+
+    @test d == d2 == d3 == d4
+    @test typeof(d) == typeof(d2) == typeof(d3) == typeof(d4) == OrderedDict{Any,Any}
     @test typeof(d) == OrderedDict{Any,Any}
 end
 
@@ -245,26 +260,25 @@ d4[1001] = randstring(3)
 
 # get! (get with default values assigned to the given location)
 
-## TODO: get! not implemented for OrderedDict
-# let f(x) = x^2, d = OrderedDict((8, 19))
+let f(x) = x^2, d = OrderedDict(8 => 19)
 
-#     @test get!(d, 8, 5) == 19
-#     @test get!(d, 19, 2) == 2
+    @test get!(d, 8, 5) == 19
+    @test get!(d, 19, 2) == 2
 
-#     @test get!(d, 42) do  # d is updated with f(2)
-#         f(2)
-#     end == 4
+    @test get!(d, 42) do  # d is updated with f(2)
+        f(2)
+    end == 4
 
-#     @test get!(d, 42) do  # d is not updated
-#         f(200)
-#     end == 4
+    @test get!(d, 42) do  # d is not updated
+        f(200)
+    end == 4
 
-#     @test get(d, 13) do   # d is not updated
-#         f(4)
-#     end == 16
+    @test get(d, 13) do   # d is not updated
+        f(4)
+    end == 16
 
-#     @test d == OrderedDict((8, 19), (19, 2), (42, 4))
-# end
+    @test d == OrderedDict(8=>19, 19=>2, 42=>4)
+end
 
 
 # issue #5886
@@ -287,12 +301,12 @@ end
 # issue 9295
 let
     d = OrderedDict()
-    @test is(push!(d, ('a', 1)), d)
+    @test is(push!(d, 'a'=> 1), d)
     @test d['a'] == 1
-    @test is(push!(d, ('b', 2), ('c', 3)), d)
+    @test is(push!(d, 'b' => 2, 'c' => 3), d)
     @test d['b'] == 2
     @test d['c'] == 3
-    @test is(push!(d, ('d', 4), ('e', 5), ('f', 6)), d)
+    @test is(push!(d, 'd' => 4, 'e' => 5, 'f' => 6), d)
     @test d['d'] == 4
     @test d['e'] == 5
     @test d['f'] == 6
