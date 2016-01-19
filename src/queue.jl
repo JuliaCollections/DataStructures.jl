@@ -20,10 +20,6 @@ end
 
 dequeue!(s::Queue) = shift!(s.store)
 
-function iter{T}(q::Queue{T})
-    a = T[]
-    for i in q.store
-        push!(a,i)
-    end
-    return a
-end
+start(q::Queue) = start(q.store)
+next(q::Queue,i) = next(q.store, i)
+done(q::Queue,i) = done(q.store, i)

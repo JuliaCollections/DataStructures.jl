@@ -17,13 +17,8 @@ function push!(s::Stack, x)
     s
 end
 
-#returns a collection that can be used in a for loop
-function iter{T}(s::Stack{T})
-    a = T[]
-    for i in s.store
-        unshift!(a,i)
-    end
-    return a
-end
+start(s::Stack) = start(s.store)
+next(s::Stack,i) = next(s.store, i)
+done(s::Stack,i) = done(s.store, i)
 
 pop!(s::Stack) = pop!(s.store)

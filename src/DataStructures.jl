@@ -18,7 +18,7 @@ module DataStructures
 
 
     export Deque, Stack, Queue
-    export deque, enqueue!, dequeue!, update!,iter
+    export deque, enqueue!, dequeue!, update!
     export capacity, num_blocks, front, back, top, sizehint!
 
     export Accumulator, counter

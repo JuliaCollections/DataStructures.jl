@@ -41,8 +41,12 @@ for i = 1:n
     push!(arr,i)
 end
 
-iterated = iter(stk)
-@test(reverse(arr) == iterated)
+#test iterator
+index = length(arr)
+for i in q
+  @test(arr[index] == i)
+  index -= 1
+end
 
 
 # Queue
@@ -90,5 +94,9 @@ for i = 1:n
     push!(arr,i)
 end
 
-iterated = iter(q)
-@test(arr == iterated)
+#test iterator
+index = 1
+for i in q
+  @test(arr[index] == i)
+  index += 1
+end
