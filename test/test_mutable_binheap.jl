@@ -1,8 +1,5 @@
 # Test of binary heaps
 
-using DataStructures
-using Base.Test
-
 # auxiliary functions
 
 function heap_values{VT,Comp}(h::MutableBinaryHeap{VT,Comp})

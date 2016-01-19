@@ -1,8 +1,5 @@
 # test stacks and queues
 
-using DataStructures
-using Base.Test
-
 # Stack
 
 s = Stack(Int, 5)
@@ -33,11 +30,11 @@ for i = 1 : n
     @test length(s) == n - i
 end
 
-#test that iter returns a LIFO collection 
+#test that iter returns a LIFO collection
 
 stk = Stack(Int, 10)
 #an array to check iteration sequence against
-arr = Int64[] 
+arr = Int64[]
 
 for i = 1:n
     push!(stk,i)
@@ -82,11 +79,11 @@ for i = 1 : n
     @test length(s) == n - i
 end
 
-#test that iter returns a FIFO collection 
+#test that iter returns a FIFO collection
 
 q = Queue(Int, 10)
 #an array to check iteration sequence against
-arr = Int64[] 
+arr = Int64[]
 
 for i = 1:n
     enqueue!(q,i)

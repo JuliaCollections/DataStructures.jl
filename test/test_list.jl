@@ -1,5 +1,3 @@
-using DataStructures
-using Base.Test
 
 l0 = nil(Char)
 @test length(l0) == 0

@@ -1,6 +1,3 @@
-using DataStructures
-using Base.Test
-
 t=Trie{Int}()
 
 t["amy"]=56

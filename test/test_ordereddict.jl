@@ -1,6 +1,3 @@
-using DataStructures
-using Base.Test
-
 # construction
 
 @test typeof(OrderedDict()) == OrderedDict{Any,Any}

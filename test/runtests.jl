@@ -1,3 +1,7 @@
+using Base.Test
+using DataStructures
+const IntSet = DataStructures.IntSet
+
 tests = ["intset",
          "deque",
          "sortedcontainers",
@@ -13,6 +17,10 @@ tests = ["intset",
          "trie",
          "list",
          "multidict"]
+
+if length(ARGS) > 0
+    tests = ARGS
+end
 
 for t in tests
     fp = joinpath(dirname(@__FILE__), "test_$t.jl")
