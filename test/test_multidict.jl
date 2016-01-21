@@ -1,5 +1,3 @@
-using DataStructures
-using Base.Test
 
 # construction
 KVS = ('a',[1])

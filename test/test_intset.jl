@@ -1,7 +1,4 @@
 ## IntSet
-using DataStructures
-using Base.Test
-const IntSet = DataStructures.IntSet
 
 # Construction, collect
 data_in = (1,5,100)

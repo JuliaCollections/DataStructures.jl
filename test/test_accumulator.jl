@@ -1,8 +1,5 @@
 # Test of accumulators
 
-using DataStructures
-using Base.Test
-
 ct = counter(ASCIIString)
 @assert isa(ct, Accumulator{ASCIIString,Int})
 

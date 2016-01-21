@@ -1,8 +1,5 @@
 # Test disjoint set
 
-using DataStructures
-using Base.Test
-
 s = IntDisjointSets(10)
 
 @test length(s) == 10
