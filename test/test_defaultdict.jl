@@ -3,8 +3,8 @@
 ##############
 
 # construction
-@test_throws ErrorException DefaultDict()
-@test_throws ErrorException DefaultDict(AbstractString, Int)
+@test_throws ArgumentError DefaultDict()
+@test_throws ArgumentError DefaultDict(AbstractString, Int)
 
 @test typeof(DefaultDict(0.0, 1 => 1.0)) == DefaultDict{Int,Float64,Float64}
 
@@ -64,8 +64,8 @@ s = similar(d)
 #####################
 
 # construction
-@test_throws ErrorException DefaultOrderedDict()
-@test_throws ErrorException DefaultOrderedDict(AbstractString, Int)
+@test_throws ArgumentError DefaultOrderedDict()
+@test_throws ArgumentError DefaultOrderedDict(AbstractString, Int)
 
 # empty dictionary
 d = DefaultOrderedDict(Char, Int, 1)

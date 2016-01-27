@@ -8,8 +8,8 @@ q = Deque{Int}()
 @test length(q) == 0
 @test isempty(q)
 @test q.blksize == DataStructures.DEFAULT_DEQUEUE_BLOCKSIZE
-@test_throws ErrorException front(q)
-@test_throws ErrorException back(q)
+@test_throws ArgumentError front(q)
+@test_throws ArgumentError back(q)
 @test length(sprint(dump,q)) >= 0
 
 @test typeof(deque(Int)) == typeof(Deque{Int}())
@@ -25,8 +25,8 @@ q = Deque{Int}(3)
 @test isempty(q)
 @test q.blksize == 3
 @test num_blocks(q) == 1
-@test_throws ErrorException front(q)
-@test_throws ErrorException back(q)
+@test_throws ArgumentError front(q)
+@test_throws ArgumentError back(q)
 @test isa(collect(q), Vector{Int})
 @test collect(q) == Int[]
 
@@ -67,8 +67,8 @@ for i = 1 : n
         @test front(q) == 1
         @test back(q) == n - i
     else
-        @test_throws ErrorException front(q)
-        @test_throws ErrorException back(q)
+        @test_throws ArgumentError front(q)
+        @test_throws ArgumentError back(q)
     end
 
     cq = collect(q)
@@ -106,8 +106,8 @@ for i = 1 : n
         @test front(q) == n - i
         @test back(q) == 1
     else
-        @test_throws ErrorException front(q)
-        @test_throws ErrorException back(q)
+        @test_throws ArgumentError front(q)
+        @test_throws ArgumentError back(q)
     end
 
     cq = collect(q)

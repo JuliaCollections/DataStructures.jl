@@ -225,7 +225,7 @@ end
 function isequal(m1::SortedDict, m2::SortedDict)
     ord = orderobject(m1)
     if !isequal(ord, orderobject(m2)) || !isequal(eltype(m1), eltype(m2))
-        error("Cannot use isequal for two SortedDicts unless their element types and ordering objects are equal")
+        throw(ArgumentError("Cannot use isequal for two SortedDicts unless their element types and ordering objects are equal"))
     end
     p1 = startof(m1)
     p2 = startof(m2)

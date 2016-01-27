@@ -380,7 +380,7 @@ end
 function setindex!{K,V}(h::HashDict{K,V}, v0, key0)
     key = convert(K,key0)
     if !isequal(key,key0)
-        error(key0, " is not a valid key for type ", K)
+        throw(ArgumentError("$key0 is not a valid key for type $K"))
     end
     v   = convert(V,  v0)
 
@@ -398,7 +398,7 @@ end
 function get!{K,V}(h::HashDict{K,V}, key0, default)
     key = convert(K,key0)
     if !isequal(key,key0)
-        error(key0, " is not a valid key for type ", K)
+        throw(ArgumentError("$key0 is not a valid key for type $K"))
     end
 
     index = ht_keyindex2(h, key)
@@ -413,7 +413,7 @@ end
 function get!{K,V}(h::HashDict{K,V}, key0, default)
     key = convert(K,key0)
     if !isequal(key,key0)
-        error(key0, " is not a valid key for type ", K)
+        throw(ArgumentError("$key0 is not a valid key for type $K"))
     end
 
     index = ht_keyindex2(h, key)
@@ -429,7 +429,7 @@ end
 function get!{K,V,F<:Base.Callable}(h::HashDict{K,V}, key0, default::F)
     key = convert(K,key0)
     if !isequal(key,key0)
-        error(key0, " is not a valid key for type ", K)
+        throw(ArgumentError("$key0 is not a valid key for type $K"))
     end
 
     index = ht_keyindex2(h, key)

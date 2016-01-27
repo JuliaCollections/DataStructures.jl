@@ -19,7 +19,7 @@ immutable DefaultDictBase{K,V,F,D} <: Associative{K,V}
     d::D
 
     check_D(D,K,V) = (D <: Associative{K,V}) ||
-        error("Default dict must be <: Associative{K,V}")
+        throw(ArgumentError("Default dict must be <: Associative{K,V}"))
 
     DefaultDictBase(x::F, kv::AbstractArray{Tuple{K,V}}) = (check_D(D,K,V); new(x, D(kv)))
     DefaultDictBase(x::F, ps::Pair{K,V}...) = (check_D(D,K,V); new(x, D(ps...)))
@@ -31,8 +31,8 @@ end
 
 # Constructors
 
-DefaultDictBase() = error("no default specified")
-DefaultDictBase(k,v) = error("no default specified")
+DefaultDictBase() = throw(ArgumentError("no default specified"))
+DefaultDictBase(k,v) = throw(ArgumentError("no default specified"))
 
 # TODO: these mimic similar Dict constructors, but may not be needed
 DefaultDictBase{K,V,F}(default::F, ks::AbstractArray{K}, vs::AbstractArray{V}) =
@@ -82,8 +82,8 @@ for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Order
 
         ## Constructors
 
-        $DefaultDict() = error("$DefaultDict: no default specified")
-        $DefaultDict(k,v) = error("$DefaultDict: no default specified")
+        $DefaultDict() = throw(ArgumentError("$DefaultDict: no default specified"))
+        $DefaultDict(k,v) = throw(ArgumentError("$DefaultDict: no default specified"))
 
         # TODO: these mimic similar Dict constructors, but may not be needed
         $DefaultDict{K,V,F}(default::F, ks::AbstractArray{K}, vs::AbstractArray{V}) = $DefaultDict{K,V,F}(default,ks,vs)
@@ -125,8 +125,8 @@ end
 
 ## Constructors
 
-# DefaultSortedDict() = error("DefaultSortedDict: no default specified")
-# DefaultSortedDict(k,v) = error("DefaultSortedDict: no default specified")
+# DefaultSortedDict() = throw(ArgumentError("DefaultSortedDict: no default specified"))
+# DefaultSortedDict(k,v) = throw(ArgumentError("DefaultSortedDict: no default specified"))
 
 # # TODO: these mimic similar Dict constructors, but may not be needed
 # DefaultSortedDict{K,V,F}(default::F, ks::AbstractArray{K}, vs::AbstractArray{V}) = DefaultSortedDict{K,V,F}(default,ks,vs)
