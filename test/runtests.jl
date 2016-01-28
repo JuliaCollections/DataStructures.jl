@@ -16,7 +16,8 @@ tests = ["intset",
          "orderedset",
          "trie",
          "list",
-         "multidict"]
+         "multidict",
+         "circularbuffer"]
 
 if length(ARGS) > 0
     tests = ARGS
