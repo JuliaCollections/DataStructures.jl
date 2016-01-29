@@ -84,6 +84,12 @@ module DataStructures
     include("tokens2.jl")
     include("containerloops.jl")
 
+    export
+        CircularBuffer,
+        capacity,
+        isfull
+    include("circularbuffer.jl")
+
     export status
     export deref_key, deref_value, deref, advance, regress
 
