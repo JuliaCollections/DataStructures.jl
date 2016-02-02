@@ -6,10 +6,10 @@
 # (see https://github.com/JuliaLang/julia/issues/5533)
 
 immutable OrderedSet{T}
-    dict::HashDict{T,Void,Ordered}
+    dict::OrderedDict{T,Void}
 
-    OrderedSet() = new(HashDict{T,Void,Ordered}())
-    OrderedSet(xs) = union!(new(HashDict{T,Void,Ordered}()), xs)
+    OrderedSet() = new(OrderedDict{T,Void}())
+    OrderedSet(xs) = union!(new(OrderedDict{T,Void}()), xs)
 end
 OrderedSet() = OrderedSet{Any}()
 OrderedSet(xs) = OrderedSet{eltype(xs)}(xs)
@@ -40,11 +40,10 @@ empty!{T}(s::OrderedSet{T}) = (empty!(s.dict); s)
 
 start(s::OrderedSet)       = start(s.dict)
 done(s::OrderedSet, state) = done(s.dict, state)
-# NOTE: manually optimized to take advantage of Dict representation
-next(s::OrderedSet, i)     = (s.dict.keys[s.dict.order[i]], skip_deleted(s.dict,i+1))
+# NOTE: manually optimized to take advantage of OrderedDict representation
+next(s::OrderedSet, i)     = (s.dict.keys[i], i+1)
 
-# TODO: simplify me?
-pop!(s::OrderedSet) = (val = s.dict.keys[s.dict.order[start(s.dict)]]; delete!(s.dict, val); val)
+pop!(s::OrderedSet) = pop!(s.dict)[1]
 
 union(s::OrderedSet) = copy(s)
 function union(s::OrderedSet, sets...)
@@ -94,4 +93,9 @@ function filter!(f::Function, s::OrderedSet)
 end
 filter(f::Function, s::OrderedSet) = filter!(f, copy(s))
 
-hash(s::OrderedSet) = (_compact_order(s.dict); hash(s.dict.keys[s.dict.order]))
+const orderedset_seed = UInt === UInt64 ? 0x2114638a942a91a5 : 0xd86bdbf1
+function hash(s::OrderedSet, h::UInt)
+    h = hash(orderedset_seed, h)
+    s.dict.ndel > 0 && rehash!(s.dict)
+    hash(s.dict.keys, h)
+end

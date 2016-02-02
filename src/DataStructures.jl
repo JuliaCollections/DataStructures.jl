@@ -63,6 +63,7 @@ module DataStructures
     include("disjoint_set.jl")
     include("heaps.jl")
 
+    include("dictsupport.jl")
     include("hashdict.jl")
     include("ordereddict.jl")
     include("orderedset.jl")

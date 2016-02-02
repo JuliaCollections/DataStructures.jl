@@ -3,7 +3,7 @@
 import Base: KeyIterator, ValueIterator, haskey, get, getkey, delete!,
              pop!, empty!, filter!, setindex!, getindex, similar,
              sizehint!, length, filter, isempty, start, next, done,
-             keys, values, _tablesz, skip_deleted, serialize, deserialize
+             keys, values, skip_deleted, serialize, deserialize
 
 import Base.Serializer: serialize_type
 const SerState =  Base.Serializer.SerializationState
