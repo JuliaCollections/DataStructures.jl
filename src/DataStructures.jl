@@ -18,7 +18,7 @@ module DataStructures
 
 
     export Deque, Stack, Queue
-    export deque, enqueue!, dequeue!, update!
+    export deque, enqueue!, dequeue!, update!, reverse_iter
     export capacity, num_blocks, front, back, top, sizehint!
 
     export Accumulator, counter
@@ -94,4 +94,6 @@ module DataStructures
     export status
     export deref_key, deref_value, deref, advance, regress
 
+    @deprecate iter(s::Stack) s
+    @deprecate iter(q::Queue) q
 end

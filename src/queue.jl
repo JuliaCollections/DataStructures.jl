@@ -20,6 +20,10 @@ end
 
 dequeue!(s::Queue) = shift!(s.store)
 
+# Iterators
+
 start(q::Queue) = start(q.store)
-next(q::Queue,i) = next(q.store, i)
-done(q::Queue,i) = done(q.store, i)
+next(q::Queue, s) = next(q.store, s)
+done(q::Queue, s) = done(q.store, s)
+
+reverse_iter(q::Queue) = reverse_iter(q.store)

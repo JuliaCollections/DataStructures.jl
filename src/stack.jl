@@ -17,8 +17,10 @@ function push!(s::Stack, x)
     s
 end
 
-start(s::Stack) = start(s.store)
-next(s::Stack,i) = next(s.store, i)
-done(s::Stack,i) = done(s.store, i)
-
 pop!(s::Stack) = pop!(s.store)
+
+start(st::Stack) = start(reverse_iter(st.store))
+next(st::Stack, s) = next(reverse_iter(st.store), s)
+done(st::Stack, s) = done(reverse_iter(st.store), s)
+
+reverse_iter{T}(s::Stack{T}) = DequeIterator{T}(s.store)
