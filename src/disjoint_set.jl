@@ -52,27 +52,31 @@ find_root(s::IntDisjointSets, x::Integer) = find_root_impl!(s.parents, x)
 in_same_set(s::IntDisjointSets, x::Integer, y::Integer) = find_root(s, x) == find_root(s, y)
 
 # merge the subset containing x and that containing y into one
-#
+# and return the root of the new set.
 function union!(s::IntDisjointSets, x::Integer, y::Integer)
     parents = s.parents
     xroot = find_root_impl!(parents, x)
     yroot = find_root_impl!(parents, y)
+    xroot != yroot ?  root_union!(s, xroot, yroot) : xroot
+end
 
-    if xroot != yroot
-        rks = s.ranks
-        @inbounds xrank = rks[xroot]
-        @inbounds yrank = rks[yroot]
+# form a new set that is the union of the two sets whose root elements are
+# x and y and return the root of the new set
+# assume x ≠ y (unsafe)
+function root_union!(s::IntDisjointSets, x::Integer, y::Integer)
+    parents = s.parents
+    rks = s.ranks
+    @inbounds xrank = rks[x]
+    @inbounds yrank = rks[y]
 
-        if xrank < yrank
-            @inbounds parents[xroot] = yroot
-        else
-            @inbounds parents[yroot] = xroot
-            if xrank == yrank
-                rks[xroot] += 1
-            end
-        end
-        @inbounds s.ngroups -= 1
+    if xrank < yrank
+        x, y = y, x
+    elseif xrank == yrank
+        rks[x] += 1
     end
+    @inbounds parents[y] = x
+    @inbounds s.ngroups -= 1
+    x
 end
 
 # make a new subset with an automatically chosen new element x
@@ -119,8 +123,10 @@ find_root{T}(s::DisjointSets{T}, x::T) = find_root(s.internal, s.intmap[x])
 
 in_same_set{T}(s::DisjointSets{T}, x::T, y::T) = in_same_set(s.internal, s.intmap[x], s.intmap[y])
 
-function union!{T}(s::DisjointSets{T}, x::T, y::T)
-    union!(s.internal, s.intmap[x], s.intmap[y])
+for f in (:union!, :root_union!)
+    @eval begin
+        ($f){T}(s::DisjointSets{T}, x::T, y::T) = ($f)(s.internal, s.intmap[x], s.intmap[y])
+    end
 end
 
 function push!{T}(s::DisjointSets{T}, x::T)
