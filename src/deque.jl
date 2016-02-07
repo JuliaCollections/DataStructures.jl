@@ -118,22 +118,22 @@ function next(q::Deque, s)
 end
 
 
-# Backwards deque iteration
+# Reverse deque iteration
 
-immutable BackwardDequeIterator{T}
+immutable ReverseDequeIterator{T}
     q::Deque{T}
 end
 
-backward_iter{T}(q::Deque{T}) = BackwardDequeIterator{T}(q)
+reverse_iter{T}(q::Deque{T}) = ReverseDequeIterator{T}(q)
 
-# State for backward deque iterator: (current block, index in block)
-start(qi::BackwardDequeIterator) = (qi.q.rear, qi.q.rear.back)
+# State for reverse deque iterator: (current block, index in block)
+start(qi::ReverseDequeIterator) = (qi.q.rear, qi.q.rear.back)
 
 # We're finished when our index is less than the first index
 # of the current block (which can only happen on the first block)
-done(qi::BackwardDequeIterator, s) = (s[2] < s[1].front)
+done(qi::ReverseDequeIterator, s) = (s[2] < s[1].front)
 
-function next(qi::BackwardDequeIterator, s)
+function next(qi::ReverseDequeIterator, s)
     cb = s[1]
     i = s[2]
     x = cb.data[i]
