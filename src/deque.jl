@@ -33,6 +33,9 @@ capacity(blk::DequeBlock) = blk.capa
 length(blk::DequeBlock) = blk.back - blk.front + 1
 isempty(blk::DequeBlock) = blk.back < blk.front
 
+ishead(blk::DequeBlock) = blk.prev === blk
+isrear(blk::DequeBlock) = blk.next === blk
+
 # reset the block to empty, and position
 
 function reset!{T}(blk::DequeBlock{T}, front::Int)
@@ -92,46 +95,60 @@ end
 
 # Iteration
 
-immutable DequeIterator{T}
-    is_done::Bool
-    cblock::DequeBlock{T}  # current block
-    i::Int
-end
+# State for deque iterator: (current block, index in block)
+start(q::Deque) = (q.head, q.head.front)
 
-start{T}(q::Deque{T}) = DequeIterator{T}(isempty(q), q.head, q.head.front)
+# We're finished when our index is past the end of a blocks
+# (which can only happen on the last block)
+done(q::Deque, s) = (s[2] > s[1].back)
 
-function next{T}(q::Deque{T}, s::DequeIterator{T})
-    cb = s.cblock
-    i::Int = s.i
-    x::T = cb.data[i]
-
-    is_done = false
+function next(q::Deque, s)
+    cb = s[1]
+    i = s[2]
+    x = cb.data[i]
 
     i += 1
-    if i > cb.back
-        cb_next = cb.next
-        if is(cb, cb_next)
-            is_done = true
-        else
-            cb = cb_next
-            i = 1
-        end
+    # If we're past the end of a block, go to the next one
+    if i > cb.back && !isrear(cb)
+        cb = cb.next
+        i = 1
     end
 
-    (x, DequeIterator{T}(is_done, cb, i))
+    (x, (cb, i))
 end
 
-done{T}(q::Deque{T}, s::DequeIterator{T}) = s.is_done
 
+# Backwards deque iteration
 
-function Base.collect{T}(q::Deque{T})
-    r = T[]
-    for x::T in q
-        push!(r, x)
+immutable BackwardDequeIterator{T}
+    q::Deque{T}
+end
+
+backward_iter{T}(q::Deque{T}) = BackwardDequeIterator{T}(q)
+
+# State for backward deque iterator: (current block, index in block)
+start(qi::BackwardDequeIterator) = (qi.q.rear, qi.q.rear.back)
+
+# We're finished when our index is less than the first index
+# of the current block (which can only happen on the first block)
+done(qi::BackwardDequeIterator, s) = (s[2] < s[1].front)
+
+function next(qi::BackwardDequeIterator, s)
+    cb = s[1]
+    i = s[2]
+    x = cb.data[i]
+
+    i -= 1
+    # If we're past the beginning of a block, go to the previous one
+    if i < cb.front && !ishead(cb)
+        cb = cb.prev
+        i = cb.back
     end
-    return r
+
+    (x, (cb, i))
 end
 
+Base.collect{T}(q::Deque{T}) = T[x for x in q]
 
 # Showing
 

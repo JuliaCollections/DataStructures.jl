@@ -29,6 +29,8 @@ q = Deque{Int}(3)
 @test_throws ArgumentError back(q)
 @test isa(collect(q), Vector{Int})
 @test collect(q) == Int[]
+@test ishead(q.head)
+@test isrear(q.rear)
 
 # push back
 
@@ -54,6 +56,9 @@ for i = 1 : n
     @test length(sprint(show,q)) >= 0
 end
 
+@test ishead(q.head)
+@test isrear(q.rear)
+
 # pop back
 
 for i = 1 : n
@@ -74,6 +79,11 @@ for i = 1 : n
     cq = collect(q)
     @test cq == collect(1:n-i)
 end
+
+@test ishead(q.head)
+@test isrear(q.rear)
+@test !ishead(q.head+1)
+@test !ishead(q.rear-1)
 
 # push front
 
