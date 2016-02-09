@@ -38,9 +38,8 @@ and ``isequal(key1,key2)`` (true when ``key1 == key2``) where ``key1`` and ``key
 are keys.
 More details are provided below.
 
-------------------------------
 Tokens for Sorted Containers
-------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The sorted container objects use a special type for indexing
 called a *token*
@@ -112,9 +111,8 @@ the user should  not extract this internal representation;
 these integers do not have a documented interpretation
 in terms of the container.
 
-----------------------------------
 Constructors for Sorted Containers
-----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``SortedDict(d)``
   Argument ``d`` is an ordinary Julia dict (or any associative type)
@@ -214,10 +212,8 @@ Constructors for Sorted Containers
   specified.
 
 
-
----------------------------------
 Complexity of Sorted Containers
----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the list of functions below, the running time of the various
 operations is provided.  In these running times,
@@ -226,9 +222,8 @@ operations is provided.  In these running times,
 container at the time of the function call, and *c* denotes the
 time needed to compare two keys.
 
---------------------------------------
 Navigating the Containers
---------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ``sd[k]``
   Argument ``sd`` is a SortedDict and ``k`` is a key.  In an
   expression, this retrieves the value associated with the key
@@ -369,9 +364,8 @@ Navigating the Containers
    is returned.
    Time: O(*c* log *n*)
 
---------------------------------------------
 Inserting & Deleting in Sorted Containers
---------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``empty!(sc)``
     Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet.  This
@@ -472,9 +466,8 @@ Inserting & Deleting in Sorted Containers
   Time: O(1)
 
 
-------------------------
 Token Manipulation
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 ``compare(sc,st1,st2)``
@@ -505,9 +498,8 @@ Token Manipulation
   Time: O(1)
 
 
---------------------------------
 Iteration Over Sorted Containers
---------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 As is standard in Julia, iteration over the containers is
 implemented via calls to three functions, ``start``,
@@ -665,9 +657,8 @@ is already advanced to the next token at the beginning of the body, so
 ``st`` is not necessarily referred to in the loop body (unless the
 user refers to it).
 
-----------------
 Other Functions
-----------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``isempty(sc)``
   Returns ``true`` if the container is empty (no items).
@@ -871,9 +862,8 @@ Other Functions
   Time:  O(*cN* log *N*), where *N* is the total size
   of all the arguments.
 
-----------------------
 Set operations
-----------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The SortedSet container supports the following set operations.  Note that
 in the case of intersect, symdiff and setdiff, the two SortedSets should
@@ -931,9 +921,8 @@ message is produced; instead, the built-in default versions of these functions
   *n* is the sizes of ``ss`` and *m* is the number of items in ``iterable``.
 
 
-----------------------
 Ordering of keys
-----------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 As mentioned earlier, the default ordering of keys uses
 ``isless`` and ``isequal`` functions.  If the default ordering is used,
 it is a requirement of the container that ``isequal(a,b)`` is true if and
@@ -1009,9 +998,8 @@ typically near the beginning::
     import Base.lt
     import DataStructures.eq
 
---------------------------------
 Cautionary note on mutable keys
---------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 As with ordinary Dicts, keys for the sorted containers
 can be either mutable or immutable.  In the
 case of mutable keys, it is important that the keys not be mutated
@@ -1029,9 +1017,8 @@ a corrupted state::
    k[1] = 7
 
 
------------------------------------
 Performance of Sorted Containers
------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The sorted containers are currently not optimized for cache performance.
 This will be addressed in the future.
