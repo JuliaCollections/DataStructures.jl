@@ -32,6 +32,9 @@ head_deque_block{T}(ty::Type{T}, n::Int) = DequeBlock{T}(n, n+1)
 capacity(blk::DequeBlock) = blk.capa
 length(blk::DequeBlock) = blk.back - blk.front + 1
 isempty(blk::DequeBlock) = blk.back < blk.front
+ishead(blk::DequeBlock) = is(blk.prev, blk)
+isrear(blk::DequeBlock) = is(blk.next, blk)
+
 
 # reset the block to empty, and position
 
@@ -93,45 +96,64 @@ end
 # Iteration
 
 immutable DequeIterator{T}
-    is_done::Bool
-    cblock::DequeBlock{T}  # current block
-    i::Int
+    q::Deque
 end
 
-start{T}(q::Deque{T}) = DequeIterator{T}(isempty(q), q.head, q.head.front)
+start{T}(qi::DequeIterator{T}) = (qi.q.head, qi.q.head.front)
 
-function next{T}(q::Deque{T}, s::DequeIterator{T})
-    cb = s.cblock
-    i::Int = s.i
-    x::T = cb.data[i]
-
-    is_done = false
+function next{T}(qi::DequeIterator{T}, s)
+    cb = s[1]
+    i = s[2]
+    x = cb.data[i]
 
     i += 1
-    if i > cb.back
-        cb_next = cb.next
-        if is(cb, cb_next)
-            is_done = true
-        else
-            cb = cb_next
-            i = 1
-        end
+    if i > cb.back && !isrear(cb)
+        cb = cb.next
+        i = 1
     end
 
-    (x, DequeIterator{T}(is_done, cb, i))
+    (x, (cb, i))
 end
 
-done{T}(q::Deque{T}, s::DequeIterator{T}) = s.is_done
+done{T}(q::DequeIterator{T}, s) = (s[2] > s[1].back)
 
+# Backwards deque iteration
 
-function Base.collect{T}(q::Deque{T})
-    r = T[]
-    for x::T in q
-        push!(r, x)
+immutable ReverseDequeIterator{T}
+    q::Deque
+end
+
+start{T}(qi::ReverseDequeIterator{T}) = (qi.q.rear, qi.q.rear.back)
+
+# We're finished when our index is less than the first index
+# of the current block (which can only happen on the first block)
+done{T}(qi::ReverseDequeIterator{T}, s) = (s[2] < s[1].front)
+
+function next{T}(qi::ReverseDequeIterator{T}, s)
+    cb = s[1]
+    i = s[2]
+    x = cb.data[i]
+
+    i -= 1
+    # If we're past the beginning of a block, go to the previous one
+    if i < cb.front && !ishead(cb)
+        cb = cb.prev
+        i = cb.back
     end
-    return r
+
+    (x, (cb, i))
 end
 
+reverse_iter{T}(q::Deque{T}) = ReverseDequeIterator{T}(q)
+
+start{T}(q::Deque{T}) = start(DequeIterator{T}(q))
+next{T}(q::Deque{T}, s) = next(DequeIterator{T}(q), s)
+done{T}(q::Deque{T}, s) = done(DequeIterator{T}(q), s)
+
+Base.length{T}(qi::DequeIterator{T}) = qi.q.len
+Base.length{T}(qi::ReverseDequeIterator{T}) = qi.q.len
+
+Base.collect{T}(q::Deque{T}) = T[x for x in q]
 
 # Showing
 

@@ -41,9 +41,22 @@ for i = 1:n
     push!(arr,i)
 end
 
-iterated = iter(stk)
-@test(reverse(arr) == iterated)
+#test iterator
 
+index = length(arr)
+for i in stk
+    @test(arr[index] == i)
+    index -= 1
+end
+
+index = 1
+for i in reverse_iter(stk)
+    @test(arr[index] == i)
+    index += 1
+end
+
+@test arr == [i for i in reverse_iter(stk)]
+@test reverse(arr) == [i for i in stk]
 
 # Queue
 
@@ -90,5 +103,19 @@ for i = 1:n
     push!(arr,i)
 end
 
-iterated = iter(q)
-@test(arr == iterated)
+#test iterator
+
+index = 1
+for i in q
+    @test(arr[index] == i)
+    index += 1
+end
+
+index = length(arr)
+for i in reverse_iter(q)
+    @test(arr[index] == i)
+    index -= 1
+end
+
+@test arr == [i for i in q]
+@test reverse(arr) == [i for i in reverse_iter(q)]

@@ -17,13 +17,10 @@ function push!(s::Stack, x)
     s
 end
 
-#returns a collection that can be used in a for loop
-function iter{T}(s::Stack{T})
-    a = T[]
-    for i in s.store
-        unshift!(a,i)
-    end
-    return a
-end
-
 pop!(s::Stack) = pop!(s.store)
+
+start(st::Stack) = start(reverse_iter(st.store))
+next(st::Stack, s) = next(reverse_iter(st.store), s)
+done(st::Stack, s) = done(reverse_iter(st.store), s)
+
+reverse_iter{T}(s::Stack{T}) = DequeIterator{T}(s.store)
