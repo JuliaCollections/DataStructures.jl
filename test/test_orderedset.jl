@@ -129,6 +129,18 @@ s = intersect(OrderedSet([5,6,7,8]), OrderedSet([7,8,9]))
 @test isequal(s, OrderedSet([7,8]))
 @test isequal(intersect(OrderedSet([2,3,1]), OrderedSet([4,2,3]), OrderedSet([5,4,3,2])), OrderedSet([2,3]))
 
+# indexing
+s = OrderedSet([1,3,5,7])
+@test s[1] == 1
+@test s[2] == 3
+@test s[end] == 7
+
+# find
+s = OrderedSet([1,3,5,7])
+@test findfirst(s,1) == 1
+@test findfirst(s,7) == 4
+@test findfirst(s,2) == 0
+
 # setdiff
 @test isequal(setdiff(OrderedSet([1,2,3]), OrderedSet()),        OrderedSet([1,2,3]))
 @test isequal(setdiff(OrderedSet([1,2,3]), OrderedSet([1])),     OrderedSet([2,3]))
