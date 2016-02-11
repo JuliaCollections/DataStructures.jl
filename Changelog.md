@@ -1,3 +1,13 @@
+v0.4.3 / 2016-02-10
+==================
+  * for DisjointSets, make union! return the root of the newly merged set
+  * Stack and Queue are now iterable, with both the standard iterator and a reverse iterator for each type. The old iter function is now deprecated
+  * Hash and == functions implemented for the Deque type
+  * CircularBuffer type has been added
+  * Many deprecation warnings were deleted (https://github.com/JuliaLang/DataStructures.jl/pull/161)
+  * Ordered sets now have indexing
+  * Performance improvements to OrderedDict
+
 
 v0.4.2 / 2016-01-13
 ==================
