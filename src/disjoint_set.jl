@@ -49,6 +49,11 @@ end
 
 find_root(s::IntDisjointSets, x::Integer) = find_root_impl!(s.parents, x)
 
+"""
+    in_same_set(s::IntDisjointSets, x::Integer, y::Integer)
+
+Returns `true` if `x` and `y` belong to the same subset in `s` and `false` otherwise.
+"""
 in_same_set(s::IntDisjointSets, x::Integer, y::Integer) = find_root(s, x) == find_root(s, y)
 
 # merge the subset containing x and that containing y into one
@@ -119,6 +124,11 @@ end
 length(s::DisjointSets) = length(s.internal)
 num_groups(s::DisjointSets) = num_groups(s.internal)
 
+"""
+    find_root{T}(s::DisjointSets{T}, x::T)
+
+Finds the root element of the subset in `s` which has the element `x` as a member.
+"""
 find_root{T}(s::DisjointSets{T}, x::T) = find_root(s.internal, s.intmap[x])
 
 in_same_set{T}(s::DisjointSets{T}, x::T, y::T) = in_same_set(s.internal, s.intmap[x], s.intmap[y])
