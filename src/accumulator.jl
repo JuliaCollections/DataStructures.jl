@@ -12,6 +12,11 @@ counter(T::Type) = Accumulator(T,Int)
 Accumulator{T,V<:Number}(dct::Dict{T,V}) = Accumulator{T,V}(copy(dct))
 counter{T}(dct::Dict{T,Int}) = Accumulator{T,Int}(copy(dct))
 
+"""
+    counter{T}(seq::AbstractArray)
+
+Returns an `Accumulator` object containing the elements from `seq`.
+"""
 function counter{T}(seq::AbstractArray{T})
     ct = counter(T)
     for x in seq
