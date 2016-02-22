@@ -11,7 +11,8 @@ import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
 """
     OrderedDict
 
-'OrderedDict's are simply dictionaries whose entries have a particular order. The order refers to insertion order, which allows deterministic iteration over the dictionary or set.
+`OrderedDict`s are  simply dictionaries  whose entries  have a  particular order.  The order
+refers to insertion order, which allows deterministic iteration over the dictionary or set.
 """
 type OrderedDict{K,V} <: Associative{K,V}
     slots::Array{Int32,1}

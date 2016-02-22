@@ -5,9 +5,10 @@ type Queue{T}
 end
 
 """
-    Queue(ty{T}[, blksize::Integer])
+    Queue(T[, blksize::Integer=1024])
 
-This is a constructor to create an object of a `Queue`.The block size `blksize` by default is `1024`.
+This is a  constructor to create an object of  a `Queue`.`T` specifies
+the data type of the member elements of the `Queue`.
 """
 Queue{T}(ty::Type{T}) = Queue(Deque{T}())
 Queue{T}(ty::Type{T}, blksize::Integer) = Queue(Deque{T}(blksize))
@@ -21,7 +22,7 @@ back(s::Queue) = back(s.store)
 """
     enqueue!(s::Queue, x)
 
-Inserts the value `x` to the front of the queue `s`.
+Inserts the value `x` to the end of the queue `s`.
 """
 function enqueue!(s::Queue, x)
     push!(s.store, x)
