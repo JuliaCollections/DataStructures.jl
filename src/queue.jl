@@ -32,7 +32,7 @@ end
 """
     dequeue!(s::Queue)
 
-Removes an element from the back of the queue `s`.
+Removes an element from the front of the queue `s`.
 """
 dequeue!(s::Queue) = shift!(s.store)
 
