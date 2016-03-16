@@ -7,8 +7,7 @@ end
 """
     Queue(T[, blksize::Integer=1024])
 
-This is a  constructor to create an object of  a `Queue`.`T` specifies
-the data type of the member elements of the `Queue`.
+Create a `Queue` objet containing elements of type `T`.
 """
 Queue{T}(ty::Type{T}) = Queue(Deque{T}())
 Queue{T}(ty::Type{T}, blksize::Integer) = Queue(Deque{T}(blksize))
@@ -32,7 +31,7 @@ end
 """
     dequeue!(s::Queue)
 
-Removes an element from the front of the queue `s`.
+Removes an element from the front of the queue `s` and removes it.
 """
 dequeue!(s::Queue) = shift!(s.store)
 
