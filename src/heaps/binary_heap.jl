@@ -140,6 +140,12 @@ function push!{T}(h::BinaryHeap{T}, v::T)
     _heap_bubble_up!(h.comparer, valtree, length(valtree))
 end
 
+
+"""
+    top(h::BinaryHeap)
+
+Returns the element at the top of the heap `h`.
+"""
 top(h::BinaryHeap) = h.valtree[1]
 
 pop!{T}(h::BinaryHeap{T}) = _binary_heap_pop!(h.comparer, h.valtree)
