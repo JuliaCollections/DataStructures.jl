@@ -20,6 +20,12 @@ push!(c, "high", 5)
 @test c["low"] == [1, 2, 3]
 @test c["high"] == [4, 5]
 
+@test length(c) == 2
+@test collect(keys(c)) == ASCIIString["high","low"]
+
+pop!(c,"low")
+@test !haskey(c,"low")
+
 # classified sets
 
 c = classified_sets(ASCIIString, Int)

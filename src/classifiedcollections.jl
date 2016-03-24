@@ -49,4 +49,4 @@ function push!{K, C}(cc::ClassifiedCollections{K, C}, key::K, e)
     push!(c, e)
 end
 
-pop!{K}(cc::Accumulator{K}, key::K) = pop!(cc.map, key)
+pop!{K}(cc::ClassifiedCollections{K}, key::K) = pop!(cc.map, key)
