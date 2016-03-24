@@ -19,6 +19,8 @@ d = OrderedDict{Char, Int}()
 @test_throws KeyError d['c'] == 1
 d['c'] = 1
 @test !isempty(d)
+@test_throws KeyError d[0.01]
+@test isempty(similar(d))
 empty!(d)
 @test isempty(d)
 
