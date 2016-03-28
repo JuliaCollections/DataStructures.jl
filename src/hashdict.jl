@@ -410,21 +410,6 @@ function get!{K,V}(h::HashDict{K,V}, key0, default)
     return v
 end
 
-function get!{K,V}(h::HashDict{K,V}, key0, default)
-    key = convert(K,key0)
-    if !isequal(key,key0)
-        throw(ArgumentError("$key0 is not a valid key for type $K"))
-    end
-
-    index = ht_keyindex2(h, key)
-
-    index > 0 && return h.vals[index]
-
-    v = convert(V,  default)
-    _setindex!(h, v, key, -index)
-    return v
-end
-
 # TODO: this makes it challenging to have V<:Base.Callable
 function get!{K,V,F<:Base.Callable}(h::HashDict{K,V}, key0, default::F)
     key = convert(K,key0)
