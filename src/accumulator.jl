@@ -9,7 +9,6 @@ end
 Accumulator{T,V<:Number}(::Type{T}, ::Type{V}) = Accumulator{T,V}(Dict{T,V}())
 counter(T::Type) = Accumulator(T,Int)
 
-Accumulator{T,V<:Number}(dct::Dict{T,V}) = Accumulator{T,V}(copy(dct))
 counter{T}(dct::Dict{T,Int}) = Accumulator{T,Int}(copy(dct))
 
 """
