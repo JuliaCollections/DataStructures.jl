@@ -14,10 +14,10 @@ reflect the counts::
 
 There are different ways to construct an accumulator/counter::
 
-  a = accumulator(K, V)    # construct an accumulator with key-type K and
+  a = Accumulator(K, V)    # construct an accumulator with key-type K and
                            # accumulated value type V
 
-  a = accumulator(dict)    # construct an accumulator from a dictionary
+  a = Accumulator(dict)    # construct an accumulator from a dictionary
 
   a = counter(K)           # construct a counter, i.e. an accumulator with
                            # key type K and value type Int
