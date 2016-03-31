@@ -88,6 +88,7 @@ immutable SDMKeyIteration{T <: SDMIterableTypesBase}
 end
 
 eltype(s::SDMKeyIteration) = keytype(extractcontainer(s.base))
+length(s::SDMKeyIteration) = length(extractcontainer(s.base))
 
 
 immutable SDMValIteration{T <: SDMIterableTypesBase}
@@ -95,7 +96,7 @@ immutable SDMValIteration{T <: SDMIterableTypesBase}
 end
 
 eltype(s::SDMValIteration) = valtype(extractcontainer(s.base))
-
+length(s::SDMValIteration) = length(extractcontainer(s.base))
 
 
 immutable SDMSemiTokenIteration{T <: SDMIterableTypesBase}
