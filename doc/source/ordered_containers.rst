@@ -9,7 +9,7 @@ particular order.  For ``OrderedDicts`` (and ``OrderedSets``), order
 refers to *insertion order*, which allows deterministic iteration over
 the dictionary or set::
 
-  d = OrderedDict(Char,Int)
+  d = OrderedDict{Char,Int}()
   for c in 'a':'e'
       d[c] = c-'a'+1
   end
