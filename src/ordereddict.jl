@@ -108,8 +108,6 @@ function convert{K,V}(::Type{OrderedDict{K,V}},d::Associative)
 end
 convert{K,V}(::Type{OrderedDict{K,V}},d::OrderedDict{K,V}) = d
 
-hashindex(key, sz) = ((hash(key)%Int) & (sz-1)) + 1
-
 function rehash!{K,V}(h::OrderedDict{K,V}, newsz = length(h.slots))
     olds = h.slots
     keys = h.keys
