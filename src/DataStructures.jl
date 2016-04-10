@@ -59,37 +59,37 @@ module DataStructures
     include("stack.jl")
     include("queue.jl")
     include("accumulator.jl")
-    include("classifiedcollections.jl")
+    include("classified_collections.jl")
     include("disjoint_set.jl")
     include("heaps.jl")
 
-    include("dictsupport.jl")
-    include("hashdict.jl")
-    include("ordereddict.jl")
-    include("orderedset.jl")
-    include("defaultdict.jl")
+    include("dict_support.jl")
+    include("hash_dict.jl")
+    include("ordered_dict.jl")
+    include("ordered_set.jl")
+    include("default_dict.jl")
     include("trie.jl")
 
-    include("intset.jl")
+    include("int_set.jl")
 
     include("list.jl")
-    include("balancedTree.jl")
+    include("balanced_tree.jl")
     include("tokens.jl")
 
     import .Tokens: IntSemiToken
 
-    include("multidict.jl")
-    include("sortedDict.jl")
-    include("sortedMultiDict.jl")
-    include("sortedSet.jl")
+    include("multi_dict.jl")
+    include("sorted_dict.jl")
+    include("sorted_multi_dict.jl")
+    include("sorted_set.jl")
     include("tokens2.jl")
-    include("containerloops.jl")
+    include("container_loops.jl")
 
     export
         CircularBuffer,
         capacity,
         isfull
-    include("circularbuffer.jl")
+    include("circular_buffer.jl")
 
     export status
     export deref_key, deref_value, deref, advance, regress
