@@ -21,7 +21,7 @@ module DataStructures
     export deque, enqueue!, dequeue!, update!, reverse_iter
     export capacity, num_blocks, front, back, top, sizehint!
 
-    export Accumulator, counter
+    export Accumulator, counter, most_common
     export ClassifiedCollections
     export classified_lists, classified_sets, classified_counters
 
