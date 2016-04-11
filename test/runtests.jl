@@ -2,22 +2,22 @@ using Base.Test
 using DataStructures
 const IntSet = DataStructures.IntSet
 
-tests = ["intset",
+tests = ["int_set",
          "deque",
-         "sortedcontainers",
+         "sorted_containers",
          "stack_and_queue",
          "accumulator",
-         "classifiedcollections",
+         "classified_collections",
          "disjoint_set",
          "binheap",
          "mutable_binheap",
-         "defaultdict",
-         "ordereddict",
-         "orderedset",
+         "default_dict",
+         "ordered_dict",
+         "ordered_set",
          "trie",
          "list",
-         "multidict",
-         "circularbuffer"]
+         "multi_dict",
+         "circular_buffer"]
 
 if length(ARGS) > 0
     tests = ARGS
