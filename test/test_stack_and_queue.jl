@@ -5,7 +5,7 @@
 s = Stack(Int, 5)
 n = 100
 
-@test typeof(s) == Stack{Int}
+@test isa(s, Stack{Int})
 @test length(s) == 0
 @test isempty(s)
 @test_throws ArgumentError top(s)
@@ -63,7 +63,7 @@ end
 s = Queue(Int, 5)
 n = 100
 
-@test typeof(s) == Queue{Int}
+@test isa(s, Queue{Int})
 @test length(s) == 0
 @test isempty(s)
 @test_throws ArgumentError front(s)

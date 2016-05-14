@@ -1,11 +1,11 @@
 # construction
 
-@test typeof(OrderedDict()) == OrderedDict{Any,Any}
-@test typeof(OrderedDict([(1,2.0)])) == OrderedDict{Int,Float64}
-@test typeof(OrderedDict([("a",1),("b",2)])) == OrderedDict{Compat.ASCIIString,Int}
-@test typeof(OrderedDict(Pair(1, 1.0))) == OrderedDict{Int,Float64}
-@test typeof(OrderedDict(Pair(1, 1.0), Pair(2, 2.0))) == OrderedDict{Int,Float64}
-@test typeof(OrderedDict(Pair(1, 1.0), Pair(2, 2.0), Pair(3, 3.0))) == OrderedDict{Int,Float64}
+@test isa(OrderedDict(), OrderedDict{Any,Any})
+@test isa(OrderedDict([(1,2.0)]), OrderedDict{Int,Float64})
+@test isa(OrderedDict([("a",1),("b",2)]), OrderedDict{Compat.ASCIIString,Int})
+@test isa(OrderedDict(Pair(1, 1.0)), OrderedDict{Int,Float64})
+@test isa(OrderedDict(Pair(1, 1.0), Pair(2, 2.0)), OrderedDict{Int,Float64})
+@test isa(OrderedDict(Pair(1, 1.0), Pair(2, 2.0), Pair(3, 3.0)), OrderedDict{Int,Float64})
 
 # empty dictionary
 d = OrderedDict{Char, Int}()
@@ -136,7 +136,10 @@ let d = OrderedDict(((1, 2), (3, 4))),
     @test d[3] === 4
 
     @test d == d2 == d3 == d4
-    @test typeof(d) == typeof(d2) == typeof(d3) == typeof(d4) == OrderedDict{Int,Int}
+    @test isa(d, OrderedDict{Int,Int})
+    @test isa(d2, OrderedDict{Int,Int})
+    @test isa(d3, OrderedDict{Int,Int})
+    @test isa(d4, OrderedDict{Int,Int})
 end
 
 let d = OrderedDict(((1, 2), (3, "b"))),
@@ -149,11 +152,11 @@ let d = OrderedDict(((1, 2), (3, "b"))),
 
     ## TODO: tuple of tuples doesn't work for mixed tuple types
     # @test d == d2 == d3 == d4
-    # @test typeof(d) == typeof(d2) == typeof(d3) == typeof(d4) == OrderedDict{Int,Any}
-    # @test typeof(d) == OrderedDict{Int,Any}
+    # @test isa(d, OrderedDict{Int,Any})
     @test d2 == d3 == d4
-    @test typeof(d2) == typeof(d3) == typeof(d4) == OrderedDict{Int,Any}
-    @test typeof(d2) == OrderedDict{Int,Any}
+    @test isa(d2, OrderedDict{Int,Any})
+    @test isa(d3, OrderedDict{Int,Any})
+    @test isa(d4, OrderedDict{Int,Any})
 end
 
 let d = OrderedDict(((1, 2), ("a", 4))),
@@ -166,11 +169,11 @@ let d = OrderedDict(((1, 2), ("a", 4))),
 
     ## TODO: tuple of tuples doesn't work for mixed tuple types
     # @test d == d2 == d3 == d4
-    # @test typeof(d) == typeof(d2) == typeof(d3) == OrderedDict{Any,Int}
-    # @test typeof(d) == OrderedDict{Any,Int}
     @test d2 == d3 == d4
-    @test typeof(d2) == typeof(d3) == typeof(d4) == OrderedDict{Any,Int}
-    @test typeof(d2) == OrderedDict{Any,Int}
+    # @test isa(d, OrderedDict{Any,Int})
+    @test isa(d2, OrderedDict{Any,Int})
+    @test isa(d3, OrderedDict{Any,Int})
+    @test isa(d4, OrderedDict{Any,Int})
 end
 
 let d = OrderedDict(((1, 2), ("a", "b"))),
@@ -182,8 +185,10 @@ let d = OrderedDict(((1, 2), ("a", "b"))),
     @test d["a"] == "b"
 
     @test d == d2 == d3 == d4
-    @test typeof(d) == typeof(d2) == typeof(d3) == typeof(d4) == OrderedDict{Any,Any}
-    @test typeof(d) == OrderedDict{Any,Any}
+    @test isa(d, OrderedDict{Any,Any})
+    @test isa(d2, OrderedDict{Any,Any})
+    @test isa(d3, OrderedDict{Any,Any})
+    @test isa(d4, OrderedDict{Any,Any})
 end
 
 @test_throws ArgumentError first(OrderedDict())
@@ -294,7 +299,7 @@ end
 let
     a = OrderedDict("foo"  => 0.0, "bar" => 42.0)
     b = OrderedDict("フー" => 17, "バー" => 4711)
-    @test is(typeof(merge(a, b)), OrderedDict{Compat.UTF8String,Float64})
+    @test isa(merge(a, b), OrderedDict{Compat.UTF8String,Float64})
 end
 
 # issue 9295
@@ -322,7 +327,7 @@ let
     serialize(s, od)
     seek(s, 0)
     dd = deserialize(s)
-    @test typeof(dd) === DataStructures.OrderedDict{Char,Int64}
+    @test isa(dd, DataStructures.OrderedDict{Char,Int64})
     @test dd == od
     close(s)
 end

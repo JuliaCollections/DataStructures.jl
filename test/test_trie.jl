@@ -17,10 +17,10 @@ t["roger"]=52
 ks = ["amy", "ann", "emma", "rob", "roger"]
 vs = [56, 15, 30, 27, 52]
 kvs = collect(zip(ks, vs))
-@test typeof(Trie(ks, vs)) == Trie{Int}
-@test typeof(Trie(kvs)) == Trie{Int}
-@test typeof(Trie(Dict(kvs))) == Trie{Int}
-@test typeof(Trie(ks)) == Trie{Void}
+@test isa(Trie(ks, vs), Trie{Int})
+@test isa(Trie(kvs), Trie{Int})
+@test isa(Trie(Dict(kvs)), Trie{Int})
+@test isa(Trie(ks), Trie{Void})
 
 
 # path iterator

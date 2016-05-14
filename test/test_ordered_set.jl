@@ -3,13 +3,13 @@ using Base.Test
 
 # construction
 
-@test is(typeof(OrderedSet()), OrderedSet{Any})
-@test is(typeof(OrderedSet([1,2,3])), OrderedSet{Int})
-@test is(typeof(OrderedSet{Int}([3])), OrderedSet{Int})
+@test isa(OrderedSet(), OrderedSet{Any})
+@test isa(OrderedSet([1,2,3]), OrderedSet{Int})
+@test isa(OrderedSet{Int}([3]), OrderedSet{Int})
 data_in = (1, "banana", ())
 s = OrderedSet(data_in)
 data_out = collect(s)
-@test is(typeof(data_out), Array{Any,1})
+@test isa(data_out, Array{Any,1})
 @test is(tuple(data_out...), data_in)
 @test is(tuple(data_in...), tuple(s...))
 @test length(data_out) == length(data_in)
