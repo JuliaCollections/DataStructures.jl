@@ -44,7 +44,7 @@ l5 = map((x) -> x*2, l4)
 @test collect(l5) == [2; 4; 6]
 
 l5b = map((x) -> "$x", l5)
-@test typeof(l5b) == Cons{ASCIIString}
+@test typeof(l5b) == Cons{Compat.ASCIIString}
 @test collect(l5b) == ["2"; "4"; "6"]
 
 l6 = filter((x) -> x < 6, l5)

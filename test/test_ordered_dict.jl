@@ -2,7 +2,7 @@
 
 @test typeof(OrderedDict()) == OrderedDict{Any,Any}
 @test typeof(OrderedDict([(1,2.0)])) == OrderedDict{Int,Float64}
-@test typeof(OrderedDict([("a",1),("b",2)])) == OrderedDict{ASCIIString,Int}
+@test typeof(OrderedDict([("a",1),("b",2)])) == OrderedDict{Compat.ASCIIString,Int}
 @test typeof(OrderedDict(Pair(1, 1.0))) == OrderedDict{Int,Float64}
 @test typeof(OrderedDict(Pair(1, 1.0), Pair(2, 2.0))) == OrderedDict{Int,Float64}
 @test typeof(OrderedDict(Pair(1, 1.0), Pair(2, 2.0), Pair(3, 3.0))) == OrderedDict{Int,Float64}
@@ -192,7 +192,7 @@ end
 
 # issue #1821
 let
-    d = OrderedDict{UTF8String, Vector{Int}}()
+    d = OrderedDict{Compat.ASCIIString, Vector{Int}}()
     d["a"] = [1, 2]
     @test_throws MethodError d["b"] = 1
     @test isa(repr(d), AbstractString)  # check that printable without error
@@ -219,7 +219,7 @@ end
 data_in = [ (rand(1:1000), randstring(2)) for _ in 1:1001 ]
 
 # Populate the first dict
-d1 = OrderedDict{Int, ASCIIString}()
+d1 = OrderedDict{Int, Compat.ASCIIString}()
 for (k,v) in data_in
     d1[k] = v
 end
@@ -294,7 +294,7 @@ end
 let
     a = OrderedDict("foo"  => 0.0, "bar" => 42.0)
     b = OrderedDict("フー" => 17, "バー" => 4711)
-    @test is(typeof(merge(a, b)), OrderedDict{UTF8String,Float64})
+    @test is(typeof(merge(a, b)), OrderedDict{Compat.UTF8String,Float64})
 end
 
 # issue 9295

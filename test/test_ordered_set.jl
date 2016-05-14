@@ -15,9 +15,9 @@ data_out = collect(s)
 @test length(data_out) == length(data_in)
 
 # hash
-s1 = OrderedSet{ASCIIString}(["bar", "foo"])
-s2 = OrderedSet{ASCIIString}(["foo", "bar"])
-s3 = OrderedSet{ASCIIString}(["baz"])
+s1 = OrderedSet{Compat.ASCIIString}(["bar", "foo"])
+s2 = OrderedSet{Compat.ASCIIString}(["foo", "bar"])
+s3 = OrderedSet{Compat.ASCIIString}(["baz"])
 @test hash(s1) != hash(s2)
 @test hash(s1) != hash(s3)
 

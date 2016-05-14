@@ -1,6 +1,7 @@
 using Base.Test
 using DataStructures
 const IntSet = DataStructures.IntSet
+import Compat: String
 
 tests = ["int_set",
          "deque",

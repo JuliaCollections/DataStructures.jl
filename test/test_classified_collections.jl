@@ -5,7 +5,7 @@ using Base.Test
 
 # classified lists
 
-c = classified_lists(ASCIIString, Int)
+c = classified_lists(Compat.ASCIIString, Int)
 
 push!(c, "low", 1)
 push!(c, "low", 2)
@@ -21,14 +21,14 @@ push!(c, "high", 5)
 @test c["high"] == [4, 5]
 
 @test length(c) == 2
-@test collect(keys(c)) == ASCIIString["high","low"]
+@test collect(keys(c)) == Compat.ASCIIString["high","low"]
 
 pop!(c,"low")
 @test !haskey(c,"low")
 
 # classified sets
 
-c = classified_sets(ASCIIString, Int)
+c = classified_sets(Compat.ASCIIString, Int)
 
 push!(c, "low", 1)
 push!(c, "low", 2)
@@ -52,7 +52,7 @@ push!(c, "high", 5)
 
 # classified counters
 
-c = classified_counters(ASCIIString, Float64)
+c = classified_counters(Compat.ASCIIString, Float64)
 
 push!(c, "low", 1.)
 push!(c, "low", 2.)

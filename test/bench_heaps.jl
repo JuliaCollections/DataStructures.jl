@@ -4,7 +4,7 @@ using DataStructures
 
 # benchmark function
 
-function benchmark_heap(title::ASCIIString, h::AbstractHeap, xs::Vector{Float64})
+function benchmark_heap(title::String, h::AbstractHeap, xs::Vector{Float64})
     @assert isempty(h)
 
     # warming
