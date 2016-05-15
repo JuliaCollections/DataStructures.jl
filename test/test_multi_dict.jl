@@ -1,22 +1,21 @@
-
 # construction
 KVS = ('a',[1])
 KV = ('a',1)
-@test typeof(MultiDict()) == MultiDict{Any,Any}
-@test typeof(MultiDict(())) == MultiDict{Any,Any}
-@test typeof(MultiDict([KVS])) == MultiDict{Char,Int}
-@test typeof(MultiDict([KV])) == MultiDict{Char,Int}
-@test typeof(MultiDict([KV, KVS])) == MultiDict{Char,Any}
+@test isa(MultiDict(), MultiDict{Any,Any})
+@test isa(MultiDict(()), MultiDict{Any,Any})
+@test isa(MultiDict([KVS]), MultiDict{Char,Int})
+@test isa(MultiDict([KV]), MultiDict{Char,Int})
+@test isa(MultiDict([KV, KVS]), MultiDict{Char,Any})
 
 PVS = 1 => [1.0]
 PV = 1 => 1.0
-@test eltype(MultiDict{Char,Int}()) == Pair{Char,Vector{Int}}
-@test typeof(MultiDict(PVS)) == MultiDict{Int,Float64}
-@test typeof(MultiDict(PVS, PVS)) == MultiDict{Int,Float64}
-@test typeof(MultiDict([PVS, PVS])) == MultiDict{Int,Float64}
-@test typeof(MultiDict(PV)) == MultiDict{Int,Float64}
-@test typeof(MultiDict(PV, PV)) == MultiDict{Int,Float64}
-@test typeof(MultiDict([PV, PV])) == MultiDict{Int,Float64}
+@test eltype(MultiDict{Char,Int}()) === Pair{Char,Vector{Int}}
+@test isa(MultiDict(PVS), MultiDict{Int,Float64})
+@test isa(MultiDict(PVS, PVS), MultiDict{Int,Float64})
+@test isa(MultiDict([PVS, PVS]), MultiDict{Int,Float64})
+@test isa(MultiDict(PV), MultiDict{Int,Float64})
+@test isa(MultiDict(PV, PV), MultiDict{Int,Float64})
+@test isa(MultiDict([PV, PV]), MultiDict{Int,Float64})
 
 # setindex!, getindex, length, isempty, empty!, in
 # copy, similar, get, haskey, getkey, start, next, done

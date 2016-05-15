@@ -3,21 +3,21 @@ using Base.Test
 
 # construction
 
-@test is(typeof(OrderedSet()), OrderedSet{Any})
-@test is(typeof(OrderedSet([1,2,3])), OrderedSet{Int})
-@test is(typeof(OrderedSet{Int}([3])), OrderedSet{Int})
+@test isa(OrderedSet(), OrderedSet{Any})
+@test isa(OrderedSet([1,2,3]), OrderedSet{Int})
+@test isa(OrderedSet{Int}([3]), OrderedSet{Int})
 data_in = (1, "banana", ())
 s = OrderedSet(data_in)
 data_out = collect(s)
-@test is(typeof(data_out), Array{Any,1})
+@test isa(data_out, Array{Any,1})
 @test is(tuple(data_out...), data_in)
 @test is(tuple(data_in...), tuple(s...))
 @test length(data_out) == length(data_in)
 
 # hash
-s1 = OrderedSet{ASCIIString}(["bar", "foo"])
-s2 = OrderedSet{ASCIIString}(["foo", "bar"])
-s3 = OrderedSet{ASCIIString}(["baz"])
+s1 = OrderedSet{Compat.ASCIIString}(["bar", "foo"])
+s2 = OrderedSet{Compat.ASCIIString}(["foo", "bar"])
+s3 = OrderedSet{Compat.ASCIIString}(["baz"])
 @test hash(s1) != hash(s2)
 @test hash(s1) != hash(s3)
 

@@ -12,7 +12,7 @@ q = Deque{Int}()
 @test_throws ArgumentError back(q)
 @test length(sprint(dump,q)) >= 0
 
-@test typeof(deque(Int)) == typeof(Deque{Int}())
+@test typeof(deque(Int)) === typeof(Deque{Int}())
 
 q = DataStructures.DequeBlock{Int}(0,0)
 @test length(q) == 0
@@ -182,5 +182,5 @@ q = Deque{Int}(1)
 push!(q,1)
 push!(q,2)
 @test length(sprint(dump,q)) >= 0
-@test typeof(empty!(q)) == typeof(Deque{Int}())
+@test typeof(empty!(q)) === typeof(Deque{Int}())
 @test isempty(q)

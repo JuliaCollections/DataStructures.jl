@@ -1,4 +1,3 @@
-
 l0 = nil(Char)
 @test length(l0) == 0
 @test l0 == nil(Char)
@@ -10,7 +9,7 @@ l1 = nil()
 @test l1 == nil()
 @test l1 == nil(Int)
 @test sprint(show,l1) == "nil()"
-@test typeof(list()) == typeof(l1)
+@test typeof(list()) === typeof(l1)
 @test copy(l1) == l1
 @test map((x) -> x*2,l1) == l1
 
@@ -23,7 +22,7 @@ l2 = cons(1, l1)
 @test cat(l2) == l2
 
 l3 = list(2, 3)
-@test is(typeof(l3), Cons{Int})
+@test isa(l3, Cons{Int})
 @test length(l3) == 2
 @test head(l3) == 2
 @test head(tail(l3)) == 3
@@ -40,11 +39,11 @@ l4 = cat(l1, l2, l3)
 @test sprint(show,l4) == "list(1, 2, 3)"
 
 l5 = map((x) -> x*2, l4)
-@test typeof(l5) == Cons{Int}
+@test isa(l5, Cons{Int})
 @test collect(l5) == [2; 4; 6]
 
 l5b = map((x) -> "$x", l5)
-@test typeof(l5b) == Cons{ASCIIString}
+@test isa(l5b, Cons{Compat.ASCIIString})
 @test collect(l5b) == ["2"; "4"; "6"]
 
 l6 = filter((x) -> x < 6, l5)
@@ -61,7 +60,7 @@ l8 = cat(l5b, l6)
 @test collect(l8) == ["2"; "4"; "6"; 2; 4]
 
 l9 = cat(list(1, 2), list(3.0, 4.0))
-@test typeof(l9) == Cons{Real}
+@test isa(l9, Cons{Real})
 @test collect(l9) == [1; 2; 3.0; 4.0]
 
 l10 = list(2, 4, 5.6, 10.5)

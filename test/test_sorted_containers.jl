@@ -267,7 +267,7 @@ end
 
 function test1()
     # a few basic tests of SortedDict to start
-    m1 = SortedDict((Dict{ASCIIString,ASCIIString}()), Forward)
+    m1 = SortedDict((Dict{Compat.ASCIIString,Compat.ASCIIString}()), Forward)
     kdarray = ["hello", "jello", "alpha", "beta", "fortune", "random",
                "july", "wednesday"]
     checkcorrectness(m1.bt, false)
@@ -1085,7 +1085,7 @@ function test4()
     # test all the errors of sorted containers
     m = SortedDict(Dict("a" => 6, "bb" => 9))
     @test_throws KeyError println(m["b"])
-    m2 = SortedDict(Dict{ASCIIString, Int}())
+    m2 = SortedDict(Dict{Compat.ASCIIString, Int}())
     @test_throws BoundsError println(first(m2))
     @test_throws BoundsError println(last(m2))
     state1 = start(m2)
@@ -1097,7 +1097,7 @@ function test4()
     @test_throws BoundsError start(exclusive(m,i1,i2))
     @test_throws KeyError delete!(m,"a")
     @test_throws KeyError pop!(m,"a")
-    m3 = SortedDict((Dict{ASCIIString, Int}()), Reverse)
+    m3 = SortedDict((Dict{Compat.ASCIIString, Int}()), Reverse)
     @test_throws ArgumentError isequal(m2, m3)
     @test_throws BoundsError m[i1]
     @test_throws BoundsError regress((m,beforestartsemitoken(m)))
@@ -1142,7 +1142,7 @@ function test5()
     ## Test use of alternative orderings in test5
     keylist = ["Apple", "aPPle", "berry", "CHerry", "Dairy", "diary"]
     vallist = [6,9,-4,2,1,8]
-    m = SortedDict(Dict{ASCIIString,Int}())
+    m = SortedDict(Dict{Compat.ASCIIString,Int}())
     for j = 1:6
         m[keylist[j]] = vallist[j]
     end
@@ -1155,7 +1155,7 @@ function test5()
                 p[2] == vallist[expectedord1[count]]
     end
     @test count == 6
-    m2 = SortedDict((Dict{ASCIIString, Int}()), Reverse)
+    m2 = SortedDict((Dict{Compat.ASCIIString, Int}()), Reverse)
     for j = 1 : 6
         m2[keylist[j]] = vallist[j]
     end
@@ -1168,7 +1168,7 @@ function test5()
                 p[2] == vallist[expectedord2[count]]
     end
     @test count == 6
-    m3 = SortedDict((Dict{ASCIIString, Int}()), CaseInsensitive())
+    m3 = SortedDict((Dict{Compat.ASCIIString, Int}()), CaseInsensitive())
     for j = 1 : 6
         m3[keylist[j]] = vallist[j]
     end
@@ -1184,10 +1184,10 @@ function test5()
     end
     @test count == 5
     m3empty = similar(m3)
-    @test eltype(m3empty) == Pair{ASCIIString, Int} &&
+    @test eltype(m3empty) == Pair{Compat.ASCIIString, Int} &&
        orderobject(m3empty) == CaseInsensitive() &&
        length(m3empty) == 0
-    m4 = SortedDict((Dict{ASCIIString,Int}()), Lt((x,y) -> isless(lowercase(x),lowercase(y))))
+    m4 = SortedDict((Dict{Compat.ASCIIString,Int}()), Lt((x,y) -> isless(lowercase(x),lowercase(y))))
     for j = 1 : 6
         m4[keylist[j]] = vallist[j]
     end
@@ -1207,10 +1207,10 @@ end
 ## testing but are included for timing tests.
 ## They are identical except for their usage of ordering objects.
 
-function test6(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
+function test6(numtrial::Int, expectedk::String, expectedd::String)
     NSTRINGPAIR = 50000
-    m1 = SortedDict(Dict{ASCIIString,ASCIIString}())
-    strlist = ASCIIString[]
+    m1 = SortedDict(Dict{Compat.ASCIIString,Compat.ASCIIString}())
+    strlist = Compat.ASCIIString[]
     open(seekfile("wordsScram.txt"), "r") do inio
         for j = 1 : NSTRINGPAIR * 2
             push!(strlist, chomp(readline(inio)))
@@ -1244,10 +1244,10 @@ end
 
 
 
-function test6a(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
+function test6a(numtrial::Int, expectedk::String, expectedd::String)
     NSTRINGPAIR = 50000
-    m1 = SortedDict((Dict{ASCIIString, ASCIIString}()), Lt(isless))
-    strlist = ASCIIString[]
+    m1 = SortedDict((Dict{Compat.ASCIIString, Compat.ASCIIString}()), Lt(isless))
+    strlist = Compat.ASCIIString[]
     open(seekfile("wordsScram.txt"), "r") do inio
         for j = 1 : NSTRINGPAIR * 2
             push!(strlist, chomp(readline(inio)))
@@ -1290,10 +1290,10 @@ function SDConstruct(a::Associative; lt::Function=isless, by::Function=identity)
 end
 
 
-function test6b(numtrial::Int, expectedk::ASCIIString, expectedd::ASCIIString)
+function test6b(numtrial::Int, expectedk::String, expectedd::String)
     NSTRINGPAIR = 50000
-    m1 = SDConstruct((Dict{ASCIIString,ASCIIString}()), lt=isless)
-    strlist = ASCIIString[]
+    m1 = SDConstruct((Dict{Compat.ASCIIString,Compat.ASCIIString}()), lt=isless)
+    strlist = Compat.ASCIIString[]
     open(seekfile("wordsScram.txt"), "r") do inio
         for j = 1 : NSTRINGPAIR * 2
             push!(strlist, chomp(readline(inio)))
@@ -1473,7 +1473,7 @@ function test7()
                           "oranges", "plums"],
                          [2.0, 6.0, 1.0, 9.0, 3.0, 4.0, 7.0, 8.0, 5.0, 10.0])
     m3empty = similar(m3)
-    @test (eltype(m3empty) == Pair{ASCIIString, Float64}) &&
+    @test (eltype(m3empty) == Pair{Compat.ASCIIString, Float64}) &&
         orderobject(m3empty) == Forward &&
         length(m3empty) == 0
     m4 = merge(m1, m2)
@@ -1614,7 +1614,7 @@ function test8()
     m2 = SortedSet(["orange", "blue", "red"])
     m3 = SortedSet(["orange", "yellow", "red"])
     m3empty = similar(m3)
-    @test eltype(m3empty) == ASCIIString &&
+    @test eltype(m3empty) == Compat.ASCIIString &&
        length(m3empty) == 0
     @test isequal(m1,m2)
     @test !isequal(m1,m3)

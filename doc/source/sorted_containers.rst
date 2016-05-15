@@ -121,7 +121,7 @@ Constructors for Sorted Containers
      c = SortedDict(Dict("New York" => 1788, "Illinois" => 1818))
 
 
-  In this example the key-type is deduced to be ASCIIString, while the
+  In this example the key-type is deduced to be String, while the
   value-type is Int.  The default ordering object ``Forward`` is used.
   See below for more information about ordering.
 
@@ -941,7 +941,7 @@ This name must be
 imported ``import Base.Reverse`` if it is used.
 
 As an example of a custom ordering, suppose the keys
-are of type ``ASCIIString``, and the user wishes to order the keys ignoring
+are of type ``String``, and the user wishes to order the keys ignoring
 case: *APPLE*, *berry* and *Cherry* would appear in that
 order, and *APPLE* and *aPPlE* would be indistinguishable in this
 ordering.

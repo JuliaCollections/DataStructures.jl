@@ -6,7 +6,7 @@
 @test_throws ArgumentError DefaultDict()
 @test_throws ArgumentError DefaultDict(AbstractString, Int)
 
-@test typeof(DefaultDict(0.0, 1 => 1.0)) == DefaultDict{Int,Float64,Float64}
+@test isa(DefaultDict(0.0, 1 => 1.0), DefaultDict{Int,Float64,Float64})
 
 # empty dictionary
 d = DefaultDict(Char, Int, 1)
@@ -55,7 +55,7 @@ e['e'] = 9
 @test f['e'] == 0
 
 s = similar(d)
-@test typeof(s) == typeof(d)
+@test typeof(s) === typeof(d)
 @test s.d.default == d.d.default
 
 
@@ -104,5 +104,5 @@ end
 @test collect(values(d)) == collect(1:26)
 
 s = similar(d)
-@test typeof(s) == typeof(d)
+@test typeof(s) === typeof(d)
 @test s.d.default == d.d.default
