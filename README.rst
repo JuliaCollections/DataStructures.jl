@@ -11,6 +11,9 @@
 .. image:: http://pkg.julialang.org/badges/DataStructures_0.4.svg
    :target: http://pkg.julialang.org/?pkg=DataStructures&ver=0.4
    :alt: PkgEval.jl Status on Julia 0.4
+.. image:: https://readthedocs.org/projects/datastructuresjl/badge/?version=latest
+   :target: http://datastructuresjl.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
 
 ====================
 DataStructures.jl
