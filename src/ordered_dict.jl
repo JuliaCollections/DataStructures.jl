@@ -26,6 +26,7 @@ type OrderedDict{K,V} <: Associative{K,V}
     end
     function OrderedDict(kv)
         h = OrderedDict{K,V}()
+        sizehint!(h, length(kv))
         for (k,v) in kv
             h[k] = v
         end
