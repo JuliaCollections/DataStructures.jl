@@ -8,6 +8,7 @@
 @test isa(OrderedDict(Pair(1, 1.0), Pair(2, 2.0), Pair(3, 3.0)), OrderedDict{Int,Float64})
 
 # empty dictionary
+
 d = OrderedDict{Char, Int}()
 @test length(d) == 0
 @test isempty(d)
@@ -19,8 +20,22 @@ d['c'] = 1
 empty!(d)
 @test isempty(d)
 
-# access, modification
+# empty-ish dictionary of specified size
 
+d = OrderedDict{Int, Float32}(4);
+@test d.slots == zeros(Int32, 16)
+@test length(d) == 4
+@test length(d.keys) == 4
+@test length(d.vals) == 4
+@test typeof(d.keys) == Array{Int, 1}
+@test typeof(d.vals) == Array{Float32, 1}
+
+d = OrderedDict{Int, Float32}(20);
+@test d.slots == zeros(Int32, 30)
+@test length(d) == 20
+
+# access, modification
+d = OrderedDict{Char, Int}()
 for c in 'a':'z'
     d[c] = c-'a'+1
 end
