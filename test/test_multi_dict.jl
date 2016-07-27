@@ -31,8 +31,10 @@ d = MultiDict{Char,Int}()
 
 @test_throws KeyError d['c'] == 1
 insert!(d, 'c', 1)
-@test collect(keys(d)) == ['c', 'a']
-@test collect(values(d)) == Array{Int,1}[[1],[1,2,3]]
+
+# order changed from v0.4 to v0.5
+@test collect(keys(d)) == ['c', 'a'] || collect(keys(d)) == ['a', 'c']
+@test collect(values(d)) == Array{Int,1}[[1],[1,2,3]] || collect(values(d)) == Array{Int,1}[[1,2,3], [1]]
 
 @test get(d, 'a', 0) == [1,2,3]
 @test get(d, 'b', 0) == 0
@@ -45,7 +47,11 @@ insert!(d, 'c', 1)
 @test copy(d) == d
 @test similar(d) == MultiDict{Char,Int}()
 
-@test [kv for kv in d] == [Pair('c', [1]), Pair('a', [1,2,3])]
+# order changed from v0.4 to v0.5
+let dict = [kv for kv in d]
+    @test  dict == [Pair('c', [1]), Pair('a', [1,2,3])] ||
+            dict == [Pair('a', [1,2,3]), Pair('c', [1])]
+end
 
 @test in(('c', 1), d)
 @test in(('a', 1), d)

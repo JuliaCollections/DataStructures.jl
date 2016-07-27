@@ -2,6 +2,7 @@ using Base.Test
 using DataStructures
 const IntSet = DataStructures.IntSet
 import Compat: String
+using Primes
 
 tests = ["int_set",
          "deque",

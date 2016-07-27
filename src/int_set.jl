@@ -5,8 +5,11 @@ import Base: similar, copy, copy!, eltype, push!, pop!, delete!, shift!,
              setdiff, setdiff!, symdiff, symdiff!, in, start, next, done,
              last, length, show, hash, issubset, ==, <=, <, unsafe_getindex, 
              unsafe_setindex!, findnextnot, first
-# These names will be removed from Base in the future:
-import Base: complement, complement!
+if !isdefined(Base, :complement)
+    export complement, complement!
+else
+    import Base: complement, complement!
+end
 
 type IntSet
     bits::BitVector
