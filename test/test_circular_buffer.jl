@@ -5,7 +5,7 @@ using Base.Test
 cb = CircularBuffer{Int}(5)
 @test length(cb) == 0
 @test capacity(cb) == 5
-# throws ArgumentError on v0.4 and BoundsError on v0.5
+# throws ArgumentError on v0.4 and BoundsError on v0.5 (diverged at 0.5.0-dev+5230)
 @test_throws Exception first(cb)
 @test isempty(cb) == true
 @test isfull(cb) == false
