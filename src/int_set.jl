@@ -5,7 +5,11 @@ import Base: similar, copy, copy!, eltype, push!, pop!, delete!, shift!,
              setdiff, setdiff!, symdiff, symdiff!, in, start, next, done,
              last, length, show, hash, issubset, ==, <=, <, unsafe_getindex, 
              unsafe_setindex!, findnextnot, first
-export complement, complement!
+if !isdefined(Base, :complement)
+    export complement, complement!
+else
+    import Base: complement, complement!
+end
 
 type IntSet
     bits::BitVector
@@ -250,6 +254,3 @@ end
 issubset(a::IntSet, b::IntSet) = isequal(a, intersect(a,b))
 <(a::IntSet, b::IntSet) = (a<=b) && !isequal(a,b)
 <=(a::IntSet, b::IntSet) = issubset(a, b)
-
-complement(s::IntSet) = complement!(copy(s))
-complement!(s::IntSet) = (s.inverse = !s.inverse; s)

@@ -126,7 +126,7 @@ end
 
 let _d = OrderedDict([("a", 0)])
     v = [k for k in filter(x->length(x)==1, collect(keys(_d)))]
-    @test isa(v, Vector{String}) || isa(v, Vector{Any})
+    @test isa(v, Vector{String}) || isa(v, Vector{ASCIIString})
 end
 
 let d = OrderedDict(((1, 2), (3, 4))),
