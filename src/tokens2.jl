@@ -182,6 +182,5 @@ end
      i[2].address == 2) && throw(BoundsError())
 
 
-@inline has_data(i::Token) =
-    (!(i[2].address in i[1].bt.useddatacells) ||
-     i[2].address < 3) && throw(BoundsError())
+@inline has_data(i::Token) = !(i[2].address in i[1].bt.useddatacells) &&
+    throw(BoundsError())

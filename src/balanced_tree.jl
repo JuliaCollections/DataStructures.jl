@@ -1,3 +1,5 @@
+using AbstractTrees
+
 ## This file implements 2-3 trees for sorted containers.
 ## The types and functions in this file are not exported; they
 ## are meant to be used by SortedDict, MultiMap and SortedSet.
@@ -11,42 +13,32 @@
 ## called the "leaves" in this file, sit above one more layer
 ## of data nodes, which are stored in a different array.  
 
-
-## KDRec is one data node:
-##  k: the key of the node
-##  d: the data of the node
-##  parent: the tree leaf that is the parent of this
-##    node.  Parent pointers are needed in order
-##    to implement indices.
-##  There are two constructors, the standard one (first)
-##  and the incomplete one (second).  The incomplete constructor
-##  is needed because when the data structure is first created,
-##  there are no valid K or D values to store in the initial
-##  data nodes.
-
-
+""" KDRec is one data node. """
 immutable KDRec{K,D}
+    " The tree leaf (idex in the BalancedTree23 `tree` array) that is the
+      parent of this node"
     parent::Int
+    " The key of the node "
     k::K
+    " The data of the node "
     d::D
     KDRec(p::Int, k1::K, d1::D) = new(p,k1,d1)
-    KDRec(p::Int) = new(p)
 end
 
-## TreeNode is an internal node of the tree.
-## child1,child2,child3:  
-##     These are the three children node numbers.
-##     If the node is a 2-node (rather than 3), then child3 == 0.
-##     If this is a leaf then child1,child2,child3 are subscripts
-##       of data nodes, else they are subscripts  of other tree nodes.
-## splitkey1:
-##    the minimum key of the subtree at child2.  If this is a leaf
-##    then it is the key of child2.
-## splitkey2: 
-##    if child3 > 0 then splitkey2 is the minimum key of the subtree at child3.
-##    If this is a leaf, then it is the key of child3.
-## Again, there are two constructors for the same reason mentioned above.
 
+"""
+`TreeNode` is an internal node of the tree.
+`child1-3`:  
+     These are the three children node numbers.
+     If the node is a 2-node (rather than 3), then `child3 == 0`.
+     If this is the lowest `tree` level (i.e. the level above the data
+     level), then child1,child2,child3 are subscripts of data nodes,
+     else they are subscripts  of other tree nodes.
+splitkey1:
+    the minimum key of the subtree at child2.
+splitkey2: 
+    if child3 > 0 then `splitkey2` is the minimum key of the subtree at `child3`.
+"""
 immutable TreeNode{K}
     child1::Int
     child2::Int
@@ -54,30 +46,15 @@ immutable TreeNode{K}
     parent::Int
     splitkey1::K
     splitkey2::K
-    TreeNode(::Type{K}, c1::Int, c2::Int, c3::Int, p::Int) = new(c1, c2, c3, p)
     TreeNode(c1::Int, c2::Int, c3::Int, p::Int, sk1::K, sk2::K) = 
         new(c1, c2, c3, p, sk1, sk2)
+    " Update the TreeNode `node`, changing only the field(s) indicated by
+      the passed keyword argument(s)"
+    TreeNode(node::TreeNode{K}; child1 = node.child1, child2 = node.child2,
+        child3 = node.child3, parent = node.parent, splitkey1 = node.splitkey1,
+        splitkey2 = node.splitkey2) =
+        new(child1, child2, child3, parent, splitkey1, splitkey2)
 end
-
-
-## The next two functions are called to initialize the tree
-## by inserting a dummy tree node with two children, the before-start
-## marker whose index is 1 and the after-end marker whose index is 2.
-## These two markers live in dummy data nodes.
-
-function initializeTree!{K}(tree::Array{TreeNode{K},1})
-    resize!(tree,1)
-    tree[1] = TreeNode{K}(K, 1, 2, 0, 0)
-    nothing
-end
-
-function initializeData!{K,D}(data::Array{KDRec{K,D},1})
-    resize!(data, 2)
-    data[1] = KDRec{K,D}(1)
-    data[2] = KDRec{K,D}(1)
-    nothing
-end
-
 
 ## Type BalancedTree23{K,D,Ord} is 'base class' for
 ## SortedDict.
@@ -90,16 +67,12 @@ end
 ## ord:: The ordering object.  Often the ordering type
 ##   is a singleton type, so this field is empty, but it
 ##   is still necessary to direct the multiple dispatch.
-## data: the (key,data) pairs of the tree.  
-##   The first and second entries of the data array are dummy placeholders
-##   for the beginning and end of the sorted order of the keys
+## data: the (key,data) pairs of the tree. 
 ## tree: the nodes of a 2-3 tree that sits above the data.
-## rootloc: the index of the entry of tree (i.e., a subscript to 
-##   treenodes) that is the tree's root    
+## rootloc: the index of the node that is tree's root (note if depth==0,
+## this is an index into data)
 ## depth: the depth of the tree, (number
 ##    of tree levels, not counting the level of data at the bottom)
-##    depth==1 means that there is a single root node 
-##      whose children are data nodes.
 ## freetreeinds: Array of indices of free locations in the
 ##    tree array (locations are freed due to deletion)
 ## freedatainds: Array of indices of free locations in the
@@ -107,9 +80,7 @@ end
 ## useddatacells: IntSet (i.e., bit vector) showing which
 ##    data cells are taken.  The complementary positions are
 ##    exactly those stored in freedatainds.  This array is
-##    used only for error checking (only present at debug level 1 and 2)
-## deletionchild and deletionleftkey are two work-arrays
-## for the delete function.
+##    used only for error checking
 
 type BalancedTree23{K, D, Ord <: Ordering}
     ord::Ord
@@ -120,133 +91,148 @@ type BalancedTree23{K, D, Ord <: Ordering}
     freetreeinds::Array{Int,1}
     freedatainds::Array{Int,1}
     useddatacells::IntSet 
-    # The next two arrays are used as a workspace by the delete!
-    # function.
-    deletionchild::Array{Int,1}
-    deletionleftkey::Array{K,1}
     function BalancedTree23(ord1::Ord)
-        tree1 = Array(TreeNode{K}, 1)
-        initializeTree!(tree1)
-        data1 = Array(KDRec{K,D}, 2)
-        initializeData!(data1)
-        u1 = IntSet()
-        push!(u1, 1, 2)
-        new(ord1, data1, tree1, 1, 1, Array(Int,0), Array(Int,0), 
-            u1, 
-            Array(Int,3), Array(K,3))
+        tree1 = Array(TreeNode{K}, 0)
+        data1 = Array(KDRec{K,D}, 0)
+        new(ord1, data1, tree1, 0, 0, Array(Int,0), Array(Int,0), 
+            IntSet())
+    end
+end
+function AbstractTrees.printnode(io::IO, tree::BalancedTree23)
+    if tree.rootloc == 0
+        print(io, "Empty Tree")
+    else
+        AbstractTrees.printnode(io, children(tree))
+    end
+end
+
+function Base.show(io::IO, tree::BalancedTree23)
+    print(io, "Balanced 2-3 tree of depth $(tree.depth)")
+end
+
+immutable Subtree
+    tree::BalancedTree23
+    idx::Int
+    level::Int
+end
+function AbstractTrees.show(io::IO, st::Subtree)
+    # Is a leaf
+    if st.tree.depth == st.level
+        node = st.tree.data[st.idx]
+        print(io, node.k => node.d)
+    else
+        node = st.tree.tree[st.idx]
+        if node.child3 == 0
+            print(io, "L < $(node.splitkey1) ≦ R")
+        else
+            print(io, "L < $(node.splitkey1) ≦ M < $(node.splitkey2) ≦ R")
+        end
+    end
+end
+
+"""
+    Dumps the internals of a node, useful for debugging, particularly as
+    print_tree(printinternals, STDOUT, st)
+"""
+function printinternals(io::IO, st::Subtree)  
+    if st.tree.depth == st.level
+        node = st.tree.data[st.idx]
+        print(io, "Leaf / idx=", st.idx, " / parent=", node.parent,
+            " / key=", node.k ," / data=", node.d)
+    else
+        node = st.tree.tree[st.idx]
+        print(io, "Internal / idx=", st.idx, " / parent=", node.parent,
+            " / children=", join((node.child1,node.child2,node.child3),','),
+            " / splitkeys=", join((node.splitkey1,node.splitkey2),','))
+    end
+end
+function printinternals(io::IO, tree::BalancedTree23)
+    if tree.rootloc == 0
+        print(io, "Empty Tree")
+    else
+        printinternals(io, Subtree(tree,tree.rootloc,0))
     end
 end
 
 
-
-
-## Function cmp2 checks a tree node with two children
-## against a given key, and returns 1 if the given key is
-## less than the node's splitkey or 2 else.  Special case
-## if the node is a leaf and its right child is the end
-## of the sorted order.
-
-@inline function cmp2_nonleaf(o::Ordering, 
-                              treenode::TreeNode,
-                              k) 
-    lt(o, k, treenode.splitkey1)? 1 : 2
+AbstractTrees.children(tree::BalancedTree23) = Subtree(tree,tree.rootloc,0)
+Base.start(st::Subtree) = 1
+function Base.getindex(st::Subtree, idx)
+    node = st.tree.tree[st.idx]
+    Subtree(st.tree, ifelse(idx == 1, node.child1,
+        ifelse(idx == 2, node.child2, node.child3)), st.level + 1)
 end
-
-
-
-@inline function cmp2_leaf(o::Ordering, 
-                           treenode::TreeNode,
-                           k) 
-    (treenode.child2 == 2) || 
-    lt(o, k, treenode.splitkey1)? 1 : 2
+AbstractTrees.nextind(st::Subtree, idx) = idx + 1
+Base.next(st::Subtree, idx) = (st[idx], AbstractTrees.nextind(st, idx))
+Base.done(st::Subtree,idx) = idx > length(st)
+Base.length(st::Subtree) =
+    (st.level == st.tree.depth) ? 0 : 
+    st.tree.tree[st.idx].child3 != 0 ? 3 :
+    st.tree.tree[st.idx].child2 == 0 ? 1 : 2
+AbstractTrees.parentlinks(st::Subtree) = AbstractTrees.StoredParents()
+AbstractTrees.siblinglinks(st::Subtree) = AbstractTrees.StoredSiblings()
+AbstractTrees.parent(_,st::Subtree) = Subtree(st.tree,
+    st.level == st.tree.depth ? st.tree.data[st.idx].parent :
+        st.tree.tree[st.idx].parent, st.level - 1)
+AbstractTrees.parent(st::Subtree) = AbstractTrees.parent(st,st)
+AbstractTrees.isroot(_,st::Subtree) = st.level == 0
+AbstractTrees.isroot(st::Subtree) = AbstractTrees.isroot(st, st)
+function AbstractTrees.relative_state(_,parent,child)
+    node = parent.tree.tree[parent.idx]
+    node.child1 == child.idx ? 1 : node.child2 == child.idx ? 2 : 3
 end
-
-
-
-## Function cmp3 checks a tree node with three children
-## against a given key, and returns 1 if the given key is
-## less than the node's splitkey1, 2 if the key is greater than or
-## equal to splitkey1 but less than splitkey2, or 3 else.  Special case
-## if the node is a leaf and its right child is the end
-## of the sorted order.
-
-@inline function cmp3_nonleaf(o::Ordering,
-                              treenode::TreeNode,
-                              k) 
-    lt(o, k, treenode.splitkey1)? 1 :
-    lt(o, k, treenode.splitkey2)? 2 : 3
+level(st::Subtree) = st.level
+isleaf(st::Subtree) = st.level == st.tree.depth
+function AbstractTrees.parentind(st::Subtree)
+    isleaf(st) ? st.tree.data[st.idx].parent : st.tree.tree[st.idx].parent
 end
-
-
-@inline function cmp3_leaf(o::Ordering,
-                           treenode::TreeNode,
-                           k) 
-    lt(o, k, treenode.splitkey1)?                           1 :
-    (treenode.child3 == 2 || lt(o, k, treenode.splitkey2))? 2 : 3
+function Base.setindex!(st::Subtree, val)
+    isleaf(st) ? st.tree.data[st.idx] = val : st.tree.tree[st.idx] = val
 end
-
-
-
-## Function cmp2le checks a tree node with two children
-## against a given key, and returns 1 if the given key is
-## less than or equal to the node's splitkey or 2 else.  Special case
-## if the node is a leaf and its right child is the end
-## of the sorted order.
-
-@inline function cmp2le_nonleaf(o::Ordering, 
-                                treenode::TreeNode,
-                                k)
-    !lt(o,treenode.splitkey1,k)? 1 : 2
+function Base.setindex!(st::Subtree, idx::Int, which)
+    @assert !isleaf(st)
+    @assert which in 1:3
+    node = st.tree.tree[st.idx]
+    st.tree.tree[st.idx] = which == 1 ? typeof(node)(node; child1 = idx) :
+        which == 2 ? typeof(node)(node; child2 = idx) :
+        typeof(node)(node; child3 = idx) 
 end
+Base.setindex!(st::Subtree, idx::Subtree, which) =
+    Base.setindex!(st, idx.idx, which)
+
+using AbstractTrees: parentind, isroot, ascend
 
 
-@inline function cmp2le_leaf(o::Ordering, 
-                             treenode::TreeNode,
-                             k)
-    treenode.child2 == 2 || !lt(o,treenode.splitkey1,k)? 1 : 2
+immutable KeyView
+    st::Subtree
 end
-
-
-
-
-## Function cmp3le checks a tree node with three children
-## against a given key, and returns 1 if the given key is
-## less than or equal to the node's splitkey1, 2 if less than or equal 
-## to splitkey2, or
-## 3 else. Special case
-## if the node is a leaf and its right child is the end
-## of the sorted order.
-
-@inline function cmp3le_nonleaf(o::Ordering,
-                                treenode::TreeNode,
-                                k)
-    !lt(o,treenode.splitkey1, k)? 1 :
-    !lt(o,treenode.splitkey2, k)? 2 : 3
+function getindex(kv::KeyView, which)
+    node = kv.st.tree.tree[kv.st.idx]
+    which == 1 ? node.splitkey1 : node.splitkey2
 end
-
-@inline function cmp3le_leaf(o::Ordering,
-                             treenode::TreeNode,
-                             k)
-    !lt(o,treenode.splitkey1,k)?                            1 :
-    (treenode.child3 == 2 || !lt(o,treenode.splitkey2, k))? 2 : 3
+function Base.setindex!(kv::KeyView, key, which)
+    node = kv.st.tree.tree[kv.st.idx]
+    kv.st.tree.tree[kv.st.idx] = which == 1 ?
+        typeof(node)(node; splitkey1 = key) :
+        typeof(node)(node; splitkey2 = key)
 end
-
-
+Base.start(kv::KeyView) = 1
+Base.next(kv::KeyView, i) = kv[i], i + 1
+Base.done(kv::KeyView, i) = i > length(kv)
+Base.length(kv::KeyView) = length(children(kv.st))-1
+Base.keys(st::Subtree) = KeyView(st)
 
 ## The empty! function deletes all data in the balanced tree.
 ## Therefore, it invalidates all indices.
 
 function empty!(t::BalancedTree23)
-    resize!(t.data,2)
-    initializeData!(t.data)
-    resize!(t.tree,1)
-    initializeTree!(t.tree)
+    resize!(t.data,0)
+    resize!(t.tree,0)
     t.depth = 1
     t.rootloc = 1
     t.freetreeinds = Array(Int,0)
     t.freedatainds = Array(Int,0)
     empty!(t.useddatacells)
-    push!(t.useddatacells, 1, 2)
     nothing
 end
 
@@ -257,6 +243,15 @@ eq(::ForwardOrdering, a, b) = isequal(a,b)
 eq(::ReverseOrdering{ForwardOrdering}, a, b) = isequal(a,b)
 eq(o::Ordering, a, b) = !lt(o, a, b) && !lt(o, b, a)
 
+function keybucket(o, st, k)
+    lt(o, k, keys(st)[1])? 1 :
+    (length(children(st)) == 2 || lt(o, k, keys(st)[2])) ? 2 : 3
+end
+
+function keybucketle(o, st, k)
+    !lt(o,keys(st)[1], k)  ? 1 :
+    (length(children(st)) == 2 || !lt(o,keys(st)[2], k)) ? 2 : 3
+end
 
 ## The findkey function finds the index of a (key,data) pair in the tree 
 ## where the given key lives (if it is present), or
@@ -266,23 +261,14 @@ eq(o::Ordering, a, b) = !lt(o, a, b) && !lt(o, b, a)
 ## It returns the index of the key found and a boolean indicating
 ## whether the exact key was found or not.
 
+function _findkey(t::BalancedTree23, k)
+    curnode = AbstractTrees.descend(st->(st.level == t.depth) ? 0 :
+        keybucket(t.ord, st, k),children(t))
+    curnode, eq(t.ord, t.data[curnode.idx].k, k)
+end
 function findkey(t::BalancedTree23, k)
-    curnode = t.rootloc
-    for depthcount = 1 : t.depth - 1
-        @inbounds thisnode = t.tree[curnode]
-        cmp = thisnode.child3 == 0?
-                         cmp2_nonleaf(t.ord, thisnode, k) :
-                         cmp3_nonleaf(t.ord, thisnode, k)
-        curnode = cmp == 1? thisnode.child1 :
-                  cmp == 2? thisnode.child2 : thisnode.child3
-    end
-    @inbounds thisnode = t.tree[curnode]
-    cmp = thisnode.child3 == 0? 
-                cmp2_leaf(t.ord, thisnode, k) :
-                cmp3_leaf(t.ord, thisnode, k)
-    curnode = cmp == 1? thisnode.child1 :
-              cmp == 2? thisnode.child2 : thisnode.child3
-    @inbounds return curnode, (curnode > 2 && eq(t.ord, t.data[curnode].k, k))
+    curnode, exactfound = _findkey(t, k)
+    curnode.idx, exactfound
 end
 
 
@@ -292,44 +278,23 @@ end
 ## key less than the given key, then it returns 1 (the before-start node).
 
 function findkeyless(t::BalancedTree23, k)
-    curnode = t.rootloc
-    for depthcount = 1 : t.depth - 1
-        @inbounds thisnode = t.tree[curnode]
-        cmp = thisnode.child3 == 0?
-               cmp2le_nonleaf(t.ord, thisnode, k) :
-               cmp3le_nonleaf(t.ord, thisnode, k)
-        curnode = cmp == 1? thisnode.child1 :
-                  cmp == 2? thisnode.child2 : thisnode.child3
+    curnode = AbstractTrees.descend(st->(st.level == t.depth) ? 0 :
+        keybucketle(t.ord, st, k),t)
+    curnode.idx, eq(t.ord, t.data[curnode.idx].k, k)
+end
+
+"""
+    Set the parent of the node `child` (either a tree or a data node) to
+    `newparent`
+"""
+function replaceparent!(child::Subtree, newparent)
+    if child.level == child.tree.depth
+        child.tree.data = 
+            KDRec{K,D}(newparent, data[whichind].k, data[whichind].d)
+    else
+        child.tree.tree[child.idx] = TreeNode{K}(tree, parent = newparent)
     end
-    @inbounds thisnode = t.tree[curnode]
-    cmp = thisnode.child3 == 0?
-            cmp2le_leaf(t.ord, thisnode, k) :
-            cmp3le_leaf(t.ord, thisnode, k)
-    curnode = cmp == 1? thisnode.child1 :
-              cmp == 2? thisnode.child2 : thisnode.child3
-    curnode
 end
-
-
-
-## The following are helper routines for the insert! and delete! functions.
-## They replace the 'parent' field of either an internal tree node or 
-## a data node at the bottom tree level.
-
-function replaceparent!{K,D}(data::Array{KDRec{K,D},1}, whichind::Int, newparent::Int)
-    data[whichind] = KDRec{K,D}(newparent, data[whichind].k, data[whichind].d)
-    nothing
-end
-
-function replaceparent!{K}(tree::Array{TreeNode{K},1}, whichind::Int, newparent::Int)
-    tree[whichind] = TreeNode{K}(tree[whichind].child1, tree[whichind].child2,
-                                 tree[whichind].child3, newparent,
-                                 tree[whichind].splitkey1, 
-                                 tree[whichind].splitkey2)
-    nothing
-end
-
-
 
 
 ## Helper function for either grabbing a brand new location in a
@@ -347,656 +312,245 @@ function push_or_reuse!(a::Vector, freelocs::Array{Int,1}, item)
     return loc
 end
 
-
-
-## Function insert! inserts a new data item into the tree.
-## The arguments are the (K,D) pair to insert.
-## The return values are a bool and an index.  The
-## bool indicates whether the insertion inserted a new record (true) or 
-## whether it replaced an existing record (false).
-## The index returned is the subscript in t.data where the
-## inserted value sits.
-## "allowdups" (i.e., "allow duplicate keys") means that no check is 
-## done whether the iterm
-## is already in the tree, so insertion of a new item always succeeds.
-
-function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdups::Bool)
-    
-    ## First we find the greatest data node that is <= k.
-    leafind, exactfound = findkey(t, k)
-    parent = t.data[leafind].parent
-
-    ## The following code is necessary because in the case of a
-    ## brand new tree, the initial tree and data entries were incompletely
-    ## initialized by the constructor.  In this case, the call to insert! 
-    ## underway carries
-    ## valid K and D values, so these valid values may now be
-    ## stored in the dummy placeholder nodes so that they no
-    ## longer hold undefined references.
-
-    if size(t.data,1) == 2
-        # @assert(t.rootloc == 1 && t.depth == 1)
-        t.tree[1] = TreeNode{K}(t.tree[1].child1, t.tree[1].child2,
-                                t.tree[1].child3, t.tree[1].parent,
-                                k, k)
-        t.data[1] = KDRec{K,D}(t.data[1].parent, k, d)
-        t.data[2] = KDRec{K,D}(t.data[2].parent, k, d)
+function fix_links!(st::Subtree)
+    for child in children(st)
+        replaceparent!(child, st.idx)
     end
+end
+
+## Function insert! 
+
+"""
+# Insert a new data item into the tree.
+
+The `k`,`d` arguments are the pair to insert.
+The return values are a bool and an index.
+bool indicates whether the insertion inserted a new record (true) or 
+whether it replaced an existing record (false).
+The index returned is the subscript in t.data where the inserted value sits.
+"allowdups" (i.e., "allow duplicate keys") means that no check is 
+done whether the iterm is already in the tree, so insertion of a new
+item always succeeds.
+"""
+function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdups::Bool)    
+    ## If empty, insert a root
+    if t.rootloc == 0
+        t.rootloc = push_or_reuse!(t.data, t.freedatainds, KDRec{K,D}(0,k,d))
+        push!(t.useddatacells, t.rootloc)
+        return false, t.rootloc
+    end
+    
+    ## First we find the greatest data node that is <= k (unless k is the
+    ## smallest node, in which case we get the smallest data node)
+    node, exactfound = _findkey(t, k)
     
     ## If we have found exactly k in the tree, then we
     ## replace the data associated with k and return.
-
     if exactfound && !allowdups
-        t.data[leafind] = KDRec{K,D}(parent, k,d)
-        return false, leafind
+        node[] = KDRec{K,D}(parentind(node), k,d)
+        return false, node.idx
     end
-
-    # We get here if k was not already found in the tree or
-    # if duplicates are allowed.
-    # In this case we insert a new node.
-    depth = t.depth
-    ord = t.ord
-
-    ## Store the new data item in the tree's data array.  Later
-    ## go back and fix the parent.
-
-    newind = push_or_reuse!(t.data, t.freedatainds, KDRec{K,D}(0,k,d))
-    p1 = parent
-    oldchild = leafind
-    newchild = newind
+    
+    ## Store the new data item in the tree's data array.
+    newind =
+        push_or_reuse!(t.data, t.freedatainds, KDRec{K,D}(parentind(node),k,d))
+    push!(t.useddatacells, newind)
+    
+    # Given a node and a minimum key/index to be inserted, get the in-order
+    # arrays of child-indices and splitkeys for the new node(s)
+    function nnars(node, newind, minkeynewchild)
+        bucket = keybucket(t.ord, node, minkeynewchild)
+        (insert!(map(st->st.idx,children(node)),bucket+1,newind),
+         insert!(collect(keys(node)), bucket, minkeynewchild))
+    end
+    
     minkeynewchild = k
-    splitroot = false
-    curdepth = depth
-
-    ## This loop ascends the tree (i.e., follows the path from a leaf to the root)
-    ## starting from the parent p1 of 
-    ## where the new key k would go.  For each 3-node we encounter
-    ## during the ascent, we add a new child, which requires splitting
-    ## the 3-node into two 2-nodes.  Then we keep going until we hit the root.
-    ## If we encounter a 2-node, then the ascent can stop; we can 
-    ## change the 2-node to a 3-node with the new child. Invariants
-    ## during this loop are:
-    ##     p1: the parent node (a tree node index) where the insertion must occur
-    ##     oldchild,newchild: the two children of the parent node; oldchild
-    ##          was already in the tree; newchild was just added to it.
-    ##     minkeynewchild:  This is the key that is the minimum value in
-    ##         the subtree rooted at newchild.
-
-    while t.tree[p1].child3 > 0
-        isleaf = (curdepth == depth)
-        oldtreenode = t.tree[p1]
-
-        ## Node p1 index a 3-node. There are three cases for how to
-        ## insert new child.  All three cases involve splitting the
-        ## existing node (oldtreenode, numbered p1) into
-        ## two new nodes.  One keeps the index p1; the other has 
-        ## has a new index called newparentnum.
-
-        
-        cmp = isleaf? cmp3_leaf(ord, oldtreenode, minkeynewchild) :
-                      cmp3_nonleaf(ord, oldtreenode, minkeynewchild)
-
-        if cmp == 1
-            lefttreenodenew = TreeNode{K}(oldtreenode.child1, newchild, 0,
-                                          oldtreenode.parent,
-                                          minkeynewchild, minkeynewchild)
-            righttreenodenew = TreeNode{K}(oldtreenode.child2, oldtreenode.child3, 0,
-                                           oldtreenode.parent, oldtreenode.splitkey2, 
-                                           oldtreenode.splitkey2)
-            minkeynewchild = oldtreenode.splitkey1
-            whichp = 1
-        elseif cmp == 2
-            lefttreenodenew = TreeNode{K}(oldtreenode.child1, oldtreenode.child2, 0,
-                                          oldtreenode.parent,
-                                          oldtreenode.splitkey1, oldtreenode.splitkey1)
-            righttreenodenew = TreeNode{K}(newchild, oldtreenode.child3, 0,
-                                           oldtreenode.parent,
-                                           oldtreenode.splitkey2, oldtreenode.splitkey2)
-            whichp = 2
-        else
-            lefttreenodenew = TreeNode{K}(oldtreenode.child1, oldtreenode.child2, 0,
-                                          oldtreenode.parent,
-                                          oldtreenode.splitkey1, oldtreenode.splitkey1)
-            righttreenodenew = TreeNode{K}(oldtreenode.child3, newchild, 0,
-                                           oldtreenode.parent,
-                                           minkeynewchild, minkeynewchild)
-            minkeynewchild = oldtreenode.splitkey2
-            whichp = 2
-        end
-        # Replace p1 with a new 2-node and insert another 2-node at
-        # index newparentnum.
-        t.tree[p1] = lefttreenodenew
-        newparentnum = push_or_reuse!(t.tree, t.freetreeinds, righttreenodenew)
-        if isleaf
-            par = (whichp == 1)? p1 : newparentnum
-            # fix the parent of the new datanode.
-            replaceparent!(t.data, newind, par)
-            push!(t.useddatacells, newind)
-            replaceparent!(t.data, righttreenodenew.child1, newparentnum)
-            replaceparent!(t.data, righttreenodenew.child2, newparentnum)
-        else
-            # If this is not a leaf, we still have to fix the
-            # parent fields of the two nodes that are now children
-            ## of the newparent.
-            replaceparent!(t.tree, righttreenodenew.child1, newparentnum)
-            replaceparent!(t.tree, righttreenodenew.child2, newparentnum)
-        end
-        oldchild = p1
-        newchild = newparentnum
-        ## If p1 is the root (i.e., we have encountered only 3-nodes during
-        ## our ascent of the tree), then the root must be split.
-        if p1 == t.rootloc
-            # @assert(curdepth == 1)
-            splitroot = true
-            break
-        end
-        p1 = t.tree[oldchild].parent
-        curdepth -= 1
+    local newparentnum::Int
+    local splitroot = true
+    
+    # Ascend the tree splitting 3-child nodes, until we hit a 2-child note
+    # newind is the index of the currently pending subtree, minkeynewchild the
+    # minimum key in that subtree
+    node = ascend(node) do node
+        isleaf(node) && return true
+        length(children(node)) == 3 || (splitroot = false; return false)
+        cchildren, ckeys = nnars(node, newind, minkeynewchild)
+        # Note: We reuse to the key, to avoid having to conjure up an invalid
+        # key, since we don't know anything about the type of the key
+        node[] = TreeNode{K}(cchildren[1:2]...,0,parentind(node),ckeys[1],ckeys[1])
+        minkeynewchild = ckeys[2]
+        newnode = TreeNode{K}(cchildren[3:4]...,0,parentind(node),ckeys[3],ckeys[3])
+        newind = push_or_reuse!(t.tree, t.freetreeinds, newnode)
+        fix_links!(Subtree(t, newind, node.level))
+        return true
     end
 
-    ## big loop terminated either because a 2-node was reached
-    ## (splitroot == false) or we went up the whole tree seeing
-    ## only 3-nodes (splitroot == true).  
-    if !splitroot
-        
-        ## If our ascent reached a 2-node, then we convert it to
-        ## a 3-node by giving it a child3 field that is >0.
-        ## Encountering a 2-node halts the ascent up the tree.
-
-        isleaf = curdepth == depth
-        oldtreenode = t.tree[p1]
-        cmpres = isleaf? cmp2_leaf(ord, oldtreenode, minkeynewchild) :
-                         cmp2_nonleaf(ord, oldtreenode, minkeynewchild)
-
-
-        t.tree[p1] = cmpres == 1?
-                         TreeNode{K}(oldtreenode.child1, newchild, oldtreenode.child2,
-                                     oldtreenode.parent,
-                                     minkeynewchild, oldtreenode.splitkey1) :
-                         TreeNode{K}(oldtreenode.child1, oldtreenode.child2, newchild,
-                                     oldtreenode.parent,
-                                     oldtreenode.splitkey1, minkeynewchild)
-        if isleaf
-            replaceparent!(t.data, newind, p1)
-            push!(t.useddatacells, newind)
+    # We've only encounterd 3-child nodes on our way up the tree, create new root
+    if isroot(node) && splitroot
+        newnode = if isleaf(node)
+            # In the ascend above, we maintain the invariant that the newind
+            # subtree has larger keys than the node subtree, but if we're still
+            # at the leaf level, we never established that, so we need to take
+            # special care
+            splitkey = max(t.data[node.idx].k, k)
+            TreeNode{K}(
+                (splitkey == k ? (t.rootloc,newind) : (newind, t.rootloc))...,
+                0,0,splitkey,splitkey)
+        else
+            TreeNode{K}(t.rootloc,newind,0,0,minkeynewchild,minkeynewchild)
         end
-    else 
-        ## Splitroot is set if the ascent of the tree encountered only 3-nodes.
-        ## In this case, the root itself was replaced by two nodes, so we need
-        ## a new root above those two.
-
-        newroot = TreeNode{K}(oldchild, newchild, 0, 0,
-                              minkeynewchild, minkeynewchild)
-        newrootloc = push_or_reuse!(t.tree, t.freetreeinds, newroot)
-        replaceparent!(t.tree, oldchild, newrootloc)
-        replaceparent!(t.tree, newchild, newrootloc)
-        t.rootloc = newrootloc
+        t.rootloc = push_or_reuse!(t.tree, t.freetreeinds, newnode)
         t.depth += 1
+        fix_links!(Subtree(t, t.rootloc, 0))
+    else
+        # Similar problem as above - the invariant was not established
+        firstchildidx = first(children(node)).idx
+        if level(node) == t.depth - 1 &&
+                lt(t.ord, k, t.data[firstchildidx].k)
+            children(node)[1] = newind
+            newind, minkeynewchild = firstchildidx, t.data[firstchildidx].k
+        end
+        cchildren, ckeys = nnars(node, newind, minkeynewchild)
+        node[] = TreeNode{K}(cchildren..., parentind(node), ckeys...)
     end
     true, newind
 end
 
-
-
-
-## nextloc0: returns the next item in the tree according to the
-## sort order, given an index i (subscript of t.data) of a current
-## item. 
-## The routine returns 2 if there is no next item (i.e., we started
-## from the last one in the sorted order).
-
-function nextloc0(t, i::Int)
-    ii = i
-    # @assert(i != 2 && i in t.useddatacells)
-    @inbounds p = t.data[i].parent
-    nextchild = 0
-    depthp = t.depth
-    @inbounds while true
-        if depthp < t.depth
-            p = t.tree[ii].parent
-        end
-        if t.tree[p].child1 == ii
-            nextchild = t.tree[p].child2
-            break
-        end
-        if t.tree[p].child2 == ii && t.tree[p].child3 > 0
-            nextchild = t.tree[p].child3
-            break
-        end
-        ii = p
-        depthp -= 1
-    end
-    @inbounds while true
-        if depthp == t.depth
-            return nextchild
-        end
-        p = nextchild
-        nextchild = t.tree[p].child1
-        depthp += 1
-    end
-end
-
-
-## prevloc0: returns the previous item in the tree according to the
-## sort order, given an index i (subscript of t.data) of a current
-## item. 
-## The routine returns 1 if there is no previous item (i.e., we started
-## from the first one in the sorted order).
-
-
-function prevloc0(t::BalancedTree23, i::Int)
-    # @assert(i != 1 && i in t.useddatacells)
-    ii = i
-    @inbounds p = t.data[i].parent
-    prevchild = 0
-    depthp = t.depth
-    @inbounds while true
-        if depthp < t.depth
-            p = t.tree[ii].parent
-        end
-        if t.tree[p].child3 == ii
-            prevchild = t.tree[p].child2
-            break
-        end
-        if t.tree[p].child2 == ii
-            prevchild = t.tree[p].child1
-            break
-        end
-        ii = p
-        depthp -= 1
-    end
-    @inbounds while true
-        if depthp == t.depth
-            return prevchild
-        end
-        p = prevchild
-        c3 = t.tree[p].child3
-        prevchild = c3 > 0? c3 : t.tree[p].child2
-        depthp += 1
-    end
-end
-
-## This function takes two indices into t.data and checks which
-## one comes first in the sorted order by chasing them both
-## up the tree until a common ancestor is found.  
-## The return value is -1 if i1 precedes i2, 0 if i1 == i2
-##, 1 if i2 precedes i1.
-
+"""
+ This function takes two indices into t.data and checks which
+ one comes first in the sorted order by chasing them both
+ up the tree until a common ancestor is found.  
+ The return value is -1 if i1 precedes i2, 0 if i1 == i2
+, 1 if i2 precedes i1.
+"""
 function compareInd(t::BalancedTree23, i1::Int, i2::Int)
     @assert(i1 in t.useddatacells && i2 in t.useddatacells)
-    if i1 == i2
-        return 0
-    end
-    i1a = i1
-    i2a = i2
-    p1 = t.data[i1].parent
-    p2 = t.data[i2].parent
-    curdepth = t.depth
+    (i1 == i2) && return 0
+    x1 = p1 = parent(tree, i1), x2 = p2 = parent(tree, i2)
     while true
-        @assert(curdepth > 0)
-        if p1 == p2
-            if i1a == t.tree[p1].child1
-                @assert(t.tree[p1].child2 == i2a || t.tree[p1].child3 == i2a)
-                return -1
-            end
-            if i1a == t.tree[p1].child2
-                if (t.tree[p1].child1 == i2a)
-                    return 1
-                end
-                @assert(t.tree[p1].child3 == i2a)
-                return -1
-            end
-            @assert(i1a == t.tree[p1].child3)
-            @assert(t.tree[p1].child1 == i2a || t.tree[p1].child2 == i2a)
-            return 1
-        end
-        i1a = p1
-        i2a = p2
-        p1 = t.tree[i1a].parent
-        p2 = t.tree[i2a].parent
-        curdepth -= 1
+        (p1 == p2) && return relative_state(p1, x1) < relative_state(p1, x2) ? -1 : 1
+        x1 = p1, x2 = p2
+        p1 = parent(tree, p1), p2 = parent(tree, p2)
     end
 end        
 
 
 ## beginloc, endloc return the index (into t.data) of the first, last item in the 
-## sorted order of the tree.  beginloc works by going to the before-start marker
-## (data node 1) and executing a next operation on it.  endloc is the opposite.
-
-beginloc(t::BalancedTree23) = nextloc0(t,1)
-endloc(t::BalancedTree23) = prevloc0(t,2)
+## sorted order of the tree. 
+beginloc(t::BalancedTree23) = first(Leaves(t)).idx
+endloc(t::BalancedTree23) = last(Leaves(t)).idx
 
 
-## delete! routine deletes an entry from the balanced tree.
-
-function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
-    
-    ## Put the cell indexed by 'it' into the deletion list.
-    ##
-    ## Create the following data items maintained in the 
-    ## upcoming loop.
-    ##
-    ## p is a tree-node ancestor of the deleted node
-    ## The children of p are stored in
-    ## t.deletionchild[..]
-    ## The number of these children is newchildcount, which is 1, 2 or 3.
-    ## The keys that lower bound the children
-    ## are stored in t.deletionleftkey[..]
-    ## There is a special case for t.deletionleftkey[1]; the
-    ## flag deletionleftkey1_valid indicates that the left key
-    ## for the immediate right neighbor of the 
-    ## deleted node has not yet been been stored in the tree.
-    ## Once it is stored, t.deletionleftkey[1] is no longer needed
-    ## or used.
-    ## The flag mustdeleteroot means that the tree has contracted
-    ## enough that it loses a level.
-
-    p = t.data[it].parent
-    newchildcount = 0
-    c1 = t.tree[p].child1
-    deletionleftkey1_valid = true
-    if c1 != it
-        deletionleftkey1_valid = false
-        newchildcount += 1
-        t.deletionchild[newchildcount] = c1
-        t.deletionleftkey[newchildcount] = t.data[c1].k
-    end
-    c2 = t.tree[p].child2
-    if c2 != it
-        newchildcount += 1
-        t.deletionchild[newchildcount] = c2
-        t.deletionleftkey[newchildcount] = t.data[c2].k
-    end
-    c3 = t.tree[p].child3
-    if c3 != it && c3 > 0
-        newchildcount += 1
-        t.deletionchild[newchildcount] = c3
-        t.deletionleftkey[newchildcount] = t.data[c3].k
-    end
-    # @assert(newchildcount == 1 || newchildcount == 2)
-    push!(t.freedatainds, it)
-    pop!(t.useddatacells,it)
-    defaultKey = t.tree[1].splitkey1
-    curdepth = t.depth
-    mustdeleteroot = false
-    pparent = -1
-    
-    ## The following loop ascends the tree and contracts nodes (reduces their
-    ## number of children) as
-    ## needed.  If newchildcount == 2 or 3, then the ascent is terminated
-    ## and a node is created with 2 or 3 children.
-    ## If newchildcount == 1, then the ascent must continue since a tree
-    ## node cannot have one child.
-    
-    while true
-        pparent = t.tree[p].parent
-        ## Simple cases when the new child count is 2 or 3
-        if newchildcount == 2
-            t.tree[p] = TreeNode{K}(t.deletionchild[1],
-                                    t.deletionchild[2], 0, pparent,
-                                    t.deletionleftkey[2], defaultKey)
-
-            break
-        end
-        if newchildcount == 3
-            t.tree[p] = TreeNode{K}(t.deletionchild[1], t.deletionchild[2],
-                                    t.deletionchild[3], pparent, 
-                                    t.deletionleftkey[2], t.deletionleftkey[3])
-            break
-        end
-        # @assert(newchildcount == 1)
-        ## For the rest of this loop, we cover the case
-        ## that p has one child.
-        
-        ## If newchildcount == 1 and curdepth==1, this means that
-        ## the root of the tree has only one child.  In this case, we can
-        ## delete the root and make its one child the new root (see below).
-        
-        if curdepth == 1
-            mustdeleteroot = true
-            break
-        end
-        
-        ## We now branch on three cases depending on whether p is child1,
-        ## child2 or child3 of its parent.
-
-        if t.tree[pparent].child1 == p
-            rightsib = t.tree[pparent].child2
-            
-            ## Here p is child1 and rightsib is child2.  
-            ## If rightsib has 2 children, then p and 
-            ## rightsib are merged into a single node
-            ## that has three children.
-            ## If rightsib has 3 children, then p and
-            ## rightsib are reformed so that each has
-            ## two children.
-
-            if t.tree[rightsib].child3 == 0
-                rc1 = t.tree[rightsib].child1
-                rc2 = t.tree[rightsib].child2
-                t.tree[p] = TreeNode{K}(t.deletionchild[1],
-                                        rc1, rc2,
-                                        pparent,
-                                        t.tree[pparent].splitkey1, 
-                                        t.tree[rightsib].splitkey1)
-                if curdepth == t.depth
-                    replaceparent!(t.data, rc1, p)
-                    replaceparent!(t.data, rc2, p)
-                else
-                    replaceparent!(t.tree, rc1, p)
-                    replaceparent!(t.tree, rc2, p)
-                end
-                push!(t.freetreeinds, rightsib)
-                newchildcount = 1
-                t.deletionchild[1] = p
-            else
-                rc1 = t.tree[rightsib].child1
-                t.tree[p] = TreeNode{K}(t.deletionchild[1], rc1, 0,
-                                        pparent,
-                                        t.tree[pparent].splitkey1, 
-                                        defaultKey)
-                sk1 = t.tree[rightsib].splitkey1
-                t.tree[rightsib] = TreeNode{K}(t.tree[rightsib].child2,
-                                               t.tree[rightsib].child3,
-                                               0,
-                                               pparent,
-                                               t.tree[rightsib].splitkey2,
-                                               defaultKey)
-                if curdepth == t.depth
-                    replaceparent!(t.data, rc1, p)
-                else
-                    replaceparent!(t.tree, rc1, p)
-                end
-                newchildcount = 2
-                t.deletionchild[1] = p
-                t.deletionchild[2] = rightsib
-                t.deletionleftkey[2] = sk1
-            end 
-            
-            ## If pparent had a third child (besides p and rightsib)
-            ## then we add this to t.deletionchild
-            
-            c3 = t.tree[pparent].child3
-            if c3 > 0
-                newchildcount += 1
-                t.deletionchild[newchildcount] = c3
-                t.deletionleftkey[newchildcount] = t.tree[pparent].splitkey2
-            end
-            p = pparent
-        elseif t.tree[pparent].child2 == p
-            
-            ## Here p is child2 and leftsib is child1.  
-            ## If leftsib has 2 children, then p and 
-            ## leftsib are merged into a single node
-            ## that has three children.
-            ## If leftsib has 3 children, then p and
-            ## leftsib are reformed so that each has
-            ## two children.
-
-            leftsib = t.tree[pparent].child1
-            lk = deletionleftkey1_valid?  
-                      t.deletionleftkey[1] : 
-                      t.tree[pparent].splitkey1
-            if t.tree[leftsib].child3 == 0
-                lc1 = t.tree[leftsib].child1
-                lc2 = t.tree[leftsib].child2
-                t.tree[p] = TreeNode{K}(lc1, lc2,
-                                        t.deletionchild[1],
-                                        pparent,
-                                        t.tree[leftsib].splitkey1,
-                                        lk)
-                if curdepth == t.depth
-                    replaceparent!(t.data, lc1, p)
-                    replaceparent!(t.data, lc2, p)
-                else
-                    replaceparent!(t.tree, lc1, p)
-                    replaceparent!(t.tree, lc2, p)
-                end
-                push!(t.freetreeinds, leftsib)
-                newchildcount = 1
-                t.deletionchild[1] = p
-            else
-                lc3 = t.tree[leftsib].child3
-                t.tree[p] = TreeNode{K}(lc3, t.deletionchild[1], 0,
-                                        pparent, lk, defaultKey)
-                sk2 = t.tree[leftsib].splitkey2
-                t.tree[leftsib] = TreeNode{K}(t.tree[leftsib].child1,
-                                              t.tree[leftsib].child2,
-                                              0, pparent,
-                                              t.tree[leftsib].splitkey1,
-                                              defaultKey)
-                if curdepth == t.depth
-                    replaceparent!(t.data, lc3, p)
-                else
-                    replaceparent!(t.tree, lc3, p)
-                end
-                newchildcount = 2
-                t.deletionchild[1] = leftsib
-                t.deletionchild[2] = p
-                t.deletionleftkey[2] = sk2
-            end
-            
-            ## If pparent had a third child (besides p and leftsib)
-            ## then we add this to t.deletionchild
-            
-            c3 = t.tree[pparent].child3
-            if c3 > 0
-                newchildcount += 1
-                t.deletionchild[newchildcount] = c3
-                t.deletionleftkey[newchildcount] = t.tree[pparent].splitkey2
-            end
-            p = pparent
-            deletionleftkey1_valid = false
-        else
-            ## Here p is child3 and leftsib is child2.
-            ## If leftsib has 2 children, then p and 
-            ## leftsib are merged into a single node
-            ## that has three children.
-            ## If leftsib has 3 children, then p and
-            ## leftsib are reformed so that each has
-            ## two children.
-            
-            # @assert(t.tree[pparent].child3 == p)
-            leftsib = t.tree[pparent].child2
-            lk = deletionleftkey1_valid? 
-                       t.deletionleftkey[1] : 
-                       t.tree[pparent].splitkey2
-            if t.tree[leftsib].child3 == 0
-                lc1 = t.tree[leftsib].child1
-                lc2 = t.tree[leftsib].child2
-                t.tree[p] = TreeNode{K}(lc1, lc2,
-                                        t.deletionchild[1],
-                                        pparent,
-                                        t.tree[leftsib].splitkey1,
-                                        lk)
-                if curdepth == t.depth
-                    replaceparent!(t.data, lc1, p)
-                    replaceparent!(t.data, lc2, p)
-                else
-                    replaceparent!(t.tree, lc1, p)
-                    replaceparent!(t.tree, lc2, p)
-                end
-                push!(t.freetreeinds, leftsib)
-                newchildcount = 2
-                t.deletionchild[1] = t.tree[pparent].child1
-                t.deletionleftkey[2] = t.tree[pparent].splitkey1
-                t.deletionchild[2] = p
-            else
-                lc3 = t.tree[leftsib].child3
-                t.tree[p] = TreeNode{K}(lc3, t.deletionchild[1], 0,
-                                        pparent, lk, defaultKey)
-                sk2 = t.tree[leftsib].splitkey2
-                t.tree[leftsib] = TreeNode{K}(t.tree[leftsib].child1,
-                                              t.tree[leftsib].child2,
-                                              0, pparent,
-                                              t.tree[leftsib].splitkey1,
-                                              defaultKey)
-                if curdepth == t.depth
-                    replaceparent!(t.data, lc3, p)
-                else
-                    replaceparent!(t.tree, lc3, p)
-                end
-                newchildcount = 3
-                t.deletionchild[1] = t.tree[pparent].child1
-                t.deletionchild[2] = leftsib
-                t.deletionchild[3] = p
-                t.deletionleftkey[2] = t.tree[pparent].splitkey1
-                t.deletionleftkey[3] = sk2
-            end
-            p = pparent
-            deletionleftkey1_valid = false
-        end
-        curdepth -= 1
-    end
-    if mustdeleteroot
-        # @assert(!deletionleftkey1_valid)
-        # @assert(p == t.rootloc)
-        t.rootloc = t.deletionchild[1]
-        t.depth -= 1
-        push!(t.freetreeinds, p)
-    end
-    
-    ## If deletionleftkey1_valid, this means that the new
-    ## min key of the deleted node and its right neighbors
-    ## has never been stored in the tree.  It must be stored
-    ## as splitkey1 or splitkey2 of some ancestor of the
-    ## deleted node, so we continue ascending the tree
-    ## until we find a node which has p (and therefore the
-    ## deleted node) as its descendent through its second
-    ## or third child.
-    ## It cannot be the case that the deleted node is 
-    ## is a descendent of the root always through 
-    ## first children, since this would mean the deleted
-    ## node is the leftmost placeholder, which
-    ## cannot be deleted.
-
-    if deletionleftkey1_valid
-        while true
-            pparentnode = t.tree[pparent]
-            if pparentnode.child2 == p
-                t.tree[pparent] = TreeNode{K}(pparentnode.child1,
-                                              pparentnode.child2,
-                                              pparentnode.child3,
-                                              pparentnode.parent,
-                                              t.deletionleftkey[1],
-                                              pparentnode.splitkey2)
-                break
-            elseif pparentnode.child3 == p
-                t.tree[pparent] = TreeNode{K}(pparentnode.child1,
-                                              pparentnode.child2,
-                                              pparentnode.child3,
-                                              pparentnode.parent,
-                                              pparentnode.splitkey1,
-                                              t.deletionleftkey[1])
-                break
-            else
-                p = pparent
-                pparent = pparentnode.parent
-                curdepth -= 1
-                # @assert(curdepth > 0)
-            end
-        end
-    end                                  
-    nothing
+function delete_child!(p, node)
+    children(p)[1] == node && (children(p)[1] = children(p)[2])
+    children(p)[3] != node && (children(p)[2] = children(p)[3])
+    children(p)[3] = 0
 end
 
+# Liquidate a parent and its children into one combined arrays
+function liquidate(p)
+    cchildren = Any[]
+    ckeys = Any[]
+    for (i,child) in enumerate(children(p))
+        (i != 1) && push!(ckeys,keys(p)[i-1])
+        append!(cchildren, map(st->st.idx,children(child)))
+        append!(ckeys, collect(keys(child)))
+    end
+    ckeys, cchildren
+end
+
+function update!(st::Subtree, ckeys, cchildren)
+    children(st)[3] = 0
+    for (i,key) in enumerate(ckeys)
+        keys(st)[i] = key
+    end
+    for (i,child) in enumerate(cchildren)
+        children(st)[i] = child
+    end
+end
+
+function deallocate!(st::Subtree)
+    if isleaf(st)
+        push!(st.tree.freedatainds, st.idx)
+        pop!(st.tree.useddatacells, st.idx)
+    else
+        push!(st.tree.freetreeinds, st.idx)
+    end
+end
+
+"""
+# Deletes an entry from the balanced tree.
+
+ For a high level overview of the algorithm, see e.g.
+ http://www-bcf.usc.edu/~dkempe/CS104/11-19.pdf
+"""
+function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
+    node = Subtree(t, it, t.depth)
+
+    # Handle the case where there's only one (leaf) node, since we can't
+    # look at the parent in that case
+    isroot(node) && (deallocate!(node); t.rootloc = t.depth = 0; return)
+    
+    p = parent(node)
+    
+    # Ok, delete the child from this node
+    delete_child!(p, node)
+    deallocate!(node)
+    
+    # If it still has two children we're done
+    (length(children(p)) == 2) && return
+    
+    # If not, we need to go up and contract the tree
+    ascend(p) do node
+        if isroot(node)
+            # We're done, contract the tree
+            t.rootloc = first(children(node)).idx
+            deallocate!(node)
+            t.depth -= 1
+            replaceparent!(Subtree(t,t.rootloc,0), 0)
+            return false
+        end
+        
+        p = parent(node)
+
+        # Determine if any of our siblings have 3 children
+        siblings = collect(children(p))
+        fatsibling = findfirst(sibling->length(children(sibling)) == 3, siblings)
+        if fatsibling != 0
+            # Borrow node from fat sibling. To do, this take the parent key
+            # that used to be between us and our sibling and move it into our
+            # node.
+            splitkeys, cchildren = liquidate(p)
+            update!(siblings[1], (splitkeys[1],), cchildren[1:2])
+            keys(p)[1] = splitkeys[2]; children(p)[3] = 0
+            update!(siblings[2], (splitkeys[3],), cchildren[3:4])
+            if length(siblings) == 3
+                keys(p)[2] = splitkeys[4]
+                update!(siblings[3], (splitkeys[5],), cchildren[5:end])
+            end
+            fix_links!(siblings[1]); fix_links!(siblings[2])
+            return false
+        elseif length(children(p)) == 3
+            # Borrow from parent
+            splitkeys, cchildren = liquidate(p)
+            # There's an ambiguity here as to whether the left child or the
+            # right child should be fat. We always choose the left for no
+            # particular reason
+            other_sibs = collect(filter(sib->sib != node, siblings))
+            update!(other_sibs[1], splitkeys[1:2], cchildren[1:3])
+            keys(p)[1] = splitkeys[3]; children(p)[3] = 0
+            update!(other_sibs[2], (splitkeys[4],), cchildren[4:5])
+            fix_links!(other_sibs[1]); fix_links!(other_sibs[2])
+            return false
+        else
+            # Combine with sibling
+            other_sib = first(filter(sib->sib != node, siblings))
+            splitkeys, cchildren = liquidate(p)
+            update!(other_sib, splitkeys, cchildren)
+            fix_links!(other_sib)
+            delete_child!(p, node)
+            deallocate!(node)
+            return true
+        end
+    end
+end
