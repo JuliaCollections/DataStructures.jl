@@ -1,4 +1,3 @@
-
 # OrderedDict
 
 import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
@@ -6,7 +5,7 @@ import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
              next, done, keys, values, setdiff, setdiff!,
              union, union!, intersect, filter, filter!,
              hash, eltype, KeyIterator, ValueIterator, convert, copy,
-             merge
+             merge, HasLength, HasShape, SizeUnknown, iteratorsize
 
 """
     OrderedDict
@@ -24,19 +23,25 @@ type OrderedDict{K,V} <: Associative{K,V}
     function OrderedDict()
         new(zeros(Int32,16), Array(K,0), Array(V,0), 0, false)
     end
+    function OrderedDict(kv, isz::Union{HasLength, HasShape})
+        n = length(kv)
+        slotsz = max(16, (n*3)>>1 )
+        h = new(zeros(Int32,slotsz), Array(K,n), Array(V,n), 0, false)
+        i = 0
+        for (k,v) in kv
+            i = i + 1
+            index = hashindex(k,slotsz)
+            h.keys[i] = k
+            h.vals[i] = v
+            h.slots[index] = i
+        end
+        return h
+    end
+    OrderedDict(kv, isz::SizeUnknown) = OrderedDict{K,V}(kv)
     function OrderedDict(kv)
         h = OrderedDict{K,V}()
         for (k,v) in kv
             h[k] = v
-        end
-        return h
-    end
-    OrderedDict(p::Pair) = setindex!(OrderedDict{K,V}(), p.second, p.first)
-    function OrderedDict(ps::Pair...)
-        h = OrderedDict{K,V}()
-        sizehint!(h, length(ps))
-        for p in ps
-            h[p.first] = p.second
         end
         return h
     end
@@ -57,19 +62,19 @@ copy(d::OrderedDict) = OrderedDict(d)
 # OrderedDict{K,V}(kv::Tuple{Vararg{Tuple{K,V}}})          = OrderedDict{K,V}(kv)
 # OrderedDict{K  }(kv::Tuple{Vararg{Tuple{K,Any}}})        = OrderedDict{K,Any}(kv)
 # OrderedDict{V  }(kv::Tuple{Vararg{Tuple{Any,V}}})        = OrderedDict{Any,V}(kv)
-OrderedDict{K,V}(kv::Tuple{Vararg{Pair{K,V}}})         = OrderedDict{K,V}(kv)
-OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})             = OrderedDict{K,Any}(kv)
-OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv)
-OrderedDict(kv::Tuple{Vararg{Pair}})                   = OrderedDict{Any,Any}(kv)
+OrderedDict{K,V}(kv::Tuple{Vararg{Pair{K,V}}})         = OrderedDict{K,V}(kv, iteratorsize(kv))
+OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})             = OrderedDict{K,Any}(kv, iteratorsize(kv))
+OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv, iteratorsize(kv))
+OrderedDict(kv::Tuple{Vararg{Pair}})                   = OrderedDict{Any,Any}(kv, iteratorsize(kv))
 
-OrderedDict{K,V}(kv::AbstractArray{Tuple{K,V}}) = OrderedDict{K,V}(kv)
-OrderedDict{K,V}(kv::AbstractArray{Pair{K,V}})  = OrderedDict{K,V}(kv)
-OrderedDict{K,V}(kv::Associative{K,V})          = OrderedDict{K,V}(kv)
+OrderedDict{K,V}(kv::AbstractArray{Tuple{K,V}}) = OrderedDict{K,V}(kv, iteratorsize(kv))
+OrderedDict{K,V}(kv::AbstractArray{Pair{K,V}})  = OrderedDict{K,V}(kv, iteratorsize(kv))
+OrderedDict{K,V}(kv::Associative{K,V})          = OrderedDict{K,V}(kv, iteratorsize(kv))
 
-OrderedDict{K,V}(ps::Pair{K,V}...)          = OrderedDict{K,V}(ps)
-OrderedDict{K}(ps::Pair{K}...,)             = OrderedDict{K,Any}(ps)
-OrderedDict{V}(ps::Pair{TypeVar(:K),V}...,) = OrderedDict{Any,V}(ps)
-OrderedDict(ps::Pair...)                    = OrderedDict{Any,Any}(ps)
+OrderedDict{K,V}(ps::Pair{K,V}...)          = OrderedDict{K,V}(ps, iteratorsize(ps))
+OrderedDict{K}(ps::Pair{K}...,)             = OrderedDict{K,Any}(ps, iteratorsize(ps))
+OrderedDict{V}(ps::Pair{TypeVar(:K),V}...,) = OrderedDict{Any,V}(ps, iteratorsize(ps))
+OrderedDict(ps::Pair...)                    = OrderedDict{Any,Any}(ps, iteratorsize(ps))
 
 function OrderedDict(kv)
     try
@@ -84,9 +89,9 @@ function OrderedDict(kv)
     end
 end
 
-dict_with_eltype{K,V}(kv, ::Type{Tuple{K,V}}) = OrderedDict{K,V}(kv)
-dict_with_eltype{K,V}(kv, ::Type{Pair{K,V}}) = OrderedDict{K,V}(kv)
-dict_with_eltype(kv, t) = OrderedDict{Any,Any}(kv)
+dict_with_eltype{K,V}(kv, ::Type{Tuple{K,V}}) = OrderedDict{K,V}(kv, iteratorsize(kv))
+dict_with_eltype{K,V}(kv, ::Type{Pair{K,V}}) = OrderedDict{K,V}(kv, iteratorsize(kv))
+dict_with_eltype(kv, t) = OrderedDict{Any,Any}(kv, iteratorsize(kv))
 
 similar{K,V}(d::OrderedDict{K,V}) = OrderedDict{K,V}()
 

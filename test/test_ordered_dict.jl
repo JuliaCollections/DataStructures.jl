@@ -8,6 +8,7 @@
 @test isa(OrderedDict(Pair(1, 1.0), Pair(2, 2.0), Pair(3, 3.0)), OrderedDict{Int,Float64})
 
 # empty dictionary
+
 d = OrderedDict{Char, Int}()
 @test length(d) == 0
 @test isempty(d)
@@ -20,7 +21,7 @@ empty!(d)
 @test isempty(d)
 
 # access, modification
-
+d = OrderedDict{Char, Int}()
 for c in 'a':'z'
     d[c] = c-'a'+1
 end
