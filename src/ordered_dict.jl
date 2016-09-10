@@ -137,7 +137,7 @@ function rehash!{K,V}(h::OrderedDict{K,V}, newsz = length(h.slots))
         newkeys = similar(keys, count0)
         newvals = similar(vals, count0)
         @inbounds for from = 1:length(keys)
-            if !ptrs || isdefined(keys, from)
+            if !ptrs || isassigned(keys, from)
                 k = keys[from]
                 hashk = hash(k)%Int
                 isdeleted = false
