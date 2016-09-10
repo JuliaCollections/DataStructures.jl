@@ -2,6 +2,8 @@ __precompile__()
 
 module DataStructures
 
+    using Compat
+
     import Base: <, <=, ==, length, isempty, start, next, done,
                  show, dump, empty!, getindex, setindex!, get, get!,
                  in, haskey, keys, merge, copy, cat,
@@ -17,7 +19,7 @@ module DataStructures
                  find, searchsortedfirst, searchsortedlast, endof, in
 
 
-    export Deque, Stack, Queue
+    export Deque, Stack, Queue, CircularDeque
     export deque, enqueue!, dequeue!, update!, reverse_iter
     export capacity, num_blocks, front, back, top, sizehint!
 
@@ -56,6 +58,7 @@ module DataStructures
     include("delegate.jl")
 
     include("deque.jl")
+    include("circ_deque.jl")
     include("stack.jl")
     include("queue.jl")
     include("accumulator.jl")
