@@ -4,6 +4,7 @@ DataStructures.jl
 This package implements a variety of data structures, including
 
 * Deque (based on block-list)
+* CircularDeque (based on a circular buffer)
 * Stack
 * Queue
 * Accumulators and Counters
@@ -23,6 +24,7 @@ Contents:
    :maxdepth: 2
 
    deque.rst
+   circ_deque.rst
    stack_and_queue.rst
    accumulators.rst
    disjoint_sets.rst

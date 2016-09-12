@@ -1,4 +1,9 @@
-using Base.Test
+if VERSION >= v"0.5.0-dev+7720"
+    using Base.Test
+else
+    using BaseTestNext
+    const Test = BaseTestNext
+end
 using DataStructures
 const IntSet = DataStructures.IntSet
 import Compat: String
@@ -6,6 +11,7 @@ using Primes
 
 tests = ["int_set",
          "deque",
+         "circ_deque",
          "sorted_containers",
          "stack_and_queue",
          "accumulator",
