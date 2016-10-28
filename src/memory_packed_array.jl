@@ -85,20 +85,17 @@ function scan{D}(A::MemoryPackedArray{D},from::Int,to::Int)
 end
 
 function in_threashold{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_elements::Int, k::Int)
-	println("left:", left," right: ", right, " number_of_elemnts:", number_of_elements, " k:", k);
 	local d = log2(A.number_of_segments);
 	local l = d-k;
 	local t = A.t0+((A.td-A.t0)/d)*l;
 	local p = A.p0-((A.p0-A.pd)/d)*l;
 	density = number_of_elements/(right-left);
 	## return	
-	println(p," ",t," ",density)
 	p<=density && density<=t
 end
 
 function ancestor{D}(A::MemoryPackedArray{D},left::Int,right::Int,seg_pos::Int, seg_size::Int)
 	local nr::Int;
-	println("seg_pos: ", seg_pos)
 	if (seg_pos & 1)==1 ## we are in left child;
 		nr = scan(A,right,right+seg_size+1);
 		right = right+seg_size;
@@ -127,14 +124,10 @@ function rebalance{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_ele
 		end
 		if i==index
 			k = j-1;
-			## k - the j where the elemnt should go. 
 		end
 		A.exists[i] = false;
 		i = i+1;
 	end
-
-	println(A.exists);
-	println(A.store);
 
 	i = right-1
 	
@@ -164,9 +157,6 @@ function rebalance{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_ele
 			i = ceil(Int,i-gap);
 		end
 	end
-	println(A.store);
-	println(A.exists);
-	
 	nothing
 end
 
@@ -178,7 +168,6 @@ function insert!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 
 	local left =  index - index%(A.segment_size)+1;
 	local right = left+A.segment_size;
-
 
 
 ##	scan couting the elemnts;
@@ -201,11 +190,7 @@ function insert!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 	end
 
 ##	rebalance with inserting the element. 
-	println("GERE")
-	println(A, left, right, number_of_elements, index, element);
-	rebalance(A,left,right,number_of_elements,index,element);
-	println(A);
-		
+	
 	nothing 	
 end
 
