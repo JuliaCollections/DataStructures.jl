@@ -10,9 +10,9 @@
 ## Functions simplifing notation: 
 
 ## Function returning the closest power of 2 >= x 
-#@inline hyperceil(x::Float64) = 1 << (ceil(log2(x)));
+@inline hyperceil(x::Float64) = 1 << (ceil(Int,log2(x)));
 ## Function returning the closest power of 2 <= x
-#@inline hyperfloor(x::Float64) = 1 << (floor(log2(x))); 
+@inline hyperfloor(x::Float64) = 1 << (floor(Int,log2(x))); 
 
 ## TODO: make the constructor idiotensicher ??
 
@@ -46,10 +46,10 @@ type MemoryPackedArray{D}
 	td::Float64
 	store::Array{D,1} 
 	exists::Array{Bool,1}
-	function MemoryPackedArray(size::Int, p0::Float64, pd::Float64, t0::Float64, td::Float64)
-			seg_size = ceil(log2(size));
+	function MemoryPackedArray(size::Int, pd::Float64, p0::Float64, t0::Float64, td::Float64)
+			seg_size = ceil(Int,log2(size));
 			no_seg = hyperceil(size/seg_size);
-			sizeP = number_of_segments*segment_size;
+			sizeP = no_seg*seg_size;
 			store = Array(D,sizeP);
 			exists = zeros(sizeP);
 			new(sizeP,seg_size,no_seg,p0,pd,t0,td,store,exists)
@@ -77,7 +77,6 @@ function scan{D}(A::MemoryPackedArray{D},from::Int,to::Int)
 	end
 
 ## 	If segemnt_size is odd we haven't checked the element in the middle.
-s
 	if ((A.segment_size & 1) == 1) && (A.exists[i])
 		nr = nr+1;
 	end
@@ -86,17 +85,20 @@ s
 end
 
 function in_threashold{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_elements::Int, k::Int)
+	println("left:", left," right: ", right, " number_of_elemnts:", number_of_elements, " k:", k);
 	local d = log2(A.number_of_segments);
 	local l = d-k;
 	local t = A.t0+((A.td-A.t0)/d)*l;
 	local p = A.p0-((A.p0-A.pd)/d)*l;
-	density = number_of_elemnts/(right-left);
+	density = number_of_elements/(right-left);
 	## return	
+	println(p," ",t," ",density)
 	p<=density && density<=t
 end
 
 function ancestor{D}(A::MemoryPackedArray{D},left::Int,right::Int,seg_pos::Int, seg_size::Int)
 	local nr::Int;
+	println("seg_pos: ", seg_pos)
 	if (seg_pos & 1)==1 ## we are in left child;
 		nr = scan(A,right,right+seg_size+1);
 		right = right+seg_size;
@@ -109,12 +111,14 @@ function ancestor{D}(A::MemoryPackedArray{D},left::Int,right::Int,seg_pos::Int, 
 end
 
 
-##	TODO:make this wiser
+#TODO:: elements are usaually too close to each other (do sth, different then ceil(Int,i-gap)), 
+#TODO:: don't rebalnace when it is not needed - ? 
 function rebalance{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_elemnts::Int,index::Int,elemnt::D)
-	local gap = ceil((right-left)/number_of_elemnts);
+	local gap = (right-left)/(number_of_elemnts+1);
 	local j = left;
 	local i = left;
 	local k::Int;
+
 	## move everthing to the left
 	while i<right
 		if A.exists[i]
@@ -123,30 +127,45 @@ function rebalance{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_ele
 		end
 		if i==index
 			k = j-1;
+			## k - the j where the elemnt should go. 
 		end
 		A.exists[i] = false;
 		i = i+1;
 	end
-	
-	i = right-1
-	while i>=left && j-1>k
-		A.store[i] = A.store[j-1];
-		A.exists[i] = true;
-		j = j-1;
-		i = i-gap;
-	end
-	if i>=left
-		A.store[i] = elemnt;
-		A.exists[i] = true;
-		i = i-gap;
-	end
 
-	while i>=left && j-1>=left
-		A.store[i] = A.store[j-1];
-		A.exists[i] = true;
-		j = j-1;
-		i = i-gap;
+	println(A.exists);
+	println(A.store);
+
+	i = right-1
+	
+	if j==left
+		## no place taken - just insert and move on
+		A.store[index] = elemnt;
+		A.exists[index] = true;
+	else
+		j = j-1; ## last last taken place
+		print(j," ",k)
+		while i>=left && j>k
+			A.store[i] = A.store[j];
+			A.exists[i] = true;
+			j = j-1;
+			println(i-gap)
+			i = ceil(Int,i-gap);
+		end
+		if i>=left ## then j==k
+			A.store[i] = elemnt;
+			A.exists[i] = true;
+			i = ceil(Int,i-gap);
+		end
+		while i>=left && j>=left
+			A.store[i] = A.store[j];
+			A.exists[i] = true;
+			j = j-1;
+			i = ceil(Int,i-gap);
+		end
 	end
+	println(A.store);
+	println(A.exists);
 	
 	nothing
 end
@@ -158,7 +177,8 @@ function insert!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 ##	right - right border of the segement conatining elemnt at "index", exclusive
 
 	local left =  index - index%(A.segment_size)+1;
-	local right = left+A.segment_size+1;
+	local right = left+A.segment_size;
+
 
 
 ##	scan couting the elemnts;
@@ -167,9 +187,11 @@ function insert!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 	local seg_size = A.segment_size;
 	local k = 0;
 
-	while !(in_threashold(A,left,right,number_of_elemnts,k)) && k <= leaf_depth 
-		seg_pos = ceil(index/seg_size);
-		left, right, number_of_elemnts = ancestor(A,left,right,seg_pos,seg_size);
+
+	while !(in_threashold(A,left,right,number_of_elements,k)) && k <= leaf_depth 
+		seg_pos = ceil(Int,index/seg_size);
+		left, right, nr = ancestor(A,left,right,seg_pos,seg_size);
+		number_of_elements = nr+number_of_elements;
 		seg_size << 1;
 		k=k+1;
 	end
@@ -178,8 +200,11 @@ function insert!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 		##TODO: handle the situation  
 	end
 
-##	rebalnace with inserting the element. 
-	rebalnace(A,left,right,number_of_elements,index,element);
+##	rebalance with inserting the element. 
+	println("GERE")
+	println(A, left, right, number_of_elements, index, element);
+	rebalance(A,left,right,number_of_elements,index,element);
+	println(A);
 		
 	nothing 	
 end
