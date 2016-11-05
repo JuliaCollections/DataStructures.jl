@@ -65,7 +65,7 @@ function scan{D}(A::MemoryPackedArray{D},from::Int,to::Int)
 	local nr = 0;
 	local i = from;
 	local j = to-1;
-	while(i<j)
+	while i<j
 		if(A.exists[i])
 			nr = nr+1;
 		end
@@ -97,7 +97,7 @@ end
 function ancestor{D}(A::MemoryPackedArray{D},left::Int,right::Int,seg_pos::Int, seg_size::Int)
 	local nr::Int;
 	if (seg_pos & 1)==1 ## we are in left child;
-		nr = scan(A,right,right+seg_size+1);
+		nr = scan(A,right,right+seg_size);
 		right = right+seg_size;
 	else 
 		nr = scan(A,left-seg_size,left);
@@ -136,13 +136,11 @@ function rebalance{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_ele
 		A.store[index] = elemnt;
 		A.exists[index] = true;
 	else
-		j = j-1; ## last last taken place
-		print(j," ",k)
+		j = j-1; ## last taken place
 		while i>=left && j>k
 			A.store[i] = A.store[j];
 			A.exists[i] = true;
 			j = j-1;
-			println(i-gap)
 			i = ceil(Int,i-gap);
 		end
 		if i>=left ## then j==k
@@ -163,14 +161,11 @@ end
 function insert!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 
 ##	left - left border of the segemnt containing elemnt at "index", inclusive
-##		this is the same as div(index/seg_size)*seg_size
 ##	right - right border of the segement conatining elemnt at "index", exclusive
 
-	local left =  index - index%(A.segment_size)+1;
-	local right = left+A.segment_size;
-
-
-##	scan couting the elemnts;
+	local segment_position = ceil(Int,index/A.segment_size);
+	local right = segment_position*A.segment_size+1;
+	local left = right-A.segment_size;
 	local number_of_elements = scan(A,left,right);
 	local leaf_depth = log2(A.number_of_segments);
 	local seg_size = A.segment_size;
@@ -178,18 +173,21 @@ function insert!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 
 
 	while !(in_threashold(A,left,right,number_of_elements,k)) && k <= leaf_depth 
+		k += 1 
+		if k>leaf_depth break end;
+
 		seg_pos = ceil(Int,index/seg_size);
 		left, right, nr = ancestor(A,left,right,seg_pos,seg_size);
 		number_of_elements = nr+number_of_elements;
-		seg_size << 1;
-		k=k+1;
+		seg_size = seg_size << 1;
 	end
 
-	if (k>leaf_depth)
+	if k>leaf_depth
 		##TODO: handle the situation  
 	end
 
 ##	rebalance with inserting the element. 
+	rebalance(A,left,right,number_of_elements,index,element);
 	
 	nothing 	
 end
