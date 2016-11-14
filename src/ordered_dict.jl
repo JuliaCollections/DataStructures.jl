@@ -29,7 +29,7 @@ type OrderedDict{K,V} <: Associative{K,V}
         new(zeros(Int32,16), Array(K,0), Array(V,0), 0, false)
     end
 
-    if VERSION >= v"0.5.0"
+    @static if VERSION >= v"0.5.0"
         function OrderedDict(kv, isz::Union{HasLength, HasShape})
             n = length(kv)
             slotsz = max(16, (n*3)>>1 )
@@ -81,7 +81,20 @@ copy(d::OrderedDict) = OrderedDict(d)
 # OrderedDict{K  }(kv::Tuple{Vararg{Tuple{K,Any}}})        = OrderedDict{K,Any}(kv)
 # OrderedDict{V  }(kv::Tuple{Vararg{Tuple{Any,V}}})        = OrderedDict{Any,V}(kv)
 
-if VERSION >= v"0.5.0"
+function OrderedDict(kv)
+    try
+        dict_with_eltype(kv, eltype(kv))
+    catch e
+        if any(x->isempty(methods(x, (typeof(kv),))), [start, next, done]) ||
+            !all(x->isa(x,Union{Tuple,Pair}),kv)
+            throw(ArgumentError("Dict(kv): kv needs to be an iterator of tuples or pairs"))
+        else
+            rethrow(e)
+        end
+    end
+end
+
+@static if VERSION >= v"0.5.0"
     OrderedDict{K,V}(kv::Tuple{Vararg{Pair{K,V}}})         = OrderedDict{K,V}(kv, iteratorsize(kv))
     OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})             = OrderedDict{K,Any}(kv, iteratorsize(kv))
     OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv, iteratorsize(kv))
@@ -95,6 +108,11 @@ if VERSION >= v"0.5.0"
     OrderedDict{K}(ps::Pair{K}...,)             = OrderedDict{K,Any}(ps, iteratorsize(ps))
     OrderedDict{V}(ps::Pair{TypeVar(:K),V}...,) = OrderedDict{Any,V}(ps, iteratorsize(ps))
     OrderedDict(ps::Pair...)                    = OrderedDict{Any,Any}(ps, iteratorsize(ps))
+
+    dict_with_eltype{K,V}(kv, ::Type{Tuple{K,V}}) = OrderedDict{K,V}(kv, iteratorsize(kv))
+    dict_with_eltype{K,V}(kv, ::Type{Pair{K,V}}) = OrderedDict{K,V}(kv, iteratorsize(kv))
+    dict_with_eltype(kv, t) = OrderedDict{Any,Any}(kv, iteratorsize(kv))
+
 else
     OrderedDict{K, V}(kv::Tuple{Vararg{Pair{K, V}}})         = OrderedDict{K, V}(kv)
     OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})               = OrderedDict{K, Any}(kv)
@@ -109,26 +127,7 @@ else
     OrderedDict{K}(ps::Pair{K}..., )              = OrderedDict{K, Any}(ps)
     OrderedDict{V}(ps::Pair{TypeVar(:K), V}..., ) = OrderedDict{Any, V}(ps)
     OrderedDict(ps::Pair...)                      = OrderedDict{Any, Any}(ps)
-end
 
-function OrderedDict(kv)
-    try
-        dict_with_eltype(kv, eltype(kv))
-    catch e
-        if any(x->isempty(methods(x, (typeof(kv),))), [start, next, done]) ||
-            !all(x->isa(x,Union{Tuple,Pair}),kv)
-            throw(ArgumentError("Dict(kv): kv needs to be an iterator of tuples or pairs"))
-        else
-            rethrow(e)
-        end
-    end
-end
-
-if VERSION >= v"0.5.0"
-    dict_with_eltype{K,V}(kv, ::Type{Tuple{K,V}}) = OrderedDict{K,V}(kv, iteratorsize(kv))
-    dict_with_eltype{K,V}(kv, ::Type{Pair{K,V}}) = OrderedDict{K,V}(kv, iteratorsize(kv))
-    dict_with_eltype(kv, t) = OrderedDict{Any,Any}(kv, iteratorsize(kv))
-else
     dict_with_eltype{K, V}(kv,  ::Type{Tuple{K, V}}) = OrderedDict{K, V}(kv)
     dict_with_eltype{K, V}(kv,  ::Type{Pair{K, V}}) = OrderedDict{K, V}(kv)
     dict_with_eltype(kv,  t) = OrderedDict{Any, Any}(kv)
