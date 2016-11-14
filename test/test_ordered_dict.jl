@@ -6,6 +6,7 @@
 @test isa(OrderedDict(Pair(1, 1.0)), OrderedDict{Int,Float64})
 @test isa(OrderedDict(Pair(1, 1.0), Pair(2, 2.0)), OrderedDict{Int,Float64})
 @test isa(OrderedDict(Pair(1, 1.0), Pair(2, 2.0), Pair(3, 3.0)), OrderedDict{Int,Float64})
+@test isa(OrderedDict([Pair(1, 1.0), Pair(2, 2.0), Pair(3, 3.0)]), OrderedDict{Int,Float64})
 
 # empty dictionary
 
