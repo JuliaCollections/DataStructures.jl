@@ -88,6 +88,8 @@ module DataStructures
     include("tokens2.jl")
     include("container_loops.jl")
 
+    include("dict_sorting.jl")
+
     export
         CircularBuffer,
         capacity,
