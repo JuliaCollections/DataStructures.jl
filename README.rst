@@ -5,6 +5,9 @@
 .. image:: https://coveralls.io/repos/JuliaLang/DataStructures.jl/badge.svg?branch=master&service=github
    :target: https://coveralls.io/github/JuliaLang/DataStructures.jl?branch=master
    :alt: Test Coverage
+.. image:: https://codecov.io/github/JuliaLang/DataStructures.jl/coverage.svg?branch=master
+   :target: https://codecov.io/github/JuliaLang/DataStructures.jl?branch=master
+   :alt: Test Coverage
 .. image:: http://pkg.julialang.org/badges/DataStructures_0.3.svg
    :target: http://pkg.julialang.org/?pkg=DataStructures&ver=0.3
    :alt: PkgEval.jl Status on Julia 0.3
