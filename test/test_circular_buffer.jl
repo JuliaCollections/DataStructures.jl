@@ -6,7 +6,8 @@ else
     const Test = BaseTestNext
 end
 
-cb = CircularBuffer{Int}(5)
+#cb = CircularBuffer{Int}(5)
+cb = CircularBuffer(Int, 5)
 @test length(cb) == 0
 @test capacity(cb) == 5
 # throws ArgumentError on v0.4 and BoundsError on v0.5 (diverged at 0.5.0-dev+5230)
@@ -41,3 +42,21 @@ append!(cb, 2:8)
 
 cb[3] = 999
 @test convert(Array, cb) == Int[4,5,999,7,8]
+
+cb = CircularBuffer(Int, 3, 4)
+#println(convert(Array, cb))
+@test size(cb) == (0, 4)
+println(cb)
+push!(cb, [10, 11, 12, 13])
+@test size(cb) == (1, 4)
+push!(cb, [20, 21, 22, 23])
+@test size(cb) == (2, 4)
+push!(cb, [30, 31, 32, 33])
+@test size(cb) == (3, 4)
+push!(cb, [40, 41, 42, 43])
+push!(cb, [50, 51, 52, 53])
+#println(cb.buffer)
+#println(cb.colons)
+#println(cb.buffer[1, :])
+#println(cb[1])
+#println(convert(Array, cb))
