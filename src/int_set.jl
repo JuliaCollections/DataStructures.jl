@@ -1,9 +1,9 @@
 # This file was a part of Julia. License is MIT: http://julialang.org/license
 
-import Base: similar, copy, copy!, eltype, push!, pop!, delete!, shift!, 
+import Base: similar, copy, copy!, eltype, push!, pop!, delete!, shift!,
              empty!, isempty, union, union!, intersect, intersect!,
              setdiff, setdiff!, symdiff, symdiff!, in, start, next, done,
-             last, length, show, hash, issubset, ==, <=, <, unsafe_getindex, 
+             last, length, show, hash, issubset, ==, <=, <, unsafe_getindex,
              unsafe_setindex!, findnextnot, first
 if !isdefined(Base, :complement)
     export complement, complement!
@@ -153,13 +153,13 @@ symdiff(s::IntSet, ns) = symdiff!(copy(s), ns)
 symdiff!(s::IntSet, ns) = (for n in ns; symdiff!(s, n); end; s)
 function symdiff!(s::IntSet, n::Integer)
     0 <= n < typemax(Int) || throw(ArgumentError(_intset_bounds_err_msg))
-    val = (n in s) $ !s.inverse
+    val = (n in s) ⊻ !s.inverse
     _setint!(s, n, val)
     s
 end
 function symdiff!(s1::IntSet, s2::IntSet)
     e = _matchlength!(s1.bits, length(s2.bits))
-    map!($, s1.bits, s1.bits, s2.bits)
+    map!(⊻, s1.bits, s1.bits, s2.bits)
     s2.inverse && (s1.inverse = !s1.inverse)
     append!(s1.bits, e)
     s1
@@ -177,7 +177,7 @@ end
 # Use the next-set index as the state to prevent looking it up again in done
 start(s::IntSet) = next(s, 0)[2]
 function next(s::IntSet, i, invert=false)
-    if s.inverse $ invert
+    if s.inverse ⊻ invert
         # i+1 could rollover causing a BoundsError in findnext/findnextnot
         nextidx = i == typemax(Int) ? 0 : findnextnot(s.bits, i+1)
         # Extend indices beyond the length of the bits since it is inverted
@@ -248,7 +248,7 @@ function hash(s::IntSet, h::UInt)
     # Only hash the bits array up to the last-set bit to prevent extra empty
     # bits from changing the hash result
     l = findprev(s.bits, length(s.bits))
-    hash(unsafe_getindex(s.bits, 1:l), h) $ hash(s.inverse) $ hashis_seed
+    hash(unsafe_getindex(s.bits, 1:l), h) ⊻ hash(s.inverse) ⊻ hashis_seed
 end
 
 issubset(a::IntSet, b::IntSet) = isequal(a, intersect(a,b))

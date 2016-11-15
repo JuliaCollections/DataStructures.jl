@@ -21,7 +21,7 @@ tail(x::Cons) = x.tail
 
 function show{T}(io::IO, l::LinkedList{T})
     if isa(l,Nil)
-        if is(T,Any)
+        if T === Any
             print(io, "nil()")
         else
             print(io, "nil(", T, ")")

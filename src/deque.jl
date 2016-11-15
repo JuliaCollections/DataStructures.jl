@@ -31,8 +31,8 @@ head_deque_block{T}(ty::Type{T}, n::Int) = DequeBlock{T}(n, n+1)
 capacity(blk::DequeBlock) = blk.capa
 length(blk::DequeBlock) = blk.back - blk.front + 1
 isempty(blk::DequeBlock) = blk.back < blk.front
-ishead(blk::DequeBlock) = is(blk.prev, blk)
-isrear(blk::DequeBlock) = is(blk.next, blk)
+ishead(blk::DequeBlock) = blk.prev === blk
+isrear(blk::DequeBlock) =  blk.next === blk
 
 
 # reset the block to empty, and position
@@ -188,7 +188,7 @@ function dump(io::IO, q::Deque)
         println(io)
 
         cb_next::DequeBlock = cb.next
-        if !is(cb, cb_next)
+        if cb !== cb_next
             cb = cb_next
             i += 1
         else
