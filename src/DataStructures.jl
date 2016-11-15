@@ -48,7 +48,7 @@ module DataStructures
     export searchsortedafter, searchequalrange
     export packcopy, packdeepcopy
     export exclusive, inclusive, semitokens
-    export orderobject, Lt, compare, onlysemitokens
+    export orderobject, ordtype, Lt, compare, onlysemitokens
 
     export MultiDict, enumerateall
 

@@ -145,6 +145,8 @@ end
 @inline keytype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) = K
 @inline valtype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = D
 @inline valtype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) = D
+@inline ordtype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = Ord
+@inline ordtype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) = Ord
 
 
 ## First and last return the first and last (key,data) pairs
