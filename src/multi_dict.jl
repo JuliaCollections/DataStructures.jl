@@ -71,13 +71,13 @@ end
 function in{K,V}(pr::(Tuple{Any,Any}), d::MultiDict{K,V})
     k = convert(K, pr[1])
     v = get(d,k,Base.secret_table_token)
-    !is(v, Base.secret_table_token) && (isa(pr[2], AbstractArray) ? v == pr[2] : pr[2] in v)
+    (v !== Base.secret_table_token) && (isa(pr[2], AbstractArray) ? v == pr[2] : pr[2] in v)
 end
 
 function pop!(d::MultiDict, key, default)
     vs = get(d, key, Base.secret_table_token)
-    if is(vs, Base.secret_table_token)
-        if !is(default, Base.secret_table_token)
+    if vs === Base.secret_table_token
+        if default !== Base.secret_table_token
             return default
         else
             throw(KeyError(key))

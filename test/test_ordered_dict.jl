@@ -307,12 +307,12 @@ end
 # issue 9295
 let
     d = OrderedDict()
-    @test is(push!(d, 'a'=> 1), d)
+    @test push!(d, 'a'=> 1) === d
     @test d['a'] == 1
-    @test is(push!(d, 'b' => 2, 'c' => 3), d)
+    @test push!(d, 'b' => 2, 'c' => 3) === d
     @test d['b'] == 2
     @test d['c'] == 3
-    @test is(push!(d, 'd' => 4, 'e' => 5, 'f' => 6), d)
+    @test push!(d, 'd' => 4, 'e' => 5, 'f' => 6) === d
     @test d['d'] == 4
     @test d['e'] == 5
     @test d['f'] == 6

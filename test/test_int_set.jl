@@ -8,7 +8,7 @@ data_out = collect(s)
 @test length(data_out) == length(data_in)
 
 # eltype, similar
-@test is(eltype(IntSet()), Int)
+@test eltype(IntSet()) ===  Int
 @test isequal(similar(IntSet([1,2,3])), IntSet())
 
 # show

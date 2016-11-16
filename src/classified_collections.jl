@@ -42,7 +42,7 @@ done(cc::ClassifiedCollections, state) = done(cc.map, state)
 
 function push!{K, C}(cc::ClassifiedCollections{K, C}, key::K, e)
     c = get(cc.map, key, nothing)
-    if is(c, nothing)
+    if c === nothing
         c = _create_empty(C)
         cc.map[key] = c
     end

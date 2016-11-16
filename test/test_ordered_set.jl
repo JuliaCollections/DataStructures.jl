@@ -15,8 +15,8 @@ data_in = (1, "banana", ())
 s = OrderedSet(data_in)
 data_out = collect(s)
 @test isa(data_out, Array{Any,1})
-@test is(tuple(data_out...), data_in)
-@test is(tuple(data_in...), tuple(s...))
+@test tuple(data_out...) === data_in
+@test tuple(data_in...) === tuple(s...)
 @test length(data_out) == length(data_in)
 
 # hash
@@ -47,10 +47,10 @@ s3 = OrderedSet{Compat.ASCIIString}(["baz"])
 # eltype, similar
 s1 = similar(OrderedSet([1,"hello"]))
 @test isequal(s1, OrderedSet())
-@test is(eltype(s1), Any)
+@test eltype(s1) === Any
 s2 = similar(OrderedSet{Float32}([2.0f0,3.0f0,4.0f0]))
 @test isequal(s2, OrderedSet())
-@test is(eltype(s2), Float32)
+@test eltype(s2) === Float32
 
 # show
 @test endswith(sprint(show, OrderedSet()), "OrderedSet{Any}()")
@@ -108,10 +108,10 @@ for data_in in ((7,8,4,5),
 
     t = tuple(s...)
 
-    @test is(t, data_in)
+    @test t === data_in
     @test length(t) == length(s)
     for (e,f) in zip(t,s)
-        @test is(e,f)
+        @test e === f
     end
 end
 
