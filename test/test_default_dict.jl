@@ -1,3 +1,21 @@
+import DataStructures: DefaultDictBase
+
+#####################
+# DefaultDictBase
+#####################
+
+#construction
+@test_throws ArgumentError DefaultDictBase()
+@test isa(DefaultDictBase(0.0), DefaultDictBase{Any, Any, Float64, Dict{Any, Any}})
+@test isa(DefaultDictBase(0.0, 1 => 1.0), DefaultDictBase{Int, Float64, Float64, Dict{Int, Float64}})
+@test isa(DefaultDictBase(0.0, [(1, 1.0)]), DefaultDictBase{Int, Float64, Float64, Dict{Int, Float64}})
+#@test isa(DefaultDictBase(0.0, Dict()), DefaultDictBase{Any, Any, Float64, Dict{Any, Any}}))
+
+ddb = DefaultDictBase{Int, Float64}(0.0)
+@test isa(ddb, DefaultDictBase{Int, Float64, Float64, Dict{Int,Float64}})
+@test isa(DefaultDictBase(1.0, ddb), DefaultDictBase{Int, Float64, Float64, Dict{Int,Float64}})
+
+
 ##############
 # DefaultDicts
 ##############
@@ -7,7 +25,7 @@
 @test_throws ArgumentError DefaultDict(AbstractString, Int)
 @test_throws ArgumentError DefaultDict{AbstractString, Int}()
 
-@test isa(DefaultDict(0.0, 1 => 1.0), DefaultDict{Int,Float64,Float64})
+@test isa(DefaultDict(0.0, 1 => 1.0), DefaultDict{Int, Float64, Float64})
 
 # empty dictionary
 d = DefaultDict{Char, Int}(1)
@@ -59,6 +77,9 @@ s = similar(d)
 @test typeof(s) === typeof(d)
 @test s.d.default == d.d.default
 
+# Alternate constructor
+@test isa(DefaultDict(0.0), DefaultDict{Any, Any, Float64})
+@test isa(DefaultDict(0.0, [(1, 1.0)]), DefaultDict{Int, Float64, Float64})
 
 #####################
 # DefaultOrderedDicts
@@ -107,3 +128,7 @@ end
 s = similar(d)
 @test typeof(s) === typeof(d)
 @test s.d.default == d.d.default
+
+# Alternate constructor
+@test isa(DefaultOrderedDict(0.0), DefaultOrderedDict{Any, Any, Float64})
+@test isa(DefaultOrderedDict(0.0, [(1, 1.0)]), DefaultOrderedDict{Int, Float64, Float64})

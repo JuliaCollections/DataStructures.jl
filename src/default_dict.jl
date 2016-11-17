@@ -34,10 +34,10 @@ DefaultDictBase() = throw(ArgumentError("no default specified"))
 DefaultDictBase(k,v) = throw(ArgumentError("no default specified"))
 
 # syntax entry points
-DefaultDictBase{F}(default::F) = DefaultDictBase{Any,Any,F,Dict}(default)
-DefaultDictBase{K,V,F}(default::F, kv::AbstractArray{Tuple{K,V}}) = DefaultDictBase{K,V,F,Dict}(default, kv)
-DefaultDictBase{K,V,F}(default::F, ps::Pair{K,V}...) = DefaultDictBase{K,V,F,Dict}(default, ps...)
-DefaultDictBase{F,D<:Associative}(default::F, d::D) = ((K,V)=eltype(d); DefaultDictBase{K,V,F,D}(default, d))
+DefaultDictBase{F}(default::F) = DefaultDictBase{Any,Any,F,Dict{Any,Any}}(default)
+DefaultDictBase{K,V,F}(default::F, kv::AbstractArray{Tuple{K,V}}) = DefaultDictBase{K,V,F,Dict{K,V}}(default, kv)
+DefaultDictBase{K,V,F}(default::F, ps::Pair{K,V}...) = DefaultDictBase{K,V,F,Dict{K,V}}(default, ps...)
+DefaultDictBase{F,D<:Associative}(default::F, d::D) = (K=keytype(d); V=valtype(d); DefaultDictBase{K,V,F,D}(default, d))
 
 # Constructor for DefaultDictBase{Int,Float64}(0.0)
 @compat (::Type{DefaultDictBase{K,V}}){K,V,F}(default::F) = DefaultDictBase{K,V,F,Dict{K,V}}(default)
