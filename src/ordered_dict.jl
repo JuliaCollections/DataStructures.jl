@@ -44,22 +44,6 @@ type OrderedDict{K,V} <: Associative{K,V}
         end
         OrderedDict(kv, isz::SizeUnknown) = OrderedDict{K,V}(kv)
     end
-
-    OrderedDict(p::Pair) = setindex!(OrderedDict{K, V}(), p.second, p.first)
-    function OrderedDict(ps::Pair...)
-        n = length(kv)
-        slotsz = max(16, (n*3)>>1 )
-        h = new(zeros(Int32,slotsz), Array(K,n), Array(V,n), 0, false)
-        i = 0
-        for p in ps
-            i = i + 1
-            index = hashindex(k,slotsz)
-            h.keys[i] = p.first
-            h.vals[i] = p.second
-            h.slots[index] = i
-        end
-        return h
-    end
     
     function OrderedDict(kv)
         h = OrderedDict{K,V}()
