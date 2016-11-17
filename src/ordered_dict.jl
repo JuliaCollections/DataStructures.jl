@@ -25,9 +25,7 @@ type OrderedDict{K,V} <: Associative{K,V}
     ndel::Int
     dirty::Bool
 
-    function OrderedDict()
-        new(zeros(Int32,16), Array(K,0), Array(V,0), 0, false)
-    end
+    OrderedDict() = new(zeros(Int32,16), Array(K,0), Array(V,0), 0, false)
 
     @static if VERSION >= v"0.5.0"
         function OrderedDict(kv, isz::Union{HasLength, HasShape})
@@ -45,16 +43,22 @@ type OrderedDict{K,V} <: Associative{K,V}
             return h
         end
         OrderedDict(kv, isz::SizeUnknown) = OrderedDict{K,V}(kv)
-    else
-        OrderedDict(p::Pair) = setindex!(OrderedDict{K, V}(), p.second, p.first)
-        function OrderedDict(ps::Pair...)
-            h = OrderedDict{K, V}()
-            sizehint!(h, length(ps))
-            for p in ps
-                h[p.first] = p.second
-            end
-            return h
+    end
+
+    OrderedDict(p::Pair) = setindex!(OrderedDict{K, V}(), p.second, p.first)
+    function OrderedDict(ps::Pair...)
+        n = length(kv)
+        slotsz = max(16, (n*3)>>1 )
+        h = new(zeros(Int32,slotsz), Array(K,n), Array(V,n), 0, false)
+        i = 0
+        for p in ps
+            i = i + 1
+            index = hashindex(k,slotsz)
+            h.keys[i] = p.first
+            h.vals[i] = p.second
+            h.slots[index] = i
         end
+        return h
     end
     
     function OrderedDict(kv)
@@ -64,6 +68,7 @@ type OrderedDict{K,V} <: Associative{K,V}
         end
         return h
     end
+
     function OrderedDict(d::OrderedDict{K,V})
         if d.ndel > 0
             rehash!(d)
