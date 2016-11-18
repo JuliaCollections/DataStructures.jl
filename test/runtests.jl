@@ -25,7 +25,8 @@ tests = ["int_set",
          "trie",
          "list",
          "multi_dict",
-         "circular_buffer"]
+         "circular_buffer",
+         "sorting"]
 
 if length(ARGS) > 0
     tests = ARGS
