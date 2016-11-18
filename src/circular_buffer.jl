@@ -66,6 +66,5 @@ function Base.size(cb::CircularBuffer)
     (length(cb), size(cb.buffer)[2:end]...)
 end
 
-
 capacity(cb::CircularBuffer) = cb.capacity
 isfull(cb::CircularBuffer) = length(cb) == cb.capacity
