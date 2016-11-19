@@ -33,10 +33,10 @@ type OrderedDict{K,V} <: Associative{K,V}
         i = 0
         for (k,v) in kv
             i = i + 1
-            index = hashindex(k,slotsz)
+            index = ht_keyindex2(h, k)
             @inbounds h.keys[i] = k
             @inbounds h.vals[i] = v
-            @inbounds h.slots[index] = i
+            @inbounds h.slots[-index] = i
             end
         return h
     end
