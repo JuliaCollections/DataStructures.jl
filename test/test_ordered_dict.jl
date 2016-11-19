@@ -3,10 +3,10 @@
 @test isa(OrderedDict(), OrderedDict{Any,Any})
 @test isa(OrderedDict([(1,2.0)]), OrderedDict{Int,Float64})
 @test isa(OrderedDict([("a",1),("b",2)]), OrderedDict{Compat.ASCIIString,Int})
-@test isa(OrderedDict(Pair(1, 1.0)), OrderedDict{Int,Float64})
-@test isa(OrderedDict(Pair(1, 1.0), Pair(2, 2.0)), OrderedDict{Int,Float64})
-@test isa(OrderedDict(Pair(1, 1.0), Pair(2, 2.0), Pair(3, 3.0)), OrderedDict{Int,Float64})
-@test isa(OrderedDict([Pair(1, 1.0), Pair(2, 2.0), Pair(3, 3.0)]), OrderedDict{Int,Float64})
+@test isa(OrderedDict(1 => 1.0), OrderedDict{Int,Float64})
+@test isa(OrderedDict(1 => 1.0, 2 => 2.0), OrderedDict{Int,Float64})
+@test isa(OrderedDict(1 => 1.0, 2 => 2.0, 3 => 3.0), OrderedDict{Int,Float64})
+@test isa(OrderedDict([1 => 1.0, 2 => 2.0, 3 => 3.0]), OrderedDict{Int,Float64})
 
 # empty dictionary
 
