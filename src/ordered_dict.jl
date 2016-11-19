@@ -34,9 +34,9 @@ type OrderedDict{K,V} <: Associative{K,V}
         for (k,v) in kv
             i = i + 1
             index = hashindex(k,slotsz)
-            h.keys[i] = k
-            h.vals[i] = v
-            h.slots[index] = i
+            @inbounds h.keys[i] = k
+            @inbounds h.vals[i] = v
+            @inbounds h.slots[index] = i
             end
         return h
     end
