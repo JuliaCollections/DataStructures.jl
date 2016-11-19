@@ -2,11 +2,11 @@
 # OrderedDict
 
 import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
-setindex!, getindex, length, isempty, start,
-next, done, keys, values, setdiff, setdiff!,
-union, union!, intersect, filter, filter!,
-hash, eltype, KeyIterator, ValueIterator, convert, copy,
-merge
+             setindex!, getindex, length, isempty, start,
+             next, done, keys, values, setdiff, setdiff!,
+             union, union!, intersect, filter, filter!,
+             hash, eltype, KeyIterator, ValueIterator, convert, copy,
+             merge
 
 if VERSION >= v"0.5.0"
     import Base: HasLength, HasShape, SizeUnknown, iteratorsize
@@ -100,26 +100,26 @@ end
 
     dict_with_eltype{K,V}(kv, ::Type{Tuple{K,V}}) = OrderedDict{K,V}(kv, iteratorsize(kv))
     dict_with_eltype{K,V}(kv, ::Type{Pair{K,V}}) = OrderedDict{K,V}(kv, iteratorsize(kv))
-    dict_with_eltype(kv, t) = OrderedDict{Any,Any}(kv, iteratorsize(kv))
+    dict_with_eltype(kv,t) = OrderedDict{Any,Any}(kv, iteratorsize(kv))
 
 else
-    OrderedDict{K, V}(kv::Tuple{Vararg{Pair{K, V}}})         = OrderedDict{K, V}(kv)
+    OrderedDict{K,V}(kv::Tuple{Vararg{Pair{K, V}}})         = OrderedDict{K, V}(kv)
     OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})               = OrderedDict{K, Any}(kv)
     OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K), V}}})  = OrderedDict{Any, V}(kv)
     OrderedDict(kv::Tuple{Vararg{Pair}})                     = OrderedDict{Any, Any}(kv)
 
-    OrderedDict{K, V}(kv::AbstractArray{Tuple{K, V}}) = OrderedDict{K, V}(kv)
-    OrderedDict{K, V}(kv::AbstractArray{Pair{K, V}})  = OrderedDict{K, V}(kv)
-    OrderedDict{K, V}(kv::Associative{K, V})          = OrderedDict{K, V}(kv)
+    OrderedDict{K,V}(kv::AbstractArray{Tuple{K, V}}) = OrderedDict{K, V}(kv)
+    OrderedDict{K,V}(kv::AbstractArray{Pair{K, V}})  = OrderedDict{K, V}(kv)
+    OrderedDict{K,V}(kv::Associative{K, V})          = OrderedDict{K, V}(kv)
 
-    OrderedDict{K, V}(ps::Pair{K, V}...)          = OrderedDict{K, V}(ps)
+    OrderedDict{K,V}(ps::Pair{K, V}...)          = OrderedDict{K, V}(ps)
     OrderedDict{K}(ps::Pair{K}..., )              = OrderedDict{K, Any}(ps)
     OrderedDict{V}(ps::Pair{TypeVar(:K), V}..., ) = OrderedDict{Any, V}(ps)
     OrderedDict(ps::Pair...)                      = OrderedDict{Any, Any}(ps)
 
-    dict_with_eltype{K, V}(kv,  ::Type{Tuple{K, V}}) = OrderedDict{K, V}(kv)
-    dict_with_eltype{K, V}(kv,  ::Type{Pair{K, V}}) = OrderedDict{K, V}(kv)
-    dict_with_eltype(kv,  t) = OrderedDict{Any, Any}(kv)
+    dict_with_eltype{K,V}(kv,  ::Type{Tuple{K, V}}) = OrderedDict{K, V}(kv)
+    dict_with_eltype{K,V}(kv,  ::Type{Pair{K, V}}) = OrderedDict{K, V}(kv)
+    dict_with_eltype(kv,t) = OrderedDict{Any, Any}(kv)
 end
 
 similar{K,V}(d::OrderedDict{K,V}) = OrderedDict{K,V}()
