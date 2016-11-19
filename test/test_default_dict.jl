@@ -5,11 +5,12 @@
 # construction
 @test_throws ArgumentError DefaultDict()
 @test_throws ArgumentError DefaultDict(AbstractString, Int)
+@test_throws ArgumentError DefaultDict{AbstractString, Int}()
 
 @test isa(DefaultDict(0.0, 1 => 1.0), DefaultDict{Int,Float64,Float64})
 
 # empty dictionary
-d = DefaultDict(Char, Int, 1)
+d = DefaultDict{Char, Int}(1)
 @test length(d) == 0
 @test isempty(d)
 @test d['c'] == 1
@@ -65,10 +66,10 @@ s = similar(d)
 
 # construction
 @test_throws ArgumentError DefaultOrderedDict()
-@test_throws ArgumentError DefaultOrderedDict(AbstractString, Int)
+@test_throws ArgumentError DefaultOrderedDict{AbstractString, Int}()
 
 # empty dictionary
-d = DefaultOrderedDict(Char, Int, 1)
+d = DefaultOrderedDict{Char, Int}(1)
 @test length(d) == 0
 @test isempty(d)
 @test d['c'] == 1
