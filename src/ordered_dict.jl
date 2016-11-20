@@ -30,14 +30,20 @@ type OrderedDict{K,V} <: Associative{K,V}
     function OrderedDict(kv)
         (n, slotsz) = get_n_slotsz(kv)
         h = new(zeros(Int32,slotsz), Array(K,n), Array(V,n), 0, false)
-        i = 0
-        for (k,v) in kv
-            i = i + 1
-            index = ht_keyindex2(h, k)
-            @inbounds h.keys[i] = k
-            @inbounds h.vals[i] = v
-            @inbounds h.slots[-index] = i
+        if n > 0
+            i = 0
+            for (k,v) in kv
+                i = i + 1
+                index = ht_keyindex2(h, k)
+                @inbounds h.keys[i] = k
+                @inbounds h.vals[i] = v
+                @inbounds h.slots[-index] = i
             end
+        else # Unknown length
+            for (k,v) in kv
+                h[k] = v
+            end
+        end
         return h
     end
     
@@ -71,7 +77,7 @@ function OrderedDict(kv)
     end
 end
 
-@static if VERSION >= v"0.5.0"
+if VERSION >= v"0.5.0"
     get_n_slotsz(kv) = get_n_slotsz(kv, iteratorsize(kv))
     get_n_slotsz(kv, isz::SizeUnknown) = (0, 16)
     function get_n_slotsz(kv, isz::Union{HasLength, HasShape})
