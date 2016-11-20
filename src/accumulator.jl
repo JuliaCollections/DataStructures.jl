@@ -1,6 +1,6 @@
 # A counter type
 
-immutable Accumulator{T, V<:Number} <: Associative{K,V}
+immutable Accumulator{T, V<:Number} <: Associative{T,V}
     map::Dict{T,V}
 end
 
