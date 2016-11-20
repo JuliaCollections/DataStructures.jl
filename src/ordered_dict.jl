@@ -77,7 +77,7 @@ function OrderedDict(kv)
     end
 end
 
-if VERSION >= v"0.5.0"
+@static if VERSION >= v"0.5.0"
     get_n_slotsz(kv) = get_n_slotsz(kv, iteratorsize(kv))
     get_n_slotsz(kv, isz::SizeUnknown) = (0, 16)
     function get_n_slotsz(kv, isz::Union{HasLength, HasShape})
