@@ -33,11 +33,16 @@ type OrderedDict{K,V} <: Associative{K,V}
         if n > 0
             i = 0
             for (k,v) in kv
-                i = i + 1
                 index = ht_keyindex2(h, k)
-                @inbounds h.keys[i] = k
-                @inbounds h.vals[i] = v
-                @inbounds h.slots[-index] = i
+                if index < 0 # new key
+                    i = i + 1
+                    @inbounds h.keys[i] = k
+                    @inbounds h.vals[i] = v
+                    @inbounds h.slots[-index] = i
+                else # duplicate key, shrink by one
+                    @inbounds h.vals[index] = v
+                    h.ndel = h.ndel + 1
+                end
             end
         else # Unknown length
             for (k,v) in kv

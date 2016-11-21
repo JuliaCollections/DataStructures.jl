@@ -8,6 +8,11 @@
 @test isa(OrderedDict(1 => 1.0, 2 => 2.0, 3 => 3.0), OrderedDict{Int,Float64})
 @test isa(OrderedDict([1 => 1.0, 2 => 2.0, 3 => 3.0]), OrderedDict{Int,Float64})
 
+# construction with duplicate keys
+x = OrderedDict( "a" => 4, "b" => 5, "c" => 6, "b" => 12, "c" => 44 )
+@test x.keys == ["a", "b", "c"]
+@test x.vals == [4, 12, 44]
+
 # empty dictionary
 
 d = OrderedDict{Char, Int}()
