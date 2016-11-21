@@ -41,7 +41,9 @@ type OrderedDict{K,V} <: Associative{K,V}
                     @inbounds h.slots[-index] = i
                 else # duplicate key, shrink by one
                     @inbounds h.vals[index] = v
-                    h.ndel = h.ndel + 1
+                    n = n - 1
+                    resize!(h.keys, n)
+                    resize!(h.vals, n)
                 end
             end
         else # Unknown length
