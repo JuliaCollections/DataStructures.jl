@@ -99,6 +99,9 @@ module DataStructures
     export status
     export deref_key, deref_value, deref, advance, regress
 
+    export RedBlackTree
+    include("redBlackTree.jl")
+
     @deprecate iter(s::Stack) s
     @deprecate iter(q::Queue) q
 end
