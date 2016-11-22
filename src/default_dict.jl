@@ -26,7 +26,6 @@ immutable DefaultDictBase{K,V,F,D} <: Associative{K,V}
 
     DefaultDictBase(x::F, d::DefaultDictBase) = (check_D(D,K,V); DefaultDictBase(x, d.d))
     DefaultDictBase(x::F, d::D=D()) = (check_D(D,K,V); new(x, d))
-    DefaultDictBase(x, ks, vs) = (check_D(D,K,V); new(x, D(ks,vs)))
 end
 
 # Constructors
@@ -34,17 +33,14 @@ end
 DefaultDictBase() = throw(ArgumentError("no default specified"))
 DefaultDictBase(k,v) = throw(ArgumentError("no default specified"))
 
-# TODO: these mimic similar Dict constructors, but may not be needed
-DefaultDictBase{K,V,F}(default::F, ks::AbstractArray{K}, vs::AbstractArray{V}) =
-    DefaultDictBase{K,V,F,Dict{K,V}}(default,ks,vs)
-DefaultDictBase{F}(default::F,ks,vs) = DefaultDictBase{Any,Any,F,Dict}(default, ks, vs)
-
 # syntax entry points
-DefaultDictBase{F}(default::F) = DefaultDictBase{Any,Any,F,Dict}(default)
-DefaultDictBase{K,V,F}(::Type{K}, ::Type{V}, default::F) = DefaultDictBase{K,V,F,Dict}(default)
-DefaultDictBase{K,V,F}(default::F, kv::AbstractArray{Tuple{K,V}}) = DefaultDictBase{K,V,F,Dict}(default, kv)
-DefaultDictBase{K,V,F}(default::F, ps::Pair{K,V}...) = DefaultDictBase{K,V,F,Dict}(default, ps...)
-DefaultDictBase{F,D<:Associative}(default::F, d::D) = ((K,V)=eltype(d); DefaultDictBase{K,V,F,D}(default, d))
+DefaultDictBase{F}(default::F) = DefaultDictBase{Any,Any,F,Dict{Any,Any}}(default)
+DefaultDictBase{K,V,F}(default::F, kv::AbstractArray{Tuple{K,V}}) = DefaultDictBase{K,V,F,Dict{K,V}}(default, kv)
+DefaultDictBase{K,V,F}(default::F, ps::Pair{K,V}...) = DefaultDictBase{K,V,F,Dict{K,V}}(default, ps...)
+DefaultDictBase{F,D<:Associative}(default::F, d::D) = (K=keytype(d); V=valtype(d); DefaultDictBase{K,V,F,D}(default, d))
+
+# Constructor for DefaultDictBase{Int,Float64}(0.0)
+@compat (::Type{DefaultDictBase{K,V}}){K,V,F}(default::F) = DefaultDictBase{K,V,F,Dict{K,V}}(default)
 
 # Functions
 
@@ -77,7 +73,6 @@ for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Order
             $DefaultDict(x, d::$DefaultDict) = $DefaultDict(x, d.d)
             $DefaultDict(x, d::HashDict) = new(DefaultDictBase{K,V,F,HashDict{K,V,$O}}(x, d))
             $DefaultDict(x) = new(DefaultDictBase{K,V,F,HashDict{K,V,$O}}(x))
-            $DefaultDict(x, ks, vs) = new(DefaultDictBase{K,V,F,HashDict{K,V,$O}}(x,ks,vs))
         end
 
         ## Constructors
@@ -85,17 +80,16 @@ for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Order
         $DefaultDict() = throw(ArgumentError("$DefaultDict: no default specified"))
         $DefaultDict(k,v) = throw(ArgumentError("$DefaultDict: no default specified"))
 
-        # TODO: these mimic similar Dict constructors, but may not be needed
-        $DefaultDict{K,V,F}(default::F, ks::AbstractArray{K}, vs::AbstractArray{V}) = $DefaultDict{K,V,F}(default,ks,vs)
-        $DefaultDict{F}(default::F,ks,vs) = $DefaultDict{Any,Any,F}(default, ks, vs)
-
         # syntax entry points
         $DefaultDict{F}(default::F) = $DefaultDict{Any,Any,F}(default)
-        $DefaultDict{K,V,F}(::Type{K}, ::Type{V}, default::F) = $DefaultDict{K,V,F}(default)
         $DefaultDict{K,V,F}(default::F, kv::AbstractArray{Tuple{K,V}}) = $DefaultDict{K,V,F}(default, kv)
         $DefaultDict{K,V,F}(default::F, ps::Pair{K,V}...) = $DefaultDict{K,V,F}(default, ps...)
 
         $DefaultDict{F}(default::F, d::Associative) = ((K,V)= (Base.keytype(d), Base.valtype(d)); $DefaultDict{K,V,F}(default, HashDict(d)))
+
+        # Constructor syntax: DefaultDictBase{Int,Float64}(default)
+        @compat (::Type{$DefaultDict{K,V}}){K,V}() = throw(ArgumentError("$DefaultDict: no default specified"))
+        @compat (::Type{$DefaultDict{K,V}}){K,V,F}(default::F) = $DefaultDict{K,V,F}(default)
 
         ## Functions
 
@@ -111,7 +105,7 @@ for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Order
 end
 
 
-## If/when a SortedDict becomes available, this should be uncommented to provide a DefaultSortedDict
+## This should be uncommented to provide a DefaultSortedDict
 
 # immutable DefaultSortedDict{K,V,F} <: Associative{K,V}
 #     d::DefaultDictBase{K,V,F,SortedDict{K,V}}
