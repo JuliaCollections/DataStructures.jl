@@ -751,7 +751,12 @@ Other Functions
   also be applied to the type itself.
   Time: O(1)
 
-
+``ordtype(sc)``
+  Returns the order type
+  for SortedDict, SortedMultiDict and SortedSet.
+  This function may
+  also be applied to the type itself.
+  Time: O(1)
 
 ``similar(sc)``
   Returns a new SortedDict, SortedMultiDict, or SortedSet

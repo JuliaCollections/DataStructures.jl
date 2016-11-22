@@ -162,6 +162,8 @@ end
 @inline keytype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) = K
 @inline valtype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) = D
 @inline valtype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) = D
+@inline ordtype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) = Ord
+@inline ordtype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) = Ord
 @inline orderobject(m::SortedMultiDict) = m.bt.ord
 
 @inline function haskey(m::SortedMultiDict, k_)

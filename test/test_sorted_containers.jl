@@ -465,7 +465,8 @@ function test2()
     @test vt == Float64
     vt2 = valtype(typeof(m1))
     @test vt2 == Float64
-
+    @test ordtype(m1) == ForwardOrdering
+    @test ordtype(typeof(m1)) == ForwardOrdering
 
     co = orderobject(m1)
     @test co == Forward
@@ -1186,7 +1187,8 @@ function test5()
     m3empty = similar(m3)
     @test eltype(m3empty) == Pair{Compat.ASCIIString, Int} &&
        orderobject(m3empty) == CaseInsensitive() &&
-       length(m3empty) == 0
+       length(m3empty) == 0 && ordtype(m3empty) == CaseInsensitive &&
+       ordtype(typeof(m3empty)) == CaseInsensitive
     m4 = SortedDict((Dict{Compat.ASCIIString,Int}()), Lt((x,y) -> isless(lowercase(x),lowercase(y))))
     for j = 1 : 6
         m4[keylist[j]] = vallist[j]
@@ -1350,6 +1352,8 @@ function test7()
     @test keytype(typeof(factors)) == Int
     @test valtype(factors) == Int
     @test valtype(typeof(factors)) == Int
+    @test ordtype(factors) == ForwardOrdering
+    @test ordtype(typeof(factors)) == ForwardOrdering
 
     push_test!(factors, 70,3)
     @test length(factors) == len+1
@@ -1600,6 +1604,8 @@ function test8()
     @test keytype(m) == Float64
     @test keytype(typeof(m)) == Float64
     @test orderobject(m) == Forward
+    @test ordtype(m) == ForwardOrdering
+    @test ordtype(typeof(m)) == ForwardOrdering
     pop!(m, smallest)
     checkcorrectness(m.bt, false)
     @test length(m) == N - dcount - 1
