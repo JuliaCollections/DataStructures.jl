@@ -53,7 +53,7 @@ type OrderedDict{K,V} <: Associative{K,V}
         end
         return h
     end
-    
+
     function OrderedDict(d::OrderedDict{K,V})
         if d.ndel > 0
             rehash!(d)
