@@ -13,6 +13,15 @@ x = OrderedDict( "a" => 4, "b" => 5, "c" => 6, "b" => 12, "c" => 44 )
 @test x.keys == ["a", "b", "c"]
 @test x.vals == [4, 12, 44]
 
+# test for JuliaLang/julia#15077
+l = 300
+x = [ (string( "foo", i ), i) for i in 1:l ]
+d = OrderedDict(x)
+@test length(d) == l
+for (k,v) in x
+    @test haskey(d,k) == true
+end
+
 # empty dictionary
 
 d = OrderedDict{Char, Int}()
