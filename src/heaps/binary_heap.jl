@@ -138,6 +138,7 @@ function push!{T}(h::BinaryHeap{T}, v::T)
     valtree = h.valtree
     push!(valtree, v)
     _heap_bubble_up!(h.comparer, valtree, length(valtree))
+    h
 end
 
 
