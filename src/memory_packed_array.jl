@@ -1,5 +1,5 @@
 ## This file implements memory-packed arrays
-## The array is goint to be used to implement cache-oblivious trees
+## The array is going to be used to implement cache-oblivious B-trees
 
 
 ## Functions simplifing notation: 
@@ -19,7 +19,7 @@
 ##	pd - density lower threshold for leaves
 ## 	td - density upper threashold for leaves
 ##	thresholds should satisfy:
-##	0 < pd < p0 < to < td = 1 
+##	pd < p0 < t0 < td = 1 
 ##
 
 ##	exists - flags indicating whether a coresponding 
@@ -46,7 +46,7 @@ type MemoryPackedArray{D}
 	end
 end
 
-## Scans the entire segment,
+## Scans the segment,
 ##	from - start of the segment (inclusive) 
 ##	to - end of the segment (exclusive)
 ##	returns: number of elements in the segment
@@ -55,9 +55,9 @@ function scan{D}(A::MemoryPackedArray{D},from::Int,to::Int)
 	sum(A.exists[from:(to-1)]);	
 end
 
-## Checks if a segment is within a threashold
+## Checks if a segment is within a threshold
 ##	left - start of the segment (inclusive)
-##	right - end of the segemnt (exclusive)
+##	right - end of the segment (exclusive)
 ##	number_of_elements - number of elements in segment
 ##	k - height of the tree corresponding to given segment 
 ##	returns: true if segemnt is within threshold, false otherwise
@@ -95,8 +95,8 @@ end
 function extend!{D}(A::MemoryPackedArray{D})
 	local taken=0;
 	local size = A.size*2;
-	store = Array(D,size);
-	exists::Array{Bool,1} = zeros(size);
+	local store = Array(D,size);
+	local exists::Array{Bool,1} = zeros(size);
 	for i in 1:A.size
 		if A.exists[i]
 			taken = taken+1;
@@ -117,8 +117,8 @@ end
 function extend!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 	local taken=0;
 	local size = A.size*2;
-	store = Array(D,size);
-	exists::Array{Bool,1} = zeros(size);
+	local store = Array(D,size);
+	local exists::Array{Bool,1} = zeros(size);
 	for i in 1:A.size
 		if A.exists[i]
 			taken = taken+1;
@@ -207,35 +207,37 @@ end
 ##	left - start of the segment (inclusive)
 ##	right - left of the segment (exlusive)
 ##	number_of_elements - number of elements in the segment
-##	index - the index where to insert the element
+##	index - the index after which insert the element
 ##	element - the element to be inserted 
 function rebalance!{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_elements::Int,index::Int,element::D)
 	local gap = (right-left)/(number_of_elements+1);
 	local j = right-1;
 	local i = right-1;
-	local k::Int;
+	local k = 0;
 	local p = 1;
 	
 	while i>=left
+		if i==index
+			k = j+1;
+		end
 		if A.exists[i]
 			A.store[j] = A.store[i];
 			j = j-1;
-		end
-		if i==index
-			k = j+1;
 		end
 		A.exists[i] = false;
 		i = i-1;
 	end
 
-	
+	k = max(1,k);
 	i = left+floor(Int,p*gap)-1;
 	p = p+1;
 	
 	
-	if j==right-1
+	if j==right-1 
+##	No elements in this segemnt, place at index
 		A.store[index] = element;
 		A.exists[index] = true;
+		println("HERE1");
 	else
 		j = j+1; 
 		while i<right && j<k
@@ -303,10 +305,10 @@ end
 
 
 ## Inserts element at given index
-##	index - the index where to insert. 
+##	index - the index after which to insert. 
 ##	Note: 	The index indicates only after which elements insert the new element,
-##		the rebalancing procedure may change the real position of the element, 
-##		but it preserves the ordering
+##		due to rebalancing the real position of the element may differ from index, 
+##		but the ordering is preserved
 ##	element - the element to be inserted.   
 function insert!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 
@@ -315,6 +317,9 @@ function insert!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 
 
 	local segment_position = ceil(Int,index/A.segment_size);
+
+	segment_position = max(segment_position,1);
+	
 	local right = segment_position*A.segment_size+1;
 	local left = right-A.segment_size;
 	local number_of_elements = scan(A,left,right);
@@ -322,9 +327,11 @@ function insert!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 	local seg_size = A.segment_size;
 	local k = 0;
 
-	if (index<A.size && in_threshold(A,left,right,number_of_elements,k) && A.exists[index]==false)
-		A.exists[index] = true;
-		A.store[index] = element;
+
+	if (index<A.size && in_threshold(A,left,right,number_of_elements,k) && A.exists[index+1]==false)
+		A.exists[index+1] = true;
+		A.store[index+1] = element;
+		println("HERE2");
 		return	
 	end
 
