@@ -26,7 +26,8 @@ tests = ["int_set",
          "list",
          "multi_dict",
          "circular_buffer",
-         "sorting"]
+         "sorting",
+         "priorityqueue"]
 
 if length(ARGS) > 0
     tests = ARGS

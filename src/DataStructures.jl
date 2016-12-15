@@ -98,6 +98,10 @@ module DataStructures
     export status
     export deref_key, deref_value, deref, advance, regress
 
+    export PriorityQueue, peek
+
+    include("priorityqueue.jl")
+
     # Deprecations
 
     # Remove when Julia 0.6 is released
