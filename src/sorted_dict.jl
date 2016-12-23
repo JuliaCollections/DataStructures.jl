@@ -1,80 +1,101 @@
 ## A SortedDict is a wrapper around balancedTree with
 ## methods similiar to those of Julia container Dict.
 
-
 type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
     bt::BalancedTree23{K,D,Ord}
 
-## Zero-argument constructor, or possibly one argument to specify order.
+    ## Base constructors
 
-    function SortedDict(o::Ord=Forward)
-        bt1 = BalancedTree23{K,D,Ord}(o)
-        new(bt1)
+    SortedDict(o::Ord) = new(BalancedTree23{K,D,Ord}(o))
+
+    function SortedDict(o::Ord, kv)
+        s = new(BalancedTree23{K,D,Ord}(o))
+
+        if eltype(kv) <: Pair
+            # It's (possibly?) more efficient to access the first and second
+            # elements of Pairs directly, rather than destructure
+            for p in kv
+                s[p.first] = p.second
+            end
+        else
+            for (k,v) in kv
+                s[k] = v
+            end
+        end
+        return s
     end
 
 end
 
-## external constructor to take an associative and infer
-## argument types
+# Any-Any constructors
+SortedDict() = SortedDict{Any,Any,ForwardOrdering}(Forward)
+SortedDict{Ord <: Ordering}(o::Ord) = SortedDict{Any,Any,Ord}(o)
 
-function SortedDict{K, D, Ord <: Ordering}(d::Associative{K,D}, o::Ord=Forward)
-    h = SortedDict{K,D,Ord}(o)
-    for (k,v) in d
-        h[k] = v
-    end
-    h
+function not_iterator_of_pairs(kv)
+    return any(x->isempty(methodswith(typeof(kv), x, true)),
+               [start, next, done]) ||
+           any(x->!isa(x, Union{Tuple,Pair}), kv)
 end
 
+# Construction from Pairs
+# TODO: fix SortedDict(1=>1, 2=>2.0)
+SortedDict(ps::Pair...) = SortedDict(Forward, ps)
+SortedDict(o::Ordering, ps::Pair...) = SortedDict(o, ps)
+@compat (::Type{SortedDict{K,D}}){K,D}(ps::Pair...) = SortedDict{K,D,ForwardOrdering}(Forward, ps)
+@compat (::Type{SortedDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, ps::Pair...) = SortedDict{K,D,Ord}(o, ps)
 
+# Construction from Associatives
+SortedDict{K,D,Ord<:Ordering}(o::Ord, d::Associative{K,D}) = SortedDict{K,D,Ord}(o, d)
 
-## More constructors based on those in dict.jl:
-## Take pairs and infer argument
-## types.  Note:  this works only for the Forward ordering.
+## Construction from iteratables of Pairs/Tuples
 
-function SortedDict{K,D}(ps::Pair{K,D}...)
-    h = SortedDict{K,D,ForwardOrdering}()
-    for p in ps
-        h[p.first] = p.second
+# Construction specifying Key/Value types
+# e.g., SortedDict{Int,Float64}([1=>1, 2=>2.0])
+@compat (::Type{SortedDict{K,D}}){K,D}(kv) = SortedDict{K,D}(Forward, kv)
+@compat function (::Type{SortedDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, kv)
+    try
+        SortedDict{K,D,Ord}(o, kv)
+    catch e
+        if not_iterator_of_pairs(kv)
+            throw(ArgumentError("SortedDict(kv): kv needs to be an iterator of tuples or pairs"))
+        else
+            rethrow(e)
+        end
     end
-    h
 end
 
-
-## Take pairs and infer argument
-## types.  Ordering parameter must be explicit first argument.
-
-
-function SortedDict{K,D, Ord <: Ordering}(o::Ord, ps::Pair{K,D}...)
-    h = SortedDict{K,D,Ord}(o)
-    for p in ps
-        h[p.first] = p.second
+# Construction inferring Key/Value types from input
+# e.g. SortedDict{}
+SortedDict(kv, o::Ordering=Forward) = SortedDict(o, kv)
+function SortedDict(o::Ordering, kv)
+    try
+        _sorted_dict_with_eltype(o, kv, eltype(kv))
+    catch e
+        if not_iterator_of_pairs(kv)
+            throw(ArgumentError("SortedDict(kv): kv needs to be an iterator of tuples or pairs"))
+        else
+            rethrow(e)
+        end
     end
-    h
 end
 
-## This one takes an iterable; ordering type is optional.
+_sorted_dict_with_eltype{K,D,Ord}(o::Ord, ps, ::Type{Pair{K,D}}) = SortedDict{  K,  D,Ord}(o, ps)
+_sorted_dict_with_eltype{K,D,Ord}(o::Ord, kv, ::Type{Tuple{K,D}}) = SortedDict{  K,  D,Ord}(o, kv)
+_sorted_dict_with_eltype{K,  Ord}(o::Ord, ps, ::Type{Pair{K}}  ) = SortedDict{  K,Any,Ord}(o, ps)
+_sorted_dict_with_eltype{    Ord}(o::Ord, kv, ::Type            ) = SortedDict{Any,Any,Ord}(o, kv)
 
-SortedDict{Ord <: Ordering}(kv, o::Ord=Forward) =
-sorteddict_with_eltype(kv, eltype(kv), o)
-
-function sorteddict_with_eltype{K,D,Ord}(kv, ::Type{Pair{K,D}}, o::Ord)
-    h = SortedDict{K,D,Ord}(o)
-    for (k,v) in kv
-        h[k] = v
-    end
-    h
-end
-
-
-
+## TODO: It seems impossible (or at least very challenging) to create the eltype below.
+##       If deemed possible, please create a test and uncomment this definition.
+# if VERSION < v"0.6.0-dev.2123"
+#     _sorted_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{TypeVar(:K),D}}) = SortedDict{Any,  D,Ord}(o, ps)
+# else
+#     eval(parse("_sorted_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,D} where K}) = SortedDict{Any,  D,Ord}(o, ps)"))
+# end
 
 
 typealias SDSemiToken IntSemiToken
 
 typealias SDToken Tuple{SortedDict,IntSemiToken}
-
-
-
 
 ## This function implements m[k]; it returns the
 ## data item associated with key k.
@@ -97,8 +118,8 @@ end
 ## push! is an alternative to insert!; it returns the container.
 
 
-@inline function push!{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, pr::Pair{K,D})
-    insert!(m.bt, convert(K,pr[1]), convert(D,pr[2]), false)
+@inline function push!{K,D}(m::SortedDict{K,D}, pr::Pair)
+    insert!(m.bt, convert(K, pr[1]), convert(D, pr[2]), false)
     m
 end
 
@@ -290,4 +311,4 @@ end
 
 
 similar{K,D,Ord<:Ordering}(m::SortedDict{K,D,Ord}) =
-SortedDict{K,D,Ord}(orderobject(m))
+    SortedDict{K,D,Ord}(orderobject(m))
