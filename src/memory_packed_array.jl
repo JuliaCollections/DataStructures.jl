@@ -234,10 +234,9 @@ function rebalance!{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_el
 	
 	
 	if j==right-1 
-##	No elements in this segemnt, place at index
+##	No elements in this segment, place at index
 		A.store[index] = element;
 		A.exists[index] = true;
-		println("HERE1");
 	else
 		j = j+1; 
 		while i<right && j<k
@@ -316,10 +315,7 @@ function insert!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 ##	Right - right border of the segement conatining element at "index", exclusive
 
 
-	local segment_position = ceil(Int,index/A.segment_size);
-
-	segment_position = max(segment_position,1);
-	
+	local segment_position = max(ceil(Int,index/A.segment_size),1);
 	local right = segment_position*A.segment_size+1;
 	local left = right-A.segment_size;
 	local number_of_elements = scan(A,left,right);
@@ -331,7 +327,6 @@ function insert!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 	if (index<A.size && in_threshold(A,left,right,number_of_elements,k) && A.exists[index+1]==false)
 		A.exists[index+1] = true;
 		A.store[index+1] = element;
-		println("HERE2");
 		return	
 	end
 
