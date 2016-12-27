@@ -278,8 +278,6 @@ function delete!{D}(A::MemoryPackedArray{D},index::Int)
 	local number_of_elements = scan(A,left,right);
 	local leaf_depth = log2(A.number_of_segments);
 	local seg_size = A.segment_size;
-
-	println(seg_size," ",right-left);
 	
 	local k = 0;
 
