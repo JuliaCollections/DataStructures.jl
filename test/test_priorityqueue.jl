@@ -1,6 +1,4 @@
-# This file is a part of Julia. License is MIT: http://julialang.org/license
-
-using Base.Collections
+# This was formerly a part of Julia. License is MIT: http://julialang.org/license
 
 # Test dequeing in sorted order.
 function test_issorted!(pq::PriorityQueue, priorities)
