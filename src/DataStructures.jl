@@ -9,7 +9,7 @@ module DataStructures
                  in, haskey, keys, merge, copy, cat,
                  push!, pop!, shift!, unshift!, insert!,
                  union!, delete!, similar, sizehint!,
-                 isequal, hash,
+                 isequal, hash, copymutable,
                  map, reverse,
                  first, last, eltype, getkey, values, sum,
                  merge, merge!, lt, Ordering, ForwardOrdering, Forward,
@@ -17,7 +17,6 @@ module DataStructures
                  isless,
                  union, intersect, symdiff, setdiff, issubset,
                  find, searchsortedfirst, searchsortedlast, endof, in
-
 
     export Deque, Stack, Queue, CircularDeque
     export deque, enqueue!, dequeue!, update!, reverse_iter
@@ -33,6 +32,7 @@ module DataStructures
     export AbstractHeap, compare, extract_all!
     export BinaryHeap, binary_minheap, binary_maxheap, nlargest, nsmallest
     export MutableBinaryHeap, mutable_binary_minheap, mutable_binary_maxheap
+    export heapify!, heapify, heappop!, heappush!, isheap
 
     export OrderedDict, OrderedSet
     export DefaultDict, DefaultOrderedDict
