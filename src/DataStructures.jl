@@ -9,7 +9,7 @@ module DataStructures
                  in, haskey, keys, merge, copy, cat,
                  push!, pop!, shift!, unshift!, insert!,
                  union!, delete!, similar, sizehint!,
-                 isequal, hash, copymutable,
+                 isequal, hash,
                  map, reverse,
                  first, last, eltype, getkey, values, sum,
                  merge, merge!, lt, Ordering, ForwardOrdering, Forward,
