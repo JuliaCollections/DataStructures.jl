@@ -18,7 +18,6 @@ module DataStructures
                  union, intersect, symdiff, setdiff, issubset,
                  find, searchsortedfirst, searchsortedlast, endof, in
 
-
     export Deque, Stack, Queue, CircularDeque
     export deque, enqueue!, dequeue!, update!, reverse_iter
     export capacity, num_blocks, front, back, top, sizehint!
@@ -33,6 +32,7 @@ module DataStructures
     export AbstractHeap, compare, extract_all!
     export BinaryHeap, binary_minheap, binary_maxheap, nlargest, nsmallest
     export MutableBinaryHeap, mutable_binary_minheap, mutable_binary_maxheap
+    export heapify!, heapify, heappop!, heappush!, isheap
 
     export OrderedDict, OrderedSet
     export DefaultDict, DefaultOrderedDict
@@ -97,6 +97,10 @@ module DataStructures
 
     export status
     export deref_key, deref_value, deref, advance, regress
+
+    export PriorityQueue, peek
+
+    include("priorityqueue.jl")
 
     # Deprecations
 
