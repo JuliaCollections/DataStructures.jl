@@ -1,4 +1,5 @@
-using DataStructures
+using DataStructures, Compat
+using Compat: String
 if VERSION >= v"0.5.0-dev+7720"
     using Base.Test
 else
@@ -29,9 +30,9 @@ end
     @test back(D) === 5
     io = IOBuffer()
     print(io, Int)
-    intstr = takebuf_string(io)
+    intstr = String(take!(io))
     print(io, D)
-    @test takebuf_string(io) == "CircularDeque{$intstr}([2,3,4,5])"
+    @test String(take!(io)) == "CircularDeque{$intstr}([2,3,4,5])"
     push!(D, 6)
     @test front(D) === 2
     @test back(D) === 6
