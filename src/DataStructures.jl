@@ -67,6 +67,7 @@ module DataStructures
     include("heaps.jl")
 
     include("dict_support.jl")
+    include("hash_dict.jl")
     include("ordered_dict.jl")
     include("ordered_set.jl")
     include("default_dict.jl")
