@@ -78,6 +78,11 @@ end
     empty!(D)
     unshift!(D, 40)
     @test front(D) == back(D) == 40
+
+    # Test iteration over loop
+    D = CircularDeque{Int}(5)
+    for i in 1:5 push!(D, i) end
+    @test collect(i for i in D) == collect(1:5)
 end
 
 nothing
