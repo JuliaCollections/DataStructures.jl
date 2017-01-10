@@ -80,6 +80,11 @@ end
     ret
 end
 
+# Iteration via getindex
+Base.start(d::CircularDeque) = 1
+Base.next(d::CircularDeque, i) = (d[i], i+1)
+Base.done(d::CircularDeque, i) = i == length(d) + 1
+
 function Base.show{T}(io::IO, D::CircularDeque{T})
     print(io, "CircularDeque{$T}([")
     for i = 1:length(D)
