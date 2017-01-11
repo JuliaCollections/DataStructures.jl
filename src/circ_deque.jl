@@ -70,15 +70,25 @@ end
     v
 end
 
-@inline function Base.getindex(D::CircularDeque, i::Integer)
-    @compat @boundscheck 1 <= i <= D.n || throw(BoundsError())
+# getindex sans bounds checking
+@inline function _unsafe_getindex(D::CircularDeque, i::Integer)
     j = D.first + i - 1
     if j > D.capacity
         j -= D.capacity
     end
     @inbounds ret = D.buffer[j]
-    ret
+    return ret
 end
+
+@inline function Base.getindex(D::CircularDeque, i::Integer)
+    @compat @boundscheck 1 <= i <= D.n || throw(BoundsError())
+    return _unsafe_getindex(D, i)
+end
+
+# Iteration via getindex
+@inline Base.start(d::CircularDeque) = 1
+@inline Base.next(d::CircularDeque, i) = (_unsafe_getindex(d, i), i+1)
+@inline Base.done(d::CircularDeque, i) = i == d.n + 1
 
 function Base.show{T}(io::IO, D::CircularDeque{T})
     print(io, "CircularDeque{$T}([")
