@@ -43,6 +43,17 @@ function Base.push!(cb::CircularBuffer, data)
     cb
 end
 
+function Base.unshift!(cb::CircularBuffer, data)
+    # if full, decrement and overwrite, otherwise unshift
+    if length(cb) == cb.capacity
+        cb.first = (cb.first == 1 ? cb.capacity : cb.first - 1)
+        cb[1] = data
+    else
+        unshift!(cb.buffer, data)
+    end
+    cb
+end
+
 function Base.append!(cb::CircularBuffer, datavec::AbstractVector)
     # push at most `capacity` items
     n = length(datavec)
