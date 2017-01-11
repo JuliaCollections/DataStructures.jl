@@ -44,7 +44,8 @@ end
     @test convert(Array, cb) == Int[4,5,999,7,8]
 
     # Test unshift
-    for i in 1:5
+    cb = CircularBuffer{Int}(5)  # New, empty one for full test coverage
+    for i in -5:5
         unshift!(cb, i)
     end
     arr = convert(Array, cb)
