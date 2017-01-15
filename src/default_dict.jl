@@ -48,6 +48,7 @@ DefaultDictBase{F,D<:Associative}(default::F, d::D) = (K=keytype(d); V=valtype(d
 @delegate DefaultDictBase.d [ get, haskey, getkey, pop!,
                               start, done, next, isempty, length ]
 
+# Some functions are delegated, but then need to return the main dictionary
 # NOTE: push! is not included below, because the fallback version just
 #       calls setindex!
 @delegate_return_parent DefaultDictBase.d [ delete!, empty!, setindex!, sizehint! ]
@@ -113,9 +114,23 @@ for _Dict in [:Dict, :OrderedDict]
                                    getkey, pop!, start, next,
                                    done, isempty, length ]
 
+        # Some functions are delegated, but then need to return the main dictionary
         # NOTE: push! is not included below, because the fallback version just
         #       calls setindex!
         @delegate_return_parent $DefaultDict.d [ delete!, empty!, setindex!, sizehint! ]
+
+        # NOTE: The second and third definition of push! below are only
+        # necessary for disambiguating with the fourth, fifth, and sixth
+        # definitions of push! below.
+        # If these are removed, the second and third definitions can be
+        # removed as well.
+        push!(d::$DefaultDict, p::Pair) = (setindex!(d.d, p.second, p.first); d)
+        push!(d::$DefaultDict, p::Pair, q::Pair) = push!(push!(d, p), q)
+        push!(d::$DefaultDict, p::Pair, q::Pair, r::Pair...) = push!(push!(push!(d, p), q), r...)
+
+        push!(d::$DefaultDict, p) = (setindex!(d.d, p[2], p[1]); d)
+        push!(d::$DefaultDict, p, q) = push!(push!(d, p), q)
+        push!(d::$DefaultDict, p, q, r...) = push!(push!(push!(d, p), q), r...)
 
         similar{K,V,F}(d::$DefaultDict{K,V,F}) = $DefaultDict{K,V,F}(d.d.default)
         in{T<:$DefaultDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
