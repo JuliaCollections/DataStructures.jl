@@ -59,6 +59,17 @@ next{T<:DefaultDictBase}(v::Base.ValueIterator{T}, i) = (v.dict.d.vals[i], Base.
 
 getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 
+const _K = TypeVar(:K)
+const _V = TypeVar(:V)
+
+function getindex{F<:Base.Callable}(d::DefaultDictBase{_K,_V,F}, key)
+    return get!(d.d, key) do
+        d.default()
+    end
+end
+
+
+
 ################
 
 # Here begins the actual definition of the DefaultDict and
