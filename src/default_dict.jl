@@ -4,7 +4,7 @@
 # DefaultDictBase is the main class used to in Default*Dicts.
 #
 # Each related (immutable) Default*Dict class contains a single
-# DefautlDictBase object as a member, and delegates almost all
+# DefaultDictBase object as a member, and delegates almost all
 # functions to this object.
 #
 # The main rationale for doing this instead of using type aliases is
@@ -66,16 +66,17 @@ getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 # wrappers around a DefaultDictBase object, and delegate all functions
 # to that object
 
-for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Ordered)]
+for _Dict in [:Dict, :OrderedDict]
+    DefaultDict = Symbol("Default"*string(_Dict))
     @eval begin
         immutable $DefaultDict{K,V,F} <: Associative{K,V}
-            d::DefaultDictBase{K,V,F,HashDict{K,V,$O}}
+            d::DefaultDictBase{K,V,F,$_Dict{K,V}}
 
-            $DefaultDict(x, ps::Pair{K,V}...) = new(DefaultDictBase{K,V,F,HashDict{K,V,$O}}(x, ps...))
-            $DefaultDict(x, kv::AbstractArray{Tuple{K,V}}) = new(DefaultDictBase{K,V,F,HashDict{K,V,$O}}(x, kv))
+            $DefaultDict(x, ps::Pair{K,V}...) = new(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, ps...))
+            $DefaultDict(x, kv::AbstractArray{Tuple{K,V}}) = new(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, kv))
             $DefaultDict(x, d::$DefaultDict) = $DefaultDict(x, d.d)
-            $DefaultDict(x, d::HashDict) = new(DefaultDictBase{K,V,F,HashDict{K,V,$O}}(x, d))
-            $DefaultDict(x) = new(DefaultDictBase{K,V,F,HashDict{K,V,$O}}(x))
+            $DefaultDict(x, d::$_Dict) = new(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, d))
+            $DefaultDict(x) = new(DefaultDictBase{K,V,F,$_Dict{K,V}}(x))
         end
 
         ## Constructors
@@ -88,7 +89,7 @@ for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Order
         $DefaultDict{K,V,F}(default::F, kv::AbstractArray{Tuple{K,V}}) = $DefaultDict{K,V,F}(default, kv)
         $DefaultDict{K,V,F}(default::F, ps::Pair{K,V}...) = $DefaultDict{K,V,F}(default, ps...)
 
-        $DefaultDict{F}(default::F, d::Associative) = ((K,V)= (Base.keytype(d), Base.valtype(d)); $DefaultDict{K,V,F}(default, HashDict(d)))
+        $DefaultDict{F}(default::F, d::Associative) = ((K,V)= (Base.keytype(d), Base.valtype(d)); $DefaultDict{K,V,F}(default, $_Dict(d)))
 
         # Constructor syntax: DefaultDictBase{Int,Float64}(default)
         @compat (::Type{$DefaultDict{K,V}}){K,V}() = throw(ArgumentError("$DefaultDict: no default specified"))
