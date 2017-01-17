@@ -1,7 +1,10 @@
 
 .. image:: https://travis-ci.org/JuliaLang/DataStructures.jl.svg?branch=master
    :target: https://travis-ci.org/JuliaLang/DataStructures.jl
-   :alt: Build Status
+   :alt: Travis Build Status
+.. image:: https://ci.appveyor.com/api/projects/status/5gw9xok4e58aixsv?svg=true
+   :target: https://ci.appveyor.com/project/kmsquire/datastructures-jl
+   :alt: Appveyor Build Status
 .. image:: https://coveralls.io/repos/JuliaLang/DataStructures.jl/badge.svg?branch=master&service=github
    :target: https://coveralls.io/github/JuliaLang/DataStructures.jl?branch=master
    :alt: Test Coverage
