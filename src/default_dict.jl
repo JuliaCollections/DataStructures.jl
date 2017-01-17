@@ -4,7 +4,7 @@
 # DefaultDictBase is the main class used to in Default*Dicts.
 #
 # Each related (immutable) Default*Dict class contains a single
-# DefautlDictBase object as a member, and delegates almost all
+# DefaultDictBase object as a member, and delegates almost all
 # functions to this object.
 #
 # The main rationale for doing this instead of using type aliases is
@@ -48,6 +48,7 @@ DefaultDictBase{F,D<:Associative}(default::F, d::D) = (K=keytype(d); V=valtype(d
 @delegate DefaultDictBase.d [ get, haskey, getkey, pop!,
                               start, done, next, isempty, length ]
 
+# Some functions are delegated, but then need to return the main dictionary
 # NOTE: push! is not included below, because the fallback version just
 #       calls setindex!
 @delegate_return_parent DefaultDictBase.d [ delete!, empty!, setindex!, sizehint! ]
@@ -59,6 +60,17 @@ next{T<:DefaultDictBase}(v::Base.ValueIterator{T}, i) = (v.dict.d.vals[i], Base.
 
 getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 
+const _K = TypeVar(:K)
+const _V = TypeVar(:V)
+
+function getindex{F<:Base.Callable}(d::DefaultDictBase{_K,_V,F}, key)
+    return get!(d.d, key) do
+        d.default()
+    end
+end
+
+
+
 ################
 
 # Here begins the actual definition of the DefaultDict and
@@ -66,16 +78,17 @@ getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 # wrappers around a DefaultDictBase object, and delegate all functions
 # to that object
 
-for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Ordered)]
+for _Dict in [:Dict, :OrderedDict]
+    DefaultDict = Symbol("Default"*string(_Dict))
     @eval begin
         immutable $DefaultDict{K,V,F} <: Associative{K,V}
-            d::DefaultDictBase{K,V,F,HashDict{K,V,$O}}
+            d::DefaultDictBase{K,V,F,$_Dict{K,V}}
 
-            $DefaultDict(x, ps::Pair{K,V}...) = new(DefaultDictBase{K,V,F,HashDict{K,V,$O}}(x, ps...))
-            $DefaultDict(x, kv::AbstractArray{Tuple{K,V}}) = new(DefaultDictBase{K,V,F,HashDict{K,V,$O}}(x, kv))
+            $DefaultDict(x, ps::Pair{K,V}...) = new(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, ps...))
+            $DefaultDict(x, kv::AbstractArray{Tuple{K,V}}) = new(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, kv))
             $DefaultDict(x, d::$DefaultDict) = $DefaultDict(x, d.d)
-            $DefaultDict(x, d::HashDict) = new(DefaultDictBase{K,V,F,HashDict{K,V,$O}}(x, d))
-            $DefaultDict(x) = new(DefaultDictBase{K,V,F,HashDict{K,V,$O}}(x))
+            $DefaultDict(x, d::$_Dict) = new(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, d))
+            $DefaultDict(x) = new(DefaultDictBase{K,V,F,$_Dict{K,V}}(x))
         end
 
         ## Constructors
@@ -88,7 +101,7 @@ for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Order
         $DefaultDict{K,V,F}(default::F, kv::AbstractArray{Tuple{K,V}}) = $DefaultDict{K,V,F}(default, kv)
         $DefaultDict{K,V,F}(default::F, ps::Pair{K,V}...) = $DefaultDict{K,V,F}(default, ps...)
 
-        $DefaultDict{F}(default::F, d::Associative) = ((K,V)= (Base.keytype(d), Base.valtype(d)); $DefaultDict{K,V,F}(default, HashDict(d)))
+        $DefaultDict{F}(default::F, d::Associative) = ((K,V)= (Base.keytype(d), Base.valtype(d)); $DefaultDict{K,V,F}(default, $_Dict(d)))
 
         # Constructor syntax: DefaultDictBase{Int,Float64}(default)
         @compat (::Type{$DefaultDict{K,V}}){K,V}() = throw(ArgumentError("$DefaultDict: no default specified"))
@@ -101,9 +114,23 @@ for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Order
                                    getkey, pop!, start, next,
                                    done, isempty, length ]
 
+        # Some functions are delegated, but then need to return the main dictionary
         # NOTE: push! is not included below, because the fallback version just
         #       calls setindex!
         @delegate_return_parent $DefaultDict.d [ delete!, empty!, setindex!, sizehint! ]
+
+        # NOTE: The second and third definition of push! below are only
+        # necessary for disambiguating with the fourth, fifth, and sixth
+        # definitions of push! below.
+        # If these are removed, the second and third definitions can be
+        # removed as well.
+        push!(d::$DefaultDict, p::Pair) = (setindex!(d.d, p.second, p.first); d)
+        push!(d::$DefaultDict, p::Pair, q::Pair) = push!(push!(d, p), q)
+        push!(d::$DefaultDict, p::Pair, q::Pair, r::Pair...) = push!(push!(push!(d, p), q), r...)
+
+        push!(d::$DefaultDict, p) = (setindex!(d.d, p[2], p[1]); d)
+        push!(d::$DefaultDict, p, q) = push!(push!(d, p), q)
+        push!(d::$DefaultDict, p, q, r...) = push!(push!(push!(d, p), q), r...)
 
         similar{K,V,F}(d::$DefaultDict{K,V,F}) = $DefaultDict{K,V,F}(d.d.default)
         in{T<:$DefaultDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
