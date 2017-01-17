@@ -1,15 +1,23 @@
+# Documentation: http://docs.travis-ci.com/user/languages/julia/
 language: julia
 os:
-    - linux
-    - osx
+  - linux
+  - osx
 julia:
-    - 0.4
-    - 0.5
-    - nightly
+  - 0.4
+  - 0.5
+  - nightly
+matrix:
+  allow_failures:
+    - julia: nightly
 notifications:
-    email: false
-script:
-    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-    - julia -e 'Pkg.clone(pwd()); Pkg.build("DataStructures"); Pkg.test("DataStructures"; coverage=true)'
+  email: false
+# uncomment the following lines to override the default test script
+#script:
+#  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+#  - julia -e 'Pkg.clone(pwd()); Pkg.build("DataStructures"); Pkg.test("DataStructures"; coverage=true)'
 after_success:
-    - julia -e 'cd(Pkg.dir("DataStructures")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder()); Codecov.submit(process_folder())'
+  # push coverage results to Coveralls
+  - julia -e 'cd(Pkg.dir("DataStructures")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
+  # push coverage results to Codecov
+  - julia -e 'cd(Pkg.dir("DataStructures")); Pkg.add("Coverage"); using Coverage; Codecov.submit(Codecov.process_folder())'
