@@ -32,8 +32,9 @@ d = DefaultDict{Char, Int}(1)
 @test length(d) == 0
 @test isempty(d)
 @test d['c'] == 1
+@test setindex!(d, 10, 'd') === d
 @test !isempty(d)
-empty!(d)
+@test empty!(d) === d
 @test isempty(d)
 
 # access, modification
@@ -46,6 +47,7 @@ empty!(d)
 @test pop!(d, 'a') == 2
 @test isempty(d)
 
+@test sizehint!(d, 26) === d
 for c in 'a':'z'
     d[c] = c-'a'+1
 end
@@ -53,7 +55,7 @@ end
 @test d['z'] == 26
 @test d['@'] == 1
 @test length(d) == 27
-delete!(d, '@')
+@test delete!(d, '@') === d
 @test length(d) == 26
 
 for (k,v) in d
@@ -95,7 +97,7 @@ d = DefaultOrderedDict{Char, Int}(1)
 @test isempty(d)
 @test d['c'] == 1
 @test !isempty(d)
-empty!(d)
+@test empty!(d) === d
 @test isempty(d)
 
 # access, modification
@@ -108,6 +110,7 @@ empty!(d)
 @test pop!(d, 'a') == 2
 @test isempty(d)
 
+@test sizehint!(d, 26) === d
 for c in 'a':'z'
     d[c] = c-'a'+1
 end
@@ -115,7 +118,7 @@ end
 @test d['z'] == 26
 @test d['@'] == 1
 @test length(d) == 27
-delete!(d, '@')
+@test delete!(d, '@') === d
 @test length(d) == 26
 
 for (k,v) in d

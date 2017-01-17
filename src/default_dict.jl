@@ -45,9 +45,12 @@ DefaultDictBase{F,D<:Associative}(default::F, d::D) = (K=keytype(d); V=valtype(d
 # Functions
 
 # most functions are simply delegated to the wrapped dictionary
-@delegate DefaultDictBase.d [ sizehint!, empty!, setindex!, get, haskey,
-                             getkey, pop!, delete!, start, done, next,
-                             isempty, length ]
+@delegate DefaultDictBase.d [ get, haskey, getkey, pop!,
+                              start, done, next, isempty, length ]
+
+# NOTE: push! is not included below, because the fallback version just
+#       calls setindex!
+@delegate_return_parent DefaultDictBase.d [ delete!, empty!, setindex!, sizehint! ]
 
 similar{K,V,F}(d::DefaultDictBase{K,V,F}) = DefaultDictBase{K,V,F}(d.default)
 in{T<:DefaultDictBase}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d)
@@ -94,10 +97,13 @@ for (DefaultDict,O) in [(:DefaultDict, :Unordered), (:DefaultOrderedDict, :Order
         ## Functions
 
         # Most functions are simply delegated to the wrapped DefaultDictBase object
-        @delegate $DefaultDict.d [ sizehint!, empty!, setindex!,
-                                   getindex, get, get!, haskey,
-                                   getkey, pop!, delete!, start, next,
+        @delegate $DefaultDict.d [ getindex, get, get!, haskey,
+                                   getkey, pop!, start, next,
                                    done, isempty, length ]
+
+        # NOTE: push! is not included below, because the fallback version just
+        #       calls setindex!
+        @delegate_return_parent $DefaultDict.d [ delete!, empty!, setindex!, sizehint! ]
 
         similar{K,V,F}(d::$DefaultDict{K,V,F}) = $DefaultDict{K,V,F}(d.d.default)
         in{T<:$DefaultDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
@@ -137,10 +143,10 @@ end
 
 ## Most functions are simply delegated to the wrapped DefaultDictBase object
 
-# @delegate DefaultSortedDict.d [ sizehint!, empty!, setindex!,
-#                            getindex, get, get!, haskey,
-#                            getkey, pop!, delete!, start, next,
-#                            done, isempty, length]
+# @delegate DefaultSortedDict.d [ getindex, get, get!, haskey,
+#                                 getkey, pop!, start, next,
+#                                 done, isempty, length]
+# @delegate_return_parent DefaultSortedDict.d [ delete!, empty!, setindex!, sizehint! ]
 
 # similar{K,V,F}(d::DefaultSortedDict{K,V,F}) = DefaultSortedDict{K,V,F}(d.d.default)
 # in{T<:DefaultSortedDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
