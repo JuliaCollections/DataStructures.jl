@@ -8,10 +8,14 @@ import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
              hash, eltype, KeyIterator, ValueIterator, convert, copy,
              merge
 
-"""
-    OrderedDict
+if VERSION >= v"0.5.0"
+    import Base: HasLength, HasShape, SizeUnknown, iteratorsize
+end
 
-`OrderedDict`s are  simply dictionaries  whose entries  have a  particular order.  The order
+"""
+OrderedDict
+
+`OrderedDict`s are simply dictionaries whose entries have a particular order.  The order
 refers to insertion order, which allows deterministic iteration over the dictionary or set.
 """
 type OrderedDict{K,V} <: Associative{K,V}
@@ -21,25 +25,35 @@ type OrderedDict{K,V} <: Associative{K,V}
     ndel::Int
     dirty::Bool
 
-    function OrderedDict()
-        new(zeros(Int32,16), Array(K,0), Array(V,0), 0, false)
-    end
+    OrderedDict() = new(zeros(Int32,16), Array(K,0), Array(V,0), 0, false)
+
     function OrderedDict(kv)
-        h = OrderedDict{K,V}()
-        for (k,v) in kv
-            h[k] = v
+        (n, slotsz) = get_n_slotsz(kv)
+        h = new(zeros(Int32,slotsz), Array(K,n), Array(V,n), 0, false)
+        if n > 0
+            i = 0
+            for (k,v) in kv
+                index = ht_keyindex2(h, k)
+                if index < 0 # new key
+                    i = i + 1
+                    @inbounds h.keys[i] = k
+                    @inbounds h.vals[i] = v
+                    @inbounds h.slots[-index] = i
+                else # duplicate key, shrink by one
+                    @inbounds h.vals[index] = v
+                    n = n - 1
+                    resize!(h.keys, n)
+                    resize!(h.vals, n)
+                end
+            end
+        else # Unknown length
+            for (k,v) in kv
+                h[k] = v
+            end
         end
         return h
     end
-    OrderedDict(p::Pair) = setindex!(OrderedDict{K,V}(), p.second, p.first)
-    function OrderedDict(ps::Pair...)
-        h = OrderedDict{K,V}()
-        sizehint!(h, length(ps))
-        for p in ps
-            h[p.first] = p.second
-        end
-        return h
-    end
+
     function OrderedDict(d::OrderedDict{K,V})
         if d.ndel > 0
             rehash!(d)
@@ -52,24 +66,10 @@ OrderedDict() = OrderedDict{Any,Any}()
 OrderedDict(kv::Tuple{}) = OrderedDict()
 copy(d::OrderedDict) = OrderedDict(d)
 
-
 # TODO: this can probably be simplified using `eltype` as a THT (Tim Holy trait)
 # OrderedDict{K,V}(kv::Tuple{Vararg{Tuple{K,V}}})          = OrderedDict{K,V}(kv)
 # OrderedDict{K  }(kv::Tuple{Vararg{Tuple{K,Any}}})        = OrderedDict{K,Any}(kv)
 # OrderedDict{V  }(kv::Tuple{Vararg{Tuple{Any,V}}})        = OrderedDict{Any,V}(kv)
-OrderedDict{K,V}(kv::Tuple{Vararg{Pair{K,V}}})         = OrderedDict{K,V}(kv)
-OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})             = OrderedDict{K,Any}(kv)
-OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv)
-OrderedDict(kv::Tuple{Vararg{Pair}})                   = OrderedDict{Any,Any}(kv)
-
-OrderedDict{K,V}(kv::AbstractArray{Tuple{K,V}}) = OrderedDict{K,V}(kv)
-OrderedDict{K,V}(kv::AbstractArray{Pair{K,V}})  = OrderedDict{K,V}(kv)
-OrderedDict{K,V}(kv::Associative{K,V})          = OrderedDict{K,V}(kv)
-
-OrderedDict{K,V}(ps::Pair{K,V}...)          = OrderedDict{K,V}(ps)
-OrderedDict{K}(ps::Pair{K}...,)             = OrderedDict{K,Any}(ps)
-OrderedDict{V}(ps::Pair{TypeVar(:K),V}...,) = OrderedDict{Any,V}(ps)
-OrderedDict(ps::Pair...)                    = OrderedDict{Any,Any}(ps)
 
 function OrderedDict(kv)
     try
@@ -84,9 +84,35 @@ function OrderedDict(kv)
     end
 end
 
-dict_with_eltype{K,V}(kv, ::Type{Tuple{K,V}}) = OrderedDict{K,V}(kv)
-dict_with_eltype{K,V}(kv, ::Type{Pair{K,V}}) = OrderedDict{K,V}(kv)
-dict_with_eltype(kv, t) = OrderedDict{Any,Any}(kv)
+@static if VERSION >= v"0.5.0"
+    get_n_slotsz(kv) = get_n_slotsz(kv, iteratorsize(kv))
+    get_n_slotsz(kv, isz::SizeUnknown) = (0, 16)
+    function get_n_slotsz(kv, isz::Union{HasLength, HasShape})
+        n = length(kv)
+        slotsz = max(16, (n*3)>>1)
+        return n, slotsz
+    end
+else
+    get_n_slotsz(kv) = (0, 16)
+end
+
+OrderedDict{K,V}(kv::Tuple{Vararg{Pair{K, V}}})         = OrderedDict{K, V}(kv)
+OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})               = OrderedDict{K, Any}(kv)
+OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K), V}}})  = OrderedDict{Any, V}(kv)
+OrderedDict(kv::Tuple{Vararg{Pair}})                     = OrderedDict{Any, Any}(kv)
+
+OrderedDict{K,V}(kv::AbstractArray{Tuple{K, V}}) = OrderedDict{K, V}(kv)
+OrderedDict{K,V}(kv::AbstractArray{Pair{K, V}})  = OrderedDict{K, V}(kv)
+OrderedDict{K,V}(kv::Associative{K, V})          = OrderedDict{K, V}(kv)
+
+OrderedDict{K,V}(ps::Pair{K, V}...)          = OrderedDict{K, V}(ps)
+OrderedDict{K}(ps::Pair{K}..., )              = OrderedDict{K, Any}(ps)
+OrderedDict{V}(ps::Pair{TypeVar(:K), V}..., ) = OrderedDict{Any, V}(ps)
+OrderedDict(ps::Pair...)                      = OrderedDict{Any, Any}(ps)
+
+dict_with_eltype{K,V}(kv,  ::Type{Tuple{K, V}}) = OrderedDict{K, V}(kv)
+dict_with_eltype{K,V}(kv,  ::Type{Pair{K, V}}) = OrderedDict{K, V}(kv)
+dict_with_eltype(kv,t) = OrderedDict{Any, Any}(kv)
 
 similar{K,V}(d::OrderedDict{K,V}) = OrderedDict{K,V}()
 
@@ -292,7 +318,7 @@ function setindex!{K,V}(h::OrderedDict{K,V}, v0, key0)
     if !isequal(key,key0)
         throw(ArgumentError("$key0 is not a valid key for type $K"))
     end
-    v = convert(V,  v0)
+    v = convert(V, v0)
 
     index = ht_keyindex2(h, key)
 
@@ -316,7 +342,7 @@ function get!{K,V}(h::OrderedDict{K,V}, key0, default)
 
     index > 0 && return h.vals[index]
 
-    v = convert(V,  default)
+    v = convert(V, default)
     _setindex!(h, v, key, -index)
     return v
 end
@@ -332,7 +358,7 @@ function get!{K,V}(default::Base.Callable, h::OrderedDict{K,V}, key0)
     index > 0 && return h.vals[index]
 
     h.dirty = false
-    v = convert(V,  default())
+    v = convert(V, default())
     if h.dirty
         index = ht_keyindex2(h, key)
     end
