@@ -14,6 +14,7 @@
 # subclassed.
 #
 
+_oldDefaultDictBase = """
 immutable DefaultDictBase{K,V,F,D} <: Associative{K,V}
     default::F
     d::D
@@ -27,6 +28,24 @@ immutable DefaultDictBase{K,V,F,D} <: Associative{K,V}
     DefaultDictBase(x::F, d::DefaultDictBase) = (check_D(D,K,V); DefaultDictBase(x, d.d))
     DefaultDictBase(x::F, d::D=D()) = (check_D(D,K,V); new(x, d))
 end
+"""
+
+_newDefaultDictBase = """
+immutable DefaultDictBase{K,V,F,D} <: Associative{K,V}
+    default::F
+    d::D
+
+    check_D(D,K,V) = (D <: Associative{K,V}) ||
+        throw(ArgumentError("Default dict must be <: Associative{K,V}"))
+
+    DefaultDictBase(x::F, kv::AbstractArray{Tuple{K,V}}) = (check_D(D,K,V); new(x, D(kv)))
+    DefaultDictBase(x::F, ps::Pair{K,V}...) = (check_D(D,K,V); new(x, D(ps...)))
+    (::Type{DefaultDictBase{K,V,F,D}}){K,V,F,D<:DefaultDictBase}(x::F, d::D) =
+        (check_D(D,K,V); DefaultDictBase(x, d.d))
+    DefaultDictBase(x::F, d::D = D()) = (check_D(D,K,V); new(x, d))
+end
+"""
+eval(VERSION < v"0.6.0-dev.2123" ? parse(_oldDefaultDictBase) : parse(_newDefaultDictBase))
 
 # Constructors
 

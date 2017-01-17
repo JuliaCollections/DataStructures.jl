@@ -6,7 +6,7 @@ function heap_values{VT,Comp}(h::MutableBinaryHeap{VT,Comp})
     n = length(h)
     nodes = h.nodes
     @assert length(nodes) == n
-    vs = Array(VT, n)
+    vs = Vector{VT}(n)
     for i = 1 : n
         vs[i] = nodes[i].value
     end
@@ -17,7 +17,7 @@ function list_values{VT,Comp}(h::MutableBinaryHeap{VT,Comp})
     n = length(h)
     nodes = h.nodes
     nodemap = h.node_map
-    vs = Array(VT, 0)
+    vs = Vector{VT}(0)
     for i = 1 : length(nodemap)
         id = nodemap[i]
         if id > 0

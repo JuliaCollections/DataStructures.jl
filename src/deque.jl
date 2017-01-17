@@ -14,7 +14,7 @@ type DequeBlock{T}
     next::DequeBlock{T}  # ref to next block
 
     function DequeBlock(capa::Int, front::Int)
-        data = Array(T, capa)
+        data = Vector{T}(capa)
         blk = new(data, capa, front, front-1)
         blk.prev = blk
         blk.next = blk
