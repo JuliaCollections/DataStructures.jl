@@ -100,7 +100,7 @@ xs = heapify!([v for v in values(priorities)])
 xs = heapify(10:-1:1)
 @test issorted([heappop!(xs) for _ in 1:10])
 
-xs = Array{Int,1}(0)
+xs = Vector{Int}(0)
 for priority in values(priorities)
     heappush!(xs, priority)
 end

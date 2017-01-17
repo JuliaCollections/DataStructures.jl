@@ -125,15 +125,15 @@ type BalancedTree23{K, D, Ord <: Ordering}
     deletionchild::Array{Int,1}
     deletionleftkey::Array{K,1}
     function BalancedTree23(ord1::Ord)
-        tree1 = Array{TreeNode{K}}(1)
+        tree1 = Vector{TreeNode{K}}(1)
         initializeTree!(tree1)
-        data1 = Array{KDRec{K,D}}(2)
+        data1 = Vector{KDRec{K,D}}(2)
         initializeData!(data1)
         u1 = IntSet()
         push!(u1, 1, 2)
-        new(ord1, data1, tree1, 1, 1, Array{Int}(0), Array{Int}(0),
+        new(ord1, data1, tree1, 1, 1, Vector{Int}(0), Vector{Int}(0),
             u1,
-            Array{Int}(3), Array{K}(3))
+            Vector{Int}(3), Vector{K}(3))
     end
 end
 
@@ -243,8 +243,8 @@ function empty!(t::BalancedTree23)
     initializeTree!(t.tree)
     t.depth = 1
     t.rootloc = 1
-    t.freetreeinds = Array{Int}(0)
-    t.freedatainds = Array{Int}(0)
+    t.freetreeinds = Vector{Int}(0)
+    t.freedatainds = Vector{Int}(0)
     empty!(t.useddatacells)
     push!(t.useddatacells, 1, 2)
     nothing
