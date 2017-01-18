@@ -22,7 +22,7 @@ type OrderedDict{K,V} <: Associative{K,V}
     dirty::Bool
 
     function OrderedDict()
-        new(zeros(Int32,16), Array(K,0), Array(V,0), 0, false)
+        new(zeros(Int32,16), Vector{K}(0), Vector{V}(0), 0, false)
     end
     function OrderedDict(kv)
         h = OrderedDict{K,V}()
@@ -57,18 +57,22 @@ copy(d::OrderedDict) = OrderedDict(d)
 # OrderedDict{K,V}(kv::Tuple{Vararg{Tuple{K,V}}})          = OrderedDict{K,V}(kv)
 # OrderedDict{K  }(kv::Tuple{Vararg{Tuple{K,Any}}})        = OrderedDict{K,Any}(kv)
 # OrderedDict{V  }(kv::Tuple{Vararg{Tuple{Any,V}}})        = OrderedDict{Any,V}(kv)
+_oldOrderedDict1 = "OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv)"
+_newOrderedDict1 = "OrderedDict{V}(kv::Tuple{Vararg{Pair{K,V} where K}})   = OrderedDict{Any,V}(kv)"
 OrderedDict{K,V}(kv::Tuple{Vararg{Pair{K,V}}})         = OrderedDict{K,V}(kv)
 OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})             = OrderedDict{K,Any}(kv)
-OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv)
+eval(VERSION < v"0.6.0-dev.2123" ? parse(_oldOrderedDict1) : parse(_newOrderedDict1))
 OrderedDict(kv::Tuple{Vararg{Pair}})                   = OrderedDict{Any,Any}(kv)
 
 OrderedDict{K,V}(kv::AbstractArray{Tuple{K,V}}) = OrderedDict{K,V}(kv)
 OrderedDict{K,V}(kv::AbstractArray{Pair{K,V}})  = OrderedDict{K,V}(kv)
 OrderedDict{K,V}(kv::Associative{K,V})          = OrderedDict{K,V}(kv)
 
+_oldOrderedDict2 = "OrderedDict{V}(ps::Pair{TypeVar(:K),V}...,) = OrderedDict{Any,V}(ps)"
+_newOrderedDict2 = "OrderedDict{V}(ps::(Pair{K,V} where K)...,) = OrderedDict{Any,V}(ps)"
 OrderedDict{K,V}(ps::Pair{K,V}...)          = OrderedDict{K,V}(ps)
 OrderedDict{K}(ps::Pair{K}...,)             = OrderedDict{K,Any}(ps)
-OrderedDict{V}(ps::Pair{TypeVar(:K),V}...,) = OrderedDict{Any,V}(ps)
+eval(VERSION < v"0.6.0-dev.2123" ? parse(_oldOrderedDict2) : parse(_newOrderedDict2))
 OrderedDict(ps::Pair...)                    = OrderedDict{Any,Any}(ps)
 
 function OrderedDict(kv)

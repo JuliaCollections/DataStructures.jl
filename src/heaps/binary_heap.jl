@@ -107,7 +107,7 @@ type BinaryHeap{T,Comp} <: AbstractHeap{T}
     valtree::Array{T}
 
     function BinaryHeap(comp::Comp)
-        new(comp, Array(T,0))
+        new(comp, Vector{T}(0))
     end
 
     function BinaryHeap(comp::Comp, xs)  # xs is an iterable collection of values

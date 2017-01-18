@@ -67,7 +67,7 @@ include("heaps/arrays_as_heaps.jl")
 
 function extract_all!{VT}(h::AbstractHeap{VT})
     n = length(h)
-    r = Array(VT, n)
+    r = Vector{VT}(n)
     for i = 1 : n
         r[i] = pop!(h)
     end
@@ -76,7 +76,7 @@ end
 
 function extract_all_rev!{VT}(h::AbstractHeap{VT})
     n = length(h)
-    r = Array(VT, n)
+    r = Vector{VT}(n)
     for i = 1 : n
         r[n + 1 - i] = pop!(h)
     end
@@ -91,14 +91,14 @@ function nextreme{T, Comp}(comp::Comp, n::Int, arr::AbstractVector{T})
     elseif n >= length(arr)
         return sort(arr, lt = (x, y) -> compare(comp, y, x))
     end
-    
+
     buffer = BinaryHeap{T,Comp}(comp)
-    
+
     for i = 1 : n
         @inbounds xi = arr[i]
         push!(buffer, xi)
     end
-    
+
     for i = n + 1 : length(arr)
         @inbounds xi = arr[i]
         if compare(comp, top(buffer), xi)

@@ -32,7 +32,7 @@ type PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
     index::Dict{K, Int}
 
     function PriorityQueue(o::O)
-        new(Array{Pair{K,V}}(0), o, Dict{K, Int}())
+        new(Vector{Pair{K,V}}(0), o, Dict{K, Int}())
     end
 
     PriorityQueue() = PriorityQueue{K,V,O}(Forward)
@@ -47,7 +47,7 @@ type PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
     end
 
     function PriorityQueue(itr, o::O)
-        xs = Array{Pair{K,V}}(length(itr))
+        xs = Vector{Pair{K,V}}(length(itr))
         index = Dict{K, Int}()
         for (i, (k, v)) in enumerate(itr)
             xs[i] = Pair{K,V}(k, v)

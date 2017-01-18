@@ -11,7 +11,7 @@ type CircularDeque{T}
     last::Int
 end
 
-@compat (::Type{CircularDeque{T}}){T}(n::Int) = CircularDeque(Array{T}(n), n, 0, 1, n)
+@compat (::Type{CircularDeque{T}}){T}(n::Int) = CircularDeque(Vector{T}(n), n, 0, 1, n)
 
 Base.length(D::CircularDeque) = D.n
 Base.eltype{T}(::Type{CircularDeque{T}}) = T
