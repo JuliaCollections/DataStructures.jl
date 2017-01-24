@@ -9,7 +9,7 @@ SortedDict, SortedMultiDict and SortedSet.
 *SortedDict* is similar to the built-in Julia type ``Dict``
 with the additional feature that the keys are stored in
 sorted order and can be efficiently iterated in this order.
-SortedDict is a subtype of Associative.  It is slower than ``Dict``
+SortedDict is a subtype of Associative.  It is generally slower than ``Dict``
 because looking up a key requires an O(log *n*) tree search rather than
 an expected O(1) hash-table lookup time as with Dict.
 SortedDict is
@@ -114,49 +114,58 @@ in terms of the container.
 Constructors for Sorted Containers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``SortedDict(d)``
-  Argument ``d`` is an ordinary Julia dict (or any associative type)
-  used to initialize the container::
+``SortedDict(o=Forward)``
+``SortedDict{K,V}(o=Forward)``
+  Construct an empty ``SortedDict`` with key type ``K`` and value type ``V``.
+  If ``K`` and ``V`` are not specified, the dictionary defaults to a
+  ``SortedDict{Any,Any}``.  Keys and values are converted to the
+  given type upon insertion.
+  Ordering ``o`` defaults to ``Forward`` ordering.
 
-     c = SortedDict(Dict("New York" => 1788, "Illinois" => 1818))
-
-
-  In this example the key-type is deduced to be String, while the
-  value-type is Int.  The default ordering object ``Forward`` is used.
-  See below for more information about ordering.
-
-``SortedDict(d,o)``
-  Argument ``d`` is an ordinary Julia dict (or any associative type)
-  used to initialize the container and ``o`` is an ordering object
-  used for ordering the keys.
+  **Note that a key type of ``Any`` will lead to slow performance, as the
+  values are stored boxed (i.e., as pointers), and insertion will
+  require a run-time lookup of the appropriate comparison function.
+  It is recommended to always specify a key type, or to use one of the
+  constructors below in which the key type is inferred.**
 
 ``SortedDict(k1=>v1, k2=>v2, ...)``
-  Arguments are key-value pairs for insertion into the
-  dictionary.
-  The keys must be of the same type as one another; the
-  values must also be of one type.
+``SortedDict{K,V}(k1=>v1, k2=>v2, ...)``
+  Construct a ``SortedDict`` from the given key-value pairs.
+  If ``K`` and ``V`` are not specified, key type and
+  value type are inferred from the given key-value pairs, and ordering is assumed
+  to be ``Forward`` ordering.
 
 ``SortedDict(o, k1=>v1, k2=>v2, ...)``
-  The first argument ``o`` is an ordering object.  The remaining
-  arguments are key-value pairs for insertion into the
-  dictionary.
-  The keys must be of the same type as one another; the
-  values must also be of one type.
+``SortedDict{K,V}(o, k1=>v1, k2=>v2, ...)``
+  Construct a ``SortedDict`` from the given pairs with the specified
+  ordering ``o``.  If ``K`` and ``V`` are
+  not specified, the key type and value type are inferred from the given pairs.
+  See below for more information about ordering.
 
-``SortedDict(iter)``
-  Takes an arbitrary iterable object of key=>value pairs.
-  The default Forward ordering is used.
+``SortedDict(d,o=Forward)``
+``SortedDict{K,V}(d,o=Forward)``
+  Construct a ``SortedDict`` from an ordinary Julia dict ``d`` (or
+  any associative type), e.g.::
 
-``SortedDict(iter,o)``
-  Takes an arbitrary iterable object of key=>value pairs.
-  The ordering object ``o`` is explicitly given.
+     d = Dict("New York" => 1788, "Illinois" => 1818)
+     c = SortedDict(d)
 
-``SortedDict{K,V,Ord}(o)``
-  Construct an empty SortedDict in which type parameters
-  are explicitly listed; ordering object is explicitly specified.
-  (See below for discussion of ordering.)  An empty SortedDict
-  may also be constructed using ``SortedDict(Dict{K,V}(),o)``
-  where the ``o`` argument is optional.
+  In this example the key-type is deduced to be ``String``, while the
+  value-type is ``Int``.
+
+  If ``K`` and ``V`` are not specified, the key type and value type are inferred
+  from the given dictionary.
+  The ordering object ``o`` defaults to ``Forward``.
+
+  See below for more information about ordering.
+
+``SortedDict(iter,o=Forward)``
+``SortedDict{K,V}(iter,o=Forward)``
+  Construct a ``SortedDict`` from an arbitrary iterable object of
+  ``key=>value`` pairs.
+  If ``K`` and ``V`` are not specified, the key type and value type are inferred
+  from the given iterable.
+  The ordering object ``o`` defaults to ``Forward``.
 
 ``SortedMultiDict(ks,vs,o)``
   Construct a SortedMultiDict using keys given by ``ks``, values
