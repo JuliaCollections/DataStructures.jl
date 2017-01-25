@@ -13,6 +13,12 @@ type SortedMultiDict{K, D, Ord <: Ordering}
     end
 end
 
+@compat (::Type{SortedMultiDict})() = SortedMultiDict{Any,Any,ForwardOrdering}(Forward)
+@compat (::Type{SortedMultiDict{K,D}}){K,D}() = SortedMultiDict{K,D,ForwardOrdering}(Forward)
+@compat (::Type{SortedMultiDict}){O<:Ordering}(o::O) = SortedMultiDict{Any,Any,O}(o)
+@compat (::Type{SortedMultiDict{K,D}}){K,D,O<:Ordering}(o::O) = SortedMultiDict{K,D,O}(o)
+# @compat (::Type{SortedMultiDict{K,D}}){K,D,O<:Ordering}(o::O, ps::Pair...) = SortedMultiDict{K,D,O}(o, ps...)
+# @compat (::Type{SortedMultiDict{K,D}}){K,D}(ps::Pair...) = SortedMultiDict{K,D}(Base.Forward, ps...)
 
 typealias SMDSemiToken IntSemiToken
 
@@ -87,7 +93,7 @@ end
 ## push! is an alternative to insert!; it returns the container.
 
 
-@inline function push!{K, D, Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}, pr::Pair{K,D})
+@inline function push!{K,D}(m::SortedMultiDict{K,D}, pr::Pair)
     insert!(m.bt, convert(K,pr[1]), convert(D,pr[2]), true)
     m
 end

@@ -1,10 +1,28 @@
+if VERSION >= v"0.5.0-dev+7720"
+    using Base.Test
+else
+    using BaseTestNext
+    const Test = BaseTestNext
+end
+
+using DataStructures
 import Base.Ordering
 import Base.Forward
 import Base.Reverse
 import DataStructures.eq
 import Base.lt
 import Base.ForwardOrdering
+import Base.ReverseOrdering
 import DataStructures.IntSemiToken
+
+immutable CaseInsensitive <: Ordering
+end
+
+lt(::CaseInsensitive, a, b) = isless(lowercase(a), lowercase(b))
+eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
+
+
+@testset "SortedContainers" begin
 
 ## Function fulldump dumps the entire tree; helpful for debugging.
 
@@ -264,8 +282,7 @@ function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree23{
 end
 
 
-
-function test1()
+@testset "SortedDictBasic" begin
     # a few basic tests of SortedDict to start
     m1 = SortedDict((Dict{Compat.ASCIIString,Compat.ASCIIString}()), Forward)
     kdarray = ["hello", "jello", "alpha", "beta", "fortune", "random",
@@ -289,13 +306,55 @@ function test1()
         checkcorrectness(m1.bt, false)
     end
     @test count == 4
-    nothing
 end
 
-function test2()
+@testset "SortedDictMethods" begin
     # test all methods of SortedDict here except loops
     m0 = SortedDict(Dict{Int, Float64}())
+    @test typeof(m0) == SortedDict{Int,Float64,ForwardOrdering}
     m1 = SortedDict(Dict(8=>32.0, 12=>33.1, 6=>18.2))
+    @test typeof(m1) == SortedDict{Int,Float64,ForwardOrdering}
+    m01 = SortedDict(8=>32.0, 12=>33.1, 6=>18.2)
+    @test typeof(m01) == SortedDict{Int,Float64,ForwardOrdering}
+    m11 = SortedDict((8=>32.0, 12=>33.1, 6=>18.2))
+    @test typeof(m11) == SortedDict{Int,Float64,ForwardOrdering}
+    m02 = SortedDict{Int,Float64}()
+    @test typeof(m02) == SortedDict{Int,Float64,ForwardOrdering}
+    m03 = SortedDict([(1,2.0), (3,4.0), (5,6.0)])
+    @test typeof(m03) == SortedDict{Int,Float64,ForwardOrdering}
+    m04 = SortedDict{Int,Float64}(Pair[1=>1, 2=>2.0])
+    @test typeof(m04) == SortedDict{Int,Float64,ForwardOrdering}
+    m05 = SortedDict{Int,Float64}(Reverse, Pair[1=>1, 2=>2.0])
+    @test typeof(m05) == SortedDict{Int,Float64,ReverseOrdering{ForwardOrdering}}
+    m06a = SortedDict(Pair[1=>2.0, 3=>'a'])
+    @test typeof(m06a) == SortedDict{Any,Any,ForwardOrdering}
+    m06b = SortedDict([(1,2.0), (3,'a')])
+    @test typeof(m06b) == SortedDict{Int,Any,ForwardOrdering}
+    m07a = SortedDict(Pair[1.0=>2, 2=>3])
+    @test typeof(m07a) == SortedDict{Any,Any,ForwardOrdering}
+    m07b = SortedDict([(1.0,2), (2,3)])
+    @test typeof(m07b) == SortedDict{Real,Int,ForwardOrdering}
+    m08a = SortedDict(Pair[1.0=>2, 2=>'a'])
+    @test typeof(m08a) == SortedDict{Any,Any,ForwardOrdering}
+    m08b = SortedDict([(1.0,2), (2,'a')])
+    @test typeof(m08b) == SortedDict{Real,Any,ForwardOrdering}
+    m09a = SortedDict(Pair{Int}[1=>2, 3=>'a'])
+    @test typeof(m09a) == SortedDict{Int,Any,ForwardOrdering}
+    m09b = SortedDict([(1,2), (3,'a')])
+    @test typeof(m09a) == SortedDict{Int,Any,ForwardOrdering}
+
+    @test m0 == m02
+    @test isequal(m0, m02)
+    @test m1 == m01
+    @test isequal(m1, m01)
+    @test m1 == m11
+    @test isequal(m1, m11)
+
+    # Test Exceptions
+    @test_throws ArgumentError SortedDict([1,2,3,4])
+    @test_throws ArgumentError SortedDict{Int,Int}([1,2,3,4])
+
+
     expected = ([6,8,12], [18.2, 32.0, 33.1])
     checkcorrectness(m1.bt, false)
     ii = startof(m1)
@@ -513,7 +572,6 @@ function test2()
     merge!(c3,c3)
     @test isequal(c3,c1)
     checkcorrectness(c3.bt, false)
-    nothing
 end
 
 
@@ -532,12 +590,14 @@ end
 
 
 
-function test3{T}(z::T)
+@testset "SortedDictLoops" begin
+    z = 0x00000000
+    T = typeof(z)
     ## Test the loops
     zero1 = zero(z)
     one1 = one(z)
     two1 = one1 + one1
-    m1 = SortedDict(Dict{T,T}())
+    m1 = SortedDict{T,T}()
     N = 1000
     for l = 1 : N
         lUi = convert(T, l)
@@ -1076,17 +1136,16 @@ function test3{T}(z::T)
     @test eltype(eachindex(exclusive(s,
                                      searchsortedfirst(s, 24),
                                      searchsortedfirst(s, 66)))) == IntSemiToken
-    nothing
 end
 
 
 
 
-function test4()
+@testset "SortedDictErrors" begin
     # test all the errors of sorted containers
     m = SortedDict(Dict("a" => 6, "bb" => 9))
     @test_throws KeyError println(m["b"])
-    m2 = SortedDict(Dict{Compat.ASCIIString, Int}())
+    m2 = SortedDict{Compat.ASCIIString,Int}()
     @test_throws BoundsError println(first(m2))
     @test_throws BoundsError println(last(m2))
     state1 = start(m2)
@@ -1099,7 +1158,7 @@ function test4()
     @test_throws KeyError delete!(m,"a")
     @test_throws KeyError pop!(m,"a")
     m3 = SortedDict((Dict{Compat.ASCIIString, Int}()), Reverse)
-    @test_throws ArgumentError isequal(m2, m3)
+    @test_throws ArgumentError isequal(m2, m3)``
     @test_throws BoundsError m[i1]
     @test_throws BoundsError regress((m,beforestartsemitoken(m)))
     @test_throws BoundsError advance((m,pastendsemitoken(m)))
@@ -1121,7 +1180,6 @@ function test4()
     @test_throws ArgumentError isequal(SortedSet(["a"]), SortedSet(["b"],Reverse))
     @test_throws ArgumentError (("a",6) in m)
     @test_throws ArgumentError ((2,5) in m1)
-    nothing
 end
 
 
@@ -1131,19 +1189,12 @@ function seekfile(fname)
     fname
 end
 
-immutable CaseInsensitive <: Ordering
-end
 
-lt(::CaseInsensitive, a, b) = isless(lowercase(a), lowercase(b))
-eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
-
-
-
-function test5()
+@testset "SortedDictOrderings" begin
     ## Test use of alternative orderings in test5
     keylist = ["Apple", "aPPle", "berry", "CHerry", "Dairy", "diary"]
     vallist = [6,9,-4,2,1,8]
-    m = SortedDict(Dict{Compat.ASCIIString,Int}())
+    m = SortedDict{Compat.ASCIIString,Int}()
     for j = 1:6
         m[keylist[j]] = vallist[j]
     end
@@ -1201,136 +1252,18 @@ function test5()
                 p[2] == vallist[expectedord3[count]]
     end
     @test count == 5
-    nothing
 end
 
-
-## test6, test6a and test6b are not run by package
-## testing but are included for timing tests.
-## They are identical except for their usage of ordering objects.
-
-function test6(numtrial::Int, expectedk::String, expectedd::String)
-    NSTRINGPAIR = 50000
-    m1 = SortedDict(Dict{Compat.ASCIIString,Compat.ASCIIString}())
-    strlist = Compat.ASCIIString[]
-    open(seekfile("wordsScram.txt"), "r") do inio
-        for j = 1 : NSTRINGPAIR * 2
-            push!(strlist, chomp(readline(inio)))
-        end
-    end
-    for trial = 1 : numtrial
-        empty!(m1)
-        count = 1
-        for j = 1 : NSTRINGPAIR
-            k = strlist[count]
-            d = strlist[count + 1]
-            m1[k] = d
-            count += 2
-        end
-        delct = div(NSTRINGPAIR, 6)
-        for j = 1 : delct
-            l = find(m1, strlist[j * 2 + 1])
-            delete!((m1,l))
-        end
-        spec = div(NSTRINGPAIR * 3,4)
-        l = startof(m1)
-        for j = 1 : spec
-            l = advance((m1,l))
-        end
-        k,d = deref((m1,l))
-        ekn = expectedk
-        edn = expectedd
-        @test k == ekn && d == edn
-    end
-end
-
-
-
-function test6a(numtrial::Int, expectedk::String, expectedd::String)
-    NSTRINGPAIR = 50000
-    m1 = SortedDict((Dict{Compat.ASCIIString, Compat.ASCIIString}()), Lt(isless))
-    strlist = Compat.ASCIIString[]
-    open(seekfile("wordsScram.txt"), "r") do inio
-        for j = 1 : NSTRINGPAIR * 2
-            push!(strlist, chomp(readline(inio)))
-        end
-    end
-    for trial = 1 : numtrial
-        empty!(m1)
-        count = 1
-        for j = 1 : NSTRINGPAIR
-            k = strlist[count]
-            d = strlist[count + 1]
-            m1[k] = d
-            count += 2
-        end
-        delct = div(NSTRINGPAIR, 6)
-        for j = 1 : delct
-            l = find(m1, strlist[j * 2 + 1])
-            delete!((m1,l))
-        end
-        spec = div(NSTRINGPAIR * 3,4)
-        l = startof(m1)
-        for j = 1 : spec
-            l = advance((m1,l))
-        end
-        k,d = deref((m1,l))
-        ekn = expectedk
-        edn = expectedd
-        @test k == ekn && d == edn
-    end
-end
-
-function SDConstruct(a::Associative; lt::Function=isless, by::Function=identity)
-    if by == identity
-        return SortedDict(a, Lt(lt))
-    elseif lt == isless
-        return SortedDict(a, By(by))
-    else
-        throw(ErrorException("having both by and lt not both implemented"))
-    end
-end
-
-
-function test6b(numtrial::Int, expectedk::String, expectedd::String)
-    NSTRINGPAIR = 50000
-    m1 = SDConstruct((Dict{Compat.ASCIIString,Compat.ASCIIString}()), lt=isless)
-    strlist = Compat.ASCIIString[]
-    open(seekfile("wordsScram.txt"), "r") do inio
-        for j = 1 : NSTRINGPAIR * 2
-            push!(strlist, chomp(readline(inio)))
-        end
-    end
-    for trial = 1 : numtrial
-        empty!(m1)
-        count = 1
-        for j = 1 : NSTRINGPAIR
-            k = strlist[count]
-            d = strlist[count + 1]
-            m1[k] = d
-            count += 2
-        end
-        delct = div(NSTRINGPAIR, 6)
-        for j = 1 : delct
-            l = find(m1, strlist[j * 2 + 1])
-            delete!((m1,l))
-        end
-        spec = div(NSTRINGPAIR * 3,4)
-        l = startof(m1)
-        for j = 1 : spec
-            l = advance((m1,l))
-        end
-        k,d = deref((m1,l))
-        ekn = expectedk
-        edn = expectedd
-        @test k == ekn && d == edn
-    end
-end
-
-
-function test7()
+@testset "SortedMultiDict" begin
     # Test all methods of SortedMultiDict except loops
     factors = SortedMultiDict(Int[], Int[])
+    @test typeof(factors) == SortedMultiDict{Int,Int,ForwardOrdering}
+    factors2 = SortedMultiDict{Int,Int}()
+    @test typeof(factors2) == SortedMultiDict{Int,Int,ForwardOrdering}
+
+    #@test factors == factors2   # Broken!  TODO: fix me...
+    @test isequal(factors, factors2)
+
     N = 1000
     checkcorrectness(factors.bt, true)
     len = 0
@@ -1511,15 +1444,27 @@ function test7()
         end
         @test count == 2
     end
-    nothing
 end
 
 
-function test8()
+@testset "SortedSet" begin
     # Test SortedSet
     N = 1000
     sm = 0.0
+
     m = SortedSet(Float64[])
+    @test typeof(m) == SortedSet{Float64, ForwardOrdering}
+    mm = SortedSet{Float64}()
+    @test typeof(mm) == SortedSet{Float64, ForwardOrdering}
+    #@test m == mm   # Broken!  TODO: Fix me...
+    @test isequal(m, mm)
+
+    @test typeof(SortedSet()) == SortedSet{Any, ForwardOrdering}
+    @test typeof(SortedSet{Float64}()) == SortedSet{Float64, ForwardOrdering}
+    @test typeof(SortedSet(Reverse)) == SortedSet{Any, ReverseOrdering{ForwardOrdering}}
+    @test typeof(SortedSet{Float64}(Reverse)) == SortedSet{Float64, ReverseOrdering{ForwardOrdering}}
+
+
     smallest = 10.0
     largest = -10.0
     for j = 1 : N
@@ -1665,14 +1610,12 @@ function test8()
     @test !issubset(["blue", "green"], m8)
     setdiff!(m8, SortedSet(["yellow", "red", "white"]))
     @test isequal(m8, SortedSet(["blue", "orange"]))
-    nothing
 end
 
 
 # test the constructors of SortedDict and SortedMultiDict
 
-function test9()
-
+@testset "SortedDictConstructors" begin
     sd1 = SortedDict("w" => 64, "p" => 12)
     @test length(sd1) == 2 && first(sd1) == ("p"=>12) &&
         last(sd1) == ("w"=>64)
@@ -1685,6 +1628,15 @@ function test9()
     sd4 = SortedDict(("w"=>64, "p"=>12), Reverse)
     @test length(sd4) == 2 && last(sd4) == ("p"=>12) &&
         first(sd4) == ("w"=>64)
+
+    @test typeof(SortedDict()) == SortedDict{Any,Any,ForwardOrdering}
+    @test typeof(SortedDict(CaseInsensitive())) == SortedDict{Any,Any,CaseInsensitive}
+    @test typeof(SortedDict{Int,Int}(Reverse)) == SortedDict{Int,Int,ReverseOrdering{ForwardOrdering}}
+    @test typeof(SortedDict{Int,Int}(Reverse, 1=>2)) == SortedDict{Int,Int,ReverseOrdering{ForwardOrdering}}
+    @test typeof(SortedDict{Int,Int}(1=>2)) == SortedDict{Int,Int,ForwardOrdering}
+end
+
+@testset "SortedMultiDictConstructors" begin
     sm1 = SortedMultiDict("w" => 64, "p" => 12, "p" => 9)
     @test length(sm1) == 3 && first(sm1) == ("p"=>12) &&
         last(sm1) == ("w"=>64)
@@ -1697,16 +1649,135 @@ function test9()
     sm4 = SortedMultiDict(("w"=> 64, "p"=>12, "p"=>9), Reverse)
     @test length(sm4) == 3 && last(sm4) == ("p"=>9) &&
         first(sm4) == ("w"=>64)
-    nothing
+
+    @test typeof(SortedMultiDict()) == SortedMultiDict{Any,Any,ForwardOrdering}
+    @test typeof(SortedMultiDict(CaseInsensitive())) == SortedMultiDict{Any,Any,CaseInsensitive}
+    @test typeof(SortedMultiDict{Int,Int}(Reverse)) == SortedMultiDict{Int,Int,ReverseOrdering{ForwardOrdering}}
+    # @test typeof(SortedMultiDict{Int,Int}(Reverse, 1=>2)) == SortedMultiDict{Int,Int,ReverseOrdering{ForwardOrdering}}
+    # @test typeof(SortedMultiDict{Int,Int}(1=>2)) == SortedMultiDict{Int,Int,ForwardOrdering}
+end
+
+end # Testset
+
+
+## sorted_dict_timing{123} are not run by package testing
+## but are included for timing tests.
+## They are identical except for their usage of ordering objects.
+
+function sorted_dict_timing1(numtrial::Int, expectedk::String, expectedd::String)
+    NSTRINGPAIR = 50000
+    m1 = SortedDict{Compat.ASCIIString,Compat.ASCIIString}()
+    strlist = Compat.ASCIIString[]
+    open(seekfile("wordsScram.txt"), "r") do inio
+        for j = 1 : NSTRINGPAIR * 2
+            push!(strlist, chomp(readline(inio)))
+        end
+    end
+    for trial = 1 : numtrial
+        empty!(m1)
+        count = 1
+        for j = 1 : NSTRINGPAIR
+            k = strlist[count]
+            d = strlist[count + 1]
+            m1[k] = d
+            count += 2
+        end
+        delct = div(NSTRINGPAIR, 6)
+        for j = 1 : delct
+            l = find(m1, strlist[j * 2 + 1])
+            delete!((m1,l))
+        end
+        spec = div(NSTRINGPAIR * 3,4)
+        l = startof(m1)
+        for j = 1 : spec
+            l = advance((m1,l))
+        end
+        k,d = deref((m1,l))
+        ekn = expectedk
+        edn = expectedd
+        @test k == ekn && d == edn
+    end
 end
 
 
-test1()
-test2()
-test3(0x00000000)
-test4()
-test5()
-#test6(2, "soothingly", "compere")
-test7()
-test8()
-test9()
+
+function sorted_dict_timing2(numtrial::Int, expectedk::String, expectedd::String)
+    NSTRINGPAIR = 50000
+    m1 = SortedDict((Dict{Compat.ASCIIString, Compat.ASCIIString}()), Lt(isless))
+    strlist = Compat.ASCIIString[]
+    open(seekfile("wordsScram.txt"), "r") do inio
+        for j = 1 : NSTRINGPAIR * 2
+            push!(strlist, chomp(readline(inio)))
+        end
+    end
+    for trial = 1 : numtrial
+        empty!(m1)
+        count = 1
+        for j = 1 : NSTRINGPAIR
+            k = strlist[count]
+            d = strlist[count + 1]
+            m1[k] = d
+            count += 2
+        end
+        delct = div(NSTRINGPAIR, 6)
+        for j = 1 : delct
+            l = find(m1, strlist[j * 2 + 1])
+            delete!((m1,l))
+        end
+        spec = div(NSTRINGPAIR * 3,4)
+        l = startof(m1)
+        for j = 1 : spec
+            l = advance((m1,l))
+        end
+        k,d = deref((m1,l))
+        ekn = expectedk
+        edn = expectedd
+        @test k == ekn && d == edn
+    end
+end
+
+function SDConstruct(a::Associative; lt::Function=isless, by::Function=identity)
+    if by == identity
+        return SortedDict(a, Lt(lt))
+    elseif lt == isless
+        return SortedDict(a, By(by))
+    else
+        throw(ErrorException("having both by and lt not both implemented"))
+    end
+end
+
+
+function sorted_dict_timing3(numtrial::Int, expectedk::String, expectedd::String)
+    NSTRINGPAIR = 50000
+    m1 = SDConstruct((Dict{Compat.ASCIIString,Compat.ASCIIString}()), lt=isless)
+    strlist = Compat.ASCIIString[]
+    open(seekfile("wordsScram.txt"), "r") do inio
+        for j = 1 : NSTRINGPAIR * 2
+            push!(strlist, chomp(readline(inio)))
+        end
+    end
+    for trial = 1 : numtrial
+        empty!(m1)
+        count = 1
+        for j = 1 : NSTRINGPAIR
+            k = strlist[count]
+            d = strlist[count + 1]
+            m1[k] = d
+            count += 2
+        end
+        delct = div(NSTRINGPAIR, 6)
+        for j = 1 : delct
+            l = find(m1, strlist[j * 2 + 1])
+            delete!((m1,l))
+        end
+        spec = div(NSTRINGPAIR * 3,4)
+        l = startof(m1)
+        for j = 1 : spec
+            l = advance((m1,l))
+        end
+        k,d = deref((m1,l))
+        ekn = expectedk
+        edn = expectedd
+        @test k == ekn && d == edn
+    end
+end

@@ -13,6 +13,13 @@ type SortedSet{K, Ord <: Ordering}
     end
 end
 
+@compat (::Type{SortedSet})() = SortedSet{Any,ForwardOrdering}(Forward)
+@compat (::Type{SortedSet{K}}){K}() = SortedSet{K,ForwardOrdering}(Forward)
+@compat (::Type{SortedSet}){O<:Ordering}(o::O) = SortedSet{Any,O}(o)
+@compat (::Type{SortedSet{K}}){K,O<:Ordering}(o::O) = SortedSet{K,O}(o)
+# @compat (::Type{SortedSet{K}}){K,O<:Ordering}(o::O, ps...) = SortedSet{K,O}(o, ps...)
+# @compat (::Type{SortedSet{K}}){K}(ps...) = SortedSet{K}(Base.Forward, ps...)
+
 
 typealias SetSemiToken IntSemiToken
 
