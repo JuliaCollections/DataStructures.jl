@@ -572,6 +572,9 @@ end
     merge!(c3,c3)
     @test isequal(c3,c1)
     checkcorrectness(c3.bt, false)
+
+    # issue #216
+    @test DataStructures.isordered(SortedDict{Int, String})
 end
 
 
@@ -1444,6 +1447,8 @@ end
         end
         @test count == 2
     end
+    # issue #216
+    @test DataStructures.isordered(SortedMultiDict{Int, String})
 end
 
 
