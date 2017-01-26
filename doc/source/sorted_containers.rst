@@ -1,7 +1,7 @@
 .. _ref-sorted-containers:
 
 ----------------------------------------
-Overview of Sorted Containers
+Sorted Containers
 ----------------------------------------
 
 Three sorted containers are provided:
@@ -114,8 +114,7 @@ in terms of the container.
 Constructors for Sorted Containers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``SortedDict(o=Forward)``
-``SortedDict{K,V}(o=Forward)``
+``SortedDict(o=Forward)`` ``SortedDict{K,V}(o=Forward)``
   Construct an empty ``SortedDict`` with key type ``K`` and value type ``V``.
   If ``K`` and ``V`` are not specified, the dictionary defaults to a
   ``SortedDict{Any,Any}``.  Keys and values are converted to the
@@ -128,22 +127,19 @@ Constructors for Sorted Containers
   It is recommended to always specify a key type, or to use one of the
   constructors below in which the key type is inferred.**
 
-``SortedDict(k1=>v1, k2=>v2, ...)``
-``SortedDict{K,V}(k1=>v1, k2=>v2, ...)``
+``SortedDict(k1=>v1, k2=>v2, ...)`` ``SortedDict{K,V}(k1=>v1, k2=>v2, ...)``
   Construct a ``SortedDict`` from the given key-value pairs.
   If ``K`` and ``V`` are not specified, key type and
   value type are inferred from the given key-value pairs, and ordering is assumed
   to be ``Forward`` ordering.
 
-``SortedDict(o, k1=>v1, k2=>v2, ...)``
-``SortedDict{K,V}(o, k1=>v1, k2=>v2, ...)``
+``SortedDict(o, k1=>v1, k2=>v2, ...)`` ``SortedDict{K,V}(o, k1=>v1, k2=>v2, ...)``
   Construct a ``SortedDict`` from the given pairs with the specified
   ordering ``o``.  If ``K`` and ``V`` are
   not specified, the key type and value type are inferred from the given pairs.
   See below for more information about ordering.
 
-``SortedDict(d,o=Forward)``
-``SortedDict{K,V}(d,o=Forward)``
+``SortedDict(d,o=Forward)`` ``SortedDict{K,V}(d,o=Forward)``
   Construct a ``SortedDict`` from an ordinary Julia dict ``d`` (or
   any associative type), e.g.::
 
@@ -159,8 +155,7 @@ Constructors for Sorted Containers
 
   See below for more information about ordering.
 
-``SortedDict(iter,o=Forward)``
-``SortedDict{K,V}(iter,o=Forward)``
+``SortedDict(iter,o=Forward)`` ``SortedDict{K,V}(iter,o=Forward)``
   Construct a ``SortedDict`` from an arbitrary iterable object of
   ``key=>value`` pairs.
   If ``K`` and ``V`` are not specified, the key type and value type are inferred
@@ -422,9 +417,10 @@ Inserting & Deleting in Sorted Containers
   Argument ``sc`` is a SortedDict or SortedMultiDict and ``k=>v`` is a
   key-value pair.
   This inserts the key-value pair into
-  the container.  If the key is already present in a
+  the container.  For SortedDict, if the key is already present in a
   this overwrites
-  the old value.
+  the old value.  For SortedMultiDict, this operation always inserts
+  a new item.
   The return
   value is ``sc``.
   Time: O(*c* log *n*)
@@ -881,8 +877,9 @@ Set operations
 
 The SortedSet container supports the following set operations.  Note that
 in the case of intersect, symdiff and setdiff, the two SortedSets should
-have the same key and ordering object.  If they have different key or ordering
-types, no error
+have the same key type and ordering object.  If they have different key 
+types or ordering
+objects, no error
 message is produced; instead, the built-in default versions of these functions
 (that can be applied to ``Any`` iterables and that return arrays) are invoked.
 
