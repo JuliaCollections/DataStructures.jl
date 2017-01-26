@@ -162,4 +162,7 @@ end
     # Alternate constructor
     @test isa(DefaultOrderedDict(0.0), DefaultOrderedDict{Any, Any, Float64})
     @test isa(DefaultOrderedDict(0.0, [(1, 1.0)]), DefaultOrderedDict{Int, Float64, Float64})
+
+    # issue #216
+    @test DataStructures.isordered(DefaultOrderedDict{Int, String})
 end

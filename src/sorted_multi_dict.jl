@@ -260,3 +260,5 @@ end
 
 similar{K,D,Ord<:Ordering}(m::SortedMultiDict{K,D,Ord}) =
    SortedMultiDict(K[], D[], orderobject(m))
+
+isordered{T<:SortedMultiDict}(::Type{T}) = true

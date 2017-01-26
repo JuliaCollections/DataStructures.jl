@@ -297,6 +297,10 @@ for k5886 in keys(d5886)
    d5886[k5886] += 1
 end
 
+# issue #216
+@test DataStructures.isordered(OrderedDict{Int, String})
+@test !DataStructures.isordered(Dict{Int, String})
+
 # Test merging
 let
     a = OrderedDict("foo"  => 0.0, "bar" => 42.0)
