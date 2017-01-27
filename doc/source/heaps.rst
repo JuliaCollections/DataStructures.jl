@@ -23,9 +23,11 @@ All heaps in this package are derived from ``AbstractHeap``, and provide the fol
 Mutable heaps (values can be changed after being pushed to a heap) are derived from
 ``AbstractMutableHeap <: AbstractHeap``, and additionally provides the following interface::
 
-  i = push!(h, v)       # adds a value to the heap and and returns a handle to v
+  i = push!(h, v)              # adds a value to the heap and and returns a handle to v
 
-  update!(h, i, v)      # updates the value of an element (referred to by the handle i)
+  update!(h, i, v)             # updates the value of an element (referred to by the handle i)
+
+  v, i = top_with_handle(h)    # returns the top value of a heap and its handle
 
 
 Currently, both min/max versions of binary heap (type ``BinaryHeap``) and mutable binary heap (type ``MutableBinaryHeap``) have been implemented.

@@ -155,27 +155,42 @@ push!(h, 2)
 @test isequal(list_values(h), [10, 7])
 
 
-# test update!
+# test update! and top_with_handle
+for (hf,m) = [(mutable_binary_minheap,-2.0), (mutable_binary_maxheap,2.0)]
+    xs = rand(100)
+    h = hf(xs)
+    @test length(h) == 100
+    @test verify_heap(h)
 
-xs = rand(100)
-hmin = mutable_binary_minheap(xs)
-hmax = mutable_binary_maxheap(xs)
+    for t = 1:1000
+        i = rand(1:100)
+        v = rand()
+        xs[i] = v
+        update!(h, i, v)
+        @test length(h) == 100
+        @test verify_heap(h)
+        @test isequal(list_values(h), xs)
 
-@test length(hmin) == 100
-@test length(hmax) == 100
-@test verify_heap(hmin)
-@test verify_heap(hmax)
+        v, i = top_with_handle(h)
+        update!(h, i, m)
+        xs[i] = m
+        @test length(h) == 100
+        @test verify_heap(h)
+        @test isequal(list_values(h), xs)
+        @test top_with_handle(h) == (m, i)
 
-for t = 1 : 1000
-    i = rand(1:100)
-    v = rand()
-    xs[i] = v
-    update!(hmin, i, v)
-    update!(hmax, i, v)
-    @test length(hmin) == 100
-    @test length(hmax) == 100
-    @test verify_heap(hmin)
-    @test verify_heap(hmax)
-    @test isequal(list_values(hmin), xs)
-    @test isequal(list_values(hmax), xs)
+        update!(h, i, -m)
+        xs[i] = -m
+        @test length(h) == 100
+        @test verify_heap(h)
+        @test isequal(list_values(h), xs)
+        @test top_with_handle(h)[2] ≠ i
+
+        update!(h, i, v)
+        xs[i] = v
+        @test length(h) == 100
+        @test verify_heap(h)
+        @test isequal(list_values(h), xs)
+        @test top_with_handle(h) == (v, i)
+    end
 end

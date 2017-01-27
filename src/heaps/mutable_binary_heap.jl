@@ -210,6 +210,16 @@ end
 
 top(h::MutableBinaryHeap) = h.nodes[1].value
 
+"""
+    top_with_handle(h::MutableBinaryHeap)
+
+Returns the element at the top of the heap `h` and its handle.
+"""
+function top_with_handle(h::MutableBinaryHeap)
+    el = h.nodes[1]
+    return el.value, el.handle
+end
+
 pop!{T}(h::MutableBinaryHeap{T}) = _binary_heap_pop!(h.comparer, h.nodes, h.node_map)
 
 """
