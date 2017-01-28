@@ -104,7 +104,7 @@ end
 
 type BinaryHeap{T,Comp} <: AbstractHeap{T}
     comparer::Comp
-    valtree::Array{T}
+    valtree::Vector{T}
 
     function BinaryHeap(comp::Comp)
         new(comp, Vector{T}(0))
