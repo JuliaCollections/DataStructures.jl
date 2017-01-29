@@ -61,3 +61,8 @@ ctm = merge(ct2, ct3)
 @test pop!(ctm, "b") == 22
 @test !haskey(ctm, "b")
 @test ctm["b"] == 0
+
+ct4 = counter(Pair{Int,Int})
+@test isa(ct4, Accumulator{Pair{Int,Int}})
+@test push!(ct4, 1=>2) == 1
+@test push!(ct4, 1=>2) == 2
