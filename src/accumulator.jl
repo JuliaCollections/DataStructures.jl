@@ -40,6 +40,8 @@ values(ct::Accumulator) = values(ct.map)
 
 sum(ct::Accumulator) = sum(values(ct.map))
 
+most_common(ct::Accumulator) = sort(collect(ct.map), by=p->p[2], rev=true)
+
 ## iteration
 
 start(ct::Accumulator) = start(ct.map)

@@ -61,3 +61,7 @@ ctm = merge(ct2, ct3)
 @test pop!(ctm, "b") == 22
 @test !haskey(ctm, "b")
 @test ctm["b"] == 0
+
+mc = most_common(ct3)
+@test isa(mc, Array{Pair{ASCIIString,Int64},1})
+@test mc == [Pair("b", 20), Pair("a", 10)]
