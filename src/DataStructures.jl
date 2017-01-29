@@ -20,7 +20,7 @@ module DataStructures
 
     export Deque, Stack, Queue, CircularDeque
     export deque, enqueue!, dequeue!, update!, reverse_iter
-    export capacity, num_blocks, front, back, top, sizehint!
+    export capacity, num_blocks, front, back, top, top_with_handle, sizehint!
 
     export Accumulator, counter
     export ClassifiedCollections

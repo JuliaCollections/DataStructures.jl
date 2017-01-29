@@ -15,27 +15,31 @@
 #   functions. Here, let h be a heap, i be a handle, and
 #   v be a value.
 #
-#   - length(h)         returns the number of elements
+#   - length(h)           returns the number of elements
 #
-#   - isempty(h)        returns whether the heap is
-#                       empty
+#   - isempty(h)          returns whether the heap is
+#                         empty
 #
-#   - push!(h, v)       add a value to the heap
+#   - push!(h, v)         add a value to the heap
 #
-#   - sizehint!(h)       set size hint to a heap
+#   - sizehint!(h)         set size hint to a heap
 #
-#   - top(h)            return the top value of a heap
+#   - top(h)              return the top value of a heap
 #
-#   - pop!(h)           removes the top value, and
-#                       returns it
+#   - pop!(h)             removes the top value, and
+#                         returns it
 #
 #  For mutable heaps, it should also support
 #
-#   - push!(h, v)       adds a value to the heap and
-#                       returns a handle to v
+#   - push!(h, v)         adds a value to the heap and
+#                         returns a handle to v
 #
-#   - update!(h, i, v)  updates the value of an element
-#                       (referred to by the handle i)
+#   - update!(h, i, v)    updates the value of an element
+#                         (referred to by the handle i)
+#
+#   - top_with_handle(h)  return the top value of a heap
+#                         and its handle
+#
 #
 ###########################################################
 
