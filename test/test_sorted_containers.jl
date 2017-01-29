@@ -1465,7 +1465,7 @@ end
     @test typeof(m) == SortedSet{Float64, ForwardOrdering}
     mm = SortedSet{Float64}()
     @test typeof(mm) == SortedSet{Float64, ForwardOrdering}
-    #@test m == mm   # Broken!  TODO: Fix me...
+    @test m == mm
     @test isequal(m, mm)
 
     @test typeof(SortedSet()) == SortedSet{Any, ForwardOrdering}
@@ -1473,6 +1473,14 @@ end
     @test typeof(SortedSet(Reverse)) == SortedSet{Any, ReverseOrdering{ForwardOrdering}}
     @test typeof(SortedSet{Float64}(Reverse)) == SortedSet{Float64, ReverseOrdering{ForwardOrdering}}
 
+    @test SortedSet([1,2]) < SortedSet([1,2,3])
+    @test SortedSet([1,2]) <= SortedSet([1,2,3])
+    @test SortedSet([1,2,3]) <= SortedSet([1,2,3])
+
+    @test SortedSet([1,2]) ⊊ SortedSet([1,2,3])
+    @test SortedSet([1,2]) ⊆ SortedSet([1,2,3])
+    @test SortedSet([1,2,3]) ⊆ SortedSet([1,2,3])
+    @test SortedSet([1,4]) ⊈ SortedSet([1,2,3])
 
     smallest = 10.0
     largest = -10.0
