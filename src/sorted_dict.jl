@@ -31,12 +31,6 @@ end
 SortedDict() = SortedDict{Any,Any,ForwardOrdering}(Forward)
 SortedDict{Ord <: Ordering}(o::Ord) = SortedDict{Any,Any,Ord}(o)
 
-function not_iterator_of_pairs(kv)
-    return any(x->isempty(methodswith(typeof(kv), x, true)),
-               [start, next, done]) ||
-           any(x->!isa(x, Union{Tuple,Pair}), kv)
-end
-
 # Construction from Pairs
 # TODO: fix SortedDict(1=>1, 2=>2.0)
 SortedDict(ps::Pair...) = SortedDict(Forward, ps)
@@ -66,6 +60,14 @@ end
 
 # Construction inferring Key/Value types from input
 # e.g. SortedDict{}
+
+function not_iterator_of_pairs(kv)
+    return any(x->isempty(methodswith(typeof(kv), x, true)),
+               [start, next, done]) ||
+           any(x->!isa(x, Union{Tuple,Pair}), kv)
+end
+
+SortedDict(o1::Ordering, o2::Ordering) = throw(ArgumentError("SortedDict with two parameters must be called with an Ordering and an interable of pairs"))
 SortedDict(kv, o::Ordering=Forward) = SortedDict(o, kv)
 function SortedDict(o::Ordering, kv)
     try
@@ -89,9 +91,8 @@ _sorted_dict_with_eltype{    Ord}(o::Ord, kv, ::Type            ) = SortedDict{A
 # if VERSION < v"0.6.0-dev.2123"
 #     _sorted_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{TypeVar(:K),D}}) = SortedDict{Any,  D,Ord}(o, ps)
 # else
-#     eval(parse("_sorted_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,D} where K}) = SortedDict{Any,  D,Ord}(o, ps)"))
+#     include_string("_sorted_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,D} where K}) = SortedDict{Any,  D,Ord}(o, ps)")
 # end
-
 
 typealias SDSemiToken IntSemiToken
 

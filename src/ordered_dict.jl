@@ -61,7 +61,7 @@ _oldOrderedDict1 = "OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = Ord
 _newOrderedDict1 = "OrderedDict{V}(kv::Tuple{Vararg{Pair{K,V} where K}})   = OrderedDict{Any,V}(kv)"
 OrderedDict{K,V}(kv::Tuple{Vararg{Pair{K,V}}})         = OrderedDict{K,V}(kv)
 OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})             = OrderedDict{K,Any}(kv)
-eval(VERSION < v"0.6.0-dev.2123" ? parse(_oldOrderedDict1) : parse(_newOrderedDict1))
+VERSION < v"0.6.0-dev.2123" ? include_string(_oldOrderedDict1) : include_string(_newOrderedDict1)
 OrderedDict(kv::Tuple{Vararg{Pair}})                   = OrderedDict{Any,Any}(kv)
 
 OrderedDict{K,V}(kv::AbstractArray{Tuple{K,V}}) = OrderedDict{K,V}(kv)
@@ -72,7 +72,7 @@ _oldOrderedDict2 = "OrderedDict{V}(ps::Pair{TypeVar(:K),V}...,) = OrderedDict{An
 _newOrderedDict2 = "OrderedDict{V}(ps::(Pair{K,V} where K)...,) = OrderedDict{Any,V}(ps)"
 OrderedDict{K,V}(ps::Pair{K,V}...)          = OrderedDict{K,V}(ps)
 OrderedDict{K}(ps::Pair{K}...,)             = OrderedDict{K,Any}(ps)
-eval(VERSION < v"0.6.0-dev.2123" ? parse(_oldOrderedDict2) : parse(_newOrderedDict2))
+VERSION < v"0.6.0-dev.2123" ? include_string(_oldOrderedDict2) : include_string(_newOrderedDict2)
 OrderedDict(ps::Pair...)                    = OrderedDict{Any,Any}(ps)
 
 function OrderedDict(kv)
