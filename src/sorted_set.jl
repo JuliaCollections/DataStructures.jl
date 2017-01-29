@@ -5,44 +5,45 @@
 @compat type SortedSet{K, Ord <: Ordering}
     bt::BalancedTree23{K,Void,Ord}
 
-    ## Zero-argument constructor, or possibly one argument to specify order.
+    function (::Type{SortedSet{K,Ord}}){K,Ord<:Ordering}(o::Ord=Forward, iter=[])
+        sorted_set = new{K,Ord}(BalancedTree23{K,Void,Ord}(o))
 
-    function (::Type{SortedSet{K,Ord}}){K, Ord <: Ordering}(o::Ord=Forward)
-        bt1 = BalancedTree23{K,Void,Ord}(o)
-        new{K,Ord}(bt1)
+        for item in iter
+            push!(sorted_set, item)
+        end
+
+        sorted_set
     end
 end
 
-@compat (::Type{SortedSet})() = SortedSet{Any,ForwardOrdering}(Forward)
-@compat (::Type{SortedSet{K}}){K}() = SortedSet{K,ForwardOrdering}(Forward)
-@compat (::Type{SortedSet}){O<:Ordering}(o::O) = SortedSet{Any,O}(o)
-@compat (::Type{SortedSet{K}}){K,O<:Ordering}(o::O) = SortedSet{K,O}(o)
-# @compat (::Type{SortedSet{K}}){K,O<:Ordering}(o::O, ps...) = SortedSet{K,O}(o, ps...)
-# @compat (::Type{SortedSet{K}}){K}(ps...) = SortedSet{K}(Base.Forward, ps...)
+SortedSet() = SortedSet{Any,ForwardOrdering}(Forward)
+SortedSet{O<:Ordering}(o::O) = SortedSet{Any,O}(o)
 
+if VERSION < v"0.5"
+    # To address ambiguity warnings on Julia v0.4
+    SortedSet(o1::Ordering,o2::Ordering) =
+        throw(ArgumentError("SortedSet with two parameters must be called with an Ordering and an interable"))
+end
+SortedSet(o::Ordering, iter) = sortedset_with_eltype(o, iter, eltype(iter))
+SortedSet(iter, o::Ordering=Forward) = sortedset_with_eltype(o, iter, eltype(iter))
+
+@compat (::Type{SortedSet{K}}){K}() = SortedSet{K,ForwardOrdering}(Forward)
+@compat (::Type{SortedSet{K}}){K,O<:Ordering}(o::O) = SortedSet{K,O}(o)
+
+if VERSION < v"0.5"
+    # To address ambiguity warnings on Julia v0.4
+    @compat (::Type{SortedSet{K}}){K}(o1::Ordering,o2::Ordering) =
+        throw(ArgumentError("SortedSet with two parameters must be called with an Ordering and an interable"))
+end
+@compat (::Type{SortedSet{K}}){K}(o::Ordering, iter) = sortedset_with_eltype(o, iter, K)
+@compat (::Type{SortedSet{K}}){K}(iter, o::Ordering=Forward) = sortedset_with_eltype(o, iter, K)
+
+sortedset_with_eltype{K,Ord}(o::Ord, iter, ::Type{K}) = SortedSet{K,Ord}(o, iter)
 
 const SetSemiToken = IntSemiToken
 
 # The following definition was moved to tokens2.jl
 # const SetToken = Tuple{SortedSet, IntSemiToken}
-
-## This constructor takes an iterable; order defaults
-## to Forward
-
-## This one takes an iterable; ordering type is optional.
-
-SortedSet{Ord <: Ordering}(iter, o::Ord=Forward) =
-    sortedset_with_eltype(iter, eltype(iter), o)
-
-function sortedset_with_eltype{K,Ord}(iter, ::Type{K}, o::Ord)
-    h = SortedSet{K,Ord}(o)
-    for k in iter
-        insert!(h, k)
-    end
-    h
-end
-
-
 
 ## This function looks up a key in the tree;
 ## if not found, then it returns a marker for the
