@@ -53,6 +53,13 @@ push!{T,V<:Number}(ct::Accumulator{T,V}, x::T, a::V) = (ct.map[x] = ct[x] + a)
 push!{T,V<:Number,V2<:Number}(ct::Accumulator{T,V}, x::T, a::V2) = push!(ct, x, convert(V,a))
 push!{T,V<:Number}(ct::Accumulator{T,V}, x::T) = push!(ct, x, one(V))
 
+# To remove ambiguities related to Accumulator now being a subtype of Associative
+if VERSION < v"0.6.0-dev.2123"
+    push!{T,V<:Number}(ct::Accumulator{T,V}, x::Pair) = push!(ct, x, one(V))
+else
+    include_string("push!(ct::Accumulator{T,V}, x::T) where T<:Pair where V<:Number = push!(ct, x, one(V))")
+end
+
 function push!{T,V<:Number,V2<:Number}(ct::Accumulator{T,V}, r::Accumulator{T,V2})
     for (x::T, v::V2) in r
         push!(ct, x, v)

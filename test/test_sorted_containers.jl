@@ -1639,6 +1639,8 @@ end
     @test typeof(SortedDict{Int,Int}(Reverse)) == SortedDict{Int,Int,ReverseOrdering{ForwardOrdering}}
     @test typeof(SortedDict{Int,Int}(Reverse, 1=>2)) == SortedDict{Int,Int,ReverseOrdering{ForwardOrdering}}
     @test typeof(SortedDict{Int,Int}(1=>2)) == SortedDict{Int,Int,ForwardOrdering}
+
+    @test_throws ArgumentError SortedDict(Reverse, Reverse)
 end
 
 @testset "SortedMultiDictConstructors" begin
