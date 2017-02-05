@@ -5,6 +5,10 @@ else
     const Test = BaseTestNext
 end
 
+if VERSION >= v"0.6.0-dev.1765"
+    using Primes
+end
+
 using DataStructures
 import Base.Ordering
 import Base.Forward
