@@ -226,6 +226,7 @@ pop!{T}(h::MutableBinaryHeap{T}) = _binary_heap_pop!(h.comparer, h.nodes, h.node
     update!{T}(h::MutableBinaryHeap{T}, i::Int, v::T)
 
 Replace the element at index `i` in heap `h` with `v`.
+This is equivalent to `h[i]=v`.
 """
 function update!{T}(h::MutableBinaryHeap{T}, i::Int, v::T)
     nodes = h.nodes
@@ -241,3 +242,6 @@ function update!{T}(h::MutableBinaryHeap{T}, i::Int, v::T)
         _heap_bubble_down!(comp, nodes, nodemap, nd_id)
     end
 end
+
+setindex!(h::MutableBinaryHeap, v, i::Int) = update!(h, i, v)
+getindex(h::MutableBinaryHeap, i::Int) = h.nodes[h.node_map[i]].value

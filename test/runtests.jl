@@ -9,7 +9,8 @@ const IntSet = DataStructures.IntSet
 import Compat: String
 using Primes
 
-tests = ["int_set",
+tests = [
+         "int_set",
          "deque",
          "circ_deque",
          "sorted_containers",
@@ -27,7 +28,8 @@ tests = ["int_set",
          "multi_dict",
          "circular_buffer",
          "sorting",
-         "priorityqueue"]
+         "priorityqueue"
+        ]
 
 if length(ARGS) > 0
     tests = ARGS

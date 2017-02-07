@@ -192,5 +192,14 @@ for (hf,m) = [(mutable_binary_minheap,-2.0), (mutable_binary_maxheap,2.0)]
         @test verify_heap(h)
         @test isequal(list_values(h), xs)
         @test top_with_handle(h) == (v, i)
+
+        i = rand(1:100)
+        v = rand()
+        h[i] = v
+        xs[i] = v
+        @test length(h) == 100
+        @test verify_heap(h)
+        @test isequal(list_values(h), xs)
+        @test v == h[i]
     end
 end
