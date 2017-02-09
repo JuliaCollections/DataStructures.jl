@@ -1,4 +1,3 @@
-
 # OrderedDict
 
 import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
@@ -14,25 +13,25 @@ import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
 `OrderedDict`s are  simply dictionaries  whose entries  have a  particular order.  The order
 refers to insertion order, which allows deterministic iteration over the dictionary or set.
 """
-type OrderedDict{K,V} <: Associative{K,V}
+@compat type OrderedDict{K,V} <: Associative{K,V}
     slots::Array{Int32,1}
     keys::Array{K,1}
     vals::Array{V,1}
     ndel::Int
     dirty::Bool
 
-    function OrderedDict()
-        new(zeros(Int32,16), Vector{K}(0), Vector{V}(0), 0, false)
+    function (::Type{OrderedDict{K,V}}){K,V}()
+        new{K,V}(zeros(Int32,16), Vector{K}(0), Vector{V}(0), 0, false)
     end
-    function OrderedDict(kv)
+    function (::Type{OrderedDict{K,V}}){K,V}(kv)
         h = OrderedDict{K,V}()
         for (k,v) in kv
             h[k] = v
         end
         return h
     end
-    OrderedDict(p::Pair) = setindex!(OrderedDict{K,V}(), p.second, p.first)
-    function OrderedDict(ps::Pair...)
+    (::Type{OrderedDict{K,V}}){K,V}(p::Pair) = setindex!(OrderedDict{K,V}(), p.second, p.first)
+    function (::Type{OrderedDict{K,V}}){K,V}(ps::Pair...)
         h = OrderedDict{K,V}()
         sizehint!(h, length(ps))
         for p in ps
@@ -40,12 +39,12 @@ type OrderedDict{K,V} <: Associative{K,V}
         end
         return h
     end
-    function OrderedDict(d::OrderedDict{K,V})
+    function (::Type{OrderedDict{K,V}}){K,V}(d::OrderedDict{K,V})
         if d.ndel > 0
             rehash!(d)
         end
         @assert d.ndel == 0
-        new(copy(d.slots), copy(d.keys), copy(d.vals), 0)
+        new{K,V}(copy(d.slots), copy(d.keys), copy(d.vals), 0)
     end
 end
 OrderedDict() = OrderedDict{Any,Any}()

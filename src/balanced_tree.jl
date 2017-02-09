@@ -7,9 +7,9 @@
 ## children.
 ## All the internal tree
 ## nodes are stored in an array of TreeNodes.  The bottom layer
-## of internal tree nodes, 
+## of internal tree nodes,
 ## called the "leaves" in this file, sit above one more layer
-## of data nodes, which are stored in a different array.  
+## of data nodes, which are stored in a different array.
 
 
 ## KDRec is one data node:
@@ -25,16 +25,16 @@
 ##  data nodes.
 
 
-immutable KDRec{K,D}
+@compat immutable KDRec{K,D}
     parent::Int
     k::K
     d::D
-    KDRec(p::Int, k1::K, d1::D) = new(p,k1,d1)
-    KDRec(p::Int) = new(p)
+    (::Type{KDRec{K,D}}){K,D}(p::Int, k1::K, d1::D) = new{K,D}(p,k1,d1)
+    (::Type{KDRec{K,D}}){K,D}(p::Int) = new{K,D}(p)
 end
 
 ## TreeNode is an internal node of the tree.
-## child1,child2,child3:  
+## child1,child2,child3:
 ##     These are the three children node numbers.
 ##     If the node is a 2-node (rather than 3), then child3 == 0.
 ##     If this is a leaf then child1,child2,child3 are subscripts
@@ -42,21 +42,21 @@ end
 ## splitkey1:
 ##    the minimum key of the subtree at child2.  If this is a leaf
 ##    then it is the key of child2.
-## splitkey2: 
+## splitkey2:
 ##    if child3 > 0 then splitkey2 is the minimum key of the subtree at child3.
 ##    If this is a leaf, then it is the key of child3.
 ## Again, there are two constructors for the same reason mentioned above.
 
-immutable TreeNode{K}
+@compat immutable TreeNode{K}
     child1::Int
     child2::Int
     child3::Int
     parent::Int
     splitkey1::K
     splitkey2::K
-    TreeNode(::Type{K}, c1::Int, c2::Int, c3::Int, p::Int) = new(c1, c2, c3, p)
-    TreeNode(c1::Int, c2::Int, c3::Int, p::Int, sk1::K, sk2::K) = 
-        new(c1, c2, c3, p, sk1, sk2)
+    (::Type{TreeNode{K}}){K}(::Type{K}, c1::Int, c2::Int, c3::Int, p::Int) = new{K}(c1, c2, c3, p)
+    (::Type{TreeNode{K}}){K}(c1::Int, c2::Int, c3::Int, p::Int, sk1::K, sk2::K) =
+        new{K}(c1, c2, c3, p, sk1, sk2)
 end
 
 
@@ -90,15 +90,15 @@ end
 ## ord:: The ordering object.  Often the ordering type
 ##   is a singleton type, so this field is empty, but it
 ##   is still necessary to direct the multiple dispatch.
-## data: the (key,data) pairs of the tree.  
+## data: the (key,data) pairs of the tree.
 ##   The first and second entries of the data array are dummy placeholders
 ##   for the beginning and end of the sorted order of the keys
 ## tree: the nodes of a 2-3 tree that sits above the data.
-## rootloc: the index of the entry of tree (i.e., a subscript to 
-##   treenodes) that is the tree's root    
+## rootloc: the index of the entry of tree (i.e., a subscript to
+##   treenodes) that is the tree's root
 ## depth: the depth of the tree, (number
 ##    of tree levels, not counting the level of data at the bottom)
-##    depth==1 means that there is a single root node 
+##    depth==1 means that there is a single root node
 ##      whose children are data nodes.
 ## freetreeinds: Array of indices of free locations in the
 ##    tree array (locations are freed due to deletion)
@@ -111,7 +111,7 @@ end
 ## deletionchild and deletionleftkey are two work-arrays
 ## for the delete function.
 
-type BalancedTree23{K, D, Ord <: Ordering}
+@compat type BalancedTree23{K, D, Ord <: Ordering}
     ord::Ord
     data::Array{KDRec{K,D}, 1}
     tree::Array{TreeNode{K}, 1}
@@ -124,16 +124,16 @@ type BalancedTree23{K, D, Ord <: Ordering}
     # function.
     deletionchild::Array{Int,1}
     deletionleftkey::Array{K,1}
-    function BalancedTree23(ord1::Ord)
+    function (::Type{BalancedTree23{K,D,Ord}}){K,D,Ord<:Ordering}(ord1::Ord)
         tree1 = Vector{TreeNode{K}}(1)
         initializeTree!(tree1)
         data1 = Vector{KDRec{K,D}}(2)
         initializeData!(data1)
         u1 = IntSet()
         push!(u1, 1, 2)
-        new(ord1, data1, tree1, 1, 1, Vector{Int}(0), Vector{Int}(0),
-            u1,
-            Vector{Int}(3), Vector{K}(3))
+        new{K,D,Ord}(ord1, data1, tree1, 1, 1, Vector{Int}(0), Vector{Int}(0),
+                     u1,
+                     Vector{Int}(3), Vector{K}(3))
     end
 end
 
@@ -955,7 +955,7 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
         t.depth -= 1
         push!(t.freetreeinds, p)
     end
-    
+
     ## If deletionleftkey1_valid, this means that the new
     ## min key of the deleted node and its right neighbors
     ## has never been stored in the tree.  It must be stored
@@ -964,8 +964,8 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
     ## until we find a node which has p (and therefore the
     ## deleted node) as its descendent through its second
     ## or third child.
-    ## It cannot be the case that the deleted node is 
-    ## is a descendent of the root always through 
+    ## It cannot be the case that the deleted node is
+    ## is a descendent of the root always through
     ## first children, since this would mean the deleted
     ## node is the leftmost placeholder, which
     ## cannot be deleted.
@@ -996,7 +996,6 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
                 # @assert(curdepth > 0)
             end
         end
-    end                                  
+    end
     nothing
 end
-

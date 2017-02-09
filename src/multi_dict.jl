@@ -5,14 +5,12 @@ import Base: haskey, get, get!, getkey, delete!, pop!, empty!,
              next, done, keys, values, copy, similar,  push!,
              count, size, eltype
 
-immutable MultiDict{K,V}
+@compat immutable MultiDict{K,V}
     d::Dict{K,Vector{V}}
 
-    MultiDict() = new(Dict{K,Vector{V}}())
-    MultiDict(kvs) = new(Dict{K,Vector{V}}(kvs))
-    if VERSION >= v"0.4.0-dev+980"
-        MultiDict(ps::Pair{K,Vector{V}}...) = new(Dict{K,Vector{V}}(ps...))
-    end
+    (::Type{MultiDict{K,V}}){K,V}() = new{K,V}(Dict{K,Vector{V}}())
+    (::Type{MultiDict{K,V}}){K,V}(kvs) = new{K,V}(Dict{K,Vector{V}}(kvs))
+    (::Type{MultiDict{K,V}}){K,V}(ps::Pair{K,Vector{V}}...) = new{K,V}(Dict{K,Vector{V}}(ps...))
 end
 
 MultiDict() = MultiDict{Any,Any}()
@@ -29,16 +27,14 @@ function multi_dict_with_eltype{K,V}(kvs, ::Type{Tuple{K,V}})
 end
 multi_dict_with_eltype(kvs, t) = MultiDict{Any,Any}(kvs)
 
-if VERSION >= v"0.4.0-dev+980"
-    MultiDict{K,V<:AbstractArray}(ps::Pair{K,V}...) = MultiDict{K, eltype(V)}(ps)
-    MultiDict{K,V}(kv::AbstractArray{Pair{K,V}})  = MultiDict(kv...)
-    function  MultiDict{K,V}(ps::Pair{K,V}...)
-        md = MultiDict{K,V}()
-        for (k,v) in ps
-            insert!(md, k, v)
-        end
-        return md
+MultiDict{K,V<:AbstractArray}(ps::Pair{K,V}...) = MultiDict{K, eltype(V)}(ps)
+MultiDict{K,V}(kv::AbstractArray{Pair{K,V}})  = MultiDict(kv...)
+function MultiDict{K,V}(ps::Pair{K,V}...)
+    md = MultiDict{K,V}()
+    for (k,v) in ps
+        insert!(md, k, v)
     end
+    return md
 end
 
 ## Functions

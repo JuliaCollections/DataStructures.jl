@@ -1,15 +1,14 @@
 ## A SortedDict is a wrapper around balancedTree with
 ## methods similiar to those of Julia container Dict.
 
-
-type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
+@compat type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
     bt::BalancedTree23{K,D,Ord}
 
 ## Zero-argument constructor, or possibly one argument to specify order.
 
-    function SortedDict(o::Ord=Forward)
+    function (::Type{SortedDict{K,D,Ord}}){K, D, Ord <: Ordering}(o::Ord=Forward)
         bt1 = BalancedTree23{K,D,Ord}(o)
-        new(bt1)
+        new{K,D,Ord}(bt1)
     end
 
 end

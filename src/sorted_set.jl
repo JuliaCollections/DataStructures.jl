@@ -2,14 +2,14 @@
 ## methods similiar to those of the julia Set.
 
 
-type SortedSet{K, Ord <: Ordering}
+@compat type SortedSet{K, Ord <: Ordering}
     bt::BalancedTree23{K,Void,Ord}
 
     ## Zero-argument constructor, or possibly one argument to specify order.
 
-    function SortedSet(o::Ord=Forward)
+    function (::Type{SortedSet{K,Ord}}){K, Ord <: Ordering}(o::Ord=Forward)
         bt1 = BalancedTree23{K,Void,Ord}(o)
-        new(bt1)
+        new{K,Ord}(bt1)
     end
 end
 
