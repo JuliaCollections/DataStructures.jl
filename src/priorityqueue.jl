@@ -23,7 +23,7 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
   "a" => 2
 ```
 """
-type PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
+@compat type PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
     # Binary heap of (element, priority) pairs.
     xs::Array{Pair{K,V}, 1}
     o::O
@@ -31,14 +31,14 @@ type PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
     # Map elements to their index in xs
     index::Dict{K, Int}
 
-    function PriorityQueue(o::O)
-        new(Vector{Pair{K,V}}(0), o, Dict{K, Int}())
+    function (::Type{PriorityQueue{K,V,O}}){K,V,O<:Ordering}(o::O)
+        new{K,V,O}(Vector{Pair{K,V}}(0), o, Dict{K, Int}())
     end
 
-    PriorityQueue() = PriorityQueue{K,V,O}(Forward)
+    (::Type{PriorityQueue{K,V,O}}){K,V,O<:Ordering}() = PriorityQueue{K,V,O}(Forward)
 
-    function PriorityQueue(ks::AbstractArray{K}, vs::AbstractArray{V},
-                           o::O)
+    function (::Type{PriorityQueue{K,V,O}}){K,V,O<:Ordering}(ks::AbstractArray{K},
+                                                             vs::AbstractArray{V}, o::O)
         # TODO: maybe deprecate
         if length(ks) != length(vs)
             throw(ArgumentError("key and value arrays must have equal lengths"))
@@ -46,7 +46,7 @@ type PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
         PriorityQueue{K,V,O}(zip(ks, vs), o)
     end
 
-    function PriorityQueue(itr, o::O)
+    function (::Type{PriorityQueue{K,V,O}}){K,V,O<:Ordering}(itr, o::O)
         xs = Vector{Pair{K,V}}(length(itr))
         index = Dict{K, Int}()
         for (i, (k, v)) in enumerate(itr)
@@ -56,7 +56,7 @@ type PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
             end
             index[k] = i
         end
-        pq = new(xs, o, index)
+        pq = new{K,V,O}(xs, o, index)
 
         # heapify
         for i in heapparent(length(pq.xs)):-1:1

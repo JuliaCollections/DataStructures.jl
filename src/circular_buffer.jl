@@ -1,13 +1,12 @@
-
 """
 New items are pushed to the back of the list, overwriting values in a circular fashion.
 """
-type CircularBuffer{T} <: AbstractVector{T}
+@compat type CircularBuffer{T} <: AbstractVector{T}
     capacity::Int
     first::Int
     buffer::Vector{T}
 
-    CircularBuffer(capacity::Int) = new(capacity, 1, T[])
+    (::Type{CircularBuffer{T}}){T}(capacity::Int) = new{T}(capacity, 1, T[])
 end
 
 function _buffer_index(cb::CircularBuffer, i::Int)

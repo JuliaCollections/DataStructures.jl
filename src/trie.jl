@@ -1,16 +1,16 @@
-type Trie{T}
+@compat type Trie{T}
     value::T
     children::Dict{Char,Trie{T}}
     is_key::Bool
 
-    function Trie()
-        self = new()
+    function (::Type{Trie{T}}){T}()
+        self = new{T}()
         self.children = Dict{Char,Trie{T}}()
         self.is_key = false
         self
     end
 
-    function Trie(ks, vs)
+    function (::Type{Trie{T}}){T}(ks, vs)
         t = Trie{T}()
         for (k, v) in zip(ks, vs)
             t[k] = v
@@ -18,7 +18,7 @@ type Trie{T}
         return t
     end
 
-    function Trie(kv)
+    function (::Type{Trie{T}}){T}(kv)
         t = Trie{T}()
         for (k,v) in kv
             t[k] = v

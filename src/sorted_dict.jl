@@ -1,15 +1,16 @@
 ## A SortedDict is a wrapper around balancedTree with
 ## methods similiar to those of Julia container Dict.
 
-type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
+@compat type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
     bt::BalancedTree23{K,D,Ord}
 
     ## Base constructors
 
-    SortedDict(o::Ord) = new(BalancedTree23{K,D,Ord}(o))
+    (::Type{SortedDict{K,D,Ord}}){K, D, Ord <: Ordering}(o::Ord) =
+        new{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
 
-    function SortedDict(o::Ord, kv)
-        s = new(BalancedTree23{K,D,Ord}(o))
+    function (::Type{SortedDict{K,D,Ord}}){K, D, Ord <: Ordering}(o::Ord, kv)
+        s = new{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
 
         if eltype(kv) <: Pair
             # It's (possibly?) more efficient to access the first and second
