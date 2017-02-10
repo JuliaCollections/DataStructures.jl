@@ -14,19 +14,22 @@
 # subclassed.
 #
 
-immutable DefaultDictBase{K,V,F,D} <: Associative{K,V}
+@compat immutable DefaultDictBase{K,V,F,D} <: Associative{K,V}
     default::F
     d::D
 
     check_D(D,K,V) = (D <: Associative{K,V}) ||
         throw(ArgumentError("Default dict must be <: Associative{$K,$V}"))
 
-    DefaultDictBase(x::F, kv::AbstractArray{Tuple{K,V}}) = (check_D(D,K,V); new(x, D(kv)))
-    DefaultDictBase(x::F, ps::Pair{K,V}...) = (check_D(D,K,V); new(x, D(ps...)))
+    (::Type{DefaultDictBase{K,V,F,D}}){K,V,F,D}(x::F, kv::AbstractArray{Tuple{K,V}}) =
+        (check_D(D,K,V); new{K,V,F,D}(x, D(kv)))
+    (::Type{DefaultDictBase{K,V,F,D}}){K,V,F,D}(x::F, ps::Pair{K,V}...) =
+        (check_D(D,K,V); new{K,V,F,D}(x, D(ps...)))
 
-    @compat (::Type{DefaultDictBase{K,V,F,D}}){K,V,F,D<:DefaultDictBase}(x::F, d::D) =
+    (::Type{DefaultDictBase{K,V,F,D}}){K,V,F,D<:DefaultDictBase}(x::F, d::D) =
         (check_D(D,K,V); DefaultDictBase(x, d.d))
-    DefaultDictBase(x::F, d::D = D()) = (check_D(D,K,V); new(x, d))
+    (::Type{DefaultDictBase{K,V,F,D}}){K,V,F,D}(x::F, d::D = D()) =
+        (check_D(D,K,V); new{K,V,F,D}(x, d))
 end
 
 # Constructors
@@ -79,14 +82,18 @@ end
 for _Dict in [:Dict, :OrderedDict]
     DefaultDict = Symbol("Default"*string(_Dict))
     @eval begin
-        immutable $DefaultDict{K,V,F} <: Associative{K,V}
+        @compat immutable $DefaultDict{K,V,F} <: Associative{K,V}
             d::DefaultDictBase{K,V,F,$_Dict{K,V}}
 
-            $DefaultDict(x, ps::Pair{K,V}...) = new(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, ps...))
-            $DefaultDict(x, kv::AbstractArray{Tuple{K,V}}) = new(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, kv))
-            $DefaultDict(x, d::$DefaultDict) = $DefaultDict(x, d.d)
-            $DefaultDict(x, d::$_Dict) = new(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, d))
-            $DefaultDict(x) = new(DefaultDictBase{K,V,F,$_Dict{K,V}}(x))
+            (::Type{$DefaultDict{K,V,F}}){K,V,F}(x, ps::Pair{K,V}...) =
+                new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, ps...))
+            (::Type{$DefaultDict{K,V,F}}){K,V,F}(x, kv::AbstractArray{Tuple{K,V}}) =
+                new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, kv))
+            (::Type{$DefaultDict{K,V,F}}){K,V,F}(x, d::$DefaultDict) = $DefaultDict(x, d.d)
+            (::Type{$DefaultDict{K,V,F}}){K,V,F}(x, d::$_Dict) =
+                new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, d))
+            (::Type{$DefaultDict{K,V,F}}){K,V,F}(x) =
+                new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x))
         end
 
         ## Constructors

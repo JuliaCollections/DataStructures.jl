@@ -102,17 +102,17 @@ end
 #
 #################################################
 
-type BinaryHeap{T,Comp} <: AbstractHeap{T}
+@compat type BinaryHeap{T,Comp} <: AbstractHeap{T}
     comparer::Comp
     valtree::Vector{T}
 
-    function BinaryHeap(comp::Comp)
-        new(comp, Vector{T}(0))
+    function (::Type{BinaryHeap{T,Comp}}){T,Comp}(comp::Comp)
+        new{T,Comp}(comp, Vector{T}(0))
     end
 
-    function BinaryHeap(comp::Comp, xs)  # xs is an iterable collection of values
+    function (::Type{BinaryHeap{T,Comp}}){T,Comp}(comp::Comp, xs)  # xs is an iterable collection of values
         valtree = _make_binary_heap(comp, T, xs)
-        new(comp, valtree)
+        new{T,Comp}(comp, valtree)
     end
 end
 

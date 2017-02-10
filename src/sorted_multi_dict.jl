@@ -2,14 +2,14 @@
 ## Unlike SortedDict, a key in SortedMultiDict can
 ## refer to multiple data entries.
 
-type SortedMultiDict{K, D, Ord <: Ordering}
+@compat type SortedMultiDict{K, D, Ord <: Ordering}
     bt::BalancedTree23{K,D,Ord}
 
 ## Zero-argument constructor, or possibly one argument to specify order.
 
-    function SortedMultiDict(o::Ord=Forward)
+    function (::Type{SortedMultiDict{K,D,Ord}}){K, D, Ord <: Ordering}(o::Ord=Forward)
         bt1 = BalancedTree23{K,D,Ord}(o)
-        new(bt1)
+        new{K,D,Ord}(bt1)
     end
 end
 
