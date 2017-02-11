@@ -16,7 +16,7 @@ import Base.values
 ## iteration.
 
 
-abstract AbstractExcludeLast{ContainerType <: SAContainer}
+@compat abstract type AbstractExcludeLast{ContainerType <: SAContainer} end
 
 immutable SDMExcludeLast{ContainerType <: SDMContainer} <:
                               AbstractExcludeLast{ContainerType}
@@ -38,7 +38,7 @@ eltype(s::AbstractExcludeLast) = eltype(s.m)
 ## This holds an object describing an include-last
 ## iteration.
 
-abstract AbstractIncludeLast{ContainerType <: SAContainer}
+@compat abstract type AbstractIncludeLast{ContainerType <: SAContainer} end
 
 
 

@@ -1,4 +1,4 @@
-abstract LinkedList{T}
+@compat abstract type LinkedList{T} end
 
 type Nil{T} <: LinkedList{T}
 end

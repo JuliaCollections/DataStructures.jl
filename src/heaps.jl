@@ -42,9 +42,9 @@
 # HT: handle type
 # VT: value type
 
-abstract AbstractHeap{VT}
+@compat abstract type AbstractHeap{VT} end
 
-abstract AbstractMutableHeap{VT,HT} <: AbstractHeap{VT}
+@compat abstract type AbstractMutableHeap{VT,HT} <: AbstractHeap{VT} end
 
 # comparer
 
