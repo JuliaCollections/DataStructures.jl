@@ -14,9 +14,9 @@
 end
 
 
-typealias SMDSemiToken IntSemiToken
+const SMDSemiToken = IntSemiToken
 
-typealias SMDToken Tuple{SortedMultiDict, IntSemiToken}
+const SMDToken = Tuple{SortedMultiDict, IntSemiToken}
 
 ## This constructor takes two arrays an ordering object which defaults
 ## to Forward
@@ -201,7 +201,7 @@ function isequal(m1::SortedMultiDict, m2::SortedMultiDict)
     end
 end
 
-typealias SDorAssociative Union{Associative,SortedMultiDict}
+const SDorAssociative = Union{Associative,SortedMultiDict}
 
 function mergetwo!{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord},
                                         m2::SDorAssociative)

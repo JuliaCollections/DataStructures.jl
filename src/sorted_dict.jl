@@ -68,9 +68,9 @@ end
 
 
 
-typealias SDSemiToken IntSemiToken
+const SDSemiToken = IntSemiToken
 
-typealias SDToken Tuple{SortedDict,IntSemiToken}
+const SDToken = Tuple{SortedDict,IntSemiToken}
 
 
 
