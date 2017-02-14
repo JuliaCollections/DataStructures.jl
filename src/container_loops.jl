@@ -7,8 +7,8 @@ import Base.values
 ## is for all sorted containers.
 ## The following two definitions now appear in tokens2.jl
 
-#typealias SDMContainer Union{SortedDict, SortedMultiDict}
-#typealias SAContainer Union{SDMContainer, SortedSet}
+# const SDMContainer = Union{SortedDict, SortedMultiDict}
+# const SAContainer = Union{SDMContainer, SortedSet}
 
 @inline extractcontainer(s::SAContainer) = s
 
@@ -64,18 +64,18 @@ eltype(s::AbstractIncludeLast) = eltype(s.m)
 ## The basic iterations are either over the whole sorted container, an
 ## exclude-last object or include-last object.
 
-typealias SDMIterableTypesBase Union{SDMContainer,
-                                     SDMExcludeLast,
-                                     SDMIncludeLast}
+const SDMIterableTypesBase = Union{SDMContainer,
+                                   SDMExcludeLast,
+                                   SDMIncludeLast}
 
-typealias SSIterableTypesBase Union{SortedSet,
-                                    SSExcludeLast,
-                                    SSIncludeLast}
+const SSIterableTypesBase = Union{SortedSet,
+                                  SSExcludeLast,
+                                  SSIncludeLast}
 
 
-typealias SAIterableTypesBase Union{SAContainer,
-                                    AbstractExcludeLast,
-                                    AbstractIncludeLast}
+const SAIterableTypesBase = Union{SAContainer,
+                                  AbstractExcludeLast,
+                                  AbstractIncludeLast}
 
 
 ## The compound iterations are obtained by applying keys(..) or values(..)
@@ -136,18 +136,18 @@ end
 eltype(s::SDMSemiTokenValIteration) = Tuple{IntSemiToken,
                                             valtype(extractcontainer(s.base))}
 
-typealias SACompoundIterable Union{SDMKeyIteration,
-                                   SDMValIteration,
-                                   SDMSemiTokenIteration,
-                                   SSSemiTokenIteration,
-                                   SDMSemiTokenKeyIteration,
-                                   SDMSemiTokenValIteration,
-                                   SAOnlySemiTokensIteration}
+const SACompoundIterable = Union{SDMKeyIteration,
+                                 SDMValIteration,
+                                 SDMSemiTokenIteration,
+                                 SSSemiTokenIteration,
+                                 SDMSemiTokenKeyIteration,
+                                 SDMSemiTokenValIteration,
+                                 SAOnlySemiTokensIteration}
 
 @inline extractcontainer(s::SACompoundIterable) = extractcontainer(s.base)
 
 
-typealias SAIterable Union{SAIterableTypesBase, SACompoundIterable}
+const SAIterable = Union{SAIterableTypesBase, SACompoundIterable}
 
 
 ## All the loops maintain a state which is an object of the

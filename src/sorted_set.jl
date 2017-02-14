@@ -21,10 +21,10 @@ end
 # @compat (::Type{SortedSet{K}}){K}(ps...) = SortedSet{K}(Base.Forward, ps...)
 
 
-typealias SetSemiToken IntSemiToken
+const SetSemiToken = IntSemiToken
 
 # The following definition was moved to tokens2.jl
-#typealias SetToken Tuple{SortedSet, IntSemiToken}
+# const SetToken = Tuple{SortedSet, IntSemiToken}
 
 ## This constructor takes an iterable; order defaults
 ## to Forward

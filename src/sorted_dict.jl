@@ -95,9 +95,9 @@ _sorted_dict_with_eltype{    Ord}(o::Ord, kv, ::Type            ) = SortedDict{A
 #     include_string("_sorted_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,D} where K}) = SortedDict{Any,  D,Ord}(o, ps)")
 # end
 
-typealias SDSemiToken IntSemiToken
+const SDSemiToken = IntSemiToken
 
-typealias SDToken Tuple{SortedDict,IntSemiToken}
+const SDToken = Tuple{SortedDict,IntSemiToken}
 
 ## This function implements m[k]; it returns the
 ## data item associated with key k.

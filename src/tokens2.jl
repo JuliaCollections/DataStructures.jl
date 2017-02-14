@@ -3,12 +3,12 @@ import Base.isequal
 import Base.colon
 import Base.endof
 
-typealias SDMContainer Union{SortedDict, SortedMultiDict}
-typealias SAContainer Union{SDMContainer, SortedSet}
+const SDMContainer = Union{SortedDict, SortedMultiDict}
+const SAContainer = Union{SDMContainer, SortedSet}
 
-typealias Token Tuple{SAContainer, IntSemiToken}
-typealias SDMToken Tuple{SDMContainer, IntSemiToken}
-typealias SetToken Tuple{SortedSet, IntSemiToken}
+const Token = Tuple{SAContainer, IntSemiToken}
+const SDMToken = Tuple{SDMContainer, IntSemiToken}
+const SetToken = Tuple{SortedSet, IntSemiToken}
 
 
 ## Function startof returns the semitoken that points
