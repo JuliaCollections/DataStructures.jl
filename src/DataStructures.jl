@@ -15,7 +15,7 @@ module DataStructures
                  merge, merge!, lt, Ordering, ForwardOrdering, Forward,
                  ReverseOrdering, Reverse, Lt,
                  isless,
-                 union, intersect, symdiff, setdiff, issubset,
+                 union, intersect, symdiff, setdiff, issubset, ⊊, ⊈,
                  find, searchsortedfirst, searchsortedlast, endof, in
 
     export Deque, Stack, Queue, CircularDeque
