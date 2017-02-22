@@ -30,8 +30,9 @@ end
 ## Take pairs and infer argument
 ## types.  Note:  this works only for the Forward ordering.
 
-function SortedDict{K,D}(ps::Pair{K,D}...)
+function SortedDict{K,D}(p1::Pair{K,D}, ps::Pair{K,D}...)
     h = SortedDict{K,D,ForwardOrdering}()
+    h[p1.first] = p1.second
     for p in ps
         h[p.first] = p.second
     end
