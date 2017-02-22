@@ -45,8 +45,9 @@ end
 ## Take pairs and infer argument
 ## types.  Note:  this works only for the Forward ordering.
 
-function SortedMultiDict{K,D}(ps::Pair{K,D}...)
+function SortedMultiDict{K,D}(p1::Pair{K,D}, ps::Pair{K,D}...)
     h = SortedMultiDict{K,D,ForwardOrdering}()
+    insert!(h, p1.first, p1.second)
     for p in ps
         insert!(h, p.first, p.second)
     end
