@@ -1468,7 +1468,19 @@ end
     @test typeof(SortedSet{Float64}()) == SortedSet{Float64, ForwardOrdering}
     @test typeof(SortedSet(Reverse)) == SortedSet{Any, ReverseOrdering{ForwardOrdering}}
     @test typeof(SortedSet{Float64}(Reverse)) == SortedSet{Float64, ReverseOrdering{ForwardOrdering}}
+    @test typeof(SortedSet([1,2,3])) == SortedSet{Int, ForwardOrdering}
+    @test typeof(SortedSet{Float32}([1,2,3])) == SortedSet{Float32, ForwardOrdering}
+    if VERSION >= v"0.5"
+        @test typeof(SortedSet(Reverse, [1,2,3])) == SortedSet{Int, ReverseOrdering{ForwardOrdering}}
+        @test typeof(SortedSet{Float32}(Reverse, [1,2,3])) == SortedSet{Float32, ReverseOrdering{ForwardOrdering}}
+    end
+    @test typeof(SortedSet([1,2,3], Reverse)) == SortedSet{Int, ReverseOrdering{ForwardOrdering}}
+    @test typeof(SortedSet{Float32}([1,2,3], Reverse)) == SortedSet{Float32, ReverseOrdering{ForwardOrdering}}
 
+    if VERSION < v"0.5"
+        @test_throws ArgumentError SortedSet(Reverse, Reverse)
+        @test_throws ArgumentError SortedSet{Int}(Reverse, Reverse)
+    end
 
     smallest = 10.0
     largest = -10.0

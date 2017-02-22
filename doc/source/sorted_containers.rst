@@ -206,20 +206,18 @@ Constructors for Sorted Containers
   may also be constructed via ``SortedMultiDict(K[], V[], o)`` where
   the ``o`` argument is optional.
 
-``SortedSet(iter,o)``
+``SortedSet()``
+``SortedSet{K}()``
+  Construct a SortedSet{Any} with ``Forward`` ordering.
+
+``SortedSet(iter,o=Forward)``
+``SortedSet{K}(iter,o=Forward)``
+``SortedSet(o, iter)``
+``SortedSet{K}(o, iter)``
   Construct a SortedSet using keys given by iterable ``iter`` (e.g.,
   an array)
   and ordering object ``o``.  The ordering object
   defaults to ``Forward`` if not specified.
-
-``SortedSet{K,Ord}(o)``
-  Construct an empty sorted set in which type parameter
-  is explicitly listed; ordering object is explicitly specified.
-  (See below for discussion of ordering.)  An alternate way
-  to create an empty set of type ``K`` is ``SortedSet(K[], o)``;
-  again, the order argument defaults to ``Forward`` if not
-  specified.
-
 
 Complexity of Sorted Containers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
