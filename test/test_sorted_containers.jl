@@ -1477,10 +1477,8 @@ end
     @test typeof(SortedSet([1,2,3], Reverse)) == SortedSet{Int, ReverseOrdering{ForwardOrdering}}
     @test typeof(SortedSet{Float32}([1,2,3], Reverse)) == SortedSet{Float32, ReverseOrdering{ForwardOrdering}}
 
-    if VERSION < v"0.5"
-        @test_throws ArgumentError SortedSet(Reverse, Reverse)
-        @test_throws ArgumentError SortedSet{Int}(Reverse, Reverse)
-    end
+    @test_throws ArgumentError SortedSet(Reverse, Reverse)
+    @test_throws ArgumentError SortedSet{Int}(Reverse, Reverse)
 
     smallest = 10.0
     largest = -10.0
