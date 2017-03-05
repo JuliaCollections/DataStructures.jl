@@ -19,22 +19,18 @@ end
 SortedSet() = SortedSet{Any,ForwardOrdering}(Forward)
 SortedSet{O<:Ordering}(o::O) = SortedSet{Any,O}(o)
 
-if VERSION < v"0.5"
-    # To address ambiguity warnings on Julia v0.4
-    SortedSet(o1::Ordering,o2::Ordering) =
-        throw(ArgumentError("SortedSet with two parameters must be called with an Ordering and an interable"))
-end
+# To address ambiguity warnings on Julia v0.4
+SortedSet(o1::Ordering,o2::Ordering) =
+    throw(ArgumentError("SortedSet with two parameters must be called with an Ordering and an interable"))
 SortedSet(o::Ordering, iter) = sortedset_with_eltype(o, iter, eltype(iter))
 SortedSet(iter, o::Ordering=Forward) = sortedset_with_eltype(o, iter, eltype(iter))
 
 @compat (::Type{SortedSet{K}}){K}() = SortedSet{K,ForwardOrdering}(Forward)
 @compat (::Type{SortedSet{K}}){K,O<:Ordering}(o::O) = SortedSet{K,O}(o)
 
-if VERSION < v"0.5"
-    # To address ambiguity warnings on Julia v0.4
-    @compat (::Type{SortedSet{K}}){K}(o1::Ordering,o2::Ordering) =
-        throw(ArgumentError("SortedSet with two parameters must be called with an Ordering and an interable"))
-end
+# To address ambiguity warnings on Julia v0.4
+@compat (::Type{SortedSet{K}}){K}(o1::Ordering,o2::Ordering) =
+    throw(ArgumentError("SortedSet with two parameters must be called with an Ordering and an interable"))
 @compat (::Type{SortedSet{K}}){K}(o::Ordering, iter) = sortedset_with_eltype(o, iter, K)
 @compat (::Type{SortedSet{K}}){K}(iter, o::Ordering=Forward) = sortedset_with_eltype(o, iter, K)
 
