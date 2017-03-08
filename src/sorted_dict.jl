@@ -62,12 +62,6 @@ end
 # Construction inferring Key/Value types from input
 # e.g. SortedDict{}
 
-function not_iterator_of_pairs(kv)
-    return any(x->isempty(methodswith(typeof(kv), x, true)),
-               [start, next, done]) ||
-           any(x->!isa(x, Union{Tuple,Pair}), kv)
-end
-
 SortedDict(o1::Ordering, o2::Ordering) = throw(ArgumentError("SortedDict with two parameters must be called with an Ordering and an interable of pairs"))
 SortedDict(kv, o::Ordering=Forward) = SortedDict(o, kv)
 function SortedDict(o::Ordering, kv)
