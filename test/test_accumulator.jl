@@ -66,3 +66,7 @@ ct4 = counter(Pair{Int,Int})
 @test isa(ct4, Accumulator{Pair{Int,Int}})
 @test push!(ct4, 1=>2) == 1
 @test push!(ct4, 1=>2) == 2
+
+
+@test counter([2,3,4,4]) == counter([4,2,3,4])
+@test counter([2,3,4,4]) != counter([4,2,3,4,4])

@@ -30,6 +30,10 @@ length(a::Accumulator) = length(a.map)
 
 ## retrieval
 
+get{T,V}(ct::Accumulator{T,V}, x::T, default) = get(ct.map, x, default)
+# need to allow user specified default in order to
+# correctly implement "informal" Associative interface
+
 getindex{T,V}(ct::Accumulator{T,V}, x::T) = get(ct.map, x, zero(V))
 
 haskey{T,V}(ct::Accumulator{T,V}, x::T) = haskey(ct.map, x)
