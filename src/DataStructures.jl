@@ -108,7 +108,7 @@ module DataStructures
     @deprecate iter(s::Stack) s
     @deprecate iter(q::Queue) q
 
-    # Remove when Julia 0.7 (or whatever version is after v0.6) is released
+    # Remove when Julia 1.0 (or whatever version is after v0.6) is released
     @deprecate DefaultDictBase(default, ks::AbstractArray, vs::AbstractArray) DefaultDictBase(default, zip(ks, vs))
     @deprecate DefaultDictBase(default, ks, vs) DefaultDictBase(default, zip(ks, vs))
     @deprecate DefaultDictBase{K,V}(::Type{K}, ::Type{V}, default) DefaultDictBase{K,V}(default)
@@ -118,4 +118,15 @@ module DataStructures
 
     @deprecate DefaultOrderedDict(default, ks, vs) DefaultOrderedDict(default, zip(ks, vs))
     @deprecate DefaultOrderedDict{K,V}(::Type{K}, ::Type{V}, default) DefaultOrderedDict{K,V}(default)
+
+    # We only want to deprecate the first two definitions here,
+    # since otherwise the deprecation messages are too verbose.
+    # Nevertheless, all five definitions below should be removed when the
+    # deprecation period ends.
+    @deprecate push!(d::DefaultDict, p::NTuple{2}) push!(d, p[1] => p[2])
+    @deprecate push!(d::DefaultOrderedDict, p::NTuple{2}) push!(d, p[1] => p[2])
+    push!(d::DefaultDictBase, p::NTuple{2}) = push!(d, p[1] => p[2])
+    push!(d::DefaultDictBase, p::NTuple{2}, q::NTuple{2}) = push!(push!(d, p), q)
+    push!(d::DefaultDictBase, p::NTuple{2}, q::NTuple{2}, r::NTuple{2}) = push!(push!(push!(d, p), q), r...)
+
 end
