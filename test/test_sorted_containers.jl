@@ -747,7 +747,7 @@ end
     @test count == 1 && sk5 == deref_key((m1,startof(m1)))
     @test eltype(eachindex(inclusive(m1, startof(m1), startof(m1)))) == T
 
-    factors = SortedMultiDict(Int[], Int[])
+    factors = SortedMultiDict{Int,Int}()
     N = 1000
     len = 0
     sum1 = 0
@@ -1165,12 +1165,22 @@ end
     @test_throws BoundsError m[i1]
     @test_throws BoundsError regress((m,beforestartsemitoken(m)))
     @test_throws BoundsError advance((m,pastendsemitoken(m)))
-    m1 = SortedMultiDict(Int[], Int[])
-    @test_throws ArgumentError m3 = SortedMultiDict(["a", "b"], [1,2,3])
-    @test_throws ArgumentError isequal(SortedMultiDict(["a"],[1]), SortedMultiDict(["b"], [1.0]))
-    @test_throws ArgumentError isequal(SortedMultiDict(["a"],[1],Reverse), SortedMultiDict(["b"], [1]))
+    m1 = SortedMultiDict{Int,Int}()
+    @test_throws ArgumentError SortedMultiDict([1,2,3])
+    @test_throws ArgumentError SortedMultiDict(Forward, [1,2,3])
+    @test_throws ArgumentError SortedMultiDict{Int,Int}([1,2,3])
+    @test_throws ArgumentError SortedMultiDict{Int,Int}(Forward, [1,2,3])
+    @test_throws ArgumentError SortedMultiDict(Forward, Reverse)
+    @test_throws ArgumentError isequal(SortedMultiDict("a"=>1), SortedMultiDict("b"=>1.0))
+    @test_throws ArgumentError isequal(SortedMultiDict(["a"=>1],Reverse), SortedMultiDict(["b"=>1]))
+    @test_throws MethodError SortedMultiDict{Char,Int}(Forward, ["aa"=>2, "bbb"=>5])
+    @test_throws MethodError SortedMultiDict(Forward, [("aa",2)=>2, "bbb"=>5])
     @test_throws BoundsError first(m1)
     @test_throws BoundsError last(m1)
+
+    println("The following warning is expected:")
+    @test_throws ArgumentError SortedMultiDict(['a','b'], [1, 2, 3])
+
     s = SortedSet([3,5])
     @test_throws KeyError delete!(s,7)
     @test_throws KeyError pop!(s, 7)
@@ -1258,14 +1268,28 @@ end
 end
 
 @testset "SortedMultiDict" begin
-    # Test all methods of SortedMultiDict except loops
-    factors = SortedMultiDict(Int[], Int[])
-    @test typeof(factors) == SortedMultiDict{Int,Int,ForwardOrdering}
-    factors2 = SortedMultiDict{Int,Int}()
-    @test typeof(factors2) == SortedMultiDict{Int,Int,ForwardOrdering}
+    test_dict = Dict('a'=>1, 'b'=>2, 'c'=>3)
 
-    #@test factors == factors2   # Broken!  TODO: fix me...
-    @test isequal(factors, factors2)
+    # Test all methods of SortedMultiDict except loops
+    factors = SortedMultiDict{Int,Int}()
+    @test typeof(factors) == SortedMultiDict{Int,Int,ForwardOrdering}
+    factors2 = SortedMultiDict(test_dict)
+    @test typeof(factors2) == SortedMultiDict{Char,Int,ForwardOrdering}
+    factors3 = SortedMultiDict{Char,Int}(test_dict)
+    @test typeof(factors3) == SortedMultiDict{Char,Int,ForwardOrdering}
+    factors4 = SortedMultiDict{Char,Float32}(Reverse, test_dict)
+    @test typeof(factors4) == SortedMultiDict{Char,Float32,ReverseOrdering{ForwardOrdering}}
+
+    test_pair_array = Pair{Char}['a'=>1, 'b'=>2, 'c'=>3]
+    factors5 = SortedMultiDict(test_pair_array)
+    @test typeof(factors5) == SortedMultiDict{Char,Any,ForwardOrdering}
+
+    println("The following warning is expected:")
+    factors6 = SortedMultiDict(['a', 'b'], [1, 2])
+    @test typeof(factors6) == SortedMultiDict{Char,Int,ForwardOrdering}
+
+    #@test factors2 == factors3   # Broken!  TODO: fix me...
+    @test isequal(factors2, factors3)
 
     N = 1000
     checkcorrectness(factors.bt, true)
@@ -1379,15 +1403,15 @@ end
     i1,i2 = searchequalrange(factors, N + 2)
     @test i1 == pastendsemitoken(factors)
     @test i2 == beforestartsemitoken(factors)
-    m1 = SortedMultiDict(["apples", "apples", "bananas"], [2.0, 1.0,1.5])
+    m1 = SortedMultiDict("apples"=>2.0, "apples"=>1.0, "bananas"=>1.5)
     checkcorrectness(m1.bt, true)
-    m2 = SortedMultiDict(["bananas","apples", "apples"], [1.5, 2.0, 1.0])
+    m2 = SortedMultiDict("bananas"=>1.5, "apples"=>2.0, "apples"=>1.0)
     checkcorrectness(m2.bt, true)
-    m3 = SortedMultiDict(["apples", "apples", "bananas"], [1.0, 2.0, 1.5])
+    m3 = SortedMultiDict("apples"=>1.0, "apples"=>2.0, "bananas"=>1.5)
     checkcorrectness(m3.bt, true)
     @test isequal(m1,m2)
     @test !isequal(m1,m3)
-    @test !isequal(m1, SortedMultiDict(["apples"], [2.0]))
+    @test !isequal(m1, SortedMultiDict("apples"=>2.0))
     stok = insert!(m2, "cherries", 6.1)
     checkcorrectness(m2.bt, true)
     @test !isequal(m1,m2)
@@ -1404,14 +1428,14 @@ end
     checkcorrectness(m6.bt, true)
     @test isequal(m1,m6)
 
-    m1 = SortedMultiDict(["bananas", "apples", "cherries", "cherries", "oranges"],
-                         [1.0, 2.0, 3.0, 4.0, 5.0])
-    m2 = SortedMultiDict(["apples", "cherries", "cherries", "bananas", "plums"],
-                         [6.0, 7.0, 8.0, 9.0, 10.0])
-    m3 = SortedMultiDict(["apples", "apples", "bananas", "bananas",
-                          "cherries", "cherries", "cherries", "cherries",
-                          "oranges", "plums"],
-                         [2.0, 6.0, 1.0, 9.0, 3.0, 4.0, 7.0, 8.0, 5.0, 10.0])
+    m1 = SortedMultiDict(zip(["bananas", "apples", "cherries", "cherries", "oranges"],
+                             [1.0, 2.0, 3.0, 4.0, 5.0]))
+    m2 = SortedMultiDict(zip(["apples", "cherries", "cherries", "bananas", "plums"],
+                             [6.0, 7.0, 8.0, 9.0, 10.0]))
+    m3 = SortedMultiDict(zip(["apples", "apples", "bananas", "bananas",
+                              "cherries", "cherries", "cherries", "cherries",
+                              "oranges", "plums"],
+                             [2.0, 6.0, 1.0, 9.0, 3.0, 4.0, 7.0, 8.0, 5.0, 10.0]))
     m3empty = similar(m3)
     @test (eltype(m3empty) == Pair{Compat.ASCIIString, Float64}) &&
         orderobject(m3empty) == Forward &&
@@ -1422,7 +1446,7 @@ end
     @test !isequal(m3, m5)
     merge!(m1, m2)
     @test isequal(m1, m3)
-    m7 = SortedMultiDict(Int[], Int[])
+    m7 = SortedMultiDict{Int,Int}()
     n1 = 10000
     for k = 1 : n1
         insert!(m7, k, k+1)
