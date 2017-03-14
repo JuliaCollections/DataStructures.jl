@@ -457,7 +457,7 @@ end
         u += pr[2]
     end
     numprimes = length(m1)
-    pn = primes(N)
+    pn = convert(Array{Int64}, primes(N))
     @test t == sum(pn)
     @test u == sum(pn.^2)
     ij = endof(m1)
