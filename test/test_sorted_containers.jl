@@ -285,6 +285,7 @@ end
 @testset "SortedDictBasic" begin
     # a few basic tests of SortedDict to start
     m1 = SortedDict((Dict{Compat.ASCIIString,Compat.ASCIIString}()), Forward)
+    @test typeof(m1) == SortedDict{Compat.ASCIIString, Compat.ASCIIString, ForwardOrdering}
     kdarray = ["hello", "jello", "alpha", "beta", "fortune", "random",
                "july", "wednesday"]
     checkcorrectness(m1.bt, false)
@@ -552,6 +553,7 @@ end
     c1 = SortedDict(Dict("Eggplants"=>3,
                         "Figs"=>9,
                         "Apples"=>7))
+    @test typeof(c1) == SortedDict{Compat.ASCIIString, Int, ForwardOrdering}
     c2 = SortedDict(Dict("Eggplants"=>6,
                         "Honeydews"=>19,
                         "Melons"=>11))
@@ -1016,6 +1018,7 @@ end
        Tuple{IntSemiToken, Int}
 
     s = SortedSet([39, 24, 2, 14, 45, 107, 66])
+    @test typeof(s) == SortedSet{Int, ForwardOrdering}
     sum1 = 0
     for k in s
         sum1 += k
@@ -1404,6 +1407,7 @@ end
     @test i1 == pastendsemitoken(factors)
     @test i2 == beforestartsemitoken(factors)
     m1 = SortedMultiDict("apples"=>2.0, "apples"=>1.0, "bananas"=>1.5)
+    @test typeof(m1) == SortedMultiDict{Compat.ASCIIString, Float64, ForwardOrdering}
     checkcorrectness(m1.bt, true)
     m2 = SortedMultiDict("bananas"=>1.5, "apples"=>2.0, "apples"=>1.0)
     checkcorrectness(m2.bt, true)
@@ -1430,6 +1434,7 @@ end
 
     m1 = SortedMultiDict(zip(["bananas", "apples", "cherries", "cherries", "oranges"],
                              [1.0, 2.0, 3.0, 4.0, 5.0]))
+    @test typeof(m1) == SortedMultiDict{Compat.ASCIIString, Float64, ForwardOrdering}
     m2 = SortedMultiDict(zip(["apples", "cherries", "cherries", "bananas", "plums"],
                              [6.0, 7.0, 8.0, 9.0, 10.0]))
     m3 = SortedMultiDict(zip(["apples", "apples", "bananas", "bananas",
@@ -1601,19 +1606,24 @@ end
     empty!(m)
     @test isempty(m)
     m1 = SortedSet(["blue", "orange", "red"])
+    @test typeof(m1) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     m2 = SortedSet(["orange", "blue", "red"])
     m3 = SortedSet(["orange", "yellow", "red"])
     m3empty = similar(m3)
+    @test typeof(m3empty) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     @test eltype(m3empty) == Compat.ASCIIString &&
        length(m3empty) == 0
     @test isequal(m1,m2)
     @test !isequal(m1,m3)
     @test !isequal(m1, SortedSet(["blue"]))
     m4 = packcopy(m3)
+    @test typeof(m4) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     @test isequal(m3,m4)
     m5 = packdeepcopy(m4)
+    @test typeof(m5) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     @test isequal(m3,m4)
     m6 = deepcopy(m5)
+    @test typeof(m6) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     @test isequal(m3,m5)
     checkcorrectness(m1.bt, false)
     checkcorrectness(m2.bt, false)
@@ -1622,28 +1632,38 @@ end
     checkcorrectness(m5.bt, false)
     checkcorrectness(m5.bt, false)
     m7 = union(m1, ["yellow"])
+    @test typeof(m7) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     m8 = union(m3, SortedSet(["blue"]))
+    @test typeof(m8) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     @test isequal(m7,m8)
     @test !isequal(m1,m8)
     union!(m1, ["yellow"])
     @test isequal(m1,m8)
     m8a = intersect(m8)
+    @test typeof(m8a) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     @test isequal(m8a,m8)
     m9 = intersect(m8, SortedSet(["yellow", "red", "white"]))
+    @test typeof(m9) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     @test isequal(m9, SortedSet(["red", "yellow"]))
     m9a = intersect(m8, SortedSet(["yellow", "red", "white"]), m8)
+    @test typeof(m9a) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     @test isequal(m9a, SortedSet(["red", "yellow"]))
     m10 = symdiff(m8,  SortedSet(["yellow", "red", "white"]))
+    @test typeof(m10) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     @test isequal(m10, SortedSet(["white", "blue", "orange"]))
     m11 = symdiff(m8, SortedSet(["yellow", "red", "blue", "orange",
                                  "zinc"]))
+    @test typeof(m11) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     @test isequal(m11, SortedSet(["zinc"]))
     m12 = symdiff(SortedSet(["yellow", "red", "blue", "orange",
                                  "zinc"]), m8)
     @test isequal(m12, SortedSet(["zinc"]))
+    @test typeof(m12) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     m13 = setdiff(m8, SortedSet(["yellow", "red", "white"]))
+    @test typeof(m13) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     @test isequal(m13, SortedSet(["blue", "orange"]))
     m14 = setdiff(m8, SortedSet(["blue"]))
+    @test typeof(m14) == SortedSet{Compat.ASCIIString, ForwardOrdering}
     @test isequal(m14, SortedSet(["orange", "yellow", "red"]))
     @test issubset(["yellow", "blue"], m8)
     @test !issubset(["blue", "green"], m8)
@@ -1656,15 +1676,19 @@ end
 
 @testset "SortedDictConstructors" begin
     sd1 = SortedDict("w" => 64, "p" => 12)
+    @test typeof(sd1) == SortedDict{Compat.ASCIIString, Int, ForwardOrdering}
     @test length(sd1) == 2 && first(sd1) == ("p"=>12) &&
         last(sd1) == ("w"=>64)
     sd2 = SortedDict(Reverse, "w" => 64, "p" => 12)
+    @test typeof(sd2) == SortedDict{Compat.ASCIIString, Int, ReverseOrdering{ForwardOrdering}}
     @test length(sd2) == 2 && last(sd2) == ("p"=>12) &&
         first(sd2) == ("w"=>64)
     sd3 = SortedDict(("w"=>64, "p"=>12))
+    @test typeof(sd3) == SortedDict{Compat.ASCIIString, Int, ForwardOrdering}
     @test length(sd3) == 2 && first(sd3) == ("p"=>12) &&
         last(sd3) == ("w"=>64)
     sd4 = SortedDict(("w"=>64, "p"=>12), Reverse)
+    @test typeof(sd4) == SortedDict{Compat.ASCIIString, Int, ReverseOrdering{ForwardOrdering}}
     @test length(sd4) == 2 && last(sd4) == ("p"=>12) &&
         first(sd4) == ("w"=>64)
 
@@ -1679,15 +1703,19 @@ end
 
 @testset "SortedMultiDictConstructors" begin
     sm1 = SortedMultiDict("w" => 64, "p" => 12, "p" => 9)
+    @test typeof(sm1) == SortedMultiDict{Compat.ASCIIString, Int, ForwardOrdering}
     @test length(sm1) == 3 && first(sm1) == ("p"=>12) &&
         last(sm1) == ("w"=>64)
     sm2 = SortedMultiDict(Reverse, "w" => 64, "p" => 12, "p" => 9)
+    @test typeof(sm2) == SortedMultiDict{Compat.ASCIIString, Int, ReverseOrdering{ForwardOrdering}}
     @test length(sm2) == 3 && last(sm2) == ("p"=>9) &&
         first(sm2) == ("w"=>64)
     sm3 = SortedMultiDict(("w"=>64, "p"=>12, "p"=> 9))
+    @test typeof(sm3) == SortedMultiDict{Compat.ASCIIString, Int, ForwardOrdering}
     @test length(sm3) == 3 && first(sm3) == ("p"=>12) &&
         last(sm3) == ("w"=>64)
     sm4 = SortedMultiDict(("w"=> 64, "p"=>12, "p"=>9), Reverse)
+    @test typeof(sm4) == SortedMultiDict{Compat.ASCIIString, Int, ReverseOrdering{ForwardOrdering}}
     @test length(sm4) == 3 && last(sm4) == ("p"=>9) &&
         first(sm4) == ("w"=>64)
 
