@@ -1,7 +1,7 @@
 .. _ref-sorted-containers:
 
 ----------------------------------------
-Overview of Sorted Containers
+Sorted Containers
 ----------------------------------------
 
 Three sorted containers are provided:
@@ -114,36 +114,33 @@ in terms of the container.
 Constructors for Sorted Containers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``SortedDict(o=Forward)``
-``SortedDict{K,V}(o=Forward)``
+``SortedDict(o=Forward)`` and ``SortedDict{K,V}(o=Forward)``
   Construct an empty ``SortedDict`` with key type ``K`` and value type ``V``.
   If ``K`` and ``V`` are not specified, the dictionary defaults to a
   ``SortedDict{Any,Any}``.  Keys and values are converted to the
   given type upon insertion.
   Ordering ``o`` defaults to ``Forward`` ordering.
 
-  **Note that a key type of ``Any`` will lead to slow performance, as the
+  **Note that a key type of ``Any`` or any other abstract type
+  will lead to slow performance, as the
   values are stored boxed (i.e., as pointers), and insertion will
   require a run-time lookup of the appropriate comparison function.
-  It is recommended to always specify a key type, or to use one of the
+  It is recommended to always specify a concrete key type, or to use one of the
   constructors below in which the key type is inferred.**
 
-``SortedDict(k1=>v1, k2=>v2, ...)``
-``SortedDict{K,V}(k1=>v1, k2=>v2, ...)``
+``SortedDict(k1=>v1, k2=>v2, ...)`` and ``SortedDict{K,V}(k1=>v1, k2=>v2, ...)``
   Construct a ``SortedDict`` from the given key-value pairs.
   If ``K`` and ``V`` are not specified, key type and
   value type are inferred from the given key-value pairs, and ordering is assumed
   to be ``Forward`` ordering.
 
-``SortedDict(o, k1=>v1, k2=>v2, ...)``
-``SortedDict{K,V}(o, k1=>v1, k2=>v2, ...)``
+``SortedDict(o, k1=>v1, k2=>v2, ...)`` and ``SortedDict{K,V}(o, k1=>v1, k2=>v2, ...)``
   Construct a ``SortedDict`` from the given pairs with the specified
   ordering ``o``.  If ``K`` and ``V`` are
   not specified, the key type and value type are inferred from the given pairs.
   See below for more information about ordering.
 
-``SortedDict(d,o=Forward)``
-``SortedDict{K,V}(d,o=Forward)``
+``SortedDict(d,o=Forward)`` and ``SortedDict{K,V}(d,o=Forward)``
   Construct a ``SortedDict`` from an ordinary Julia dict ``d`` (or
   any associative type), e.g.::
 
@@ -159,8 +156,7 @@ Constructors for Sorted Containers
 
   See below for more information about ordering.
 
-``SortedDict(iter,o=Forward)``
-``SortedDict{K,V}(iter,o=Forward)``
+``SortedDict(iter,o=Forward)`` and ``SortedDict{K,V}(iter,o=Forward)``
   Construct a ``SortedDict`` from an arbitrary iterable object of
   ``key=>value`` pairs.
   If ``K`` and ``V`` are not specified, the key type and value type are inferred
@@ -206,14 +202,13 @@ Constructors for Sorted Containers
   may also be constructed via ``SortedMultiDict(K[], V[], o)`` where
   the ``o`` argument is optional.
 
-``SortedSet()``
-``SortedSet{K}()``
-  Construct a SortedSet{Any} with ``Forward`` ordering.
+``SortedSet()`` and ``SortedSet{K}()``
+  Construct a ``SortedSet{Any}`` with ``Forward`` ordering.
+  Refer to the remark above about loss of performance when the
+  key-type is ``Any``.
 
-``SortedSet(iter,o=Forward)``
-``SortedSet{K}(iter,o=Forward)``
-``SortedSet(o, iter)``
-``SortedSet{K}(o, iter)``
+
+``SortedSet(iter,o=Forward)``, ``SortedSet{K}(iter,o=Forward)``, ``SortedSet(o, iter)``, ``SortedSet{K}(o, iter)``
   Construct a SortedSet using keys given by iterable ``iter`` (e.g.,
   an array)
   and ordering object ``o``.  The ordering object
@@ -286,7 +281,7 @@ Navigating the Containers
   it returns the before-start semitoken.  Time: O(log *n*)
 
 ``first(sc)``
-  Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet  This function
+  Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet.  This function
   returns the first item (a ``k=>v`` pair for SortedDict and SortedMultiDict or
   a key for SortedSet)
   according
@@ -298,7 +293,7 @@ Navigating the Containers
 ``last(sc)``
   Argument ``sc`` is a SortedDict, SortedMultiDict or SortedSet.  This function
   returns the last item (a ``k=>v`` pair for SortedDict and SortedMultiDict
-  or   a key for SortedSet)
+  or  a key for SortedSet)
   according
   to the sorted order in the container.  Thus, ``last(sc)`` is
   equivalent to ``deref((sc,endof(sc)))``.
@@ -382,7 +377,7 @@ Inserting & Deleting in Sorted Containers
   Argument ``sc`` is a SortedDict or SortedMultiDict, ``k`` is a key and ``v``
   is the corresponding value.  This inserts the ``(k,v)`` pair into
   the container.  If the key is already present in a
-  SortedDict or SortedSet, this overwrites
+  SortedDict, this overwrites
   the old value.  In the case of SortedMultiDict, no overwriting takes place
   (since SortedMultiDict allows the same key to associate with multiple values).
   In the case of SortedDict, the return
@@ -395,7 +390,7 @@ Inserting & Deleting in Sorted Containers
 ``insert!(sc,k)``
   Argument ``sc`` is a SortedSet and ``k`` is a key.
   This inserts the key into
-  the container.  If the key is already present in a
+  the container.  If the key is already present,
   this overwrites
   the old value.  (This is not necessarily a no-op; see below for
   remarks about the customizing the sort order.)
@@ -408,7 +403,7 @@ Inserting & Deleting in Sorted Containers
 ``push!(sc,k)``
   Argument ``sc`` is a SortedSet and ``k`` is a key.
   This inserts the key into
-  the container.  If the key is already present in a
+  the container.  If the key is already present,
   this overwrites
   the old value.  (This is not necessarily a no-op; see below for
   remarks about the customizing the sort order.)
@@ -420,7 +415,7 @@ Inserting & Deleting in Sorted Containers
   Argument ``sc`` is a SortedDict or SortedMultiDict and ``k=>v`` is a
   key-value pair.
   This inserts the key-value pair into
-  the container.  If the key is already present in a
+  the container.  If the key is already present,
   this overwrites
   the old value.
   The return
@@ -647,7 +642,7 @@ To be compatible with standard containers, the package also offers
 
 This iteration function ``eachindex`` is equivalent to ``keys`` in the case
 of SortedDict.  It is equivalent to ``onlysemitokens`` in the case of SortedMultiDict
-and SortedMultiSet.
+and SortedSet.
 
 
 In place of ``sc`` in the above ``keys``, ``values`` and
@@ -681,9 +676,11 @@ Other Functions
   ``p`` is a key=>value
   pair.  In the case that ``sc``
   is a SortedSet, ``p`` should be a key.
-  Time: O(*c* log *n*) for SortedDict and SortedSet.
+  Time: O(*c* log *n* + *d*) for SortedDict and SortedSet,
+  where *d* stands for the
+  time to compare two values.
   In the case of SortedMultiDict, the time is
-  O(*cl* log *n*), where *l* stands for the number
+  O(*c* log *n* + *dl*), and *l* stands for the number
   of entries that have the key of the given pair.
   (So therefore this call is inefficient if the same key
   addresses a large number of values, and an alternative
