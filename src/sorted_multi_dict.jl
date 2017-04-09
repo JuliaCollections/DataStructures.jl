@@ -7,10 +7,10 @@
 
     ## Base constructors
 
-    SortedMultiDict(o::Ord) = new(BalancedTree23{K,D,Ord}(o))
+    (::Type{SortedMultiDict{K,D,Ord}}){K,D,Ord}(o::Ord) = new{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
 
-    function SortedMultiDict(o::Ord, kv)
-        smd = new(BalancedTree23{K,D,Ord}(o))
+    function (::Type{SortedMultiDict{K,D,Ord}}){K,D,Ord}(o::Ord, kv)
+        smd = new{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
 
         if eltype(kv) <: Pair
             # It's (possibly?) more efficient to access the first and second
