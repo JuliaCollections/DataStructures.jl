@@ -107,6 +107,29 @@ function back(q::Deque)
 end
 
 
+# Equality
+
+function ==(x::Deque, y::Deque ; front::Bool = true)
+    xcopy = deepcopy(x)
+    ycopy = deepcopy(y)
+    front ? _equals_shift!(xcopy, ycopy) : _equals_pop!(xcopy, ycopy)
+end
+
+function _equals_pop!(x::Deque, y::Deque)
+    isempty(x) && return isempty(y)
+    isempty(y) && return false
+    isequal(pop!(x), pop!(y)) || return false
+    isequal_pop!(x, y)
+end
+
+function _equals_shift!(x::Deque, y::Deque)
+    isempty(x) && return isempty(y)
+    isempty(y) && return false
+    isequal(shift!(x), shift!(y)) || return false
+    isequal_shift!(x, y)
+end
+
+
 # Iteration
 
 immutable DequeIterator{T}
