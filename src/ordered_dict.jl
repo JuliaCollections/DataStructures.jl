@@ -25,6 +25,7 @@ refers to insertion order, which allows deterministic iteration over the diction
     end
     function (::Type{OrderedDict{K,V}}){K,V}(kv)
         h = OrderedDict{K,V}()
+        sizehint!(h, length(kv))
         for (k,v) in kv
             h[k] = v
         end
