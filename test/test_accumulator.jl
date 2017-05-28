@@ -67,6 +67,10 @@ ct4 = counter(Pair{Int,Int})
 @test push!(ct4, 1=>2) == 1
 @test push!(ct4, 1=>2) == 2
 
+ct5 = counter(Dict([("a",10), ("b",20)]))
+@test merge(ct5)===ct5
+@test merge!(ct5)===ct5
+@test merge(ct5,ct5,ct5)==counter(Dict([("a",30), ("b",60)]))
 
 @test counter([2,3,4,4]) == counter([4,2,3,4])
 @test counter([2,3,4,4]) != counter([4,2,3,4,4])
