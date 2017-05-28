@@ -73,4 +73,16 @@ end
 
 pop!{T,V<:Number}(ct::Accumulator{T,V}, x::T) = pop!(ct.map, x)
 
-merge{T,V<:Number}(ct1::Accumulator{T,V}, ct2::Accumulator{T,V}) = push!(copy(ct1), ct2)
+function merge!{T,V<:Number}(ct1::Accumulator{T,V}, others::Accumulator{T,V}...)
+    for ct in others
+        push!(ct1,ct)
+    end
+    return ct1
+end
+
+merge{T,V<:Number}(ct1::Accumulator{T,V}) = ct1
+function merge{T,V<:Number}(ct1::Accumulator{T,V}, others::Accumulator{T,V}...)
+    ct = copy(ct1)
+    merge!(ct,others...)
+    return ct
+end
