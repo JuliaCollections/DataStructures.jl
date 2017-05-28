@@ -74,3 +74,24 @@ ct5 = counter(Dict([("a",10), ("b",20)]))
 
 @test counter([2,3,4,4]) == counter([4,2,3,4])
 @test counter([2,3,4,4]) != counter([4,2,3,4,4])
+
+
+ct5 = counter(split("a b b c c c"))
+@test ct5["a"] == 1
+@test ct5["b"] == 2
+@test ct5["c"] == 3
+
+ct6 = counter(["a", "b" , "b", "c", "c", "c"])
+for ii in split("a b c")
+    push!(ct6, ii)
+end
+@show ct6
+@test ct6["a"] == 2
+@test ct6["b"] == 3
+@test ct6["c"] == 4
+for ii in split("a b")
+    pop!(ct6, ii)
+end
+@test ct6["a"] == 0
+@test ct6["b"] == 0
+@test ct6["c"] == 4
