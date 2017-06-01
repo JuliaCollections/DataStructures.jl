@@ -20,7 +20,7 @@
         v = SortedVector([(5, "a"), (2, "b")], x->x[1])
         @test v.data == [(2, "b"), (5, "a")]
 
-        push!(v, (3, "z")
+        push!(v, (3, "z"))
         @test v.data == [(2, "b"), (3, "z"), (5, "a")]
 
         push!(v, (6, "z"), (4, "y"))
