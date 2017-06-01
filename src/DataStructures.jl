@@ -8,7 +8,7 @@ module DataStructures
                  show, dump, empty!, getindex, setindex!, get, get!,
                  in, haskey, keys, merge, copy, cat,
                  push!, pop!, shift!, unshift!, insert!,
-                 union!, delete!, similar, sizehint!,
+                 union!, delete!, similar, sizehint!, resize!,
                  isequal, hash,
                  map, reverse,
                  first, last, eltype, getkey, values, sum,
@@ -51,6 +51,8 @@ module DataStructures
     export orderobject, ordtype, Lt, compare, onlysemitokens
 
     export MultiDict, enumerateall
+
+    export SortedVector
 
     import Base: eachindex, keytype, valtype
 
@@ -101,6 +103,8 @@ module DataStructures
     export PriorityQueue, peek
 
     include("priorityqueue.jl")
+
+    include("sorted_vector.jl")
 
     # Deprecations
 
