@@ -208,7 +208,7 @@ function push!{T}(h::MutableBinaryHeap{T}, v::T)
     i
 end
 
-top(h::MutableBinaryHeap) = h.nodes[1].value
+@inline top(h::MutableBinaryHeap) = h.nodes[1].value
 
 """
     top_with_handle(h::MutableBinaryHeap)
