@@ -27,10 +27,16 @@ function insert!{T}(v::SortedVector{T}, i::Int, x::T)
 end
 
 function push!{T}(v::SortedVector{T}, x::T)
-    i = binary_search(v, x)
+    i = searchsortedfirst(v.data, x, by=v.by)
     insert!(v.data, i, x)
     return v
 end
+
+isempty(v::SortedVector) = isempty(v.data)
+
+pop!(v::SortedVector) = pop!(v.data)
+
+shift!(v::SortedVector) = shift!(v.data)
 
 function deleteat!(v::SortedVector, i::Int)
     deleteat!(v.data, i)
@@ -43,6 +49,7 @@ function resize!(v::SortedVector, n::Int)
 end
 
 
+## Use searchsortedfirst instead
 """
 Do binary search for item `x` in *sorted* vector `v`.
 Returns the lower bound for the position of `x` in `v`.
