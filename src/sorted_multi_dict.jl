@@ -84,7 +84,7 @@ _sorted_multidict_with_eltype{    Ord}(o::Ord, kv, ::Type            ) = SortedM
 # if VERSION < v"0.6.0-dev.2123"
 #     _sorted_multi_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{TypeVar(:K),D}}) = SortedMultiDict{Any,  D,Ord}(o, ps)
 # else
-#     include_string("_sorted_multi_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,D} where K}) = SortedMultiDict{Any,  D,Ord}(o, ps)")
+#     _include_string("_sorted_multi_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,D} where K}) = SortedMultiDict{Any,  D,Ord}(o, ps)")
 # end
 
 const SMDSemiToken = IntSemiToken

@@ -54,6 +54,7 @@ module DataStructures
 
     import Base: eachindex, keytype, valtype
 
+    _include_string(str) = eval(parse(str))
 
     include("delegate.jl")
 
