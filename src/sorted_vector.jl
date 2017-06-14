@@ -1,3 +1,6 @@
+"""
+A `SortedVector` behaves like a standard Julia `Vector`, except that its elements are stored in sorted order, with an optional function `by` that determines the sorting order in the same way as `Base.searchsorted`.
+"""
 immutable SortedVector{T, F<:Function}
     data::Vector{T}
     by::F
@@ -46,56 +49,4 @@ end
 function resize!(v::SortedVector, n::Int)
     resize!(v.data, n)
     return v
-end
-
-
-## Use searchsortedfirst instead
-"""
-Do binary search for item `x` in *sorted* vector `v`.
-Returns the lower bound for the position of `x` in `v`.
-"""
-function binary_search(v::SortedVector, x)
-
-    by = v.by
-
-    a, b = 1, length(v)
-
-    if by(x) < by(v[a])
-        return 1
-
-    elseif by(x) > by(v[b])
-        return b + 1
-    end
-
-    m = (a + b) ÷ 2  # mid-point
-
-    while abs(a - b) > 1
-
-        # @show a, b, v[a], v[b]
-
-        if by(v[m]) == by(x)
-            return m
-        end
-
-        if by(x) < by(v[m])
-            b = m
-        else
-            a = m
-        end
-
-        m = (a + b) ÷ 2  # mid-point
-
-    end
-
-    # @show a, b, v[a], v[b]
-
-    if by(v[a]) == by(x)
-        return a
-    end
-
-    if by(v[b]) == by(x)
-        return b
-    end
-
-    return b  # a is a lower_bound; insert in position b
 end
