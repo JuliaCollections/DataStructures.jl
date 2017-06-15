@@ -90,3 +90,31 @@ root2 = find_root(s, 3)
 @test root_union!(s, root1, root2) == 7
 @test find_root(s, 7) == 7
 @test find_root(s, 3) == 7
+
+
+## Some tests using non-integer disjoint sets
+
+elems = ["a", "b", "c", "d"]
+a = DisjointSets{AbstractString}(elems)
+union!(a, "a", "b")
+@test in_same_set(a,"a","b")
+@test find_root(a,"a") == find_root(a,"b")
+@test find_root(a,"a") in elems
+@test !in_same_set(a, "c", "d")
+# union returns new root
+@test find_root(a,"a") == union!(a,"b","c")
+union!(a,"c","d")
+# Now they should be in same set, and a is transitively connected to d
+@test in_same_set(a,"a", "d") 
+# Root element should thus be same for all:
+@test all(find_root(a,first(elems)) .== map(x->find_root(a,x),elems))
+ 
+push!(a, "f")
+@test find_root(a,"a") != find_root(a,"f")
+
+
+
+
+
+
+
