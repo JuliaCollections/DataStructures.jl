@@ -47,7 +47,6 @@ s = DisjointSets{Int}(1:10)
 @test num_groups(s) == 10
 
 r = [find_root(s, i) for i in 1 : 10]
-@test isa(r, Vector{Int})
 @test isequal(r, collect(1:10))
 
 for i = 1 : 5
@@ -75,7 +74,6 @@ push!(s, 17)
 
 r0 = [ r0 ; 17]
 r = [find_root(s, i) for i in [1 : 10; 17] ]
-@test isa(r, Vector{Int})
 @test isequal(r, r0)
 
 root1 = find_root(s, 7)
