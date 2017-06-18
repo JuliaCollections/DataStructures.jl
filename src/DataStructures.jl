@@ -54,6 +54,7 @@ module DataStructures
 
     import Base: eachindex, keytype, valtype
 
+    _include_string(str) = eval(parse(str))
 
     include("delegate.jl")
 
@@ -118,4 +119,14 @@ module DataStructures
 
     @deprecate DefaultOrderedDict(default, ks, vs) DefaultOrderedDict(default, zip(ks, vs))
     @deprecate DefaultOrderedDict{K,V}(::Type{K}, ::Type{V}, default) DefaultOrderedDict{K,V}(default)
+
+    function SortedMultiDict{K,V}(ks::AbstractVector{K},
+                                  vs::AbstractVector{V},
+                                  o::Ordering=Forward)
+        Base.depwarn("SortedMultiDict(ks, vs, o::Ordering=Forward) is deprecated.\n" * "Use SortedMultiDict(o, zip(ks,vs)) or SortedMultiDict(zip(ks, vs))", :SortedMultiDict)
+        if length(ks) != length(vs)
+            throw(ArgumentError("SortedMultiDict(ks,vs,o): ks and vs arrays must be the same length"))
+        end
+        SortedMultiDict(o, zip(ks,vs))
+    end
 end

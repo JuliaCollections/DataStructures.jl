@@ -1,15 +1,16 @@
 ## A SortedDict is a wrapper around balancedTree with
 ## methods similiar to those of Julia container Dict.
 
-type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
+@compat type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
     bt::BalancedTree23{K,D,Ord}
 
     ## Base constructors
 
-    SortedDict(o::Ord) = new(BalancedTree23{K,D,Ord}(o))
+    (::Type{SortedDict{K,D,Ord}}){K, D, Ord <: Ordering}(o::Ord) =
+        new{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
 
-    function SortedDict(o::Ord, kv)
-        s = new(BalancedTree23{K,D,Ord}(o))
+    function (::Type{SortedDict{K,D,Ord}}){K, D, Ord <: Ordering}(o::Ord, kv)
+        s = new{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
 
         if eltype(kv) <: Pair
             # It's (possibly?) more efficient to access the first and second
@@ -61,12 +62,6 @@ end
 # Construction inferring Key/Value types from input
 # e.g. SortedDict{}
 
-function not_iterator_of_pairs(kv)
-    return any(x->isempty(methodswith(typeof(kv), x, true)),
-               [start, next, done]) ||
-           any(x->!isa(x, Union{Tuple,Pair}), kv)
-end
-
 SortedDict(o1::Ordering, o2::Ordering) = throw(ArgumentError("SortedDict with two parameters must be called with an Ordering and an interable of pairs"))
 SortedDict(kv, o::Ordering=Forward) = SortedDict(o, kv)
 function SortedDict(o::Ordering, kv)
@@ -91,12 +86,12 @@ _sorted_dict_with_eltype{    Ord}(o::Ord, kv, ::Type            ) = SortedDict{A
 # if VERSION < v"0.6.0-dev.2123"
 #     _sorted_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{TypeVar(:K),D}}) = SortedDict{Any,  D,Ord}(o, ps)
 # else
-#     include_string("_sorted_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,D} where K}) = SortedDict{Any,  D,Ord}(o, ps)")
+#     _include_string("_sorted_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,D} where K}) = SortedDict{Any,  D,Ord}(o, ps)")
 # end
 
-typealias SDSemiToken IntSemiToken
+const SDSemiToken = IntSemiToken
 
-typealias SDToken Tuple{SortedDict,IntSemiToken}
+const SDToken = Tuple{SortedDict,IntSemiToken}
 
 ## This function implements m[k]; it returns the
 ## data item associated with key k.

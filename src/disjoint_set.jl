@@ -105,11 +105,11 @@ end
 #
 ############################################################
 
-type DisjointSets{T}
+@compat type DisjointSets{T}
     intmap::Dict{T,Int}
     internal::IntDisjointSets
 
-    function DisjointSets(xs)    # xs must be iterable
+    function (::Type{DisjointSets{T}}){T}(xs)    # xs must be iterable
         imap = Dict{T,Int}()
         n = length(xs)
         sizehint!(imap, n)
@@ -117,7 +117,7 @@ type DisjointSets{T}
         for x in xs
             imap[x] = (id += 1)
         end
-        new(imap, IntDisjointSets(n))
+        new{T}(imap, IntDisjointSets(n))
     end
 end
 

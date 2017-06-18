@@ -150,20 +150,20 @@ end
 #
 #################################################
 
-type MutableBinaryHeap{VT, Comp} <: AbstractMutableHeap{VT,Int}
+@compat type MutableBinaryHeap{VT, Comp} <: AbstractMutableHeap{VT,Int}
     comparer::Comp
     nodes::Vector{MutableBinaryHeapNode{VT}}
     node_map::Vector{Int}
 
-    function MutableBinaryHeap(comp::Comp)
+    function (::Type{MutableBinaryHeap{VT, Comp}}){VT, Comp}(comp::Comp)
         nodes = Vector{MutableBinaryHeapNode{VT}}(0)
         node_map = Vector{Int}(0)
-        new(comp, nodes, node_map)
+        new{VT, Comp}(comp, nodes, node_map)
     end
 
-    function MutableBinaryHeap(comp::Comp, xs)  # xs is an iterable collection of values
+    function (::Type{MutableBinaryHeap{VT, Comp}}){VT, Comp}(comp::Comp, xs)  # xs is an iterable collection of values
         nodes, node_map = _make_mutable_binary_heap(comp, VT, xs)
-        new(comp, nodes, node_map)
+        new{VT, Comp}(comp, nodes, node_map)
     end
 end
 

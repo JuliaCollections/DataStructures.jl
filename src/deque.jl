@@ -5,7 +5,7 @@
 #
 #######################################
 
-type DequeBlock{T}
+@compat type DequeBlock{T}
     data::Vector{T}  # only data[front:back] is valid
     capa::Int
     front::Int
@@ -13,9 +13,9 @@ type DequeBlock{T}
     prev::DequeBlock{T}  # ref to previous block
     next::DequeBlock{T}  # ref to next block
 
-    function DequeBlock(capa::Int, front::Int)
+    function (::Type{DequeBlock{T}}){T}(capa::Int, front::Int)
         data = Vector{T}(capa)
-        blk = new(data, capa, front, front-1)
+        blk = new{T}(data, capa, front, front-1)
         blk.prev = blk
         blk.next = blk
         blk
@@ -58,19 +58,19 @@ end
 
 const DEFAULT_DEQUEUE_BLOCKSIZE = 1024
 
-type Deque{T}
+@compat type Deque{T}
     nblocks::Int
     blksize::Int
     len::Int
     head::DequeBlock{T}
     rear::DequeBlock{T}
 
-    function Deque(blksize::Int)
+    function (::Type{Deque{T}}){T}(blksize::Int)
         head = rear = rear_deque_block(T, blksize)
-        new(1, blksize, 0, head, rear)
+        new{T}(1, blksize, 0, head, rear)
     end
 
-    Deque() = Deque{T}(DEFAULT_DEQUEUE_BLOCKSIZE)
+    (::Type{Deque{T}}){T}() = Deque{T}(DEFAULT_DEQUEUE_BLOCKSIZE)
 end
 
 """

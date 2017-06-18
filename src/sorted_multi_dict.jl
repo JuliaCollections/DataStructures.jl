@@ -2,83 +2,94 @@
 ## Unlike SortedDict, a key in SortedMultiDict can
 ## refer to multiple data entries.
 
-type SortedMultiDict{K, D, Ord <: Ordering}
+@compat type SortedMultiDict{K, D, Ord <: Ordering}
     bt::BalancedTree23{K,D,Ord}
 
-## Zero-argument constructor, or possibly one argument to specify order.
+    ## Base constructors
 
-    function SortedMultiDict(o::Ord=Forward)
-        bt1 = BalancedTree23{K,D,Ord}(o)
-        new(bt1)
+    (::Type{SortedMultiDict{K,D,Ord}}){K,D,Ord}(o::Ord) = new{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
+
+    function (::Type{SortedMultiDict{K,D,Ord}}){K,D,Ord}(o::Ord, kv)
+        smd = new{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
+
+        if eltype(kv) <: Pair
+            # It's (possibly?) more efficient to access the first and second
+            # elements of Pairs directly, rather than destructure
+            for p in kv
+                insert!(smd, p.first, p.second)
+            end
+        else
+            for (k,v) in kv
+                insert!(smd, k, v)
+            end
+        end
+        return smd
+
     end
 end
 
-@compat (::Type{SortedMultiDict})() = SortedMultiDict{Any,Any,ForwardOrdering}(Forward)
-@compat (::Type{SortedMultiDict{K,D}}){K,D}() = SortedMultiDict{K,D,ForwardOrdering}(Forward)
-@compat (::Type{SortedMultiDict}){O<:Ordering}(o::O) = SortedMultiDict{Any,Any,O}(o)
-@compat (::Type{SortedMultiDict{K,D}}){K,D,O<:Ordering}(o::O) = SortedMultiDict{K,D,O}(o)
-# @compat (::Type{SortedMultiDict{K,D}}){K,D,O<:Ordering}(o::O, ps::Pair...) = SortedMultiDict{K,D,O}(o, ps...)
-# @compat (::Type{SortedMultiDict{K,D}}){K,D}(ps::Pair...) = SortedMultiDict{K,D}(Base.Forward, ps...)
+SortedMultiDict() = SortedMultiDict{Any,Any,ForwardOrdering}(Forward)
+SortedMultiDict{O<:Ordering}(o::O) = SortedMultiDict{Any,Any,O}(o)
 
-typealias SMDSemiToken IntSemiToken
+# Construction from Pairs
+SortedMultiDict(ps::Pair...) = SortedMultiDict(Forward, ps)
+SortedMultiDict(o::Ordering, ps::Pair...) = SortedMultiDict(o, ps)
+@compat (::Type{SortedMultiDict{K,D}}){K,D}(ps::Pair...) = SortedMultiDict{K,D,ForwardOrdering}(Forward, ps)
+@compat (::Type{SortedMultiDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, ps::Pair...) = SortedMultiDict{K,D,Ord}(o, ps)
 
-typealias SMDToken Tuple{SortedMultiDict, IntSemiToken}
+# Construction from Associatives
+SortedMultiDict{K,D,Ord<:Ordering}(o::Ord, d::Associative{K,D}) = SortedMultiDict{K,D,Ord}(o, d)
 
-## This constructor takes two arrays an ordering object which defaults
-## to Forward
+## Construction from iteratables of Pairs/Tuples
 
-function SortedMultiDict{K,D, Ord <: Ordering}(kk::AbstractArray{K,1},
-                                               dd::AbstractArray{D,1},
-                                               o::Ord=Forward)
-    if length(kk) != length(dd)
-        throw(ArgumentError("SortedMultiDict K and D constructor array arguments must be the same length"))
+# Construction specifying Key/Value types
+# e.g., SortedMultiDict{Int,Float64}([1=>1, 2=>2.0])
+@compat (::Type{SortedMultiDict{K,D}}){K,D}(kv) = SortedMultiDict{K,D}(Forward, kv)
+@compat function (::Type{SortedMultiDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, kv)
+    try
+        SortedMultiDict{K,D,Ord}(o, kv)
+    catch e
+        if not_iterator_of_pairs(kv)
+            throw(ArgumentError("SortedMultiDict(kv): kv needs to be an iterator of tuples or pairs"))
+        else
+            rethrow(e)
+        end
     end
-    h = SortedMultiDict{K,D,Ord}(o)
-    for i = 1 : length(kk)
-        insert!(h, kk[i], dd[i])
-    end
-    h
 end
 
+# Construction inferring Key/Value types from input
+# e.g. SortedMultiDict{}
 
-
-## Take pairs and infer argument
-## types.  Note:  this works only for the Forward ordering.
-
-function SortedMultiDict{K,D}(ps::Pair{K,D}...)
-    h = SortedMultiDict{K,D,ForwardOrdering}()
-    for p in ps
-        insert!(h, p.first, p.second)
+SortedMultiDict(o1::Ordering, o2::Ordering) = throw(ArgumentError("SortedMultiDict with two parameters must be called with an Ordering and an interable of pairs"))
+SortedMultiDict(kv, o::Ordering=Forward) = SortedMultiDict(o, kv)
+function SortedMultiDict(o::Ordering, kv)
+    try
+        _sorted_multidict_with_eltype(o, kv, eltype(kv))
+    catch e
+        if not_iterator_of_pairs(kv)
+            throw(ArgumentError("SortedMultiDict(kv): kv needs to be an iterator of tuples or pairs"))
+        else
+            rethrow(e)
+        end
     end
-    h
 end
 
+_sorted_multidict_with_eltype{K,D,Ord}(o::Ord, ps, ::Type{Pair{K,D}}) = SortedMultiDict{  K,  D,Ord}(o, ps)
+_sorted_multidict_with_eltype{K,D,Ord}(o::Ord, kv, ::Type{Tuple{K,D}}) = SortedMultiDict{  K,  D,Ord}(o, kv)
+_sorted_multidict_with_eltype{K,  Ord}(o::Ord, ps, ::Type{Pair{K}}  ) = SortedMultiDict{  K,Any,Ord}(o, ps)
+_sorted_multidict_with_eltype{    Ord}(o::Ord, kv, ::Type            ) = SortedMultiDict{Any,Any,Ord}(o, kv)
 
-## Take pairs and infer argument
-## types.  Ordering parameter must be explicit first argument.
+## TODO: It seems impossible (or at least very challenging) to create the eltype below.
+##       If deemed possible, please create a test and uncomment this definition.
+# if VERSION < v"0.6.0-dev.2123"
+#     _sorted_multi_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{TypeVar(:K),D}}) = SortedMultiDict{Any,  D,Ord}(o, ps)
+# else
+#     _include_string("_sorted_multi_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,D} where K}) = SortedMultiDict{Any,  D,Ord}(o, ps)")
+# end
 
+const SMDSemiToken = IntSemiToken
 
-function SortedMultiDict{K,D, Ord <: Ordering}(o::Ord, ps::Pair{K,D}...)
-    h = SortedMultiDict{K,D,Ord}(o)
-    for p in ps
-        insert!(h, p.first, p.second)
-    end
-    h
-end
-
-
-## This one takes an iterable; ordering type is optional.
-
-SortedMultiDict{Ord <: Ordering}(kv, o::Ord=Forward) =
-sortedmultidict_with_eltype(kv, eltype(kv), o)
-
-function sortedmultidict_with_eltype{K,D,Ord}(kv, ::Type{Pair{K,D}}, o::Ord)
-    h = SortedMultiDict{K,D,Ord}(o)
-    for (k,v) in kv
-        insert!(h, k, v)
-    end
-    h
-end
+const SMDToken = Tuple{SortedMultiDict, IntSemiToken}
 
 
 ## This function inserts an item into the tree.
@@ -207,7 +218,7 @@ function isequal(m1::SortedMultiDict, m2::SortedMultiDict)
     end
 end
 
-typealias SDorAssociative Union{Associative,SortedMultiDict}
+const SDorAssociative = Union{Associative,SortedMultiDict}
 
 function mergetwo!{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord},
                                         m2::SDorAssociative)
@@ -217,13 +228,13 @@ function mergetwo!{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord},
 end
 
 function packcopy{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord})
-    w = SortedMultiDict((K)[], (D)[], orderobject(m))
+    w = SortedMultiDict{K,D}(orderobject(m))
     mergetwo!(w,m)
     w
 end
 
 function packdeepcopy{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord})
-    w = SortedMultiDict((K)[], (D)[], orderobject(m))
+    w = SortedMultiDict{K,D}(orderobject(m))
     for (k,v) in m
         insert!(w.bt, deepcopy(k), deepcopy(v), true)
     end
@@ -259,6 +270,6 @@ function Base.show{K,D,Ord <: Ordering}(io::IO, m::SortedMultiDict{K,D,Ord})
 end
 
 similar{K,D,Ord<:Ordering}(m::SortedMultiDict{K,D,Ord}) =
-   SortedMultiDict(K[], D[], orderobject(m))
+   SortedMultiDict{K,D}(orderobject(m))
 
 isordered{T<:SortedMultiDict}(::Type{T}) = true

@@ -26,7 +26,7 @@ push!(c, "high", 5)
 @test c["high"] == [4, 5]
 
 @test length(c) == 2
-@test collect(keys(c)) == Compat.ASCIIString["high","low"]
+@test sort(collect(keys(c))) == Compat.ASCIIString["high","low"]
 
 pop!(c,"low")
 @test !haskey(c,"low")

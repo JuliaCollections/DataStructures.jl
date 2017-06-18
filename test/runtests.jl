@@ -9,8 +9,11 @@ const IntSet = DataStructures.IntSet
 import Compat: String
 using Primes
 
-tests = [
-         "int_set",
+if VERSION >= v"0.5.0" && VERSION < v"0.6.0-dev"
+    @test isempty(detect_ambiguities(Base, Core, DataStructures))
+end
+
+tests = ["int_set",
          "deque",
          "circ_deque",
          "sorted_containers",

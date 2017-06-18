@@ -1,4 +1,3 @@
-
 # OrderedDict
 
 import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
@@ -14,25 +13,25 @@ import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
 `OrderedDict`s are  simply dictionaries  whose entries  have a  particular order.  The order
 refers to insertion order, which allows deterministic iteration over the dictionary or set.
 """
-type OrderedDict{K,V} <: Associative{K,V}
+@compat type OrderedDict{K,V} <: Associative{K,V}
     slots::Array{Int32,1}
     keys::Array{K,1}
     vals::Array{V,1}
     ndel::Int
     dirty::Bool
 
-    function OrderedDict()
-        new(zeros(Int32,16), Vector{K}(0), Vector{V}(0), 0, false)
+    function (::Type{OrderedDict{K,V}}){K,V}()
+        new{K,V}(zeros(Int32,16), Vector{K}(0), Vector{V}(0), 0, false)
     end
-    function OrderedDict(kv)
+    function (::Type{OrderedDict{K,V}}){K,V}(kv)
         h = OrderedDict{K,V}()
         for (k,v) in kv
             h[k] = v
         end
         return h
     end
-    OrderedDict(p::Pair) = setindex!(OrderedDict{K,V}(), p.second, p.first)
-    function OrderedDict(ps::Pair...)
+    (::Type{OrderedDict{K,V}}){K,V}(p::Pair) = setindex!(OrderedDict{K,V}(), p.second, p.first)
+    function (::Type{OrderedDict{K,V}}){K,V}(ps::Pair...)
         h = OrderedDict{K,V}()
         sizehint!(h, length(ps))
         for p in ps
@@ -40,12 +39,12 @@ type OrderedDict{K,V} <: Associative{K,V}
         end
         return h
     end
-    function OrderedDict(d::OrderedDict{K,V})
+    function (::Type{OrderedDict{K,V}}){K,V}(d::OrderedDict{K,V})
         if d.ndel > 0
             rehash!(d)
         end
         @assert d.ndel == 0
-        new(copy(d.slots), copy(d.keys), copy(d.vals), 0)
+        new{K,V}(copy(d.slots), copy(d.keys), copy(d.vals), 0)
     end
 end
 OrderedDict() = OrderedDict{Any,Any}()
@@ -61,7 +60,7 @@ _oldOrderedDict1 = "OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = Ord
 _newOrderedDict1 = "OrderedDict{V}(kv::Tuple{Vararg{Pair{K,V} where K}})   = OrderedDict{Any,V}(kv)"
 OrderedDict{K,V}(kv::Tuple{Vararg{Pair{K,V}}})         = OrderedDict{K,V}(kv)
 OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})             = OrderedDict{K,Any}(kv)
-VERSION < v"0.6.0-dev.2123" ? include_string(_oldOrderedDict1) : include_string(_newOrderedDict1)
+VERSION < v"0.6.0-dev.2123" ? _include_string(_oldOrderedDict1) : _include_string(_newOrderedDict1)
 OrderedDict(kv::Tuple{Vararg{Pair}})                   = OrderedDict{Any,Any}(kv)
 
 OrderedDict{K,V}(kv::AbstractArray{Tuple{K,V}}) = OrderedDict{K,V}(kv)
@@ -72,7 +71,7 @@ _oldOrderedDict2 = "OrderedDict{V}(ps::Pair{TypeVar(:K),V}...,) = OrderedDict{An
 _newOrderedDict2 = "OrderedDict{V}(ps::(Pair{K,V} where K)...,) = OrderedDict{Any,V}(ps)"
 OrderedDict{K,V}(ps::Pair{K,V}...)          = OrderedDict{K,V}(ps)
 OrderedDict{K}(ps::Pair{K}...,)             = OrderedDict{K,Any}(ps)
-VERSION < v"0.6.0-dev.2123" ? include_string(_oldOrderedDict2) : include_string(_newOrderedDict2)
+VERSION < v"0.6.0-dev.2123" ? _include_string(_oldOrderedDict2) : _include_string(_newOrderedDict2)
 OrderedDict(ps::Pair...)                    = OrderedDict{Any,Any}(ps)
 
 function OrderedDict(kv)

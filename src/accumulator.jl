@@ -30,9 +30,13 @@ length(a::Accumulator) = length(a.map)
 
 ## retrieval
 
-getindex{T,V}(ct::Accumulator{T,V}, x::T) = get(ct.map, x, zero(V))
+get(ct::Accumulator, x, default) = get(ct.map, x, default)
+# need to allow user specified default in order to
+# correctly implement "informal" Associative interface
 
-haskey{T,V}(ct::Accumulator{T,V}, x::T) = haskey(ct.map, x)
+getindex{T,V}(ct::Accumulator{T,V}, x) = get(ct.map, x, zero(V))
+
+haskey(ct::Accumulator, x) = haskey(ct.map, x)
 
 keys(ct::Accumulator) = keys(ct.map)
 
@@ -49,24 +53,35 @@ done(ct::Accumulator, state) = done(ct.map, state)
 
 # manipulation
 
-push!{T,V<:Number}(ct::Accumulator{T,V}, x::T, a::V) = (ct.map[x] = ct[x] + a)
-push!{T,V<:Number,V2<:Number}(ct::Accumulator{T,V}, x::T, a::V2) = push!(ct, x, convert(V,a))
-push!{T,V<:Number}(ct::Accumulator{T,V}, x::T) = push!(ct, x, one(V))
+push!(ct::Accumulator, x, a::Number) = (ct.map[x] = ct[x] + a)
+push!{T,V}(ct::Accumulator{T,V}, x) = push!(ct, x, one(V))
 
 # To remove ambiguities related to Accumulator now being a subtype of Associative
 if VERSION < v"0.6.0-dev.2123"
-    push!{T,V<:Number}(ct::Accumulator{T,V}, x::Pair) = push!(ct, x, one(V))
+    push!{T,V}(ct::Accumulator{T,V}, x::Pair) = push!(ct, x, one(V))
 else
-    include_string("push!(ct::Accumulator{T,V}, x::T) where T<:Pair where V<:Number = push!(ct, x, one(V))")
+    _include_string("push!(ct::Accumulator{T,V}, x::T) where T<:Pair where V = push!(ct, x, one(V))")
 end
 
-function push!{T,V<:Number,V2<:Number}(ct::Accumulator{T,V}, r::Accumulator{T,V2})
-    for (x::T, v::V2) in r
+function push!(ct::Accumulator, r::Accumulator)
+    for (x, v) in r
         push!(ct, x, v)
     end
     ct
 end
 
-pop!{T,V<:Number}(ct::Accumulator{T,V}, x::T) = pop!(ct.map, x)
+pop!(ct::Accumulator, x) = pop!(ct.map, x)
 
-merge{T,V<:Number}(ct1::Accumulator{T,V}, ct2::Accumulator{T,V}) = push!(copy(ct1), ct2)
+function merge!(ct1::Accumulator, others::Accumulator...)
+    for ct in others
+        push!(ct1,ct)
+    end
+    return ct1
+end
+
+merge(ct1::Accumulator) = ct1
+function merge{T,V<:Number}(ct1::Accumulator{T,V}, others::Accumulator{T,V}...)
+    ct = copy(ct1)
+    merge!(ct,others...)
+    return ct
+end
