@@ -90,3 +90,31 @@ root2 = find_root(s, 3)
 @test root_union!(s, root1, root2) == 7
 @test find_root(s, 7) == 7
 @test find_root(s, 3) == 7
+
+
+#tests for get_size
+s = IntDisjointSets(10)
+@test_throws ErrorException get_size(s, 1)
+
+s = IntDisjointSets(10, true)
+@test get_size(s, 2) == 1
+union!(s, 2, 3)
+@test get_size(s, 2) == get_size(s, 3) == 2
+union!(s, 2, 5)
+@test get_size(s, 2) == get_size(s, 3) == get_size(s, 5) == 3
+
+s = DisjointSets{Int}(2:11)
+@test_throws ErrorException get_size(s, 2)
+
+s = DisjointSets{Int}(2:11, true)
+@test get_size(s, 2) == 1
+union!(s, 2, 3)
+@test get_size(s, 2) == get_size(s, 3) == 2
+union!(s, 2, 5)
+@test get_size(s, 2) == get_size(s, 3) == get_size(s, 5) == 3
+
+
+
+
+
+

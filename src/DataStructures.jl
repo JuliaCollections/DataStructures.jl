@@ -26,7 +26,7 @@ module DataStructures
     export ClassifiedCollections
     export classified_lists, classified_sets, classified_counters
 
-    export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set, root_union!
+    export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set, root_union!, get_size
     export push!
 
     export AbstractHeap, compare, extract_all!
