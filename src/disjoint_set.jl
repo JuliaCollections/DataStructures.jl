@@ -127,7 +127,7 @@ end
 # get size of set containing element x
 #
 get_size(s::IntDisjointSets{<:Int}, x::Integer) = s.sizes[find_root(s, x)]
-get_size(s::IntDisjointSets{<:Void}, x::Integer) = error("DisjointSets wasn't initialized with store_size = true")
+get_size(s::IntDisjointSets{<:Void}, x::Integer) = throw(ErrorException("DisjointSets wasn't initialized with store_size = true"))
 
 
 ############################################################
