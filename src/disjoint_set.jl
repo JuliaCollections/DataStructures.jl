@@ -23,7 +23,7 @@ type IntDisjointSets{T<:Union{Void, Int}}
     IntDisjointSets{T}(n::Integer) where {T<:Int} = new(collect(1:n), zeros(Int, n), ones(Int, n), n)
     IntDisjointSets{T}(n::Integer) where {T<:Void} = new(collect(1:n), zeros(Int, n), Vector{Void}(), n)
 end
-IntDisjointSets(n::Integer, store_size::Bool=false) = store_size ? IntDisjointSets{Int}(n) : IntDisjointSets{Void}(n)
+IntDisjointSets(n::Integer) = IntDisjointSets{Int}(n)
 
 length(s::IntDisjointSets) = length(s.parents)
 num_groups(s::IntDisjointSets) = s.ngroups
@@ -154,7 +154,6 @@ get_size(s::IntDisjointSets{<:Void}, x::Integer) = throw(ErrorException("Disjoin
         new{T, S}(imap, IntDisjointSets{S}(n))
     end
 end
-IntDisjointSets(xs, store_size::Bool=true) = store_size ? IntDisjointSets{eltype(s), Int}(n) : IntDisjointSets{eltype(s), Void}(n)
 
 length(s::DisjointSets) = length(s.internal)
 num_groups(s::DisjointSets) = num_groups(s.internal)
