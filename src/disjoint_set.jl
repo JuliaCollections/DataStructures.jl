@@ -139,11 +139,11 @@ get_size(s::IntDisjointSets{<:Void}, x::Integer) = throw(ErrorException("Disjoin
 #
 ############################################################
 
-@compat type DisjointSets{T}
+@compat type DisjointSets{T, S<:Union{Void, Int}}
     intmap::Dict{T,Int}
-    internal::IntDisjointSets
+    internal::IntDisjointSets{S}
 
-    function (::Type{DisjointSets{T}}){T}(xs, store_size::Bool=false)    # xs must be iterable
+    function (::Type{DisjointSets{T, S}}){T, S}(xs)    # xs must be iterable
         imap = Dict{T,Int}()
         n = length(xs)
         sizehint!(imap, n)
@@ -151,9 +151,10 @@ get_size(s::IntDisjointSets{<:Void}, x::Integer) = throw(ErrorException("Disjoin
         for x in xs
             imap[x] = (id += 1)
         end
-        new{T}(imap, IntDisjointSets(n, store_size))
+        new{T, S}(imap, IntDisjointSets{S}(n))
     end
 end
+IntDisjointSets(xs, store_size::Bool=true) = store_size ? IntDisjointSets{eltype(s), Int}(n) : IntDisjointSets{eltype(s), Void}(n)
 
 length(s::DisjointSets) = length(s.internal)
 num_groups(s::DisjointSets) = num_groups(s.internal)
