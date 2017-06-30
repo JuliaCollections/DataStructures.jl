@@ -14,22 +14,19 @@
 # subclassed.
 #
 
-@compat immutable DefaultDictBase{K,V,F,D} <: Associative{K,V}
+struct DefaultDictBase{K,V,F,D<:Associative{K,V}} <: Associative{K,V}
     default::F
     d::D
 
-    check_D(D,K,V) = (D <: Associative{K,V}) ||
-        throw(ArgumentError("Default dict must be <: Associative{$K,$V}"))
+    DefaultDictBase{K,V,F,D}(x::F, kv::AbstractArray{Tuple{K,V}}) where {K,V,F,D} =
+        new{K,V,F,D}(x, D(kv))
+    DefaultDictBase{K,V,F,D}(x::F, ps::Pair{K,V}...) where {K,V,F,D} =
+        new{K,V,F,D}(x, D(ps...))
 
-    (::Type{DefaultDictBase{K,V,F,D}}){K,V,F,D}(x::F, kv::AbstractArray{Tuple{K,V}}) =
-        (check_D(D,K,V); new{K,V,F,D}(x, D(kv)))
-    (::Type{DefaultDictBase{K,V,F,D}}){K,V,F,D}(x::F, ps::Pair{K,V}...) =
-        (check_D(D,K,V); new{K,V,F,D}(x, D(ps...)))
-
-    (::Type{DefaultDictBase{K,V,F,D}}){K,V,F,D<:DefaultDictBase}(x::F, d::D) =
-        (check_D(D,K,V); DefaultDictBase(x, d.d))
-    (::Type{DefaultDictBase{K,V,F,D}}){K,V,F,D}(x::F, d::D = D()) =
-        (check_D(D,K,V); new{K,V,F,D}(x, d))
+    DefaultDictBase{K,V,F,D}(x::F, d::D) where {K,V,F,D<:DefaultDictBase} =
+        new{K,V,F,typeof(d.d)}(x, d.d)
+    DefaultDictBase{K,V,F,D}(x::F, d::D=D()) where {K,V,F,D} =
+        new{K,V,F,D}(x, d)
 end
 
 # Constructors
@@ -38,13 +35,16 @@ DefaultDictBase() = throw(ArgumentError("no default specified"))
 DefaultDictBase(k,v) = throw(ArgumentError("no default specified"))
 
 # syntax entry points
-DefaultDictBase{F}(default::F) = DefaultDictBase{Any,Any,F,Dict{Any,Any}}(default)
-DefaultDictBase{K,V,F}(default::F, kv::AbstractArray{Tuple{K,V}}) = DefaultDictBase{K,V,F,Dict{K,V}}(default, kv)
-DefaultDictBase{K,V,F}(default::F, ps::Pair{K,V}...) = DefaultDictBase{K,V,F,Dict{K,V}}(default, ps...)
-DefaultDictBase{F,D<:Associative}(default::F, d::D) = (K=keytype(d); V=valtype(d); DefaultDictBase{K,V,F,D}(default, d))
+DefaultDictBase(default::F) where {F} = DefaultDictBase{Any,Any,F,Dict{Any,Any}}(default)
+DefaultDictBase(default::F, kv::AbstractArray{Tuple{K,V}}) where {K,V,F} =
+    DefaultDictBase{K,V,F,Dict{K,V}}(default, kv)
+DefaultDictBase(default::F, ps::Pair{K,V}...) where {K,V,F} =
+    DefaultDictBase{K,V,F,Dict{K,V}}(default, ps...)
+DefaultDictBase(default::F, d::D) where {F,D<:Associative} =
+    DefaultDictBase{keytype(d),valtype(d),F,D}(default, d)
 
 # Constructor for DefaultDictBase{Int,Float64}(0.0)
-@compat (::Type{DefaultDictBase{K,V}}){K,V,F}(default::F) = DefaultDictBase{K,V,F,Dict{K,V}}(default)
+DefaultDictBase{K,V}(default::F) where {K,V,F} = DefaultDictBase{K,V,F,Dict{K,V}}(default)
 
 # Functions
 
@@ -57,14 +57,15 @@ DefaultDictBase{F,D<:Associative}(default::F, d::D) = (K=keytype(d); V=valtype(d
 #       calls setindex!
 @delegate_return_parent DefaultDictBase.d [ delete!, empty!, setindex!, sizehint! ]
 
-similar{K,V,F}(d::DefaultDictBase{K,V,F}) = DefaultDictBase{K,V,F}(d.default)
-in{T<:DefaultDictBase}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d)
-next{T<:DefaultDictBase}(v::Base.KeyIterator{T}, i) = (v.dict.d.keys[i], Base.skip_deleted(v.dict.d,i+1))
-next{T<:DefaultDictBase}(v::Base.ValueIterator{T}, i) = (v.dict.d.vals[i], Base.skip_deleted(v.dict.d,i+1))
+similar(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default)
+
+in(key, v::Base.KeyIterator{<:DefaultDictBase}) = key in keys(v.dict.d)
+next(v::Base.KeyIterator{<:DefaultDictBase}, i) = (v.dict.d.keys[i], Base.skip_deleted(v.dict.d,i+1))
+next(v::Base.ValueIterator{<:DefaultDictBase}, i) = (v.dict.d.vals[i], Base.skip_deleted(v.dict.d,i+1))
 
 getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 
-function getindex{K,V,F<:Base.Callable}(d::DefaultDictBase{K,V,F}, key)
+function getindex(d::DefaultDictBase{K,V,F}, key) where {K,V,F<:Base.Callable}
     return get!(d.d, key) do
         d.default()
     end
@@ -80,19 +81,19 @@ end
 # to that object
 
 for _Dict in [:Dict, :OrderedDict]
-    DefaultDict = Symbol("Default"*string(_Dict))
+    DefaultDict = Symbol("Default", _Dict)
     @eval begin
-        @compat immutable $DefaultDict{K,V,F} <: Associative{K,V}
+        struct $DefaultDict{K,V,F} <: Associative{K,V}
             d::DefaultDictBase{K,V,F,$_Dict{K,V}}
 
-            (::Type{$DefaultDict{K,V,F}}){K,V,F}(x, ps::Pair{K,V}...) =
+            $DefaultDict{K,V,F}(x, ps::Pair{K,V}...) where {K,V,F} =
                 new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, ps...))
-            (::Type{$DefaultDict{K,V,F}}){K,V,F}(x, kv::AbstractArray{Tuple{K,V}}) =
+            $DefaultDict{K,V,F}(x, kv::AbstractArray{Tuple{K,V}}) where {K,V,F} =
                 new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, kv))
-            (::Type{$DefaultDict{K,V,F}}){K,V,F}(x, d::$DefaultDict) = $DefaultDict(x, d.d)
-            (::Type{$DefaultDict{K,V,F}}){K,V,F}(x, d::$_Dict) =
+            $DefaultDict{K,V,F}(x, d::$DefaultDict) where {K,V,F} = $DefaultDict(x, d.d)
+            $DefaultDict{K,V,F}(x, d::$_Dict) where {K,V,F} =
                 new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, d))
-            (::Type{$DefaultDict{K,V,F}}){K,V,F}(x) =
+            $DefaultDict{K,V,F}(x) where {K,V,F} =
                 new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x))
         end
 
@@ -102,15 +103,18 @@ for _Dict in [:Dict, :OrderedDict]
         $DefaultDict(k,v) = throw(ArgumentError("$DefaultDict: no default specified"))
 
         # syntax entry points
-        $DefaultDict{F}(default::F) = $DefaultDict{Any,Any,F}(default)
-        $DefaultDict{K,V,F}(default::F, kv::AbstractArray{Tuple{K,V}}) = $DefaultDict{K,V,F}(default, kv)
-        $DefaultDict{K,V,F}(default::F, ps::Pair{K,V}...) = $DefaultDict{K,V,F}(default, ps...)
+        $DefaultDict(default::F) where {F} = $DefaultDict{Any,Any,F}(default)
+        $DefaultDict(default::F, kv::AbstractArray{Tuple{K,V}}) where {K,V,F} =
+            $DefaultDict{K,V,F}(default, kv)
+        $DefaultDict(default::F, ps::Pair{K,V}...) where {K,V,F} =
+            $DefaultDict{K,V,F}(default, ps...)
 
-        $DefaultDict{F}(default::F, d::Associative) = ((K,V)= (Base.keytype(d), Base.valtype(d)); $DefaultDict{K,V,F}(default, $_Dict(d)))
+        $DefaultDict(default::F, d::Associative{K,V}) where {F,K,V} =
+            $DefaultDict{K,V,F}(default, $_Dict(d))
 
         # Constructor syntax: DefaultDictBase{Int,Float64}(default)
-        @compat (::Type{$DefaultDict{K,V}}){K,V}() = throw(ArgumentError("$DefaultDict: no default specified"))
-        @compat (::Type{$DefaultDict{K,V}}){K,V,F}(default::F) = $DefaultDict{K,V,F}(default)
+        $DefaultDict{K,V}() where {K,V} = throw(ArgumentError("$DefaultDict: no default specified"))
+        $DefaultDict{K,V}(default::F) where {K,V,F} = $DefaultDict{K,V,F}(default)
 
         ## Functions
 
@@ -137,16 +141,17 @@ for _Dict in [:Dict, :OrderedDict]
         push!(d::$DefaultDict, p, q) = push!(push!(d, p), q)
         push!(d::$DefaultDict, p, q, r...) = push!(push!(push!(d, p), q), r...)
 
-        similar{K,V,F}(d::$DefaultDict{K,V,F}) = $DefaultDict{K,V,F}(d.d.default)
-        in{T<:$DefaultDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
+        similar(d::$DefaultDict{K,V,F}) where {K,V,F} = $DefaultDict{K,V,F}(d.d.default)
+        in(key, v::Base.KeyIterator{<:$DefaultDict}) = key in keys(v.dict.d.d)
     end
 end
 
-isordered{T<:DefaultOrderedDict}(::Type{T}) = true
+isordered(::Type{<:DefaultOrderedDict}) = true
 
 ## This should be uncommented to provide a DefaultSortedDict
+## TODO: Update the syntax for 0.6 should you choose to uncomment this
 
-# immutable DefaultSortedDict{K,V,F} <: Associative{K,V}
+# struct DefaultSortedDict{K,V,F} <: Associative{K,V}
 #     d::DefaultDictBase{K,V,F,SortedDict{K,V}}
 
 #     DefaultSortedDict(x, kv::AbstractArray{(K,V)}) = new(DefaultDictBase{K,V,F,SortedDict{K,V}}(x, kv))

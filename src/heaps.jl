@@ -46,16 +46,16 @@
 # HT: handle type
 # VT: value type
 
-@compat abstract type AbstractHeap{VT} end
+abstract type AbstractHeap{VT} end
 
-@compat abstract type AbstractMutableHeap{VT,HT} <: AbstractHeap{VT} end
+abstract type AbstractMutableHeap{VT,HT} <: AbstractHeap{VT} end
 
 # comparer
 
-immutable LessThan
+struct LessThan
 end
 
-immutable GreaterThan
+struct GreaterThan
 end
 
 compare(c::LessThan, x, y) = x < y
@@ -69,7 +69,7 @@ include("heaps/arrays_as_heaps.jl")
 
 # generic functions
 
-function extract_all!{VT}(h::AbstractHeap{VT})
+function extract_all!(h::AbstractHeap{VT}) where VT
     n = length(h)
     r = Vector{VT}(n)
     for i = 1 : n
@@ -78,7 +78,7 @@ function extract_all!{VT}(h::AbstractHeap{VT})
     r
 end
 
-function extract_all_rev!{VT}(h::AbstractHeap{VT})
+function extract_all_rev!(h::AbstractHeap{VT}) where VT
     n = length(h)
     r = Vector{VT}(n)
     for i = 1 : n
@@ -89,7 +89,7 @@ end
 
 # Array functions using heaps
 
-function nextreme{T, Comp}(comp::Comp, n::Int, arr::AbstractVector{T})
+function nextreme(comp::Comp, n::Int, arr::AbstractVector{T}) where {T,Comp}
     if n <= 0
         return T[] # sort(arr)[1:n] returns [] for n <= 0
     elseif n >= length(arr)
@@ -98,12 +98,12 @@ function nextreme{T, Comp}(comp::Comp, n::Int, arr::AbstractVector{T})
 
     buffer = BinaryHeap{T,Comp}(comp)
 
-    for i = 1 : n
+    for i = 1:n
         @inbounds xi = arr[i]
         push!(buffer, xi)
     end
 
-    for i = n + 1 : length(arr)
+    for i = n+1:length(arr)
         @inbounds xi = arr[i]
         if compare(comp, top(buffer), xi)
             # This could use a pushpop method
@@ -115,20 +115,20 @@ function nextreme{T, Comp}(comp::Comp, n::Int, arr::AbstractVector{T})
     return extract_all_rev!(buffer)
 end
 
-@doc """
-Returns the `n` largest elements of `arr`.
+"""
+    nlargest(n::Int, arr::AbstractVector)
+
+Return the `n` largest elements of `arr`.
 
 Equivalent to `sort(arr, lt = >)[1:min(n, end)]`
-""" ->
-function nlargest{T}(n::Int, arr::AbstractVector{T})
-    return nextreme(LessThan(), n, arr)
-end
+"""
+nlargest(n::Int, arr::AbstractVector) = nextreme(LessThan(), n, arr)
 
-@doc """
-Returns the `n` smallest elements of `arr`.
+"""
+    nsmallest(n::Int, arr::AbstractVector)
+
+Return the `n` smallest elements of `arr`.
 
 Equivalent to `sort(arr, lt = <)[1:min(n, end)]`
-""" ->
-function nsmallest{T}(n::Int, arr::AbstractVector{T})
-    return nextreme(GreaterThan(), n, arr)
-end
+"""
+nsmallest(n::Int, arr::AbstractVector) = nextreme(GreaterThan(), n, arr)

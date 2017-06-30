@@ -10,36 +10,18 @@ import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
 """
     OrderedDict
 
-`OrderedDict`s are  simply dictionaries  whose entries  have a  particular order.  The order
+`OrderedDict`s are simply dictionaries whose entries have a particular order. The order
 refers to insertion order, which allows deterministic iteration over the dictionary or set.
 """
-@compat type OrderedDict{K,V} <: Associative{K,V}
+mutable struct OrderedDict{K,V} <: Associative{K,V}
     slots::Array{Int32,1}
     keys::Array{K,1}
     vals::Array{V,1}
     ndel::Int
     dirty::Bool
 
-    function (::Type{OrderedDict{K,V}}){K,V}()
-        new{K,V}(zeros(Int32,16), Vector{K}(0), Vector{V}(0), 0, false)
-    end
-    function (::Type{OrderedDict{K,V}}){K,V}(kv)
-        h = OrderedDict{K,V}()
-        for (k,v) in kv
-            h[k] = v
-        end
-        return h
-    end
-    (::Type{OrderedDict{K,V}}){K,V}(p::Pair) = setindex!(OrderedDict{K,V}(), p.second, p.first)
-    function (::Type{OrderedDict{K,V}}){K,V}(ps::Pair...)
-        h = OrderedDict{K,V}()
-        sizehint!(h, length(ps))
-        for p in ps
-            h[p.first] = p.second
-        end
-        return h
-    end
-    function (::Type{OrderedDict{K,V}}){K,V}(d::OrderedDict{K,V})
+    OrderedDict{K,V}() where {K,V} = new{K,V}(zeros(Int32,16), Vector{K}(0), Vector{V}(0), 0, false)
+    function OrderedDict{K,V}(d::OrderedDict{K,V}) where {K,V}
         if d.ndel > 0
             rehash!(d)
         end
@@ -47,7 +29,23 @@ refers to insertion order, which allows deterministic iteration over the diction
         new{K,V}(copy(d.slots), copy(d.keys), copy(d.vals), 0)
     end
 end
+function OrderedDict{K,V}(kv) where {K,V}
+    h = OrderedDict{K,V}()
+    for (k,v) in kv
+        h[k] = v
+    end
+    return h
+end
+OrderedDict{K,V}(p::Pair) where {K,V} = setindex!(OrderedDict{K,V}(), p.second, p.first)
 OrderedDict() = OrderedDict{Any,Any}()
+function OrderedDict{K,V}(ps::Pair...) where {K,V}
+    h = OrderedDict{K,V}()
+    sizehint!(h, length(ps))
+    for p in ps
+        h[p.first] = p.second
+    end
+    return h
+end
 OrderedDict(kv::Tuple{}) = OrderedDict()
 copy(d::OrderedDict) = OrderedDict(d)
 
@@ -56,23 +54,19 @@ copy(d::OrderedDict) = OrderedDict(d)
 # OrderedDict{K,V}(kv::Tuple{Vararg{Tuple{K,V}}})          = OrderedDict{K,V}(kv)
 # OrderedDict{K  }(kv::Tuple{Vararg{Tuple{K,Any}}})        = OrderedDict{K,Any}(kv)
 # OrderedDict{V  }(kv::Tuple{Vararg{Tuple{Any,V}}})        = OrderedDict{Any,V}(kv)
-_oldOrderedDict1 = "OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv)"
-_newOrderedDict1 = "OrderedDict{V}(kv::Tuple{Vararg{Pair{K,V} where K}})   = OrderedDict{Any,V}(kv)"
-OrderedDict{K,V}(kv::Tuple{Vararg{Pair{K,V}}})         = OrderedDict{K,V}(kv)
-OrderedDict{K}(kv::Tuple{Vararg{Pair{K}}})             = OrderedDict{K,Any}(kv)
-VERSION < v"0.6.0-dev.2123" ? _include_string(_oldOrderedDict1) : _include_string(_newOrderedDict1)
-OrderedDict(kv::Tuple{Vararg{Pair}})                   = OrderedDict{Any,Any}(kv)
+OrderedDict(kv::Tuple{Vararg{Pair{K,V} where K}}) where {V} = OrderedDict{Any,V}(kv)
+OrderedDict(kv::Tuple{Vararg{Pair{K,V}}}) where {K,V}       = OrderedDict{K,V}(kv)
+OrderedDict(kv::Tuple{Vararg{Pair{K}}}) where {K}           = OrderedDict{K,Any}(kv)
+OrderedDict(kv::Tuple{Vararg{Pair}})                        = OrderedDict{Any,Any}(kv)
 
-OrderedDict{K,V}(kv::AbstractArray{Tuple{K,V}}) = OrderedDict{K,V}(kv)
-OrderedDict{K,V}(kv::AbstractArray{Pair{K,V}})  = OrderedDict{K,V}(kv)
-OrderedDict{K,V}(kv::Associative{K,V})          = OrderedDict{K,V}(kv)
+OrderedDict(kv::AbstractArray{Tuple{K,V}}) where {K,V} = OrderedDict{K,V}(kv)
+OrderedDict(kv::AbstractArray{Pair{K,V}}) where {K,V}  = OrderedDict{K,V}(kv)
+OrderedDict(kv::Associative{K,V}) where {K,V}          = OrderedDict{K,V}(kv)
 
-_oldOrderedDict2 = "OrderedDict{V}(ps::Pair{TypeVar(:K),V}...,) = OrderedDict{Any,V}(ps)"
-_newOrderedDict2 = "OrderedDict{V}(ps::(Pair{K,V} where K)...,) = OrderedDict{Any,V}(ps)"
-OrderedDict{K,V}(ps::Pair{K,V}...)          = OrderedDict{K,V}(ps)
-OrderedDict{K}(ps::Pair{K}...,)             = OrderedDict{K,Any}(ps)
-VERSION < v"0.6.0-dev.2123" ? _include_string(_oldOrderedDict2) : _include_string(_newOrderedDict2)
-OrderedDict(ps::Pair...)                    = OrderedDict{Any,Any}(ps)
+OrderedDict(ps::(Pair{K,V} where K)...) where {V} = OrderedDict{Any,V}(ps)
+OrderedDict(ps::Pair{K,V}...) where {K,V}         = OrderedDict{K,V}(ps)
+OrderedDict(ps::Pair{K}...) where {K}             = OrderedDict{K,Any}(ps)
+OrderedDict(ps::Pair...)                          = OrderedDict{Any,Any}(ps)
 
 function OrderedDict(kv)
     try
@@ -87,14 +81,14 @@ function OrderedDict(kv)
     end
 end
 
-dict_with_eltype{K,V}(kv, ::Type{Tuple{K,V}}) = OrderedDict{K,V}(kv)
-dict_with_eltype{K,V}(kv, ::Type{Pair{K,V}}) = OrderedDict{K,V}(kv)
+dict_with_eltype(kv, ::Type{Tuple{K,V}}) where {K,V} = OrderedDict{K,V}(kv)
+dict_with_eltype(kv, ::Type{Pair{K,V}}) where {K,V}  = OrderedDict{K,V}(kv)
 dict_with_eltype(kv, t) = OrderedDict{Any,Any}(kv)
 
-similar{K,V}(d::OrderedDict{K,V}) = OrderedDict{K,V}()
+similar(d::OrderedDict{K,V}) where {K,V} = OrderedDict{K,V}()
 
 length(d::OrderedDict) = length(d.keys) - d.ndel
-isempty(d::OrderedDict) = (length(d)==0)
+isempty(d::OrderedDict) = length(d) == 0
 
 """
     isordered(::Type)
@@ -102,13 +96,15 @@ isempty(d::OrderedDict) = (length(d)==0)
 Property of associative containers, that is `true` if the container type has a
 defined order (such as `OrderedDict` and `SortedDict`), and `false` otherwise.
 """
-isordered{T<:Associative}(::Type{T}) = false
-isordered{T<:OrderedDict}(::Type{T}) = true
+isordered(::Type{T}) where {T<:Associative} = false
+isordered(::Type{T}) where {T<:OrderedDict} = true
 
 # conversion between OrderedDict types
-function convert{K,V}(::Type{OrderedDict{K,V}}, d::Associative)
+function convert(::Type{OrderedDict{K,V}}, d::Associative) where {K,V}
     if !isordered(typeof(d))
-        Base.depwarn("Conversion to OrderedDict is deprecated for unordered associative containers (in this case, $(typeof(d))). Use an ordered or sorted associative type, such as SortedDict and OrderedDict.", :convert)
+        Base.depwarn("Conversion to OrderedDict is deprecated for unordered associative" *
+                     "containers (in this case, $(typeof(d))). Use an ordered or sorted" *
+                     "associative type, such as SortedDict and OrderedDict.", :convert)
     end
     h = OrderedDict{K,V}()
     for (k,v) in d
@@ -121,9 +117,9 @@ function convert{K,V}(::Type{OrderedDict{K,V}}, d::Associative)
     end
     return h
 end
-convert{K,V}(::Type{OrderedDict{K,V}},d::OrderedDict{K,V}) = d
+convert(::Type{OrderedDict{K,V}},d::OrderedDict{K,V}) where {K,V} = d
 
-function rehash!{K,V}(h::OrderedDict{K,V}, newsz = length(h.slots))
+function rehash!(h::OrderedDict{K,V}, newsz = length(h.slots)) where {K,V}
     olds = h.slots
     keys = h.keys
     vals = h.vals
@@ -221,7 +217,7 @@ function sizehint!(d::OrderedDict, newsz)
     rehash!(d, slotsz)
 end
 
-function empty!{K,V}(h::OrderedDict{K,V})
+function empty!(h::OrderedDict)
     fill!(h.slots, 0)
     empty!(h.keys)
     empty!(h.vals)
@@ -231,7 +227,7 @@ function empty!{K,V}(h::OrderedDict{K,V})
 end
 
 # get the index where a key is stored, or -1 if not present
-function ht_keyindex{K,V}(h::OrderedDict{K,V}, key, direct)
+function ht_keyindex(h::OrderedDict, key, direct)
     slots = h.slots
     sz = length(slots)
     iter = 0
@@ -256,7 +252,7 @@ end
 # get the index where a key is stored, or -pos if not present
 # and the key would be inserted at pos
 # This version is for use by setindex! and get!
-function ht_keyindex2{K,V}(h::OrderedDict{K,V}, key)
+function ht_keyindex2(h::OrderedDict, key)
     slots = h.slots
     sz = length(slots)
     iter = 0
@@ -302,12 +298,12 @@ function _setindex!(h::OrderedDict, v, key, index)
     end
 end
 
-function setindex!{K,V}(h::OrderedDict{K,V}, v0, key0)
+function setindex!(h::OrderedDict{K,V}, v0, key0) where {K,V}
     key = convert(K,key0)
     if !isequal(key,key0)
         throw(ArgumentError("$key0 is not a valid key for type $K"))
     end
-    v = convert(V,  v0)
+    v = convert(V, v0)
 
     index = ht_keyindex2(h, key)
 
@@ -321,9 +317,9 @@ function setindex!{K,V}(h::OrderedDict{K,V}, v0, key0)
     return h
 end
 
-function get!{K,V}(h::OrderedDict{K,V}, key0, default)
-    key = convert(K,key0)
-    if !isequal(key,key0)
+function get!(h::OrderedDict{K,V}, key0, default) where {K,V}
+    key = convert(K, key0)
+    if !isequal(key, key0)
         throw(ArgumentError("$key0 is not a valid key for type $K"))
     end
 
@@ -331,14 +327,14 @@ function get!{K,V}(h::OrderedDict{K,V}, key0, default)
 
     index > 0 && return h.vals[index]
 
-    v = convert(V,  default)
+    v = convert(V, default)
     _setindex!(h, v, key, -index)
     return v
 end
 
-function get!{K,V}(default::Base.Callable, h::OrderedDict{K,V}, key0)
-    key = convert(K,key0)
-    if !isequal(key,key0)
+function get!(default::Base.Callable, h::OrderedDict{K,V}, key0) where {K,V}
+    key = convert(K, key0)
+    if !isequal(key, key0)
         throw(ArgumentError("$key0 is not a valid key for type $K"))
     end
 
@@ -360,25 +356,25 @@ function get!{K,V}(default::Base.Callable, h::OrderedDict{K,V}, key0)
     return v
 end
 
-function getindex{K,V}(h::OrderedDict{K,V}, key)
+function getindex(h::OrderedDict{K,V}, key) where {K,V}
     index = ht_keyindex(h, key, true)
     return (index<0) ? throw(KeyError(key)) : h.vals[index]::V
 end
 
-function get{K,V}(h::OrderedDict{K,V}, key, default)
+function get(h::OrderedDict{K,V}, key, default) where {K,V}
     index = ht_keyindex(h, key, true)
     return (index<0) ? default : h.vals[index]::V
 end
 
-function get{K,V}(default::Base.Callable, h::OrderedDict{K,V}, key)
+function get(default::Base.Callable, h::OrderedDict{K,V}, key) where {K,V}
     index = ht_keyindex(h, key, true)
     return (index<0) ? default() : h.vals[index]::V
 end
 
 haskey(h::OrderedDict, key) = (ht_keyindex(h, key, true) >= 0)
-in{T<:OrderedDict}(key, v::KeyIterator{T}) = (ht_keyindex(v.dict, key, true) >= 0)
+in(key, v::KeyIterator{<:OrderedDict}) = (ht_keyindex(v.dict, key, true) >= 0)
 
-function getkey{K,V}(h::OrderedDict{K,V}, key, default)
+function getkey(h::OrderedDict{K,V}, key, default) where {K,V}
     index = ht_keyindex(h, key, true)
     return (index<0) ? default : h.keys[index]::K
 end
@@ -429,8 +425,8 @@ end
 done(t::OrderedDict, i) = done(t.keys, i)
 next(t::OrderedDict, i) = (Pair(t.keys[i],t.vals[i]), i+1)
 
-next{T<:OrderedDict}(v::KeyIterator{T}, i) = (v.dict.keys[i], i+1)
-next{T<:OrderedDict}(v::ValueIterator{T}, i) = (v.dict.vals[i], i+1)
+next(v::KeyIterator{<:OrderedDict}, i) = (v.dict.keys[i], i+1)
+next(v::ValueIterator{<:OrderedDict}, i) = (v.dict.vals[i], i+1)
 
 function merge(d::OrderedDict, others::Associative...)
     K, V = keytype(d), valtype(d)

@@ -1,11 +1,10 @@
 ## A SortedSet is a wrapper around balancedTree with
 ## methods similiar to those of the julia Set.
 
-
-@compat type SortedSet{K, Ord <: Ordering}
+mutable struct SortedSet{K,Ord<:Ordering}
     bt::BalancedTree23{K,Void,Ord}
 
-    function (::Type{SortedSet{K,Ord}}){K,Ord<:Ordering}(o::Ord=Forward, iter=[])
+    function SortedSet{K,Ord}(o::Ord=Forward, iter=[]) where {K,Ord<:Ordering}
         sorted_set = new{K,Ord}(BalancedTree23{K,Void,Ord}(o))
 
         for item in iter
@@ -17,7 +16,7 @@
 end
 
 SortedSet() = SortedSet{Any,ForwardOrdering}(Forward)
-SortedSet{O<:Ordering}(o::O) = SortedSet{Any,O}(o)
+SortedSet(o::O) where {O<:Ordering} = SortedSet{Any,O}(o)
 
 # To address ambiguity warnings on Julia v0.4
 SortedSet(o1::Ordering,o2::Ordering) =
@@ -25,16 +24,16 @@ SortedSet(o1::Ordering,o2::Ordering) =
 SortedSet(o::Ordering, iter) = sortedset_with_eltype(o, iter, eltype(iter))
 SortedSet(iter, o::Ordering=Forward) = sortedset_with_eltype(o, iter, eltype(iter))
 
-@compat (::Type{SortedSet{K}}){K}() = SortedSet{K,ForwardOrdering}(Forward)
-@compat (::Type{SortedSet{K}}){K,O<:Ordering}(o::O) = SortedSet{K,O}(o)
+SortedSet{K}() where {K} = SortedSet{K,ForwardOrdering}(Forward)
+SortedSet{K}(o::O) where {K,O<:Ordering} = SortedSet{K,O}(o)
 
 # To address ambiguity warnings on Julia v0.4
-@compat (::Type{SortedSet{K}}){K}(o1::Ordering,o2::Ordering) =
+SortedSet{K}(o1::Ordering,o2::Ordering) where {K} =
     throw(ArgumentError("SortedSet with two parameters must be called with an Ordering and an interable"))
-@compat (::Type{SortedSet{K}}){K}(o::Ordering, iter) = sortedset_with_eltype(o, iter, K)
-@compat (::Type{SortedSet{K}}){K}(iter, o::Ordering=Forward) = sortedset_with_eltype(o, iter, K)
+SortedSet{K}(o::Ordering, iter) where {K} = sortedset_with_eltype(o, iter, K)
+SortedSet{K}(iter, o::Ordering=Forward) where {K} = sortedset_with_eltype(o, iter, K)
 
-sortedset_with_eltype{K,Ord}(o::Ord, iter, ::Type{K}) = SortedSet{K,Ord}(o, iter)
+sortedset_with_eltype(o::Ord, iter, ::Type{K}) where {K,Ord} = SortedSet{K,Ord}(o, iter)
 
 const SetSemiToken = IntSemiToken
 
@@ -47,7 +46,7 @@ const SetSemiToken = IntSemiToken
 
 @inline function find(m::SortedSet, k_)
     ll, exactfound = findkey(m.bt, convert(keytype(m),k_))
-    IntSemiToken(exactfound? ll : 2)
+    IntSemiToken(exactfound ? ll : 2)
 end
 
 
@@ -94,12 +93,12 @@ end
     return exactfound
 end
 
-@inline eltype{K,Ord <: Ordering}(m::SortedSet{K,Ord}) = K
-@inline eltype{K,Ord <: Ordering}(::Type{SortedSet{K,Ord}}) = K
-@inline keytype{K,Ord <: Ordering}(m::SortedSet{K,Ord}) = K
-@inline keytype{K,Ord <: Ordering}(::Type{SortedSet{K,Ord}}) = K
-@inline ordtype{K,Ord <: Ordering}(m::SortedSet{K,Ord}) = Ord
-@inline ordtype{K,Ord <: Ordering}(::Type{SortedSet{K,Ord}}) = Ord
+@inline eltype(m::SortedSet{K,Ord}) where {K,Ord<:Ordering} = K
+@inline eltype(::Type{SortedSet{K,Ord}}) where {K,Ord<:Ordering} = K
+@inline keytype(m::SortedSet{K,Ord}) where {K,Ord<:Ordering} = K
+@inline keytype(::Type{SortedSet{K,Ord}}) where {K,Ord<:Ordering} = K
+@inline ordtype(m::SortedSet{K,Ord}) where {K,Ord<:Ordering} = Ord
+@inline ordtype(::Type{SortedSet{K,Ord}}) where {K,Ord<:Ordering} = Ord
 @inline orderobject(m::SortedSet) = m.bt.ord
 
 haskey(m::SortedSet, k_) = in(k_, m)
@@ -110,7 +109,6 @@ haskey(m::SortedSet, k_) = in(k_, m)
     delete!(m.bt, i)
     m
 end
-
 
 @inline function pop!(m::SortedSet, k_)
     k = convert(keytype(m),k_)
@@ -128,8 +126,6 @@ end
     delete!(m.bt, i)
     k
 end
-
-
 
 ## Check if two SortedSets are equal in the sense of containing
 ## the same K entries.  This sense of equality does not mean
@@ -160,7 +156,7 @@ function isequal(m1::SortedSet, m2::SortedSet)
 end
 
 
-function union!{K, Ord <: Ordering}(m1::SortedSet{K,Ord}, iterable_item)
+function union!(m1::SortedSet{K,Ord}, iterable_item) where {K,Ord<:Ordering}
     for k in iterable_item
         push!(m1,convert(K,k))
     end
@@ -175,7 +171,7 @@ function union(m1::SortedSet, others...)
     mr
 end
 
-function intersect2{K, Ord <: Ordering}(m1::SortedSet{K, Ord}, m2::SortedSet{K, Ord})
+function intersect2(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord}) where {K,Ord<:Ordering}
     ord = orderobject(m1)
     mi = SortedSet(K[], ord)
     p1 = startof(m1)
@@ -199,7 +195,7 @@ function intersect2{K, Ord <: Ordering}(m1::SortedSet{K, Ord}, m2::SortedSet{K, 
 end
 
 
-function intersect{K, Ord <: Ordering}(m1::SortedSet{K,Ord}, others::SortedSet{K,Ord}...)
+function intersect(m1::SortedSet{K,Ord}, others::SortedSet{K,Ord}...) where {K,Ord<:Ordering}
     ord = orderobject(m1)
     for s2 in others
         if !isequal(ord, orderobject(s2))
@@ -218,7 +214,7 @@ function intersect{K, Ord <: Ordering}(m1::SortedSet{K,Ord}, others::SortedSet{K
 end
 
 
-function symdiff{K, Ord <: Ordering}(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord})
+function symdiff(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord}) where {K,Ord<:Ordering}
     ord = orderobject(m1)
     if !isequal(ord, orderobject(m2))
         throw(ArgumentError("Cannot apply symdiff to two SortedSets unless their ordering objects are equal"))
@@ -254,7 +250,7 @@ function symdiff{K, Ord <: Ordering}(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord})
     end
 end
 
-function setdiff{K, Ord <: Ordering}(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord})
+function setdiff(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord}) where {K,Ord<:Ordering}
     ord = orderobject(m1)
     if !isequal(ord, orderobject(m2))
         throw(ArgumentError("Cannot apply setdiff to two SortedSets unless their ordering objects are equal"))
@@ -305,7 +301,7 @@ function issubset(iterable, m2::SortedSet)
 end
 
 
-function packcopy{K,Ord <: Ordering}(m::SortedSet{K,Ord})
+function packcopy(m::SortedSet{K,Ord}) where {K,Ord<:Ordering}
     w = SortedSet(K[], orderobject(m))
     for k in m
         push!(w, k)
@@ -313,7 +309,7 @@ function packcopy{K,Ord <: Ordering}(m::SortedSet{K,Ord})
     w
 end
 
-function packdeepcopy{K, Ord <: Ordering}(m::SortedSet{K,Ord})
+function packdeepcopy(m::SortedSet{K,Ord}) where {K,Ord<:Ordering}
     w = SortedSet(K[], orderobject(m))
     for k in m
         newk = deepcopy(k)
@@ -322,9 +318,7 @@ function packdeepcopy{K, Ord <: Ordering}(m::SortedSet{K,Ord})
     w
 end
 
-
-
-function Base.show{K,Ord <: Ordering}(io::IO, m::SortedSet{K,Ord})
+function show(io::IO, m::SortedSet{K,Ord}) where {K,Ord<:Ordering}
     print(io, "SortedSet(")
     keys = K[]
     for k in m
@@ -336,5 +330,5 @@ function Base.show{K,Ord <: Ordering}(io::IO, m::SortedSet{K,Ord})
     print(io, ")")
 end
 
-similar{K,Ord<:Ordering}(m::SortedSet{K,Ord}) =
-SortedSet{K,Ord}(orderobject(m))
+similar(m::SortedSet{K,Ord}) where {K,Ord<:Ordering} =
+    SortedSet{K,Ord}(orderobject(m))

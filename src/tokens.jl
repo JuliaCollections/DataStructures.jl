@@ -6,11 +6,9 @@
 
 module Tokens
 
-using Compat
+abstract type AbstractSemiToken end
 
-@compat abstract type AbstractSemiToken end
-
-immutable IntSemiToken <: AbstractSemiToken
+struct IntSemiToken <: AbstractSemiToken
     address::Int
 end
 

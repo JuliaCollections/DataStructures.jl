@@ -1,10 +1,5 @@
 using DataStructures
-if VERSION >= v"0.5.0-dev+7720"
-    using Base.Test
-else
-    using BaseTestNext
-    const Test = BaseTestNext
-end
+using Base.Test
 
 # construction
 
@@ -20,9 +15,9 @@ data_out = collect(s)
 @test length(data_out) == length(data_in)
 
 # hash
-s1 = OrderedSet{Compat.ASCIIString}(["bar", "foo"])
-s2 = OrderedSet{Compat.ASCIIString}(["foo", "bar"])
-s3 = OrderedSet{Compat.ASCIIString}(["baz"])
+s1 = OrderedSet{String}(["bar", "foo"])
+s2 = OrderedSet{String}(["foo", "bar"])
+s3 = OrderedSet{String}(["baz"])
 @test hash(s1) != hash(s2)
 @test hash(s1) != hash(s3)
 

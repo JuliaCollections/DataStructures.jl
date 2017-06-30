@@ -1,11 +1,5 @@
-using DataStructures, Compat
-using Compat: String
-if VERSION >= v"0.5.0-dev+7720"
-    using Base.Test
-else
-    using BaseTestNext
-    const Test = BaseTestNext
-end
+using DataStructures
+using Base.Test
 
 @testset "CircularDeque" begin
     D = CircularDeque{Int}(5)
