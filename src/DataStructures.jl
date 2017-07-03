@@ -19,7 +19,7 @@ module DataStructures
                  find, searchsortedfirst, searchsortedlast, endof, in
 
     export Deque, Stack, Queue, CircularDeque
-    export deque, enqueue!, dequeue!, update!, reverse_iter
+    export deque, enqueue!, dequeue!, dequeue_with_val!, update!, reverse_iter
     export capacity, num_blocks, front, back, top, top_with_handle, sizehint!
 
     export Accumulator, counter
