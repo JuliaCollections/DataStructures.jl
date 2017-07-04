@@ -8,26 +8,21 @@ type vEBEntry{K}
 	isleaf::boolean
 	MPAidx::Int
 	function vEBEntry(value::K)
-		this.value = value
-		this.isblank = false
-		this.isleaf = false
+		isblank = false
+		isleaf = false
+		return new(value,isblank,isleaf,Nullable{Int}())
 	end
 	function vEBEntry()
-		this.isblank = true
-		this.isleaf = false
+		value = Nullable{K}()
+		isblank = true
+		isleaf = false
+		return new(value,isblank,isleaf)
 	end
 	function vEBEntry(value::K,MPAidx::Int)
-		this.value = value
-		this.isblank = false
-		this.isleaf = true
-		this.MPAidx = MPAidx
+		isblank = false
+		isleaf = true
+		return new(value,isblank,isleaf,MPAidx)
 	end
-end
-
-type UpdateInfo{K}
-	value::K
-	isblank::boolean
-	n::Int
 end
 
 type vEBBinaryTree{K}
@@ -35,30 +30,36 @@ type vEBBinaryTree{K}
 	tree_size::Int
 	n_elements::Int
 	MPA::MemoryPackedArray{K}
-	function vEBBinaryTree(tree_size::Int)
-		this.tree_size = tree_size
+	height::Int
+	function vEBBinaryTree(capacity_size::Int)
 		n_elements = 0
-		this.MPA = MemoryPackedArray{K}(tree_size,0.0,0.1,0.5,0.9)
-	end
-	function isEmpty()
-		return n_elemnts==0
-	end
+		MPA = MemoryPackedArray{K}(capacity_size,0.0,0.1,0.5,0.9)
+		height = ceil(Int.log2(this.MPA.capacity))
+		store = Array(vEBBinaryTree{K}, 1<<(height+1))
+		tree_size = 1<<(height+1)
+		return new(store,tree_size,n_elements,MPA,height)
+end
 
-	function find(key::K)
-		root = 1
-		find_rec(root,key)
-	end
 
-	function find_rec(n::Int,key::K)
-		idx = vEB_index(n)
-		if store[idx].isleaf
+function isEmpty{K}(vEBTree::vEBBinaryTree{K})
+	return vEBTree.n_elements==0
+end
+
+function find{K}(vEBTree::vEBBinaryTree{K}, key::K)
+	root = 1
+	return find_rec(vEBTree,root,key)
+end
+
+function find_rec{K}(vEBTree::vEBBinaryTree{K},n::Int,key::K)
+		idx = vEB_index{K}(vEBTree,n,this.height)
+		if this.vstore[idx].isleaf
 			return store[idx].MPAidx
 		elseif store[idx].isblank || store[idx].value<=key
 			return find_rec((2*n),key)
 		else
 			return find_rec((2*n)+1,key)
 		end
-	end
+end
 
 	function delete!(key::K)
 		delete_p(key)
@@ -70,27 +71,32 @@ type vEBBinaryTree{K}
 
 	function insert_p(key::K)
 		MPAidx = find(key)
-		updates = this.MPA.insert!(MPAidx,key)
-		perform_update(updates)
+		updates, capacity_changed = this.MPA.insert!(MPAidx,key)
+		perform_update(updates,capacity_changed)
+		this.n_elements+=1
 	end
 
 	function delete_p(key::K)
-		MPAidx, found = find(key)
-		if found:
-			updates = this.MPA.delete!(MPAidx)
-			update_leafs(updates)
+		MPAidx = find(key)
+		if MPA.store[MPAidx].value==key:
+			updates, capacity_changed = this.MPA.delete!(MPAidx)
+			perform_update(updates,capacity_changed)
+			this.n_elements-=1
 		end
 	end
 
-
-	function perform_update(updates::Array{UpdateInfo{K},1})
+	function perform_update(updates::Array{UpdateInfo{K},1},capacity_changed)
+		if capacity_changed:
+			build_tree(updates)
+			return
+		end
 		parents = []
 		for u in updates:
-				idx = vEB_index(u.n)
+				idx = vEB_index(u.n,this.height)
 				if store[idx].isblank != u.blank || store[idx].value != u.value:
 					store[idx].isblank = u.blank
 					store[idx].value = u.value
-					parents.append!(u/2)
+					parents.append!(div(u.n,2))
 				end
 		end
 		update_path(parents)
@@ -100,9 +106,9 @@ type vEBBinaryTree{K}
 	function update_path(updates::Array{Int,1})
 		parent_update = []
 		for u in updates:
-			idx = vEB_index(u)
-			left_child = vEB_index(u*2)
-			right_child = vEB_index(u*2+1)
+			idx = vEB_index(u,this.height)
+			left_child = vEB_index(u*2.this.height)
+			right_child = vEB_index(u*2+1,this.height)
 
 			node = store[idx]
 
@@ -126,19 +132,37 @@ type vEBBinaryTree{K}
 			end
 
 			if old_blank != node.isblank || old_value != node.value
-				parent_update.append!(u/2)
+				parent_update.append!(div(u,2))
 			end
+
 		end
 		if size(parent_update)>0:
 			update_path(parent_update)
 		end
 	end
 
+	function build_tree{K}(updates):
+			this.height = ceil(Int.log2(this.MPA.capacity))
+			this.tree_size = 1<<(height+1)
+			new_store = Array(vEBEntry{K},this.tree_size)
+			parents = []
+			for u in updates:
+					idx = vEB_index(u.n,this.height)
+					new_store[idx].isblank = u.blank
+					new_store[idx].value = u.value
+					parents.append!(div(u.n,2))
+			end
+			this.store = new_store
+			update_path(parents)
+	end
 
-	function vEB_index(n::Int, depth::Int, height::Int)
+
+	function vEB_index(n::Int, height::Int)
 		if height<3
 			return n
 		end
+
+		depth = floor(Int,log2(n))
 
 		bottom_h = hyperceil(h*1.0/2)
 		top_h = h - bottom_h
