@@ -265,7 +265,7 @@ function dequeue_with_val!(pq::PriorityQueue)
         percolate_down!(pq, 1)
     end
     delete!(pq.index, x.first)
-    Tuple(x)
+    (x.first, x.second)
 end
 
 function dequeue_with_val!(pq::PriorityQueue, key)
