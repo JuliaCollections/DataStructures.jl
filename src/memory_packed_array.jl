@@ -2,18 +2,15 @@
 ## The array is going to be used to implement cache-oblivious B-trees
 
 ##
-immutable MPACell{D}
-	value::D
-	function MPACell(value::D)
-		new(value,1)
-	end
-end
 
-immutable UpdateInfo{K}
-	value::K
-	isblank::boolean
-	old_MPAidx::int
+
+immutable UpdateInfo{D}
+	value::D
+	isblank::Bool
 	MPAidx::Int
+	function UpdateInfo{D}(value::D,isblank::Bool,MPAidx::Int)
+		return new(value,isblank,MPAidx)
+	end
 end
 
 ## Functions simplifing notation:
@@ -49,7 +46,7 @@ type MemoryPackedArray{D}
 	pd::Float64
 	t0::Float64
 	td::Float64
-	store::Array{MPACell{D},1}
+	store::Array{D,1}
 	exists::Array{Bool,1}
 	decreaseThreshold::Float64
 	extendThreshold::Float64
@@ -58,7 +55,7 @@ type MemoryPackedArray{D}
 			seg_capacity = ceil(Int,log2(capacity))
 			no_seg = hyperceil(capacity/seg_capacity)
 			capacityP = no_seg*seg_capacity
-			store = Array(MPACell{D},capacityP)
+			store = Array(D,capacityP)
 			exists = zeros(capacityP)
 			decreaseThreshold = 0.3
 			extendThreshold = 0.65
@@ -167,7 +164,7 @@ end
 function extend!{D}(A::MemoryPackedArray{D})
 	taken=0
 	capacity = (A.capacity << 1)
-	store = Array(MPACell{D},capacity)
+	store = Array(D,capacity)
 	exists::Array{Bool,1} = zeros(capacity)
 	for i in 1:A.capacity
 		if A.exists[i]
@@ -187,10 +184,10 @@ end
 
 
 ## Extends the array by factor 2 and inserts an element
-function extend!{D}(A::MemoryPackedArray{D},index::Int,element::MPACell{D})
+function extend!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 	taken=0
 	capacity = (A.capacity << 1)
-	store = Array(MPACell{D},capacity)
+	store = Array(D,capacity)
 	exists::Array{Bool,1} = zeros(capacity)
 	for i in 1:A.capacity
 		if A.exists[i]
@@ -212,16 +209,19 @@ end
 function decrease!{D}(A::MemoryPackedArray{D})
 	taken = 0
 	capacity = (A.capacity >> 1)
-	store = Array(MPACell{D},capacity)
-	exists = Array(Bool,capacity)
+	store = Array(D,capacity)
+	exists::Array{Bool,1}=zeros(capacity)
 	local j=1
-	for i in 1:A.capacity
+	local i = 1
+	while i<A.capacity
 		if A.exists[i]
+			print(i," ",j," ",A.capacity," ",A.count,"\n")
 			taken+=1
 			exists[j] = true
 			store[j] = A.store[i]
 			j+=1
 		end
+		i+=1
 	end
 	A.number_of_segments >>= 1
 	A.capacity = capacity
@@ -247,8 +247,6 @@ function rebalance!{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_el
 	while i>=left
 		if A.exists[i]
 			A.store[j] = A.store[i]
-		#	handleReplacement(U,A.store[])
-		#	handleReplacementRight!(A,A.store[j],i,j)
 			j -= 1
 		end
 		A.exists[i] = false
@@ -264,7 +262,6 @@ function rebalance!{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_el
 ##	Move the elements to right positions
 		while i<right && j<right
 			A.store[i] = A.store[j]
-			#handleReplacementLeft!(A,A.store[i],i)
 			A.exists[i] = true;
 			j += 1
 			i = left+ceil(Int,p*gap)
@@ -273,9 +270,11 @@ function rebalance!{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_el
 
 	U = Array(UpdateInfo{D},right-left)
 	j = 1
-	for i in left:right
-	 	U[j] = UpdateInfo(A.store[i].value,A.exists[i],floor(Int,log2(A.capacity))-1+i)
+	i = left
+	while i<right
+	 	U[j] = UpdateInfo{D}(A.store[i],A.exists[i],floor(Int,log2(A.capacity))-1+i)
 		j+=1
+		i+=1
 	end
 	return U
 end
@@ -286,7 +285,7 @@ end
 ##	number_of_elements - number of elements in the segment
 ##	index - the index after which insert the element
 ##	element - the element to be inserted
-function rebalance!{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_elements::Int,index::Int,element::MPACell{D})
+function rebalance!{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_elements::Int,index::Int,element::D)
 	local gap = (right-left)/(number_of_elements+1)
 	local j = right-1
 	local i = right-1
@@ -299,7 +298,6 @@ function rebalance!{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_el
 		end
 		if A.exists[i]
 			A.store[j] = A.store[i]
-			handleReplacementRight!(A,A.store[j],i,j)
 			j -= 1
 		end
 		A.exists[i] = false
@@ -315,12 +313,10 @@ function rebalance!{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_el
 ##	No elements in this segment, place at index
 		A.store[index] = element
 		A.exists[index] = true
-		handleReplacementLeft!(A,A.store[index],index)
 	else
 		j +=1
 		while i<right && j<k
 			A.store[i] = A.store[j]
-			handleReplacementLeft!(A,A.store[i],i)
 			A.exists[i] = true
 			j += 1
 			i = left+ceil(Int,p*gap)
@@ -329,7 +325,6 @@ function rebalance!{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_el
 		if i<right
 ## 	Then j==k, so insert the new element here
 			A.store[i] = element
-			handleReplacementLeft!(A,A.store[i],i)
 			A.exists[i] = true
 			i = left+ceil(Int,p*gap)
 			p += 1
@@ -337,7 +332,6 @@ function rebalance!{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_el
 		end
 		while i<right && j<right
 			A.store[i] = A.store[j]
-			handleReplacementLeft!(A,A.store[i],i)
 			A.exists[i] = true
 			j += 1
 			i =left+ceil(Int,p*gap)
@@ -346,9 +340,11 @@ function rebalance!{D}(A::MemoryPackedArray{D},left::Int,right::Int,number_of_el
 	end
 	U = Array(UpdateInfo{D},right-left)
 	j = 1
-	for i in left:right
-		U[j] = UpdateInfo(A.store[i].value,A.exists[i],floor(Int,log2(A.capacity))-1+i)
+	i = left;
+	while i<right
+		U[j] = UpdateInfo{D}(A.store[i],A.exists[i],floor(Int,log2(A.capacity))-1+i)
 		j+=1
+		i+=1
 	end
 	return U
 end
@@ -363,6 +359,7 @@ function delete!{D}(A::MemoryPackedArray{D},index::Int)
 	segment_position = ceil(Int,index/A.segment_capacity)
 	right = segment_position*A.segment_capacity+1
 	left = right-A.segment_capacity
+	print("seg ",left," ",right," ",A.segment_capacity," ",A.capacity,"\n")
 	number_of_elements = scan(A,left,right)
 	leaf_depth = log2(A.number_of_segments)
 	seg_capacity = A.segment_capacity
@@ -381,7 +378,7 @@ function delete!{D}(A::MemoryPackedArray{D},index::Int)
 	U = rebalance!(A,left,right,number_of_elements)
 	A.count-=1
 	capacity_changed = false
-	if(A.count/A.capacity<A.decreaseThreshold)
+	if(A.count*1.0/A.capacity<A.decreaseThreshold)
 		U, capacity_changed = decrease!(A)
 	end
 	return U, capacity_changed
@@ -394,7 +391,7 @@ end
 ##		due to rebalancing the real position of the element may differ from index,
 ##		but the ordering is preserved
 ##	element - the element to be inserted.
-function insert!{D}(A::MemoryPackedArray{D},index::Int,element::MPACell{D})
+function insert!{D}(A::MemoryPackedArray{D},index::Int,element::D)
 
 ##	Left - left border of the segemnt containing element at "index", inclusive
 ##	Right - right border of the segement conatining element at "index", exclusive
@@ -411,8 +408,9 @@ function insert!{D}(A::MemoryPackedArray{D},index::Int,element::MPACell{D})
 	if (index<A.capacity && in_upper_threshold(A,left,right,number_of_elements,k) && A.exists[index+1]==false)
 		A.exists[index+1] = true
 		A.store[index+1] = element
-		update_info = UpdateInfo(A.store[index+1].value,A.exists[index+1],floor(Int,log2(A.capacity))+index)
+		update_info = UpdateInfo{D}(A.store[index+1],A.exists[index+1],floor(Int,log2(A.capacity))+index)
 		capacity_changed = false
+		A.count+=1
 		return [update_info], capacity_changed
 	end
 
@@ -427,6 +425,7 @@ function insert!{D}(A::MemoryPackedArray{D},index::Int,element::MPACell{D})
 
 	if k>leaf_depth
 		U, capacity_changed = extend!(A,index,element)
+		A.count+=1
 		return U, capacity_changed
 	end
 
@@ -434,7 +433,7 @@ function insert!{D}(A::MemoryPackedArray{D},index::Int,element::MPACell{D})
 	U = rebalance!(A,left,right,number_of_elements,index,element)
 	A.count+=1
 	capacity_changed = false
-	if(A.count/A.capacity>A.extendThreshold)
+	if(A.count/A.capacity>A.extendThreshold && (A.capacity >> 1) >= A.segment_capacity)
 		U, capacity_changed = extend!(A)
 	end
 	return U,capacity_changed
