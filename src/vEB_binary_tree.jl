@@ -61,54 +61,54 @@ function find_rec{K}(vEBTree::vEBBinaryTree{K},n::Int,key::K)
 		end
 end
 
-	function delete!(key::K)
-		delete_p(key)
+	function delete!(vEBTree::vEBBinaryTree{K},key::K)
+		delete_p(vEBTree, key)
 	end
 
-	function insert!(key::K)
-		insert_p(key)
+	function insert!(vEBTree::vEBBinaryTree{K},key::K)
+		insert_p(vEBTree, key)
 	end
 
-	function insert_p(key::K)
-		MPAidx = find(key)
+	function insert_p(vEBTree::vEBBinaryTree{K},key::K)
+		MPAidx = find(vEBTree, key)
 		updates, capacity_changed = this.MPA.insert!(MPAidx,key)
-		perform_update(updates,capacity_changed)
+		perform_update(vEBTree, updates,capacity_changed)
 		this.n_elements+=1
 	end
 
-	function delete_p(key::K)
-		MPAidx = find(key)
+	function delete_p(vEBTree::vEBBinaryTree{K}, key::K)
+		MPAidx = find(vEBTree, key)
 		if MPA.store[MPAidx].value==key:
 			updates, capacity_changed = this.MPA.delete!(MPAidx)
-			perform_update(updates,capacity_changed)
+			perform_update(vEBTree, updates,capacity_changed)
 			this.n_elements-=1
 		end
 	end
 
-	function perform_update(updates::Array{UpdateInfo{K},1},capacity_changed)
+	function perform_update(vEBTree::vEBBinaryTree{K}, updates::Array{UpdateInfo{K},1},capacity_changed)
 		if capacity_changed:
-			build_tree(updates)
+			build_tree(vEBTree, updates)
 			return
 		end
 		parents = []
 		for u in updates:
-				idx = vEB_index(u.n,this.height)
+				idx = vEB_index(vEBTree, u.n,this.height)
 				if store[idx].isblank != u.blank || store[idx].value != u.value:
 					store[idx].isblank = u.blank
 					store[idx].value = u.value
 					parents.append!(div(u.n,2))
 				end
 		end
-		update_path(parents)
+		update_path(vEBTree, parents)
 	end
 
 
-	function update_path(updates::Array{Int,1})
+	function update_path(vEBTree::vEBBinaryTree{K}, updates::Array{Int,1})
 		parent_update = []
 		for u in updates:
-			idx = vEB_index(u,this.height)
-			left_child = vEB_index(u*2.this.height)
-			right_child = vEB_index(u*2+1,this.height)
+			idx = vEB_index(vEBTree,u,this.height)
+			left_child = vEB_index(vEBTree, u*2.this.height)
+			right_child = vEB_index(vEBTree, u*2+1,this.height)
 
 			node = store[idx]
 
@@ -137,27 +137,27 @@ end
 
 		end
 		if size(parent_update)>0:
-			update_path(parent_update)
+			update_path(vEBTree, parent_update)
 		end
 	end
 
-	function build_tree{K}(updates):
+	function build_tree{K}(vEBTree::vEBBinaryTree{K}, updates):
 			this.height = ceil(Int.log2(this.MPA.capacity))
 			this.tree_size = 1<<(height+1)
 			new_store = Array(vEBEntry{K},this.tree_size)
 			parents = []
 			for u in updates:
-					idx = vEB_index(u.n,this.height)
+					idx = vEB_index(vEBTree, u.n,this.height)
 					new_store[idx].isblank = u.blank
 					new_store[idx].value = u.value
 					parents.append!(div(u.n,2))
 			end
 			this.store = new_store
-			update_path(parents)
+			update_path(vEBTree, parents)
 	end
 
 
-	function vEB_index(n::Int, height::Int)
+	function vEB_index(vEBTree::vEBBinaryTree{K}, n::Int, height::Int)
 		if height<3
 			return n
 		end
@@ -168,8 +168,7 @@ end
 		top_h = h - bottom_h
 
 		if depth<top_h:
-			cal_new_depth
-			return vEB_index(n,cal_new_depth,top_h)
+			return vEB_index(vEBTree,n,top_h)
 		end
 
 		sub_d = depth - top_h
@@ -184,6 +183,6 @@ end
 
 		x = top_size+(sub_root & (num_sub-1))*sub_size
 
-		return x + vEB_index(n,bottom_h)
+		return x + vEB_index(vEBTree,n,bottom_h)
 	end
 end
