@@ -236,9 +236,9 @@ function dequeue!(pq::PriorityQueue, key)
 end
 
 """
-    dequeue_with_val!(pq)
+    dequeue_pair!(pq)
 
-Remove and return a the lowest priority key and value from a priority queue as a tuple.
+Remove and return a the lowest priority key and value from a priority queue as a pair.
 
 ```jldoctest
 julia> a = PriorityQueue(["a","b","c"],[2,3,1],Base.Order.Forward)
@@ -247,8 +247,8 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
   "b" => 3
   "a" => 2
 
-julia> dequeue_with_val!(a)
-("c", 1)
+julia> dequeue_pair!(a)
+"c" => 1
 
 julia> a
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
@@ -256,7 +256,7 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
   "a" => 2
 ```
 """
-function dequeue_with_val!(pq::PriorityQueue)
+function dequeue_pair!(pq::PriorityQueue)
     x = pq.xs[1]
     y = pop!(pq.xs)
     if !isempty(pq)
@@ -265,13 +265,13 @@ function dequeue_with_val!(pq::PriorityQueue)
         percolate_down!(pq, 1)
     end
     delete!(pq.index, x.first)
-    (x.first, x.second)
+    x
 end
 
-function dequeue_with_val!(pq::PriorityQueue, key)
+function dequeue_pair!(pq::PriorityQueue, key)
     idx = pq.index[key]
     force_up!(pq, idx)
-    dequeue_with_val!(pq)
+    dequeue_pair!(pq)
 end
 
 
