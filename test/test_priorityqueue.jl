@@ -95,12 +95,7 @@ end
 
 priorities2 = Dict(zip('a':'e', 5:-1:1))
 pq = PriorityQueue(priorities2)
-try
-    dequeue_pair!(pq, 'g')
-    error("should have resulted in KeyError")
-catch ex
-    @test isa(ex, KeyError)
-end
+@test_throws KeyError dequeue_pair!(pq, 'g')
 @test dequeue_pair!(pq) == Pair('e', 1)
 @test dequeue_pair!(pq, 'b') == Pair('b', 4)
 @test length(pq) == 3
