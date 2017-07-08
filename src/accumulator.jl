@@ -24,6 +24,14 @@ function counter{T}(seq::AbstractArray{T})
     return ct
 end
 
+function counter{T<:Base.Generator}(gen::T)
+    ct = counter(Base._default_eltype(T))
+    for x in gen
+        push!(ct, x)
+    end
+    return ct
+end
+
 copy{T,V<:Number}(ct::Accumulator{T,V}) = Accumulator{T,V}(copy(ct.map))
 
 length(a::Accumulator) = length(a.map)

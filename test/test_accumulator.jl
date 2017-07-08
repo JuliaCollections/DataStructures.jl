@@ -95,3 +95,6 @@ end
 @test ct6["a"] == 0
 @test ct6["b"] == 0
 @test ct6["c"] == 4
+
+s = ["y", "el", "sol", "se", "fue"]
+@test counter(length(x) for x in s) == counter(map(length, s))
