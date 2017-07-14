@@ -1,3 +1,64 @@
+v0.6.0 / 2017-07-09
+==================
+  * Added dequeue_pair! to Deque implementation
+  * Fix depwarn on 0.7
+  * Reduce TypeStrictness for Accumulator
+  * Update CI URLs to point to new caching infrastructure
+  * Re-fix 0.6 depwarns
+
+v0.5.3 / 2017-02-21
+==================
+  * Julia v0.6 depwarn, ambiguity, and other misc fixes
+  * Fix an ambiguities in SortedDict, SortedMultiDict constructors
+  * Fix 0.6 typealias depwarn
+  * Fix 0.6 abstract type declaration depwarn
+  * Fix 0.6 misc other depwarns
+  * Fix push!(x::Accumulator,...) ambiguous function definitions
+  * Fix typing in BinaryHeap type
+  * Remove eval from DefaultDict constructor
+
+v0.5.2 / 2017-01-18
+==================
+  * Julia 0.6 fixes
+  * Remove recently introduced TypeVars.
+  * Don't allow failure on nightly
+
+v0.5.1 / 2017-01-07
+==================
+  * Temporarily revert removal of HashDict (broke gadfly)
+
+v0.5.0 / 2017-01-05
+==================
+  * Move PriorityQueue from Base
+  * Added ordtype() function for sorted collections
+  * Changed OrderedDict implementation to Jeff Bezanson's version (from Julia #10116)
+  * Remove HashDict (no longer needed), refactor Dict-related classes
+  * Added more Dict-related tests
+  * Allow OrderedDicts to be sorted
+  * Fix xor deprecations
+
+v0.4.6 / 2016-07-28
+==================
+  * Add Deque based on a circular buffer
+  * isdefined -> isassigned
+
+v0.4.5 / 2016-07-28
+==================
+  * Fixes for Julia v0.5
+     * Tests: primes moved from Base to Primes.jl for
+     * Exception type updates for
+     * Export complement if not available in Base
+     * Fix ASCIIString, UTF8String -> String deprecations
+     * Fix getfield deprecation
+  * Add RTD badge to Readme
+
+v0.4.4 / 2016-04-10
+==================
+  * rename files with underscores for consistency
+  * OrderedDict: use type parameters for constructor, rather than as parameters
+  * add various docstrings
+  * Remove spaces between {} and () in function/constructor definitions
+
 v0.4.3 / 2016-02-10
 ==================
   * for DisjointSets, make union! return the root of the newly merged set

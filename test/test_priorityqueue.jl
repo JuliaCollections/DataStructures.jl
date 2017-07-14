@@ -93,6 +93,13 @@ while !isempty(pq)
     @test 10 != dequeue!(pq)
 end
 
+priorities2 = Dict(zip('a':'e', 5:-1:1))
+pq = PriorityQueue(priorities2)
+@test_throws KeyError dequeue_pair!(pq, 'g')
+@test dequeue_pair!(pq) == Pair('e', 1)
+@test dequeue_pair!(pq, 'b') == Pair('b', 4)
+@test length(pq) == 3
+
 # low level heap operations
 xs = heapify!([v for v in values(priorities)])
 @test issorted([heappop!(xs) for _ in length(priorities)])
