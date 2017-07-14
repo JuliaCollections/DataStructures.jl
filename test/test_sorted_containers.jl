@@ -1164,7 +1164,7 @@ end
     @test_throws KeyError delete!(m,"a")
     @test_throws KeyError pop!(m,"a")
     m3 = SortedDict((Dict{Compat.ASCIIString, Int}()), Reverse)
-    @test_throws ArgumentError isequal(m2, m3)``
+    @test_throws ArgumentError isequal(m2, m3)
     @test_throws BoundsError m[i1]
     @test_throws BoundsError regress((m,beforestartsemitoken(m)))
     @test_throws BoundsError advance((m,pastendsemitoken(m)))
