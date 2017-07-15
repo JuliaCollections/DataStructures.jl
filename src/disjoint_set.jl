@@ -13,14 +13,17 @@
 #
 ############################################################
 
-type IntDisjointSets
+type IntDisjointSets{T<:Union{Void, Int}}
     parents::Vector{Int}
     ranks::Vector{Int}
+    sizes::Vector{T}
     ngroups::Int
 
     # creates a disjoint set comprised of n singletons
-    IntDisjointSets(n::Integer) = new(collect(1:n), zeros(Int, n), n)
+    IntDisjointSets{T}(n::Integer) where {T<:Int} = new(collect(1:n), zeros(Int, n), ones(Int, n), n)
+    IntDisjointSets{T}(n::Integer) where {T<:Void} = new(collect(1:n), zeros(Int, n), Vector{Void}(), n)
 end
+IntDisjointSets(n::Integer) = IntDisjointSets{Int}(n)
 
 length(s::IntDisjointSets) = length(s.parents)
 num_groups(s::IntDisjointSets) = s.ngroups
@@ -68,7 +71,7 @@ end
 # form a new set that is the union of the two sets whose root elements are
 # x and y and return the root of the new set
 # assume x ≠ y (unsafe)
-function root_union!(s::IntDisjointSets, x::Integer, y::Integer)
+function root_union!(s::IntDisjointSets{<:Void}, x::Integer, y::Integer)
     parents = s.parents
     rks = s.ranks
     @inbounds xrank = rks[x]
@@ -84,16 +87,47 @@ function root_union!(s::IntDisjointSets, x::Integer, y::Integer)
     x
 end
 
+function root_union!(s::IntDisjointSets{<:Int}, x::Integer, y::Integer)
+    parents = s.parents
+    rks = s.ranks
+    @inbounds xrank = rks[x]
+    @inbounds yrank = rks[y]
+
+    if xrank < yrank
+        x, y = y, x
+    elseif xrank == yrank
+        rks[x] += 1
+    end
+    @inbounds parents[y] = x
+    @inbounds s.sizes[x] += s.sizes[y]
+    @inbounds s.ngroups -= 1
+    x
+end
+
 # make a new subset with an automatically chosen new element x
 # returns the new element
 #
-function push!(s::IntDisjointSets)
+function push!(s::IntDisjointSets{<:Void})
     x = length(s) + 1
     push!(s.parents, x)
     push!(s.ranks, 0)
     s.ngroups += 1
     return x
 end
+
+function push!(s::IntDisjointSets{<:Int})
+    x = length(s) + 1
+    push!(s.parents, x)
+    push!(s.ranks, 0)
+    push!(s.sizes, 1)
+    s.ngroups += 1
+    return x
+end
+
+# get size of set containing element x
+#
+get_size(s::IntDisjointSets{<:Int}, x::Integer) = s.sizes[find_root(s, x)]
+get_size(s::IntDisjointSets{<:Void}, x::Integer) = throw(ErrorException("DisjointSets wasn't initialized with store_size = true"))
 
 
 ############################################################
@@ -105,12 +139,12 @@ end
 #
 ############################################################
 
-@compat type DisjointSets{T}
+@compat type DisjointSets{T, S<:Union{Void, Int}}
     intmap::Dict{T,Int}
     revmap::Vector{T}
-    internal::IntDisjointSets
+    internal::IntDisjointSets{S}
 
-    function (::Type{DisjointSets{T}}){T}(xs)    # xs must be iterable
+    function (::Type{DisjointSets{T, S}}){T, S}(xs)    # xs must be iterable
         imap = Dict{T,Int}()
         rmap = Vector{T}()
         n = length(xs)
@@ -121,7 +155,7 @@ end
             imap[x] = (id += 1)
             push!(rmap,x)
         end
-        new{T}(imap, rmap, IntDisjointSets(n))
+        new{T, S}(imap, rmap, IntDisjointSets{S}(n))
     end
 end
 
@@ -147,3 +181,5 @@ function push!{T}(s::DisjointSets{T}, x::T)
     push!(s.revmap,x) # Note, this assumes invariant: length(s.revmap) == id
     x
 end
+
+get_size{T}(s::DisjointSets{T}, x::Integer) = get_size(s.internal, s.intmap[x])
