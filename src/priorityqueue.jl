@@ -23,7 +23,7 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
   "a" => 2
 ```
 """
-@compat type PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
+mutable struct PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
     # Binary heap of (element, priority) pairs.
     xs::Array{Pair{K,V}, 1}
     o::O
@@ -31,22 +31,11 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
     # Map elements to their index in xs
     index::Dict{K, Int}
 
-    function (::Type{PriorityQueue{K,V,O}}){K,V,O<:Ordering}(o::O)
+    function PriorityQueue{K,V,O}(o::O) where {K,V,O<:Ordering}
         new{K,V,O}(Vector{Pair{K,V}}(0), o, Dict{K, Int}())
     end
 
-    (::Type{PriorityQueue{K,V,O}}){K,V,O<:Ordering}() = PriorityQueue{K,V,O}(Forward)
-
-    function (::Type{PriorityQueue{K,V,O}}){K,V,O<:Ordering}(ks::AbstractArray{K},
-                                                             vs::AbstractArray{V}, o::O)
-        # TODO: maybe deprecate
-        if length(ks) != length(vs)
-            throw(ArgumentError("key and value arrays must have equal lengths"))
-        end
-        PriorityQueue{K,V,O}(zip(ks, vs), o)
-    end
-
-    function (::Type{PriorityQueue{K,V,O}}){K,V,O<:Ordering}(itr, o::O)
+    function PriorityQueue{K,V,O}(itr, o::O) where {K,V,O<:Ordering}
         xs = Vector{Pair{K,V}}(length(itr))
         index = Dict{K, Int}()
         for (i, (k, v)) in enumerate(itr)
@@ -67,16 +56,29 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
     end
 end
 
+PriorityQueue{K,V,O}() where {K,V,O<:Ordering} = PriorityQueue{K,V,O}(Forward)
+
+function PriorityQueue{K,V,O}(ks::AbstractArray{K}, vs::AbstractArray{V}, o::O) where {K,V,O<:Ordering}
+    # TODO: maybe deprecate
+    if length(ks) != length(vs)
+        throw(ArgumentError("key and value arrays must have equal lengths"))
+    end
+    PriorityQueue{K,V,O}(zip(ks, vs), o)
+end
+
 PriorityQueue(o::Ordering=Forward) = PriorityQueue{Any,Any,typeof(o)}(o)
-PriorityQueue{K,V}(::Type{K}, ::Type{V}, o::Ordering=Forward) = PriorityQueue{K,V,typeof(o)}(o)
+PriorityQueue(::Type{K}, ::Type{V}, o::Ordering=Forward) where {K,V} =
+    PriorityQueue{K,V,typeof(o)}(o)
 
 # TODO: maybe deprecate
-PriorityQueue{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V},
-                   o::Ordering=Forward) = PriorityQueue{K,V,typeof(o)}(ks, vs, o)
+PriorityQueue(ks::AbstractArray{K}, vs::AbstractArray{V}, o::Ordering=Forward) where {K,V} =
+    PriorityQueue{K,V,typeof(o)}(ks, vs, o)
 
-PriorityQueue{K,V}(kvs::Associative{K,V}, o::Ordering=Forward) = PriorityQueue{K,V,typeof(o)}(kvs, o)
+PriorityQueue(kvs::Associative{K,V}, o::Ordering=Forward) where {K,V} =
+    PriorityQueue{K,V,typeof(o)}(kvs, o)
 
-PriorityQueue{K,V}(a::AbstractArray{Tuple{K,V}}, o::Ordering=Forward) = PriorityQueue{K,V,typeof(o)}(a, o)
+PriorityQueue(a::AbstractArray{Tuple{K,V}}, o::Ordering=Forward) where {K,V} =
+    PriorityQueue{K,V,typeof(o)}(a, o)
 
 length(pq::PriorityQueue) = length(pq.xs)
 isempty(pq::PriorityQueue) = isempty(pq.xs)
@@ -137,19 +139,19 @@ function force_up!(pq::PriorityQueue, i::Integer)
     pq.xs[i] = x
 end
 
-function getindex{K,V}(pq::PriorityQueue{K,V}, key)
+function getindex(pq::PriorityQueue, key)
     pq.xs[pq.index[key]].second
 end
 
 
-function get{K,V}(pq::PriorityQueue{K,V}, key, deflt)
+function get(pq::PriorityQueue, key, deflt)
     i = get(pq.index, key, 0)
     i == 0 ? deflt : pq.xs[i].second
 end
 
 
 # Change the priority of an existing element, or equeue it if it isn't present.
-function setindex!{K,V}(pq::PriorityQueue{K, V}, value, key)
+function setindex!(pq::PriorityQueue{K,V}, value, key) where {K,V}
     if haskey(pq, key)
         i = pq.index[key]
         oldvalue = pq.xs[i].second
@@ -185,7 +187,7 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 4 entries:
   "d" => 4
 ```
 """
-function enqueue!{K,V}(pq::PriorityQueue{K,V}, key, value)
+function enqueue!(pq::PriorityQueue{K,V}, key, value) where {K,V}
     if haskey(pq, key)
         throw(ArgumentError("PriorityQueue keys must be unique"))
     end
@@ -280,7 +282,7 @@ start(pq::PriorityQueue) = start(pq.index)
 
 done(pq::PriorityQueue, i) = done(pq.index, i)
 
-function next{K,V}(pq::PriorityQueue{K,V}, i)
+function next(pq::PriorityQueue, i)
     (k, idx), i = next(pq.index, i)
     return (pq.xs[idx], i)
 end

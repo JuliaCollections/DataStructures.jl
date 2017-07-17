@@ -1,22 +1,22 @@
 # A counter type
 
-immutable Accumulator{T, V<:Number} <: Associative{T,V}
+struct Accumulator{T, V<:Number} <: Associative{T,V}
     map::Dict{T,V}
 end
 
 ## constructors
 
-Accumulator{T,V<:Number}(::Type{T}, ::Type{V}) = Accumulator{T,V}(Dict{T,V}())
-counter(T::Type) = Accumulator(T,Int)
+Accumulator(::Type{T}, ::Type{V}) where {T,V<:Number} = Accumulator{T,V}(Dict{T,V}())
+counter(T::Type) = Accumulator(T, Int)
 
-counter{T}(dct::Dict{T,Int}) = Accumulator{T,Int}(copy(dct))
+counter(dct::Dict{T,Int}) where {T} = Accumulator{T,Int}(copy(dct))
 
 """
-    counter{T}(seq::AbstractArray)
+    counter(seq::AbstractArray)
 
 Returns an `Accumulator` object containing the elements from `seq`.
 """
-function counter{T}(seq::AbstractArray{T})
+function counter(seq::AbstractArray{T}) where T
     ct = counter(T)
     for x in seq
         push!(ct, x)
@@ -24,7 +24,7 @@ function counter{T}(seq::AbstractArray{T})
     return ct
 end
 
-copy{T,V<:Number}(ct::Accumulator{T,V}) = Accumulator{T,V}(copy(ct.map))
+copy(ct::Accumulator{T,V}) where {T,V<:Number} = Accumulator{T,V}(copy(ct.map))
 
 length(a::Accumulator) = length(a.map)
 
@@ -34,12 +34,9 @@ get(ct::Accumulator, x, default) = get(ct.map, x, default)
 # need to allow user specified default in order to
 # correctly implement "informal" Associative interface
 
-getindex{T,V}(ct::Accumulator{T,V}, x) = get(ct.map, x, zero(V))
-
+getindex(ct::Accumulator{T,V}, x) where {T,V} = get(ct.map, x, zero(V))
 haskey(ct::Accumulator, x) = haskey(ct.map, x)
-
 keys(ct::Accumulator) = keys(ct.map)
-
 values(ct::Accumulator) = values(ct.map)
 
 sum(ct::Accumulator) = sum(values(ct.map))
@@ -50,18 +47,13 @@ start(ct::Accumulator) = start(ct.map)
 next(ct::Accumulator, state) = next(ct.map, state)
 done(ct::Accumulator, state) = done(ct.map, state)
 
-
 # manipulation
 
 push!(ct::Accumulator, x, a::Number) = (ct.map[x] = ct[x] + a)
-push!{T,V}(ct::Accumulator{T,V}, x) = push!(ct, x, one(V))
+push!(ct::Accumulator{T,V}, x) where {T,V} = push!(ct, x, one(V))
 
 # To remove ambiguities related to Accumulator now being a subtype of Associative
-if VERSION < v"0.6.0-dev.2123"
-    push!{T,V}(ct::Accumulator{T,V}, x::Pair) = push!(ct, x, one(V))
-else
-    _include_string("push!(ct::Accumulator{T,V}, x::T) where T<:Pair where V = push!(ct, x, one(V))")
-end
+push!(ct::Accumulator{T,V}, x::T) where {T<:Pair,V} = push!(ct, x, one(V))
 
 function push!(ct::Accumulator, r::Accumulator)
     for (x, v) in r
@@ -80,7 +72,7 @@ function merge!(ct1::Accumulator, others::Accumulator...)
 end
 
 merge(ct1::Accumulator) = ct1
-function merge{T,V<:Number}(ct1::Accumulator{T,V}, others::Accumulator{T,V}...)
+function merge(ct1::Accumulator{T,V}, others::Accumulator{T,V}...) where {T,V<:Number}
     ct = copy(ct1)
     merge!(ct,others...)
     return ct

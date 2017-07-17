@@ -2,21 +2,21 @@ __precompile__()
 
 module DataStructures
 
-    using Compat
-
     import Base: <, <=, ==, length, isempty, start, next, done,
                  show, dump, empty!, getindex, setindex!, get, get!,
-                 in, haskey, keys, merge, copy, cat,
-                 push!, pop!, shift!, unshift!, insert!,
+                 unsafe_getindex, unsafe_setindex!, convert,
+                 in, haskey, keys, merge, copy, copy!, cat,
+                 push!, pop!, shift!, unshift!, insert!, append!,
                  union!, delete!, similar, sizehint!,
-                 isequal, hash,
-                 map, reverse,
+                 isequal, hash, ===, size,
+                 map, reverse, collect, count,
                  first, last, eltype, getkey, values, sum,
                  merge, merge!, lt, Ordering, ForwardOrdering, Forward,
                  ReverseOrdering, Reverse, Lt,
                  isless,
-                 union, intersect, symdiff, setdiff, issubset,
-                 find, searchsortedfirst, searchsortedlast, endof, in
+                 union, intersect, setdiff, setdiff!, symdiff, symdiff!, issubset,
+                 find, findnextnot, searchsortedfirst, searchsortedlast, endof, in,
+                 iteratorsize
 
     export Deque, Stack, Queue, CircularDeque
     export deque, enqueue!, dequeue!, dequeue_pair!, update!, reverse_iter

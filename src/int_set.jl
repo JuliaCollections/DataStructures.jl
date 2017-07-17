@@ -1,17 +1,8 @@
 # This file was a part of Julia. License is MIT: http://julialang.org/license
 
-import Base: similar, copy, copy!, eltype, push!, pop!, delete!, shift!,
-             empty!, isempty, union, union!, intersect, intersect!,
-             setdiff, setdiff!, symdiff, symdiff!, in, start, next, done,
-             last, length, show, hash, issubset, ==, <=, <, unsafe_getindex,
-             unsafe_setindex!, findnextnot, first
-if !isdefined(Base, :complement)
-    export complement, complement!
-else
-    import Base: complement, complement!
-end
+export complement, complement!
 
-type IntSet
+mutable struct IntSet
     bits::BitVector
     inverse::Bool
     IntSet() = new(fill!(BitVector(256), false), false)
@@ -38,11 +29,11 @@ end
 
 # An internal function for setting the inclusion bit for a given integer n >= 0
 @inline function _setint!(s::IntSet, n::Integer, b::Bool)
-    idx = n+1
+    idx = n + 1
     if idx > length(s.bits)
         !b && return s # setting a bit to zero outside the set's bits is a no-op
-        newlen = idx + idx>>1 # This operation may overflow; we want saturation
-        _resize0!(s.bits, ifelse(newlen<0, typemax(Int), newlen))
+        newlen = idx + idx >> 1 # This operation may overflow; we want saturation
+        _resize0!(s.bits, ifelse(newlen < 0, typemax(Int), newlen))
     end
     unsafe_setindex!(s.bits, b, idx) # Use @inbounds once available
     s
