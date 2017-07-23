@@ -14,7 +14,7 @@
 # subclassed.
 #
 
-@compat immutable DefaultDictBase{K,V,F,D} <: Associative{K,V}
+immutable DefaultDictBase{K,V,F,D} <: Associative{K,V}
     default::F
     d::D
 
@@ -44,7 +44,7 @@ DefaultDictBase{K,V,F}(default::F, ps::Pair{K,V}...) = DefaultDictBase{K,V,F,Dic
 DefaultDictBase{F,D<:Associative}(default::F, d::D) = (K=keytype(d); V=valtype(d); DefaultDictBase{K,V,F,D}(default, d))
 
 # Constructor for DefaultDictBase{Int,Float64}(0.0)
-@compat (::Type{DefaultDictBase{K,V}}){K,V,F}(default::F) = DefaultDictBase{K,V,F,Dict{K,V}}(default)
+(::Type{DefaultDictBase{K,V}}){K,V,F}(default::F) = DefaultDictBase{K,V,F,Dict{K,V}}(default)
 
 # Functions
 
@@ -82,7 +82,7 @@ end
 for _Dict in [:Dict, :OrderedDict]
     DefaultDict = Symbol("Default"*string(_Dict))
     @eval begin
-        @compat immutable $DefaultDict{K,V,F} <: Associative{K,V}
+        immutable $DefaultDict{K,V,F} <: Associative{K,V}
             d::DefaultDictBase{K,V,F,$_Dict{K,V}}
 
             (::Type{$DefaultDict{K,V,F}}){K,V,F}(x, ps::Pair{K,V}...) =
@@ -109,8 +109,8 @@ for _Dict in [:Dict, :OrderedDict]
         $DefaultDict{F}(default::F, d::Associative) = ((K,V)= (Base.keytype(d), Base.valtype(d)); $DefaultDict{K,V,F}(default, $_Dict(d)))
 
         # Constructor syntax: DefaultDictBase{Int,Float64}(default)
-        @compat (::Type{$DefaultDict{K,V}}){K,V}() = throw(ArgumentError("$DefaultDict: no default specified"))
-        @compat (::Type{$DefaultDict{K,V}}){K,V,F}(default::F) = $DefaultDict{K,V,F}(default)
+        (::Type{$DefaultDict{K,V}}){K,V}() = throw(ArgumentError("$DefaultDict: no default specified"))
+        (::Type{$DefaultDict{K,V}}){K,V,F}(default::F) = $DefaultDict{K,V,F}(default)
 
         ## Functions
 

@@ -1,15 +1,9 @@
-if VERSION >= v"0.5.0-dev+7720"
-    using Base.Test
-else
-    using BaseTestNext
-    const Test = BaseTestNext
-end
+using Base.Test
 using DataStructures
 const IntSet = DataStructures.IntSet
-import Compat: String
 using Primes
 
-if VERSION >= v"0.5.0" && VERSION < v"0.6.0-dev"
+if VERSION < v"0.6.0-dev"
     @test isempty(detect_ambiguities(Base, Core, DataStructures))
 end
 

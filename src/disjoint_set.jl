@@ -105,7 +105,7 @@ end
 #
 ############################################################
 
-@compat type DisjointSets{T}
+type DisjointSets{T}
     intmap::Dict{T,Int}
     revmap::Vector{T}
     internal::IntDisjointSets

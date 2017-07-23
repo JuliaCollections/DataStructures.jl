@@ -1,16 +1,11 @@
 # Test classified collections
 
 using DataStructures
-if VERSION >= v"0.5.0-dev+7720"
-    using Base.Test
-else
-    using BaseTestNext
-    const Test = BaseTestNext
-end
+using Base.Test
 
 # classified lists
 
-c = classified_lists(Compat.ASCIIString, Int)
+c = classified_lists(String, Int)
 
 push!(c, "low", 1)
 push!(c, "low", 2)
@@ -26,14 +21,14 @@ push!(c, "high", 5)
 @test c["high"] == [4, 5]
 
 @test length(c) == 2
-@test sort(collect(keys(c))) == Compat.ASCIIString["high","low"]
+@test sort(collect(keys(c))) == String["high","low"]
 
 pop!(c,"low")
 @test !haskey(c,"low")
 
 # classified sets
 
-c = classified_sets(Compat.ASCIIString, Int)
+c = classified_sets(String, Int)
 
 push!(c, "low", 1)
 push!(c, "low", 2)
@@ -57,7 +52,7 @@ push!(c, "high", 5)
 
 # classified counters
 
-c = classified_counters(Compat.ASCIIString, Float64)
+c = classified_counters(String, Float64)
 
 push!(c, "low", 1.)
 push!(c, "low", 2.)

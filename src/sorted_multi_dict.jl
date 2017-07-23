@@ -2,7 +2,7 @@
 ## Unlike SortedDict, a key in SortedMultiDict can
 ## refer to multiple data entries.
 
-@compat type SortedMultiDict{K, D, Ord <: Ordering}
+type SortedMultiDict{K, D, Ord <: Ordering}
     bt::BalancedTree23{K,D,Ord}
 
     ## Base constructors
@@ -34,8 +34,8 @@ SortedMultiDict{O<:Ordering}(o::O) = SortedMultiDict{Any,Any,O}(o)
 # Construction from Pairs
 SortedMultiDict(ps::Pair...) = SortedMultiDict(Forward, ps)
 SortedMultiDict(o::Ordering, ps::Pair...) = SortedMultiDict(o, ps)
-@compat (::Type{SortedMultiDict{K,D}}){K,D}(ps::Pair...) = SortedMultiDict{K,D,ForwardOrdering}(Forward, ps)
-@compat (::Type{SortedMultiDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, ps::Pair...) = SortedMultiDict{K,D,Ord}(o, ps)
+(::Type{SortedMultiDict{K,D}}){K,D}(ps::Pair...) = SortedMultiDict{K,D,ForwardOrdering}(Forward, ps)
+(::Type{SortedMultiDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, ps::Pair...) = SortedMultiDict{K,D,Ord}(o, ps)
 
 # Construction from Associatives
 SortedMultiDict{K,D,Ord<:Ordering}(o::Ord, d::Associative{K,D}) = SortedMultiDict{K,D,Ord}(o, d)
@@ -44,8 +44,8 @@ SortedMultiDict{K,D,Ord<:Ordering}(o::Ord, d::Associative{K,D}) = SortedMultiDic
 
 # Construction specifying Key/Value types
 # e.g., SortedMultiDict{Int,Float64}([1=>1, 2=>2.0])
-@compat (::Type{SortedMultiDict{K,D}}){K,D}(kv) = SortedMultiDict{K,D}(Forward, kv)
-@compat function (::Type{SortedMultiDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, kv)
+(::Type{SortedMultiDict{K,D}}){K,D}(kv) = SortedMultiDict{K,D}(Forward, kv)
+function (::Type{SortedMultiDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, kv)
     try
         SortedMultiDict{K,D,Ord}(o, kv)
     catch e

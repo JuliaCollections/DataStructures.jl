@@ -5,7 +5,7 @@
 #
 #######################################
 
-@compat type DequeBlock{T}
+type DequeBlock{T}
     data::Vector{T}  # only data[front:back] is valid
     capa::Int
     front::Int
@@ -58,7 +58,7 @@ end
 
 const DEFAULT_DEQUEUE_BLOCKSIZE = 1024
 
-@compat type Deque{T}
+type Deque{T}
     nblocks::Int
     blksize::Int
     len::Int
