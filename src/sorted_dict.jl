@@ -1,7 +1,7 @@
 ## A SortedDict is a wrapper around balancedTree with
 ## methods similiar to those of Julia container Dict.
 
-@compat type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
+type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
     bt::BalancedTree23{K,D,Ord}
 
     ## Base constructors
@@ -36,8 +36,8 @@ SortedDict{Ord <: Ordering}(o::Ord) = SortedDict{Any,Any,Ord}(o)
 # TODO: fix SortedDict(1=>1, 2=>2.0)
 SortedDict(ps::Pair...) = SortedDict(Forward, ps)
 SortedDict(o::Ordering, ps::Pair...) = SortedDict(o, ps)
-@compat (::Type{SortedDict{K,D}}){K,D}(ps::Pair...) = SortedDict{K,D,ForwardOrdering}(Forward, ps)
-@compat (::Type{SortedDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, ps::Pair...) = SortedDict{K,D,Ord}(o, ps)
+(::Type{SortedDict{K,D}}){K,D}(ps::Pair...) = SortedDict{K,D,ForwardOrdering}(Forward, ps)
+(::Type{SortedDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, ps::Pair...) = SortedDict{K,D,Ord}(o, ps)
 
 # Construction from Associatives
 SortedDict{K,D,Ord<:Ordering}(o::Ord, d::Associative{K,D}) = SortedDict{K,D,Ord}(o, d)
@@ -46,8 +46,8 @@ SortedDict{K,D,Ord<:Ordering}(o::Ord, d::Associative{K,D}) = SortedDict{K,D,Ord}
 
 # Construction specifying Key/Value types
 # e.g., SortedDict{Int,Float64}([1=>1, 2=>2.0])
-@compat (::Type{SortedDict{K,D}}){K,D}(kv) = SortedDict{K,D}(Forward, kv)
-@compat function (::Type{SortedDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, kv)
+(::Type{SortedDict{K,D}}){K,D}(kv) = SortedDict{K,D}(Forward, kv)
+function (::Type{SortedDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, kv)
     try
         SortedDict{K,D,Ord}(o, kv)
     catch e
@@ -129,7 +129,7 @@ end
 
 @inline function find(m::SortedDict, k_)
     ll, exactfound = findkey(m.bt, convert(keytype(m),k_))
-    IntSemiToken(exactfound? ll : 2)
+    IntSemiToken(exactfound ? ll : 2)
 end
 
 ## This function inserts an item into the tree.
@@ -196,7 +196,7 @@ end
 
 @inline function get{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_, default_)
     i, exactfound = findkey(m.bt, convert(K,k_))
-   return exactfound? m.bt.data[i].d : convert(D,default_)
+   return exactfound ? m.bt.data[i].d : convert(D,default_)
 end
 
 
@@ -215,7 +215,7 @@ end
 
 function getkey{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_, default_)
     i, exactfound = findkey(m.bt, convert(K,k_))
-    exactfound? m.bt.data[i].k : convert(K, default_)
+    exactfound ? m.bt.data[i].k : convert(K, default_)
 end
 
 ## Function delete! deletes an item at a given

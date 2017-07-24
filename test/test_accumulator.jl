@@ -1,7 +1,7 @@
 # Test of accumulators
 
-ct = counter(Compat.ASCIIString)
-@assert isa(ct, Accumulator{Compat.ASCIIString,Int})
+ct = counter(String)
+@assert isa(ct, Accumulator{String,Int})
 
 @test ct["abc"] == 0
 @test !haskey(ct, "abc")
@@ -29,7 +29,7 @@ push!(ct, "b", 0x3)
 @test sum(ct) == 6
 
 ct2 = counter(["a", "a", "b", "b", "a", "c", "c"])
-@test isa(ct2, Accumulator{Compat.ASCIIString,Int})
+@test isa(ct2, Accumulator{String,Int})
 @test haskey(ct2, "a")
 @test haskey(ct2, "b")
 @test haskey(ct2, "c")
@@ -43,14 +43,14 @@ push!(ct, ct2)
 @test ct["c"] == 2
 
 ct3 = counter(Dict([("a",10), ("b",20)]))
-@test isa(ct3, Accumulator{Compat.ASCIIString,Int})
+@test isa(ct3, Accumulator{String,Int})
 @test haskey(ct3, "a")
 @test haskey(ct3, "b")
 @test ct3["a"] == 10
 @test ct3["b"] == 20
 
 ctm = merge(ct2, ct3)
-@test isa(ctm, Accumulator{Compat.ASCIIString,Int})
+@test isa(ctm, Accumulator{String,Int})
 @test haskey(ctm, "a")
 @test haskey(ctm, "b")
 @test haskey(ctm, "c")

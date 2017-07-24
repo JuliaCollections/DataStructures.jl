@@ -150,7 +150,7 @@ end
 #
 #################################################
 
-@compat type MutableBinaryHeap{VT, Comp} <: AbstractMutableHeap{VT,Int}
+type MutableBinaryHeap{VT, Comp} <: AbstractMutableHeap{VT,Int}
     comparer::Comp
     nodes::Vector{MutableBinaryHeapNode{VT}}
     node_map::Vector{Int}

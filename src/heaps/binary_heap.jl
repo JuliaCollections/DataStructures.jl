@@ -102,7 +102,7 @@ end
 #
 #################################################
 
-@compat type BinaryHeap{T,Comp} <: AbstractHeap{T}
+type BinaryHeap{T,Comp} <: AbstractHeap{T}
     comparer::Comp
     valtree::Vector{T}
 

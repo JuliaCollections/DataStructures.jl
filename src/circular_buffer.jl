@@ -1,7 +1,7 @@
 """
 New items are pushed to the back of the list, overwriting values in a circular fashion.
 """
-@compat type CircularBuffer{T} <: AbstractVector{T}
+type CircularBuffer{T} <: AbstractVector{T}
     capacity::Int
     first::Int
     buffer::Vector{T}
