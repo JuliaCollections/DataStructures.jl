@@ -95,3 +95,7 @@ end
 @test ct6["a"] == 0
 @test ct6["b"] == 0
 @test ct6["c"] == 4
+
+# ambiguity resolution
+ct7 = counter(Int)
+@test_throws MethodError push!(ct7, 1=>2)
