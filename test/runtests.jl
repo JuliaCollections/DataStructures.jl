@@ -3,9 +3,7 @@ using DataStructures
 const IntSet = DataStructures.IntSet
 using Primes
 
-if VERSION < v"0.6.0-dev"
-    @test isempty(detect_ambiguities(Base, Core, DataStructures))
-end
+@test isempty(detect_ambiguities(Base, Core, DataStructures))
 
 tests = ["int_set",
          "deque",
