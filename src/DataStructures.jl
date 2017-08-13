@@ -105,10 +105,6 @@ module DataStructures
 
     # Deprecations
 
-    # Remove when Julia 0.6 is released
-    @deprecate iter(s::Stack) s
-    @deprecate iter(q::Queue) q
-
     # Remove when Julia 0.7 (or whatever version is after v0.6) is released
     @deprecate DefaultDictBase(default, ks::AbstractArray, vs::AbstractArray) DefaultDictBase(default, zip(ks, vs))
     @deprecate DefaultDictBase(default, ks, vs) DefaultDictBase(default, zip(ks, vs))
