@@ -43,12 +43,12 @@ end
 
     # building from two lists (deprecated)
     ks, vs = 1:n, rand(1:pmax, n)
-    println("The following warning is expected:")
+    println("\nThe following warning is expected:")
     pq3 = PriorityQueue(ks,vs)
 
     # building from two lists of different sizes - throws an error
     ks, vs = 1:n+1, rand(1:pmax, n)
-    println("The following warning is expected:")
+    println("\nThe following warning is expected:")
     @test_throws ArgumentError PriorityQueue(ks, vs)
 
     # building from Dict
@@ -81,20 +81,23 @@ end
     # construction from pairs
     pq9 = PriorityQueue('a'=>1, 'b'=>2)
     @test peek(pq9) == ('a'=>1)
+
+    pq10 = PriorityQueue(Reverse, 'a'=>1, 'b'=>2)
+    @test peek(pq10) == ('b'=>2)
+
+    pq11 = PriorityQueue(Pair{Char}['a'=>1,'b'=>2])
+    @test peek(pq11) == ('a'=>1)
     
     # duplicate key => ArgumentError
     @test_throws ArgumentError PriorityQueue('a'=>1, 'a'=>2)
 
-    # No pair/tuple => ArguentError
+    # Not a pair/tuple => ArguentError
     @test_throws ArgumentError PriorityQueue(['a'])
+    @test_throws ArgumentError PriorityQueue(Reverse, ['a'])
 
     # Silly test
     @test_throws ArgumentError PriorityQueue(Reverse, Reverse)
 
-    # peek
-    pq10 = PriorityQueue(priorities)
-    lowpri = findmin(vs)
-    @test peek(pq10)[2] == pq10[ks[lowpri[2]]]
 end
 
 @testset "PriorityQueueMethods" begin
@@ -105,12 +108,17 @@ end
     @test dequeue!(pq1) == 'a'
     @test dequeue!(pq1) == 'b'
 
-    #enqueue error throw
     pmax = 1000
     n = 10000
-    r = rand(1:pmax, n)
-    priorities = Dict(zip(1:n, r))
+    ks, vs = 1:n, rand(1:pmax, n)
+    priorities = Dict(zip(ks, vs))
 
+    # peek
+    pq1 = PriorityQueue(priorities)
+    lowpri = findmin(vs)
+    @test peek(pq1)[2] == pq1[ks[lowpri[2]]]
+
+    #enqueue error throw
     ks, vs = 1:n, rand(1:pmax, n)
     pq = PriorityQueue(zip(ks, vs))
     @test_throws ArgumentError enqueue!(pq, 1, 10)
