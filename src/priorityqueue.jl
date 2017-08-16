@@ -236,7 +236,7 @@ Insert the a key `k` into a priority queue `pq` with priority `v`.
 
 """
 enqueue!(pq::PriorityQueue, key, value) = enqueue!(pq, key=>value)
-enqueue!{K,V}(pq::PriorityQueue{K,V}, pair) = enqueue!(pq, Pair{K,V}(pair))
+enqueue!{K,V}(pq::PriorityQueue{K,V}, kv) = enqueue!(pq, Pair{K,V}(kv.first, kv.second))
 
 """
     dequeue!(pq)
