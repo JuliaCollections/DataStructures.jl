@@ -198,34 +198,45 @@ function setindex!{K,V}(pq::PriorityQueue{K, V}, value, key)
 end
 
 """
-    enqueue!(pq, k, v)
+    enqueue!(pq, k=>v)
 
 Insert the a key `k` into a priority queue `pq` with priority `v`.
 
 ```jldoctest
-julia> a = PriorityQueue(["a","b","c"],[2,3,1],Base.Order.Forward)
+julia> a = PriorityQueue(PriorityQueue("a"=>1, "b"=>2, "c"=>3))
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
-  "c" => 1
-  "b" => 3
-  "a" => 2
+  "c" => 3
+  "b" => 2
+  "a" => 1
 
-julia> enqueue!(a, "d", 4)
+julia> enqueue!(a, "d"=>4)
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 4 entries:
-  "c" => 1
-  "b" => 3
-  "a" => 2
+  "c" => 3
+  "b" => 2
+  "a" => 1
   "d" => 4
 ```
 """
-function enqueue!{K,V}(pq::PriorityQueue{K,V}, key, value)
+function enqueue!{K,V}(pq::PriorityQueue{K,V}, pair::Pair{K,V})
+    key = pair.first
     if haskey(pq, key)
         throw(ArgumentError("PriorityQueue keys must be unique"))
     end
-    push!(pq.xs, Pair{K,V}(key, value))
+    push!(pq.xs, pair)
     pq.index[key] = length(pq)
     percolate_up!(pq, length(pq))
-    pq
+    
+    return pq
 end
+
+"""
+enqueue!(pq, k, v)
+
+Insert the a key `k` into a priority queue `pq` with priority `v`.
+
+"""
+enqueue!(pq::PriorityQueue, key, value) = enqueue!(pq, key=>value)
+enqueue!{K,V}(pq::PriorityQueue{K,V}, pair) = enqueue!(pq, Pair{K,V}(pair))
 
 """
     dequeue!(pq)
