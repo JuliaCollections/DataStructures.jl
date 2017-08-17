@@ -94,7 +94,8 @@ end
     # Not a pair/tuple => ArguentError
     @test_throws ArgumentError PriorityQueue(['a'])
     @test_throws ArgumentError PriorityQueue(Reverse, ['a'])
-
+    @test_throws ArgumentError PriorityQueue{Char,Int}(Base.Order.Reverse, ['a'])
+    
     # Silly test
     @test_throws ArgumentError PriorityQueue(Reverse, Reverse)
 
