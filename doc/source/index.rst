@@ -4,6 +4,7 @@ DataStructures.jl
 This package implements a variety of data structures, including
 
 * Deque (based on block-list)
+* CircularBuffer
 * CircularDeque (based on a circular buffer)
 * Stack
 * Queue
@@ -17,6 +18,7 @@ This package implements a variety of data structures, including
 * Linked List
 * Sorted Dict, Sorted Multi-Dict and Sorted Set
 * DataStructures.IntSet
+* Priority Queue
 
 Contents:
 
@@ -24,8 +26,10 @@ Contents:
    :maxdepth: 2
 
    deque.rst
+   circ_buffer.rst
    circ_deque.rst
    stack_and_queue.rst
+   priority-queue.rst
    accumulators.rst
    disjoint_sets.rst
    heaps.rst
@@ -43,4 +47,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
