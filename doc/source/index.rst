@@ -8,6 +8,7 @@ This package implements a variety of data structures, including
 * CircularDeque (based on a circular buffer)
 * Stack
 * Queue
+* Priority Queue
 * Accumulators and Counters
 * Disjoint Sets
 * Binary Heap
@@ -18,7 +19,6 @@ This package implements a variety of data structures, including
 * Linked List
 * Sorted Dict, Sorted Multi-Dict and Sorted Set
 * DataStructures.IntSet
-* Priority Queue
 
 Contents:
 
