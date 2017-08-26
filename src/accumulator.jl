@@ -69,6 +69,7 @@ if VERSION < v"0.6.0-dev.2123"
     push!{T,V}(ct::Accumulator{T,V}, x::Pair) = push!(ct, x, one(V))
 else
     _include_string("push!(ct::Accumulator{T,V}, x::T) where T<:Pair where V = push!(ct, x, one(V))")
+    _include_string("push!(ct::Accumulator{T,V}, x::Pair) where {T,V} = push!(ct, convert(T, x))")
 end
 
 function push!(ct::Accumulator, r::Accumulator)

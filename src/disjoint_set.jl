@@ -105,19 +105,23 @@ end
 #
 ############################################################
 
-@compat type DisjointSets{T}
+type DisjointSets{T}
     intmap::Dict{T,Int}
+    revmap::Vector{T}
     internal::IntDisjointSets
 
     function (::Type{DisjointSets{T}}){T}(xs)    # xs must be iterable
         imap = Dict{T,Int}()
+        rmap = Vector{T}()
         n = length(xs)
         sizehint!(imap, n)
+        sizehint!(rmap, n)
         id = 0
         for x in xs
             imap[x] = (id += 1)
+            push!(rmap,x)
         end
-        new{T}(imap, IntDisjointSets(n))
+        new{T}(imap, rmap, IntDisjointSets(n))
     end
 end
 
@@ -129,17 +133,17 @@ num_groups(s::DisjointSets) = num_groups(s.internal)
 
 Finds the root element of the subset in `s` which has the element `x` as a member.
 """
-find_root{T}(s::DisjointSets{T}, x::T) = find_root(s.internal, s.intmap[x])
+find_root{T}(s::DisjointSets{T}, x::T) = s.revmap[find_root(s.internal, s.intmap[x])]
 
 in_same_set{T}(s::DisjointSets{T}, x::T, y::T) = in_same_set(s.internal, s.intmap[x], s.intmap[y])
 
-for f in (:union!, :root_union!)
-    @eval begin
-        ($f){T}(s::DisjointSets{T}, x::T, y::T) = ($f)(s.internal, s.intmap[x], s.intmap[y])
-    end
-end
+union!{T}(s::DisjointSets{T}, x::T, y::T) = s.revmap[union!(s.internal, s.intmap[x], s.intmap[y])]
+
+root_union!{T}(s::DisjointSets{T}, x::T, y::T) = s.revmap[root_union!(s.internal, s.intmap[x], s.intmap[y])]
 
 function push!{T}(s::DisjointSets{T}, x::T)
     id = push!(s.internal)
     s.intmap[x] = id
+    push!(s.revmap,x) # Note, this assumes invariant: length(s.revmap) == id
+    x
 end

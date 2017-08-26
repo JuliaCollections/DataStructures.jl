@@ -105,10 +105,6 @@ module DataStructures
 
     # Deprecations
 
-    # Remove when Julia 0.6 is released
-    @deprecate iter(s::Stack) s
-    @deprecate iter(q::Queue) q
-
     # Remove when Julia 0.7 (or whatever version is after v0.6) is released
     @deprecate DefaultDictBase(default, ks::AbstractArray, vs::AbstractArray) DefaultDictBase(default, zip(ks, vs))
     @deprecate DefaultDictBase(default, ks, vs) DefaultDictBase(default, zip(ks, vs))
@@ -129,4 +125,18 @@ module DataStructures
         end
         SortedMultiDict(o, zip(ks,vs))
     end
+
+    @deprecate PriorityQueue{K,V}(::Type{K}, ::Type{V}) PriorityQueue{K,V}()    
+    @deprecate PriorityQueue{K,V}(::Type{K}, ::Type{V}, o::Ordering) PriorityQueue{K,V,typeof(o)}(o)    
+    
+    function PriorityQueue{K,V}(ks::AbstractVector{K},
+                                vs::AbstractVector{V},
+                                o::Ordering=Forward)
+        Base.depwarn("PriorityQueue(ks, vs, o::Ordering=Forward) is deprecated.\n" * "Use PriorityQueue(o, zip(ks,vs)) or PriorityQueue(zip(ks, vs))", :PriorityQueue)
+        if length(ks) != length(vs)
+            throw(ArgumentError("PriorityQueue(ks,vs,o): ks and vs arrays must be the same length"))
+        end
+        PriorityQueue(o, zip(ks,vs))
+    end
+                                            
 end

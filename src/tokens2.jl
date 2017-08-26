@@ -62,9 +62,9 @@ end
 
 
 @inline status(ii::Token) =
-       !(ii[2].address in ii[1].bt.useddatacells)? 0 :
-         ii[2].address == 1?                       2 :
-         ii[2].address == 2?                       3 : 1
+       !(ii[2].address in ii[1].bt.useddatacells) ? 0 :
+         ii[2].address == 1 ?                       2 :
+         ii[2].address == 2 ?                       3 : 1
 
 """
     compare(m::SAContainer, s::IntSemiToken, t::IntSemiToken)

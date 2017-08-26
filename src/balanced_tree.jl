@@ -25,7 +25,7 @@
 ##  data nodes.
 
 
-@compat immutable KDRec{K,D}
+immutable KDRec{K,D}
     parent::Int
     k::K
     d::D
@@ -47,7 +47,7 @@ end
 ##    If this is a leaf, then it is the key of child3.
 ## Again, there are two constructors for the same reason mentioned above.
 
-@compat immutable TreeNode{K}
+immutable TreeNode{K}
     child1::Int
     child2::Int
     child3::Int
@@ -111,7 +111,7 @@ end
 ## deletionchild and deletionleftkey are two work-arrays
 ## for the delete function.
 
-@compat type BalancedTree23{K, D, Ord <: Ordering}
+type BalancedTree23{K, D, Ord <: Ordering}
     ord::Ord
     data::Array{KDRec{K,D}, 1}
     tree::Array{TreeNode{K}, 1}
@@ -146,19 +146,19 @@ end
 ## if the node is a leaf and its right child is the end
 ## of the sorted order.
 
-@inline function cmp2_nonleaf(o::Ordering, 
+@inline function cmp2_nonleaf(o::Ordering,
                               treenode::TreeNode,
-                              k) 
-    lt(o, k, treenode.splitkey1)? 1 : 2
+                              k)
+    lt(o, k, treenode.splitkey1) ? 1 : 2
 end
 
 
 
-@inline function cmp2_leaf(o::Ordering, 
+@inline function cmp2_leaf(o::Ordering,
                            treenode::TreeNode,
-                           k) 
-    (treenode.child2 == 2) || 
-    lt(o, k, treenode.splitkey1)? 1 : 2
+                           k)
+    (treenode.child2 == 2) ||
+    lt(o, k, treenode.splitkey1) ? 1 : 2
 end
 
 
@@ -172,17 +172,17 @@ end
 
 @inline function cmp3_nonleaf(o::Ordering,
                               treenode::TreeNode,
-                              k) 
-    lt(o, k, treenode.splitkey1)? 1 :
-    lt(o, k, treenode.splitkey2)? 2 : 3
+                              k)
+    lt(o, k, treenode.splitkey1) ? 1 :
+    lt(o, k, treenode.splitkey2) ? 2 : 3
 end
 
 
 @inline function cmp3_leaf(o::Ordering,
                            treenode::TreeNode,
-                           k) 
-    lt(o, k, treenode.splitkey1)?                           1 :
-    (treenode.child3 == 2 || lt(o, k, treenode.splitkey2))? 2 : 3
+                           k)
+    lt(o, k, treenode.splitkey1) ?                           1 :
+    (treenode.child3 == 2 || lt(o, k, treenode.splitkey2)) ? 2 : 3
 end
 
 
@@ -193,17 +193,17 @@ end
 ## if the node is a leaf and its right child is the end
 ## of the sorted order.
 
-@inline function cmp2le_nonleaf(o::Ordering, 
+@inline function cmp2le_nonleaf(o::Ordering,
                                 treenode::TreeNode,
                                 k)
-    !lt(o,treenode.splitkey1,k)? 1 : 2
+    !lt(o,treenode.splitkey1,k) ? 1 : 2
 end
 
 
-@inline function cmp2le_leaf(o::Ordering, 
+@inline function cmp2le_leaf(o::Ordering,
                              treenode::TreeNode,
                              k)
-    treenode.child2 == 2 || !lt(o,treenode.splitkey1,k)? 1 : 2
+    treenode.child2 == 2 || !lt(o,treenode.splitkey1,k) ? 1 : 2
 end
 
 
@@ -211,7 +211,7 @@ end
 
 ## Function cmp3le checks a tree node with three children
 ## against a given key, and returns 1 if the given key is
-## less than or equal to the node's splitkey1, 2 if less than or equal 
+## less than or equal to the node's splitkey1, 2 if less than or equal
 ## to splitkey2, or
 ## 3 else. Special case
 ## if the node is a leaf and its right child is the end
@@ -220,15 +220,15 @@ end
 @inline function cmp3le_nonleaf(o::Ordering,
                                 treenode::TreeNode,
                                 k)
-    !lt(o,treenode.splitkey1, k)? 1 :
-    !lt(o,treenode.splitkey2, k)? 2 : 3
+    !lt(o,treenode.splitkey1, k) ? 1 :
+    !lt(o,treenode.splitkey2, k) ? 2 : 3
 end
 
 @inline function cmp3le_leaf(o::Ordering,
                              treenode::TreeNode,
                              k)
-    !lt(o,treenode.splitkey1,k)?                            1 :
-    (treenode.child3 == 2 || !lt(o,treenode.splitkey2, k))? 2 : 3
+    !lt(o,treenode.splitkey1,k) ?                            1 :
+    (treenode.child3 == 2 || !lt(o,treenode.splitkey2, k)) ? 2 : 3
 end
 
 
@@ -258,7 +258,7 @@ eq(::ReverseOrdering{ForwardOrdering}, a, b) = isequal(a,b)
 eq(o::Ordering, a, b) = !lt(o, a, b) && !lt(o, b, a)
 
 
-## The findkey function finds the index of a (key,data) pair in the tree 
+## The findkey function finds the index of a (key,data) pair in the tree
 ## where the given key lives (if it is present), or
 ## if the key is not present, to the lower bound for the key,
 ## i.e., the data item that comes immediately before it.
@@ -270,18 +270,18 @@ function findkey(t::BalancedTree23, k)
     curnode = t.rootloc
     for depthcount = 1 : t.depth - 1
         @inbounds thisnode = t.tree[curnode]
-        cmp = thisnode.child3 == 0?
+        cmp = thisnode.child3 == 0 ?
                          cmp2_nonleaf(t.ord, thisnode, k) :
                          cmp3_nonleaf(t.ord, thisnode, k)
-        curnode = cmp == 1? thisnode.child1 :
-                  cmp == 2? thisnode.child2 : thisnode.child3
+        curnode = cmp == 1 ? thisnode.child1 :
+                  cmp == 2 ? thisnode.child2 : thisnode.child3
     end
     @inbounds thisnode = t.tree[curnode]
-    cmp = thisnode.child3 == 0? 
+    cmp = thisnode.child3 == 0 ?
                 cmp2_leaf(t.ord, thisnode, k) :
                 cmp3_leaf(t.ord, thisnode, k)
-    curnode = cmp == 1? thisnode.child1 :
-              cmp == 2? thisnode.child2 : thisnode.child3
+    curnode = cmp == 1 ? thisnode.child1 :
+              cmp == 2 ? thisnode.child2 : thisnode.child3
     @inbounds return curnode, (curnode > 2 && eq(t.ord, t.data[curnode].k, k))
 end
 
@@ -295,25 +295,25 @@ function findkeyless(t::BalancedTree23, k)
     curnode = t.rootloc
     for depthcount = 1 : t.depth - 1
         @inbounds thisnode = t.tree[curnode]
-        cmp = thisnode.child3 == 0?
+        cmp = thisnode.child3 == 0 ?
                cmp2le_nonleaf(t.ord, thisnode, k) :
                cmp3le_nonleaf(t.ord, thisnode, k)
-        curnode = cmp == 1? thisnode.child1 :
-                  cmp == 2? thisnode.child2 : thisnode.child3
+        curnode = cmp == 1 ? thisnode.child1 :
+                  cmp == 2 ? thisnode.child2 : thisnode.child3
     end
     @inbounds thisnode = t.tree[curnode]
-    cmp = thisnode.child3 == 0?
+    cmp = thisnode.child3 == 0 ?
             cmp2le_leaf(t.ord, thisnode, k) :
             cmp3le_leaf(t.ord, thisnode, k)
-    curnode = cmp == 1? thisnode.child1 :
-              cmp == 2? thisnode.child2 : thisnode.child3
+    curnode = cmp == 1 ? thisnode.child1 :
+              cmp == 2 ? thisnode.child2 : thisnode.child3
     curnode
 end
 
 
 
 ## The following are helper routines for the insert! and delete! functions.
-## They replace the 'parent' field of either an internal tree node or 
+## They replace the 'parent' field of either an internal tree node or
 ## a data node at the bottom tree level.
 
 function replaceparent!{K,D}(data::Array{KDRec{K,D},1}, whichind::Int, newparent::Int)
@@ -324,7 +324,7 @@ end
 function replaceparent!{K}(tree::Array{TreeNode{K},1}, whichind::Int, newparent::Int)
     tree[whichind] = TreeNode{K}(tree[whichind].child1, tree[whichind].child2,
                                  tree[whichind].child3, newparent,
-                                 tree[whichind].splitkey1, 
+                                 tree[whichind].splitkey1,
                                  tree[whichind].splitkey2)
     nothing
 end
@@ -352,23 +352,23 @@ end
 ## Function insert! inserts a new data item into the tree.
 ## The arguments are the (K,D) pair to insert.
 ## The return values are a bool and an index.  The
-## bool indicates whether the insertion inserted a new record (true) or 
+## bool indicates whether the insertion inserted a new record (true) or
 ## whether it replaced an existing record (false).
 ## The index returned is the subscript in t.data where the
 ## inserted value sits.
-## "allowdups" (i.e., "allow duplicate keys") means that no check is 
+## "allowdups" (i.e., "allow duplicate keys") means that no check is
 ## done whether the iterm
 ## is already in the tree, so insertion of a new item always succeeds.
 
 function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdups::Bool)
-    
+
     ## First we find the greatest data node that is <= k.
     leafind, exactfound = findkey(t, k)
     parent = t.data[leafind].parent
 
     ## The following code is necessary because in the case of a
     ## brand new tree, the initial tree and data entries were incompletely
-    ## initialized by the constructor.  In this case, the call to insert! 
+    ## initialized by the constructor.  In this case, the call to insert!
     ## underway carries
     ## valid K and D values, so these valid values may now be
     ## stored in the dummy placeholder nodes so that they no
@@ -382,7 +382,7 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
         t.data[1] = KDRec{K,D}(t.data[1].parent, k, d)
         t.data[2] = KDRec{K,D}(t.data[2].parent, k, d)
     end
-    
+
     ## If we have found exactly k in the tree, then we
     ## replace the data associated with k and return.
 
@@ -409,11 +409,11 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
     curdepth = depth
 
     ## This loop ascends the tree (i.e., follows the path from a leaf to the root)
-    ## starting from the parent p1 of 
+    ## starting from the parent p1 of
     ## where the new key k would go.  For each 3-node we encounter
     ## during the ascent, we add a new child, which requires splitting
     ## the 3-node into two 2-nodes.  Then we keep going until we hit the root.
-    ## If we encounter a 2-node, then the ascent can stop; we can 
+    ## If we encounter a 2-node, then the ascent can stop; we can
     ## change the 2-node to a 3-node with the new child. Invariants
     ## during this loop are:
     ##     p1: the parent node (a tree node index) where the insertion must occur
@@ -429,11 +429,11 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
         ## Node p1 index a 3-node. There are three cases for how to
         ## insert new child.  All three cases involve splitting the
         ## existing node (oldtreenode, numbered p1) into
-        ## two new nodes.  One keeps the index p1; the other has 
+        ## two new nodes.  One keeps the index p1; the other has
         ## has a new index called newparentnum.
 
-        
-        cmp = isleaf? cmp3_leaf(ord, oldtreenode, minkeynewchild) :
+
+        cmp = isleaf ? cmp3_leaf(ord, oldtreenode, minkeynewchild) :
                       cmp3_nonleaf(ord, oldtreenode, minkeynewchild)
 
         if cmp == 1
@@ -441,7 +441,7 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
                                           oldtreenode.parent,
                                           minkeynewchild, minkeynewchild)
             righttreenodenew = TreeNode{K}(oldtreenode.child2, oldtreenode.child3, 0,
-                                           oldtreenode.parent, oldtreenode.splitkey2, 
+                                           oldtreenode.parent, oldtreenode.splitkey2,
                                            oldtreenode.splitkey2)
             minkeynewchild = oldtreenode.splitkey1
             whichp = 1
@@ -468,7 +468,7 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
         t.tree[p1] = lefttreenodenew
         newparentnum = push_or_reuse!(t.tree, t.freetreeinds, righttreenodenew)
         if isleaf
-            par = (whichp == 1)? p1 : newparentnum
+            par = (whichp == 1) ? p1 : newparentnum
             # fix the parent of the new datanode.
             replaceparent!(t.data, newind, par)
             push!(t.useddatacells, newind)
@@ -496,20 +496,20 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
 
     ## big loop terminated either because a 2-node was reached
     ## (splitroot == false) or we went up the whole tree seeing
-    ## only 3-nodes (splitroot == true).  
+    ## only 3-nodes (splitroot == true).
     if !splitroot
-        
+
         ## If our ascent reached a 2-node, then we convert it to
         ## a 3-node by giving it a child3 field that is >0.
         ## Encountering a 2-node halts the ascent up the tree.
 
         isleaf = curdepth == depth
         oldtreenode = t.tree[p1]
-        cmpres = isleaf? cmp2_leaf(ord, oldtreenode, minkeynewchild) :
+        cmpres = isleaf ? cmp2_leaf(ord, oldtreenode, minkeynewchild) :
                          cmp2_nonleaf(ord, oldtreenode, minkeynewchild)
 
 
-        t.tree[p1] = cmpres == 1?
+        t.tree[p1] = cmpres == 1 ?
                          TreeNode{K}(oldtreenode.child1, newchild, oldtreenode.child2,
                                      oldtreenode.parent,
                                      minkeynewchild, oldtreenode.splitkey1) :
@@ -520,7 +520,7 @@ function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdup
             replaceparent!(t.data, newind, p1)
             push!(t.useddatacells, newind)
         end
-    else 
+    else
         ## Splitroot is set if the ascent of the tree encountered only 3-nodes.
         ## In this case, the root itself was replaced by two nodes, so we need
         ## a new root above those two.
@@ -541,7 +541,7 @@ end
 
 ## nextloc0: returns the next item in the tree according to the
 ## sort order, given an index i (subscript of t.data) of a current
-## item. 
+## item.
 ## The routine returns 2 if there is no next item (i.e., we started
 ## from the last one in the sorted order).
 
@@ -579,7 +579,7 @@ end
 
 ## prevloc0: returns the previous item in the tree according to the
 ## sort order, given an index i (subscript of t.data) of a current
-## item. 
+## item.
 ## The routine returns 1 if there is no previous item (i.e., we started
 ## from the first one in the sorted order).
 
@@ -611,14 +611,14 @@ function prevloc0(t::BalancedTree23, i::Int)
         end
         p = prevchild
         c3 = t.tree[p].child3
-        prevchild = c3 > 0? c3 : t.tree[p].child2
+        prevchild = c3 > 0 ? c3 : t.tree[p].child2
         depthp += 1
     end
 end
 
 ## This function takes two indices into t.data and checks which
 ## one comes first in the sorted order by chasing them both
-## up the tree until a common ancestor is found.  
+## up the tree until a common ancestor is found.
 ## The return value is -1 if i1 precedes i2, 0 if i1 == i2
 ##, 1 if i2 precedes i1.
 
@@ -656,10 +656,10 @@ function compareInd(t::BalancedTree23, i1::Int, i2::Int)
         p2 = t.tree[i2a].parent
         curdepth -= 1
     end
-end        
+end
 
 
-## beginloc, endloc return the index (into t.data) of the first, last item in the 
+## beginloc, endloc return the index (into t.data) of the first, last item in the
 ## sorted order of the tree.  beginloc works by going to the before-start marker
 ## (data node 1) and executing a next operation on it.  endloc is the opposite.
 
@@ -670,10 +670,10 @@ endloc(t::BalancedTree23) = prevloc0(t,2)
 ## delete! routine deletes an entry from the balanced tree.
 
 function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
-    
+
     ## Put the cell indexed by 'it' into the deletion list.
     ##
-    ## Create the following data items maintained in the 
+    ## Create the following data items maintained in the
     ## upcoming loop.
     ##
     ## p is a tree-node ancestor of the deleted node
@@ -684,7 +684,7 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
     ## are stored in t.deletionleftkey[..]
     ## There is a special case for t.deletionleftkey[1]; the
     ## flag deletionleftkey1_valid indicates that the left key
-    ## for the immediate right neighbor of the 
+    ## for the immediate right neighbor of the
     ## deleted node has not yet been been stored in the tree.
     ## Once it is stored, t.deletionleftkey[1] is no longer needed
     ## or used.
@@ -720,14 +720,14 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
     curdepth = t.depth
     mustdeleteroot = false
     pparent = -1
-    
+
     ## The following loop ascends the tree and contracts nodes (reduces their
     ## number of children) as
     ## needed.  If newchildcount == 2 or 3, then the ascent is terminated
     ## and a node is created with 2 or 3 children.
     ## If newchildcount == 1, then the ascent must continue since a tree
     ## node cannot have one child.
-    
+
     while true
         pparent = t.tree[p].parent
         ## Simple cases when the new child count is 2 or 3
@@ -740,31 +740,31 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
         end
         if newchildcount == 3
             t.tree[p] = TreeNode{K}(t.deletionchild[1], t.deletionchild[2],
-                                    t.deletionchild[3], pparent, 
+                                    t.deletionchild[3], pparent,
                                     t.deletionleftkey[2], t.deletionleftkey[3])
             break
         end
         # @assert(newchildcount == 1)
         ## For the rest of this loop, we cover the case
         ## that p has one child.
-        
+
         ## If newchildcount == 1 and curdepth==1, this means that
         ## the root of the tree has only one child.  In this case, we can
         ## delete the root and make its one child the new root (see below).
-        
+
         if curdepth == 1
             mustdeleteroot = true
             break
         end
-        
+
         ## We now branch on three cases depending on whether p is child1,
         ## child2 or child3 of its parent.
 
         if t.tree[pparent].child1 == p
             rightsib = t.tree[pparent].child2
-            
-            ## Here p is child1 and rightsib is child2.  
-            ## If rightsib has 2 children, then p and 
+
+            ## Here p is child1 and rightsib is child2.
+            ## If rightsib has 2 children, then p and
             ## rightsib are merged into a single node
             ## that has three children.
             ## If rightsib has 3 children, then p and
@@ -777,7 +777,7 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
                 t.tree[p] = TreeNode{K}(t.deletionchild[1],
                                         rc1, rc2,
                                         pparent,
-                                        t.tree[pparent].splitkey1, 
+                                        t.tree[pparent].splitkey1,
                                         t.tree[rightsib].splitkey1)
                 if curdepth == t.depth
                     replaceparent!(t.data, rc1, p)
@@ -793,7 +793,7 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
                 rc1 = t.tree[rightsib].child1
                 t.tree[p] = TreeNode{K}(t.deletionchild[1], rc1, 0,
                                         pparent,
-                                        t.tree[pparent].splitkey1, 
+                                        t.tree[pparent].splitkey1,
                                         defaultKey)
                 sk1 = t.tree[rightsib].splitkey1
                 t.tree[rightsib] = TreeNode{K}(t.tree[rightsib].child2,
@@ -811,11 +811,11 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
                 t.deletionchild[1] = p
                 t.deletionchild[2] = rightsib
                 t.deletionleftkey[2] = sk1
-            end 
-            
+            end
+
             ## If pparent had a third child (besides p and rightsib)
             ## then we add this to t.deletionchild
-            
+
             c3 = t.tree[pparent].child3
             if c3 > 0
                 newchildcount += 1
@@ -824,9 +824,9 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
             end
             p = pparent
         elseif t.tree[pparent].child2 == p
-            
-            ## Here p is child2 and leftsib is child1.  
-            ## If leftsib has 2 children, then p and 
+
+            ## Here p is child2 and leftsib is child1.
+            ## If leftsib has 2 children, then p and
             ## leftsib are merged into a single node
             ## that has three children.
             ## If leftsib has 3 children, then p and
@@ -834,8 +834,8 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
             ## two children.
 
             leftsib = t.tree[pparent].child1
-            lk = deletionleftkey1_valid?  
-                      t.deletionleftkey[1] : 
+            lk = deletionleftkey1_valid ?
+                      t.deletionleftkey[1] :
                       t.tree[pparent].splitkey1
             if t.tree[leftsib].child3 == 0
                 lc1 = t.tree[leftsib].child1
@@ -875,10 +875,10 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
                 t.deletionchild[2] = p
                 t.deletionleftkey[2] = sk2
             end
-            
+
             ## If pparent had a third child (besides p and leftsib)
             ## then we add this to t.deletionchild
-            
+
             c3 = t.tree[pparent].child3
             if c3 > 0
                 newchildcount += 1
@@ -889,17 +889,17 @@ function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
             deletionleftkey1_valid = false
         else
             ## Here p is child3 and leftsib is child2.
-            ## If leftsib has 2 children, then p and 
+            ## If leftsib has 2 children, then p and
             ## leftsib are merged into a single node
             ## that has three children.
             ## If leftsib has 3 children, then p and
             ## leftsib are reformed so that each has
             ## two children.
-            
+
             # @assert(t.tree[pparent].child3 == p)
             leftsib = t.tree[pparent].child2
-            lk = deletionleftkey1_valid? 
-                       t.deletionleftkey[1] : 
+            lk = deletionleftkey1_valid ?
+                       t.deletionleftkey[1] :
                        t.tree[pparent].splitkey2
             if t.tree[leftsib].child3 == 0
                 lc1 = t.tree[leftsib].child1

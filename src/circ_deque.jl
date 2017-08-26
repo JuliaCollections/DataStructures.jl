@@ -11,7 +11,7 @@ type CircularDeque{T}
     last::Int
 end
 
-@compat (::Type{CircularDeque{T}}){T}(n::Int) = CircularDeque(Vector{T}(n), n, 0, 1, n)
+(::Type{CircularDeque{T}}){T}(n::Int) = CircularDeque(Vector{T}(n), n, 0, 1, n)
 
 Base.length(D::CircularDeque) = D.n
 Base.eltype{T}(::Type{CircularDeque{T}}) = T
@@ -27,17 +27,17 @@ end
 Base.isempty(D::CircularDeque) = D.n == 0
 
 @inline function front(D::CircularDeque)
-    @compat @boundscheck D.n > 0 || throw(BoundsError())
+    @boundscheck D.n > 0 || throw(BoundsError())
     D.buffer[D.first]
 end
 
 @inline function back(D::CircularDeque)
-    @compat @boundscheck D.n > 0 || throw(BoundsError())
+    @boundscheck D.n > 0 || throw(BoundsError())
     D.buffer[D.last]
 end
 
 @inline function Base.push!(D::CircularDeque, v)
-    @compat @boundscheck D.n < D.capacity || throw(BoundsError()) # prevent overflow
+    @boundscheck D.n < D.capacity || throw(BoundsError()) # prevent overflow
     D.n += 1
     tmp = D.last+1
     D.last = ifelse(tmp > D.capacity, 1, tmp)  # wraparound
@@ -54,7 +54,7 @@ end
 end
 
 @inline function Base.unshift!(D::CircularDeque, v)
-    @compat @boundscheck D.n < D.capacity || throw(BoundsError())
+    @boundscheck D.n < D.capacity || throw(BoundsError())
     D.n += 1
     tmp = D.first - 1
     D.first = ifelse(tmp < 1, D.capacity, tmp)
@@ -81,7 +81,7 @@ end
 end
 
 @inline function Base.getindex(D::CircularDeque, i::Integer)
-    @compat @boundscheck 1 <= i <= D.n || throw(BoundsError())
+    @boundscheck 1 <= i <= D.n || throw(BoundsError())
     return _unsafe_getindex(D, i)
 end
 

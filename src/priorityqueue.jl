@@ -23,7 +23,7 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
   "a" => 2
 ```
 """
-@compat type PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
+type PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
     # Binary heap of (element, priority) pairs.
     xs::Array{Pair{K,V}, 1}
     o::O
@@ -35,18 +35,7 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
         new{K,V,O}(Vector{Pair{K,V}}(0), o, Dict{K, Int}())
     end
 
-    (::Type{PriorityQueue{K,V,O}}){K,V,O<:Ordering}() = PriorityQueue{K,V,O}(Forward)
-
-    function (::Type{PriorityQueue{K,V,O}}){K,V,O<:Ordering}(ks::AbstractArray{K},
-                                                             vs::AbstractArray{V}, o::O)
-        # TODO: maybe deprecate
-        if length(ks) != length(vs)
-            throw(ArgumentError("key and value arrays must have equal lengths"))
-        end
-        PriorityQueue{K,V,O}(zip(ks, vs), o)
-    end
-
-    function (::Type{PriorityQueue{K,V,O}}){K,V,O<:Ordering}(itr, o::O)
+    function (::Type{PriorityQueue{K,V,O}}){K,V,O<:Ordering}(o::O, itr)
         xs = Vector{Pair{K,V}}(length(itr))
         index = Dict{K, Int}()
         for (i, (k, v)) in enumerate(itr)
@@ -67,16 +56,59 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
     end
 end
 
+# Any-Any constructors
 PriorityQueue(o::Ordering=Forward) = PriorityQueue{Any,Any,typeof(o)}(o)
-PriorityQueue{K,V}(::Type{K}, ::Type{V}, o::Ordering=Forward) = PriorityQueue{K,V,typeof(o)}(o)
 
-# TODO: maybe deprecate
-PriorityQueue{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V},
-                   o::Ordering=Forward) = PriorityQueue{K,V,typeof(o)}(ks, vs, o)
+# Construction from Pairs
+PriorityQueue(ps::Pair...) = PriorityQueue(Forward, ps)
+PriorityQueue(o::Ordering, ps::Pair...) = PriorityQueue(o, ps)
+(::Type{PriorityQueue{K,V}}){K,V}(ps::Pair...) = PriorityQueue{K,V,ForwardOrdering}(Forward, ps)
+(::Type{PriorityQueue{K,V}}){K,V,Ord<:Ordering}(o::Ord, ps::Pair...) = PriorityQueue{K,V,Ord}(o, ps)
 
-PriorityQueue{K,V}(kvs::Associative{K,V}, o::Ordering=Forward) = PriorityQueue{K,V,typeof(o)}(kvs, o)
+# Construction specifying Key/Value types
+# e.g., PriorityQueue{Int,Float64}([1=>1, 2=>2.0])
+(::Type{PriorityQueue{K,V}}){K,V}(kv) = PriorityQueue{K,V}(Forward, kv)
+function (::Type{PriorityQueue{K,V}}){K,V,Ord<:Ordering}(o::Ord, kv)
+    try
+        PriorityQueue{K,V,Ord}(o, kv)
+    catch e
+        if not_iterator_of_pairs(kv)
+            throw(ArgumentError("PriorityQueue(kv): kv needs to be an iterator of tuples or pairs"))
+        else
+            rethrow(e)
+        end
+    end
+end
 
-PriorityQueue{K,V}(a::AbstractArray{Tuple{K,V}}, o::Ordering=Forward) = PriorityQueue{K,V,typeof(o)}(a, o)
+# Construction inferring Key/Value types from input
+# e.g. PriorityQueue{}
+
+PriorityQueue(o1::Ordering, o2::Ordering) = throw(ArgumentError("PriorityQueue with two parameters must be called with an Ordering and an interable of pairs"))
+PriorityQueue(kv, o::Ordering=Forward) = PriorityQueue(o, kv)
+function PriorityQueue(o::Ordering, kv)
+    try
+        _priority_queue_with_eltype(o, kv, eltype(kv))
+    catch e
+        if not_iterator_of_pairs(kv)
+            throw(ArgumentError("PriorityQueue(kv): kv needs to be an iterator of tuples or pairs"))
+        else
+            rethrow(e)
+        end
+    end
+end
+
+_priority_queue_with_eltype{K,V,Ord}(o::Ord, ps, ::Type{Pair{K,V}} ) = PriorityQueue{  K,  V,Ord}(o, ps)
+_priority_queue_with_eltype{K,V,Ord}(o::Ord, kv, ::Type{Tuple{K,V}}) = PriorityQueue{  K,  V,Ord}(o, kv)
+_priority_queue_with_eltype{K,  Ord}(o::Ord, ps, ::Type{Pair{K}}   ) = PriorityQueue{  K,Any,Ord}(o, ps)
+_priority_queue_with_eltype{    Ord}(o::Ord, kv, ::Type            ) = PriorityQueue{Any,Any,Ord}(o, kv)
+
+## TODO: It seems impossible (or at least very challenging) to create the eltype below.
+##       If deemed possible, please create a test and uncomment this definition.
+# if VERSION < v"0.6.0-dev.2123"
+#     _priority_queue_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{TypeVar(:K),D}}) = PriorityQueue{Any,  D,Ord}(o, ps)
+# else
+#     _include_string("_priority_queue_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,V} where K}) = PriorityQueue{Any,  D,Ord}(o, ps)")
+# end
 
 length(pq::PriorityQueue) = length(pq.xs)
 isempty(pq::PriorityQueue) = isempty(pq.xs)
@@ -166,34 +198,45 @@ function setindex!{K,V}(pq::PriorityQueue{K, V}, value, key)
 end
 
 """
-    enqueue!(pq, k, v)
+    enqueue!(pq, k=>v)
 
 Insert the a key `k` into a priority queue `pq` with priority `v`.
 
 ```jldoctest
-julia> a = PriorityQueue(["a","b","c"],[2,3,1],Base.Order.Forward)
+julia> a = PriorityQueue(PriorityQueue("a"=>1, "b"=>2, "c"=>3))
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
-  "c" => 1
-  "b" => 3
-  "a" => 2
+  "c" => 3
+  "b" => 2
+  "a" => 1
 
-julia> enqueue!(a, "d", 4)
+julia> enqueue!(a, "d"=>4)
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 4 entries:
-  "c" => 1
-  "b" => 3
-  "a" => 2
+  "c" => 3
+  "b" => 2
+  "a" => 1
   "d" => 4
 ```
 """
-function enqueue!{K,V}(pq::PriorityQueue{K,V}, key, value)
+function enqueue!{K,V}(pq::PriorityQueue{K,V}, pair::Pair{K,V})
+    key = pair.first
     if haskey(pq, key)
         throw(ArgumentError("PriorityQueue keys must be unique"))
     end
-    push!(pq.xs, Pair{K,V}(key, value))
+    push!(pq.xs, pair)
     pq.index[key] = length(pq)
     percolate_up!(pq, length(pq))
-    pq
+    
+    return pq
 end
+
+"""
+enqueue!(pq, k, v)
+
+Insert the a key `k` into a priority queue `pq` with priority `v`.
+
+"""
+enqueue!(pq::PriorityQueue, key, value) = enqueue!(pq, key=>value)
+enqueue!{K,V}(pq::PriorityQueue{K,V}, kv) = enqueue!(pq, Pair{K,V}(kv.first, kv.second))
 
 """
     dequeue!(pq)

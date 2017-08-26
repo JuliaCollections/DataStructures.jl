@@ -1,4 +1,4 @@
-@compat type Trie{T}
+type Trie{T}
     value::T
     children::Dict{Char,Trie{T}}
     is_key::Bool
@@ -126,6 +126,4 @@ function done(it::TrieIterator, state)
 end
 
 path(t::Trie, str::AbstractString) = TrieIterator(t, str)
-if VERSION >= v"0.5.0-dev+3294"
-    Base.iteratorsize(::Type{TrieIterator}) = Base.SizeUnknown()
-end
+Base.iteratorsize(::Type{TrieIterator}) = Base.SizeUnknown()

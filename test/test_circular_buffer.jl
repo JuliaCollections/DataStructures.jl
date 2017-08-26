@@ -1,21 +1,11 @@
 using DataStructures
-if VERSION >= v"0.5.0-dev+7720"
-    using Base.Test
-else
-    using BaseTestNext
-    const Test = BaseTestNext
-end
+using Base.Test
 
 @testset "CircularBuffer" begin
     cb = CircularBuffer{Int}(5)
     @test length(cb) == 0
     @test capacity(cb) == 5
-    # throws ArgumentError on v0.4 and BoundsError on v0.5 (diverged at 0.5.0-dev+5230)
-    if VERSION >= v"0.5.0-dev+5230"
-        @test_throws BoundsError first(cb)
-    else
-        @test_throws ArgumentError first(cb)
-    end
+    @test_throws BoundsError first(cb)
     @test isempty(cb) == true
     @test isfull(cb) == false
 

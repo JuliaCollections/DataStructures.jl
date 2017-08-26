@@ -5,7 +5,7 @@ import Base: haskey, get, get!, getkey, delete!, pop!, empty!,
              next, done, keys, values, copy, similar,  push!,
              count, size, eltype
 
-@compat immutable MultiDict{K,V}
+immutable MultiDict{K,V}
     d::Dict{K,Vector{V}}
 
     (::Type{MultiDict{K,V}}){K,V}() = new{K,V}(Dict{K,Vector{V}}())
@@ -85,11 +85,9 @@ function pop!(d::MultiDict, key, default)
 end
 pop!(d::MultiDict, key) = pop!(d, key, Base.secret_table_token)
 
-if VERSION >= v"0.4.0-dev+980"
-    push!(d::MultiDict, kv::Pair) = insert!(d, kv[1], kv[2])
-    #push!(d::MultiDict, kv::Pair, kv2::Pair) = (push!(d.d, kv, kv2); d)
-    #push!(d::MultiDict, kv::Pair, kv2::Pair, kv3::Pair...) = (push!(d.d, kv, kv2, kv3...); d)
-end
+push!(d::MultiDict, kv::Pair) = insert!(d, kv[1], kv[2])
+#push!(d::MultiDict, kv::Pair, kv2::Pair) = (push!(d.d, kv, kv2); d)
+#push!(d::MultiDict, kv::Pair, kv2::Pair, kv3::Pair...) = (push!(d.d, kv, kv2, kv3...); d)
 
 push!(d::MultiDict, kv) = insert!(d, kv[1], kv[2])
 #push!(d::MultiDict, kv, kv2...) = (push!(d.d, kv, kv2...); d)
