@@ -10,8 +10,8 @@ type CircularBuffer{T} <: AbstractVector{T}
 end
 
 function Base.empty!(cb::CircularBuffer)
-    cb.buffer = typeof(cb.buffer)[]
-    cb
+    cb.first = 1
+    empty!(cb.buffer)
 end
 
 function _buffer_index(cb::CircularBuffer, i::Int)
