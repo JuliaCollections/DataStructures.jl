@@ -9,6 +9,11 @@ type CircularBuffer{T} <: AbstractVector{T}
     (::Type{CircularBuffer{T}}){T}(capacity::Int) = new{T}(capacity, 1, T[])
 end
 
+function Base.empty!(cb::CircularBuffer)
+    cb.first = 1
+    empty!(cb.buffer)
+end
+
 function _buffer_index(cb::CircularBuffer, i::Int)
     n = length(cb)
     if i < 1 || i > n
@@ -54,7 +59,7 @@ function Base.unshift!(cb::CircularBuffer, data)
 end
 
 function Base.append!(cb::CircularBuffer, datavec::AbstractVector)
-    # push at most `capacity` items
+    # push at most last `capacity` items
     n = length(datavec)
     for i in max(1, n-capacity(cb)+1):n
         push!(cb, datavec[i])
