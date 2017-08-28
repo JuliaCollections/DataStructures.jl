@@ -1,14 +1,14 @@
-@compat abstract type LinkedList{T} end
+abstract type LinkedList{T} end
 
-type Nil{T} <: LinkedList{T}
+mutable struct Nil{T} <: LinkedList{T}
 end
 
-type Cons{T} <: LinkedList{T}
+mutable struct Cons{T} <: LinkedList{T}
     head::T
     tail::LinkedList{T}
 end
 
-cons{T}(h, t::LinkedList{T}) = Cons{T}(h, t)
+cons(h, t::LinkedList{T}) where {T} = Cons{T}(h, t)
 
 nil(T) = Nil{T}()
 nil() = nil(Any)
@@ -19,7 +19,7 @@ tail(x::Cons) = x.tail
 ==(x::Nil, y::Nil) = true
 ==(x::Cons, y::Cons) = (x.head == y.head) && (x.tail == y.tail)
 
-function show{T}(io::IO, l::LinkedList{T})
+function show(io::IO, l::LinkedList{T}) where T
     if isa(l,Nil)
         if T === Any
             print(io, "nil()")
@@ -47,7 +47,7 @@ function list(elts...)
     return l
 end
 
-function list{T}(elts::T...)
+function list(elts::T...) where T
     l = nil(T)
     for i=length(elts):-1:1
         l = cons(elts[i],l)
@@ -76,7 +76,7 @@ function map(f::Base.Callable, l::Cons)
     reverse(l2)
 end
 
-function filter{T}(f::Function, l::LinkedList{T})
+function filter(f::Function, l::LinkedList{T}) where T
     l2 = nil(T)
     for h in l
         if f(h)
@@ -86,7 +86,7 @@ function filter{T}(f::Function, l::LinkedList{T})
     reverse(l2)
 end
 
-function reverse{T}(l::LinkedList{T})
+function reverse(l::LinkedList{T}) where T
     l2 = nil(T)
     for h in l
         l2 = cons(h, l2)
@@ -124,8 +124,8 @@ function cat(lst::LinkedList, lsts::LinkedList...)
     reverse(l2)
 end
 
-start{T}(l::Nil{T}) = l
-start{T}(l::Cons{T}) = l
-done{T}(l::Cons{T}, state::Cons{T}) = false
-done{T}(l::LinkedList, state::Nil{T}) = true
-next{T}(l::Cons{T}, state::Cons{T}) = (state.head, state.tail)
+start(l::Nil{T}) where {T} = l
+start(l::Cons{T}) where {T} = l
+done(l::Cons{T}, state::Cons{T}) where {T} = false
+done(l::LinkedList, state::Nil{T}) where {T} = true
+next(l::Cons{T}, state::Cons{T}) where {T} = (state.head, state.tail)

@@ -8,9 +8,9 @@ module Tokens
 
 using Compat
 
-@compat abstract type AbstractSemiToken end
+abstract type AbstractSemiToken end
 
-immutable IntSemiToken <: AbstractSemiToken
+struct IntSemiToken <: AbstractSemiToken
     address::Int
 end
 

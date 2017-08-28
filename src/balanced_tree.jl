@@ -25,12 +25,12 @@
 ##  data nodes.
 
 
-immutable KDRec{K,D}
+struct KDRec{K,D}
     parent::Int
     k::K
     d::D
-    (::Type{KDRec{K,D}}){K,D}(p::Int, k1::K, d1::D) = new{K,D}(p,k1,d1)
-    (::Type{KDRec{K,D}}){K,D}(p::Int) = new{K,D}(p)
+    KDRec{K,D}(p::Int, k1::K, d1::D) where {K,D} = new{K,D}(p,k1,d1)
+    KDRec{K,D}(p::Int) where {K,D} = new{K,D}(p)
 end
 
 ## TreeNode is an internal node of the tree.
@@ -47,15 +47,15 @@ end
 ##    If this is a leaf, then it is the key of child3.
 ## Again, there are two constructors for the same reason mentioned above.
 
-immutable TreeNode{K}
+struct TreeNode{K}
     child1::Int
     child2::Int
     child3::Int
     parent::Int
     splitkey1::K
     splitkey2::K
-    (::Type{TreeNode{K}}){K}(::Type{K}, c1::Int, c2::Int, c3::Int, p::Int) = new{K}(c1, c2, c3, p)
-    (::Type{TreeNode{K}}){K}(c1::Int, c2::Int, c3::Int, p::Int, sk1::K, sk2::K) =
+    TreeNode{K}(::Type{K}, c1::Int, c2::Int, c3::Int, p::Int) where {K} = new{K}(c1, c2, c3, p)
+    TreeNode{K}(c1::Int, c2::Int, c3::Int, p::Int, sk1::K, sk2::K) where {K} =
         new{K}(c1, c2, c3, p, sk1, sk2)
 end
 
@@ -65,13 +65,13 @@ end
 ## marker whose index is 1 and the after-end marker whose index is 2.
 ## These two markers live in dummy data nodes.
 
-function initializeTree!{K}(tree::Array{TreeNode{K},1})
+function initializeTree!(tree::Array{TreeNode{K},1}) where K
     resize!(tree,1)
     tree[1] = TreeNode{K}(K, 1, 2, 0, 0)
     nothing
 end
 
-function initializeData!{K,D}(data::Array{KDRec{K,D},1})
+function initializeData!(data::Array{KDRec{K,D},1}) where {K,D}
     resize!(data, 2)
     data[1] = KDRec{K,D}(1)
     data[2] = KDRec{K,D}(1)
@@ -111,7 +111,7 @@ end
 ## deletionchild and deletionleftkey are two work-arrays
 ## for the delete function.
 
-type BalancedTree23{K, D, Ord <: Ordering}
+mutable struct BalancedTree23{K, D, Ord <: Ordering}
     ord::Ord
     data::Array{KDRec{K,D}, 1}
     tree::Array{TreeNode{K}, 1}
@@ -124,7 +124,7 @@ type BalancedTree23{K, D, Ord <: Ordering}
     # function.
     deletionchild::Array{Int,1}
     deletionleftkey::Array{K,1}
-    function (::Type{BalancedTree23{K,D,Ord}}){K,D,Ord<:Ordering}(ord1::Ord)
+    function BalancedTree23{K,D,Ord}(ord1::Ord) where {K,D,Ord<:Ordering}
         tree1 = Vector{TreeNode{K}}(1)
         initializeTree!(tree1)
         data1 = Vector{KDRec{K,D}}(2)
@@ -316,12 +316,12 @@ end
 ## They replace the 'parent' field of either an internal tree node or
 ## a data node at the bottom tree level.
 
-function replaceparent!{K,D}(data::Array{KDRec{K,D},1}, whichind::Int, newparent::Int)
+function replaceparent!(data::Array{KDRec{K,D},1}, whichind::Int, newparent::Int) where {K,D}
     data[whichind] = KDRec{K,D}(newparent, data[whichind].k, data[whichind].d)
     nothing
 end
 
-function replaceparent!{K}(tree::Array{TreeNode{K},1}, whichind::Int, newparent::Int)
+function replaceparent!(tree::Array{TreeNode{K},1}, whichind::Int, newparent::Int) where K
     tree[whichind] = TreeNode{K}(tree[whichind].child1, tree[whichind].child2,
                                  tree[whichind].child3, newparent,
                                  tree[whichind].splitkey1,
@@ -360,7 +360,7 @@ end
 ## done whether the iterm
 ## is already in the tree, so insertion of a new item always succeeds.
 
-function insert!{K,D,Ord <: Ordering}(t::BalancedTree23{K,D,Ord}, k, d, allowdups::Bool)
+function insert!(t::BalancedTree23{K,D,Ord}, k, d, allowdups::Bool) where {K,D,Ord <: Ordering}
 
     ## First we find the greatest data node that is <= k.
     leafind, exactfound = findkey(t, k)
@@ -669,7 +669,7 @@ endloc(t::BalancedTree23) = prevloc0(t,2)
 
 ## delete! routine deletes an entry from the balanced tree.
 
-function delete!{K,D,Ord<:Ordering}(t::BalancedTree23{K,D,Ord}, it::Int)
+function delete!(t::BalancedTree23{K,D,Ord}, it::Int) where {K,D,Ord<:Ordering}
 
     ## Put the cell indexed by 'it' into the deletion list.
     ##

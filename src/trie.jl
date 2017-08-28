@@ -1,16 +1,16 @@
-type Trie{T}
+mutable struct Trie{T}
     value::T
     children::Dict{Char,Trie{T}}
     is_key::Bool
 
-    function (::Type{Trie{T}}){T}()
+    function Trie{T}() where T
         self = new{T}()
         self.children = Dict{Char,Trie{T}}()
         self.is_key = false
         self
     end
 
-    function (::Type{Trie{T}}){T}(ks, vs)
+    function Trie{T}(ks, vs) where T
         t = Trie{T}()
         for (k, v) in zip(ks, vs)
             t[k] = v
@@ -18,7 +18,7 @@ type Trie{T}
         return t
     end
 
-    function (::Type{Trie{T}}){T}(kv)
+    function Trie{T}(kv) where T
         t = Trie{T}()
         for (k,v) in kv
             t[k] = v
@@ -28,12 +28,12 @@ type Trie{T}
 end
 
 Trie() = Trie{Any}()
-Trie{K<:AbstractString,V}(ks::AbstractVector{K}, vs::AbstractVector{V}) = Trie{V}(ks, vs)
-Trie{K<:AbstractString,V}(kv::AbstractVector{Tuple{K,V}}) = Trie{V}(kv)
-Trie{K<:AbstractString,V}(kv::Associative{K,V}) = Trie{V}(kv)
-Trie{K<:AbstractString}(ks::AbstractVector{K}) = Trie{Void}(ks, similar(ks, Void))
+Trie(ks::AbstractVector{K}, vs::AbstractVector{V}) where {K<:AbstractString,V} = Trie{V}(ks, vs)
+Trie(kv::AbstractVector{Tuple{K,V}}) where {K<:AbstractString,V} = Trie{V}(kv)
+Trie(kv::Associative{K,V}) where {K<:AbstractString,V} = Trie{V}(kv)
+Trie(ks::AbstractVector{K}) where {K<:AbstractString} = Trie{Void}(ks, similar(ks, Void))
 
-function setindex!{T}(t::Trie{T}, val::T, key::AbstractString)
+function setindex!(t::Trie{T}, val::T, key::AbstractString) where T
     node = t
     for char in key
         if !haskey(node.children, char)
@@ -98,7 +98,7 @@ end
 # and i is the index of the current character of the string.
 # The indexing is potentially confusing;
 # see the comments and implementation below for details.
-immutable TrieIterator
+struct TrieIterator
     t::Trie
     str::AbstractString
 end

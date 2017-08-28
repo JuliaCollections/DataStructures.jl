@@ -23,7 +23,7 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
   "a" => 2
 ```
 """
-type PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
+mutable struct PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
     # Binary heap of (element, priority) pairs.
     xs::Array{Pair{K,V}, 1}
     o::O
@@ -31,11 +31,11 @@ type PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
     # Map elements to their index in xs
     index::Dict{K, Int}
 
-    function (::Type{PriorityQueue{K,V,O}}){K,V,O<:Ordering}(o::O)
+    function PriorityQueue{K,V,O}(o::O) where {K,V,O<:Ordering}
         new{K,V,O}(Vector{Pair{K,V}}(0), o, Dict{K, Int}())
     end
 
-    function (::Type{PriorityQueue{K,V,O}}){K,V,O<:Ordering}(o::O, itr)
+    function PriorityQueue{K,V,O}(o::O, itr) where {K,V,O<:Ordering}
         xs = Vector{Pair{K,V}}(length(itr))
         index = Dict{K, Int}()
         for (i, (k, v)) in enumerate(itr)
@@ -62,13 +62,13 @@ PriorityQueue(o::Ordering=Forward) = PriorityQueue{Any,Any,typeof(o)}(o)
 # Construction from Pairs
 PriorityQueue(ps::Pair...) = PriorityQueue(Forward, ps)
 PriorityQueue(o::Ordering, ps::Pair...) = PriorityQueue(o, ps)
-(::Type{PriorityQueue{K,V}}){K,V}(ps::Pair...) = PriorityQueue{K,V,ForwardOrdering}(Forward, ps)
-(::Type{PriorityQueue{K,V}}){K,V,Ord<:Ordering}(o::Ord, ps::Pair...) = PriorityQueue{K,V,Ord}(o, ps)
+PriorityQueue{K,V}(ps::Pair...) where {K,V} = PriorityQueue{K,V,ForwardOrdering}(Forward, ps)
+PriorityQueue{K,V}(o::Ord, ps::Pair...) where {K,V,Ord<:Ordering} = PriorityQueue{K,V,Ord}(o, ps)
 
 # Construction specifying Key/Value types
 # e.g., PriorityQueue{Int,Float64}([1=>1, 2=>2.0])
-(::Type{PriorityQueue{K,V}}){K,V}(kv) = PriorityQueue{K,V}(Forward, kv)
-function (::Type{PriorityQueue{K,V}}){K,V,Ord<:Ordering}(o::Ord, kv)
+PriorityQueue{K,V}(kv) where {K,V} = PriorityQueue{K,V}(Forward, kv)
+function PriorityQueue{K,V}(o::Ord, kv) where {K,V,Ord<:Ordering}
     try
         PriorityQueue{K,V,Ord}(o, kv)
     catch e
@@ -97,10 +97,10 @@ function PriorityQueue(o::Ordering, kv)
     end
 end
 
-_priority_queue_with_eltype{K,V,Ord}(o::Ord, ps, ::Type{Pair{K,V}} ) = PriorityQueue{  K,  V,Ord}(o, ps)
-_priority_queue_with_eltype{K,V,Ord}(o::Ord, kv, ::Type{Tuple{K,V}}) = PriorityQueue{  K,  V,Ord}(o, kv)
-_priority_queue_with_eltype{K,  Ord}(o::Ord, ps, ::Type{Pair{K}}   ) = PriorityQueue{  K,Any,Ord}(o, ps)
-_priority_queue_with_eltype{    Ord}(o::Ord, kv, ::Type            ) = PriorityQueue{Any,Any,Ord}(o, kv)
+_priority_queue_with_eltype(o::Ord, ps, ::Type{Pair{K,V}} ) where {K,V,Ord} = PriorityQueue{  K,  V,Ord}(o, ps)
+_priority_queue_with_eltype(o::Ord, kv, ::Type{Tuple{K,V}}) where {K,V,Ord} = PriorityQueue{  K,  V,Ord}(o, kv)
+_priority_queue_with_eltype(o::Ord, ps, ::Type{Pair{K}}   ) where {K,  Ord} = PriorityQueue{  K,Any,Ord}(o, ps)
+_priority_queue_with_eltype(o::Ord, kv, ::Type            ) where {    Ord} = PriorityQueue{Any,Any,Ord}(o, kv)
 
 ## TODO: It seems impossible (or at least very challenging) to create the eltype below.
 ##       If deemed possible, please create a test and uncomment this definition.
@@ -169,19 +169,19 @@ function force_up!(pq::PriorityQueue, i::Integer)
     pq.xs[i] = x
 end
 
-function getindex{K,V}(pq::PriorityQueue{K,V}, key)
+function getindex(pq::PriorityQueue{K,V}, key) where {K,V}
     pq.xs[pq.index[key]].second
 end
 
 
-function get{K,V}(pq::PriorityQueue{K,V}, key, deflt)
+function get(pq::PriorityQueue{K,V}, key, deflt) where {K,V}
     i = get(pq.index, key, 0)
     i == 0 ? deflt : pq.xs[i].second
 end
 
 
 # Change the priority of an existing element, or equeue it if it isn't present.
-function setindex!{K,V}(pq::PriorityQueue{K, V}, value, key)
+function setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
     if haskey(pq, key)
         i = pq.index[key]
         oldvalue = pq.xs[i].second
@@ -217,7 +217,7 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 4 entries:
   "d" => 4
 ```
 """
-function enqueue!{K,V}(pq::PriorityQueue{K,V}, pair::Pair{K,V})
+function enqueue!(pq::PriorityQueue{K,V}, pair::Pair{K,V}) where {K,V}
     key = pair.first
     if haskey(pq, key)
         throw(ArgumentError("PriorityQueue keys must be unique"))
@@ -236,7 +236,7 @@ Insert the a key `k` into a priority queue `pq` with priority `v`.
 
 """
 enqueue!(pq::PriorityQueue, key, value) = enqueue!(pq, key=>value)
-enqueue!{K,V}(pq::PriorityQueue{K,V}, kv) = enqueue!(pq, Pair{K,V}(kv.first, kv.second))
+enqueue!(pq::PriorityQueue{K,V}, kv) where {K,V} = enqueue!(pq, Pair{K,V}(kv.first, kv.second))
 
 """
     dequeue!(pq)
@@ -323,7 +323,7 @@ start(pq::PriorityQueue) = start(pq.index)
 
 done(pq::PriorityQueue, i) = done(pq.index, i)
 
-function next{K,V}(pq::PriorityQueue{K,V}, i)
+function next(pq::PriorityQueue{K,V}, i) where {K,V}
     (k, idx), i = next(pq.index, i)
     return (pq.xs[idx], i)
 end

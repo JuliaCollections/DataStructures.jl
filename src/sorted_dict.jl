@@ -1,15 +1,15 @@
 ## A SortedDict is a wrapper around balancedTree with
 ## methods similiar to those of Julia container Dict.
 
-type SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
+mutable struct SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
     bt::BalancedTree23{K,D,Ord}
 
     ## Base constructors
 
-    (::Type{SortedDict{K,D,Ord}}){K, D, Ord <: Ordering}(o::Ord) =
+    SortedDict{K,D,Ord}(o::Ord) where {K, D, Ord <: Ordering} =
         new{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
 
-    function (::Type{SortedDict{K,D,Ord}}){K, D, Ord <: Ordering}(o::Ord, kv)
+    function SortedDict{K,D,Ord}(o::Ord, kv) where {K, D, Ord <: Ordering}
         s = new{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
 
         if eltype(kv) <: Pair
@@ -30,24 +30,24 @@ end
 
 # Any-Any constructors
 SortedDict() = SortedDict{Any,Any,ForwardOrdering}(Forward)
-SortedDict{Ord <: Ordering}(o::Ord) = SortedDict{Any,Any,Ord}(o)
+SortedDict(o::Ord) where {Ord <: Ordering} = SortedDict{Any,Any,Ord}(o)
 
 # Construction from Pairs
 # TODO: fix SortedDict(1=>1, 2=>2.0)
 SortedDict(ps::Pair...) = SortedDict(Forward, ps)
 SortedDict(o::Ordering, ps::Pair...) = SortedDict(o, ps)
-(::Type{SortedDict{K,D}}){K,D}(ps::Pair...) = SortedDict{K,D,ForwardOrdering}(Forward, ps)
-(::Type{SortedDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, ps::Pair...) = SortedDict{K,D,Ord}(o, ps)
+SortedDict{K,D}(ps::Pair...) where {K,D} = SortedDict{K,D,ForwardOrdering}(Forward, ps)
+SortedDict{K,D}(o::Ord, ps::Pair...) where {K,D,Ord<:Ordering} = SortedDict{K,D,Ord}(o, ps)
 
 # Construction from Associatives
-SortedDict{K,D,Ord<:Ordering}(o::Ord, d::Associative{K,D}) = SortedDict{K,D,Ord}(o, d)
+SortedDict(o::Ord, d::Associative{K,D}) where {K,D,Ord<:Ordering} = SortedDict{K,D,Ord}(o, d)
 
 ## Construction from iteratables of Pairs/Tuples
 
 # Construction specifying Key/Value types
 # e.g., SortedDict{Int,Float64}([1=>1, 2=>2.0])
-(::Type{SortedDict{K,D}}){K,D}(kv) = SortedDict{K,D}(Forward, kv)
-function (::Type{SortedDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, kv)
+SortedDict{K,D}(kv) where {K,D} = SortedDict{K,D}(Forward, kv)
+function SortedDict{K,D}(o::Ord, kv) where {K,D,Ord<:Ordering}
     try
         SortedDict{K,D,Ord}(o, kv)
     catch e
@@ -76,10 +76,10 @@ function SortedDict(o::Ordering, kv)
     end
 end
 
-_sorted_dict_with_eltype{K,D,Ord}(o::Ord, ps, ::Type{Pair{K,D}}) = SortedDict{  K,  D,Ord}(o, ps)
-_sorted_dict_with_eltype{K,D,Ord}(o::Ord, kv, ::Type{Tuple{K,D}}) = SortedDict{  K,  D,Ord}(o, kv)
-_sorted_dict_with_eltype{K,  Ord}(o::Ord, ps, ::Type{Pair{K}}  ) = SortedDict{  K,Any,Ord}(o, ps)
-_sorted_dict_with_eltype{    Ord}(o::Ord, kv, ::Type            ) = SortedDict{Any,Any,Ord}(o, kv)
+_sorted_dict_with_eltype(o::Ord, ps, ::Type{Pair{K,D}}) where {K,D,Ord} = SortedDict{  K,  D,Ord}(o, ps)
+_sorted_dict_with_eltype(o::Ord, kv, ::Type{Tuple{K,D}}) where {K,D,Ord} = SortedDict{  K,  D,Ord}(o, kv)
+_sorted_dict_with_eltype(o::Ord, ps, ::Type{Pair{K}}  ) where {K,  Ord} = SortedDict{  K,Any,Ord}(o, ps)
+_sorted_dict_with_eltype(o::Ord, kv, ::Type            ) where {    Ord} = SortedDict{Any,Any,Ord}(o, kv)
 
 ## TODO: It seems impossible (or at least very challenging) to create the eltype below.
 ##       If deemed possible, please create a test and uncomment this definition.
@@ -106,7 +106,7 @@ end
 ## This function implements m[k]=d; it sets the
 ## data item associated with key k equal to d.
 
-@inline function setindex!{K, D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, d_, k_)
+@inline function setindex!(m::SortedDict{K,D,Ord}, d_, k_) where {K, D, Ord <: Ordering}
     insert!(m.bt, convert(K,k_), convert(D,d_), false)
     m
 end
@@ -114,7 +114,7 @@ end
 ## push! is an alternative to insert!; it returns the container.
 
 
-@inline function push!{K,D}(m::SortedDict{K,D}, pr::Pair)
+@inline function push!(m::SortedDict{K,D}, pr::Pair) where {K,D}
     insert!(m.bt, convert(K, pr[1]), convert(D, pr[2]), false)
     m
 end
@@ -140,16 +140,16 @@ end
 ## The token points to the newly inserted item.
 
 
-@inline function insert!{K,D, Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_, d_)
+@inline function insert!(m::SortedDict{K,D,Ord}, k_, d_) where {K,D, Ord <: Ordering}
     b, i = insert!(m.bt, convert(K,k_), convert(D,d_), false)
     b, IntSemiToken(i)
 end
 
 
 
-@inline eltype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) =  Pair{K,D}
-@inline eltype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) =  Pair{K,D}
-@inline function in{K,D,Ord <: Ordering}(pr::Pair, m::SortedDict{K,D,Ord})
+@inline eltype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} =  Pair{K,D}
+@inline eltype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} =  Pair{K,D}
+@inline function in(pr::Pair, m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering}
     i, exactfound = findkey(m.bt,convert(K,pr[1]))
     return exactfound && isequal(m.bt.data[i].d,convert(D,pr[2]))
 end
@@ -158,12 +158,12 @@ end
     throw(ArgumentError("'(k,v) in sorteddict' not supported in Julia 0.4 or 0.5.  See documentation"))
 
 
-@inline keytype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = K
-@inline keytype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) = K
-@inline valtype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = D
-@inline valtype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) = D
-@inline ordtype{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}) = Ord
-@inline ordtype{K,D,Ord <: Ordering}(::Type{SortedDict{K,D,Ord}}) = Ord
+@inline keytype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} = K
+@inline keytype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = K
+@inline valtype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} = D
+@inline valtype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = D
+@inline ordtype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} = Ord
+@inline ordtype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = Ord
 
 
 ## First and last return the first and last (key,data) pairs
@@ -194,13 +194,13 @@ end
     exactfound
 end
 
-@inline function get{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_, default_)
+@inline function get(m::SortedDict{K,D,Ord}, k_, default_) where {K,D,Ord <: Ordering}
     i, exactfound = findkey(m.bt, convert(K,k_))
    return exactfound ? m.bt.data[i].d : convert(D,default_)
 end
 
 
-function get!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_, default_)
+function get!(m::SortedDict{K,D,Ord}, k_, default_) where {K,D,Ord <: Ordering}
     k = convert(K,k_)
     i, exactfound = findkey(m.bt, k)
     if exactfound
@@ -213,7 +213,7 @@ function get!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_, default_)
 end
 
 
-function getkey{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord}, k_, default_)
+function getkey(m::SortedDict{K,D,Ord}, k_, default_) where {K,D,Ord <: Ordering}
     i, exactfound = findkey(m.bt, convert(K,k_))
     exactfound ? m.bt.data[i].k : convert(K, default_)
 end
@@ -266,20 +266,20 @@ function isequal(m1::SortedDict, m2::SortedDict)
 end
 
 
-function mergetwo!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},
-                                        m2::Associative{K,D})
+function mergetwo!(m::SortedDict{K,D,Ord},
+                   m2::Associative{K,D}) where {K,D,Ord <: Ordering}
     for (k,v) in m2
         m[convert(K,k)] = convert(D,v)
     end
 end
 
-function packcopy{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
+function packcopy(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering}
     w = SortedDict(Dict{K,D}(),orderobject(m))
     mergetwo!(w,m)
     w
 end
 
-function packdeepcopy{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
+function packdeepcopy(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering}
     w = SortedDict(Dict{K,D}(),orderobject(m))
     for (k,v) in m
         newk = deepcopy(k)
@@ -290,15 +290,15 @@ function packdeepcopy{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord})
 end
 
 
-function merge!{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},
-                                     others::Associative{K,D}...)
+function merge!(m::SortedDict{K,D,Ord},
+                others::Associative{K,D}...) where {K,D,Ord <: Ordering}
     for o in others
         mergetwo!(m,o)
     end
 end
 
-function merge{K,D,Ord <: Ordering}(m::SortedDict{K,D,Ord},
-                                    others::Associative{K,D}...)
+function merge(m::SortedDict{K,D,Ord},
+               others::Associative{K,D}...) where {K,D,Ord <: Ordering}
     result = packcopy(m)
     merge!(result, others...)
     result
@@ -306,7 +306,7 @@ end
 
 
 
-similar{K,D,Ord<:Ordering}(m::SortedDict{K,D,Ord}) =
+similar(m::SortedDict{K,D,Ord}) where {K,D,Ord<:Ordering} =
     SortedDict{K,D,Ord}(orderobject(m))
 
-isordered{T<:SortedDict}(::Type{T}) = true
+isordered(::Type{T}) where {T<:SortedDict} = true

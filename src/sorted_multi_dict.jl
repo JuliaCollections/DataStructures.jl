@@ -2,14 +2,14 @@
 ## Unlike SortedDict, a key in SortedMultiDict can
 ## refer to multiple data entries.
 
-type SortedMultiDict{K, D, Ord <: Ordering}
+mutable struct SortedMultiDict{K, D, Ord <: Ordering}
     bt::BalancedTree23{K,D,Ord}
 
     ## Base constructors
 
-    (::Type{SortedMultiDict{K,D,Ord}}){K,D,Ord}(o::Ord) = new{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
+    SortedMultiDict{K,D,Ord}(o::Ord) where {K,D,Ord} = new{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
 
-    function (::Type{SortedMultiDict{K,D,Ord}}){K,D,Ord}(o::Ord, kv)
+    function SortedMultiDict{K,D,Ord}(o::Ord, kv) where {K,D,Ord}
         smd = new{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
 
         if eltype(kv) <: Pair
@@ -29,23 +29,23 @@ type SortedMultiDict{K, D, Ord <: Ordering}
 end
 
 SortedMultiDict() = SortedMultiDict{Any,Any,ForwardOrdering}(Forward)
-SortedMultiDict{O<:Ordering}(o::O) = SortedMultiDict{Any,Any,O}(o)
+SortedMultiDict(o::O) where {O<:Ordering} = SortedMultiDict{Any,Any,O}(o)
 
 # Construction from Pairs
 SortedMultiDict(ps::Pair...) = SortedMultiDict(Forward, ps)
 SortedMultiDict(o::Ordering, ps::Pair...) = SortedMultiDict(o, ps)
-(::Type{SortedMultiDict{K,D}}){K,D}(ps::Pair...) = SortedMultiDict{K,D,ForwardOrdering}(Forward, ps)
-(::Type{SortedMultiDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, ps::Pair...) = SortedMultiDict{K,D,Ord}(o, ps)
+SortedMultiDict{K,D}(ps::Pair...) where {K,D} = SortedMultiDict{K,D,ForwardOrdering}(Forward, ps)
+SortedMultiDict{K,D}(o::Ord, ps::Pair...) where {K,D,Ord<:Ordering} = SortedMultiDict{K,D,Ord}(o, ps)
 
 # Construction from Associatives
-SortedMultiDict{K,D,Ord<:Ordering}(o::Ord, d::Associative{K,D}) = SortedMultiDict{K,D,Ord}(o, d)
+SortedMultiDict(o::Ord, d::Associative{K,D}) where {K,D,Ord<:Ordering} = SortedMultiDict{K,D,Ord}(o, d)
 
 ## Construction from iteratables of Pairs/Tuples
 
 # Construction specifying Key/Value types
 # e.g., SortedMultiDict{Int,Float64}([1=>1, 2=>2.0])
-(::Type{SortedMultiDict{K,D}}){K,D}(kv) = SortedMultiDict{K,D}(Forward, kv)
-function (::Type{SortedMultiDict{K,D}}){K,D,Ord<:Ordering}(o::Ord, kv)
+SortedMultiDict{K,D}(kv) where {K,D} = SortedMultiDict{K,D}(Forward, kv)
+function SortedMultiDict{K,D}(o::Ord, kv) where {K,D,Ord<:Ordering}
     try
         SortedMultiDict{K,D,Ord}(o, kv)
     catch e
@@ -74,10 +74,10 @@ function SortedMultiDict(o::Ordering, kv)
     end
 end
 
-_sorted_multidict_with_eltype{K,D,Ord}(o::Ord, ps, ::Type{Pair{K,D}}) = SortedMultiDict{  K,  D,Ord}(o, ps)
-_sorted_multidict_with_eltype{K,D,Ord}(o::Ord, kv, ::Type{Tuple{K,D}}) = SortedMultiDict{  K,  D,Ord}(o, kv)
-_sorted_multidict_with_eltype{K,  Ord}(o::Ord, ps, ::Type{Pair{K}}  ) = SortedMultiDict{  K,Any,Ord}(o, ps)
-_sorted_multidict_with_eltype{    Ord}(o::Ord, kv, ::Type            ) = SortedMultiDict{Any,Any,Ord}(o, kv)
+_sorted_multidict_with_eltype(o::Ord, ps, ::Type{Pair{K,D}}) where {K,D,Ord} = SortedMultiDict{  K,  D,Ord}(o, ps)
+_sorted_multidict_with_eltype(o::Ord, kv, ::Type{Tuple{K,D}}) where {K,D,Ord} = SortedMultiDict{  K,  D,Ord}(o, kv)
+_sorted_multidict_with_eltype(o::Ord, ps, ::Type{Pair{K}}  ) where {K,  Ord} = SortedMultiDict{  K,Any,Ord}(o, ps)
+_sorted_multidict_with_eltype(o::Ord, kv, ::Type            ) where {    Ord} = SortedMultiDict{Any,Any,Ord}(o, kv)
 
 ## TODO: It seems impossible (or at least very challenging) to create the eltype below.
 ##       If deemed possible, please create a test and uncomment this definition.
@@ -96,7 +96,7 @@ const SMDToken = Tuple{SortedMultiDict, IntSemiToken}
 ## It returns a token that
 ## points to the newly inserted item.
 
-@inline function insert!{K, D, Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}, k_, d_)
+@inline function insert!(m::SortedMultiDict{K,D,Ord}, k_, d_) where {K, D, Ord <: Ordering}
     b, i = insert!(m.bt, convert(K,k_), convert(D,d_), true)
     IntSemiToken(i)
 end
@@ -104,7 +104,7 @@ end
 ## push! is an alternative to insert!; it returns the container.
 
 
-@inline function push!{K,D}(m::SortedMultiDict{K,D}, pr::Pair)
+@inline function push!(m::SortedMultiDict{K,D}, pr::Pair) where {K,D}
     insert!(m.bt, convert(K,pr[1]), convert(D,pr[2]), true)
     m
 end
@@ -166,8 +166,8 @@ end
 
 
 
-@inline eltype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) =  Pair{K,D}
-@inline eltype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) =  Pair{K,D}
+@inline eltype(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering} =  Pair{K,D}
+@inline eltype(::Type{SortedMultiDict{K,D,Ord}}) where {K,D,Ord <: Ordering} =  Pair{K,D}
 @inline in(pr::Pair, m::SortedMultiDict) =
     in_(pr[1], pr[2], m)
 @inline in(::Tuple{Any,Any}, ::SortedMultiDict) =
@@ -175,12 +175,12 @@ end
 
 
 
-@inline keytype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) = K
-@inline keytype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) = K
-@inline valtype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) = D
-@inline valtype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) = D
-@inline ordtype{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord}) = Ord
-@inline ordtype{K,D,Ord <: Ordering}(::Type{SortedMultiDict{K,D,Ord}}) = Ord
+@inline keytype(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering} = K
+@inline keytype(::Type{SortedMultiDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = K
+@inline valtype(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering} = D
+@inline valtype(::Type{SortedMultiDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = D
+@inline ordtype(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering} = Ord
+@inline ordtype(::Type{SortedMultiDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = Ord
 @inline orderobject(m::SortedMultiDict) = m.bt.ord
 
 @inline function haskey(m::SortedMultiDict, k_)
@@ -220,20 +220,20 @@ end
 
 const SDorAssociative = Union{Associative,SortedMultiDict}
 
-function mergetwo!{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord},
-                                        m2::SDorAssociative)
+function mergetwo!(m::SortedMultiDict{K,D,Ord},
+                   m2::SDorAssociative) where {K,D,Ord <: Ordering}
     for (k,v) in m2
         insert!(m.bt, convert(K,k), convert(D,v), true)
     end
 end
 
-function packcopy{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord})
+function packcopy(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering}
     w = SortedMultiDict{K,D}(orderobject(m))
     mergetwo!(w,m)
     w
 end
 
-function packdeepcopy{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord})
+function packdeepcopy(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering}
     w = SortedMultiDict{K,D}(orderobject(m))
     for (k,v) in m
         insert!(w.bt, deepcopy(k), deepcopy(v), true)
@@ -242,21 +242,21 @@ function packdeepcopy{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord})
 end
 
 
-function merge!{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord},
-                                     others::SDorAssociative...)
+function merge!(m::SortedMultiDict{K,D,Ord},
+                others::SDorAssociative...) where {K,D,Ord <: Ordering}
     for o in others
         mergetwo!(m,o)
     end
 end
 
-function merge{K,D,Ord <: Ordering}(m::SortedMultiDict{K,D,Ord},
-                                    others::SDorAssociative...)
+function merge(m::SortedMultiDict{K,D,Ord},
+               others::SDorAssociative...) where {K,D,Ord <: Ordering}
     result = packcopy(m)
     merge!(result, others...)
     result
 end
 
-function Base.show{K,D,Ord <: Ordering}(io::IO, m::SortedMultiDict{K,D,Ord})
+function Base.show(io::IO, m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering}
     print(io, "SortedMultiDict(")
     print(io, orderobject(m), ",")
     l = length(m)
@@ -269,7 +269,7 @@ function Base.show{K,D,Ord <: Ordering}(io::IO, m::SortedMultiDict{K,D,Ord})
     print(io, ")")
 end
 
-similar{K,D,Ord<:Ordering}(m::SortedMultiDict{K,D,Ord}) =
+similar(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord<:Ordering} =
    SortedMultiDict{K,D}(orderobject(m))
 
-isordered{T<:SortedMultiDict}(::Type{T}) = true
+isordered(::Type{T}) where {T<:SortedMultiDict} = true

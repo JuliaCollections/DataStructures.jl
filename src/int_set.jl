@@ -11,7 +11,7 @@ else
     import Base: complement, complement!
 end
 
-type IntSet
+mutable struct IntSet
     bits::BitVector
     inverse::Bool
     IntSet() = new(fill!(BitVector(256), false), false)

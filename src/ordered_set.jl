@@ -5,11 +5,11 @@
 # TODO: Most of these functions should be removed once AbstractSet is introduced there
 # (see https://github.com/JuliaLang/julia/issues/5533)
 
-immutable OrderedSet{T}
+struct OrderedSet{T}
     dict::OrderedDict{T,Void}
 
-    (::Type{OrderedSet{T}}){T}() = new{T}(OrderedDict{T,Void}())
-    (::Type{OrderedSet{T}}){T}(xs) = union!(new{T}(OrderedDict{T,Void}()), xs)
+    OrderedSet{T}() where {T} = new{T}(OrderedDict{T,Void}())
+    OrderedSet{T}(xs) where {T} = union!(new{T}(OrderedDict{T,Void}()), xs)
 end
 OrderedSet() = OrderedSet{Any}()
 OrderedSet(xs) = OrderedSet{eltype(xs)}(xs)
@@ -20,7 +20,7 @@ show(io::IO, s::OrderedSet) = (show(io, typeof(s)); print(io, "("); !isempty(s) 
 @delegate OrderedSet.dict [isempty, length]
 
 sizehint!(s::OrderedSet, sz::Integer) = (sizehint!(s.dict, sz); s)
-eltype{T}(s::OrderedSet{T}) = T
+eltype(s::OrderedSet{T}) where {T} = T
 
 in(x, s::OrderedSet) = haskey(s.dict, x)
 
@@ -36,10 +36,10 @@ union!(s::OrderedSet, xs) = (for x in xs; push!(s,x); end; s)
 setdiff!(s::OrderedSet, xs) = (for x in xs; delete!(s,x); end; s)
 setdiff!(s::Set, xs::OrderedSet) = (for x in xs; delete!(s,x); end; s)
 
-similar{T}(s::OrderedSet{T}) = OrderedSet{T}()
+similar(s::OrderedSet{T}) where {T} = OrderedSet{T}()
 copy(s::OrderedSet) = union!(similar(s), s)
 
-empty!{T}(s::OrderedSet{T}) = (empty!(s.dict); s)
+empty!(s::OrderedSet{T}) where {T} = (empty!(s.dict); s)
 
 start(s::OrderedSet)       = start(s.dict)
 done(s::OrderedSet, state) = done(s.dict, state)

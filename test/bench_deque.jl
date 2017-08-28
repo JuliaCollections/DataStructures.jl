@@ -4,7 +4,7 @@ using DataStructures
 
 # push_back
 
-function batch_pushback!{Container,T}(v::Container, n::Int, e::T)
+function batch_pushback!(v::Container, n::Int, e::T) where {Container,T}
     for i = 1 : n
         push!(v, e)
     end
@@ -26,7 +26,7 @@ println("push back 10^7 integers:")
 
 # push_front
 
-function batch_pushfront!{Container,T}(v::Container, n::Int, e::T)
+function batch_pushfront!(v::Container, n::Int, e::T) where {Container,T}
     for i = 1 : n
         unshift!(v, e)
     end
