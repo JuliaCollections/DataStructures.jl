@@ -1,5 +1,5 @@
 
-0.6.1 / 2017-08-28
+0.6.2 / 2017-08-28
 ==================
 
   * empty!() for CircularDeque, add it to docs, add some other missing things to docs (#317)
@@ -7,6 +7,10 @@
   * PriorityQueue updates (Fixes #312) (#316)
   * Remove additional v0.6 deprecations
   * Fix a "formal" ambiguity on 0.6+ and enable ambiguity tests
+
+v0.6.1 / 2017-07-26
+==================
+  * Fix most of 0.7 depwarns
 
 v0.6.0 / 2017-07-09
 ==================
