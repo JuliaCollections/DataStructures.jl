@@ -57,8 +57,8 @@ push!(ct::Accumulator, x, a::Number) = (ct.map[x] = ct[x] + a)
 push!(ct::Accumulator{T,V}, x) where {T,V} = push!(ct, x, one(V))
 
 # To remove ambiguities related to Accumulator now being a subtype of Associative
-_include_string("push!(ct::Accumulator{T,V}, x::T) where T<:Pair where V = push!(ct, x, one(V))")
-_include_string("push!(ct::Accumulator{T,V}, x::Pair) where {T,V} = push!(ct, convert(T, x))")
+push!(ct::Accumulator{T,V}, x::T) where T<:Pair where V = push!(ct, x, one(V))
+push!(ct::Accumulator{T,V}, x::Pair) where {T,V} = push!(ct, convert(T, x))
 
 function push!(ct::Accumulator, r::Accumulator)
     for (x, v) in r
