@@ -16,16 +16,16 @@ import Base.values
 ## iteration.
 
 
-@compat abstract type AbstractExcludeLast{ContainerType <: SAContainer} end
+abstract type AbstractExcludeLast{ContainerType <: SAContainer} end
 
-immutable SDMExcludeLast{ContainerType <: SDMContainer} <:
+struct SDMExcludeLast{ContainerType <: SDMContainer} <:
                               AbstractExcludeLast{ContainerType}
     m::ContainerType
     first::Int
     pastlast::Int
 end
 
-immutable SSExcludeLast{ContainerType <: SortedSet} <:
+struct SSExcludeLast{ContainerType <: SortedSet} <:
                               AbstractExcludeLast{ContainerType}
     m::ContainerType
     first::Int
@@ -38,11 +38,11 @@ eltype(s::AbstractExcludeLast) = eltype(s.m)
 ## This holds an object describing an include-last
 ## iteration.
 
-@compat abstract type AbstractIncludeLast{ContainerType <: SAContainer} end
+abstract type AbstractIncludeLast{ContainerType <: SAContainer} end
 
 
 
-immutable SDMIncludeLast{ContainerType <: SDMContainer} <:
+struct SDMIncludeLast{ContainerType <: SDMContainer} <:
                                AbstractIncludeLast{ContainerType}
     m::ContainerType
     first::Int
@@ -50,7 +50,7 @@ immutable SDMIncludeLast{ContainerType <: SDMContainer} <:
 end
 
 
-immutable SSIncludeLast{ContainerType <: SortedSet} <:
+struct SSIncludeLast{ContainerType <: SortedSet} <:
                                AbstractIncludeLast{ContainerType}
     m::ContainerType
     first::Int
@@ -83,7 +83,7 @@ const SAIterableTypesBase = Union{SAContainer,
 ## Furthermore, semitokens(..) can be applied
 ## to either a basic iteration or a keys/values iteration.
 
-immutable SDMKeyIteration{T <: SDMIterableTypesBase}
+struct SDMKeyIteration{T <: SDMIterableTypesBase}
     base::T
 end
 
@@ -91,7 +91,7 @@ eltype(s::SDMKeyIteration) = keytype(extractcontainer(s.base))
 length(s::SDMKeyIteration) = length(extractcontainer(s.base))
 
 
-immutable SDMValIteration{T <: SDMIterableTypesBase}
+struct SDMValIteration{T <: SDMIterableTypesBase}
     base::T
 end
 
@@ -99,7 +99,7 @@ eltype(s::SDMValIteration) = valtype(extractcontainer(s.base))
 length(s::SDMValIteration) = length(extractcontainer(s.base))
 
 
-immutable SDMSemiTokenIteration{T <: SDMIterableTypesBase}
+struct SDMSemiTokenIteration{T <: SDMIterableTypesBase}
     base::T
 end
 
@@ -107,7 +107,7 @@ eltype(s::SDMSemiTokenIteration) = Tuple{IntSemiToken,
                                          keytype(extractcontainer(s.base)),
                                          valtype(extractcontainer(s.base))}
 
-immutable SSSemiTokenIteration{T <: SSIterableTypesBase}
+struct SSSemiTokenIteration{T <: SSIterableTypesBase}
     base::T
 end
 
@@ -115,21 +115,21 @@ eltype(s::SSSemiTokenIteration) = Tuple{IntSemiToken,
                                         eltype(extractcontainer(s.base))}
 
 
-immutable SDMSemiTokenKeyIteration{T <: SDMIterableTypesBase}
+struct SDMSemiTokenKeyIteration{T <: SDMIterableTypesBase}
     base::T
 end
 
 eltype(s::SDMSemiTokenKeyIteration) = Tuple{IntSemiToken,
                                             keytype(extractcontainer(s.base))}
 
-immutable SAOnlySemiTokensIteration{T <: SAIterableTypesBase}
+struct SAOnlySemiTokensIteration{T <: SAIterableTypesBase}
     base::T
 end
 
 eltype(::SAOnlySemiTokensIteration) = IntSemiToken
 
 
-immutable SDMSemiTokenValIteration{T <: SDMIterableTypesBase}
+struct SDMSemiTokenValIteration{T <: SDMIterableTypesBase}
     base::T
 end
 
@@ -153,7 +153,7 @@ const SAIterable = Union{SAIterableTypesBase, SACompoundIterable}
 ## All the loops maintain a state which is an object of the
 ## following type.
 
-immutable SAIterationState
+struct SAIterationState
     next::Int
     final::Int
 end
@@ -164,50 +164,50 @@ end
 @inline done(::SAIterable, state::SAIterationState) = state.next == state.final
 
 
-@inline exclusive{T <: SDMContainer}(m::T, ii::(Tuple{IntSemiToken,IntSemiToken})) =
+@inline exclusive(m::T, ii::(Tuple{IntSemiToken,IntSemiToken})) where {T <: SDMContainer} =
     SDMExcludeLast(m, ii[1].address, ii[2].address)
 
-@inline exclusive{T <: SortedSet}(m::T, ii::(Tuple{IntSemiToken,IntSemiToken})) =
+@inline exclusive(m::T, ii::(Tuple{IntSemiToken,IntSemiToken})) where {T <: SortedSet} =
     SSExcludeLast(m, ii[1].address, ii[2].address)
 
-@inline exclusive{T <: SAContainer}(m::T, i1::IntSemiToken, i2::IntSemiToken) =
+@inline exclusive(m::T, i1::IntSemiToken, i2::IntSemiToken) where {T <: SAContainer} =
     exclusive(m, (i1,i2))
 
-@inline inclusive{T <: SDMContainer}(m::T, ii::(Tuple{IntSemiToken,IntSemiToken})) =
+@inline inclusive(m::T, ii::(Tuple{IntSemiToken,IntSemiToken})) where {T <: SDMContainer} =
     SDMIncludeLast(m, ii[1].address, ii[2].address)
 
-@inline inclusive{T <: SortedSet}(m::T, ii::(Tuple{IntSemiToken,IntSemiToken})) =
+@inline inclusive(m::T, ii::(Tuple{IntSemiToken,IntSemiToken})) where {T <: SortedSet} =
     SSIncludeLast(m, ii[1].address, ii[2].address)
 
-@inline inclusive{T <: SAContainer}(m::T, i1::IntSemiToken, i2::IntSemiToken) =
+@inline inclusive(m::T, i1::IntSemiToken, i2::IntSemiToken) where {T <: SAContainer} =
     inclusive(m, (i1,i2))
 
 
 
 # Next definition needed to break ambiguity with keys(Associative) from Dict.jl
 
-@inline keys{K, D, Ord <: Ordering}(ba::SortedDict{K,D,Ord}) = SDMKeyIteration(ba)
-@inline keys{T <: SDMIterableTypesBase}(ba::T) = SDMKeyIteration(ba)
+@inline keys(ba::SortedDict{K,D,Ord}) where {K, D, Ord <: Ordering} = SDMKeyIteration(ba)
+@inline keys(ba::T) where {T <: SDMIterableTypesBase} = SDMKeyIteration(ba)
 
 
-in{K,D,Ord <: Ordering}(k, keyit::SDMKeyIteration{SortedDict{K,D,Ord}}) =
+in(k, keyit::SDMKeyIteration{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} =
     haskey(extractcontainer(keyit.base), k)
 
-in{K,D,Ord <: Ordering}(k, keyit::SDMKeyIteration{SortedMultiDict{K,D,Ord}}) =
+in(k, keyit::SDMKeyIteration{SortedMultiDict{K,D,Ord}}) where {K,D,Ord <: Ordering} =
     haskey(extractcontainer(keyit.base), k)
 
 
 
 # Next definition needed to break ambiguity with values(Associative) from Dict.jl
-@inline values{K, D, Ord <: Ordering}(ba::SortedDict{K,D,Ord}) = SDMValIteration(ba)
-@inline values{T <: SDMIterableTypesBase}(ba::T) = SDMValIteration(ba)
-@inline semitokens{T <: SDMIterableTypesBase}(ba::T) = SDMSemiTokenIteration(ba)
-@inline semitokens{T <: SSIterableTypesBase}(ba::T) = SSSemiTokenIteration(ba)
-@inline semitokens{T <: SDMIterableTypesBase}(ki::SDMKeyIteration{T}) =
+@inline values(ba::SortedDict{K,D,Ord}) where {K, D, Ord <: Ordering} = SDMValIteration(ba)
+@inline values(ba::T) where {T <: SDMIterableTypesBase} = SDMValIteration(ba)
+@inline semitokens(ba::T) where {T <: SDMIterableTypesBase} = SDMSemiTokenIteration(ba)
+@inline semitokens(ba::T) where {T <: SSIterableTypesBase} = SSSemiTokenIteration(ba)
+@inline semitokens(ki::SDMKeyIteration{T}) where {T <: SDMIterableTypesBase} =
                    SDMSemiTokenKeyIteration(ki.base)
-@inline semitokens{T <: SDMIterableTypesBase}(vi::SDMValIteration{T}) =
+@inline semitokens(vi::SDMValIteration{T}) where {T <: SDMIterableTypesBase} =
                    SDMSemiTokenValIteration(vi.base)
-@inline onlysemitokens{T <: SAIterableTypesBase}(ba::T) = SAOnlySemiTokensIteration(ba)
+@inline onlysemitokens(ba::T) where {T <: SAIterableTypesBase} = SAOnlySemiTokensIteration(ba)
 
 
 
@@ -310,12 +310,12 @@ end
 eachindex(sd::SortedDict) = keys(sd)
 eachindex(sdm::SortedMultiDict) = onlysemitokens(sdm)
 eachindex(ss::SortedSet) = onlysemitokens(ss)
-eachindex{K,D,Ord <: Ordering}(sd::SDMExcludeLast{SortedDict{K,D,Ord}}) = keys(sd)
-eachindex{K,D,Ord <: Ordering}(smd::SDMExcludeLast{SortedMultiDict{K,D,Ord}}) =
+eachindex(sd::SDMExcludeLast{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = keys(sd)
+eachindex(smd::SDMExcludeLast{SortedMultiDict{K,D,Ord}}) where {K,D,Ord <: Ordering} =
      onlysemitokens(smd)
 eachindex(ss::SSExcludeLast) = onlysemitokens(ss)
-eachindex{K,D,Ord <: Ordering}(sd::SDMIncludeLast{SortedDict{K,D,Ord}}) = keys(sd)
-eachindex{K,D,Ord <: Ordering}(smd::SDMIncludeLast{SortedMultiDict{K,D,Ord}}) =
+eachindex(sd::SDMIncludeLast{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = keys(sd)
+eachindex(smd::SDMIncludeLast{SortedMultiDict{K,D,Ord}}) where {K,D,Ord <: Ordering} =
      onlysemitokens(smd)
 eachindex(ss::SSIncludeLast) = onlysemitokens(ss)
 

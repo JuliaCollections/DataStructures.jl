@@ -1,11 +1,11 @@
 # stacks
 
-type Stack{T}
+mutable struct Stack{T}
     store::Deque{T}
 end
 
-Stack{T}(ty::Type{T}) = Stack(Deque{T}())
-Stack{T}(ty::Type{T}, blksize::Integer) = Stack(Deque{T}(blksize))
+Stack(ty::Type{T}) where {T} = Stack(Deque{T}())
+Stack(ty::Type{T}, blksize::Integer) where {T} = Stack(Deque{T}(blksize))
 
 isempty(s::Stack) = isempty(s.store)
 length(s::Stack) = length(s.store)
@@ -23,4 +23,4 @@ start(st::Stack) = start(reverse_iter(st.store))
 next(st::Stack, s) = next(reverse_iter(st.store), s)
 done(st::Stack, s) = done(reverse_iter(st.store), s)
 
-reverse_iter{T}(s::Stack{T}) = DequeIterator{T}(s.store)
+reverse_iter(s::Stack{T}) where {T} = DequeIterator{T}(s.store)

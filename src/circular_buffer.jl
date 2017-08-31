@@ -1,12 +1,12 @@
 """
 New items are pushed to the back of the list, overwriting values in a circular fashion.
 """
-type CircularBuffer{T} <: AbstractVector{T}
+mutable struct CircularBuffer{T} <: AbstractVector{T}
     capacity::Int
     first::Int
     buffer::Vector{T}
 
-    (::Type{CircularBuffer{T}}){T}(capacity::Int) = new{T}(capacity, 1, T[])
+    CircularBuffer{T}(capacity::Int) where {T} = new{T}(capacity, 1, T[])
 end
 
 function Base.empty!(cb::CircularBuffer)
@@ -69,7 +69,7 @@ end
 
 Base.length(cb::CircularBuffer) = length(cb.buffer)
 Base.size(cb::CircularBuffer) = (length(cb),)
-Base.convert{T}(::Type{Array}, cb::CircularBuffer{T}) = T[x for x in cb]
+Base.convert(::Type{Array}, cb::CircularBuffer{T}) where {T} = T[x for x in cb]
 Base.isempty(cb::CircularBuffer) = isempty(cb.buffer)
 
 capacity(cb::CircularBuffer) = cb.capacity

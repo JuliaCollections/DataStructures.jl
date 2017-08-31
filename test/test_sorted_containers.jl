@@ -9,7 +9,7 @@ import Base.ForwardOrdering
 import Base.ReverseOrdering
 import DataStructures.IntSemiToken
 
-immutable CaseInsensitive <: Ordering
+struct CaseInsensitive <: Ordering
 end
 
 lt(::CaseInsensitive, a, b) = isless(lowercase(a), lowercase(b))
@@ -93,8 +93,8 @@ push_test!(m, k, v) = push!(m, k=>v)
 
 ## Function checkcorrectness checks a balanced tree for correctness.
 
-function checkcorrectness{K,D,Ord <: Ordering}(t::DataStructures.BalancedTree23{K,D,Ord},
-                                               allowdups=false)
+function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
+                          allowdups=false) where {K,D,Ord <: Ordering}
     dsz = size(t.data, 1)
     tsz = size(t.tree, 1)
     r = t.rootloc

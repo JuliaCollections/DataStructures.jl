@@ -3,7 +3,7 @@
 
 Create a double-ended queue of maximum capacity `n`, implemented as a circular buffer. The element type is `T`.
 """
-type CircularDeque{T}
+mutable struct CircularDeque{T}
     buffer::Vector{T}
     capacity::Int
     n::Int
@@ -11,10 +11,10 @@ type CircularDeque{T}
     last::Int
 end
 
-(::Type{CircularDeque{T}}){T}(n::Int) = CircularDeque(Vector{T}(n), n, 0, 1, n)
+CircularDeque{T}(n::Int) where {T} = CircularDeque(Vector{T}(n), n, 0, 1, n)
 
 Base.length(D::CircularDeque) = D.n
-Base.eltype{T}(::Type{CircularDeque{T}}) = T
+Base.eltype(::Type{CircularDeque{T}}) where {T} = T
 capacity(D::CircularDeque) = D.capacity
 
 function Base.empty!(D::CircularDeque)
@@ -90,7 +90,7 @@ end
 @inline Base.next(d::CircularDeque, i) = (_unsafe_getindex(d, i), i+1)
 @inline Base.done(d::CircularDeque, i) = i == d.n + 1
 
-function Base.show{T}(io::IO, D::CircularDeque{T})
+function Base.show(io::IO, D::CircularDeque{T}) where T
     print(io, "CircularDeque{$T}([")
     for i = 1:length(D)
         print(io, D[i])

@@ -116,9 +116,9 @@ module DataStructures
     @deprecate DefaultOrderedDict(default, ks, vs) DefaultOrderedDict(default, zip(ks, vs))
     @deprecate DefaultOrderedDict{K,V}(::Type{K}, ::Type{V}, default) DefaultOrderedDict{K,V}(default)
 
-    function SortedMultiDict{K,V}(ks::AbstractVector{K},
-                                  vs::AbstractVector{V},
-                                  o::Ordering=Forward)
+    function SortedMultiDict(ks::AbstractVector{K},
+                             vs::AbstractVector{V},
+                             o::Ordering=Forward) where {K,V}
         Base.depwarn("SortedMultiDict(ks, vs, o::Ordering=Forward) is deprecated.\n" * "Use SortedMultiDict(o, zip(ks,vs)) or SortedMultiDict(zip(ks, vs))", :SortedMultiDict)
         if length(ks) != length(vs)
             throw(ArgumentError("SortedMultiDict(ks,vs,o): ks and vs arrays must be the same length"))
@@ -129,9 +129,9 @@ module DataStructures
     @deprecate PriorityQueue{K,V}(::Type{K}, ::Type{V}) PriorityQueue{K,V}()    
     @deprecate PriorityQueue{K,V}(::Type{K}, ::Type{V}, o::Ordering) PriorityQueue{K,V,typeof(o)}(o)    
     
-    function PriorityQueue{K,V}(ks::AbstractVector{K},
-                                vs::AbstractVector{V},
-                                o::Ordering=Forward)
+    function PriorityQueue(ks::AbstractVector{K},
+                           vs::AbstractVector{V},
+                           o::Ordering=Forward) where {K,V}
         Base.depwarn("PriorityQueue(ks, vs, o::Ordering=Forward) is deprecated.\n" * "Use PriorityQueue(o, zip(ks,vs)) or PriorityQueue(zip(ks, vs))", :PriorityQueue)
         if length(ks) != length(vs)
             throw(ArgumentError("PriorityQueue(ks,vs,o): ks and vs arrays must be the same length"))

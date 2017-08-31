@@ -5,20 +5,20 @@ import Base: haskey, get, get!, getkey, delete!, pop!, empty!,
              next, done, keys, values, copy, similar,  push!,
              count, size, eltype
 
-immutable MultiDict{K,V}
+struct MultiDict{K,V}
     d::Dict{K,Vector{V}}
 
-    (::Type{MultiDict{K,V}}){K,V}() = new{K,V}(Dict{K,Vector{V}}())
-    (::Type{MultiDict{K,V}}){K,V}(kvs) = new{K,V}(Dict{K,Vector{V}}(kvs))
-    (::Type{MultiDict{K,V}}){K,V}(ps::Pair{K,Vector{V}}...) = new{K,V}(Dict{K,Vector{V}}(ps...))
+    MultiDict{K,V}() where {K,V} = new{K,V}(Dict{K,Vector{V}}())
+    MultiDict{K,V}(kvs) where {K,V} = new{K,V}(Dict{K,Vector{V}}(kvs))
+    MultiDict{K,V}(ps::Pair{K,Vector{V}}...) where {K,V} = new{K,V}(Dict{K,Vector{V}}(ps...))
 end
 
 MultiDict() = MultiDict{Any,Any}()
 MultiDict(kv::Tuple{}) = MultiDict()
 MultiDict(kvs) = multi_dict_with_eltype(kvs, eltype(kvs))
 
-multi_dict_with_eltype{K,V}(kvs, ::Type{Tuple{K,Vector{V}}}) = MultiDict{K,V}(kvs)
-function multi_dict_with_eltype{K,V}(kvs, ::Type{Tuple{K,V}})
+multi_dict_with_eltype(kvs, ::Type{Tuple{K,Vector{V}}}) where {K,V} = MultiDict{K,V}(kvs)
+function multi_dict_with_eltype(kvs, ::Type{Tuple{K,V}}) where {K,V}
     md = MultiDict{K,V}()
     for (k,v) in kvs
         insert!(md, k, v)
@@ -27,9 +27,9 @@ function multi_dict_with_eltype{K,V}(kvs, ::Type{Tuple{K,V}})
 end
 multi_dict_with_eltype(kvs, t) = MultiDict{Any,Any}(kvs)
 
-MultiDict{K,V<:AbstractArray}(ps::Pair{K,V}...) = MultiDict{K, eltype(V)}(ps)
-MultiDict{K,V}(kv::AbstractArray{Pair{K,V}})  = MultiDict(kv...)
-function MultiDict{K,V}(ps::Pair{K,V}...)
+MultiDict(ps::Pair{K,V}...) where {K,V<:AbstractArray} = MultiDict{K, eltype(V)}(ps)
+MultiDict(kv::AbstractArray{Pair{K,V}}) where {K,V}  = MultiDict(kv...)
+function MultiDict(ps::Pair{K,V}...) where {K,V}
     md = MultiDict{K,V}()
     for (k,v) in ps
         insert!(md, k, v)
@@ -47,12 +47,12 @@ end
 
 sizehint!(d::MultiDict, sz::Integer) = (sizehint!(d.d, sz); d)
 copy(d::MultiDict) = MultiDict(d)
-similar{K,V}(d::MultiDict{K,V}) = MultiDict{K,V}()
+similar(d::MultiDict{K,V}) where {K,V} = MultiDict{K,V}()
 ==(d1::MultiDict, d2::MultiDict) = d1.d == d2.d
 delete!(d::MultiDict, key) = (delete!(d.d, key); d)
 empty!(d::MultiDict) = (empty!(d.d); d)
 
-function insert!{K,V}(d::MultiDict{K,V}, k, v)
+function insert!(d::MultiDict{K,V}, k, v) where {K,V}
     if !haskey(d.d, k)
         d.d[k] = isa(v, AbstractArray) ? eltype(v)[] : V[]
     end
@@ -64,7 +64,7 @@ function insert!{K,V}(d::MultiDict{K,V}, k, v)
     return d
 end
 
-function in{K,V}(pr::(Tuple{Any,Any}), d::MultiDict{K,V})
+function in(pr::(Tuple{Any,Any}), d::MultiDict{K,V}) where {K,V}
     k = convert(K, pr[1])
     v = get(d,k,Base.secret_table_token)
     (v !== Base.secret_table_token) && (isa(pr[2], AbstractArray) ? v == pr[2] : pr[2] in v)
@@ -97,7 +97,7 @@ size(d::MultiDict) = (length(keys(d)), count(d::MultiDict))
 
 # enumerate
 
-immutable EnumerateAll
+struct EnumerateAll
     d::MultiDict
 end
 enumerateall(d::MultiDict) = EnumerateAll(d)

@@ -2,7 +2,7 @@
 
 # auxiliary functions
 
-function heap_values{VT,Comp}(h::MutableBinaryHeap{VT,Comp})
+function heap_values(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
     n = length(h)
     nodes = h.nodes
     @assert length(nodes) == n
@@ -13,7 +13,7 @@ function heap_values{VT,Comp}(h::MutableBinaryHeap{VT,Comp})
     vs
 end
 
-function list_values{VT,Comp}(h::MutableBinaryHeap{VT,Comp})
+function list_values(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
     n = length(h)
     nodes = h.nodes
     nodemap = h.node_map
@@ -27,7 +27,7 @@ function list_values{VT,Comp}(h::MutableBinaryHeap{VT,Comp})
     vs
 end
 
-function verify_heap{VT,Comp}(h::MutableBinaryHeap{VT,Comp})
+function verify_heap(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
     comp = h.comparer
     nodes = h.nodes
     n = length(h)
