@@ -1,5 +1,3 @@
-using DataStructures
-using Base.Test
 
 @testset "CircularDeque" begin
     D = CircularDeque{Int}(5)

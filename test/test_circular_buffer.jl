@@ -1,6 +1,3 @@
-using DataStructures
-using Base.Test
-
 @testset "CircularBuffer" begin
     cb = CircularBuffer{Int}(5)
     @test length(cb) == 0
