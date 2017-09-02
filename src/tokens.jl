@@ -6,8 +6,6 @@
 
 module Tokens
 
-using Compat
-
 abstract type AbstractSemiToken end
 
 struct IntSemiToken <: AbstractSemiToken
