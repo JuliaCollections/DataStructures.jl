@@ -2,6 +2,7 @@
 0.7.0 / 2017-09-02
 ==================
 
+  * Drop support for Julia v0.5 (and update to v0.6/v0.7 syntax)
   * empty!() for CircularDeque, add it to docs, add some other missing things to docs (#317)
   * Minor updates to PriorityQueue docs
   * PriorityQueue updates (Fixes #312) (#316)
