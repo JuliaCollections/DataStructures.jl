@@ -1,5 +1,7 @@
 ## IntSet
 
+@testset "IntSet" begin
+
 # Construction, collect
 data_in = (1,5,100)
 s = IntSet(data_in)
@@ -119,7 +121,7 @@ s = IntSet(1:2:10)
 @test s === delete!(s, 1)
 for i in s; pop!(s, i); end
 @test isempty(s)
-x = 0
+global x = 0
 @test 1 == pop!(()->(global x; x+=1), s, 100)
 @test x == 1
 push!(s, 100)
@@ -283,3 +285,5 @@ s = IntSet(b)
 
 show(IOBuffer(), IntSet())
 show(IOBuffer(), complement(IntSet()))
+
+end # @testset IntSet

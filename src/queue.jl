@@ -1,6 +1,6 @@
 # FIFO queue
 
-type Queue{T}
+mutable struct Queue{T}
     store::Deque{T}
 end
 
@@ -9,8 +9,8 @@ end
 
 Create a `Queue` object containing elements of type `T`.
 """
-Queue{T}(ty::Type{T}) = Queue(Deque{T}())
-Queue{T}(ty::Type{T}, blksize::Integer) = Queue(Deque{T}(blksize))
+Queue(ty::Type{T}) where {T} = Queue(Deque{T}())
+Queue(ty::Type{T}, blksize::Integer) where {T} = Queue(Deque{T}(blksize))
 
 isempty(s::Queue) = isempty(s.store)
 length(s::Queue) = length(s.store)

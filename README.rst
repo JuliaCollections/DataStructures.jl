@@ -28,6 +28,8 @@ DataStructures.jl
 This package implements a variety of data structures, including
 
 * Deque (based on block-list)
+* CircularBuffer
+* CircularDeque
 * Stack
 * Queue
 * Accumulators and Counters

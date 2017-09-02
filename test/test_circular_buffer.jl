@@ -1,6 +1,3 @@
-using DataStructures
-using Base.Test
-
 @testset "CircularBuffer" begin
     cb = CircularBuffer{Int}(5)
     @test length(cb) == 0
@@ -43,4 +40,7 @@ using Base.Test
     for (idx, n) in enumerate(5:1)
         @test arr[idx] == n
     end
+
+    # test empty!(cb)
+    @test length(empty!(cb)) == 0
 end

@@ -1,12 +1,17 @@
 """
 New items are pushed to the back of the list, overwriting values in a circular fashion.
 """
-type CircularBuffer{T} <: AbstractVector{T}
+mutable struct CircularBuffer{T} <: AbstractVector{T}
     capacity::Int
     first::Int
     buffer::Vector{T}
 
-    (::Type{CircularBuffer{T}}){T}(capacity::Int) = new{T}(capacity, 1, T[])
+    CircularBuffer{T}(capacity::Int) where {T} = new{T}(capacity, 1, T[])
+end
+
+function Base.empty!(cb::CircularBuffer)
+    cb.first = 1
+    empty!(cb.buffer)
 end
 
 function _buffer_index(cb::CircularBuffer, i::Int)
@@ -54,7 +59,7 @@ function Base.unshift!(cb::CircularBuffer, data)
 end
 
 function Base.append!(cb::CircularBuffer, datavec::AbstractVector)
-    # push at most `capacity` items
+    # push at most last `capacity` items
     n = length(datavec)
     for i in max(1, n-capacity(cb)+1):n
         push!(cb, datavec[i])
@@ -64,7 +69,7 @@ end
 
 Base.length(cb::CircularBuffer) = length(cb.buffer)
 Base.size(cb::CircularBuffer) = (length(cb),)
-Base.convert{T}(::Type{Array}, cb::CircularBuffer{T}) = T[x for x in cb]
+Base.convert(::Type{Array}, cb::CircularBuffer{T}) where {T} = T[x for x in cb]
 Base.isempty(cb::CircularBuffer) = isempty(cb.buffer)
 
 capacity(cb::CircularBuffer) = cb.capacity
