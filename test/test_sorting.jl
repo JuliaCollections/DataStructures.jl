@@ -1,6 +1,3 @@
-using DataStructures
-using Base.Test
-
 @testset "DictionarySorting" begin
     forward = OrderedDict(zip('a':'z', 26:-1:1))
     rev = OrderedDict(zip(reverse('a':'z'), 1:26))

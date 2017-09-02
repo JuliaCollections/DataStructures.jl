@@ -1,5 +1,3 @@
-using Base.Test
-using DataStructures
 import Base.Ordering
 import Base.Forward
 import Base.Reverse
