@@ -97,8 +97,12 @@
     @test ct6["b"] == 0
     @test ct6["c"] == 4
 
+    s = ["y", "el", "sol", "se", "fue"]
+    @test counter(length(x) for x in s) == counter(map(length, s))
+  
     # ambiguity resolution
     ct7 = counter(Int)
     @test_throws MethodError push!(ct7, 1=>2)
 
 end # @testset Accumulators
+

@@ -26,6 +26,8 @@ There are different ways to construct an accumulator/counter::
 
   a = counter(seq)         # construct a counter by counting keys in a sequence
 
+  a = counter(gen)         # construct a counter by counting keys in a generator
+
 
 Usage of an accumulator/counter::
 
