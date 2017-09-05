@@ -126,6 +126,7 @@ module DataStructures
 
     @deprecate PriorityQueue{K,V}(::Type{K}, ::Type{V}) PriorityQueue{K,V}()    
     @deprecate PriorityQueue{K,V}(::Type{K}, ::Type{V}, o::Ordering) PriorityQueue{K,V,typeof(o)}(o)    
+    @deprecate (PriorityQueue{K,V,ForwardOrdering}() where {K,V}) PriorityQueue{K,V}()
     
     function PriorityQueue(ks::AbstractVector{K},
                            vs::AbstractVector{V},
