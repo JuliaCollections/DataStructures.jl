@@ -49,13 +49,13 @@ DefaultDictBase{K,V}(default::F) where {K,V,F} = DefaultDictBase{K,V,F,Dict{K,V}
 # Functions
 
 # most functions are simply delegated to the wrapped dictionary
-@delegate DefaultDictBase.d [ get, haskey, getkey, pop!,
+@delegate DefaultDictBase d [ get, haskey, getkey, pop!,
                               start, done, next, isempty, length ]
 
 # Some functions are delegated, but then need to return the main dictionary
 # NOTE: push! is not included below, because the fallback version just
 #       calls setindex!
-@delegate_return_parent DefaultDictBase.d [ delete!, empty!, setindex!, sizehint! ]
+@delegate_return_parent DefaultDictBase d [ delete!, empty!, setindex!, sizehint! ]
 
 similar(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default)
 in(key, v::Base.KeyIterator{T}) where {T<:DefaultDictBase} = key in keys(v.dict.d)
@@ -115,14 +115,14 @@ for _Dict in [:Dict, :OrderedDict]
         ## Functions
 
         # Most functions are simply delegated to the wrapped DefaultDictBase object
-        @delegate $DefaultDict.d [ getindex, get, get!, haskey,
+        @delegate $DefaultDict d [ getindex, get, get!, haskey,
                                    getkey, pop!, start, next,
                                    done, isempty, length ]
 
         # Some functions are delegated, but then need to return the main dictionary
         # NOTE: push! is not included below, because the fallback version just
         #       calls setindex!
-        @delegate_return_parent $DefaultDict.d [ delete!, empty!, setindex!, sizehint! ]
+        @delegate_return_parent $DefaultDict d [ delete!, empty!, setindex!, sizehint! ]
 
         # NOTE: The second and third definition of push! below are only
         # necessary for disambiguating with the fourth, fifth, and sixth

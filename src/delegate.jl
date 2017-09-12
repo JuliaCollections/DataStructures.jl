@@ -1,7 +1,6 @@
 # by JMW
-macro delegate(source, targets)
-    typename = esc(source.args[1])
-    fieldname = source.args[2].args[1]
+macro delegate(source, fieldname, targets)
+    typename = esc(source)
     funcnames = targets.args
     n = length(funcnames)
     fdefs = Vector{Any}(n)
@@ -15,9 +14,8 @@ macro delegate(source, targets)
     return Expr(:block, fdefs...)
 end
 
-macro delegate_return_parent(source, targets)
-    typename = esc(source.args[1])
-    fieldname = source.args[2].args[1]
+macro delegate_return_parent(source, fieldname, targets)
+    typename = esc(source)
     funcnames = targets.args
     n = length(funcnames)
     fdefs = Vector{Any}(n)

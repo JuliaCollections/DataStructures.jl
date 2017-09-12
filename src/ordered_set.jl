@@ -17,7 +17,7 @@ OrderedSet(xs) = OrderedSet{eltype(xs)}(xs)
 
 show(io::IO, s::OrderedSet) = (show(io, typeof(s)); print(io, "("); !isempty(s) && Base.show_comma_array(io, s,'[',']'); print(io, ")"))
 
-@delegate OrderedSet.dict [isempty, length]
+@delegate OrderedSet dict [isempty, length]
 
 sizehint!(s::OrderedSet, sz::Integer) = (sizehint!(s.dict, sz); s)
 eltype(s::OrderedSet{T}) where {T} = T
