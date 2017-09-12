@@ -41,7 +41,7 @@ end
 
 ## Most functions are simply delegated to the wrapped Dict
 
-@delegate MultiDict.d [ haskey, get, get!, getkey,
+@delegate MultiDict d [ haskey, get, get!, getkey,
                         getindex, length, isempty, eltype,
                         start, next, done, keys, values]
 
