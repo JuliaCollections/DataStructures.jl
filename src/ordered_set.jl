@@ -31,6 +31,8 @@ delete!(s::OrderedSet, x) = (delete!(s.dict, x); s)
 
 getindex(x::OrderedSet,i::Int) = x.dict.keys[i]
 endof(x::OrderedSet) = endof(x.dict.keys)
+# Needed on 0.7 to mimic array indexing.
+Base.nextind(::OrderedSet, i::Int) = i + 1
 
 union!(s::OrderedSet, xs) = (for x in xs; push!(s,x); end; s)
 setdiff!(s::OrderedSet, xs) = (for x in xs; delete!(s,x); end; s)

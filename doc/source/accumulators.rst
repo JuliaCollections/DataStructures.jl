@@ -7,7 +7,7 @@ Accumulators and Counters
 A accumulator, as defined below, is a data structure that maintains an accumulated number for each key. This is a counter when the accumulated values
 reflect the counts::
 
-  type Accumulator{K, V<:Number}
+  struct Accumulator{K, V<:Number}
       map::Dict{K, V}
   end
 
