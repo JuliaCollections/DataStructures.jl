@@ -146,7 +146,7 @@ isordered(::Type{T}) where {T<:DefaultOrderedDict} = true
 
 ## This should be uncommented to provide a DefaultSortedDict
 
-# immutable DefaultSortedDict{K,V,F} <: Associative{K,V}
+# struct DefaultSortedDict{K,V,F} <: Associative{K,V}
 #     d::DefaultDictBase{K,V,F,SortedDict{K,V}}
 
 #     DefaultSortedDict(x, kv::AbstractArray{(K,V)}) = new(DefaultDictBase{K,V,F,SortedDict{K,V}}(x, kv))

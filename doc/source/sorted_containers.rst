@@ -975,7 +975,7 @@ a custom ordering is as follows.
 First, the user creates a singleton type that is a subtype of
 ``Ordering`` as follows::
 
-    immutable CaseInsensitive <: Ordering
+    struct CaseInsensitive <: Ordering
     end
 
 Next, the user defines a method named ``lt`` for less-than

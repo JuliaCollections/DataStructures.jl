@@ -45,7 +45,7 @@
     od60 = OrderedDict{Int,Int}()
     od60[1] = 2
 
-    ranges = Range[2:5,6:9,10:13]
+    ranges = [2:5, 6:9, 10:13]
     for range in ranges
         for i = range
             od60[i] = i+1
