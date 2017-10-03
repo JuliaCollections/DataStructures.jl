@@ -67,6 +67,13 @@ function Base.append!(cb::CircularBuffer, datavec::AbstractVector)
     cb
 end
 
+function Base.fill!(cb::CircularBuffer, data = 0)
+    # fill buffer with items
+    resize!(cb.buffer, cb.capacity)
+    cb.buffer[:] = data
+    cb
+end
+
 Base.length(cb::CircularBuffer) = length(cb.buffer)
 Base.size(cb::CircularBuffer) = (length(cb),)
 Base.convert(::Type{Array}, cb::CircularBuffer{T}) where {T} = T[x for x in cb]
