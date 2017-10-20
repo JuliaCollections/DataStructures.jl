@@ -9,16 +9,31 @@
     @test !haskey(ct, "abc")
     @test isempty(collect(keys(ct)))
 
-    push!(ct, "a")
+    # Test setindex!
+    ct["b"] = 2
+    @test ct["b"] == 2
+    ct["b"] = 0
+    @test ct["b"] == 0
+
+
+
+    inc!(ct, "a")
     @test haskey(ct, "a")
     @test ct["a"] == 1
 
-    push!(ct, "b", 2)
+    inc!(ct, "b", 2)
     @test haskey(ct, "b")
     @test ct["b"] == 2
 
+    # Test dec!
+    dec!(ct, "b")
+    @test ct["b"] == 1
+    dec!(ct, "b", 16)
+    @test ct["b"] == -15
+    ct["b"] = 2     
+
     # Test convert
-    push!(ct, "b", 0x3)
+    inc!(ct, "b", 0x3)
     @test ct["b"] == 5
 
     @test !haskey(ct, "abc")
@@ -39,7 +54,7 @@
     @test ct2["b"] == 2
     @test ct2["c"] == 2
 
-    push!(ct, ct2)
+    merge!(ct, ct2)
     @test ct["a"] == 4
     @test ct["b"] == 7
     @test ct["c"] == 2
@@ -85,7 +100,7 @@
 
     ct6 = counter(["a", "b" , "b", "c", "c", "c"])
     for ii in split("a b c")
-        push!(ct6, ii)
+        inc!(ct6, ii)
     end
     @test ct6["a"] == 2
     @test ct6["b"] == 3
