@@ -114,7 +114,17 @@
 
     s = ["y", "el", "sol", "se", "fue"]
     @test counter(length(x) for x in s) == counter(map(length, s))
-  
+
+
+    # non-integer uses
+    acc = Accumulator(Symbol, Float16)
+    acc[:a] = 1.5
+    @test acc[:a] ≈ 1.5
+    push!(acc, :a, 2.5)
+    @test acc[:a] ≈ 4.0
+    dec!(acc, :a)
+    @test acc[:a] ≈ 3.0
+
     # ambiguity resolution
     ct7 = counter(Int)
     @test_throws MethodError push!(ct7, 1=>2)
@@ -123,7 +133,10 @@
     #deprecations
     ctd = counter([1,2,3])
     @test ctd[3]==1
+
+    println("\nThe following warning is expected:")
     @test pop!(ctd, 3)==1
+    println("\nThe following warning is expected:")
     @test push!(counter([1,2,3]),counter([1,2,3])) == merge!(counter([1,2,3]), counter([1,2,3]))
 
 end # @testset Accumulators
