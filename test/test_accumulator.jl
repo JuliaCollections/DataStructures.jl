@@ -60,7 +60,7 @@
     @test ctm["b"] == 22
     @test ctm["c"] == 2
 
-    @test pop!(ctm, "b") == 22
+    @test reset!(ctm, "b") == 22
     @test !haskey(ctm, "b")
     @test ctm["b"] == 0
 
@@ -70,7 +70,7 @@
     @test push!(ct4, 1=>2) == 2
 
     ct5 = counter(Dict([("a",10), ("b",20)]))
-    @test merge(ct5)===ct5
+    @test merge(ct5)==ct5
     @test merge!(ct5)===ct5
     @test merge(ct5,ct5,ct5)==counter(Dict([("a",30), ("b",60)]))
 
@@ -91,7 +91,7 @@
     @test ct6["b"] == 3
     @test ct6["c"] == 4
     for ii in split("a b")
-        pop!(ct6, ii)
+        reset!(ct6, ii)
     end
     @test ct6["a"] == 0
     @test ct6["b"] == 0
@@ -104,5 +104,14 @@
     ct7 = counter(Int)
     @test_throws MethodError push!(ct7, 1=>2)
 
+
+    #deprecations
+    ctd = counter([1,2,3])
+    @test ctd[3]==1
+    @test pop!(ctd, 3)==1
+    @test push!(counter([1,2,3]),counter([1,2,3])) == merge!(counter([1,2,3]), counter([1,2,3]))
+
 end # @testset Accumulators
+
+
 

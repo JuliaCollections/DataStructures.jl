@@ -9,30 +9,22 @@ end
 Accumulator(::Type{T}, ::Type{V}) where {T,V<:Number} = Accumulator{T,V}(Dict{T,V}())
 counter(T::Type) = Accumulator(T,Int)
 
-counter(dct::Dict{T,Int}) where {T} = Accumulator{T,Int}(copy(dct))
+counter(dct::Dict{T,V}) where {T,V<:Integer} = Accumulator{T,V}(copy(dct))
 
 """
-    counter{T}(seq::AbstractArray)
+    counter(seq)
 
 Returns an `Accumulator` object containing the elements from `seq`.
 """
-function counter(seq::AbstractArray{T}) where T
-    ct = counter(T)
+function counter(seq)
+    ct = counter(eltype(seq))
     for x in seq
-        push!(ct, x)
+        inc!(ct, x)
     end
     return ct
 end
 
-function counter(gen::T) where {T<:Base.Generator}
-    ct = counter(Base._default_eltype(T))
-    for x in gen
-        push!(ct, x)
-    end
-    return ct
-end
-
-copy(ct::Accumulator{T,V}) where {T,V<:Number} = Accumulator{T,V}(copy(ct.map))
+copy(ct::Accumulator) = Accumulator(copy(ct.map))
 
 length(a::Accumulator) = length(a.map)
 
@@ -43,6 +35,9 @@ get(ct::Accumulator, x, default) = get(ct.map, x, default)
 # correctly implement "informal" Associative interface
 
 getindex(ct::Accumulator{T,V}, x) where {T,V} = get(ct.map, x, zero(V))
+
+setindex!(ct::Accumulator, x, v) = setindex!(ct.map, x, v)
+
 
 haskey(ct::Accumulator, x) = haskey(ct.map, x)
 
@@ -61,32 +56,80 @@ done(ct::Accumulator, state) = done(ct.map, state)
 
 # manipulation
 
-push!(ct::Accumulator, x, a::Number) = (ct.map[x] = ct[x] + a)
-push!(ct::Accumulator{T,V}, x) where {T,V} = push!(ct, x, one(V))
+"""
+    inc!(ct, x, [v=1])
+
+Increments the count for `x` by `v` (defaulting to one)
+"""
+inc!(ct::Accumulator, x, a::Number) = (ct[x] += a)
+inc!(ct::Accumulator{T,V}, x) where {T,V} = inc!(ct, x, one(V))
+
+# inc! is preferred over push!, but we need to provide push! for the Bag interpreation
+# which is used by classified_collections.jl
+push!(ct::Accumulator, x) = inc!(ct, x)
+push!(ct::Accumulator, x, a::Number) = inc!(ct, x, a)
 
 # To remove ambiguities related to Accumulator now being a subtype of Associative
-push!(ct::Accumulator{T,V}, x::T) where T<:Pair where V = push!(ct, x, one(V))
-push!(ct::Accumulator{T,V}, x::Pair) where {T,V} = push!(ct, convert(T, x))
+push!(ct::Accumulator, x::Pair)  = inc!(ct, x)
 
-function push!(ct::Accumulator, r::Accumulator)
-    for (x, v) in r
-        push!(ct, x, v)
+
+
+"""
+    dec!(ct, x, [v=1])
+
+Decrements the count for `x` by `v` (defaulting to one)
+"""
+dec!(ct::Accumulator, x, a::Number) = (ct[x] -= a)
+dec!(ct::Accumulator{T,V}, x) where {T,V} = dec!(ct, x, one(V))
+
+#TODO: once we are done deprecating `pop!` for `reset!` then add `pop!` as an alias for `dec!`
+
+"""
+    merge!(ct1, others...)
+
+Merges the other counters into `ctl`,
+summing the counts for all elements.
+"""
+function merge!(ct::Accumulator, other::Accumulator)
+    for (x, v) in other
+        inc!(ct, x, v)
     end
     ct
 end
 
-pop!(ct::Accumulator, x) = pop!(ct.map, x)
 
 function merge!(ct1::Accumulator, others::Accumulator...)
     for ct in others
-        push!(ct1,ct)
+        merge!(ct1,ct)
     end
     return ct1
 end
 
-merge(ct1::Accumulator) = ct1
-function merge(ct1::Accumulator{T,V}, others::Accumulator{T,V}...) where {T,V<:Number}
+
+"""
+     merge(counters...)
+
+Creates a new counter with total counts equal to the sum of the counts in the counters given as arguments.
+
+See also merge!
+"""
+function merge(ct1::Accumulator, others::Accumulator...)
     ct = copy(ct1)
     merge!(ct,others...)
-    return ct
 end
+
+"""
+    reset!(ct::Accumulator, x)
+
+Resets the count of `x` to zero.
+Returns its former count.
+"""
+reset!(ct::Accumulator, x) = pop!(ct.map, x)
+
+
+
+## Deprecations
+@deprecate pop!(ct::Accumulator, x) reset!(ct, x)
+@deprecate push!(ct1::Accumulator, ct2::Accumulator) merge!(ct1,ct2)
+
+
