@@ -569,7 +569,19 @@ end
 
     # issue #216
     @test DataStructures.isordered(SortedDict{Int, String})
+
+
+    # check for get!
+    dfc =  SortedDict()
+    x1 = get!(dfc,1,[1])
+    @test x1 == [1]
+    @test x1 === dfc[1]
+    x2 = get!(()->[2], dfc, 2)
+    @test x2 == [2]
+    @test x2 === dfc[2]
+
 end
+
 
 
 function bitreverse(i)

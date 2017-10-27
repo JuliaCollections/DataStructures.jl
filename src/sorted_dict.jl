@@ -199,18 +199,19 @@ end
    return exactfound ? m.bt.data[i].d : convert(D,default_)
 end
 
-
-function get!(m::SortedDict{K,D,Ord}, k_, default_) where {K,D,Ord <: Ordering}
+function get!(default_::Union{Function,Type}, m::SortedDict{K,D}, k_) where {K,D}
     k = convert(K,k_)
     i, exactfound = findkey(m.bt, k)
     if exactfound
         return m.bt.data[i].d
     else
-        default = convert(D,default_)
+        default = convert(D,default_())
         insert!(m.bt,k, default, false)
         return default
     end
 end
+
+get!(m::SortedDict, k_, default_) = get!(()->default_, m, k_)
 
 
 function getkey(m::SortedDict{K,D,Ord}, k_, default_) where {K,D,Ord <: Ordering}
