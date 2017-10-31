@@ -571,15 +571,24 @@ end
     @test DataStructures.isordered(SortedDict{Int, String})
 
 
-    # check for get!
-    dfc =  SortedDict()
+    # check for get! and get
+    dfc =  SortedDict{Int, Vector{Int}()
     x1 = get!(dfc,1,[1])
     @test x1 == [1]
     @test x1 === dfc[1]
+    @test x1 === get!(dfc, 1, [1000])
+    @test x1 === get(dfc, 1, [1000])
+    
     x2 = get!(()->[2], dfc, 2)
     @test x2 == [2]
     @test x2 === dfc[2]
-
+    @test x3 === get!(()=>[1000], dfc, 2)
+    @test x3 === get(()=>[1000], dfc, 2)
+    
+    @test [42] == get(()=>[42], dfc, 3)
+    @test !haskey(dfc, 3)
+    @test [43] == get(dfc, 4, [43])
+    @test !haskey(dfc, 4)        
 end
 
 
