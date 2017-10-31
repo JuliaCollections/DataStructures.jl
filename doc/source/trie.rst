@@ -12,6 +12,7 @@ An implementation of the `Trie` data structure. This is an associative structure
   haskey(t,"Rob") #true
   get(t,"Rob",nothing) #42
   keys(t) # "Rob", "Roger"
+  keys(subtrie(t, "Ro")) # "b", "ger"
 
 Constructors::
 
