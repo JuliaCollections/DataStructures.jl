@@ -147,6 +147,6 @@ end
 
 Returns the element at the top of the heap `h`.
 """
-top(h::BinaryHeap) = h.valtree[1]
+@inline top(h::BinaryHeap) = h.valtree[1]
 
 pop!(h::BinaryHeap{T}) where {T} = _binary_heap_pop!(h.comparer, h.valtree)
