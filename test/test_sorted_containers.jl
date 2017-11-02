@@ -572,7 +572,7 @@ end
 
 
     # check for get! and get
-    dfc =  SortedDict{Int, Vector{Int}()
+    dfc =  SortedDict{Int, Vector{Int}}()
     x1 = get!(dfc,1,[1])
     @test x1 == [1]
     @test x1 === dfc[1]
