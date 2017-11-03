@@ -582,10 +582,10 @@ end
     x2 = get!(()->[2], dfc, 2)
     @test x2 == [2]
     @test x2 === dfc[2]
-    @test x2 === get!(()=>[1000], dfc, 2)
-    @test x2 === get(()=>[1000], dfc, 2)
+    @test x2 === get!(()->[1000], dfc, 2)
+    @test x2 === get(()->[1000], dfc, 2)
     
-    @test [42] == get(()=>[42], dfc, 3)
+    @test [42] == get(()->[42], dfc, 3)
     @test !haskey(dfc, 3)
     @test [43] == get(dfc, 4, [43])
     @test !haskey(dfc, 4)        
