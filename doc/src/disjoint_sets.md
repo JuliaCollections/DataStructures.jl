@@ -1,5 +1,4 @@
-Disjoint Sets
-=============
+# Disjoint Sets
 
 Some algorithms, such as finding connected components in undirected
 graph and Kruskal's method of finding minimum spanning tree, require a

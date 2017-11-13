@@ -52,8 +52,7 @@ h = mutable_binary_minheap([1,4,3,2])
 h = mutable_binary_maxheap([1,4,3,2])    # create a mutable min/max heap from a vector
 ```
 
-Functions using heaps
-=====================
+# Functions using heaps
 
 Heaps can be used to extract the largest or smallest elements of an
 array without sorting the entire array first:

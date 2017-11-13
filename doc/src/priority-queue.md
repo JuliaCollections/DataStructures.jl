@@ -1,5 +1,4 @@
-Priority Queue
-==============
+# Priority Queue
 
 The `PriorityQueue` type provides a basic priority queue implementation
 allowing for arbitrary key and priority types. Multiple identical keys

@@ -1,5 +1,4 @@
-DataStructures.IntSet
-=====================
+# DataStructures.IntSet
 
 `DataStructures.IntSet` is a drop-in replacement for the Base `IntSet`
 type. It efficiently stores dense collections of small non-negative

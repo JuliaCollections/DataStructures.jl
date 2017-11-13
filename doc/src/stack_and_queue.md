@@ -1,5 +1,4 @@
-Stack and Queue
-===============
+# Stack and Queue
 
 The `Stack` and `Queue` types are a light-weight wrapper of a deque
 type, which respectively provide interfaces for LIFO and FIFO access.

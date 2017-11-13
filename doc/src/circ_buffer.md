@@ -1,5 +1,4 @@
-CircularBuffer
-==============
+# CircularBuffer
 
 The `CircularBuffer` type implements a circular buffer of fixed
 `capacity` where new items are pushed to the back of the list,

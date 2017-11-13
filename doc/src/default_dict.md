@@ -1,5 +1,4 @@
-DefaultDict and DefaultOrderedDict
-==================================
+# DefaultDict and DefaultOrderedDict
 
 A DefaultDict allows specification of a default value to return when a
 requested key is not in a dictionary.

@@ -1,5 +1,4 @@
-DataStructures.jl
-=================
+# DataStructures.jl
 
 This package implements a variety of data structures, including
 
@@ -22,8 +21,7 @@ This package implements a variety of data structures, including
 
 Contents:
 
-Indices and tables
-==================
+# Indices and tables
 
 -   genindex
 -   modindex

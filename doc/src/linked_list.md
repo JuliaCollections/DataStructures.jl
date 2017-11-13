@@ -1,5 +1,4 @@
-Linked List
-===========
+# Linked List
 
 A list of sequentially linked nodes. This allows efficient insertion of
 nodes to the front of the list:

@@ -1,5 +1,4 @@
-CircularDeque
-=============
+# CircularDeque
 
 The `CircularDeque` type implements a double-ended queue using a
 circular buffer of fixed `capacity`. This data structure supports

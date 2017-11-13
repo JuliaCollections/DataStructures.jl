@@ -1,5 +1,4 @@
-Sorted Containers
-=================
+# Sorted Containers
 
 Three sorted containers are provided: SortedDict, SortedMultiDict and
 SortedSet. *SortedDict* is similar to the built-in Julia type `Dict`
@@ -26,8 +25,7 @@ functions are `isless(key1,key2)` (true when `key1 < key2`) and
 `isequal(key1,key2)` (true when `key1 == key2`) where `key1` and `key2`
 are keys. More details are provided below.
 
-Tokens for Sorted Containers
-\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~
+## Tokens for Sorted Containers
 
 The sorted container objects use a special type for indexing called a
 *token* defined as a two-entry tuple and aliased as `SDToken`,
@@ -87,8 +85,7 @@ integers. However, for the purpose of future compatibility, the user
 should not extract this internal representation; these integers do not
 have a documented interpretation in terms of the container.
 
-Constructors for Sorted Containers
-\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~
+## Constructors for Sorted Containers
 
 `SortedDict(o=Forward)` and `SortedDict{K,V}(o=Forward)`
 
@@ -194,16 +191,14 @@ c = SortedDict(d)
     array) and ordering object `o`. The ordering object defaults to
     `Forward` if not specified.
 
-Complexity of Sorted Containers
-\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~
+## Complexity of Sorted Containers
 
 In the list of functions below, the running time of the various
 operations is provided. In these running times, *n* denotes the current
 size (number of items) in the container at the time of the function
 call, and *c* denotes the time needed to compare two keys.
 
-Navigating the Containers
--------------------------
+### Navigating the Containers
 
 `sd[k]`
 
@@ -341,8 +336,7 @@ Navigating the Containers
     key, then the pair (past-end-semitoken, before-start-semitoken) is
     returned. Time: O(*c* log *n*)
 
-Inserting & Deleting in Sorted Containers
-\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~
+## Inserting & Deleting in Sorted Containers
 
 `empty!(sc)`
 
@@ -424,8 +418,7 @@ Inserting & Deleting in Sorted Containers
     the full token `(sc,st)` refers to. This expression may occur on
     either side of an assignment statement. Time: O(1)
 
-Token Manipulation
-------------------
+### Token Manipulation
 
 `compare(sc,st1,st2)`
 
@@ -454,8 +447,7 @@ Token Manipulation
     data, 2 if the token is the before-start token and 3 if it is the
     past-end token. Time: O(1)
 
-Iteration Over Sorted Containers
-\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~
+## Iteration Over Sorted Containers
 
 As is standard in Julia, iteration over the containers is implemented
 via calls to three functions, `start`, `next` and `done`. It is usual
@@ -619,8 +611,7 @@ is because the for-loop internal state variable is already advanced to
 the next token at the beginning of the body, so `st` is not necessarily
 referred to in the loop body (unless the user refers to it).
 
-Other Functions
----------------
+### Other Functions
 
 ```julia
 isempty(sc)
@@ -856,8 +847,7 @@ merge!(sc, sc1...)
     provides equivalent functionality. Time: O(*cN* log *N*), where *N*
     is the total size of all the arguments.
 
-Set operations
---------------
+### Set operations
 
 The SortedSet container supports the following set operations. Note that
 in the case of intersect, symdiff and setdiff, the two SortedSets should
@@ -931,8 +921,7 @@ issubset(iterable, ss)
     the key-type of `ss`. Time: O(*cm* log *n*), where *n* is the sizes
     of `ss` and *m* is the number of items in `iterable`.
 
-Ordering of keys
-----------------
+### Ordering of keys
 
 As mentioned earlier, the default ordering of keys uses `isless` and
 `isequal` functions. If the default ordering is used, it is a
@@ -1014,8 +1003,9 @@ import Base.lt
 import DataStructures.eq
 ```
 
-Cautionary note on mutable keys
-\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~ As with ordinary
+## Cautionary note on mutable keys
+
+As with ordinary
 Dicts, keys for the sorted containers can be either mutable or
 immutable. In the case of mutable keys, it is important that the keys
 not be mutated once they are in the container else the indexing
@@ -1032,8 +1022,7 @@ sd[k] = 19
 k[1] = 7
 ```
 
-Performance of Sorted Containers
-\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~
+## Performance of Sorted Containers
 
 The sorted containers are currently not optimized for cache performance.
 This will be addressed in the future.
