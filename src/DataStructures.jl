@@ -2,7 +2,7 @@ __precompile__()
 
 module DataStructures
 
-    import Base: <, <=, ==, length, isempty, start, next, done,
+    import Base: <, <=, ==, length, isempty, start, next, done, delete!,
                  show, dump, empty!, getindex, setindex!, get, get!,
                  in, haskey, keys, merge, copy, cat,
                  push!, pop!, shift!, unshift!, insert!,
@@ -20,12 +20,12 @@ module DataStructures
     export deque, enqueue!, dequeue!, dequeue_pair!, update!, reverse_iter
     export capacity, num_blocks, front, back, top, top_with_handle, sizehint!
 
-    export Accumulator, counter
+    export Accumulator, counter, reset!, inc!, dec!
+
     export ClassifiedCollections
     export classified_lists, classified_sets, classified_counters
 
     export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set, root_union!
-    export push!
 
     export AbstractHeap, compare, extract_all!
     export BinaryHeap, binary_minheap, binary_maxheap, nlargest, nsmallest
