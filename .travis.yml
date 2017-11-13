@@ -24,4 +24,4 @@ after_success:
   # Documenter auto-deploy
   # following `using` instruction is for triggering precompilation
   - julia -e 'Pkg.add("Documenter")'
-  - julia -e 'cd(Pkg.dir("DataStructures", "docs")); include("make.jl")'
+  - julia -e 'cd(Pkg.dir("DataStructures", "doc")); include("make.jl")'
