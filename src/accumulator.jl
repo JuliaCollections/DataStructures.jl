@@ -24,7 +24,7 @@ function counter(seq)
     return ct
 end
 
-eltype_for_accumulator(seq::T) = eltype(T)
+eltype_for_accumulator(seq::T) where T = eltype(T)
 function eltype_for_accumulator(seq::T) where {T<:Base.Generator}
     @static if VERSION < v"0.7.0-DEV.2096"
         Base._default_eltype(T)
