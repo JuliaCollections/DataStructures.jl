@@ -1,5 +1,4 @@
-OrderedDicts and OrderedSets
-============================
+# OrderedDicts and OrderedSets
 
 `OrderedDicts` are simply dictionaries whose entries have a particular
 order. For `OrderedDicts` (and `OrderedSets`), order refers to

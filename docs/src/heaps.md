@@ -1,5 +1,4 @@
-Heaps
-=====
+# Heaps
 
 Heaps are data structures that efficiently maintain the minimum (or
 maximum) for a set of data that may dynamically change.

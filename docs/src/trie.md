@@ -1,5 +1,4 @@
-Trie
-====
+# Trie
 
 An implementation of the Trie data structure. This is an associative
 structure, with AbstractString keys:
