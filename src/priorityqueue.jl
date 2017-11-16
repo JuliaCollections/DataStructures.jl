@@ -330,6 +330,7 @@ end
 
 """
     delete!(pq, key)
+
 Delete the mapping for the given key in a priority queue, and return the priority queue.
 # Examples
 ```jldoctest
@@ -338,10 +339,11 @@ DataStructures.PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 ent
   "c" => 1
   "b" => 3
   "a" => 2
+
 julia> delete!(q, "b")
 DataStructures.PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
   "c" => 1
-  "a" => 4
+  "a" => 2
 ```
 """
 function delete!(pq::PriorityQueue, key)
