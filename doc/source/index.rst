@@ -3,7 +3,7 @@ DataStructures.jl
 
 This package implements a variety of data structures, including
 
-* Deque (based on block-list)
+* Deque (implemented with an `unrolled linked list <https://en.wikipedia.org/wiki/Unrolled_linked_list>`_)
 * CircularBuffer
 * CircularDeque (based on a circular buffer)
 * Stack
