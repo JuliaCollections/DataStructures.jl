@@ -184,37 +184,39 @@ end
 end
 
 
-
-
 @inline orderobject(m::SortedDict) = m.bt.ord
 
 
 @inline function haskey(m::SortedDict, k_)
-    i, exactfound = findkey(m.bt,convert(keytype(m),k_))
+    i, exactfound = findkey(m.bt, convert(keytype(m), k_))
     exactfound
 end
 
-@inline function get(m::SortedDict{K,D,Ord}, k_, default_) where {K,D,Ord <: Ordering}
-    i, exactfound = findkey(m.bt, convert(K,k_))
-   return exactfound ? m.bt.data[i].d : convert(D,default_)
+function get(default_::Union{Function,Type}, m::SortedDict{K,D}, k_) where {K,D}
+    i, exactfound = findkey(m.bt, convert(K, k_))
+   return exactfound ? m.bt.data[i].d : convert(D, default_())
 end
 
+get(m::SortedDict, k_, default_) = get(()->default_, m, k_)
 
-function get!(m::SortedDict{K,D,Ord}, k_, default_) where {K,D,Ord <: Ordering}
+
+function get!(default_::Union{Function,Type}, m::SortedDict{K,D}, k_) where {K,D}
     k = convert(K,k_)
     i, exactfound = findkey(m.bt, k)
     if exactfound
         return m.bt.data[i].d
     else
-        default = convert(D,default_)
+        default = convert(D, default_())
         insert!(m.bt,k, default, false)
         return default
     end
 end
 
+get!(m::SortedDict, k_, default_) = get!(()->default_, m, k_)
+
 
 function getkey(m::SortedDict{K,D,Ord}, k_, default_) where {K,D,Ord <: Ordering}
-    i, exactfound = findkey(m.bt, convert(K,k_))
+    i, exactfound = findkey(m.bt, convert(K, k_))
     exactfound ? m.bt.data[i].k : convert(K, default_)
 end
 
@@ -222,14 +224,14 @@ end
 ## key
 
 @inline function delete!(m::SortedDict, k_)
-    i, exactfound = findkey(m.bt,convert(keytype(m),k_))
+    i, exactfound = findkey(m.bt, convert(keytype(m), k_))
     !exactfound && throw(KeyError(k_))
     delete!(m.bt, i)
     m
 end
 
 @inline function pop!(m::SortedDict, k_)
-    i, exactfound = findkey(m.bt,convert(keytype(m),k_))
+    i, exactfound = findkey(m.bt, convert(keytype(m), k_))
     !exactfound && throw(KeyError(k_))
     d = m.bt.data[i].d
     delete!(m.bt, i)
@@ -274,7 +276,7 @@ function mergetwo!(m::SortedDict{K,D,Ord},
 end
 
 function packcopy(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering}
-    w = SortedDict(Dict{K,D}(),orderobject(m))
+    w = SortedDict(Dict{K,D}(), orderobject(m))
     mergetwo!(w,m)
     w
 end
