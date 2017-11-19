@@ -87,109 +87,15 @@ have a documented interpretation in terms of the container.
 
 ## Constructors for Sorted Containers
 
-`SortedDict(o=Forward)` and `SortedDict{K,V}(o=Forward)`
+    SortedMultiDict(ks, vs, o)
 
-:   Construct an empty `SortedDict` with key type `K` and value type
-    `V`. If `K` and `V` are not specified, the dictionary defaults to a
-    `SortedDict{Any,Any}`. Keys and values are converted to the given
-    type upon insertion. Ordering `o` defaults to `Forward` ordering.
+Construct a SortedMultiDict using keys given by `ks`, values given
+by `vs` and ordering object `o`. The ordering object defaults to
+`Forward` if not specified. The two arguments `ks` and `vs` are
+1-dimensional arrays of the same length in which `ks` holds keys and
+`vs` holds the corresponding values.
 
-    **Note that a key type of `Any` or any other abstract type will lead
-    to slow performance, as the values are stored boxed (i.e., as
-    pointers), and insertion will require a run-time lookup of the
-    appropriate comparison function. It is recommended to always specify
-    a concrete key type, or to use one of the constructors below in
-    which the key type is inferred.**
 
-`SortedDict(k1=>v1, k2=>v2, ...)` and `SortedDict{K,V}(k1=>v1, k2=>v2, ...)`
-
-:   Construct a `SortedDict` from the given key-value pairs. If `K` and
-    `V` are not specified, key type and value type are inferred from the
-    given key-value pairs, and ordering is assumed to be `Forward`
-    ordering.
-
-`SortedDict(o, k1=>v1, k2=>v2, ...)` and `SortedDict{K,V}(o, k1=>v1, k2=>v2, ...)`
-
-:   Construct a `SortedDict` from the given pairs with the specified
-    ordering `o`. If `K` and `V` are not specified, the key type and
-    value type are inferred from the given pairs. See below for more
-    information about ordering.
-
-`SortedDict(d,o=Forward)` and `SortedDict{K,V}(d,o=Forward)`
-
-:   Construct a `SortedDict` from an ordinary Julia dict `d` (or any
-    associative type), e.g.:
-
-```julia
-d = Dict("New York" => 1788, "Illinois" => 1818)
-c = SortedDict(d)
-```
-
-    In this example the key-type is deduced to be `String`, while the
-    value-type is `Int`.
-
-    If `K` and `V` are not specified, the key type and value type are
-    inferred from the given dictionary. The ordering object `o` defaults
-    to `Forward`.
-
-    See below for more information about ordering.
-
-`SortedDict(iter,o=Forward)` and `SortedDict{K,V}(iter,o=Forward)`
-
-:   Construct a `SortedDict` from an arbitrary iterable object of
-    `key=>value` pairs. If `K` and `V` are not specified, the key type
-    and value type are inferred from the given iterable. The ordering
-    object `o` defaults to `Forward`.
-
-`SortedMultiDict(ks,vs,o)`
-
-:   Construct a SortedMultiDict using keys given by `ks`, values given
-    by `vs` and ordering object `o`. The ordering object defaults to
-    `Forward` if not specified. The two arguments `ks` and `vs` are
-    1-dimensional arrays of the same length in which `ks` holds keys and
-    `vs` holds the corresponding values.
-
-`SortedMultiDict(k1=>v1, k2=>v2, ...)`
-
-:   Arguments are key-value pairs for insertion into the multidict. The
-    keys must be of the same type as one another; the values must also
-    be of one type.
-
-`SortedMultiDict(o, k1=>v1, k2=>v2, ...)`
-
-:   The first argument `o` is an ordering object. The remaining
-    arguments are key-value pairs for insertion into the multidict. The
-    keys must be of the same type as one another; the values must also
-    be of one type.
-
-`SortedMultiDict(iter)`
-
-:   Takes an arbitrary iterable object of key=&gt;value pairs. The
-    default Forward ordering is used.
-
-`SortedMultiDict(iter,o)`
-
-:   Takes an arbitrary iterable object of key=&gt;value pairs. The
-    ordering object `o` is explicitly given.
-
-`SortedMultiDict{K,V,Ord}(o)`
-
-:   Construct an empty sorted multidict in which type parameters are
-    explicitly listed; ordering object is explicitly specified. (See
-    below for discussion of ordering.) An empty SortedMultiDict may also
-    be constructed via `SortedMultiDict(K[], V[], o)` where the `o`
-    argument is optional.
-
-`SortedSet()` and `SortedSet{K}()`
-
-:   Construct a `SortedSet{Any}` with `Forward` ordering. Refer to the
-    remark above about loss of performance when the key-type is `Any`.
-
-`SortedSet(iter,o=Forward)`, `SortedSet{K}(iter,o=Forward)`, `SortedSet(o, iter)`, `SortedSet{K}(o, iter)`
-
-:   Construct a SortedSet using keys given by iterable `iter` (e.g., an
-    array) and ordering object `o`. The ordering object defaults to
-    `Forward` if not specified.
 
 ## Complexity of Sorted Containers
 
@@ -200,252 +106,156 @@ call, and *c* denotes the time needed to compare two keys.
 
 ### Navigating the Containers
 
-`sd[k]`
+    deref((sc, st))
 
-:   Argument `sd` is a SortedDict and `k` is a key. In an expression,
-    this retrieves the value associated with the key (or `KeyError` if
-    none). On the left-hand side of an assignment, this assigns or
-    reassigns the value associated with the key. (For assigning and
-    reassigning, see also `insert!` below.) Time: O(*c* log *n*)
+Argument `(sc,st)` is a token (i.e., `sc` is a container and `st` is
+a semitoken). Note the double-parentheses in the calling syntax: the
+argument of `deref` is a token, which is defined to be a 2-tuple.
+This returns a key=&gt;value pair. pointed to by the token for
+SortedDict and SortedMultiDict. Note that the syntax
+`k,v=deref((sc,st))` is valid because Julia automatically iterates
+over the two entries of the Pair in order to assign `k` and `v`. For
+SortedSet this returns a key. Time: O(1)
 
-`find(sd,k)`
+    deref_key((sc, st))
 
-:   Argument `sd` is a SortedDict and argument `k` is a key. This
-    function returns the semitoken that refers to the item whose key is
-    `k`, or past-end semitoken if `k` is absent. Time: O(*c* log *n*)
+Argument `(sc,st)` is a token for SortedMultiDict or SortedDict.
+This returns the key (i.e., the first half of a key=&gt;value pair)
+pointed to by the token. This functionality is available as plain
+`deref` for SortedSet. Time: O(1)
 
-`deref((sc,st))`
+    deref_value((sc, st))
 
-:   Argument `(sc,st)` is a token (i.e., `sc` is a container and `st` is
-    a semitoken). Note the double-parentheses in the calling syntax: the
-    argument of `deref` is a token, which is defined to be a 2-tuple.
-    This returns a key=&gt;value pair. pointed to by the token for
-    SortedDict and SortedMultiDict. Note that the syntax
-    `k,v=deref((sc,st))` is valid because Julia automatically iterates
-    over the two entries of the Pair in order to assign `k` and `v`. For
-    SortedSet this returns a key. Time: O(1)
+Argument `(sc,st)` is a token for SortedMultiDict or SortedDict.
+This returns the value (i.e., the second half of a key=&gt;value
+pair) pointed to by the token. Time: O(1)
 
-`deref_key((sc,st))`
+    startof(sc)
 
-:   Argument `(sc,st)` is a token for SortedMultiDict or SortedDict.
-    This returns the key (i.e., the first half of a key=&gt;value pair)
-    pointed to by the token. This functionality is available as plain
-    `deref` for SortedSet. Time: O(1)
+Argument `sc` is SortedDict, SortedMultiDict or SortedSet. This
+function returns the semitoken of the first item according to the
+sorted order in the container. If the container is empty, it returns
+the past-end semitoken. Time: O(log *n*)
 
-`deref_value((sc,st))`
+    endof(sc)
 
-:   Argument `(sc,st)` is a token for SortedMultiDict or SortedDict.
-    This returns the value (i.e., the second half of a key=&gt;value
-    pair) pointed to by the token. Time: O(1)
+Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
+function returns the semitoken of the last item according to the
+sorted order in the container. If the container is empty, it returns
+the before-start semitoken. Time: O(log *n*)
 
-`startof(sc)`
+    pastendsemitoken(sc)
 
-:   Argument `sc` is SortedDict, SortedMultiDict or SortedSet. This
-    function returns the semitoken of the first item according to the
-    sorted order in the container. If the container is empty, it returns
-    the past-end semitoken. Time: O(log *n*)
+Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
+function returns the past-end semitoken. Time: O(1)
 
-`endof(sc)`
+    beforestartsemitoken(sc)
 
-:   Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
-    function returns the semitoken of the last item according to the
-    sorted order in the container. If the container is empty, it returns
-    the before-start semitoken. Time: O(log *n*)
+Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
+function returns the before-start semitoken. Time: O(1)
 
-`first(sc)`
+    advance((sc,st))
 
-:   Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
-    function returns the first item (a `k=>v` pair for SortedDict and
-    SortedMultiDict or a key for SortedSet) according to the sorted
-    order in the container. Thus, `first(sc)` is equivalent to
-    `deref((sc,startof(sc)))`. It is an error to call this function on
-    an empty container. Time: O(log *n*)
+Argument `(sc,st)` is a token. This function returns the semitoken
+of the next entry in the container according to the sort order of
+the keys. After the last item, this routine returns the past-end
+semitoken. It is an error to invoke this function if `(sc,st)` is
+the past-end token. If `(sc,st)` is the before-start token, then
+this routine returns the semitoken of the first item in the sort
+order (i.e., the same semitoken returned by the `startof` function).
+Time: O(log *n*)
 
-`last(sc)`
+    regress((sc,st))
 
-:   Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
-    function returns the last item (a `k=>v` pair for SortedDict and
-    SortedMultiDict or a key for SortedSet) according to the sorted
-    order in the container. Thus, `last(sc)` is equivalent to
-    `deref((sc,endof(sc)))`. It is an error to call this function on an
-    empty container. Time: O(log *n*)
+Argument `(sc,st)` is a token. This function returns the semitoken
+of the previous entry in the container according to the sort order
+of the keys. If `(sc,st)` indexes the first item, this routine
+returns the before-start semitoken. It is an error to invoke this
+function if `(sc,st)` is the before-start token. If `(sc,st)` is the
+past-end token, then this routine returns the smitoken of the last
+item in the sort order (i.e., the same semitoken returned by the
+`endof` function). Time: O(log *n*)
 
-`pastendsemitoken(sc)`
+    searchsortedfirst(sc,k)
 
-:   Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
-    function returns the past-end semitoken. Time: O(1)
+Argument `sc` is a SortedDict, SortedMultiDict or SortedSet and `k`
+is a key. This routine returns the semitoken of the first item in
+the container whose key is greater than or equal to `k`. If there is
+no such key, then the past-end semitoken is returned. Time: O(*c*
+log *n*)
 
-`beforestartsemitoken(sc)`
+    searchsortedlast(sc,k)
 
-:   Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
-    function returns the before-start semitoken. Time: O(1)
+Argument `sc` is a SortedDict, SortedMultiDict or SortedSet and `k`
+is a key. This routine returns the semitoken of the last item in the
+container whose key is less than or equal to `k`. If there is no
+such key, then the before-start semitoken is returned. Time: O(*c*
+log *n*)
 
-`advance((sc,st))`
+    searchsortedafter(sc,k)
 
-:   Argument `(sc,st)` is a token. This function returns the semitoken
-    of the next entry in the container according to the sort order of
-    the keys. After the last item, this routine returns the past-end
-    semitoken. It is an error to invoke this function if `(sc,st)` is
-    the past-end token. If `(sc,st)` is the before-start token, then
-    this routine returns the semitoken of the first item in the sort
-    order (i.e., the same semitoken returned by the `startof` function).
-    Time: O(log *n*)
+Argument `sc` is a SortedDict, SortedMultiDict or SortedSet and `k`
+is an element of the key type. This routine returns the semitoken of
+the first item in the container whose key is greater than `k`. If
+there is no such key, then the past-end semitoken is returned. Time:
+O(*c* log *n*)
 
-`regress((sc,st))`
+    searchequalrange(sc,k)
 
-:   Argument `(sc,st)` is a token. This function returns the semitoken
-    of the previous entry in the container according to the sort order
-    of the keys. If `(sc,st)` indexes the first item, this routine
-    returns the before-start semitoken. It is an error to invoke this
-    function if `(sc,st)` is the before-start token. If `(sc,st)` is the
-    past-end token, then this routine returns the smitoken of the last
-    item in the sort order (i.e., the same semitoken returned by the
-    `endof` function). Time: O(log *n*)
-
-`searchsortedfirst(sc,k)`
-
-:   Argument `sc` is a SortedDict, SortedMultiDict or SortedSet and `k`
-    is a key. This routine returns the semitoken of the first item in
-    the container whose key is greater than or equal to `k`. If there is
-    no such key, then the past-end semitoken is returned. Time: O(*c*
-    log *n*)
-
-`searchsortedlast(sc,k)`
-
-:   Argument `sc` is a SortedDict, SortedMultiDict or SortedSet and `k`
-    is a key. This routine returns the semitoken of the last item in the
-    container whose key is less than or equal to `k`. If there is no
-    such key, then the before-start semitoken is returned. Time: O(*c*
-    log *n*)
-
-`searchsortedafter(sc,k)`
-
-:   Argument `sc` is a SortedDict, SortedMultiDict or SortedSet and `k`
-    is an element of the key type. This routine returns the semitoken of
-    the first item in the container whose key is greater than `k`. If
-    there is no such key, then the past-end semitoken is returned. Time:
-    O(*c* log *n*)
-
-`searchequalrange(sc,k)`
-
-:   Argument `sc` is a SortedMultiDict and `k` is an element of the key
-    type. This routine returns a pair of semitokens; the first of the
-    pair is the semitoken addressing the first item in the container
-    with key `k` and the second is the semitoken addressing the last
-    item in the container with key `k`. If no item matches the given
-    key, then the pair (past-end-semitoken, before-start-semitoken) is
-    returned. Time: O(*c* log *n*)
+Argument `sc` is a SortedMultiDict and `k` is an element of the key
+type. This routine returns a pair of semitokens; the first of the
+pair is the semitoken addressing the first item in the container
+with key `k` and the second is the semitoken addressing the last
+item in the container with key `k`. If no item matches the given
+key, then the pair (past-end-semitoken, before-start-semitoken) is
+returned. Time: O(*c* log *n*)
 
 ## Inserting & Deleting in Sorted Containers
 
-`empty!(sc)`
+    empty!(sc)
 
-:   Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
-    empties the container. Time: O(1).
+Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
+empties the container. Time: O(1).
 
-`insert!(sc,k,v)`
+    delete!((sc, st))
 
-:   Argument `sc` is a SortedDict or SortedMultiDict, `k` is a key and
-    `v` is the corresponding value. This inserts the `(k,v)` pair into
-    the container. If the key is already present in a SortedDict, this
-    overwrites the old value. In the case of SortedMultiDict, no
-    overwriting takes place (since SortedMultiDict allows the same key
-    to associate with multiple values). In the case of SortedDict, the
-    return value is a pair whose first entry is boolean and indicates
-    whether the insertion was new (i.e., the key was not previously
-    present) and the second entry is the semitoken of the new entry. In
-    the case of SortedMultiDict, a semitoken is returned (but no
-    boolean). Time: O(*c* log *n*)
+Argument `(sc,st)` is a token for a SortedDict, SortedMultiDict or
+SortedSet. This operation deletes the item addressed by `(sc,st)`.
+It is an error to call this on an entry that has already been
+deleted or on the before-start or past-end tokens. After this
+operation is complete, `(sc,st)` is an invalid token and cannot be
+used in any further operations. Time: O(log *n*)
 
-`insert!(sc,k)`
 
-:   Argument `sc` is a SortedSet and `k` is a key. This inserts the key
-    into the container. If the key is already present, this overwrites
-    the old value. (This is not necessarily a no-op; see below for
-    remarks about the customizing the sort order.) The return value is a
-    pair whose first entry is boolean and indicates whether the
-    insertion was new (i.e., the key was not previously present) and the
-    second entry is the semitoken of the new entry. Time: O(*c* log *n*)
-
-`push!(sc,k)`
-
-:   Argument `sc` is a SortedSet and `k` is a key. This inserts the key
-    into the container. If the key is already present, this overwrites
-    the old value. (This is not necessarily a no-op; see below for
-    remarks about the customizing the sort order.) The return value is
-    `sc`. Time: O(*c* log *n*)
-
-`push!(sc, k=>v)`
-
-:   Argument `sc` is a SortedDict or SortedMultiDict and `k=>v` is a
-    key-value pair. This inserts the key-value pair into the container.
-    If the key is already present, this overwrites the old value. The
-    return value is `sc`. Time: O(*c* log *n*)
-
-`delete!((sc,st))`
-
-:   Argument `(sc,st)` is a token for a SortedDict, SortedMultiDict or
-    SortedSet. This operation deletes the item addressed by `(sc,st)`.
-    It is an error to call this on an entry that has already been
-    deleted or on the before-start or past-end tokens. After this
-    operation is complete, `(sc,st)` is an invalid token and cannot be
-    used in any further operations. Time: O(log *n*)
-
-`delete!(sc,k)`
-
-:   Argument `sc` is a SortedDict or SortedSet and `k` is a key. This
-    operation deletes the item whose key is `k`. It is a `KeyError` if
-    `k` is not a key of an item in the container. After this operation
-    is complete, any token addressing the deleted item is invalid.
-    Returns `sc`. Time: O(*c* log *n*)
-
-`pop!(sc,k)`
-
-:   Deletes the item with key `k` in SortedDict or SortedSet `sc` and
-    returns the value that was associated with `k` in the case of
-    SortedDict or `k` itself in the case of SortedSet. A `KeyError`
-    results if `k` is not in `sc`. Time: O(*c* log *n*)
-
-`pop!(ss)`
-
-:   Deletes the item with first key in SortedSet `ss` and returns the
-    key. A `BoundsError` results if `ss` is empty. Time: O(*c* log *n*)
-
-`sc[st]`
-
-:   If `st` is a semitoken and `sc` is a SortedDict or SortedMultiDict,
-    then `sc[st]` refers to the value field of the (key,value) pair that
-    the full token `(sc,st)` refers to. This expression may occur on
-    either side of an assignment statement. Time: O(1)
 
 ### Token Manipulation
 
-`compare(sc,st1,st2)`
+    compare(sc, st1, st2)
 
-:   Here, `st1` and `st2` are semitokens for the same container `sc`;
-    this function determines the relative positions of the data items
-    indexed by `(sc,st1)` and `(sc,st2)` in the sorted order. The return
-    value is -1 if `(sc,st1)` precedes `(sc,st2)`, 0 if they are equal,
-    and 1 if `(sc,st1)` succeeds `(sc,st2)`. This function compares the
-    tokens by determining their relative position within the tree
-    without dereferencing them. For SortedDict it is mostly equivalent
-    to comparing `deref_key((sc,st1))` to `deref_key((sc,st2))` using
-    the ordering of the SortedDict except in the case that either
-    `(sc,st1)` or `(sc,st2)` is the before-start or past-end token, in
-    which case the `deref` operation will fail. Which one is more
-    efficient depends on the time-complexity of comparing two keys.
-    Similarly, for SortedSet it is mostly equivalent to comparing
-    `deref((sc,st1))` to `deref((sc,st2))`. For SortedMultiDict, this
-    function is not equivalent to a key comparison since two items in a
-    SortedMultiDict with the same key are not necessarily the same item.
-    Time: O(log *n*)
+Here, `st1` and `st2` are semitokens for the same container `sc`;
+this function determines the relative positions of the data items
+indexed by `(sc,st1)` and `(sc,st2)` in the sorted order. The return
+value is -1 if `(sc,st1)` precedes `(sc,st2)`, 0 if they are equal,
+and 1 if `(sc,st1)` succeeds `(sc,st2)`. This function compares the
+tokens by determining their relative position within the tree
+without dereferencing them. For SortedDict it is mostly equivalent
+to comparing `deref_key((sc,st1))` to `deref_key((sc,st2))` using
+the ordering of the SortedDict except in the case that either
+`(sc,st1)` or `(sc,st2)` is the before-start or past-end token, in
+which case the `deref` operation will fail. Which one is more
+efficient depends on the time-complexity of comparing two keys.
+Similarly, for SortedSet it is mostly equivalent to comparing
+`deref((sc,st1))` to `deref((sc,st2))`. For SortedMultiDict, this
+function is not equivalent to a key comparison since two items in a
+SortedMultiDict with the same key are not necessarily the same item.
+Time: O(log *n*)
 
-`status((sc,st))`
+    status((sc, st))
 
-:   This function returns 0 if the token `(sc,st)` is invalid (e.g.,
-    refers to a deleted item), 1 if the token is valid and points to
-    data, 2 if the token is the before-start token and 3 if it is the
-    past-end token. Time: O(1)
+This function returns 0 if the token `(sc,st)` is invalid (e.g.,
+refers to a deleted item), 1 if the token is valid and points to
+data, 2 if the token is the before-start token and 3 if it is the
+past-end token. Time: O(1)
 
 ## Iteration Over Sorted Containers
 
@@ -613,53 +423,31 @@ referred to in the loop body (unless the user refers to it).
 
 ### Other Functions
 
-```julia
-isempty(sc)
-```
+    isempty(sc)
 
-:   Returns `true` if the container is empty (no items). Time: O(1)
+Returns `true` if the container is empty (no items). Time: O(1)
 
-```julia
-length(sc)
-```
+    length(sc)
 
-:   Returns the length, i.e., number of items, in the container. Time:
-    O(1)
+Returns the length, i.e., number of items, in the container. Time:
+O(1)
 
-```julia
-in(p,sc)
-```
+    in(x, iter)
 
-:   Returns true if `p` is in `sc`. In the case that `sc` is a
-    SortedDict or SortedMultiDict, `p` is a key=&gt;value pair. In the
-    case that `sc` is a SortedSet, `p` should be a key. Time: O(*c* log
-    *n* + *d*) for SortedDict and SortedSet, where *d* stands for the
-    time to compare two values. In the case of SortedMultiDict, the time
-    is O(*c* log *n* + *dl*), and *l* stands for the number of entries
-    that have the key of the given pair. (So therefore this call is
-    inefficient if the same key addresses a large number of values, and
-    an alternative should be considered.)
+Returns true if `x` is in `iter`, where `iter` refers to any of the
+iterable objects described above in the discussion of container
+loops and `x` is of the appropriate type. For all of the iterables
+except the five listed below, the algorithm used is a linear-time
+search. For example, the call:
 
-```julia
-in(x,iter)
-```
+    `(k=>v) in exclusive(sd, st1, st2)`
 
-:   Returns true if `x` is in `iter`, where `iter` refers to any of the
-    iterable objects described above in the discussion of container
-    loops and `x` is of the appropriate type. For all of the iterables
-    except the five listed below, the algorithm used is a linear-time
-    search. For example, the call:
+where `sd` is a SortedDict, `st1` and `st2` are semitokens, `k` is a
+key, and `v` is a value, will loop over all entries in the
+dictionary between the two tokens and a compare for equality using
+`isequal` between the indexed item and `k=>v`.
 
-```julia
-(k=>v) in exclusive(sd,st1,st2)
-```
-
-    where `sd` is a SortedDict, `st1` and `st2` are semitokens, `k` is a
-    key, and `v` is a value, will loop over all entries in the
-    dictionary between the two tokens and a compare for equality using
-    `isequal` between the indexed item and `k=>v`.
-
-    The five exceptions are:
+The five exceptions are:
 
 ```julia
 (k=>v) in sd
@@ -669,18 +457,18 @@ k in keys(sd)
 k in keys(smd)
 ```
 
-    Here, `sd` is a SortedDict, `smd` is a SortedMultiDict, and `ss` is
-    a SortedSet.
+Here, `sd` is a SortedDict, `smd` is a SortedMultiDict, and `ss` is
+a SortedSet.
 
-    These five invocations of `in` use the index structure of the sorted
-    container and test equality based on the order object of the keys
-    rather than `isequal`. Therefore, these five are all faster than
-    linear-time looping. The first three were already discussed in the
-    previous entry. The last two are equivalent to `haskey(sd,k)` and
-    `haskey(smd,k)` respectively. To force the use of `isequal` test on
-    the keys rather than the order object (thus slowing the execution
-    from logarithmic to linear time), replace the above five constructs
-    with these:
+These five invocations of `in` use the index structure of the sorted
+container and test equality based on the order object of the keys
+rather than `isequal`. Therefore, these five are all faster than
+linear-time looping. The first three were already discussed in the
+previous entry. The last two are equivalent to `haskey(sd,k)` and
+`haskey(smd,k)` respectively. To force the use of `isequal` test on
+the keys rather than the order object (thus slowing the execution
+from logarithmic to linear time), replace the above five constructs
+with these:
 
 ```julia
 (k=>v) in collect(sd)
@@ -690,162 +478,16 @@ k in collect(keys(sd))
 k in collect(keys(smd))
 ```
 
-```julia
-eltype(sc)
-```
 
-:   Returns the (key,value) type (a 2-entry pair, i.e., `Pair{K,V}`) for
-    SortedDict and SortedMultiDict. Returns the key type for SortedSet.
-    This function may also be applied to the type itself. Time: O(1)
+    deepcopy(sc)
 
-```julia
-keytype(sc)
-```
+This returns a copy of `sc` in which the data is deep-copied, i.e.,
+the keys and values are replicated if they are mutable types. A
+semitoken for the original `sc` is a valid semitoken for the copy
+because this operation preserves the relative positions of the data
+in memory. Time O(*maxn*), where *maxn* denotes the maximum size
+that `sc` has attained in the past.
 
-:   Returns the key type for SortedDict, SortedMultiDict and SortedSet.
-    This function may also be applied to the type itself. Time: O(1)
-
-```julia
-valtype(sc)
-```
-
-:   Returns the value type for SortedDict and SortedMultiDict. This
-    function may also be applied to the type itself. Time: O(1)
-
-```julia
-ordtype(sc)
-```
-
-:   Returns the order type for SortedDict, SortedMultiDict and
-    SortedSet. This function may also be applied to the type itself.
-    Time: O(1)
-
-```julia
-similar(sc)
-```
-
-:   Returns a new SortedDict, SortedMultiDict, or SortedSet of the same
-    type and with the same ordering as `sc` but with no entries (i.e.,
-    empty). Time: O(1)
-
-```julia
-orderobject(sc)
-```
-
-:   Returns the order object used to construct the container. Time: O(1)
-
-```julia
-haskey(sc,k)
-```
-
-:   Returns true if key `k` is present for SortedDict, SortedMultiDict
-    or SortedSet `sc`. For SortedSet, `haskey(sc,k)` is a synonym for
-    `in(k,sc)`. For SortedDict and SortedMultiDict, `haskey(sc,k)` is
-    equivalent to `in(k,keys(sc))`. Time: O(*c* log *n*)
-
-```julia
-get(sd,k,v)
-```
-
-:   Returns the value associated with key `k` where `sd` is a
-    SortedDict, or else returns `v` if `k` is not in `sd`. Time: O(*c*
-    log *n*)
-
-```julia
-get!(sd,k,v)
-```
-
-:   Returns the value associated with key `k` where `sd` is a
-    SortedDict, or else returns `v` if `k` is not in `sd`, and in the
-    latter case, inserts `(k,v)` into `sd`. Time: O(*c* log *n*)
-
-```julia
-getkey(sd,k,defaultk)
-```
-
-:   Returns key `k` where `sd` is a SortedDict, if `k` is in `sd` else
-    it returns `defaultk`. If the container uses in its ordering an `eq`
-    method different from isequal (e.g., case-insensitive ASCII strings
-    illustrated below), then the return value is the actual key stored
-    in the SortedDict that is equivalent to `k` according to the `eq`
-    method, which might not be equal to `k`. Similarly, if the user
-    performs an implicit conversion as part of the call (e.g., the
-    container has keys that are floats, but the `k` argument to `getkey`
-    is an Int), then the returned key is the actual stored key rather
-    than `k`. Time: O(*c* log *n*)
-
-```julia
-isequal(sc1,sc2)
-```
-
-:   Checks if two containers are equal in the sense that they contain
-    the same items; the keys are compared using the `eq` method, while
-    the values are compared with the `isequal` function. In the case of
-    SortedMultiDict, equality requires that the values associated with a
-    particular key have same order (that is, the same insertion order).
-    Note that `isequal` in this sense does not imply any correspondence
-    between semitokens for items in `sc1` with those for `sc2`. If the
-    equality-testing method associated with the keys and values implies
-    hash-equivalence in the case of SortedDict, then `isequal` of the
-    entire containers implies hash-equivalence of the containers. Time:
-    O(*cn* + *n* log *n*)
-
-```julia
-packcopy(sc)
-```
-
-:   This returns a copy of `sc` in which the data is packed. When
-    deletions take place, the previously allocated memory is not
-    returned. This function can be used to reclaim memory after many
-    deletions. Time: O(*cn* log *n*)
-
-```julia
-deepcopy(sc)
-```
-
-:   This returns a copy of `sc` in which the data is deep-copied, i.e.,
-    the keys and values are replicated if they are mutable types. A
-    semitoken for the original `sc` is a valid semitoken for the copy
-    because this operation preserves the relative positions of the data
-    in memory. Time O(*maxn*), where *maxn* denotes the maximum size
-    that `sc` has attained in the past.
-
-```julia
-packdeepcopy(sc)
-```
-
-:   This returns a packed copy of `sc` in which the keys and values are
-    deep-copied. This function can be used to reclaim memory after many
-    deletions. Time: O(*cn* log *n*)
-
-```julia
-merge(sc1, sc2...)
-```
-
-:   This returns a SortedDict or SortedMultiDict that results from
-    merging SortedDicts or SortedMultiDicts `sc1`, `sc2`, etc., which
-    all must have the same key-value-ordering types. In the case of keys
-    duplicated among the arguments, the rightmost argument that owns the
-    key gets its value stored for SortedDict. In the case of
-    SortedMultiDict all the key-value pairs are stored, and for keys
-    shared between `sc1` and `sc2` the ordering is left-to-right. This
-    function is not available for SortedSet, but the `union` function
-    (see below) provides equivalent functionality. Time: O(*cN* log
-    *N*), where *N* is the total size of all the arguments.
-
-```julia
-merge!(sc, sc1...)
-```
-
-:   This updates `sc` by merging SortedDicts or SortedMultiDicts `sc1`,
-    etc. into `sc`. These must all must have the same key-value types.
-    In the case of keys duplicated among the arguments, the rightmost
-    argument that owns the key gets its value stored for SortedDict. In
-    the case of SortedMultiDict all the key-value pairs are stored, and
-    for overlapping keys the ordering is left-to-right. This function is
-    not available for SortedSet, but the `union!` function (see below)
-    provides equivalent functionality. Time: O(*cN* log *N*), where *N*
-    is the total size of all the arguments.
 
 ### Set operations
 
@@ -856,70 +498,7 @@ ordering types, no error message is produced; instead, the built-in
 default versions of these functions (that can be applied to `Any`
 iterables and that return arrays) are invoked.
 
-```julia
-union!(ss, iterable)
-```
 
-:   This function inserts each item from the second argument (which must
-    iterable) into the SortedSet `ss`. The items must be convertible to
-    the key-type of `ss`. Time: O(*ci* log *n*) where *i* is the number
-    of items in the iterable argument.
-
-```julia
-union(ss, iterable...)
-```
-
-:   This function creates a new SortedSet (the return argument) and
-    inserts each item from `ss` and each item from each iterable
-    argument into the returned SortedSet. Time: O(*cn* log *n*) where
-    *n* is the total number of items in all the arguments.
-
-```julia
-intersect(ss, others...)
-```
-
-:   Each argument is a SortedSet with the same key and order type. The
-    return variable is a new SortedSet that is the intersection of all
-    the sets that are input. Time: O(*cn* log *n*), where *n* is the
-    total number of items in all the arguments.
-
-```julia
-symdiff(ss1, ss2)
-```
-
-:   The two argument are sorted sets with the same key and order type.
-    This operation computes the symmetric difference, i.e., a sorted set
-    containing entries that are in one of `ss1`, `ss2` but not both.
-    Time: O(*cn* log *n*), where *n* is the total size of the two
-    containers.
-
-```julia
-setdiff(ss1, ss2)
-```
-
-:   The two arguments are sorted sets with the same key and order type.
-    This operation computes the difference, i.e., a sorted set
-    containing entries that in are in `ss1` but not `ss2`. Time: O(*cn*
-    log *n*), where *n* is the total size of the two containers.
-
-```julia
-setdiff!(ss, iterable)
-```
-
-:   This function deletes items in `ss` that appear in the second
-    argument. The second argument must be iterable and its entries must
-    be convertible to the key type of m1. Time: O(*cm* log *n*), where
-    *n* is the size of `ss` and *m* is the number of items in
-    `iterable`.
-
-```julia
-issubset(iterable, ss)
-```
-
-:   This function checks whether each item of the first argument is an
-    element of the SortedSet `ss`. The entries must be convertible to
-    the key-type of `ss`. Time: O(*cm* log *n*), where *n* is the sizes
-    of `ss` and *m* is the number of items in `iterable`.
 
 ### Ordering of keys
 
