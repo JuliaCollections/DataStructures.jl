@@ -35,7 +35,7 @@ end
 Construct a `SortedSet{Any}` with `Forward` ordering.
 
 **Note that a key type of `Any` or any other abstract type will lead
-to slow performance.
+to slow performance.**
 """
 SortedSet() = SortedSet{Any,ForwardOrdering}(Forward)
 
@@ -45,7 +45,7 @@ SortedSet() = SortedSet{Any,ForwardOrdering}(Forward)
 Construct a `SortedSet{Any}` with `o` ordering.
 
 **Note that a key type of `Any` or any other abstract type will lead
-to slow performance.
+to slow performance.**
 """
 SortedSet(o::O) where {O<:Ordering} = SortedSet{Any,O}(o)
 
