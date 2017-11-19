@@ -12,8 +12,8 @@ ordering type `O`. SortedSet has only keys; it is an alternative to the
 built-in `Set` container. Internally, SortedSet is implemented as a
 SortedDict in which the value type is `Void`. Finally, SortedMultiDict
 is similar to SortedDict except that each key can be associated with
-multiple values. The key=&gt;value pairs in a SortedMultiDict are stored
-according to the sorted order for keys, and key=&gt;value pairs with the
+multiple values. The key=>value pairs in a SortedMultiDict are stored
+according to the sorted order for keys, and key=>value pairs with the
 same key are stored in order of insertion.
 
 The containers internally use a 2-3 tree, which is a kind of balanced
@@ -111,7 +111,7 @@ call, and *c* denotes the time needed to compare two keys.
 Argument `(sc,st)` is a token (i.e., `sc` is a container and `st` is
 a semitoken). Note the double-parentheses in the calling syntax: the
 argument of `deref` is a token, which is defined to be a 2-tuple.
-This returns a key=&gt;value pair. pointed to by the token for
+This returns a key=>value pair. pointed to by the token for
 SortedDict and SortedMultiDict. Note that the syntax
 `k,v=deref((sc,st))` is valid because Julia automatically iterates
 over the two entries of the Pair in order to assign `k` and `v`. For
@@ -120,14 +120,14 @@ SortedSet this returns a key. Time: O(1)
     deref_key((sc, st))
 
 Argument `(sc,st)` is a token for SortedMultiDict or SortedDict.
-This returns the key (i.e., the first half of a key=&gt;value pair)
+This returns the key (i.e., the first half of a key=>value pair)
 pointed to by the token. This functionality is available as plain
 `deref` for SortedSet. Time: O(1)
 
     deref_value((sc, st))
 
 Argument `(sc,st)` is a token for SortedMultiDict or SortedDict.
-This returns the value (i.e., the second half of a key=&gt;value
+This returns the value (i.e., the second half of a key=>value
 pair) pointed to by the token. Time: O(1)
 
     startof(sc)
