@@ -19,11 +19,30 @@ This package implements a variety of data structures, including
 -   Sorted Dict, Sorted Multi-Dict and Sorted Set
 -   DataStructures.IntSet
 
-Contents:
+## Contents
 
-# Indices and tables
+```@contents
+Pages = [
+    "index.md",
+    "deque.md",
+    "circ_buffer.md",
+    "circ_deque.md",
+    "stack_and_queue.md",
+    "priority-queue.md",
+    "accumulators.md",
+    "disjoint_sets.md",
+    "heaps.md",
+    "ordered_containers.md",
+    "default_dict.md",
+    "trie.md",
+    "linked_list.md",
+    "intset.md",
+    "sorted_containers.md",
+]
+```
+
+## Indices and tables
 
 -   genindex
 -   modindex
 -   search
-
