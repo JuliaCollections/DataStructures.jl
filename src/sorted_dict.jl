@@ -84,9 +84,8 @@ SortedDict{K,D}(ps::Pair...) where {K,D} = SortedDict{K,D,ForwardOrdering}(Forwa
     SortedDict(o, k1=>v1, k2=>v2, ...)
 
 Construct a `SortedDict` from the given pairs with the specified
-ordering `o`. If `K` and `V` are not specified, the key type and
-value type are inferred from the given pairs. See below for more
-information about ordering.
+ordering `o`. The key type and value type are inferred from the 
+given pairs.
 """
 SortedDict(o::Ordering, ps::Pair...) = SortedDict(o, ps)
 
@@ -154,8 +153,6 @@ value-type is `Int`.
 If `K` and `V` are not specified, the key type and value type are
 inferred from the given dictionary. The ordering object `o` defaults
 to `Forward`.
-
-See below for more information about ordering.
 """
 SortedDict(kv, o::Ordering=Forward) = SortedDict(o, kv)
 function SortedDict(o::Ordering, kv)
