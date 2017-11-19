@@ -91,7 +91,7 @@ SortedMultiDict(o::Ord, d::Associative{K,D}) where {K,D,Ord<:Ordering} = SortedM
 """
     SortedMultiDict{K,D}(iter)
 
-Takes an arbitrary iterable object of key=&gt;value pairs with
+Takes an arbitrary iterable object of key=>value pairs with
 key type `K` and value type `D`. The default Forward ordering is used.
 """
 SortedMultiDict{K,D}(kv) where {K,D} = SortedMultiDict{K,D}(Forward, kv)
@@ -99,7 +99,7 @@ SortedMultiDict{K,D}(kv) where {K,D} = SortedMultiDict{K,D}(Forward, kv)
 """
     SortedMultiDict{K,D}(o, iter)
 
-Takes an arbitrary iterable object of key=&gt;value pairs with
+Takes an arbitrary iterable object of key=>value pairs with
 key type `K` and value type `D`. The ordering object `o` is explicitly given.
 """
 function SortedMultiDict{K,D}(o::Ord, kv) where {K,D,Ord<:Ordering}
@@ -274,7 +274,7 @@ This function may also be applied to the type itself. Time: O(1)
     in(p, sc)
 
 Returns true if `p` is in `sc`. In the case that `sc` is a
-SortedDict or SortedMultiDict, `p` is a key=&gt;value pair. In the
+SortedDict or SortedMultiDict, `p` is a key=>value pair. In the
 case that `sc` is a SortedSet, `p` should be a key. Time: O(*c* log
 *n* + *d*) for SortedDict and SortedSet, where *d* stands for the
 time to compare two values. In the case of SortedMultiDict, the time

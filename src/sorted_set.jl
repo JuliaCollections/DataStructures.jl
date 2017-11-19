@@ -8,11 +8,11 @@ mutable struct SortedSet{K, Ord <: Ordering}
     """
         SortedSet(iter, o=Forward)
     and
-        SortedSet{K}(iter, o=Forward)
+        `SortedSet{K}(iter, o=Forward)`
     and
-        SortedSet(o, iter)
+        `SortedSet(o, iter)`
     and
-        SortedSet{K}(o, iter)
+        `SortedSet{K}(o, iter)`
 
     Construct a SortedSet using keys given by iterable `iter` (e.g., an
     array) and ordering object `o`. The ordering object defaults to

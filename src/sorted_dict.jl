@@ -5,7 +5,12 @@ mutable struct SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
     bt::BalancedTree23{K,D,Ord}
 
     ## Base constructors
+    """
+        SortedDict{K,V}(o=Forward)
 
+    Construct an empty `SortedDict` with key type `K` and value type
+    `V` with `o` ordering (default to forward ordering).
+    """
     SortedDict{K,D,Ord}(o::Ord) where {K, D, Ord <: Ordering} =
         new{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
 
@@ -46,8 +51,6 @@ SortedDict() = SortedDict{Any,Any,ForwardOrdering}(Forward)
 
 """
     SortedDict(o=Forward)
-and
-    SortedDict{K,V}(o=Forward)
 
 Construct an empty `SortedDict` with key type `K` and value type
 `V`. If `K` and `V` are not specified, the dictionary defaults to a
@@ -67,8 +70,7 @@ SortedDict(o::Ord) where {Ord <: Ordering} = SortedDict{Any,Any,Ord}(o)
 # TODO: fix SortedDict(1=>1, 2=>2.0)
 """
     SortedDict(k1=>v1, k2=>v2, ...)
-and
-    SortedDict{K,V}(k1=>v1, k2=>v2, ...)
+and `SortedDict{K,V}(k1=>v1, k2=>v2, ...)`
 
 Construct a `SortedDict` from the given key-value pairs. If `K` and
 `V` are not specified, key type and value type are inferred from the
@@ -108,8 +110,7 @@ SortedDict(o::Ord, d::Associative{K,D}) where {K,D,Ord<:Ordering} = SortedDict{K
 # e.g., SortedDict{Int,Float64}([1=>1, 2=>2.0])
 """
     SortedDict(iter, o=Forward)
-and
-    SortedDict{K,V}(iter, o=Forward)
+and `SortedDict{K,V}(iter, o=Forward)`
 
 Construct a `SortedDict` from an arbitrary iterable object of
 `key=>value` pairs. If `K` and `V` are not specified, the key type
@@ -137,8 +138,7 @@ SortedDict(o1::Ordering, o2::Ordering) = throw(ArgumentError("SortedDict with tw
 
 """
     SortedDict(d, o=Forward)
-and
-    SortedDict{K,V}(d, o=Forward)
+and `SortedDict{K,V}(d, o=Forward)`
 
 Construct a `SortedDict` from an ordinary Julia dict `d` (or any
 associative type), e.g.:
@@ -294,7 +294,7 @@ This function may also be applied to the type itself. Time: O(1)
     in(p, sc)
 
 Returns true if `p` is in `sc`. In the case that `sc` is a
-SortedDict or SortedMultiDict, `p` is a key=&gt;value pair. In the
+SortedDict or SortedMultiDict, `p` is a key=>value pair. In the
 case that `sc` is a SortedSet, `p` should be a key. Time: O(*c* log
 *n* + *d*) for SortedDict and SortedSet, where *d* stands for the
 time to compare two values. In the case of SortedMultiDict, the time

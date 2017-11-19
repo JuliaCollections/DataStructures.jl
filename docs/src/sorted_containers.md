@@ -1,5 +1,9 @@
 # Sorted Containers
 
+```@meta
+CurrentModule = DataStructures
+```
+
 Three sorted containers are provided: SortedDict, SortedMultiDict and
 SortedSet. *SortedDict* is similar to the built-in Julia type `Dict`
 with the additional feature that the keys are stored in sorted order and
@@ -87,6 +91,32 @@ have a documented interpretation in terms of the container.
 
 ## Constructors for Sorted Containers
 
+
+### `SortedDict` constructors
+
+```@docs
+SortedDict(o::Ord) where {Ord <: Ordering}
+```
+
+    SortedDict{K,V}(o=Forward)
+
+Construct an empty `SortedDict` with key type `K` and value type
+`V` with `o` ordering (default to forward ordering).
+
+```@docs
+SortedDict{K,D,Ord}(o::Ord) where {K, D, Ord <: Ordering}
+```
+
+```@docs
+SortedDict(ps::Pair...)
+```
+
+```@docs
+SortedDict{K,D}(o::Ord, ps::Pair...) where {K,D,Ord<:Ordering}
+```
+
+### `SortedMultiDict` constructors
+
     SortedMultiDict(ks, vs, o)
 
 Construct a SortedMultiDict using keys given by `ks`, values given
@@ -95,7 +125,54 @@ by `vs` and ordering object `o`. The ordering object defaults to
 1-dimensional arrays of the same length in which `ks` holds keys and
 `vs` holds the corresponding values.
 
+```@docs
+SortedMultiDict{K,D,Ord}(o::Ord) where {K,D,Ord}
+```
 
+```@docs
+SortedMultiDict()
+```
+
+```@docs
+SortedMultiDict(o::O) where {O<:Ordering}
+```
+
+```@docs
+SortedMultiDict(ps::Pair...)
+```
+
+```@docs
+SortedMultiDict(o::Ordering, ps::Pair...)
+```
+
+```@docs
+SortedMultiDict{K,D}(kv) where {K,D}
+```
+
+```@docs
+SortedMultiDict{K,D}(o::Ord, kv) where {K,D,Ord<:Ordering}
+```
+
+### `SortedSets` constructors
+```@docs
+SortedSet{K,Ord}(o::Ord=Forward, iter=[]) where {K,Ord<:Ordering}
+```
+
+```@docs
+SortedSet()
+```
+
+```@docs
+SortedSet(o::O) where {O<:Ordering}
+```
+
+```@docs
+SortedSet{K}() where {K}
+```
+
+```@docs
+SortedSet{K}(o::O) where {K,O<:Ordering}
+```
 
 ## Complexity of Sorted Containers
 
@@ -105,6 +182,13 @@ size (number of items) in the container at the time of the function
 call, and *c* denotes the time needed to compare two keys.
 
 ### Navigating the Containers
+```@docs
+getindex(m::SortedDict, k_)
+```
+
+```@docs
+find(m::SortedDict, k_)
+```
 
     deref((sc, st))
 
@@ -143,6 +227,30 @@ Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
 function returns the semitoken of the last item according to the
 sorted order in the container. If the container is empty, it returns
 the before-start semitoken. Time: O(log *n*)
+
+```@docs
+first(sc::SortedDict)
+```
+
+```@docs
+first(sc::SortedMultiDict)
+```
+
+```@docs
+first(sc::SortedSet)
+```
+
+```@docs
+last(sc::SortedDict)
+```
+
+```@docs
+last(sc::SortedMultiDict)
+```
+
+```@docs
+last(sc::SortedSet)
+```
 
     pastendsemitoken(sc)
 
@@ -217,6 +325,30 @@ returned. Time: O(*c* log *n*)
 Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
 empties the container. Time: O(1).
 
+```@docs
+insert!(sc::SortedDict, k, v)
+```
+
+```@docs
+insert!(sc::SortedMultiDict, k, v)
+```
+
+```@docs
+insert!(sc::SortedSet, k)
+```
+
+```@docs
+push!(sc::SortedSet, k)
+```
+
+```@docs
+push!(sc::SortedDict, pr::Pair)
+```
+
+```@docs
+push!(sc::SortedMultiDict, pr::Pair)
+```
+
     delete!((sc, st))
 
 Argument `(sc,st)` is a token for a SortedDict, SortedMultiDict or
@@ -226,7 +358,21 @@ deleted or on the before-start or past-end tokens. After this
 operation is complete, `(sc,st)` is an invalid token and cannot be
 used in any further operations. Time: O(log *n*)
 
+```@docs
+pop!(sc::SortedDict, k)
+```
 
+```@docs
+pop!(ss::SortedSet, k)
+```
+
+```@docs
+pop!(ss::SortedSet)
+```
+
+```@docs
+setindex!(m::SortedDict, d_, k_)
+```
 
 ### Token Manipulation
 
@@ -432,6 +578,10 @@ Returns `true` if the container is empty (no items). Time: O(1)
 Returns the length, i.e., number of items, in the container. Time:
 O(1)
 
+```docs
+in(pr::Pair, m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering}
+```
+
     in(x, iter)
 
 Returns true if `x` is in `iter`, where `iter` refers to any of the
@@ -440,7 +590,7 @@ loops and `x` is of the appropriate type. For all of the iterables
 except the five listed below, the algorithm used is a linear-time
 search. For example, the call:
 
-    `(k=>v) in exclusive(sd, st1, st2)`
+    (k=>v) in exclusive(sd, st1, st2)
 
 where `sd` is a SortedDict, `st1` and `st2` are semitokens, `k` is a
 key, and `v` is a value, will loop over all entries in the
@@ -479,6 +629,54 @@ k in collect(keys(smd))
 ```
 
 
+```@docs
+eltype(sc::SortedDict)
+```
+
+```@docs
+keytype(sc::SortedDict)
+```
+
+```@docs
+valtype(sc::SortedDict)
+```
+
+```@docs
+ordtype(sc::SortedDict)
+```
+
+```@docs
+similar(sc::SortedDict)
+```
+
+```@docs
+orderobject(sc::SortedDict)
+```
+
+```@docs
+haskey(sc::SortedDict,k)
+```
+
+```@docs
+get(sd::SortedDict,k,v)
+```
+
+```@docs
+get!(sd::SortedDict,k,v)
+```
+
+```@docs
+getkey(sd::SortedDict,k,defaultk)
+```
+
+```@docs
+isequal(sc1::SortedDict,sc2::SortedDict)
+```
+
+```@docs
+packcopy(sc::SortedDict)
+```
+
     deepcopy(sc)
 
 This returns a copy of `sc` in which the data is deep-copied, i.e.,
@@ -488,6 +686,19 @@ because this operation preserves the relative positions of the data
 in memory. Time O(*maxn*), where *maxn* denotes the maximum size
 that `sc` has attained in the past.
 
+```@docs
+packdeepcopy(sc)
+```
+
+```@docs
+merge(m::SortedDict{K,D,Ord},
+               others::Associative{K,D}...) where {K,D,Ord <: Ordering}
+```
+
+```@docs
+merge!(m::SortedDict{K,D,Ord},
+                others::Associative{K,D}...) where {K,D,Ord <: Ordering}
+```
 
 ### Set operations
 
@@ -498,7 +709,33 @@ ordering types, no error message is produced; instead, the built-in
 default versions of these functions (that can be applied to `Any`
 iterables and that return arrays) are invoked.
 
+```@docs
+union!(m1::SortedSet, iterable_item)
+```
 
+```@docs
+union(m1::SortedSet, others...)
+```
+
+```@docs
+intersect(m1::SortedSet{K,Ord}, others::SortedSet{K,Ord}...) where {K, Ord <: Ordering}
+```
+
+```@docs
+symdiff(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord}) where {K, Ord <: Ordering}
+```
+
+```@docs
+setdiff(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord}) where {K, Ord <: Ordering}
+```
+
+```@docs
+setdiff!(m1::SortedSet, iterable)
+```
+
+```@docs
+issubset(iterable, m2::SortedSet)
+```
 
 ### Ordering of keys
 
