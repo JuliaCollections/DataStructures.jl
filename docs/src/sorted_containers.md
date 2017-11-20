@@ -155,7 +155,7 @@ SortedMultiDict{K,D}(o::Ord, kv) where {K,D,Ord<:Ordering}
 
 ### `SortedSets` constructors
 ```@docs
-SortedSet{K,Ord}(o::Ord=Forward, iter=[]) where {K,Ord<:Ordering}
+SortedSet{K, Ord <: Ordering}
 ```
 
 ```@docs

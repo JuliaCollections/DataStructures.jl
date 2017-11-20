@@ -390,7 +390,7 @@ or SortedSet `sc`. For SortedSet, `haskey(sc,k)` is a synonym for
 equivalent to `in(k,keys(sc))`. Time: O(*c* log *n*)
 """
 @inline function haskey(m::SortedDict, k_)
-    i, exactfound = findkey(m.bt,convert(keytype(m),k_))
+    i, exactfound = findkey(m.bt, convert(keytype(m), k_))
     exactfound
 end
 
@@ -401,29 +401,32 @@ Returns the value associated with key `k` where `sd` is a
 SortedDict, or else returns `v` if `k` is not in `sd`. Time: O(*c*
 log *n*)
 """
-@inline function get(m::SortedDict{K,D,Ord}, k_, default_) where {K,D,Ord <: Ordering}
-    i, exactfound = findkey(m.bt, convert(K,k_))
-   return exactfound ? m.bt.data[i].d : convert(D,default_)
+function get(default_::Union{Function,Type}, m::SortedDict{K,D}, k_) where {K,D}
+    i, exactfound = findkey(m.bt, convert(K, k_))
+    return exactfound ? m.bt.data[i].d : convert(D, default_())
 end
+
+get(m::SortedDict, k_, default_) = get(()->default_, m, k_)
 
 """
     get!(sd,k,v)
-
 Returns the value associated with key `k` where `sd` is a
 SortedDict, or else returns `v` if `k` is not in `sd`, and in the
 latter case, inserts `(k,v)` into `sd`. Time: O(*c* log *n*)
 """
-function get!(m::SortedDict{K,D,Ord}, k_, default_) where {K,D,Ord <: Ordering}
+function get!(default_::Union{Function,Type}, m::SortedDict{K,D}, k_) where {K,D}
     k = convert(K,k_)
     i, exactfound = findkey(m.bt, k)
     if exactfound
         return m.bt.data[i].d
     else
-        default = convert(D,default_)
+        default = convert(D, default_())
         insert!(m.bt,k, default, false)
         return default
     end
 end
+
+get!(m::SortedDict, k_, default_) = get!(()->default_, m, k_)
 
 """
     getkey(sd,k,defaultk)
@@ -440,7 +443,7 @@ is an Int), then the returned key is the actual stored key rather
 than `k`. Time: O(*c* log *n*)
 """
 function getkey(m::SortedDict{K,D,Ord}, k_, default_) where {K,D,Ord <: Ordering}
-    i, exactfound = findkey(m.bt, convert(K,k_))
+    i, exactfound = findkey(m.bt, convert(K, k_))
     exactfound ? m.bt.data[i].k : convert(K, default_)
 end
 
@@ -456,7 +459,7 @@ is complete, any token addressing the deleted item is invalid.
 Returns `sc`. Time: O(*c* log *n*)
 """
 @inline function delete!(m::SortedDict, k_)
-    i, exactfound = findkey(m.bt,convert(keytype(m),k_))
+    i, exactfound = findkey(m.bt, convert(keytype(m), k_))
     !exactfound && throw(KeyError(k_))
     delete!(m.bt, i)
     m
@@ -471,7 +474,7 @@ SortedDict or `k` itself in the case of SortedSet. A `KeyError`
 results if `k` is not in `sc`. Time: O(*c* log *n*)
 """
 @inline function pop!(m::SortedDict, k_)
-    i, exactfound = findkey(m.bt,convert(keytype(m),k_))
+    i, exactfound = findkey(m.bt, convert(keytype(m), k_))
     !exactfound && throw(KeyError(k_))
     d = m.bt.data[i].d
     delete!(m.bt, i)
@@ -538,7 +541,7 @@ returned. This function can be used to reclaim memory after many
 deletions. Time: O(*cn* log *n*)
 """
 function packcopy(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering}
-    w = SortedDict(Dict{K,D}(),orderobject(m))
+    w = SortedDict(Dict{K,D}(), orderobject(m))
     mergetwo!(w,m)
     w
 end

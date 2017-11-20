@@ -2,22 +2,22 @@
 ## methods similiar to those of the julia Set.
 
 
+"""
+    SortedSet(iter, o=Forward)
+and
+    `SortedSet{K}(iter, o=Forward)`
+and
+    `SortedSet(o, iter)`
+and
+    `SortedSet{K}(o, iter)`
+
+Construct a SortedSet using keys given by iterable `iter` (e.g., an
+array) and ordering object `o`. The ordering object defaults to
+`Forward` if not specified.
+"""
 mutable struct SortedSet{K, Ord <: Ordering}
     bt::BalancedTree23{K,Void,Ord}
 
-    """
-        SortedSet(iter, o=Forward)
-    and
-        `SortedSet{K}(iter, o=Forward)`
-    and
-        `SortedSet(o, iter)`
-    and
-        `SortedSet{K}(o, iter)`
-
-    Construct a SortedSet using keys given by iterable `iter` (e.g., an
-    array) and ordering object `o`. The ordering object defaults to
-    `Forward` if not specified.
-    """
     function SortedSet{K,Ord}(o::Ord=Forward, iter=[]) where {K,Ord<:Ordering}
         sorted_set = new{K,Ord}(BalancedTree23{K,Void,Ord}(o))
 
