@@ -68,9 +68,9 @@ function Base.append!(cb::CircularBuffer, datavec::AbstractVector)
 end
 
 function Base.fill!(cb::CircularBuffer, data = 0)
-    # fill buffer with items
+    # fill buffer with items - for preallocation
     resize!(cb.buffer, cb.capacity)
-    cb.buffer[:] = data
+    Base.fill!(cb.buffer, data)
     cb
 end
 

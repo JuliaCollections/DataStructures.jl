@@ -43,4 +43,13 @@
 
     # test empty!(cb)
     @test length(empty!(cb)) == 0
+
+    # test fill!(cb, val)
+    empty!(cb)
+    fill!(cb, 123)
+    @test length(cb) == capacity(cb)
+    for idx in 1:length(cb)
+        @test cb[idx] == 123
+    end
+
 end
