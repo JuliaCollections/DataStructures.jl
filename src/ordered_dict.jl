@@ -4,7 +4,7 @@ import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
              setindex!, getindex, length, isempty, start,
              next, done, keys, values, setdiff, setdiff!,
              union, union!, intersect, filter, filter!,
-             hash, eltype, KeyIterator, ValueIterator, convert, copy,
+             hash, eltype, ValueIterator, convert, copy,
              merge
 
 """
@@ -376,7 +376,11 @@ function get(default::Base.Callable, h::OrderedDict{K,V}, key) where {K,V}
 end
 
 haskey(h::OrderedDict, key) = (ht_keyindex(h, key, true) >= 0)
-in(key, v::KeyIterator{T}) where {T<:OrderedDict} = (ht_keyindex(v.dict, key, true) >= 0)
+if isdefined(Base, :KeySet) # 0.7.0-DEV.2722
+    in(key, v::Base.KeySet{K,T}) where {K,T<:OrderedDict{K}} = (ht_keyindex(v.dict, key, true) >= 0)
+else
+    in(key, v::Base.KeyIterator{T}) where {T<:OrderedDict} = (ht_keyindex(v.dict, key, true) >= 0)
+end
 
 function getkey(h::OrderedDict{K,V}, key, default) where {K,V}
     index = ht_keyindex(h, key, true)
@@ -429,7 +433,11 @@ end
 done(t::OrderedDict, i) = done(t.keys, i)
 next(t::OrderedDict, i) = (Pair(t.keys[i],t.vals[i]), i+1)
 
-next(v::KeyIterator{T}, i) where {T<:OrderedDict} = (v.dict.keys[i], i+1)
+if isdefined(Base, :KeySet) # 0.7.0-DEV.2722
+    next(v::Base.KeySet{K,T}, i) where {K,T<:OrderedDict{K}} = (v.dict.keys[i], i+1)
+else
+    next(v::Base.KeyIterator{T}, i) where {T<:OrderedDict} = (v.dict.keys[i], i+1)
+end
 next(v::ValueIterator{T}, i) where {T<:OrderedDict} = (v.dict.vals[i], i+1)
 
 function merge(d::OrderedDict, others::Associative...)
