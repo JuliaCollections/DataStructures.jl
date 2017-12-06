@@ -11,7 +11,7 @@ mutable struct CircularDeque{T}
     last::Int
 end
 
-CircularDeque{T}(n::Int) where {T} = CircularDeque(Vector{T}(n), n, 0, 1, n)
+CircularDeque{T}(n::Int) where {T} = CircularDeque(Vector{T}(uninitialized, n), n, 0, 1, n)
 
 Base.length(D::CircularDeque) = D.n
 Base.eltype(::Type{CircularDeque{T}}) where {T} = T

@@ -14,7 +14,7 @@ end
 mutable struct IntSet
     bits::BitVector
     inverse::Bool
-    IntSet() = new(fill!(BitVector(256), false), false)
+    IntSet() = new(falses(256), false)
 end
 IntSet(itr) = union!(IntSet(), itr)
 
@@ -63,7 +63,7 @@ function _matchlength!(b::BitArray, newlen::Integer)
     len = length(b)
     len > newlen && return splice!(b, newlen+1:len)
     len < newlen && _resize0!(b, newlen)
-    return BitVector(0)
+    return BitVector()
 end
 
 const _intset_bounds_err_msg = "elements of IntSet must be between 0 and typemax(Int)-1"

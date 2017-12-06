@@ -32,11 +32,11 @@ mutable struct PriorityQueue{K,V,O<:Ordering} <: Associative{K,V}
     index::Dict{K, Int}
 
     function PriorityQueue{K,V,O}(o::O) where {K,V,O<:Ordering}
-        new{K,V,O}(Vector{Pair{K,V}}(0), o, Dict{K, Int}())
+        new{K,V,O}(Vector{Pair{K,V}}(), o, Dict{K, Int}())
     end
 
     function PriorityQueue{K,V,O}(o::O, itr) where {K,V,O<:Ordering}
-        xs = Vector{Pair{K,V}}(length(itr))
+        xs = Vector{Pair{K,V}}(uninitialized, length(itr))
         index = Dict{K, Int}()
         for (i, (k, v)) in enumerate(itr)
             xs[i] = Pair{K,V}(k, v)
@@ -104,11 +104,7 @@ _priority_queue_with_eltype(o::Ord, kv, ::Type            ) where {    Ord} = Pr
 
 ## TODO: It seems impossible (or at least very challenging) to create the eltype below.
 ##       If deemed possible, please create a test and uncomment this definition.
-# if VERSION < v"0.6.0-dev.2123"
-#     _priority_queue_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{TypeVar(:K),D}}) = PriorityQueue{Any,  D,Ord}(o, ps)
-# else
-#     _include_string("_priority_queue_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,V} where K}) = PriorityQueue{Any,  D,Ord}(o, ps)")
-# end
+# _priority_queue_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,V} where K}) = PriorityQueue{Any,  D,Ord}(o, ps)
 
 length(pq::PriorityQueue) = length(pq.xs)
 isempty(pq::PriorityQueue) = isempty(pq.xs)
@@ -225,7 +221,7 @@ function enqueue!(pq::PriorityQueue{K,V}, pair::Pair{K,V}) where {K,V}
     push!(pq.xs, pair)
     pq.index[key] = length(pq)
     percolate_up!(pq, length(pq))
-    
+
     return pq
 end
 

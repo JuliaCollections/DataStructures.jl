@@ -136,9 +136,9 @@
 
     # find
     s = OrderedSet([1,3,5,7])
-    @test findfirst(s,1) == 1
-    @test findfirst(s,7) == 4
-    @test findfirst(s,2) == 0
+    @test findfirst(equalto(1), s) == 1
+    @test findfirst(equalto(7), s) == 4
+    @test findfirst(equalto(2), s) == 0
 
     # setdiff
     @test isequal(setdiff(OrderedSet([1,2,3]), OrderedSet()),        OrderedSet([1,2,3]))

@@ -16,7 +16,7 @@ classified_lists(K::Type, V::Type) = ClassifiedCollections(K, Vector{V})
 classified_sets(K::Type, V::Type) = ClassifiedCollections(K, Set{V})
 classified_counters(K::Type, T::Type) = ClassifiedCollections(K, Accumulator{T, Int})
 
-_create_empty(::Type{Vector{T}}) where {T} = Vector{T}(0)
+_create_empty(::Type{Vector{T}}) where {T} = Vector{T}()
 _create_empty(::Type{Set{T}}) where {T} = Set{T}()
 _create_empty(::Type{Accumulator{T,V}}) where {T,V} = Accumulator(T, V)
 

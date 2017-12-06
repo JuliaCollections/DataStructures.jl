@@ -14,7 +14,7 @@ function test_issorted!(pq::PriorityQueue, priorities, rev=false)
             @test priorities[last] <= priorities[value]
         else
             @test priorities[value] <= priorities[last]
-        end            
+        end
         value = last
     end
 end
@@ -87,7 +87,7 @@ end
 
     pq11 = PriorityQueue(Pair{Char}['a'=>1,'b'=>2])
     @test peek(pq11) == ('a'=>1)
-    
+
     # duplicate key => ArgumentError
     @test_throws ArgumentError PriorityQueue('a'=>1, 'a'=>2)
 
@@ -95,7 +95,7 @@ end
     @test_throws ArgumentError PriorityQueue(['a'])
     @test_throws ArgumentError PriorityQueue(Reverse, ['a'])
     @test_throws ArgumentError PriorityQueue{Char,Int}(Base.Order.Reverse, ['a'])
-    
+
     # Silly test
     @test_throws ArgumentError PriorityQueue(Reverse, Reverse)
 
@@ -139,7 +139,7 @@ end
         enqueue!(pq, kv)
     end
     test_issorted!(pq, priorities)
-    
+
     # enqueing values via enqueue!
     pq = PriorityQueue()
     for (k, v) in priorities
@@ -199,7 +199,7 @@ end
     xs = heapify(10:-1:1)
     @test issorted([heappop!(xs) for _ in 1:10])
 
-    xs = Vector{Int}(0)
+    xs = Vector{Int}()
     for priority in values(priorities)
         heappush!(xs, priority)
     end
