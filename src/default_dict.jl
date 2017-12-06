@@ -58,8 +58,13 @@ DefaultDictBase{K,V}(default::F) where {K,V,F} = DefaultDictBase{K,V,F,Dict{K,V}
 @delegate_return_parent DefaultDictBase.d [ delete!, empty!, setindex!, sizehint! ]
 
 similar(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default)
-in(key, v::Base.KeyIterator{T}) where {T<:DefaultDictBase} = key in keys(v.dict.d)
-next(v::Base.KeyIterator{T}, i) where {T<:DefaultDictBase} = (v.dict.d.keys[i], Base.skip_deleted(v.dict.d,i+1))
+if isdefined(Base, :KeySet) # 0.7.0-DEV.2722
+    in(key, v::Base.KeySet{K,T}) where {K,T<:DefaultDictBase{K}} = key in keys(v.dict.d)
+    next(v::Base.KeySet{K,T}, i) where {K,T<:DefaultDictBase{K}} = (v.dict.d.keys[i], Base.skip_deleted(v.dict.d,i+1))
+else
+    in(key, v::Base.KeyIterator{T}) where {T<:DefaultDictBase} = key in keys(v.dict.d)
+    next(v::Base.KeyIterator{T}, i) where {T<:DefaultDictBase} = (v.dict.d.keys[i], Base.skip_deleted(v.dict.d,i+1))
+end
 next(v::Base.ValueIterator{T}, i) where {T<:DefaultDictBase} = (v.dict.d.vals[i], Base.skip_deleted(v.dict.d,i+1))
 
 getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
@@ -138,7 +143,11 @@ for _Dict in [:Dict, :OrderedDict]
         push!(d::$DefaultDict, p, q, r...) = push!(push!(push!(d, p), q), r...)
 
         similar(d::$DefaultDict{K,V,F}) where {K,V,F} = $DefaultDict{K,V,F}(d.d.default)
-        in(key, v::Base.KeyIterator{T}) where {T<:$DefaultDict} = key in keys(v.dict.d.d)
+        if isdefined(Base, :KeySet) # 0.7.0-DEV.2722
+            in(key, v::Base.KeySet{K,T}) where {K,T<:$DefaultDict{K}} = key in keys(v.dict.d.d)
+        else
+            in(key, v::Base.KeyIterator{T}) where {T<:$DefaultDict} = key in keys(v.dict.d.d)
+        end
     end
 end
 
@@ -182,4 +191,4 @@ isordered(::Type{T}) where {T<:DefaultOrderedDict} = true
 # @delegate_return_parent DefaultSortedDict.d [ delete!, empty!, setindex!, sizehint! ]
 
 # similar{K,V,F}(d::DefaultSortedDict{K,V,F}) = DefaultSortedDict{K,V,F}(d.d.default)
-# in{T<:DefaultSortedDict}(key, v::Base.KeyIterator{T}) = key in keys(v.dict.d.d)
+# in{T<:DefaultSortedDict}(key, v::Base.KeySet{T}) = key in keys(v.dict.d.d)
