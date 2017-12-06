@@ -1,7 +1,7 @@
-using Base.Test
+using Compat.Test
 using DataStructures
 const IntSet = DataStructures.IntSet
-using Primes
+using Primes, Compat
 
 @test isempty(detect_ambiguities(Base, Core, DataStructures))
 

@@ -71,7 +71,7 @@ include("heaps/arrays_as_heaps.jl")
 
 function extract_all!(h::AbstractHeap{VT}) where VT
     n = length(h)
-    r = Vector{VT}(n)
+    r = Vector{VT}(uninitialized, n)
     for i = 1 : n
         r[i] = pop!(h)
     end
@@ -80,7 +80,7 @@ end
 
 function extract_all_rev!(h::AbstractHeap{VT}) where VT
     n = length(h)
-    r = Vector{VT}(n)
+    r = Vector{VT}(uninitialized, n)
     for i = 1 : n
         r[n + 1 - i] = pop!(h)
     end

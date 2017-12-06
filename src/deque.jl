@@ -14,7 +14,7 @@ mutable struct DequeBlock{T}
     next::DequeBlock{T}  # ref to next block
 
     function DequeBlock{T}(capa::Int, front::Int) where T
-        data = Vector{T}(capa)
+        data = Vector{T}(uninitialized, capa)
         blk = new{T}(data, capa, front, front-1)
         blk.prev = blk
         blk.next = blk

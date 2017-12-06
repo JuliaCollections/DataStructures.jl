@@ -16,6 +16,8 @@ module DataStructures
                  union, intersect, symdiff, setdiff, issubset,
                  find, searchsortedfirst, searchsortedlast, endof, in
 
+    import Compat.uninitialized
+
     export Deque, Stack, Queue, CircularDeque
     export deque, enqueue!, dequeue!, dequeue_pair!, update!, reverse_iter
     export capacity, num_blocks, front, back, top, top_with_handle, sizehint!
@@ -51,8 +53,6 @@ module DataStructures
     export MultiDict, enumerateall
 
     import Base: eachindex, keytype, valtype
-
-    _include_string(str) = eval(parse(str))
 
     include("delegate.jl")
 
@@ -106,13 +106,13 @@ module DataStructures
     # Remove when Julia 0.7 (or whatever version is after v0.6) is released
     @deprecate DefaultDictBase(default, ks::AbstractArray, vs::AbstractArray) DefaultDictBase(default, zip(ks, vs))
     @deprecate DefaultDictBase(default, ks, vs) DefaultDictBase(default, zip(ks, vs))
-    @deprecate DefaultDictBase{K,V}(::Type{K}, ::Type{V}, default) DefaultDictBase{K,V}(default)
+    @deprecate DefaultDictBase(::Type{K}, ::Type{V}, default) where {K,V} DefaultDictBase{K,V}(default)
 
     @deprecate DefaultDict(default, ks, vs) DefaultDict(default, zip(ks, vs))
-    @deprecate DefaultDict{K,V}(::Type{K}, ::Type{V}, default) DefaultDict{K,V}(default)
+    @deprecate DefaultDict(::Type{K}, ::Type{V}, default) where {K,V} DefaultDict{K,V}(default)
 
     @deprecate DefaultOrderedDict(default, ks, vs) DefaultOrderedDict(default, zip(ks, vs))
-    @deprecate DefaultOrderedDict{K,V}(::Type{K}, ::Type{V}, default) DefaultOrderedDict{K,V}(default)
+    @deprecate DefaultOrderedDict(::Type{K}, ::Type{V}, default) where {K,V} DefaultOrderedDict{K,V}(default)
 
     function SortedMultiDict(ks::AbstractVector{K},
                              vs::AbstractVector{V},
@@ -124,10 +124,10 @@ module DataStructures
         SortedMultiDict(o, zip(ks,vs))
     end
 
-    @deprecate PriorityQueue{K,V}(::Type{K}, ::Type{V}) PriorityQueue{K,V}()    
-    @deprecate PriorityQueue{K,V}(::Type{K}, ::Type{V}, o::Ordering) PriorityQueue{K,V,typeof(o)}(o)    
+    @deprecate PriorityQueue(::Type{K}, ::Type{V}) where {K,V} PriorityQueue{K,V}()
+    @deprecate PriorityQueue(::Type{K}, ::Type{V}, o::Ordering) where {K,V} PriorityQueue{K,V,typeof(o)}(o)
     @deprecate (PriorityQueue{K,V,ForwardOrdering}() where {K,V}) PriorityQueue{K,V}()
-    
+
     function PriorityQueue(ks::AbstractVector{K},
                            vs::AbstractVector{V},
                            o::Ordering=Forward) where {K,V}
@@ -137,5 +137,5 @@ module DataStructures
         end
         PriorityQueue(o, zip(ks,vs))
     end
-                                            
+
 end

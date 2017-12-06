@@ -96,10 +96,10 @@ function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
     dsz = size(t.data, 1)
     tsz = size(t.tree, 1)
     r = t.rootloc
-    bfstreenodes = Vector{Int}(0)
+    bfstreenodes = Vector{Int}()
     tdpth = t.depth
     intree = IntSet()
-    levstart = Vector{Int}(tdpth)
+    levstart = Vector{Int}(uninitialized, tdpth)
     push!(bfstreenodes, r)
     levstart[1] = 1
     push!(intree, r)
@@ -132,8 +132,8 @@ function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
     end
     bfstreesize = size(bfstreenodes, 1)
     dataused = IntSet()
-    minkeys = Vector{K}(bfstreesize)
-    maxkeys = Vector{K}(bfstreesize)
+    minkeys = Vector{K}(uninitialized, bfstreesize)
+    maxkeys = Vector{K}(uninitialized, bfstreesize)
     for s = levstart[tdpth] : bfstreesize
         anc = bfstreenodes[s]
         c1 = t.tree[anc].child1

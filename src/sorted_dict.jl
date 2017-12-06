@@ -83,11 +83,7 @@ _sorted_dict_with_eltype(o::Ord, kv, ::Type            ) where {    Ord} = Sorte
 
 ## TODO: It seems impossible (or at least very challenging) to create the eltype below.
 ##       If deemed possible, please create a test and uncomment this definition.
-# if VERSION < v"0.6.0-dev.2123"
-#     _sorted_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{TypeVar(:K),D}}) = SortedDict{Any,  D,Ord}(o, ps)
-# else
-#     _include_string("_sorted_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,D} where K}) = SortedDict{Any,  D,Ord}(o, ps)")
-# end
+# _sorted_dict_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,D} where K}) = SortedDict{Any,  D,Ord}(o, ps)
 
 const SDSemiToken = IntSemiToken
 

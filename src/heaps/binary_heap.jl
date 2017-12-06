@@ -107,7 +107,7 @@ mutable struct BinaryHeap{T,Comp} <: AbstractHeap{T}
     valtree::Vector{T}
 
     function BinaryHeap{T,Comp}(comp::Comp) where {T,Comp}
-        new{T,Comp}(comp, Vector{T}(0))
+        new{T,Comp}(comp, Vector{T}())
     end
 
     function BinaryHeap{T,Comp}(comp::Comp, xs) where {T,Comp}  # xs is an iterable collection of values

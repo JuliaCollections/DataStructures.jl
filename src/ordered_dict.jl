@@ -21,7 +21,7 @@ mutable struct OrderedDict{K,V} <: Associative{K,V}
     dirty::Bool
 
     function OrderedDict{K,V}() where {K,V}
-        new{K,V}(zeros(Int32,16), Vector{K}(0), Vector{V}(0), 0, false)
+        new{K,V}(zeros(Int32,16), Vector{K}(), Vector{V}(), 0, false)
     end
     function OrderedDict{K,V}(kv) where {K,V}
         h = OrderedDict{K,V}()
@@ -56,23 +56,19 @@ copy(d::OrderedDict) = OrderedDict(d)
 # OrderedDict{K,V}(kv::Tuple{Vararg{Tuple{K,V}}})          = OrderedDict{K,V}(kv)
 # OrderedDict{K  }(kv::Tuple{Vararg{Tuple{K,Any}}})        = OrderedDict{K,Any}(kv)
 # OrderedDict{V  }(kv::Tuple{Vararg{Tuple{Any,V}}})        = OrderedDict{Any,V}(kv)
-_oldOrderedDict1 = "OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv)"
-_newOrderedDict1 = "OrderedDict{V}(kv::Tuple{Vararg{Pair{K,V} where K}})   = OrderedDict{Any,V}(kv)"
-OrderedDict(kv::Tuple{Vararg{Pair{K,V}}}) where {K,V}         = OrderedDict{K,V}(kv)
-OrderedDict(kv::Tuple{Vararg{Pair{K}}}) where {K}             = OrderedDict{K,Any}(kv)
-VERSION < v"0.6.0-dev.2123" ? _include_string(_oldOrderedDict1) : _include_string(_newOrderedDict1)
-OrderedDict(kv::Tuple{Vararg{Pair}})                   = OrderedDict{Any,Any}(kv)
+OrderedDict(kv::Tuple{Vararg{Pair{K,V}}}) where {K,V}       = OrderedDict{K,V}(kv)
+OrderedDict(kv::Tuple{Vararg{Pair{K}}}) where {K}           = OrderedDict{K,Any}(kv)
+OrderedDict(kv::Tuple{Vararg{Pair{K,V} where K}}) where {V} = OrderedDict{Any,V}(kv)
+OrderedDict(kv::Tuple{Vararg{Pair}})                        = OrderedDict{Any,Any}(kv)
 
 OrderedDict(kv::AbstractArray{Tuple{K,V}}) where {K,V} = OrderedDict{K,V}(kv)
 OrderedDict(kv::AbstractArray{Pair{K,V}}) where {K,V}  = OrderedDict{K,V}(kv)
 OrderedDict(kv::Associative{K,V}) where {K,V}          = OrderedDict{K,V}(kv)
 
-_oldOrderedDict2 = "OrderedDict{V}(ps::Pair{TypeVar(:K),V}...,) = OrderedDict{Any,V}(ps)"
-_newOrderedDict2 = "OrderedDict{V}(ps::(Pair{K,V} where K)...,) = OrderedDict{Any,V}(ps)"
 OrderedDict(ps::Pair{K,V}...) where {K,V}          = OrderedDict{K,V}(ps)
 OrderedDict(ps::Pair{K}...,) where {K}             = OrderedDict{K,Any}(ps)
-VERSION < v"0.6.0-dev.2123" ? _include_string(_oldOrderedDict2) : _include_string(_newOrderedDict2)
-OrderedDict(ps::Pair...)                    = OrderedDict{Any,Any}(ps)
+OrderedDict(ps::(Pair{K,V} where K)...,) where {V} = OrderedDict{Any,V}(ps)
+OrderedDict(ps::Pair...)                           = OrderedDict{Any,Any}(ps)
 
 function OrderedDict(kv)
     try
