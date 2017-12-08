@@ -121,8 +121,8 @@ s = IntSet(1:2:10)
 @test s === delete!(s, 1)
 for i in s; pop!(s, i); end
 @test isempty(s)
-global x = 0
-@test 1 == pop!(()->(global x; x+=1), s, 100)
+x = 0
+@test 1 == pop!(()->(x+=1), s, 100)
 @test x == 1
 push!(s, 100)
 @test pop!(()->throw(ErrorException()), s, 100) == 100
