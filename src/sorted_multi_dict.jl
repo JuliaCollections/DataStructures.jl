@@ -37,8 +37,8 @@ SortedMultiDict(o::Ordering, ps::Pair...) = SortedMultiDict(o, ps)
 SortedMultiDict{K,D}(ps::Pair...) where {K,D} = SortedMultiDict{K,D,ForwardOrdering}(Forward, ps)
 SortedMultiDict{K,D}(o::Ord, ps::Pair...) where {K,D,Ord<:Ordering} = SortedMultiDict{K,D,Ord}(o, ps)
 
-# Construction from Associatives
-SortedMultiDict(o::Ord, d::Associative{K,D}) where {K,D,Ord<:Ordering} = SortedMultiDict{K,D,Ord}(o, d)
+# Construction from AbstractDicts
+SortedMultiDict(o::Ord, d::AbstractDict{K,D}) where {K,D,Ord<:Ordering} = SortedMultiDict{K,D,Ord}(o, d)
 
 ## Construction from iteratables of Pairs/Tuples
 
@@ -214,10 +214,10 @@ function isequal(m1::SortedMultiDict, m2::SortedMultiDict)
     end
 end
 
-const SDorAssociative = Union{Associative,SortedMultiDict}
+const SDorAbstractDict = Union{AbstractDict,SortedMultiDict}
 
 function mergetwo!(m::SortedMultiDict{K,D,Ord},
-                   m2::SDorAssociative) where {K,D,Ord <: Ordering}
+                   m2::SDorAbstractDict) where {K,D,Ord <: Ordering}
     for (k,v) in m2
         insert!(m.bt, convert(K,k), convert(D,v), true)
     end
@@ -239,14 +239,14 @@ end
 
 
 function merge!(m::SortedMultiDict{K,D,Ord},
-                others::SDorAssociative...) where {K,D,Ord <: Ordering}
+                others::SDorAbstractDict...) where {K,D,Ord <: Ordering}
     for o in others
         mergetwo!(m,o)
     end
 end
 
 function merge(m::SortedMultiDict{K,D,Ord},
-               others::SDorAssociative...) where {K,D,Ord <: Ordering}
+               others::SDorAbstractDict...) where {K,D,Ord <: Ordering}
     result = packcopy(m)
     merge!(result, others...)
     result

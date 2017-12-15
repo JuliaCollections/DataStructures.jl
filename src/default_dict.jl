@@ -14,12 +14,12 @@
 # subclassed.
 #
 
-struct DefaultDictBase{K,V,F,D} <: Associative{K,V}
+struct DefaultDictBase{K,V,F,D} <: AbstractDict{K,V}
     default::F
     d::D
 
-    check_D(D,K,V) = (D <: Associative{K,V}) ||
-        throw(ArgumentError("Default dict must be <: Associative{$K,$V}"))
+    check_D(D,K,V) = (D <: AbstractDict{K,V}) ||
+        throw(ArgumentError("Default dict must be <: AbstractDict{$K,$V}"))
 
     DefaultDictBase{K,V,F,D}(x::F, kv::AbstractArray{Tuple{K,V}}) where {K,V,F,D} =
         (check_D(D,K,V); new{K,V,F,D}(x, D(kv)))
@@ -41,7 +41,7 @@ DefaultDictBase(k,v) = throw(ArgumentError("no default specified"))
 DefaultDictBase(default::F) where {F} = DefaultDictBase{Any,Any,F,Dict{Any,Any}}(default)
 DefaultDictBase(default::F, kv::AbstractArray{Tuple{K,V}}) where {K,V,F} = DefaultDictBase{K,V,F,Dict{K,V}}(default, kv)
 DefaultDictBase(default::F, ps::Pair{K,V}...) where {K,V,F} = DefaultDictBase{K,V,F,Dict{K,V}}(default, ps...)
-DefaultDictBase(default::F, d::D) where {F,D<:Associative} = (K=keytype(d); V=valtype(d); DefaultDictBase{K,V,F,D}(default, d))
+DefaultDictBase(default::F, d::D) where {F,D<:AbstractDict} = (K=keytype(d); V=valtype(d); DefaultDictBase{K,V,F,D}(default, d))
 
 # Constructor for DefaultDictBase{Int,Float64}(0.0)
 DefaultDictBase{K,V}(default::F) where {K,V,F} = DefaultDictBase{K,V,F,Dict{K,V}}(default)
@@ -87,7 +87,7 @@ end
 for _Dict in [:Dict, :OrderedDict]
     DefaultDict = Symbol("Default"*string(_Dict))
     @eval begin
-        struct $DefaultDict{K,V,F} <: Associative{K,V}
+        struct $DefaultDict{K,V,F} <: AbstractDict{K,V}
             d::DefaultDictBase{K,V,F,$_Dict{K,V}}
 
             $DefaultDict{K,V,F}(x, ps::Pair{K,V}...) where {K,V,F} =
@@ -111,7 +111,7 @@ for _Dict in [:Dict, :OrderedDict]
         $DefaultDict(default::F, kv::AbstractArray{Tuple{K,V}}) where {K,V,F} = $DefaultDict{K,V,F}(default, kv)
         $DefaultDict(default::F, ps::Pair{K,V}...) where {K,V,F} = $DefaultDict{K,V,F}(default, ps...)
 
-        $DefaultDict(default::F, d::Associative) where {F} = ((K,V)= (Base.keytype(d), Base.valtype(d)); $DefaultDict{K,V,F}(default, $_Dict(d)))
+        $DefaultDict(default::F, d::AbstractDict) where {F} = ((K,V)= (Base.keytype(d), Base.valtype(d)); $DefaultDict{K,V,F}(default, $_Dict(d)))
 
         # Constructor syntax: DefaultDictBase{Int,Float64}(default)
         $DefaultDict{K,V}() where {K,V} = throw(ArgumentError("$DefaultDict: no default specified"))
@@ -155,7 +155,7 @@ isordered(::Type{T}) where {T<:DefaultOrderedDict} = true
 
 ## This should be uncommented to provide a DefaultSortedDict
 
-# struct DefaultSortedDict{K,V,F} <: Associative{K,V}
+# struct DefaultSortedDict{K,V,F} <: AbstractDict{K,V}
 #     d::DefaultDictBase{K,V,F,SortedDict{K,V}}
 
 #     DefaultSortedDict(x, kv::AbstractArray{(K,V)}) = new(DefaultDictBase{K,V,F,SortedDict{K,V}}(x, kv))
@@ -179,7 +179,7 @@ isordered(::Type{T}) where {T<:DefaultOrderedDict} = true
 # DefaultSortedDict{K,V,F}(::Type{K}, ::Type{V}, default::F) = DefaultSortedDict{K,V,F}(default)
 # DefaultSortedDict{K,V,F}(default::F, kv::AbstractArray{(K,V)}) = DefaultSortedDict{K,V,F}(default, kv)
 
-# DefaultSortedDict{F}(default::F, d::Associative) = ((K,V)=eltype(d); DefaultSortedDict{K,V,F}(default, SortedDict(d)))
+# DefaultSortedDict{F}(default::F, d::AbstractDict) = ((K,V)=eltype(d); DefaultSortedDict{K,V,F}(default, SortedDict(d)))
 
 ## Functions
 

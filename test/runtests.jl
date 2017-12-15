@@ -3,6 +3,10 @@ using DataStructures
 const IntSet = DataStructures.IntSet
 using Primes, Compat
 
+if VERSION < v"0.7.0-DEV.2951"
+    const AbstractDict = Associative
+end
+
 @test isempty(detect_ambiguities(Base, Core, DataStructures))
 
 tests = ["int_set",
