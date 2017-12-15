@@ -22,7 +22,7 @@ the dictionary or set::
              #     catalan = 0.9159655941772...,
              #     φ = 1.6180339887498...]
 
-All standard ``Associative`` and ``Dict`` functions are available for
+All standard ``AbstractDict`` and ``Dict`` functions are available for
 ``OrderedDicts``, and all ``Set`` operations are available for
 OrderedSets.
 

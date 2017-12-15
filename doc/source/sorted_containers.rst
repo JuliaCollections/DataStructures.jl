@@ -9,7 +9,7 @@ SortedDict, SortedMultiDict and SortedSet.
 *SortedDict* is similar to the built-in Julia type ``Dict``
 with the additional feature that the keys are stored in
 sorted order and can be efficiently iterated in this order.
-SortedDict is a subtype of Associative.  It is generally slower than ``Dict``
+SortedDict is a subtype of AbstractDict.  It is generally slower than ``Dict``
 because looking up a key requires an O(log *n*) tree search rather than
 an expected O(1) hash-table lookup time as with Dict.
 SortedDict is

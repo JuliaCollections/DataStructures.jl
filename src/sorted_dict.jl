@@ -1,7 +1,7 @@
 ## A SortedDict is a wrapper around balancedTree with
 ## methods similiar to those of Julia container Dict.
 
-mutable struct SortedDict{K, D, Ord <: Ordering} <: Associative{K,D}
+mutable struct SortedDict{K, D, Ord <: Ordering} <: AbstractDict{K,D}
     bt::BalancedTree23{K,D,Ord}
 
     ## Base constructors
@@ -39,8 +39,8 @@ SortedDict(o::Ordering, ps::Pair...) = SortedDict(o, ps)
 SortedDict{K,D}(ps::Pair...) where {K,D} = SortedDict{K,D,ForwardOrdering}(Forward, ps)
 SortedDict{K,D}(o::Ord, ps::Pair...) where {K,D,Ord<:Ordering} = SortedDict{K,D,Ord}(o, ps)
 
-# Construction from Associatives
-SortedDict(o::Ord, d::Associative{K,D}) where {K,D,Ord<:Ordering} = SortedDict{K,D,Ord}(o, d)
+# Construction from AbstractDicts
+SortedDict(o::Ord, d::AbstractDict{K,D}) where {K,D,Ord<:Ordering} = SortedDict{K,D,Ord}(o, d)
 
 ## Construction from iteratables of Pairs/Tuples
 
@@ -265,7 +265,7 @@ end
 
 
 function mergetwo!(m::SortedDict{K,D,Ord},
-                   m2::Associative{K,D}) where {K,D,Ord <: Ordering}
+                   m2::AbstractDict{K,D}) where {K,D,Ord <: Ordering}
     for (k,v) in m2
         m[convert(K,k)] = convert(D,v)
     end
@@ -289,14 +289,14 @@ end
 
 
 function merge!(m::SortedDict{K,D,Ord},
-                others::Associative{K,D}...) where {K,D,Ord <: Ordering}
+                others::AbstractDict{K,D}...) where {K,D,Ord <: Ordering}
     for o in others
         mergetwo!(m,o)
     end
 end
 
 function merge(m::SortedDict{K,D,Ord},
-               others::Associative{K,D}...) where {K,D,Ord <: Ordering}
+               others::AbstractDict{K,D}...) where {K,D,Ord <: Ordering}
     result = packcopy(m)
     merge!(result, others...)
     result

@@ -1816,7 +1816,7 @@ function sorted_dict_timing2(numtrial::Int, expectedk::String, expectedd::String
     end
 end
 
-function SDConstruct(a::Associative; lt::Function=isless, by::Function=identity)
+function SDConstruct(a::AbstractDict; lt::Function=isless, by::Function=identity)
     if by == identity
         return SortedDict(a, Lt(lt))
     elseif lt == isless

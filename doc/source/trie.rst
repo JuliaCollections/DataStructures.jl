@@ -19,7 +19,7 @@ Constructors::
   Trie(keys, values)                  # construct a Trie with the given keys and values
   Trie(keys)                          # construct a Trie{Void} with the given keys and with values = nothing
   Trie(kvs::AbstractVector{(K, V)})   # construct a Trie from the given vector of (key, value) pairs
-  Trie(kvs::Associative{K, V})        # construct a Trie from the given associative structure
+  Trie(kvs::AbstractDict{K, V})        # construct a Trie from the given associative structure
 
 This package also provides an iterator ``path(t::Trie, str)`` for looping over all the nodes
 encountered in searching for the given string ``str``.

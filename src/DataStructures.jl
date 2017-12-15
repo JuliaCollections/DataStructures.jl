@@ -54,6 +54,10 @@ module DataStructures
 
     import Base: eachindex, keytype, valtype
 
+    if VERSION < v"0.7.0-DEV.2951"
+        const AbstractDict = Associative
+    end
+
     include("delegate.jl")
 
     include("deque.jl")
