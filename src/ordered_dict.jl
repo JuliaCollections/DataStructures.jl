@@ -280,11 +280,11 @@ end
 function _setindex!(h::OrderedDict, v, key, index)
     hk, hv = h.keys, h.vals
     #push!(h.keys, key)
-    ccall(:jl_array_grow_end, Void, (Any, UInt), hk, 1)
+    ccall(:jl_array_grow_end, Cvoid, (Any, UInt), hk, 1)
     nk = length(hk)
     @inbounds hk[nk] = key
     #push!(h.vals, v)
-    ccall(:jl_array_grow_end, Void, (Any, UInt), hv, 1)
+    ccall(:jl_array_grow_end, Cvoid, (Any, UInt), hv, 1)
     @inbounds hv[nk] = v
     @inbounds h.slots[index] = nk
     h.dirty = true
@@ -409,8 +409,8 @@ end
 function _delete!(h::OrderedDict, index)
     @inbounds ki = h.slots[index]
     @inbounds h.slots[index] = -ki
-    ccall(:jl_arrayunset, Void, (Any, UInt), h.keys, ki-1)
-    ccall(:jl_arrayunset, Void, (Any, UInt), h.vals, ki-1)
+    ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.keys, ki-1)
+    ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.vals, ki-1)
     h.ndel += 1
     h.dirty = true
     h

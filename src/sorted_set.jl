@@ -3,10 +3,10 @@
 
 
 mutable struct SortedSet{K, Ord <: Ordering}
-    bt::BalancedTree23{K,Void,Ord}
+    bt::BalancedTree23{K,Nothing,Ord}
 
     function SortedSet{K,Ord}(o::Ord=Forward, iter=[]) where {K,Ord<:Ordering}
-        sorted_set = new{K,Ord}(BalancedTree23{K,Void,Ord}(o))
+        sorted_set = new{K,Ord}(BalancedTree23{K,Nothing,Ord}(o))
 
         for item in iter
             push!(sorted_set, item)

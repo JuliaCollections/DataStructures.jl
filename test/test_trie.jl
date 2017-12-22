@@ -24,7 +24,7 @@
     @test isa(Trie(ks, vs), Trie{Int})
     @test isa(Trie(kvs), Trie{Int})
     @test isa(Trie(Dict(kvs)), Trie{Int})
-    @test isa(Trie(ks), Trie{Void})
+    @test isa(Trie(ks), Trie{Nothing})
 
 
     # path iterator
