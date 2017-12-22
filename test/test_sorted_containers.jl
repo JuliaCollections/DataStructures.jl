@@ -578,17 +578,17 @@ end
     @test x1 === dfc[1]
     @test x1 === get!(dfc, 1, [1000])
     @test x1 === get(dfc, 1, [1000])
-    
+
     x2 = get!(()->[2], dfc, 2)
     @test x2 == [2]
     @test x2 === dfc[2]
     @test x2 === get!(()->[1000], dfc, 2)
     @test x2 === get(()->[1000], dfc, 2)
-    
+
     @test [42] == get(()->[42], dfc, 3)
     @test !haskey(dfc, 3)
     @test [43] == get(dfc, 4, [43])
-    @test !haskey(dfc, 4)        
+    @test !haskey(dfc, 4)
 end
 
 
@@ -1816,7 +1816,7 @@ function sorted_dict_timing2(numtrial::Int, expectedk::String, expectedd::String
     end
 end
 
-function SDConstruct(a::Associative; lt::Function=isless, by::Function=identity)
+function SDConstruct(a::AbstractDict; lt::Function=isless, by::Function=identity)
     if by == identity
         return SortedDict(a, Lt(lt))
     elseif lt == isless

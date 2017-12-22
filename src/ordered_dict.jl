@@ -13,7 +13,7 @@ import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
 `OrderedDict`s are  simply dictionaries  whose entries  have a  particular order.  The order
 refers to insertion order, which allows deterministic iteration over the dictionary or set.
 """
-mutable struct OrderedDict{K,V} <: Associative{K,V}
+mutable struct OrderedDict{K,V} <: AbstractDict{K,V}
     slots::Array{Int32,1}
     keys::Array{K,1}
     vals::Array{V,1}
@@ -63,7 +63,7 @@ OrderedDict(kv::Tuple{Vararg{Pair}})                        = OrderedDict{Any,An
 
 OrderedDict(kv::AbstractArray{Tuple{K,V}}) where {K,V} = OrderedDict{K,V}(kv)
 OrderedDict(kv::AbstractArray{Pair{K,V}}) where {K,V}  = OrderedDict{K,V}(kv)
-OrderedDict(kv::Associative{K,V}) where {K,V}          = OrderedDict{K,V}(kv)
+OrderedDict(kv::AbstractDict{K,V}) where {K,V}          = OrderedDict{K,V}(kv)
 
 OrderedDict(ps::Pair{K,V}...) where {K,V}          = OrderedDict{K,V}(ps)
 OrderedDict(ps::Pair{K}...,) where {K}             = OrderedDict{K,Any}(ps)
@@ -98,11 +98,11 @@ isempty(d::OrderedDict) = (length(d)==0)
 Property of associative containers, that is `true` if the container type has a
 defined order (such as `OrderedDict` and `SortedDict`), and `false` otherwise.
 """
-isordered(::Type{T}) where {T<:Associative} = false
+isordered(::Type{T}) where {T<:AbstractDict} = false
 isordered(::Type{T}) where {T<:OrderedDict} = true
 
 # conversion between OrderedDict types
-function convert(::Type{OrderedDict{K,V}}, d::Associative) where {K,V}
+function convert(::Type{OrderedDict{K,V}}, d::AbstractDict) where {K,V}
     if !isordered(typeof(d))
         Base.depwarn("Conversion to OrderedDict is deprecated for unordered associative containers (in this case, $(typeof(d))). Use an ordered or sorted associative type, such as SortedDict and OrderedDict.", :convert)
     end
@@ -436,7 +436,7 @@ else
 end
 next(v::ValueIterator{T}, i) where {T<:OrderedDict} = (v.dict.vals[i], i+1)
 
-function merge(d::OrderedDict, others::Associative...)
+function merge(d::OrderedDict, others::AbstractDict...)
     K, V = keytype(d), valtype(d)
     for other in others
         K = promote_type(K, keytype(other))

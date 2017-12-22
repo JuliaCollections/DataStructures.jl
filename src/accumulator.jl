@@ -1,6 +1,6 @@
 # A counter type
 
-struct Accumulator{T, V<:Number} <: Associative{T,V}
+struct Accumulator{T, V<:Number} <: AbstractDict{T,V}
     map::Dict{T,V}
 end
 
@@ -43,7 +43,7 @@ length(a::Accumulator) = length(a.map)
 
 get(ct::Accumulator, x, default) = get(ct.map, x, default)
 # need to allow user specified default in order to
-# correctly implement "informal" Associative interface
+# correctly implement "informal" AbstractDict interface
 
 getindex(ct::Accumulator{T,V}, x) where {T,V} = get(ct.map, x, zero(V))
 
@@ -80,7 +80,7 @@ inc!(ct::Accumulator{T,V}, x) where {T,V} = inc!(ct, x, one(V))
 push!(ct::Accumulator, x) = inc!(ct, x)
 push!(ct::Accumulator, x, a::Number) = inc!(ct, x, a)
 
-# To remove ambiguities related to Accumulator now being a subtype of Associative
+# To remove ambiguities related to Accumulator now being a subtype of AbstractDict
 push!(ct::Accumulator, x::Pair)  = inc!(ct, x)
 
 
