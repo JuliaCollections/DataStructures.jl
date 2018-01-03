@@ -52,7 +52,7 @@ pop!(s::OrderedSet) = pop!(s.dict)[1]
 
 union(s::OrderedSet) = copy(s)
 function union(s::OrderedSet, sets...)
-    u = OrderedSet{Base.join_eltype(s, sets...)}()
+    u = OrderedSet{Base.promote_eltype(s, sets...)}()
     union!(u,s)
     for t in sets
         union!(u,t)
