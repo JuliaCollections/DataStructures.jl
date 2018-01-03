@@ -2,6 +2,7 @@ using Compat.Test
 using DataStructures
 const IntSet = DataStructures.IntSet
 using Primes, Compat
+using Compat.Unicode: lowercase
 
 @test isempty(detect_ambiguities(Base, Core, DataStructures))
 
