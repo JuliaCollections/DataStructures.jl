@@ -14,9 +14,9 @@
 .. image:: http://pkg.julialang.org/badges/DataStructures_0.6.svg
    :target: http://pkg.julialang.org/?pkg=DataStructures&ver=0.6
    :alt: PkgEval.jl Status on Julia 0.6
-.. image:: https://readthedocs.org/projects/datastructuresjl/badge/?version=latest
-   :target: http://datastructuresjl.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
+.. image:: https://img.shields.io/badge/docs-latest-blue.svg
+   :target: https://juliacollections.github.io/DataStructures.jl/latest
+   :alt: Documentation
 
 ====================
 DataStructures.jl
@@ -45,4 +45,4 @@ This package implements a variety of data structures, including
 Resources
 -----------------
 
-* **Documentation**: http://datastructuresjl.readthedocs.org/en/latest/
+* **Documentation**: https://juliacollections.github.io/DataStructures.jl/latest
