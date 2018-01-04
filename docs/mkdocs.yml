@@ -1,5 +1,5 @@
 site_name:        DataStructures.jl
-repo_url:         https://github.com/oxinabox/DataStructures.jl
+repo_url:         https://github.com/JuliaCollections/DataStructures.jl
 site_description: Documentation for the Julia DataStructures package
 site_author:      JuliaCollections
 

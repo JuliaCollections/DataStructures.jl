@@ -25,8 +25,7 @@ makedocs(
 )
 
 deploydocs(
-    #repo = "github.com/JuliaCollections/DataStructures.jl",
-    repo = "github.com/oxinabox/DataStructures.jl.git",
+    repo = "github.com/JuliaCollections/DataStructures.jl.git",
     julia  = "0.6",
     latest = "master",
     target = "build",
