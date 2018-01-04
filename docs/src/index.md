@@ -40,9 +40,3 @@ Pages = [
     "sorted_containers.md",
 ]
 ```
-
-## Indices and tables
-
--   genindex
--   modindex
--   search
