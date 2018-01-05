@@ -4,13 +4,13 @@ An implementation of the Trie data structure. This is an associative
 structure, with AbstractString keys:
 
 ```julia
-t=Trie{Int}()
-t["Rob"]=42
-t["Roger"]=24
-haskey(t,"Rob") #true
-get(t,"Rob",nothing) #42
-keys(t) # "Rob", "Roger"
-keys(subtrie(t, "Ro")) # "b", "ger"
+t = Trie{Int}()
+t["Rob"] = 42
+t["Roger"] = 24
+haskey(t, "Rob")  # true
+get(t, "Rob", nothing)  # 42
+keys(t)  # "Rob", "Roger"
+keys(subtrie(t, "Ro"))  # "b", "ger"
 ```
 
 Constructors:
