@@ -40,7 +40,7 @@ DefaultDict{AbstractString,Array{Int64,1},Function} with 2 entries:
 
 # create a Dictionary of type AbstractString=&gt;DefaultDict{AbstractString, Int}, where the default of the
 # inner set of DefaultDicts is zero
-dd = DefaultDict(AbstractString, DefaultDict, () -&gt; DefaultDict(AbstractString,Int,0))</code></pre><p><span>$`  Note that in the last example, we need to use a function to create each new$</span>DefaultDict<code>. If we forget, we will end up using the same</code>DefaultDict`` for all default values:</p><pre><code class="language-julia">julia&gt; dd = DefaultDict(AbstractString, DefaultDict, DefaultDict(AbstractString,Int,0));
+dd = DefaultDict(AbstractString, DefaultDict, () -&gt; DefaultDict(AbstractString,Int,0))</code></pre><p>Note that in the last example, we need to use a function to create each new <code>DefaultDict</code>. If we forget, we will end up using the same<code>DefaultDict</code> for all default values:</p><pre><code class="language-julia">julia&gt; dd = DefaultDict(AbstractString, DefaultDict, DefaultDict(AbstractString,Int,0));
 
 julia&gt; dd[&quot;a&quot;]
 DefaultDict{AbstractString,Int64,Int64,Dict{K,V}}()
