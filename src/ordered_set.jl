@@ -6,10 +6,10 @@
 # (see https://github.com/JuliaLang/julia/issues/5533)
 
 struct OrderedSet{T}
-    dict::OrderedDict{T,Void}
+    dict::OrderedDict{T,Nothing}
 
-    OrderedSet{T}() where {T} = new{T}(OrderedDict{T,Void}())
-    OrderedSet{T}(xs) where {T} = union!(new{T}(OrderedDict{T,Void}()), xs)
+    OrderedSet{T}() where {T} = new{T}(OrderedDict{T,Nothing}())
+    OrderedSet{T}(xs) where {T} = union!(new{T}(OrderedDict{T,Nothing}()), xs)
 end
 OrderedSet() = OrderedSet{Any}()
 OrderedSet(xs) = OrderedSet{eltype(xs)}(xs)
@@ -52,7 +52,7 @@ pop!(s::OrderedSet) = pop!(s.dict)[1]
 
 union(s::OrderedSet) = copy(s)
 function union(s::OrderedSet, sets...)
-    u = OrderedSet{Base.join_eltype(s, sets...)}()
+    u = OrderedSet{Base.promote_eltype(s, sets...)}()
     union!(u,s)
     for t in sets
         union!(u,t)

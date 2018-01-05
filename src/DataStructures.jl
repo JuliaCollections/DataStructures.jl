@@ -16,7 +16,7 @@ module DataStructures
                  union, intersect, symdiff, setdiff, issubset,
                  find, searchsortedfirst, searchsortedlast, endof, in
 
-    import Compat.uninitialized
+    using Compat: uninitialized, Nothing, Cvoid, AbstractDict
 
     export Deque, Stack, Queue, CircularDeque
     export deque, enqueue!, dequeue!, dequeue_pair!, update!, reverse_iter

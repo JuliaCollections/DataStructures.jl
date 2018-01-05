@@ -212,7 +212,7 @@
     let
         local bar
         bestkey(d, key) = key
-        bestkey(d::Associative{K,V}, key) where {K<:AbstractString,V} = string(key)
+        bestkey(d::AbstractDict{K,V}, key) where {K<:AbstractString,V} = string(key)
         bar(x) = bestkey(x, :y)
         @test bar(OrderedDict([(:x, [1,2,5])])) == :y
         @test bar(OrderedDict([("x", [1,2,5])])) == "y"

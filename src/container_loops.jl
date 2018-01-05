@@ -184,7 +184,7 @@ end
 
 
 
-# Next definition needed to break ambiguity with keys(Associative) from Dict.jl
+# Next definition needed to break ambiguity with keys(AbstractDict) from Dict.jl
 
 @inline keys(ba::SortedDict{K,D,Ord}) where {K, D, Ord <: Ordering} = SDMKeyIteration(ba)
 @inline keys(ba::T) where {T <: SDMIterableTypesBase} = SDMKeyIteration(ba)
@@ -198,7 +198,7 @@ in(k, keyit::SDMKeyIteration{SortedMultiDict{K,D,Ord}}) where {K,D,Ord <: Orderi
 
 
 
-# Next definition needed to break ambiguity with values(Associative) from Dict.jl
+# Next definition needed to break ambiguity with values(AbstractDict) from Dict.jl
 @inline values(ba::SortedDict{K,D,Ord}) where {K, D, Ord <: Ordering} = SDMValIteration(ba)
 @inline values(ba::T) where {T <: SDMIterableTypesBase} = SDMValIteration(ba)
 @inline semitokens(ba::T) where {T <: SDMIterableTypesBase} = SDMSemiTokenIteration(ba)
