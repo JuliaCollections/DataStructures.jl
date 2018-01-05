@@ -60,8 +60,7 @@ DefaultDict{AbstractString,Array{Int64,1},Function} with 2 entries:
 dd = DefaultDict(AbstractString, DefaultDict, () -> DefaultDict(AbstractString,Int,0))
 ```
 
-`` `  Note that in the last example, we need to use a function to create each new ``DefaultDict`. If we forget, we will end up using the same`DefaultDict\`\`
-for all default values:
+Note that in the last example, we need to use a function to create each new `DefaultDict`. If we forget, we will end up using the same`DefaultDict` for all default values:
 
 ```julia
 julia> dd = DefaultDict(AbstractString, DefaultDict, DefaultDict(AbstractString,Int,0));

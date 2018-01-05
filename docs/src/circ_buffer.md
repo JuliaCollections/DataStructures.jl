@@ -16,8 +16,8 @@ length(a)           # get the number of elements currently in the buffer
 size(a)             # same as length(a)
 push!(a, 10)        # add an element to the back and overwrite front if full
 unshift!(a, 10)     # add an element to the front and overwrite back if full
-append!(a, [1, 2, 3, 4])    # push at most last `capacity` items
-convert(Vector{Float64}, a) # convert items to type Float64
+append!(a, [1, 2, 3, 4])     # push at most last `capacity` items
+convert(Vector{Float64}, a)  # convert items to type Float64
 eltype(a)           # return type of items
 a[1]                # get the element at the front
 a[end]              # get the element at the back
