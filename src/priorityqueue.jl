@@ -18,7 +18,7 @@ lowest priority element.
 ```jldoctest
 julia> a = PriorityQueue(["a","b","c"],[2,3,1],Base.Order.Forward)
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
-  "c" => 1
+  "c" => 1111  # ToFix
   "b" => 3
   "a" => 2
 ```
