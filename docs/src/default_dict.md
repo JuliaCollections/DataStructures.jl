@@ -23,6 +23,9 @@ DefaultOrderedDict(default, kv)     # create a DefaultOrderedDict with a default
 DefaultOrderedDict(KeyType, ValueType, default) # create a DefaultOrderedDict with Dict type (KeyType,ValueType)
 ```
 
+All constructors also take a `passkey::Bool=false` keyword argument which determines whether to pass along the `key`
+argument when calling the default function. It has no effect when the key is just a value.
+
 Examples using `DefaultDict`:
 
 ```julia
@@ -58,9 +61,27 @@ DefaultDict{AbstractString,Array{Int64,1},Function} with 2 entries:
 # create a Dictionary of type AbstractString=>DefaultDict{AbstractString, Int}, where the default of the
 # inner set of DefaultDicts is zero
 dd = DefaultDict(AbstractString, DefaultDict, () -> DefaultDict(AbstractString,Int,0))
+
+# use DefaultDict to cache an expensive function call, i.e., memoize
+# https://en.wikipedia.org/wiki/Memoization
+dd = DefaultDict{AbstractString, Int}(passkey=true) do key
+    len = length(key)
+    sleep(len)
+    return len
+end
+
+julia> dd["hi"]  # slow
+2
+
+julia> dd["ho"]  # slow
+2
+
+julia> dd["hi"]  # fast
+2
 ```
 
-Note that in the last example, we need to use a function to create each new `DefaultDict`. If we forget, we will end up using the same`DefaultDict` for all default values:
+Note that in the second-last example, we need to use a function to create each new `DefaultDict`.
+If we forget, we will end up using the same`DefaultDict` for all default values:
 
 ```julia
 julia> dd = DefaultDict(AbstractString, DefaultDict, DefaultDict(AbstractString,Int,0));
