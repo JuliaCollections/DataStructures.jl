@@ -126,4 +126,8 @@ function done(it::TrieIterator, state)
 end
 
 path(t::Trie, str::AbstractString) = TrieIterator(t, str)
+if VERSION < v"0.7.0-DEV.3309"
 Base.iteratorsize(::Type{TrieIterator}) = Base.SizeUnknown()
+else
+Base.IteratorSize(::Type{TrieIterator}) = Base.SizeUnknown()
+end
