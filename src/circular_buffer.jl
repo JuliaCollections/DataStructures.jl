@@ -4,21 +4,26 @@ New items are pushed to the back of the list, overwriting values in a circular f
 mutable struct CircularBuffer{T} <: AbstractVector{T}
     capacity::Int
     first::Int
+    length::Int
     buffer::Vector{T}
 
-    CircularBuffer{T}(capacity::Int) where {T} = new{T}(capacity, 1, T[])
+    CircularBuffer{T}(capacity::Int) where {T} = new{T}(capacity, 1, 0, Vector{T}(capacity))
 end
 
 function Base.empty!(cb::CircularBuffer)
-    cb.first = 1
-    empty!(cb.buffer)
+    cb.length = 0
+    cb
 end
 
 function _buffer_index(cb::CircularBuffer, i::Int)
-    n = length(cb)
-    if i < 1 || i > n
-        throw(BoundsError("CircularBuffer out of range. cb=$cb i=$i"))
+    if i < 1 || i > cb.length
+        throw(BoundsError(cb, i))
     end
+    _mod_buffer_index(cb, i)
+end
+
+function _mod_buffer_index(cb::CircularBuffer, i::Int)
+    n = cb.capacity
     idx = cb.first + i - 1
     if idx > n
         idx - n
@@ -36,25 +41,43 @@ function Base.setindex!(cb::CircularBuffer, data, i::Int)
     cb
 end
 
+function Base.pop!(cb::CircularBuffer)
+    if cb.length == 0
+        throw(ArgumentError("array must be non-empty"))
+    end
+    i = _mod_buffer_index(cb, cb.length)
+    cb.length -= 1
+    cb.buffer[i]
+end
+
 function Base.push!(cb::CircularBuffer, data)
     # if full, increment and overwrite, otherwise push
-    if length(cb) == cb.capacity
+    if cb.length == cb.capacity
         cb.first = (cb.first == cb.capacity ? 1 : cb.first + 1)
-        cb[length(cb)] = data
     else
-        push!(cb.buffer, data)
+        cb.length += 1
     end
+    cb.buffer[_mod_buffer_index(cb, cb.length)] = data
     cb
+end
+
+function Base.shift!(cb::CircularBuffer)
+    if cb.length == 0
+        throw(ArgumentError("array must be non-empty"))
+    end
+    i = cb.first
+    cb.first = (cb.first + 1 > cb.capacity ? 1 : cb.first + 1)
+    cb.length -= 1
+    cb.buffer[i]
 end
 
 function Base.unshift!(cb::CircularBuffer, data)
     # if full, decrement and overwrite, otherwise unshift
-    if length(cb) == cb.capacity
-        cb.first = (cb.first == 1 ? cb.capacity : cb.first - 1)
-        cb[1] = data
-    else
-        unshift!(cb.buffer, data)
+    if cb.length < cb.capacity
+        cb.length += 1
     end
+    cb.first = (cb.first == 1 ? cb.length : cb.first - 1)
+    cb.buffer[cb.first] = data
     cb
 end
 
@@ -67,10 +90,10 @@ function Base.append!(cb::CircularBuffer, datavec::AbstractVector)
     cb
 end
 
-Base.length(cb::CircularBuffer) = length(cb.buffer)
+Base.length(cb::CircularBuffer) = cb.length
 Base.size(cb::CircularBuffer) = (length(cb),)
 Base.convert(::Type{Array}, cb::CircularBuffer{T}) where {T} = T[x for x in cb]
-Base.isempty(cb::CircularBuffer) = isempty(cb.buffer)
+Base.isempty(cb::CircularBuffer) = cb.length == 0
 
 capacity(cb::CircularBuffer) = cb.capacity
 isfull(cb::CircularBuffer) = length(cb) == cb.capacity
