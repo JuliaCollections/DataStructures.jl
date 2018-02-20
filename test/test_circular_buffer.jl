@@ -43,4 +43,28 @@
 
     # test empty!(cb)
     @test length(empty!(cb)) == 0
+
+    # test pop!(cb)
+    cb = CircularBuffer{Int}(5)
+    for i in 0:5    # one extra to force wraparound
+        push!(cb, i)
+    end
+    for j in 5:-1:1
+        @test pop!(cb) == j
+        @test convert(Array, cb) == collect(1:j-1)
+    end
+    @test isempty(cb)
+    @test_throws ArgumentError pop!(cb)
+
+    # test shift!(cb)
+    cb = CircularBuffer{Int}(5)
+    for i in 0:5    # one extra to force wraparound
+        push!(cb, i)
+    end
+    for j in 1:5
+        @test shift!(cb) == j
+        @test convert(Array, cb) == collect(j+1:5)
+    end
+    @test isempty(cb)
+    @test_throws ArgumentError shift!(cb)
 end
