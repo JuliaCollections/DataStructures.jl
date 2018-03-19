@@ -17,7 +17,7 @@
         push!(D, i)
     end
     @test_throws BoundsError push!(D, 6)
-    @test shift!(D) === 1
+    @test popfirst!(D) === 1
     @test front(D) === 2
     @test back(D) === 5
     io = IOBuffer()
@@ -31,17 +31,17 @@
     @test pop!(D) === 6
     @test front(D) === 2
     @test back(D) === 5
-    unshift!(D, 7)
+    pushfirst!(D, 7)
     @test front(D) === 7
     @test back(D) === 5
-    @test_throws BoundsError unshift!(D, 8)
-    @test shift!(D) === 7
-    @test shift!(D) === 2
+    @test_throws BoundsError pushfirst!(D, 8)
+    @test popfirst!(D) === 7
+    @test popfirst!(D) === 2
     @test pop!(D) === 5
-    @test shift!(D) === 3
+    @test popfirst!(D) === 3
     @test pop!(D) === 4
     @test_throws BoundsError pop!(D)
-    @test_throws BoundsError shift!(D)
+    @test_throws BoundsError popfirst!(D)
     @test isempty(D)
     push!(D, 10)
     @test !isempty(D)
@@ -54,21 +54,21 @@
     for i = 1:5
         push!(D, i)
     end
-    @test shift!(D) == 1
+    @test popfirst!(D) == 1
     push!(D, 6)
     for i = 2:6
         @test back(D) === 6
         @test D[1] === i
         @test D[7-i] === 6
-        @test shift!(D) === i
+        @test popfirst!(D) === i
     end
 
-    # Test that unshift! works on an empty deque, and that front/back give the right answer
+    # Test that pushfirst! works on an empty deque, and that front/back give the right answer
     D = CircularDeque{Int}(5)
-    unshift!(D, 30)
+    pushfirst!(D, 30)
     @test front(D) == back(D) == 30
     empty!(D)
-    unshift!(D, 40)
+    pushfirst!(D, 40)
     @test front(D) == back(D) == 40
 
     # Test iteration over loop

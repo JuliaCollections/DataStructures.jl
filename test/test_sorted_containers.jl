@@ -99,7 +99,7 @@ function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
     bfstreenodes = Vector{Int}()
     tdpth = t.depth
     intree = IntSet()
-    levstart = Vector{Int}(uninitialized, tdpth)
+    levstart = Vector{Int}(undef, tdpth)
     push!(bfstreenodes, r)
     levstart[1] = 1
     push!(intree, r)
@@ -132,8 +132,8 @@ function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
     end
     bfstreesize = size(bfstreenodes, 1)
     dataused = IntSet()
-    minkeys = Vector{K}(uninitialized, bfstreesize)
-    maxkeys = Vector{K}(uninitialized, bfstreesize)
+    minkeys = Vector{K}(undef, bfstreesize)
+    maxkeys = Vector{K}(undef, bfstreesize)
     for s = levstart[tdpth] : bfstreesize
         anc = bfstreenodes[s]
         c1 = t.tree[anc].child1
@@ -402,7 +402,7 @@ end
         end
     end
     @test !isempty(m1)
-    assert(length(m1) == N - 1)
+    @assert length(m1) == N - 1
     for i = 2 : N
         d = pop!(m1, i)
         @test d == convert(Float64,i)^2
@@ -418,7 +418,7 @@ end
             checkcorrectness(m1.bt, false)
         end
     end
-    ii = endof(m1)
+    ii = lastindex(m1)
     for i = 1 : N - 1
         pr = deref((m1,ii))
         @test pr[1] == N + 1 - i && pr[2] == convert(Float64,pr[1]) ^ 2
@@ -432,7 +432,7 @@ end
         end
         j = deref_key((m1,ii))
         for k = j * 2 : j : N
-            p = find(m1, k)
+            p = findkey(m1, k)
             if p != pastendsemitoken(m1)
                 delete!((m1,p))
             end
@@ -453,7 +453,7 @@ end
     pn = convert(Array{Int64}, primes(N))
     @test t == sum(pn)
     @test u == sum(pn.^2)
-    ij = endof(m1)
+    ij = lastindex(m1)
     @test deref_key((m1,ij)) == last(pn) &&
        convert(Float64, last(pn)^2) ==  deref_value((m1,ij))
     m1[6] = 49.0
@@ -485,7 +485,7 @@ end
     i9 = regress((m1,i8))
     @test i9 == beforestartsemitoken(m1)
     @test status((m1,i9)) == 2
-    i10 = find(m1, 17)
+    i10 = findkey(m1, 17)
     i11 = regress((m1,i10))
     @test deref_key((m1,i11)) == 13
     i12 = searchsortedfirst(m1, 47)
@@ -538,7 +538,7 @@ end
     @test getkey(m1,12, 9) == 9
     delete!(m1, 17)
     @test length(m1) == length(ww) - 1
-    @test deref_key((m1,advance((m1,find(m1,13))))) == 19
+    @test deref_key((m1,advance((m1,findkey(m1,13))))) == 19
     empty!(m1)
     checkcorrectness(m1.bt, false)
     @test isempty(m1)
@@ -622,7 +622,7 @@ end
         m1[bitreverse(lUi)] = lUi
     end
     count = 0
-    for (stok,k,v) in semitokens(inclusive(m1, startof(m1), endof(m1)))
+    for (stok,k,v) in semitokens(inclusive(m1, startof(m1), lastindex(m1)))
         for (stok2,k2,v2) in semitokens(exclusive(m1, startof(m1), pastendsemitoken(m1)))
             c = compare(m1,stok,stok2)
             if c < 0
@@ -1169,9 +1169,9 @@ end
     @test_throws BoundsError println(last(m2))
     state1 = start(m2)
     @test_throws BoundsError next(m2, state1)
-    i1 = find(m,"a")
+    i1 = findkey(m,"a")
     delete!((m,i1))
-    i2 = find(m,"bb")
+    i2 = findkey(m,"bb")
     @test_throws BoundsError start(inclusive(m,i1,i2))
     @test_throws BoundsError start(exclusive(m,i1,i2))
     @test_throws KeyError delete!(m,"a")
@@ -1336,7 +1336,7 @@ end
     @test Pair(70,3) in factors
     i = searchsortedfirst(factors, 70)
     dcount = 0
-    for (s,k,v) in semitokens(inclusive(factors, i, endof(factors)))
+    for (s,k,v) in semitokens(inclusive(factors, i, lastindex(factors)))
         @test k == 70
         if v == 3
             delete!((factors,s))
@@ -1414,7 +1414,7 @@ end
     @test isempty(factors)
     i = startof(factors)
     @test i == pastendsemitoken(factors)
-    i = endof(factors)
+    i = lastindex(factors)
     @test i == beforestartsemitoken(factors)
     i1,i2 = searchequalrange(factors, N + 2)
     @test i1 == pastendsemitoken(factors)
@@ -1555,7 +1555,7 @@ end
     v = first(m)
     @test v == smallest
     @test deref((m,i3)) == v
-    i4 = endof(m)
+    i4 = lastindex(m)
     w = last(m)
     @test w == largest
     @test deref((m,i4)) == w
@@ -1764,7 +1764,7 @@ function sorted_dict_timing1(numtrial::Int, expectedk::String, expectedd::String
         end
         delct = div(NSTRINGPAIR, 6)
         for j = 1 : delct
-            l = find(m1, strlist[j * 2 + 1])
+            l = findkey(m1, strlist[j * 2 + 1])
             delete!((m1,l))
         end
         spec = div(NSTRINGPAIR * 3,4)
@@ -1801,7 +1801,7 @@ function sorted_dict_timing2(numtrial::Int, expectedk::String, expectedd::String
         end
         delct = div(NSTRINGPAIR, 6)
         for j = 1 : delct
-            l = find(m1, strlist[j * 2 + 1])
+            l = findkey(m1, strlist[j * 2 + 1])
             delete!((m1,l))
         end
         spec = div(NSTRINGPAIR * 3,4)
@@ -1847,7 +1847,7 @@ function sorted_dict_timing3(numtrial::Int, expectedk::String, expectedd::String
         end
         delct = div(NSTRINGPAIR, 6)
         for j = 1 : delct
-            l = find(m1, strlist[j * 2 + 1])
+            l = findkey(m1, strlist[j * 2 + 1])
             delete!((m1,l))
         end
         spec = div(NSTRINGPAIR * 3,4)

@@ -71,7 +71,7 @@ include("heaps/arrays_as_heaps.jl")
 
 function extract_all!(h::AbstractHeap{VT}) where VT
     n = length(h)
-    r = Vector{VT}(uninitialized, n)
+    r = Vector{VT}(undef, n)
     for i = 1 : n
         r[i] = pop!(h)
     end
@@ -80,7 +80,7 @@ end
 
 function extract_all_rev!(h::AbstractHeap{VT}) where VT
     n = length(h)
-    r = Vector{VT}(uninitialized, n)
+    r = Vector{VT}(undef, n)
     for i = 1 : n
         r[n + 1 - i] = pop!(h)
     end
@@ -115,20 +115,24 @@ function nextreme(comp::Comp, n::Int, arr::AbstractVector{T}) where {T, Comp}
     return extract_all_rev!(buffer)
 end
 
-@doc """
-Returns the `n` largest elements of `arr`.
+"""
+    nlargest(n, arr)
+
+Return the `n` largest elements of the array `arr`.
 
 Equivalent to `sort(arr, lt = >)[1:min(n, end)]`
-""" ->
+"""
 function nlargest(n::Int, arr::AbstractVector{T}) where T
     return nextreme(LessThan(), n, arr)
 end
 
-@doc """
-Returns the `n` smallest elements of `arr`.
+"""
+    nsmallest(n, arr)
+
+Return the `n` smallest elements of the array `arr`.
 
 Equivalent to `sort(arr, lt = <)[1:min(n, end)]`
-""" ->
+"""
 function nsmallest(n::Int, arr::AbstractVector{T}) where T
     return nextreme(GreaterThan(), n, arr)
 end

@@ -127,8 +127,8 @@ function _make_mutable_binary_heap(comp::Comp, ty::Type{T}, values) where {Comp,
     # make a static binary index tree from a list of values
 
     n = length(values)
-    nodes = Vector{MutableBinaryHeapNode{T}}(uninitialized, n)
-    nodemap = Vector{Int}(uninitialized, n)
+    nodes = Vector{MutableBinaryHeapNode{T}}(undef, n)
+    nodemap = Vector{Int}(undef, n)
 
     i::Int = 0
     for v in values

@@ -111,7 +111,7 @@ julia> heapify(a, Base.Order.Reverse)
  2
 ```
 """
-heapify(xs::AbstractArray, o::Ordering=Forward) = heapify!(copy!(similar(xs), xs), o)
+heapify(xs::AbstractArray, o::Ordering=Forward) = heapify!(copyto!(similar(xs), xs), o)
 
 """
     isheap(v, ord::Ordering=Forward)

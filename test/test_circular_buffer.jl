@@ -30,10 +30,10 @@
     cb[3] = 999
     @test convert(Array, cb) == Int[4,5,999,7,8]
 
-    # Test unshift
+    # Test pushfirst
     cb = CircularBuffer{Int}(5)  # New, empty one for full test coverage
     for i in -5:5
-        unshift!(cb, i)
+        pushfirst!(cb, i)
     end
     arr = convert(Array, cb)
     @test arr == Int[5, 4, 3, 2, 1]
@@ -56,15 +56,15 @@
     @test isempty(cb)
     @test_throws ArgumentError pop!(cb)
 
-    # test shift!(cb)
+    # test popfirst!(cb)
     cb = CircularBuffer{Int}(5)
     for i in 0:5    # one extra to force wraparound
         push!(cb, i)
     end
     for j in 1:5
-        @test shift!(cb) == j
+        @test popfirst!(cb) == j
         @test convert(Array, cb) == collect(j+1:5)
     end
     @test isempty(cb)
-    @test_throws ArgumentError shift!(cb)
+    @test_throws ArgumentError popfirst!(cb)
 end

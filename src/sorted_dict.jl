@@ -235,13 +235,13 @@ end
 ## end of the tree.
 
 """
-    find(sd, k)
+    findkey(sd, k)
 
 Argument `sd` is a SortedDict and argument `k` is a key. This
 function returns the semitoken that refers to the item whose key is
 `k`, or past-end semitoken if `k` is absent. Time: O(*c* log *n*)
 """
-@inline function find(m::SortedDict, k_)
+@inline function findkey(m::SortedDict, k_)
     ll, exactfound = findkey(m.bt, convert(keytype(m),k_))
     IntSemiToken(exactfound ? ll : 2)
 end
@@ -368,7 +368,7 @@ Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
 function returns the last item (a `k=>v` pair for SortedDict and
 SortedMultiDict or a key for SortedSet) according to the sorted
 order in the container. Thus, `last(sc)` is equivalent to
-`deref((sc,endof(sc)))`. It is an error to call this function on an
+`deref((sc,lastindex(sc)))`. It is an error to call this function on an
 empty container. Time: O(log *n*)
 """
 @inline function last(m::SortedDict)

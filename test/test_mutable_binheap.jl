@@ -6,7 +6,7 @@ function heap_values(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
     n = length(h)
     nodes = h.nodes
     @assert length(nodes) == n
-    vs = Vector{VT}(uninitialized, n)
+    vs = Vector{VT}(undef, n)
     for i = 1 : n
         vs[i] = nodes[i].value
     end

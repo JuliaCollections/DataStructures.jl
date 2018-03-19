@@ -14,7 +14,7 @@ mutable struct DequeBlock{T}
     next::DequeBlock{T}  # ref to next block
 
     function DequeBlock{T}(capa::Int, front::Int) where T
-        data = Vector{T}(uninitialized, capa)
+        data = Vector{T}(undef, capa)
         blk = new{T}(data, capa, front, front-1)
         blk.prev = blk
         blk.next = blk
@@ -243,7 +243,7 @@ function push!(q::Deque{T}, x) where T  # push back
     q
 end
 
-function unshift!(q::Deque{T}, x) where T   # push front
+function pushfirst!(q::Deque{T}, x) where T   # push front
     head = q.head
 
     if isempty(head)
@@ -288,7 +288,7 @@ function pop!(q::Deque{T}) where T   # pop back
 end
 
 
-function shift!(q::Deque{T}) where T  # pop front
+function popfirst!(q::Deque{T}) where T  # pop front
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     head = q.head
     @assert head.back >= head.front

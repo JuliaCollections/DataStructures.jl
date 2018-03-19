@@ -36,7 +36,7 @@ mutable struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
     end
 
     function PriorityQueue{K,V,O}(o::O, itr) where {K,V,O<:Ordering}
-        xs = Vector{Pair{K,V}}(uninitialized, length(itr))
+        xs = Vector{Pair{K,V}}(undef, length(itr))
         index = Dict{K, Int}()
         for (i, (k, v)) in enumerate(itr)
             xs[i] = Pair{K,V}(k, v)

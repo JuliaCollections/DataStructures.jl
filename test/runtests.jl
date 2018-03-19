@@ -1,8 +1,11 @@
-using Compat.Test
 using DataStructures
-const IntSet = DataStructures.IntSet
-using Primes, Compat
-using Compat.Unicode: lowercase
+using Compat
+using Compat.Test
+using Compat.Random
+using Compat.Serialization
+using Primes
+
+import DataStructures: IntSet
 
 @test isempty(detect_ambiguities(Base, Core, DataStructures))
 

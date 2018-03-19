@@ -33,7 +33,7 @@ end
 
 Removes an element from the front of the queue `s` and returns it.
 """
-dequeue!(s::Queue) = shift!(s.store)
+dequeue!(s::Queue) = popfirst!(s.store)
 
 # Iterators
 

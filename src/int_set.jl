@@ -1,10 +1,11 @@
 # This file was a part of Julia. License is MIT: http://julialang.org/license
 
-import Base: similar, copy, copy!, eltype, push!, pop!, delete!, shift!,
+import Base: similar, copy, copy!, eltype, push!, pop!, delete!,
              empty!, isempty, union, union!, intersect, intersect!,
              setdiff, setdiff!, symdiff, symdiff!, in, start, next, done,
              last, length, show, hash, issubset, ==, <=, <, unsafe_getindex,
              unsafe_setindex!, findnextnot, first
+import Compat: popfirst!
 if !isdefined(Base, :complement)
     export complement, complement!
 else
@@ -22,7 +23,7 @@ similar(s::IntSet) = IntSet()
 copy(s1::IntSet) = copy!(IntSet(), s1)
 function copy!(to::IntSet, from::IntSet)
     resize!(to.bits, length(from.bits))
-    copy!(to.bits, from.bits)
+    copyto!(to.bits, from.bits)
     to.inverse = from.inverse
     to
 end
@@ -92,7 +93,7 @@ function pop!(f::Function, s::IntSet, n::Integer)
 end
 _delete!(s::IntSet, n::Integer) = _setint!(s, n, s.inverse)
 delete!(s::IntSet, n::Integer) = n < 0 ? s : _delete!(s, n)
-shift!(s::IntSet) = pop!(s, first(s))
+popfirst!(s::IntSet) = pop!(s, first(s))
 
 empty!(s::IntSet) = (fill!(s.bits, false); s.inverse = false; s)
 isempty(s::IntSet) = s.inverse ? length(s.bits) == typemax(Int) && all(s.bits) : !any(s.bits)
@@ -179,11 +180,11 @@ start(s::IntSet) = next(s, 0)[2]
 function next(s::IntSet, i, invert=false)
     if s.inverse ⊻ invert
         # i+1 could rollover causing a BoundsError in findnext/findnextnot
-        nextidx = i == typemax(Int) ? 0 : findnextnot(s.bits, i+1)
+        nextidx = i == typemax(Int) ? 0 : coalesce(findnextnot(s.bits, i+1), 0)
         # Extend indices beyond the length of the bits since it is inverted
         nextidx = nextidx == 0 ? max(i, length(s.bits))+1 : nextidx
     else
-        nextidx = i == typemax(Int) ? 0 : findnext(s.bits, i+1)
+        nextidx = i == typemax(Int) ? 0 : coalesce(findnext(s.bits, i+1), 0)
     end
     (i-1, nextidx)
 end
@@ -195,9 +196,9 @@ nextnot(s::IntSet, i) = next(s, i, true)
 function last(s::IntSet)
     l = length(s.bits)
     if s.inverse
-        idx = l < typemax(Int) ? typemax(Int) : findprevnot(s.bits, l)
+        idx = l < typemax(Int) ? typemax(Int) : coalesce(findprevnot(s.bits, l), 0)
     else
-        idx = findprev(s.bits, l)
+        idx = coalesce(findprev(s.bits, l), 0)
     end
     idx == 0 ? throw(ArgumentError("collection must be non-empty")) : idx - 1
 end

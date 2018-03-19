@@ -11,7 +11,7 @@ mutable struct CircularDeque{T}
     last::Int
 end
 
-CircularDeque{T}(n::Int) where {T} = CircularDeque(Vector{T}(uninitialized, n), n, 0, 1, n)
+CircularDeque{T}(n::Int) where {T} = CircularDeque(Vector{T}(undef, n), n, 0, 1, n)
 
 Base.length(D::CircularDeque) = D.n
 Base.eltype(::Type{CircularDeque{T}}) where {T} = T
@@ -53,7 +53,7 @@ end
     v
 end
 
-@inline function Base.unshift!(D::CircularDeque, v)
+@inline function Compat.pushfirst!(D::CircularDeque, v)
     @boundscheck D.n < D.capacity || throw(BoundsError())
     D.n += 1
     tmp = D.first - 1
@@ -62,7 +62,7 @@ end
     D
 end
 
-@inline function Base.shift!(D::CircularDeque)
+@inline function Compat.popfirst!(D::CircularDeque)
     v = front(D)
     D.n -= 1
     tmp = D.first + 1
