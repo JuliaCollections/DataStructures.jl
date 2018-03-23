@@ -17,34 +17,35 @@
 struct DefaultDictBase{K,V,F,D} <: AbstractDict{K,V}
     default::F
     d::D
+    passkey::Bool
 
     check_D(D,K,V) = (D <: AbstractDict{K,V}) ||
         throw(ArgumentError("Default dict must be <: AbstractDict{$K,$V}"))
 
-    DefaultDictBase{K,V,F,D}(x::F, kv::AbstractArray{Tuple{K,V}}) where {K,V,F,D} =
-        (check_D(D,K,V); new{K,V,F,D}(x, D(kv)))
-    DefaultDictBase{K,V,F,D}(x::F, ps::Pair{K,V}...) where {K,V,F,D} =
-        (check_D(D,K,V); new{K,V,F,D}(x, D(ps...)))
+    DefaultDictBase{K,V,F,D}(x::F, kv::AbstractArray{Tuple{K,V}}; passkey=false) where {K,V,F,D} =
+        (check_D(D,K,V); new{K,V,F,D}(x, D(kv), passkey))
+    DefaultDictBase{K,V,F,D}(x::F, ps::Pair{K,V}...; passkey=false) where {K,V,F,D} =
+        (check_D(D,K,V); new{K,V,F,D}(x, D(ps...), passkey))
 
-    DefaultDictBase{K,V,F,D}(x::F, d::D) where {K,V,F,D<:DefaultDictBase} =
-        (check_D(D,K,V); DefaultDictBase(x, d.d))
-    DefaultDictBase{K,V,F,D}(x::F, d::D = D()) where {K,V,F,D} =
-        (check_D(D,K,V); new{K,V,F,D}(x, d))
+    DefaultDictBase{K,V,F,D}(x::F, d::D; passkey=d.passkey) where {K,V,F,D<:DefaultDictBase} =
+        (check_D(D,K,V); DefaultDictBase(x, d.d; passkey=passkey))
+    DefaultDictBase{K,V,F,D}(x::F, d::D = D(); passkey=false) where {K,V,F,D} =
+        (check_D(D,K,V); new{K,V,F,D}(x, d, passkey))
 end
 
 # Constructors
 
-DefaultDictBase() = throw(ArgumentError("no default specified"))
-DefaultDictBase(k,v) = throw(ArgumentError("no default specified"))
+DefaultDictBase(; kwargs...) = throw(ArgumentError("no default specified"))
+DefaultDictBase(k, v; kwargs...) = throw(ArgumentError("no default specified"))
 
 # syntax entry points
-DefaultDictBase(default::F) where {F} = DefaultDictBase{Any,Any,F,Dict{Any,Any}}(default)
-DefaultDictBase(default::F, kv::AbstractArray{Tuple{K,V}}) where {K,V,F} = DefaultDictBase{K,V,F,Dict{K,V}}(default, kv)
-DefaultDictBase(default::F, ps::Pair{K,V}...) where {K,V,F} = DefaultDictBase{K,V,F,Dict{K,V}}(default, ps...)
-DefaultDictBase(default::F, d::D) where {F,D<:AbstractDict} = (K=keytype(d); V=valtype(d); DefaultDictBase{K,V,F,D}(default, d))
+DefaultDictBase(default::F; kwargs...) where {F} = DefaultDictBase{Any,Any,F,Dict{Any,Any}}(default; kwargs...)
+DefaultDictBase(default::F, kv::AbstractArray{Tuple{K,V}}; kwargs...) where {K,V,F} = DefaultDictBase{K,V,F,Dict{K,V}}(default, kv; kwargs...)
+DefaultDictBase(default::F, ps::Pair{K,V}...; kwargs...) where {K,V,F} = DefaultDictBase{K,V,F,Dict{K,V}}(default, ps...; kwargs...)
+DefaultDictBase(default::F, d::D; kwargs...) where {F,D<:AbstractDict} = (K=keytype(d); V=valtype(d); DefaultDictBase{K,V,F,D}(default, d; kwargs...))
 
 # Constructor for DefaultDictBase{Int,Float64}(0.0)
-DefaultDictBase{K,V}(default::F) where {K,V,F} = DefaultDictBase{K,V,F,Dict{K,V}}(default)
+DefaultDictBase{K,V}(default::F; kwargs...) where {K,V,F} = DefaultDictBase{K,V,F,Dict{K,V}}(default; kwargs...)
 
 # Functions
 
@@ -57,7 +58,7 @@ DefaultDictBase{K,V}(default::F) where {K,V,F} = DefaultDictBase{K,V,F,Dict{K,V}
 #       calls setindex!
 @delegate_return_parent DefaultDictBase.d [ delete!, empty!, setindex!, sizehint! ]
 
-similar(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default)
+similar(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default; passkey=d.passkey)
 if isdefined(Base, :KeySet) # 0.7.0-DEV.2722
     in(key, v::Base.KeySet{K,T}) where {K,T<:DefaultDictBase{K}} = key in keys(v.dict.d)
     next(v::Base.KeySet{K,T}, i) where {K,T<:DefaultDictBase{K}} = (v.dict.d.keys[i], Base.skip_deleted(v.dict.d,i+1))
@@ -70,8 +71,14 @@ next(v::Base.ValueIterator{T}, i) where {T<:DefaultDictBase} = (v.dict.d.vals[i]
 getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 
 function getindex(d::DefaultDictBase{K,V,F}, key) where {K,V,F<:Base.Callable}
-    return get!(d.d, key) do
-        d.default()
+    if d.passkey
+        return get!(d.d, key) do
+            d.default(key)
+        end
+    else
+        return get!(d.d, key) do
+            d.default()
+        end
     end
 end
 
@@ -90,15 +97,15 @@ for _Dict in [:Dict, :OrderedDict]
         struct $DefaultDict{K,V,F} <: AbstractDict{K,V}
             d::DefaultDictBase{K,V,F,$_Dict{K,V}}
 
-            $DefaultDict{K,V,F}(x, ps::Pair{K,V}...) where {K,V,F} =
-                new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, ps...))
-            $DefaultDict{K,V,F}(x, kv::AbstractArray{Tuple{K,V}}) where {K,V,F} =
-                new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, kv))
+            $DefaultDict{K,V,F}(x, ps::Pair{K,V}...; kwargs...) where {K,V,F} =
+                new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, ps...; kwargs...))
+            $DefaultDict{K,V,F}(x, kv::AbstractArray{Tuple{K,V}}; kwargs...) where {K,V,F} =
+                new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, kv; kwargs...))
             $DefaultDict{K,V,F}(x, d::$DefaultDict) where {K,V,F} = $DefaultDict(x, d.d)
-            $DefaultDict{K,V,F}(x, d::$_Dict) where {K,V,F} =
-                new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, d))
-            $DefaultDict{K,V,F}(x) where {K,V,F} =
-                new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x))
+            $DefaultDict{K,V,F}(x, d::$_Dict; kwargs...) where {K,V,F} =
+                new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x, d; kwargs...))
+            $DefaultDict{K,V,F}(x; kwargs...) where {K,V,F} =
+                new{K,V,F}(DefaultDictBase{K,V,F,$_Dict{K,V}}(x; kwargs...))
         end
 
         ## Constructors
@@ -107,15 +114,15 @@ for _Dict in [:Dict, :OrderedDict]
         $DefaultDict(k,v) = throw(ArgumentError("$DefaultDict: no default specified"))
 
         # syntax entry points
-        $DefaultDict(default::F) where {F} = $DefaultDict{Any,Any,F}(default)
-        $DefaultDict(default::F, kv::AbstractArray{Tuple{K,V}}) where {K,V,F} = $DefaultDict{K,V,F}(default, kv)
-        $DefaultDict(default::F, ps::Pair{K,V}...) where {K,V,F} = $DefaultDict{K,V,F}(default, ps...)
+        $DefaultDict(default::F; kwargs...) where {F} = $DefaultDict{Any,Any,F}(default; kwargs...)
+        $DefaultDict(default::F, kv::AbstractArray{Tuple{K,V}}; kwargs...) where {K,V,F} = $DefaultDict{K,V,F}(default, kv; kwargs...)
+        $DefaultDict(default::F, ps::Pair{K,V}...; kwargs...) where {K,V,F} = $DefaultDict{K,V,F}(default, ps...; kwargs...)
 
-        $DefaultDict(default::F, d::AbstractDict) where {F} = ((K,V)= (Base.keytype(d), Base.valtype(d)); $DefaultDict{K,V,F}(default, $_Dict(d)))
+        $DefaultDict(default::F, d::AbstractDict; kwargs...) where {F} = ((K,V)= (Base.keytype(d), Base.valtype(d)); $DefaultDict{K,V,F}(default, $_Dict(d); kwargs...))
 
         # Constructor syntax: DefaultDictBase{Int,Float64}(default)
-        $DefaultDict{K,V}() where {K,V} = throw(ArgumentError("$DefaultDict: no default specified"))
-        $DefaultDict{K,V}(default::F) where {K,V,F} = $DefaultDict{K,V,F}(default)
+        $DefaultDict{K,V}(; kwargs...) where {K,V} = throw(ArgumentError("$DefaultDict: no default specified"))
+        $DefaultDict{K,V}(default::F; kwargs...) where {K,V,F} = $DefaultDict{K,V,F}(default; kwargs...)
 
         ## Functions
 

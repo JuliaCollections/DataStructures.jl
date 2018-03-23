@@ -15,6 +15,10 @@ import DataStructures: DefaultDictBase
     ddb = DefaultDictBase{Int, Float64}(0.0)
     @test isa(ddb, DefaultDictBase{Int, Float64, Float64, Dict{Int,Float64}})
     @test isa(DefaultDictBase(1.0, ddb), DefaultDictBase{Int, Float64, Float64, Dict{Int,Float64}})
+
+    @test isa(DefaultDictBase{Int, String}(String), DefaultDictBase{Int, String, typeof(String), Dict{Int, String}})
+    @test isa(DefaultDictBase{Int, String}(String; passkey=true), DefaultDictBase{Int, String, typeof(String), Dict{Int, String}})
+    @test isa(DefaultDictBase{Int, String}(String; passkey=false), DefaultDictBase{Int, String, typeof(String), Dict{Int, String}})
 end
 
 ##############
@@ -91,6 +95,35 @@ end
     e['e'] = 9
     @test e['e'] == 9
     @test f['e'] == 0
+
+    @testset "passkey" begin
+        calls = 0
+        g = DefaultDict{String, Int}(passkey=true) do key
+            calls += 1
+            return length(key)
+        end
+        @test g["foobar"] == 6
+        @test calls == 1
+        @test length(g) == 1
+        @test g["baz"] == 3
+        @test calls == 2
+        @test length(g) == 2
+        @test g["foobar"] == 6
+        @test calls == 2
+        @test length(g) == 2
+
+        @testset "Incorrect Usage" begin
+            bad_dds = [
+                DefaultDict{Int, Int}(k -> k, passkey=false),
+                DefaultDict{Int, Int}(() -> 3, passkey=true),
+            ]
+            for bad_dd in bad_dds
+                bad_dd[3] = 10
+                @test bad_dd[3] == 10
+                @test_throws MethodError bad_dd[234]
+            end
+        end
+    end
 
     # Alternate constructor
     @test isa(DefaultDict(0.0), DefaultDict{Any, Any, Float64})
