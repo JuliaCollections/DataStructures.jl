@@ -9,7 +9,7 @@ DefaultOrderedDict(default, kv)     # create a DefaultOrderedDict with a default
                                     # optionally wrapping an existing dictionary
                                     # or array of key-value pairs
 
-DefaultOrderedDict(KeyType, ValueType, default) # create a DefaultOrderedDict with Dict type (KeyType,ValueType)</code></pre><p>Examples using <code>DefaultDict</code>:</p><pre><code class="language-julia">dd = DefaultDict(1)               # create an (Any=&gt;Any) DefaultDict with a default value of 1
+DefaultOrderedDict(KeyType, ValueType, default) # create a DefaultOrderedDict with Dict type (KeyType,ValueType)</code></pre><p>All constructors also take a <code>passkey::Bool=false</code> keyword argument which determines whether to pass along the <code>key</code> argument when calling the default function. It has no effect when the key is just a value.</p><p>Examples using <code>DefaultDict</code>:</p><pre><code class="language-julia">dd = DefaultDict(1)               # create an (Any=&gt;Any) DefaultDict with a default value of 1
 dd = DefaultDict(AbstractString, Int, 0)  # create a (AbstractString=&gt;Int) DefaultDict with a default value of 0
 
 d = [&#39;a&#39;=&gt;1, &#39;b&#39;=&gt;2]
@@ -40,7 +40,24 @@ DefaultDict{AbstractString,Array{Int64,1},Function} with 2 entries:
 
 # create a Dictionary of type AbstractString=&gt;DefaultDict{AbstractString, Int}, where the default of the
 # inner set of DefaultDicts is zero
-dd = DefaultDict(AbstractString, DefaultDict, () -&gt; DefaultDict(AbstractString,Int,0))</code></pre><p>Note that in the last example, we need to use a function to create each new <code>DefaultDict</code>. If we forget, we will end up using the same<code>DefaultDict</code> for all default values:</p><pre><code class="language-julia">julia&gt; dd = DefaultDict(AbstractString, DefaultDict, DefaultDict(AbstractString,Int,0));
+dd = DefaultDict(AbstractString, DefaultDict, () -&gt; DefaultDict(AbstractString,Int,0))
+
+# use DefaultDict to cache an expensive function call, i.e., memoize
+# https://en.wikipedia.org/wiki/Memoization
+dd = DefaultDict{AbstractString, Int}(passkey=true) do key
+    len = length(key)
+    sleep(len)
+    return len
+end
+
+julia&gt; dd[&quot;hi&quot;]  # slow
+2
+
+julia&gt; dd[&quot;ho&quot;]  # slow
+2
+
+julia&gt; dd[&quot;hi&quot;]  # fast
+2</code></pre><p>Note that in the second-last example, we need to use a function to create each new <code>DefaultDict</code>. If we forget, we will end up using the same<code>DefaultDict</code> for all default values:</p><pre><code class="language-julia">julia&gt; dd = DefaultDict(AbstractString, DefaultDict, DefaultDict(AbstractString,Int,0));
 
 julia&gt; dd[&quot;a&quot;]
 DefaultDict{AbstractString,Int64,Int64,Dict{K,V}}()
