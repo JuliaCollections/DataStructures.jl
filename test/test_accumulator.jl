@@ -112,33 +112,44 @@
     @test ct6["b"] == 0
     @test ct6["c"] == 4
 
-    s = ["y", "el", "sol", "se", "fue"]
-    @test counter(length(x) for x in s) == counter(map(length, s))
 
+    @testset "Generators" begin
+        s = ["y", "el", "sol", "se", "fue"]
+        @test counter(length(x) for x in s) == counter(map(length, s))
+    end
 
-    # non-integer uses
-    acc = Accumulator(Symbol, Float16)
-    acc[:a] = 1.5
-    @test acc[:a] ≈ 1.5
-    push!(acc, :a, 2.5)
-    @test acc[:a] ≈ 4.0
-    dec!(acc, :a)
-    @test acc[:a] ≈ 3.0
+    @testset "non-integer uses" begin
+        acc = Accumulator(Symbol, Float16)
+        acc[:a] = 1.5
+        @test acc[:a] ≈ 1.5
+        push!(acc, :a, 2.5)
+        @test acc[:a] ≈ 4.0
+        dec!(acc, :a)
+        @test acc[:a] ≈ 3.0
+    end
 
-    # ambiguity resolution
-    ct7 = counter(Int)
-    @test_throws MethodError push!(ct7, 1=>2)
+    @testset "ambiguity resolution" begin
+        ct7 = counter(Int)
+        @test_throws MethodError push!(ct7, 1=>2)
+    end
 
+	@testset "most common" begin
+		@test most_common(counter("abbbccddddda")) == ['d'=>5, 'b'=>3, 'a'=>2, 'c'=>2]
+		@test most_common(counter("abbbccddddda"),2) == ['d'=>5, 'b'=>3]
+		@test most_common(counter("a")) == ['a'=>1]
 
-    #deprecations
-    ctd = counter([1,2,3])
-    @test ctd[3]==1
+		@test_throws BoundsError most_common(counter("a"),2)
+	end
 
-    println("\nThe following warning is expected:")
-    @test pop!(ctd, 3)==1
-    println("\nThe following warning is expected:")
-    @test push!(counter([1,2,3]),counter([1,2,3])) == merge!(counter([1,2,3]), counter([1,2,3]))
+    @testset "deprecations" begin
+        ctd = counter([1,2,3])
+        @test ctd[3]==1
 
+        println("\nThe following warning is expected:")
+        @test pop!(ctd, 3)==1
+        println("\nThe following warning is expected:")
+        @test push!(counter([1,2,3]),counter([1,2,3])) == merge!(counter([1,2,3]), counter([1,2,3]))
+    end
 end # @testset Accumulators
 
 

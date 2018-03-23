@@ -137,6 +137,34 @@ Returns its former count.
 """
 reset!(ct::Accumulator, x) = pop!(ct.map, x)
 
+"""
+     most_common(acc::Accumulator, [k])
+
+Returns a sorted vector of the `k` most common elements, with their counts.
+If `k` is ommitted, the full sorted collection is returned.
+
+Example
+```
+julia> most_common(counter("abbbccddddda"))
+
+4-element Array{Pair{Char,Int64},1}:
+ 'd'=>5
+ 'b'=>3
+ 'c'=>2
+ 'a'=>2
+
+
+julia> most_common(counter("abbbccddddda"),2)
+
+2-element Array{Pair{Char,Int64},1}:
+ 'd'=>5
+ 'b'=>3
+
+```
+"""
+most_common(acc::Accumulator) = sort(collect(acc), by=last, rev=true)
+most_common(acc::Accumulator, k) = select(collect(acc), 1:k, by=last, rev=true)
+
 
 
 ## Deprecations
