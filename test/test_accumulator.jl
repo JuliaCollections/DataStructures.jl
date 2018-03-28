@@ -133,13 +133,23 @@
         @test_throws MethodError push!(ct7, 1=>2)
     end
 
-	@testset "most common" begin
-		@test most_common(counter("abbbccddddda")) == ['d'=>5, 'b'=>3, 'a'=>2, 'c'=>2]
-		@test most_common(counter("abbbccddddda"),2) == ['d'=>5, 'b'=>3]
-		@test most_common(counter("a")) == ['a'=>1]
+    @testset "nlargest" begin
+        @test nlargest(counter("abbbccddddda")) == ['d'=>5, 'b'=>3, 'a'=>2, 'c'=>2]
+        @test nlargest(counter("abbbccddddda"),2) == ['d'=>5, 'b'=>3]
+        @test nlargest(counter("a")) == ['a'=>1]
 
-		@test_throws BoundsError most_common(counter("a"),2)
-	end
+        @test_throws BoundsError nlargest(counter("a"),2)
+    end
+
+    @testset "nsmallest" begin
+        acc = counter("aabbbcccc")
+        @test nsmallest(acc) == ['a'=>2, 'b'=>3, 'c'=>4]
+        @test nsmallest(acc,2) == ['a'=>2, 'b'=>3]
+        acc['d']=0
+        @test nsmallest(acc,2) == ['d'=>0, 'a'=>2]
+
+        @test_throws BoundsError nsmallest(counter("a"),2)
+    end
 
     @testset "deprecations" begin
         ctd = counter([1,2,3])
