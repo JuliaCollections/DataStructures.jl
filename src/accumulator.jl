@@ -29,7 +29,7 @@ function eltype_for_accumulator(seq::T) where {T<:Base.Generator}
     @static if VERSION < v"0.7.0-DEV.2104"
         Base._default_eltype(T)
     else
-        Base.@default_eltype(T)
+        Base.@default_eltype(seq)
     end
 end
 

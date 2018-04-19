@@ -5,7 +5,7 @@ module DataStructures
     import Base: <, <=, ==, length, isempty, start, next, done, delete!,
                  show, dump, empty!, getindex, setindex!, get, get!,
                  in, haskey, keys, merge, copy, cat,
-                 push!, pop!, shift!, unshift!, insert!,
+                 push!, pop!, insert!,
                  union!, delete!, similar, sizehint!,
                  isequal, hash,
                  map, reverse,
@@ -14,9 +14,11 @@ module DataStructures
                  ReverseOrdering, Reverse, Lt,
                  isless,
                  union, intersect, symdiff, setdiff, issubset,
-                 find, searchsortedfirst, searchsortedlast, endof, in
+                 searchsortedfirst, searchsortedlast, in
 
-    using Compat: uninitialized, Nothing, Cvoid, AbstractDict
+    using Compat
+    using Compat.InteractiveUtils # for methodswith
+    import Compat: lastindex, pushfirst!, popfirst!
 
     export Deque, Stack, Queue, CircularDeque
     export deque, enqueue!, dequeue!, dequeue_pair!, update!, reverse_iter
@@ -51,6 +53,8 @@ module DataStructures
     export orderobject, ordtype, Lt, compare, onlysemitokens
 
     export MultiDict, enumerateall
+
+    export findkey
 
     import Base: eachindex, keytype, valtype
 
@@ -131,11 +135,20 @@ module DataStructures
     function PriorityQueue(ks::AbstractVector{K},
                            vs::AbstractVector{V},
                            o::Ordering=Forward) where {K,V}
-        Base.depwarn("PriorityQueue(ks, vs, o::Ordering=Forward) is deprecated.\n" * "Use PriorityQueue(o, zip(ks,vs)) or PriorityQueue(zip(ks, vs))", :PriorityQueue)
+        Base.depwarn("PriorityQueue(ks, vs, o::Ordering=Forward) is deprecated.\n" *
+                     "Use PriorityQueue(o, zip(ks,vs)) or PriorityQueue(zip(ks, vs))", :PriorityQueue)
         if length(ks) != length(vs)
             throw(ArgumentError("PriorityQueue(ks,vs,o): ks and vs arrays must be the same length"))
         end
         PriorityQueue(o, zip(ks,vs))
     end
 
+    @deprecate find(x::Union{SortedDict,SortedSet}, k) findkey(x, k)
+    @deprecate endof(x::OrderedSet) lastindex(x)
+    for T in [:IntSet, :Deque, :CircularDeque]
+        @eval @deprecate shift!(x::$T) popfirst!(x)
+    end
+    for T in [:Deque, :CircularDeque, :CircularBuffer]
+        @eval @deprecate unshift!(d::$T, x) pushfirst!(d, x)
+    end
 end

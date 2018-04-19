@@ -125,15 +125,15 @@ mutable struct BalancedTree23{K, D, Ord <: Ordering}
     deletionchild::Array{Int,1}
     deletionleftkey::Array{K,1}
     function BalancedTree23{K,D,Ord}(ord1::Ord) where {K,D,Ord<:Ordering}
-        tree1 = Vector{TreeNode{K}}(uninitialized, 1)
+        tree1 = Vector{TreeNode{K}}(undef, 1)
         initializeTree!(tree1)
-        data1 = Vector{KDRec{K,D}}(uninitialized, 2)
+        data1 = Vector{KDRec{K,D}}(undef, 2)
         initializeData!(data1)
         u1 = IntSet()
         push!(u1, 1, 2)
         new{K,D,Ord}(ord1, data1, tree1, 1, 1, Vector{Int}(), Vector{Int}(),
                      u1,
-                     Vector{Int}(uninitialized, 3), Vector{K}(uninitialized, 3))
+                     Vector{Int}(undef, 3), Vector{K}(undef, 3))
     end
 end
 

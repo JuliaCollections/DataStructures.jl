@@ -14,7 +14,7 @@ macro delegate(source, targets)
     fieldname = unquote(source.args[2])
     funcnames = targets.args
     n = length(funcnames)
-    fdefs = Vector{Any}(uninitialized, n)
+    fdefs = Vector{Any}(undef, n)
     for i in 1:n
         funcname = esc(funcnames[i])
         fdefs[i] = quote
@@ -30,7 +30,7 @@ macro delegate_return_parent(source, targets)
     fieldname = unquote(source.args[2])
     funcnames = targets.args
     n = length(funcnames)
-    fdefs = Vector{Any}(uninitialized, n)
+    fdefs = Vector{Any}(undef, n)
     for i in 1:n
         funcname = esc(funcnames[i])
         fdefs[i] = quote

@@ -25,7 +25,7 @@ s = IntSet([0,1,10,20,200,300,1000,10000,10002])
 @test length(s) == 9
 @test pop!(s) == 10002
 @test length(s) == 8
-@test shift!(s) == 0
+@test popfirst!(s) == 0
 @test length(s) == 7
 @test !in(0,s)
 @test !in(10002,s)
@@ -129,8 +129,8 @@ push!(s, 100)
 push!(s, 1:2:10...)
 @test pop!(s) == 9
 @test pop!(s) == 7
-@test shift!(s) == 1
-@test shift!(s) == 3
+@test popfirst!(s) == 1
+@test popfirst!(s) == 3
 @test collect(s) == [5]
 empty!(s)
 @test isempty(s)
@@ -144,8 +144,8 @@ c = complement(IntSet())
 @test_throws ArgumentError pop!(()->throw(ErrorException()), c, -1)
 @test pop!(c, 1, 0) == 0
 @test c === delete!(c, 1)
-@test shift!(c) == 0
-@test shift!(c) == 2
+@test popfirst!(c) == 0
+@test popfirst!(c) == 2
 @test_throws ArgumentError pop!(c)
 @test collect(complement(c)) == [0,1,2]
 @test empty!(c) == IntSet()

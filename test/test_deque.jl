@@ -79,7 +79,7 @@
     q = Deque{Int}(3)
 
     for i = 1 : n
-        unshift!(q, i)
+        pushfirst!(q, i)
         @test length(q) == i
         @test isempty(q) == false
         @test num_blocks(q) == div(i-1, 3) + 1
@@ -95,7 +95,7 @@
     # pop front
 
     for i = 1 : n
-        x = shift!(q)
+        x = popfirst!(q)
         @test length(q) == n - i
         @test isempty(q) == (i == n)
         @test num_blocks(q) == div(n-i-1, 3) + 1
@@ -128,8 +128,8 @@
                 push!(r, x[i])
                 push!(q, x[i])
             else
-                unshift!(r, x[i])
-                unshift!(q, x[i])
+                pushfirst!(r, x[i])
+                pushfirst!(q, x[i])
             end
         end
 
@@ -142,8 +142,8 @@
                 pop!(r)
                 pop!(q)
             else
-                shift!(r)
-                shift!(q)
+                popfirst!(r)
+                popfirst!(q)
             end
         end
 
@@ -163,7 +163,7 @@
     push!(b, 2, 1)
     @test a != b
     @test hash(a) !== hash(b)
-    shift!(b)
+    popfirst!(b)
     push!(b, 2)
     @test a == b
     @test hash(a) == hash(b)

@@ -30,9 +30,9 @@ pop!(s::OrderedSet, x, deflt) = pop!(s.dict, x, deflt) == deflt ? deflt : x
 delete!(s::OrderedSet, x) = (delete!(s.dict, x); s)
 
 getindex(x::OrderedSet,i::Int) = x.dict.keys[i]
-endof(x::OrderedSet) = endof(x.dict.keys)
-# Needed on 0.7 to mimic array indexing.
-Base.nextind(::OrderedSet, i::Int) = i + 1
+lastindex(x::OrderedSet) = lastindex(x.dict.keys)
+Base.nextind(::OrderedSet, i::Int) = i + 1  # Needed on 0.7 to mimic array indexing.
+Base.keys(s::OrderedSet) = 1:length(s)
 
 union!(s::OrderedSet, xs) = (for x in xs; push!(s,x); end; s)
 setdiff!(s::OrderedSet, xs) = (for x in xs; delete!(s,x); end; s)

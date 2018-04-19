@@ -7,7 +7,7 @@ mutable struct CircularBuffer{T} <: AbstractVector{T}
     length::Int
     buffer::Vector{T}
 
-    CircularBuffer{T}(capacity::Int) where {T} = new{T}(capacity, 1, 0, Vector{T}(capacity))
+    CircularBuffer{T}(capacity::Int) where {T} = new{T}(capacity, 1, 0, Vector{T}(undef, capacity))
 end
 
 function Base.empty!(cb::CircularBuffer)
@@ -61,7 +61,7 @@ function Base.push!(cb::CircularBuffer, data)
     cb
 end
 
-function Base.shift!(cb::CircularBuffer)
+function Compat.popfirst!(cb::CircularBuffer)
     if cb.length == 0
         throw(ArgumentError("array must be non-empty"))
     end
@@ -71,8 +71,8 @@ function Base.shift!(cb::CircularBuffer)
     cb.buffer[i]
 end
 
-function Base.unshift!(cb::CircularBuffer, data)
-    # if full, decrement and overwrite, otherwise unshift
+function Compat.pushfirst!(cb::CircularBuffer, data)
+    # if full, decrement and overwrite, otherwise pushfirst
     if cb.length < cb.capacity
         cb.length += 1
     end

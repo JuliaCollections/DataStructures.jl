@@ -87,7 +87,7 @@ const SetSemiToken = IntSemiToken
 ## if not found, then it returns a marker for the
 ## end of the tree.
 
-@inline function find(m::SortedSet, k_)
+@inline function findkey(m::SortedSet, k_)
     ll, exactfound = findkey(m.bt, convert(keytype(m),k_))
     IntSemiToken(exactfound ? ll : 2)
 end
@@ -159,7 +159,7 @@ Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
 function returns the last item (a `k=>v` pair for SortedDict and
 SortedMultiDict or a key for SortedSet) according to the sorted
 order in the container. Thus, `last(sc)` is equivalent to
-`deref((sc,endof(sc)))`. It is an error to call this function on an
+`deref((sc,lastindex(sc)))`. It is an error to call this function on an
 empty container. Time: O(log *n*)
 """
 @inline function last(m::SortedSet)
@@ -485,7 +485,7 @@ be convertible to the key type of m1. Time: O(*cm* log *n*), where
 """
 function setdiff!(m1::SortedSet, iterable)
     for p in iterable
-        i = find(m1, p)
+        i = findkey(m1, p)
         if i != pastendsemitoken(m1)
             delete!((m1,i))
         end
