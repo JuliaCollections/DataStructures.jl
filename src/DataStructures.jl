@@ -143,12 +143,21 @@ module DataStructures
         PriorityQueue(o, zip(ks,vs))
     end
 
-    @deprecate find(x::Union{SortedDict,SortedSet}, k) findkey(x, k)
-    @deprecate endof(x::OrderedSet) lastindex(x)
-    for T in [:IntSet, :Deque, :CircularDeque]
-        @eval @deprecate shift!(x::$T) popfirst!(x)
+    if isdefined(Base, :find)
+        import Base: find
+        @deprecate find(x::Union{SortedDict,SortedSet}, k) findkey(x, k)
     end
-    for T in [:Deque, :CircularDeque, :CircularBuffer]
-        @eval @deprecate unshift!(d::$T, x) pushfirst!(d, x)
+    if isdefined(Base, :endof) && isdefined(Base, :lastindex)
+        import Base: endof
+        @deprecate endof(x::OrderedSet) lastindex(x)
+    end
+    if isdefined(Base, :shift!) && isdefined(Base, :popfirst!)
+        import Base: shift!, unshift!
+        for T in [:IntSet, :Deque, :CircularDeque]
+            @eval @deprecate shift!(x::$T) popfirst!(x)
+        end
+        for T in [:Deque, :CircularDeque, :CircularBuffer]
+            @eval @deprecate unshift!(d::$T, x) pushfirst!(d, x)
+        end
     end
 end
