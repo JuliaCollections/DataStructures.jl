@@ -78,7 +78,7 @@ function Compat.pushfirst!(cb::CircularBuffer, data)
         cb[1] = data
     else
         cb.length += 1
-        unshift!(cb.buffer, data)
+        Compat.pushfirst!(cb.buffer, data)
     end
     cb
 end
