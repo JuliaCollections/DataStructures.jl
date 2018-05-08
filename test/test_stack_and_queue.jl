@@ -30,6 +30,10 @@
         @test isempty(s) == (i == n)
         @test length(s) == n - i
     end
+    
+    s = Stack(Int,1)
+    push!(s, 10)
+    @test length(empty!(s)) == 0
 
     #test that iter returns a LIFO collection
 

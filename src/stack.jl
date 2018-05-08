@@ -19,6 +19,8 @@ end
 
 pop!(s::Stack) = pop!(s.store)
 
+empty!(s::Stack) = (empty!(s.store); s)
+
 start(st::Stack) = start(reverse_iter(st.store))
 next(st::Stack, s) = next(reverse_iter(st.store), s)
 done(st::Stack, s) = done(reverse_iter(st.store), s)
