@@ -72,12 +72,14 @@ function Compat.popfirst!(cb::CircularBuffer)
 end
 
 function Compat.pushfirst!(cb::CircularBuffer, data)
-    # if full, decrement and overwrite, otherwise pushfirst
-    if cb.length < cb.capacity
+    # if full, decrement and overwrite, otherwise unshift
+    if length(cb) == cb.capacity
+        cb.first = (cb.first == 1 ? cb.capacity : cb.first - 1)
+        cb[1] = data
+    else
         cb.length += 1
+        Compat.pushfirst!(cb.buffer, data)
     end
-    cb.first = (cb.first == 1 ? cb.length : cb.first - 1)
-    cb.buffer[cb.first] = data
     cb
 end
 
