@@ -165,7 +165,7 @@ julia> nlargest(counter("abbbccddddda"),2)
 ```
 """
 nlargest(acc::Accumulator) = sort!(collect(acc), by=last, rev=true)
-nlargest(acc::Accumulator, n) = select!(collect(acc), 1:n, by=last, rev=true)
+nlargest(acc::Accumulator, n) = @compat partialsort!(collect(acc), 1:n, by=last, rev=true)
 
 
 """
@@ -179,7 +179,7 @@ For obvious reasons this will not include zero counts for items not encountered.
 (unless those elements are added to he accumulator directly, eg via `acc[foo]=0)
 """
 nsmallest(acc::Accumulator) = sort!(collect(acc), by=last, rev=false)
-nsmallest(acc::Accumulator, n) = select!(collect(acc), 1:n, by=last, rev=false)
+nsmallest(acc::Accumulator, n) = @compat partialsort!(collect(acc), 1:n, by=last, rev=false)
 
 
 

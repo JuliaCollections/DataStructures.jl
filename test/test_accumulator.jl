@@ -30,7 +30,7 @@
     @test ct["b"] == 1
     dec!(ct, "b", 16)
     @test ct["b"] == -15
-    ct["b"] = 2     
+    ct["b"] = 2
 
     # Test convert
     inc!(ct, "b", 0x3)
@@ -134,9 +134,12 @@
     end
 
     @testset "nlargest" begin
-        @test nlargest(counter("abbbccddddda")) == ['d'=>5, 'b'=>3, 'a'=>2, 'c'=>2]
+        @test nlargest(counter("abbbcddddda")) == ['d'=>5, 'b'=>3, 'a'=>2, 'c'=>1]
         @test nlargest(counter("abbbccddddda"),2) == ['d'=>5, 'b'=>3]
         @test nlargest(counter("a")) == ['a'=>1]
+
+        @test nlargest(counter("aaabbcc")) ∈ (['a'=>3,'b'=>2, 'c'=>2], ['a'=>3,'c'=>2, 'b'=>2])
+
 
         @test_throws BoundsError nlargest(counter("a"),2)
     end
@@ -147,6 +150,8 @@
         @test nsmallest(acc,2) == ['a'=>2, 'b'=>3]
         acc['d']=0
         @test nsmallest(acc,2) == ['d'=>0, 'a'=>2]
+
+        @test nsmallest(counter("aaabbcc")) ∈ (['b'=>2, 'c'=>2, 'a'=>3], ['c'=>2, 'b'=>2, 'a'=>3])
 
         @test_throws BoundsError nsmallest(counter("a"),2)
     end
