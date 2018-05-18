@@ -426,7 +426,7 @@ function start(t::OrderedDict)
     t.ndel > 0 && rehash!(t)
     1
 end
-done(t::OrderedDict, i::Int) = done(t.keys, i)
+done(t::OrderedDict, i::Int) = i > length(t.keys)
 next(t::OrderedDict, i::Int) = (Pair(t.keys[i],t.vals[i]), i+1)
 
 if isdefined(Base, :KeySet) # 0.7.0-DEV.2722
