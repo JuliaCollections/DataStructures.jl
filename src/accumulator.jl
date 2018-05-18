@@ -1,4 +1,4 @@
-# A counter type
+#A counter type
 
 struct Accumulator{T, V<:Number} <: AbstractDict{T,V}
     map::Dict{T,V}
@@ -136,6 +136,50 @@ Resets the count of `x` to zero.
 Returns its former count.
 """
 reset!(ct::Accumulator, x) = pop!(ct.map, x)
+
+"""
+     nlargest(acc::Accumulator, [n])
+
+Returns a sorted vector of the `n` most common elements, with their counts.
+If `n` is omitted, the full sorted collection is returned.
+
+This corresponds to Python's `Counter.most_common` function.
+
+Example
+```
+julia> nlargest(counter("abbbccddddda"))
+
+4-element Array{Pair{Char,Int64},1}:
+ 'd'=>5
+ 'b'=>3
+ 'c'=>2
+ 'a'=>2
+
+
+julia> nlargest(counter("abbbccddddda"),2)
+
+2-element Array{Pair{Char,Int64},1}:
+ 'd'=>5
+ 'b'=>3
+
+```
+"""
+nlargest(acc::Accumulator) = sort!(collect(acc), by=last, rev=true)
+nlargest(acc::Accumulator, n) = partialsort!(collect(acc), 1:n, by=last, rev=true)
+
+
+"""
+     nsmallest(acc::Accumulator, [n])
+
+Returns a sorted vector of the `n` least common elements, with their counts.
+If `n` is omitted, the full sorted collection is returned.
+
+This is the opposite of the `nlargest` function.
+For obvious reasons this will not include zero counts for items not encountered.
+(unless those elements are added to he accumulator directly, eg via `acc[foo]=0)
+"""
+nsmallest(acc::Accumulator) = sort!(collect(acc), by=last, rev=false)
+nsmallest(acc::Accumulator, n) = partialsort!(collect(acc), 1:n, by=last, rev=false)
 
 
 
