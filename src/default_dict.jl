@@ -52,6 +52,11 @@ DefaultDictBase{K,V}(default::F; kwargs...) where {K,V,F} = DefaultDictBase{K,V,
 # most functions are simply delegated to the wrapped dictionary
 @delegate DefaultDictBase.d [ get, haskey, getkey, pop!,
                               start, done, next, isempty, length ]
+if isdefined(Base, :LegacyIterationCompat)
+    # resolve ambiguity
+    next(d::DefaultDictBase, state::Base.LegacyIterationCompat{I,T,S}) where {I>:DefaultDictBase,T,S} = next(d.d, state)
+    done(d::DefaultDictBase, state::Base.LegacyIterationCompat{I,T,S}) where {I>:DefaultDictBase,T,S} = done(d.d, state)
+end
 
 # Some functions are delegated, but then need to return the main dictionary
 # NOTE: push! is not included below, because the fallback version just
@@ -66,7 +71,7 @@ else
     in(key, v::Base.KeyIterator{T}) where {T<:DefaultDictBase} = key in keys(v.dict.d)
     next(v::Base.KeyIterator{T}, i) where {T<:DefaultDictBase} = (v.dict.d.keys[i], Base.skip_deleted(v.dict.d,i+1))
 end
-next(v::Base.ValueIterator{T}, i) where {T<:DefaultDictBase} = (v.dict.d.vals[i], Base.skip_deleted(v.dict.d,i+1))
+next(v::Base.ValueIterator{T}, i::Int) where {T<:DefaultDictBase} = (v.dict.d.vals[i], Base.skip_deleted(v.dict.d,i+1))
 
 getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 
@@ -130,6 +135,11 @@ for _Dict in [:Dict, :OrderedDict]
         @delegate $DefaultDict.d [ getindex, get, get!, haskey,
                                    getkey, pop!, start, next,
                                    done, isempty, length ]
+        if isdefined(Base, :LegacyIterationCompat)
+            # resolve ambiguity
+            next(d::$DefaultDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:$DefaultDict,T,S} = next(d.d, state)
+            done(d::$DefaultDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:$DefaultDict,T,S} = done(d.d, state)
+        end
 
         # Some functions are delegated, but then need to return the main dictionary
         # NOTE: push! is not included below, because the fallback version just

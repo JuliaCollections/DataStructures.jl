@@ -44,6 +44,11 @@ end
 @delegate MultiDict.d [ haskey, get, get!, getkey,
                         getindex, length, isempty, eltype,
                         start, next, done, keys, values]
+if isdefined(Base, :LegacyIterationCompat)
+    # resolve ambiguity
+    next(d::MultiDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:MultiDict,T,S} = next(d.d, state)
+    done(d::MultiDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:MultiDict,T,S} = done(d.d, state)
+end
 
 sizehint!(d::MultiDict, sz::Integer) = (sizehint!(d.d, sz); d)
 copy(d::MultiDict) = MultiDict(d)
@@ -110,12 +115,12 @@ function start(e::EnumerateAll)
     (start(e.d.d), nothing, vs, start(vs))
 end
 
-function done(e::EnumerateAll, s)
+function done(e::EnumerateAll, s::Tuple)
     dst, k, vs, vst = s
     done(vs, vst) && done(e.d.d, dst)
 end
 
-function next(e::EnumerateAll, s)
+function next(e::EnumerateAll, s::Tuple)
     dst, k, vs, vst = s
     while done(vs, vst)
         ((k, vs), dst) = next(e.d.d, dst)

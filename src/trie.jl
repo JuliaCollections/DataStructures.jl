@@ -110,7 +110,7 @@ end
 # since the root of the trie corresponds to a length 0 prefix of str.
 start(it::TrieIterator) = (it.t, 0)
 
-function next(it::TrieIterator, state)
+function next(it::TrieIterator, state::Tuple)
     t, i = state
     i == 0 && return it.t, (it.t, 1)
 
@@ -118,7 +118,7 @@ function next(it::TrieIterator, state)
     return (t, (t, i + 1))
 end
 
-function done(it::TrieIterator, state)
+function done(it::TrieIterator, state::Tuple)
     t, i = state
     i == 0 && return false
     i == length(it.str) + 1 && return true
