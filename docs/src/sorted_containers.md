@@ -71,7 +71,7 @@ then there may be a loss of performance compared to:
 k,v = deref((sc,st))
 ```
 
-because the former needs an extra heap allocation step for `tok`.
+because the former may need an extra heap allocation step for `tok`.
 
 The notion of token is similar to the concept of iterators used by C++
 standard containers. Tokens can be explicitly advanced or regressed
@@ -406,8 +406,8 @@ past-end token. Time: O(1)
 ## Iteration Over Sorted Containers
 
 As is standard in Julia, iteration over the containers is implemented
-via calls to three functions, `start`, `next` and `done`. It is usual
-practice, however, to call these functions implicitly with a for-loop
+via calls to the function `Base.iterate`. It is usual
+practice, however, to call this function implicitly with a for-loop
 rather than explicitly, so they are presented here in for-loop notation.
 Internally, all of these iterations are implemented with semitokens that
 are advanced via the `advance` operation. Each iteration of these loops
@@ -454,11 +454,13 @@ end
 ```
 
 Here, `st1` and `st2` are semitokens that refer to the container `sc`.
+Token `(sc,st1)` may not be the before-start token and
+token `(sc,st2)` may not be the past-end token.  
 It is acceptable for `(sc,st1)` to be the past-end token or `(sc,st2)`
-to be the before-start token (in these cases, the body is not executed).
+to be the before-start token or both (in these cases, the body is not executed).
 If `compare(sc,st1,st2)==1` then the body is not executed. A second
-calling format for `inclusive` is `inclusive(sc,(st1,st2))`. One purpose
-for second format is so that the return value of `searchequalrange` may
+calling format for `inclusive` is `inclusive(sc,(st1,st2))`. With
+the second format, the return value of `searchequalrange` may
 be used directly as the second argument to `inclusive`.
 
 One can also define a loop that excludes the final item:
@@ -771,10 +773,10 @@ Lt((x,y) -> isless(lowercase(x),lowercase(y)))
 The ordering object is indicated in the above list of constructors in
 the `o` position (see above for constructor syntax).
 
-This approach suffers from a performance hit (10%-50% depending on the
-container) because the compiler cannot inline or compute the correct
-dispatch for the function in parentheses, so the dispatch takes place at
-run-time. A more complicated but higher-performance method to implement
+This approach suffers may suffer from a performance hit because
+higher performance may be possibility if equality is available
+as well as less-than.
+A more complicated but higher-performance method to implement
 a custom ordering is as follows. First, the user creates a singleton
 type that is a subtype of `Ordering` as follows:
 
@@ -798,7 +800,7 @@ container also needs an equal-to function; the default is:
 eq(o::Ordering, a, b) = !lt(o, a, b) && !lt(o, b, a)
 ```
 
-For a further slight performance boost, the user can also customize this
+The user can also customize this
 function with a more efficient implementation. In the above example, an
 appropriate customization would be:
 
