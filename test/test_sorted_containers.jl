@@ -14,6 +14,7 @@ lt(::CaseInsensitive, a, b) = isless(lowercase(a), lowercase(b))
 eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
 
 
+
 @testset "SortedContainers" begin
 
 ## Function fulldump dumps the entire tree; helpful for debugging.
@@ -98,7 +99,7 @@ function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
     r = t.rootloc
     bfstreenodes = Vector{Int}()
     tdpth = t.depth
-    intree = IntSet()
+    intree = BitSet()
     levstart = Vector{Int}(undef, tdpth)
     push!(bfstreenodes, r)
     levstart[1] = 1
@@ -131,7 +132,7 @@ function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
         end
     end
     bfstreesize = size(bfstreenodes, 1)
-    dataused = IntSet()
+    dataused = BitSet()
     minkeys = Vector{K}(undef, bfstreesize)
     maxkeys = Vector{K}(undef, bfstreesize)
     for s = levstart[tdpth] : bfstreesize
@@ -230,7 +231,7 @@ function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
             end
         end
     end
-    freedata = IntSet()
+    freedata = BitSet()
     for i = 1 : size(t.freedatainds,1)
         fdi = t.freedatainds[i]
         if in(fdi, freedata)
@@ -254,7 +255,7 @@ function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
             throw(ErrorException("Mismatch between t.freedatainds and t.useddatacells"))
         end
     end
-    freetree = IntSet()
+    freetree = BitSet()
     for i = 1 : size(t.freetreeinds,1)
         tfi = t.freetreeinds[i]
         if in(tfi, freetree)
@@ -1167,13 +1168,25 @@ end
     m2 = SortedDict{String,Int}()
     @test_throws BoundsError println(first(m2))
     @test_throws BoundsError println(last(m2))
-    state1 = start(m2)
-    @test_throws BoundsError next(m2, state1)
+    if VERSION < v"0.7.0-DEV.5126"
+        state1 = start(m2)
+        @test_throws BoundsError next(m2, state1)
+    end
     i1 = findkey(m,"a")
-    delete!((m,i1))
-    i2 = findkey(m,"bb")
-    @test_throws BoundsError start(inclusive(m,i1,i2))
-    @test_throws BoundsError start(exclusive(m,i1,i2))
+    if VERSION >= v"0.7.0-DEV.5126"
+        scrap, state1 = iterate(m)
+        delete!((m,i1))
+        i2 = findkey(m,"bb")
+        @test_throws BoundsError iterate(inclusive(m, i1, i2))
+        @test_throws BoundsError iterate(exclusive(m, i1, i2))
+        delete!((m,i2))
+        @test_throws BoundsError iterate(m, state1)
+    else
+        delete!((m,i1))
+        i2 = findkey(m,"bb")
+        @test_throws BoundsError start(inclusive(m,i1,i2))
+        @test_throws BoundsError start(exclusive(m,i1,i2))
+    end
     @test_throws KeyError delete!(m,"a")
     @test_throws KeyError pop!(m,"a")
     m3 = SortedDict((Dict{String, Int}()), Reverse)
