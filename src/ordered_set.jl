@@ -21,6 +21,7 @@ show(io::IO, s::OrderedSet) = (show(io, typeof(s)); print(io, "("); !isempty(s) 
 
 sizehint!(s::OrderedSet, sz::Integer) = (sizehint!(s.dict, sz); s)
 eltype(s::OrderedSet{T}) where {T} = T
+eltype(::Type{OrderedSet{T}}) where {T} = T
 
 in(x, s::OrderedSet) = haskey(s.dict, x)
 
@@ -29,10 +30,10 @@ pop!(s::OrderedSet, x) = (pop!(s.dict, x); x)
 pop!(s::OrderedSet, x, deflt) = pop!(s.dict, x, deflt) == deflt ? deflt : x
 delete!(s::OrderedSet, x) = (delete!(s.dict, x); s)
 
-getindex(x::OrderedSet,i::Int) = x.dict.keys[i]
-lastindex(x::OrderedSet) = lastindex(x.dict.keys)
-Base.nextind(::OrderedSet, i::Int) = i + 1  # Needed on 0.7 to mimic array indexing.
-Base.keys(s::OrderedSet) = 1:length(s)
+#getindex(x::OrderedSet,i::Int) = x.dict.keys[i]
+#lastindex(x::OrderedSet) = lastindex(x.dict.keys)
+#Base.nextind(::OrderedSet, i::Int) = i + 1  # Needed on 0.7 to mimic array indexing.
+#Base.keys(s::OrderedSet) = 1:length(s)
 
 union!(s::OrderedSet, xs) = (for x in xs; push!(s,x); end; s)
 setdiff!(s::OrderedSet, xs) = (for x in xs; delete!(s,x); end; s)
@@ -43,12 +44,44 @@ copy(s::OrderedSet) = union!(similar(s), s)
 
 empty!(s::OrderedSet{T}) where {T} = (empty!(s.dict); s)
 
-start(s::OrderedSet)       = start(s.dict)
-done(s::OrderedSet, state) = done(s.dict, state)
-# NOTE: manually optimized to take advantage of OrderedDict representation
-next(s::OrderedSet, i)     = (s.dict.keys[i], i+1)
 
-pop!(s::OrderedSet) = pop!(s.dict)[1]
+
+if VERSION >= v"0.7.0-DEV.5126"
+    IteratorEltype(::Type{OrderedSet{K}} where {K}) = HasEltype()
+    IteratorSize(::Type{OrderedSet{K}} where {K}) = HasLength()
+
+    function iterate(os::OrderedSet, pos = 1)
+        t = iterate(os.dict, pos)
+        if t == nothing
+            return nothing
+        else
+            return (t[1][1], t[2])
+        end
+    end
+    
+else
+    start(os::OrderedSet) = start(os.dict)
+    function next(os::OrderedSet, state)
+        (dt, state) = next(os.dict, state)
+        return (dt[1], state)
+    end
+    done(os::OrderedSet, state) = done(os.dict, state)
+end
+
+
+function pop!(s::OrderedSet)
+    l = length(s.dict.a1)
+    while l > 0
+        if s.dict.a1[l][2]
+            key = s.dict.a1[l][1]
+            pop!(s.dict, key)
+            return key
+        end
+        l -= 1
+    end
+    throw(ArgumentError("OrderedSet must be nonempty"))
+end
+
 
 union(s::OrderedSet) = copy(s)
 function union(s::OrderedSet, sets...)
@@ -98,9 +131,3 @@ function filter!(f::Function, s::OrderedSet)
 end
 filter(f::Function, s::OrderedSet) = filter!(f, copy(s))
 
-const orderedset_seed = UInt === UInt64 ? 0x2114638a942a91a5 : 0xd86bdbf1
-function hash(s::OrderedSet, h::UInt)
-    h = hash(orderedset_seed, h)
-    s.dict.ndel > 0 && rehash!(s.dict)
-    hash(s.dict.keys, h)
-end

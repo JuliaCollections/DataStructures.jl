@@ -128,21 +128,21 @@
     @test isequal(s, OrderedSet([7,8]))
     @test isequal(intersect(OrderedSet([2,3,1]), OrderedSet([4,2,3]), OrderedSet([5,4,3,2])), OrderedSet([2,3]))
 
-    # indexing
-    s = OrderedSet([1,3,5,7])
-    @test s[1] == 1
-    @test s[2] == 3
-    @test s[end] == 7
+    # indexing - deleted
+    # s = OrderedSet([1,3,5,7])
+    # @test s[1] == 1
+    # @test s[2] == 3
+    # @test s[end] == 7
 
     # find
-    s = OrderedSet([1,3,5,7])
-    @test findfirst(isequal(1), s) == 1
-    @test findfirst(isequal(7), s) == 4
-    if VERSION >= v"0.7.0-DEV.3399"
-        @test findfirst(isequal(2), s) == nothing
-    else
-        @test findfirst(isequal(2), s) == 0    
-    end    
+    #s = OrderedSet([1,3,5,7])
+    #@test findfirst(isequal(1), s) == 1
+    #@test findfirst(isequal(7), s) == 4
+    #if VERSION >= v"0.7.0-DEV.3399"
+    #    @test findfirst(isequal(2), s) == nothing
+    #else
+    #    @test findfirst(isequal(2), s) == 0    
+    #end    
 
     # setdiff
     @test isequal(setdiff(OrderedSet([1,2,3]), OrderedSet()),        OrderedSet([1,2,3]))
