@@ -229,7 +229,7 @@ is complete, any token addressing the deleted item is invalid.
 Returns `sc`. Time: O(*c* log *n*)
 """
 @inline function delete!(m::SortedSet, k_)
-    i, exactfound = findkey(m.bt,convert(keytype(m),k_))
+    i, exactfound = findkey(m.bt, convert(keytype(m), k_))
     !exactfound && throw(KeyError(k_))
     delete!(m.bt, i)
     m

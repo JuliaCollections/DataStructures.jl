@@ -1,26 +1,21 @@
 # Sort for dicts
 import Base: sort, sort!
 
-function sort!(d::OrderedDict; byvalue::Bool=false, args...)
-    if d.ndel > 0
-        rehash!(d)
-    end
-
+function sort!(od::OrderedDict; byvalue::Bool=false, args...)
+    keylist = collect(keys(od))
+    vallist = [od[k] for k in keylist]
     if byvalue
-        p = sortperm(d.vals; args...)
+        p = sortperm(vallist; args...)
     else
-        p = sortperm(d.keys; args...)
+        p = sortperm(keylist; args...)
     end
-
-    for (i,key) in enumerate(d.keys)
-        idx = ht_keyindex(d, key, false)
-        d.slots[idx] = p[i]
+    newa1 = Vector{Tuple{keytype(od),Bool}}()
+    for (i, k) in enumerate(keylist[p])
+        od.d1[k] = (vallist[p[i]], i)
+        push!(newa1, (k, true))
     end
-
-    d.keys = d.keys[p]
-    d.vals = d.vals[p]
-
-    return d
+    od.a1 = newa1
+    return od
 end
 
 sort(d::OrderedDict; args...) = sort!(copy(d); args...)
