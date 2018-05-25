@@ -38,7 +38,7 @@ dequeue!(s::Queue) = popfirst!(s.store)
 # Iterators
 
 start(q::Queue) = start(q.store)
-next(q::Queue, s) = next(q.store, s)
-done(q::Queue, s) = done(q.store, s)
+next(q::Queue, s::Tuple) = next(q.store, s)
+done(q::Queue, s::Tuple) = done(q.store, s)
 
 reverse_iter(q::Queue) = reverse_iter(q.store)

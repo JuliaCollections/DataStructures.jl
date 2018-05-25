@@ -3,11 +3,12 @@ using Compat
 using Compat.Test
 using Compat.Random
 using Compat.Serialization
-using Primes
 
 import DataStructures: IntSet
 
 @test isempty(detect_ambiguities(Base, Core, DataStructures))
+
+using Primes
 
 tests = ["int_set",
          "deque",

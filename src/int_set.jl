@@ -177,7 +177,7 @@ end
 
 # Use the next-set index as the state to prevent looking it up again in done
 start(s::IntSet) = next(s, 0)[2]
-function next(s::IntSet, i, invert=false)
+function next(s::IntSet, i::Int, invert=false)
     if s.inverse ⊻ invert
         # i+1 could rollover causing a BoundsError in findnext/findnextnot
         nextidx = i == typemax(Int) ? 0 : coalesce(findnextnot(s.bits, i+1), 0)
@@ -188,7 +188,7 @@ function next(s::IntSet, i, invert=false)
     end
     (i-1, nextidx)
 end
-done(s::IntSet, i) = i <= 0
+done(s::IntSet, i::Int) = i <= 0
 
 # Nextnot iterates through elements *not* in the set
 nextnot(s::IntSet, i) = next(s, i, true)

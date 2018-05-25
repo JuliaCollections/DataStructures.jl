@@ -426,15 +426,15 @@ function start(t::OrderedDict)
     t.ndel > 0 && rehash!(t)
     1
 end
-done(t::OrderedDict, i) = done(t.keys, i)
-next(t::OrderedDict, i) = (Pair(t.keys[i],t.vals[i]), i+1)
+done(t::OrderedDict, i::Int) = i > length(t.keys)
+next(t::OrderedDict, i::Int) = (Pair(t.keys[i],t.vals[i]), i+1)
 
 if isdefined(Base, :KeySet) # 0.7.0-DEV.2722
     next(v::Base.KeySet{K,T}, i) where {K,T<:OrderedDict{K}} = (v.dict.keys[i], i+1)
 else
     next(v::Base.KeyIterator{T}, i) where {T<:OrderedDict} = (v.dict.keys[i], i+1)
 end
-next(v::ValueIterator{T}, i) where {T<:OrderedDict} = (v.dict.vals[i], i+1)
+next(v::ValueIterator{T}, i::Int) where {T<:OrderedDict} = (v.dict.vals[i], i+1)
 
 function merge(d::OrderedDict, others::AbstractDict...)
     K, V = keytype(d), valtype(d)

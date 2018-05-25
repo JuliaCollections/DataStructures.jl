@@ -323,3 +323,12 @@ function next(pq::PriorityQueue{K,V}, i) where {K,V}
     (k, idx), i = next(pq.index, i)
     return (pq.xs[idx], i)
 end
+
+if isdefined(Base, :LegacyIterationCompat)
+    # resolve ambiguity
+    done(ct::PriorityQueue, i::Base.LegacyIterationCompat{I,T,S}) where {I>:PriorityQueue,T,S} = done(pq.index, i)
+    function next(ct::PriorityQueue{K,V}, i::Base.LegacyIterationCompat{I,T,S}) where {K,V,I>:PriorityQueue{K,V},T,S}
+        (k, idx), i = next(pq.index, i)
+        return (pq.xs[idx], i)
+    end
+end
