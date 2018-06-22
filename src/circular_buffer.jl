@@ -15,14 +15,14 @@ function Base.empty!(cb::CircularBuffer)
     cb
 end
 
-function _buffer_index_checked(cb::CircularBuffer, i::Int)
-    if i < 1 || i > cb.length
+Base.@propagate_inbounds function _buffer_index_checked(cb::CircularBuffer, i::Int)
+    @boundscheck if i < 1 || i > cb.length
         throw(BoundsError(cb, i))
     end
     _buffer_index(cb, i)
 end
 
-function _buffer_index(cb::CircularBuffer, i::Int)
+@inline function _buffer_index(cb::CircularBuffer, i::Int)
     n = cb.capacity
     idx = cb.first + i - 1
     if idx > n
@@ -32,16 +32,16 @@ function _buffer_index(cb::CircularBuffer, i::Int)
     end
 end
 
-function Base.getindex(cb::CircularBuffer, i::Int)
+@inline Base.@propagate_inbounds function Base.getindex(cb::CircularBuffer, i::Int)
     cb.buffer[_buffer_index_checked(cb, i)]
 end
 
-function Base.setindex!(cb::CircularBuffer, data, i::Int)
+@inline Base.@propagate_inbounds function Base.setindex!(cb::CircularBuffer, data, i::Int)
     cb.buffer[_buffer_index_checked(cb, i)] = data
     cb
 end
 
-function Base.pop!(cb::CircularBuffer)
+@inline function Base.pop!(cb::CircularBuffer)
     if cb.length == 0
         throw(ArgumentError("array must be non-empty"))
     end
@@ -50,7 +50,7 @@ function Base.pop!(cb::CircularBuffer)
     cb.buffer[i]
 end
 
-function Base.push!(cb::CircularBuffer, data)
+@inline function Base.push!(cb::CircularBuffer, data)
     # if full, increment and overwrite, otherwise push
     if cb.length == cb.capacity
         cb.first = (cb.first == cb.capacity ? 1 : cb.first + 1)
