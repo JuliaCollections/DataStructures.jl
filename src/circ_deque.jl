@@ -28,12 +28,14 @@ Base.isempty(D::CircularDeque) = D.n == 0
 
 @inline function front(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
-    D.buffer[D.first]
+    @inbounds ret = D.buffer[D.first]
+    ret
 end
 
 @inline function back(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
-    D.buffer[D.last]
+    @inbounds ret=D.buffer[D.last]
+    ret
 end
 
 @inline function Base.push!(D::CircularDeque, v)
