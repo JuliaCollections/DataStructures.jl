@@ -17,7 +17,7 @@
 ##  d: the data of the node
 ##  parent: the tree leaf that is the parent of this
 ##    node.  Parent pointers are needed in order
-##    to implement indices.
+##    to implement tokens.
 ##  There are two constructors, the standard one (first)
 ##  and the incomplete one (second).  The incomplete constructor
 ##  is needed because when the data structure is first created,
@@ -80,14 +80,14 @@ end
 
 
 ## Type BalancedTree23{K,D,Ord} is 'base class' for
-## SortedDict.
+## SortedDict, SortedMultiDict and SortedSet.
 ## K = key type, D = data type
 ## Key type must support an ordering operation defined by Ordering
 ## object Ord.
 ## The default is Forward which implies that the ordering function
 ## is isless (see ordering.jl)
 ## The fields are as follows.
-## ord:: The ordering object.  Often the ordering type
+## ord: The ordering object.  Often the ordering type
 ##   is a singleton type, so this field is empty, but it
 ##   is still necessary to direct the multiple dispatch.
 ## data: the (key,data) pairs of the tree.
@@ -104,10 +104,10 @@ end
 ##    tree array (locations are freed due to deletion)
 ## freedatainds: Array of indices of free locations in the
 ##    data array (locations are freed due to deletion)
-## useddatacells: IntSet (i.e., bit vector) showing which
+## useddatacells: BitSet (i.e., bit vector) showing which
 ##    data cells are taken.  The complementary positions are
 ##    exactly those stored in freedatainds.  This array is
-##    used only for error checking (only present at debug level 1 and 2)
+##    used only for error checking.
 ## deletionchild and deletionleftkey are two work-arrays
 ## for the delete function.
 
@@ -119,7 +119,7 @@ mutable struct BalancedTree23{K, D, Ord <: Ordering}
     depth::Int
     freetreeinds::Array{Int,1}
     freedatainds::Array{Int,1}
-    useddatacells::IntSet
+    useddatacells::BitSet
     # The next two arrays are used as a workspace by the delete!
     # function.
     deletionchild::Array{Int,1}
@@ -129,7 +129,7 @@ mutable struct BalancedTree23{K, D, Ord <: Ordering}
         initializeTree!(tree1)
         data1 = Vector{KDRec{K,D}}(undef, 2)
         initializeData!(data1)
-        u1 = IntSet()
+        u1 = BitSet()
         push!(u1, 1, 2)
         new{K,D,Ord}(ord1, data1, tree1, 1, 1, Vector{Int}(), Vector{Int}(),
                      u1,
@@ -631,30 +631,30 @@ function compareInd(t::BalancedTree23, i1::Int, i2::Int)
     i2a = i2
     p1 = t.data[i1].parent
     p2 = t.data[i2].parent
-    curdepth = t.depth
+    # curdepth = t.depth
     while true
-        @assert(curdepth > 0)
+        # @assert(curdepth > 0)
         if p1 == p2
             if i1a == t.tree[p1].child1
-                @assert(t.tree[p1].child2 == i2a || t.tree[p1].child3 == i2a)
+                # @assert(t.tree[p1].child2 == i2a || t.tree[p1].child3 == i2a)
                 return -1
             end
             if i1a == t.tree[p1].child2
                 if (t.tree[p1].child1 == i2a)
                     return 1
                 end
-                @assert(t.tree[p1].child3 == i2a)
+                # @assert(t.tree[p1].child3 == i2a)
                 return -1
             end
-            @assert(i1a == t.tree[p1].child3)
-            @assert(t.tree[p1].child1 == i2a || t.tree[p1].child2 == i2a)
+            # @assert(i1a == t.tree[p1].child3)
+            # @assert(t.tree[p1].child1 == i2a || t.tree[p1].child2 == i2a)
             return 1
         end
         i1a = p1
         i2a = p2
         p1 = t.tree[i1a].parent
         p2 = t.tree[i2a].parent
-        curdepth -= 1
+        # curdepth -= 1
     end
 end
 

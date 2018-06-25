@@ -14,6 +14,7 @@ lt(::CaseInsensitive, a, b) = isless(lowercase(a), lowercase(b))
 eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
 
 
+
 @testset "SortedContainers" begin
 
 ## Function fulldump dumps the entire tree; helpful for debugging.
@@ -98,7 +99,7 @@ function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
     r = t.rootloc
     bfstreenodes = Vector{Int}()
     tdpth = t.depth
-    intree = IntSet()
+    intree = BitSet()
     levstart = Vector{Int}(undef, tdpth)
     push!(bfstreenodes, r)
     levstart[1] = 1
@@ -131,7 +132,7 @@ function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
         end
     end
     bfstreesize = size(bfstreenodes, 1)
-    dataused = IntSet()
+    dataused = BitSet()
     minkeys = Vector{K}(undef, bfstreesize)
     maxkeys = Vector{K}(undef, bfstreesize)
     for s = levstart[tdpth] : bfstreesize
@@ -230,7 +231,7 @@ function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
             end
         end
     end
-    freedata = IntSet()
+    freedata = BitSet()
     for i = 1 : size(t.freedatainds,1)
         fdi = t.freedatainds[i]
         if in(fdi, freedata)
@@ -254,7 +255,7 @@ function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
             throw(ErrorException("Mismatch between t.freedatainds and t.useddatacells"))
         end
     end
-    freetree = IntSet()
+    freetree = BitSet()
     for i = 1 : size(t.freetreeinds,1)
         tfi = t.freetreeinds[i]
         if in(tfi, freetree)
@@ -636,7 +637,9 @@ end
         end
     end
     @test eltype(semitokens(exclusive(m1, startof(m1), pastendsemitoken(m1)))) ==
-    Tuple{IntSemiToken, T, T}
+        Tuple{IntSemiToken, T, T}
+    @test eltype(typeof(semitokens(exclusive(m1, startof(m1), pastendsemitoken(m1))))) ==
+        Tuple{IntSemiToken, T, T}
     @test count == N^2
     N = 10000
     sk = zero1
@@ -666,10 +669,12 @@ end
     @test sk2 == sk
     @test sv == sv2
     sk2 = zero1
+    @test length(keys(m1)) == length(m1)
     for k in keys(m1)
         sk2 += k
     end
     @test eltype(keys(m1)) == T
+    @test eltype(typeof(keys(m1))) == T
     @test sk2 == sk
 
     sk2a = zero1
@@ -679,11 +684,16 @@ end
         sk2a += k
     end
     @test eltype(eachindex(m1)) == T
+    @test eltype(typeof(eachindex(m1))) == T
+    @test length(eachindex(m1)) == length(m1)
     @test sk2a == sk
 
 
 
     sk2b = zero1
+    @test length(onlysemitokens(m1)) == length(m1)
+    @test eltype(onlysemitokens(m1)) == IntSemiToken
+    @test eltype(typeof(onlysemitokens(m1))) == IntSemiToken
     for st in onlysemitokens(m1)
         sk2b += deref_key((m1,st))
     end
@@ -694,6 +704,8 @@ end
         sv2 += v
     end
     @test eltype(values(m1)) == T
+    @test eltype(typeof(values(m1))) == T
+    @test length(values(m1)) == length(m1)
 
     @test sv == sv2
     count = 0
@@ -702,6 +714,8 @@ end
         count += 1
     end
     @test eltype(semitokens(keys(m1))) == Tuple{IntSemiToken, T}
+    @test eltype(typeof(semitokens(keys(m1)))) == Tuple{IntSemiToken, T}
+    @test length(semitokens(keys(m1))) == length(m1)
 
     @test count == N
     count = 0
@@ -711,6 +725,8 @@ end
     end
     @test count == N
     @test eltype(semitokens(values(m1))) == Tuple{IntSemiToken, T}
+    @test eltype(typeof(semitokens(values(m1)))) == Tuple{IntSemiToken, T}
+    @test length(semitokens(values(m1))) == length(m1)
 
     pos1 = searchsortedfirst(m1, div(N,2))
     sk2 = zero1
@@ -719,6 +735,7 @@ end
     end
     @test sk2 == skhalf
     @test eltype(keys(exclusive(m1, startof(m1), pos1))) == T
+    @test eltype(typeof(keys(exclusive(m1, startof(m1), pos1)))) == T
 
 
 
@@ -728,6 +745,7 @@ end
     end
     @test sk2a == skhalf
     @test eltype(eachindex(exclusive(m1, startof(m1), pos1))) == T
+    @test eltype(typeof(eachindex(exclusive(m1, startof(m1), pos1)))) == T
 
 
 
@@ -741,6 +759,7 @@ end
         count += 1
     end
     @test eltype(keys(exclusive(m1, startof(m1), pos1))) == T
+    @test eltype(typeof(keys(exclusive(m1, startof(m1), pos1)))) == T
     @test count == 0
 
 
@@ -750,6 +769,8 @@ end
     end
     @test count == 0
     @test eltype(keys(inclusive(m1, startof(m1), beforestartsemitoken(m1)))) ==
+       T
+    @test eltype(typeof(keys(inclusive(m1, startof(m1), beforestartsemitoken(m1))))) ==
        T
 
 
@@ -761,6 +782,7 @@ end
     end
     @test count == 1 && sk5 == deref_key((m1,startof(m1)))
     @test eltype(eachindex(inclusive(m1, startof(m1), startof(m1)))) == T
+    @test eltype(typeof(eachindex(inclusive(m1, startof(m1), startof(m1))))) == T
 
     factors = SortedMultiDict{Int,Int}()
     N = 1000
@@ -786,9 +808,6 @@ end
     @test sum1a == sum1 && sum2a == sum2
 
 
-
-
-
     sum1a = 0
     sum2a = 0
     for st in eachindex(factors)
@@ -797,6 +816,9 @@ end
         sum2a += v
     end
     @test sum1a == sum1 && sum2a == sum2
+    @test length(eachindex(factors)) == length(factors)
+    @test eltype(eachindex(factors)) == IntSemiToken
+    @test eltype(typeof(eachindex(factors))) == IntSemiToken
 
     sum1a = 0
     sum2a = 0
@@ -806,7 +828,9 @@ end
         sum2a += v
     end
     @test sum1a == sum1 && sum2a == sum2
+    @test length(onlysemitokens(factors)) == length(factors)
     @test eltype(onlysemitokens(factors)) == IntSemiToken
+    @test eltype(typeof(onlysemitokens(factors))) == IntSemiToken
 
     sum2 = 0
     for (k,v) in inclusive(factors,
@@ -819,6 +843,9 @@ end
     @test eltype(inclusive(factors,
                            searchsortedfirst(factors,70),
                            searchsortedlast(factors,70))) == Pair{Int,Int}
+    @test eltype(typeof(inclusive(factors,
+                                  searchsortedfirst(factors,70),
+                                  searchsortedlast(factors,70)))) == Pair{Int,Int}
 
 
     sum2 = 0
@@ -833,6 +860,9 @@ end
     @test eltype(eachindex(inclusive(factors,
                                      searchsortedfirst(factors,70),
                                      searchsortedlast(factors,70)))) == IntSemiToken
+    @test eltype(typeof(eachindex(inclusive(factors,
+                                            searchsortedfirst(factors,70),
+                                            searchsortedlast(factors,70))))) == IntSemiToken
 
 
 
@@ -846,6 +876,9 @@ end
     @test eltype(exclusive(factors,
                            searchsortedfirst(factors,70),
                            searchsortedlast(factors,70))) == Pair{Int,Int}
+    @test eltype(typeof(exclusive(factors,
+                                  searchsortedfirst(factors,70),
+                                  searchsortedlast(factors,70)))) == Pair{Int,Int}
 
 
     sum3 = 0
@@ -859,6 +892,9 @@ end
     @test eltype(eachindex(exclusive(factors,
                                      searchsortedfirst(factors,70),
                                      searchsortedlast(factors,70)))) == IntSemiToken
+    @test eltype(typeof(eachindex(exclusive(factors,
+                                            searchsortedfirst(factors,70),
+                                            searchsortedlast(factors,70))))) == IntSemiToken
 
 
     sum4 = 0
@@ -878,6 +914,7 @@ end
 
     @test sum5 == sum2a
     @test eltype(values(factors)) == Int
+    @test eltype(typeof(values(factors))) == Int
 
     sum2 = 0
     for k in keys(inclusive(factors,
@@ -889,6 +926,9 @@ end
     @test eltype(keys(inclusive(factors,
                                 searchsortedfirst(factors,70),
                                 searchsortedlast(factors,70)))) ==  Int
+    @test eltype(typeof(keys(inclusive(factors,
+                                       searchsortedfirst(factors,70),
+                                       searchsortedlast(factors,70))))) ==  Int
 
 
     sum3 = 0
@@ -902,6 +942,10 @@ end
                                 searchsortedfirst(factors,60),
                                 searchsortedfirst(factors,61)))) == Int
 
+    @test eltype(typeof(keys(exclusive(factors,
+                                       searchsortedfirst(factors,60),
+                                       searchsortedfirst(factors,61))))) == Int
+
 
 
     sum2 = 0
@@ -914,6 +958,9 @@ end
     @test eltype(values(inclusive(factors,
                                   searchsortedfirst(factors,60),
                                   searchsortedfirst(factors,61)))) == Int
+    @test eltype(typeof(values(inclusive(factors,
+                                         searchsortedfirst(factors,60),
+                                         searchsortedfirst(factors,61))))) == Int
 
     sum3 = 0
     for v in values(exclusive(factors,
@@ -925,6 +972,9 @@ end
     @test eltype(values(exclusive(factors,
                                   searchsortedfirst(factors,60),
                                   searchsortedfirst(factors,61)))) == Int
+    @test eltype(typeof(values(exclusive(factors,
+                                         searchsortedfirst(factors,60),
+                                         searchsortedfirst(factors,61))))) == Int
 
     sum1b = 0
     sum2b = 0
@@ -935,6 +985,7 @@ end
     end
     @test sum1b == sum1a && sum2b == sum2a
     @test eltype(semitokens(factors)) == Tuple{IntSemiToken, Int, Int}
+    @test eltype(typeof(semitokens(factors))) == Tuple{IntSemiToken, Int, Int}
 
     sum2 = 0
     for (st,k,v) in semitokens(inclusive(factors,
@@ -947,6 +998,10 @@ end
     @test eltype(semitokens(inclusive(factors,
                                          searchsortedfirst(factors,70),
                                          searchsortedlast(factors,70)))) ==
+        Tuple{IntSemiToken, Int, Int}
+    @test eltype(typeof(semitokens(inclusive(factors,
+                                         searchsortedfirst(factors,70),
+                                         searchsortedlast(factors,70))))) ==
         Tuple{IntSemiToken, Int, Int}
 
     sum3 = 0
@@ -962,6 +1017,11 @@ end
                                       searchsortedfirst(factors,61)))) ==
          Tuple{IntSemiToken, Int, Int}
 
+    @test eltype(typeof(semitokens(exclusive(factors,
+                                             searchsortedfirst(factors,60),
+                                             searchsortedfirst(factors,61))))) ==
+         Tuple{IntSemiToken, Int, Int}
+
     sum4 = 0
     for (st,k) in semitokens(keys(factors))
         @test deref_key((factors,st)) == k && mod(k,deref_value((factors,st))) == 0
@@ -969,6 +1029,7 @@ end
     end
     @test sum4 == sum1
     @test eltype(semitokens(keys(factors))) == Tuple{IntSemiToken,Int}
+    @test eltype(typeof(semitokens(keys(factors)))) == Tuple{IntSemiToken,Int}
 
     sum5 = 0
     for (st,v) in semitokens(values(factors))
@@ -977,6 +1038,7 @@ end
     end
     @test sum5 == sum2a
     @test eltype(semitokens(values(factors))) == Tuple{IntSemiToken,Int}
+    @test eltype(typeof(semitokens(values(factors)))) == Tuple{IntSemiToken,Int}
 
     sum2 = 0
     for (st,k) in semitokens(keys(inclusive(factors,
@@ -991,6 +1053,11 @@ end
                                            searchsortedlast(factors,70))))) ==
         Tuple{IntSemiToken, Int}
 
+    @test eltype(typeof(semitokens(keys(inclusive(factors,
+                                           searchsortedfirst(factors,70),
+                                           searchsortedlast(factors,70)))))) ==
+        Tuple{IntSemiToken, Int}
+
     sum3 = 0
     for (st,k) in semitokens(keys(inclusive(factors,
                                             searchsortedfirst(factors,60),
@@ -1002,6 +1069,10 @@ end
     @test eltype(semitokens(keys(inclusive(factors,
                                             searchsortedfirst(factors,60),
                                             searchsortedlast(factors,60))))) ==
+        Tuple{IntSemiToken, Int}
+    @test eltype(typeof(semitokens(keys(inclusive(factors,
+                                                  searchsortedfirst(factors,60),
+                                                  searchsortedlast(factors,60)))))) ==
         Tuple{IntSemiToken, Int}
 
     sum2 = 0
@@ -1016,6 +1087,10 @@ end
                                               searchsortedfirst(factors,70),
                                               searchsortedlast(factors,70))))) ==
       Tuple{IntSemiToken, Int}
+    @test eltype(typeof(semitokens(values(inclusive(factors,
+                                                    searchsortedfirst(factors,70),
+                                                    searchsortedlast(factors,70)))))) ==
+      Tuple{IntSemiToken, Int}
 
     sum3 = 0
     for (st,v) in semitokens(values(exclusive(factors,
@@ -1028,6 +1103,10 @@ end
     @test eltype(semitokens(values(exclusive(factors,
                                               searchsortedfirst(factors,60),
                                               searchsortedfirst(factors,61))))) ==
+       Tuple{IntSemiToken, Int}
+    @test eltype(typeof(semitokens(values(exclusive(factors,
+                                              searchsortedfirst(factors,60),
+                                              searchsortedfirst(factors,61)))))) ==
        Tuple{IntSemiToken, Int}
 
     s = SortedSet([39, 24, 2, 14, 45, 107, 66])
@@ -1044,7 +1123,9 @@ end
         sum1 += k
     end
     @test sum1 == sum([39, 24, 2, 14, 45, 107, 66])
+    @test length(semitokens(s)) == length(s)
     @test eltype(semitokens(s)) == Tuple{IntSemiToken, Int}
+    @test eltype(typeof(semitokens(s))) == Tuple{IntSemiToken, Int}
 
 
     sum1 = 0
@@ -1052,8 +1133,10 @@ end
         k = deref((s,st))
         sum1 += k
     end
+    @test length(onlysemitokens(s)) == length(s)
     @test sum1 == sum([39, 24, 2, 14, 45, 107, 66])
     @test eltype(onlysemitokens(s)) == IntSemiToken
+    @test eltype(typeof(onlysemitokens(s))) == IntSemiToken
 
 
     sum1 = 0
@@ -1062,7 +1145,9 @@ end
         sum1 += k
     end
     @test sum1 == sum([39, 24, 2, 14, 45, 107, 66])
+    @test length(eachindex(s)) == length(s)
     @test eltype(eachindex(s)) == IntSemiToken
+    @test eltype(typeof(eachindex(s))) == IntSemiToken
 
 
     sum2 = 0
@@ -1075,6 +1160,9 @@ end
     @test eltype(inclusive(s,
                        searchsortedfirst(s, 24),
                        searchsortedfirst(s, 66))) == Int
+    @test eltype(typeof(inclusive(s,
+                                  searchsortedfirst(s, 24),
+                                  searchsortedfirst(s, 66)))) == Int
 
 
     sum2 = 0
@@ -1087,8 +1175,9 @@ end
     @test eltype(eachindex(inclusive(s,
                                      searchsortedfirst(s, 24),
                                      searchsortedfirst(s, 66)))) == IntSemiToken
-
-
+    @test eltype(typeof(eachindex(inclusive(s,
+                                            searchsortedfirst(s, 24),
+                                            searchsortedfirst(s, 66))))) == IntSemiToken
 
 
     sum2 = 0
@@ -1100,9 +1189,13 @@ end
     end
     @test sum2 == 24 + 39 + 45 + 66
     @test eltype(semitokens(inclusive(s,
-                                       searchsortedfirst(s, 24),
-                                       searchsortedfirst(s, 66)))) ==
-      Tuple{IntSemiToken, Int}
+                                      searchsortedfirst(s, 24),
+                                      searchsortedfirst(s, 66)))) ==
+                                          Tuple{IntSemiToken, Int}
+    @test eltype(typeof(semitokens(inclusive(s,
+                                         searchsortedfirst(s, 24),
+                                         searchsortedfirst(s, 66))))) ==
+                                             Tuple{IntSemiToken, Int}
 
 
     sum2 = 0
@@ -1115,6 +1208,10 @@ end
     @test eltype(onlysemitokens(inclusive(s,
                                           searchsortedfirst(s, 24),
                                           searchsortedfirst(s, 66)))) == IntSemiToken
+
+    @test eltype(typeof(onlysemitokens(inclusive(s,
+                                          searchsortedfirst(s, 24),
+                                          searchsortedfirst(s, 66))))) == IntSemiToken
 
 
 
@@ -1130,6 +1227,10 @@ end
                        searchsortedfirst(s, 24),
                        searchsortedfirst(s, 66))) == Int
 
+    @test eltype(typeof(exclusive(s,
+                       searchsortedfirst(s, 24),
+                       searchsortedfirst(s, 66)))) == Int
+
 
     sum3 = 0
     for (st,k) in semitokens(exclusive(s,
@@ -1143,6 +1244,10 @@ end
                                        searchsortedfirst(s, 24),
                                        searchsortedfirst(s, 66)))) ==
      Tuple{IntSemiToken, Int}
+    @test eltype(typeof(semitokens(exclusive(s,
+                                       searchsortedfirst(s, 24),
+                                       searchsortedfirst(s, 66))))) ==
+     Tuple{IntSemiToken, Int}
 
 
     sum3 = 0
@@ -1155,6 +1260,9 @@ end
     @test eltype(eachindex(exclusive(s,
                                      searchsortedfirst(s, 24),
                                      searchsortedfirst(s, 66)))) == IntSemiToken
+    @test eltype(typeof(eachindex(exclusive(s,
+                                            searchsortedfirst(s, 24),
+                                            searchsortedfirst(s, 66))))) == IntSemiToken
 end
 
 
@@ -1167,13 +1275,25 @@ end
     m2 = SortedDict{String,Int}()
     @test_throws BoundsError println(first(m2))
     @test_throws BoundsError println(last(m2))
-    state1 = start(m2)
-    @test_throws BoundsError next(m2, state1)
+    if VERSION < v"0.7.0-DEV.5126"
+        state1 = start(m2)
+        @test_throws BoundsError next(m2, state1)
+    end
     i1 = findkey(m,"a")
-    delete!((m,i1))
-    i2 = findkey(m,"bb")
-    @test_throws BoundsError start(inclusive(m,i1,i2))
-    @test_throws BoundsError start(exclusive(m,i1,i2))
+    if VERSION >= v"0.7.0-DEV.5126"
+        scrap, state1 = iterate(m)
+        delete!((m,i1))
+        i2 = findkey(m,"bb")
+        @test_throws BoundsError iterate(inclusive(m, i1, i2))
+        @test_throws BoundsError iterate(exclusive(m, i1, i2))
+        delete!((m,i2))
+        @test_throws BoundsError iterate(m, state1)
+    else
+        delete!((m,i1))
+        i2 = findkey(m,"bb")
+        @test_throws BoundsError start(inclusive(m,i1,i2))
+        @test_throws BoundsError start(exclusive(m,i1,i2))
+    end
     @test_throws KeyError delete!(m,"a")
     @test_throws KeyError pop!(m,"a")
     m3 = SortedDict((Dict{String, Int}()), Reverse)

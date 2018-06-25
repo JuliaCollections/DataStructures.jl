@@ -16,6 +16,12 @@ module DataStructures
                  union, intersect, symdiff, setdiff, issubset,
                  searchsortedfirst, searchsortedlast, in
 
+    if VERSION >= v"0.7.0-DEV.5126"
+        import Base: iterate, IteratorSize, HasLength, SizeUnknown,
+                   IteratorEltype, HasEltype
+    end
+    
+
     using Compat
     using Compat.InteractiveUtils # for methodswith
     import Compat: lastindex, pushfirst!, popfirst!
