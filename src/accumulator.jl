@@ -26,11 +26,7 @@ end
 
 eltype_for_accumulator(seq::T) where T = eltype(T)
 function eltype_for_accumulator(seq::T) where {T<:Base.Generator}
-    @static if VERSION < v"0.7.0-DEV.2104"
-        Base._default_eltype(T)
-    else
-        Base.@default_eltype(seq)
-    end
+    Base.@default_eltype(seq)
 end
 
 
@@ -63,11 +59,9 @@ sum(ct::Accumulator) = sum(values(ct.map))
 start(ct::Accumulator) = start(ct.map)
 next(ct::Accumulator, state) = next(ct.map, state)
 done(ct::Accumulator, state) = done(ct.map, state)
-if isdefined(Base, :LegacyIterationCompat)
-    # resolve ambiguity
-    next(ct::Accumulator, state::Base.LegacyIterationCompat{I,T,S}) where {I>:Accumulator,T,S} = next(ct.map, state)
-    done(ct::Accumulator, state::Base.LegacyIterationCompat{I,T,S}) where {I>:Accumulator,T,S} = done(ct.map, state)
-end
+# resolve ambiguity
+next(ct::Accumulator, state::Base.LegacyIterationCompat{I,T,S}) where {I>:Accumulator,T,S} = next(ct.map, state)
+done(ct::Accumulator, state::Base.LegacyIterationCompat{I,T,S}) where {I>:Accumulator,T,S} = done(ct.map, state)
 
 # manipulation
 

@@ -1,6 +1,4 @@
-import Base.isless
-import Base.isequal
-import Compat.lastindex
+import Base: isless, isequal
 
 const SDMContainer = Union{SortedDict, SortedMultiDict}
 const SAContainer = Union{SDMContainer, SortedSet}

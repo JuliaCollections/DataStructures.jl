@@ -5,12 +5,6 @@ import Base: similar, copy, copy!, eltype, push!, pop!, delete!,
              setdiff, setdiff!, symdiff, symdiff!, in, start, next, done,
              last, length, show, hash, issubset, ==, <=, <, unsafe_getindex,
              unsafe_setindex!, findnextnot, first
-import Compat: popfirst!
-if !isdefined(Base, :complement)
-    export complement, complement!
-else
-    import Base: complement, complement!
-end
 
 mutable struct IntSet
     bits::BitVector
@@ -54,7 +48,7 @@ end
 @inline function _resize0!(b::BitVector, newlen::Integer)
     len = length(b)
     resize!(b, newlen)
-    len < newlen && unsafe_setindex!(b, false, len+1:newlen) # resize! gives dirty memory
+    len < newlen && @inbounds(b[len+1:newlen] .= false) # resize! gives dirty memory
     b
 end
 
@@ -180,11 +174,11 @@ start(s::IntSet) = next(s, 0)[2]
 function next(s::IntSet, i::Int, invert=false)
     if s.inverse ⊻ invert
         # i+1 could rollover causing a BoundsError in findnext/findnextnot
-        nextidx = i == typemax(Int) ? 0 : coalesce(findnextnot(s.bits, i+1), 0)
+        nextidx = i == typemax(Int) ? 0 : something(findnextnot(s.bits, i+1), 0)
         # Extend indices beyond the length of the bits since it is inverted
         nextidx = nextidx == 0 ? max(i, length(s.bits))+1 : nextidx
     else
-        nextidx = i == typemax(Int) ? 0 : coalesce(findnext(s.bits, i+1), 0)
+        nextidx = i == typemax(Int) ? 0 : something(findnext(s.bits, i+1), 0)
     end
     (i-1, nextidx)
 end
@@ -196,9 +190,9 @@ nextnot(s::IntSet, i) = next(s, i, true)
 function last(s::IntSet)
     l = length(s.bits)
     if s.inverse
-        idx = l < typemax(Int) ? typemax(Int) : coalesce(findprevnot(s.bits, l), 0)
+        idx = l < typemax(Int) ? typemax(Int) : something(findprevnot(s.bits, l), 0)
     else
-        idx = coalesce(findprev(s.bits, l), 0)
+        idx = something(findprev(s.bits, l), 0)
     end
     idx == 0 ? throw(ArgumentError("collection must be non-empty")) : idx - 1
 end

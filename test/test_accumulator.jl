@@ -155,16 +155,6 @@
 
         @test_throws BoundsError nsmallest(counter("a"),2)
     end
-
-    @testset "deprecations" begin
-        ctd = counter([1,2,3])
-        @test ctd[3]==1
-
-        println("\nThe following warning is expected:")
-        @test pop!(ctd, 3)==1
-        println("\nThe following warning is expected:")
-        @test push!(counter([1,2,3]),counter([1,2,3])) == merge!(counter([1,2,3]), counter([1,2,3]))
-    end
 end # @testset Accumulators
 
 

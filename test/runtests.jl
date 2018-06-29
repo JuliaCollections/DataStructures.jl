@@ -1,8 +1,7 @@
 using DataStructures
-using Compat
-using Compat.Test
-using Compat.Random
-using Compat.Serialization
+using Test
+using Random
+using Serialization
 
 import DataStructures: IntSet
 

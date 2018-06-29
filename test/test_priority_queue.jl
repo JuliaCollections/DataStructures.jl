@@ -34,22 +34,14 @@ end
     r = rand(1:pmax, n)
     priorities = Dict(zip(1:n, r))
 
+    ks, vs = 1:n+1, rand(1:pmax, n)
+
     # building from a dict
     pq1 = PriorityQueue(priorities)
     test_issorted!(pq1, priorities)
 
     pq2 = PriorityQueue(priorities)
     test_isrequested!(pq2, 1:n)
-
-    # building from two lists (deprecated)
-    ks, vs = 1:n, rand(1:pmax, n)
-    println("\nThe following warning is expected:")
-    pq3 = PriorityQueue(ks,vs)
-
-    # building from two lists of different sizes - throws an error
-    ks, vs = 1:n+1, rand(1:pmax, n)
-    println("\nThe following warning is expected:")
-    @test_throws ArgumentError PriorityQueue(ks, vs)
 
     # building from Dict
     priorities = Dict(zip(ks, vs))

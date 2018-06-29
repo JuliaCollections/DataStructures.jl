@@ -5,7 +5,7 @@ module DataStructures
     import Base: <, <=, ==, length, isempty, start, next, done, delete!,
                  show, dump, empty!, getindex, setindex!, get, get!,
                  in, haskey, keys, merge, copy, cat,
-                 push!, pop!, insert!,
+                 push!, pop!, pushfirst!, popfirst!, insert!, lastindex,
                  union!, delete!, similar, sizehint!,
                  isequal, hash,
                  map, reverse,
@@ -14,11 +14,12 @@ module DataStructures
                  ReverseOrdering, Reverse, Lt,
                  isless,
                  union, intersect, symdiff, setdiff, issubset,
-                 searchsortedfirst, searchsortedlast, in
+                 searchsortedfirst, searchsortedlast, in,
+                 eachindex, keytype, valtype
 
-    using Compat
-    using Compat.InteractiveUtils # for methodswith
-    import Compat: lastindex, pushfirst!, popfirst!
+    using InteractiveUtils: methodswith
+
+    export complement, complement!
 
     export Deque, Stack, Queue, CircularDeque
     export deque, enqueue!, dequeue!, dequeue_pair!, update!, reverse_iter
@@ -55,8 +56,6 @@ module DataStructures
     export MultiDict, enumerateall
 
     export findkey
-
-    import Base: eachindex, keytype, valtype
 
     include("delegate.jl")
 
@@ -104,60 +103,4 @@ module DataStructures
     export PriorityQueue, peek
 
     include("priorityqueue.jl")
-
-    # Deprecations
-
-    # Remove when Julia 0.7 (or whatever version is after v0.6) is released
-    @deprecate DefaultDictBase(default, ks::AbstractArray, vs::AbstractArray) DefaultDictBase(default, zip(ks, vs))
-    @deprecate DefaultDictBase(default, ks, vs) DefaultDictBase(default, zip(ks, vs))
-    @deprecate DefaultDictBase(::Type{K}, ::Type{V}, default) where {K,V} DefaultDictBase{K,V}(default)
-
-    @deprecate DefaultDict(default, ks, vs) DefaultDict(default, zip(ks, vs))
-    @deprecate DefaultDict(::Type{K}, ::Type{V}, default) where {K,V} DefaultDict{K,V}(default)
-
-    @deprecate DefaultOrderedDict(default, ks, vs) DefaultOrderedDict(default, zip(ks, vs))
-    @deprecate DefaultOrderedDict(::Type{K}, ::Type{V}, default) where {K,V} DefaultOrderedDict{K,V}(default)
-
-    function SortedMultiDict(ks::AbstractVector{K},
-                             vs::AbstractVector{V},
-                             o::Ordering=Forward) where {K,V}
-        Base.depwarn("SortedMultiDict(ks, vs, o::Ordering=Forward) is deprecated.\n" * "Use SortedMultiDict(o, zip(ks,vs)) or SortedMultiDict(zip(ks, vs))", :SortedMultiDict)
-        if length(ks) != length(vs)
-            throw(ArgumentError("SortedMultiDict(ks,vs,o): ks and vs arrays must be the same length"))
-        end
-        SortedMultiDict(o, zip(ks,vs))
-    end
-
-    @deprecate PriorityQueue(::Type{K}, ::Type{V}) where {K,V} PriorityQueue{K,V}()
-    @deprecate PriorityQueue(::Type{K}, ::Type{V}, o::Ordering) where {K,V} PriorityQueue{K,V,typeof(o)}(o)
-    @deprecate (PriorityQueue{K,V,ForwardOrdering}() where {K,V}) PriorityQueue{K,V}()
-
-    function PriorityQueue(ks::AbstractVector{K},
-                           vs::AbstractVector{V},
-                           o::Ordering=Forward) where {K,V}
-        Base.depwarn("PriorityQueue(ks, vs, o::Ordering=Forward) is deprecated.\n" *
-                     "Use PriorityQueue(o, zip(ks,vs)) or PriorityQueue(zip(ks, vs))", :PriorityQueue)
-        if length(ks) != length(vs)
-            throw(ArgumentError("PriorityQueue(ks,vs,o): ks and vs arrays must be the same length"))
-        end
-        PriorityQueue(o, zip(ks,vs))
-    end
-
-    if isdefined(Base, :find)
-        import Base: find
-        @deprecate find(x::Union{SortedDict,SortedSet}, k) findkey(x, k)
-    end
-    if isdefined(Base, :endof) && isdefined(Base, :lastindex)
-        import Base: endof
-        @deprecate endof(x::OrderedSet) lastindex(x)
-    end
-    if isdefined(Base, :shift!) && isdefined(Base, :popfirst!)
-        import Base: shift!, unshift!
-        for T in [:IntSet, :Deque, :CircularDeque]
-            @eval @deprecate shift!(x::$T) popfirst!(x)
-        end
-        for T in [:Deque, :CircularDeque, :CircularBuffer]
-            @eval @deprecate unshift!(d::$T, x) pushfirst!(d, x)
-        end
-    end
 end

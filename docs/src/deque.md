@@ -12,8 +12,8 @@ isempty(a)          # test whether the dequeue is empty
 length(a)           # get the number of elements
 push!(a, 10)        # add an element to the back
 pop!(a)             # remove an element from the back
-unshift!(a, 20)     # add an element to the front
-shift!(a)           # remove an element from the front
+pushfirst!(a, 20)   # add an element to the front
+popfirst!(a)        # remove an element from the front
 front(a)            # get the element at the front
 back(a)             # get the element at the back
 ```

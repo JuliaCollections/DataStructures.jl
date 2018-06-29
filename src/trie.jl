@@ -126,4 +126,4 @@ function done(it::TrieIterator, state::Tuple)
 end
 
 path(t::Trie, str::AbstractString) = TrieIterator(t, str)
-Compat.IteratorSize(::Type{TrieIterator}) = Base.SizeUnknown()
+Base.IteratorSize(::Type{TrieIterator}) = Base.SizeUnknown()

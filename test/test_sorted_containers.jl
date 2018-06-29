@@ -1194,9 +1194,6 @@ end
     @test_throws BoundsError first(m1)
     @test_throws BoundsError last(m1)
 
-    println("The following warning is expected:")
-    @test_throws ArgumentError SortedMultiDict(['a','b'], [1, 2, 3])
-
     s = SortedSet([3,5])
     @test_throws KeyError delete!(s,7)
     @test_throws KeyError pop!(s, 7)
@@ -1299,10 +1296,6 @@ end
     test_pair_array = Pair{Char}['a'=>1, 'b'=>2, 'c'=>3]
     factors5 = SortedMultiDict(test_pair_array)
     @test typeof(factors5) == SortedMultiDict{Char,Any,ForwardOrdering}
-
-    println("The following warning is expected:")
-    factors6 = SortedMultiDict(['a', 'b'], [1, 2])
-    @test typeof(factors6) == SortedMultiDict{Char,Int,ForwardOrdering}
 
     #@test factors2 == factors3   # Broken!  TODO: fix me...
     @test isequal(factors2, factors3)

@@ -1,3 +1,6 @@
+using DataStructures, Test
+import DataStructures: IntSet
+
 ## IntSet
 
 @testset "IntSet" begin
@@ -16,7 +19,7 @@ data_out = collect(s)
 # show
 @test sprint(show, IntSet()) == "IntSet([])"
 @test sprint(show, IntSet([1,2,3])) == "IntSet([1, 2, 3])"
-@test contains(sprint(show, complement(IntSet())), "...,")
+@test occursin("...,", sprint(show, complement(IntSet())))
 
 
 s = IntSet([0,1,10,20,200,300,1000,10000,10002])
