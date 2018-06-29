@@ -372,11 +372,7 @@ function get(default::Base.Callable, h::OrderedDict{K,V}, key) where {K,V}
 end
 
 haskey(h::OrderedDict, key) = (ht_keyindex(h, key, true) >= 0)
-if isdefined(Base, :KeySet) # 0.7.0-DEV.2722
-    in(key, v::Base.KeySet{K,T}) where {K,T<:OrderedDict{K}} = (ht_keyindex(v.dict, key, true) >= 0)
-else
-    in(key, v::Base.KeyIterator{T}) where {T<:OrderedDict} = (ht_keyindex(v.dict, key, true) >= 0)
-end
+in(key, v::Base.KeySet{K,T}) where {K,T<:OrderedDict{K}} = (ht_keyindex(v.dict, key, true) >= 0)
 
 function getkey(h::OrderedDict{K,V}, key, default) where {K,V}
     index = ht_keyindex(h, key, true)
@@ -428,12 +424,6 @@ function start(t::OrderedDict)
 end
 done(t::OrderedDict, i::Int) = i > length(t.keys)
 next(t::OrderedDict, i::Int) = (Pair(t.keys[i],t.vals[i]), i+1)
-
-if isdefined(Base, :KeySet) # 0.7.0-DEV.2722
-    next(v::Base.KeySet{K,T}, i) where {K,T<:OrderedDict{K}} = (v.dict.keys[i], i+1)
-else
-    next(v::Base.KeyIterator{T}, i) where {T<:OrderedDict} = (v.dict.keys[i], i+1)
-end
 next(v::ValueIterator{T}, i::Int) where {T<:OrderedDict} = (v.dict.vals[i], i+1)
 
 function merge(d::OrderedDict, others::AbstractDict...)

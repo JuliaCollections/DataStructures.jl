@@ -61,7 +61,7 @@ end
     cb
 end
 
-function Compat.popfirst!(cb::CircularBuffer)
+function popfirst!(cb::CircularBuffer)
     if cb.length == 0
         throw(ArgumentError("array must be non-empty"))
     end
@@ -71,7 +71,7 @@ function Compat.popfirst!(cb::CircularBuffer)
     cb.buffer[i]
 end
 
-function Compat.pushfirst!(cb::CircularBuffer, data)
+function pushfirst!(cb::CircularBuffer, data)
     # if full, decrement and overwrite, otherwise pushfirst
     if cb.length < cb.capacity
         cb.length += 1

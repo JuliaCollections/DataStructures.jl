@@ -53,7 +53,7 @@ end
     v
 end
 
-@inline function Compat.pushfirst!(D::CircularDeque, v)
+@inline function pushfirst!(D::CircularDeque, v)
     @boundscheck D.n < D.capacity || throw(BoundsError())
     D.n += 1
     tmp = D.first - 1
@@ -62,7 +62,7 @@ end
     D
 end
 
-@inline function Compat.popfirst!(D::CircularDeque)
+@inline function popfirst!(D::CircularDeque)
     v = front(D)
     D.n -= 1
     tmp = D.first + 1

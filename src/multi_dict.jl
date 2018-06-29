@@ -44,11 +44,9 @@ end
 @delegate MultiDict.d [ haskey, get, get!, getkey,
                         getindex, length, isempty, eltype,
                         start, next, done, keys, values]
-if isdefined(Base, :LegacyIterationCompat)
-    # resolve ambiguity
-    next(d::MultiDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:MultiDict,T,S} = next(d.d, state)
-    done(d::MultiDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:MultiDict,T,S} = done(d.d, state)
-end
+# resolve ambiguity
+next(d::MultiDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:MultiDict,T,S} = next(d.d, state)
+done(d::MultiDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:MultiDict,T,S} = done(d.d, state)
 
 sizehint!(d::MultiDict, sz::Integer) = (sizehint!(d.d, sz); d)
 copy(d::MultiDict) = MultiDict(d)

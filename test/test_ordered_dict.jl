@@ -1,5 +1,6 @@
+using DataStructures, Test
 
-    @testset "OrderedDict" begin
+@testset "OrderedDict" begin
 
     # construction
 
