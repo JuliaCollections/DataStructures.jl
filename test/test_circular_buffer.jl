@@ -40,6 +40,12 @@
     for (idx, n) in enumerate(5:1)
         @test arr[idx] == n
     end
+    # Issue 379
+    cb = CircularBuffer{Int}(5)
+    pushfirst!(cb, 1)
+    @test cb == [1]
+    pushfirst!(cb, 2)
+    @test cb == [2, 1]
 
     # test empty!(cb)
     @test length(empty!(cb)) == 0
