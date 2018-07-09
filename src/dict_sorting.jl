@@ -11,15 +11,9 @@ function sort!(d::OrderedDict; byvalue::Bool=false, args...)
     else
         p = sortperm(d.keys; args...)
     end
-
-    for (i,key) in enumerate(d.keys)
-        idx = ht_keyindex(d, key, false)
-        d.slots[idx] = p[i]
-    end
-
     d.keys = d.keys[p]
     d.vals = d.vals[p]
-
+    rehash!(d)
     return d
 end
 
