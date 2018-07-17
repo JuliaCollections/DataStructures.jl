@@ -78,7 +78,7 @@ end
             @test v == k-'a'+1
         end
 
-        s = similar(d)
+        s = empty(d)
         @test typeof(s) === typeof(d)
         @test s.d.default == d.d.default
 
@@ -187,7 +187,7 @@ end
         @test collect(keys(d)) == collect('a':'z')
         @test collect(values(d)) == collect(1:26)
 
-        s = similar(d)
+        s = empty(d)
         @test typeof(s) === typeof(d)
         @test s.d.default == d.d.default
     end

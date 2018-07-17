@@ -61,7 +61,9 @@ done(d::DefaultDictBase, state::Base.LegacyIterationCompat{I,T,S}) where {I>:Def
 #       calls setindex!
 @delegate_return_parent DefaultDictBase.d [ delete!, empty!, setindex!, sizehint! ]
 
-similar(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default; passkey=d.passkey)
+empty(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default; passkey=d.passkey)
+@deprecate similar(d::DefaultDictBase) empty(d)
+
 next(v::Base.ValueIterator{T}, i::Int) where {T<:DefaultDictBase} = (v.dict.d.vals[i], Base.skip_deleted(v.dict.d,i+1))
 
 getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
@@ -148,8 +150,10 @@ for _Dict in [:Dict, :OrderedDict]
         push!(d::$DefaultDict, p, q) = push!(push!(d, p), q)
         push!(d::$DefaultDict, p, q, r...) = push!(push!(push!(d, p), q), r...)
 
-        similar(d::$DefaultDict{K,V,F}) where {K,V,F} = $DefaultDict{K,V,F}(d.d.default)
+        empty(d::$DefaultDict{K,V,F}) where {K,V,F} = $DefaultDict{K,V,F}(d.d.default)
         in(key, v::Base.KeySet{K,T}) where {K,T<:$DefaultDict{K}} = key in keys(v.dict.d.d)
+
+        @deprecate similar(d::$DefaultDict) empty(d)
     end
 end
 

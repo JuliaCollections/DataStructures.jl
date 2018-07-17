@@ -38,11 +38,11 @@
     @test !isequal(OrderedSet{Any}([1,2,3,4]), OrderedSet{Int}([1,2,3]))
     @test !isequal(OrderedSet{Int}([1,2,3,4]), OrderedSet{Any}([1,2,3]))
 
-    # eltype, similar
-    s1 = similar(OrderedSet([1,"hello"]))
+    # eltype, empty
+    s1 = empty(OrderedSet([1,"hello"]))
     @test isequal(s1, OrderedSet())
     @test eltype(s1) === Any
-    s2 = similar(OrderedSet{Float32}([2.0f0,3.0f0,4.0f0]))
+    s2 = empty(OrderedSet{Float32}([2.0f0,3.0f0,4.0f0]))
     @test isequal(s2, OrderedSet())
     @test eltype(s2) === Float32
 

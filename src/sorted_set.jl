@@ -556,11 +556,11 @@ function Base.show(io::IO, m::SortedSet{K,Ord}) where {K,Ord <: Ordering}
 end
 
 """
-    similar(sc)
+    empty(sc)
 
-Returns a new SortedDict, SortedMultiDict, or SortedSet of the same
+Returns a new `SortedDict`, `SortedMultiDict`, or `SortedSet` of the same
 type and with the same ordering as `sc` but with no entries (i.e.,
 empty). Time: O(1)
 """
-similar(m::SortedSet{K,Ord}) where {K,Ord<:Ordering} =
-SortedSet{K,Ord}(orderobject(m))
+empty(m::SortedSet{K,Ord}) where {K,Ord<:Ordering} = SortedSet{K,Ord}(orderobject(m))
+@deprecate similar(m::SortedSet) empty(m)
