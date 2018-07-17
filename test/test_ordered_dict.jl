@@ -359,4 +359,7 @@ using DataStructures, Test
         )
     end
 
+    # Issue #400
+    @test filter(p->first(p) > 1, OrderedDict(1=>2, 3=>4)) isa OrderedDict
+
 end # @teestset OrderedDict
