@@ -602,13 +602,15 @@ end
 
 
 """
-    similar(sc)
+    empty(sc)
 
-Returns a new SortedDict, SortedMultiDict, or SortedSet of the same
+Returns a new `SortedDict`, `SortedMultiDict`, or `SortedSet` of the same
 type and with the same ordering as `sc` but with no entries (i.e.,
 empty). Time: O(1)
 """
-similar(m::SortedDict{K,D,Ord}) where {K,D,Ord<:Ordering} =
+empty(m::SortedDict{K,D,Ord}) where {K,D,Ord<:Ordering} =
     SortedDict{K,D,Ord}(orderobject(m))
+
+@deprecate similar(m::SortedDict) empty(m)
 
 isordered(::Type{T}) where {T<:SortedDict} = true

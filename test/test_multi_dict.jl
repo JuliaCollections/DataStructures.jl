@@ -20,7 +20,7 @@
     @test isa(MultiDict([PV, PV]), MultiDict{Int,Float64})
 
     # setindex!, getindex, length, isempty, empty!, in
-    # copy, similar, get, haskey, getkey, start, next, done
+    # copy, empty, get, haskey, getkey, start, next, done
     d = MultiDict{Char,Int}()
 
     @test length(d) == 0
@@ -47,7 +47,7 @@
     @test getkey(d, 'b', 0) == 0
 
     @test copy(d) == d
-    @test similar(d) == MultiDict{Char,Int}()
+    @test empty(d) == MultiDict{Char,Int}()
 
     # order changed from v0.4 to v0.5
     let dict = [kv for kv in d]

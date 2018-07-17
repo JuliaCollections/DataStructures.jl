@@ -3,7 +3,7 @@
 import Base: haskey, get, get!, getkey, delete!, pop!, empty!,
              insert!, getindex, length, isempty, start,
              next, done, keys, values, copy, similar,  push!,
-             count, size, eltype
+             count, size, eltype, empty
 
 struct MultiDict{K,V}
     d::Dict{K,Vector{V}}
@@ -50,10 +50,12 @@ done(d::MultiDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:MultiDict
 
 sizehint!(d::MultiDict, sz::Integer) = (sizehint!(d.d, sz); d)
 copy(d::MultiDict) = MultiDict(d)
-similar(d::MultiDict{K,V}) where {K,V} = MultiDict{K,V}()
+empty(d::MultiDict{K,V}) where {K,V} = MultiDict{K,V}()
 ==(d1::MultiDict, d2::MultiDict) = d1.d == d2.d
 delete!(d::MultiDict, key) = (delete!(d.d, key); d)
 empty!(d::MultiDict) = (empty!(d.d); d)
+
+@deprecate similar(d::MultiDict) empty(d)
 
 function insert!(d::MultiDict{K,V}, k, v) where {K,V}
     if !haskey(d.d, k)

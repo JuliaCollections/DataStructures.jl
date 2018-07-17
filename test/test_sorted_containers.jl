@@ -1261,7 +1261,7 @@ end
                 p[2] == vallist[expectedord3[count]]
     end
     @test count == 5
-    m3empty = similar(m3)
+    m3empty = empty(m3)
     @test eltype(m3empty) == Pair{String, Int} &&
        orderobject(m3empty) == CaseInsensitive() &&
        length(m3empty) == 0 && ordtype(m3empty) == CaseInsensitive &&
@@ -1447,7 +1447,7 @@ end
                               "cherries", "cherries", "cherries", "cherries",
                               "oranges", "plums"],
                              [2.0, 6.0, 1.0, 9.0, 3.0, 4.0, 7.0, 8.0, 5.0, 10.0]))
-    m3empty = similar(m3)
+    m3empty = empty(m3)
     @test (eltype(m3empty) == Pair{String, Float64}) &&
         orderobject(m3empty) == Forward &&
         length(m3empty) == 0
@@ -1613,7 +1613,7 @@ end
     @test typeof(m1) == SortedSet{String, ForwardOrdering}
     m2 = SortedSet(["orange", "blue", "red"])
     m3 = SortedSet(["orange", "yellow", "red"])
-    m3empty = similar(m3)
+    m3empty = empty(m3)
     @test typeof(m3empty) == SortedSet{String, ForwardOrdering}
     @test eltype(m3empty) == String &&
        length(m3empty) == 0

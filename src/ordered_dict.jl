@@ -5,7 +5,7 @@ import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
              next, done, keys, values, setdiff, setdiff!,
              union, union!, intersect, filter, filter!,
              hash, eltype, ValueIterator, convert, copy,
-             merge
+             merge, empty
 
 """
     OrderedDict
@@ -87,7 +87,8 @@ dict_with_eltype(kv, ::Type{Tuple{K,V}}) where {K,V} = OrderedDict{K,V}(kv)
 dict_with_eltype(kv, ::Type{Pair{K,V}}) where {K,V} = OrderedDict{K,V}(kv)
 dict_with_eltype(kv, t) = OrderedDict{Any,Any}(kv)
 
-similar(d::OrderedDict{K,V}) where {K,V} = OrderedDict{K,V}()
+empty(d::OrderedDict{K,V}) where {K,V} = OrderedDict{K,V}()
+@deprecate similar(d::OrderedDict) empty(d)
 
 length(d::OrderedDict) = length(d.keys) - d.ndel
 isempty(d::OrderedDict) = (length(d)==0)

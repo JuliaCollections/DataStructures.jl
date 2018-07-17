@@ -4,7 +4,7 @@ import Base: similar, copy, copy!, eltype, push!, pop!, delete!,
              empty!, isempty, union, union!, intersect, intersect!,
              setdiff, setdiff!, symdiff, symdiff!, in, start, next, done,
              last, length, show, hash, issubset, ==, <=, <, unsafe_getindex,
-             unsafe_setindex!, findnextnot, first
+             unsafe_setindex!, findnextnot, first, empty
 
 mutable struct IntSet
     bits::BitVector
@@ -13,7 +13,7 @@ mutable struct IntSet
 end
 IntSet(itr) = union!(IntSet(), itr)
 
-similar(s::IntSet) = IntSet()
+empty(s::IntSet) = IntSet()
 copy(s1::IntSet) = copy!(IntSet(), s1)
 function copy!(to::IntSet, from::IntSet)
     resize!(to.bits, length(from.bits))
@@ -249,3 +249,5 @@ end
 issubset(a::IntSet, b::IntSet) = isequal(a, intersect(a,b))
 <(a::IntSet, b::IntSet) = (a<=b) && !isequal(a,b)
 <=(a::IntSet, b::IntSet) = issubset(a, b)
+
+@deprecate similar(s::IntSet) empty(s)

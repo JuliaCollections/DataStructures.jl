@@ -6,7 +6,7 @@ module DataStructures
                  show, dump, empty!, getindex, setindex!, get, get!,
                  in, haskey, keys, merge, copy, cat,
                  push!, pop!, pushfirst!, popfirst!, insert!, lastindex,
-                 union!, delete!, similar, sizehint!,
+                 union!, delete!, similar, sizehint!, empty,
                  isequal, hash,
                  map, reverse,
                  first, last, eltype, getkey, values, sum,

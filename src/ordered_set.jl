@@ -38,8 +38,10 @@ union!(s::OrderedSet, xs) = (for x in xs; push!(s,x); end; s)
 setdiff!(s::OrderedSet, xs) = (for x in xs; delete!(s,x); end; s)
 setdiff!(s::Set, xs::OrderedSet) = (for x in xs; delete!(s,x); end; s)
 
-similar(s::OrderedSet{T}) where {T} = OrderedSet{T}()
-copy(s::OrderedSet) = union!(similar(s), s)
+empty(s::OrderedSet{T}) where {T} = OrderedSet{T}()
+@deprecate similar(s::OrderedSet) empty(s)
+
+copy(s::OrderedSet) = union!(empty(s), s)
 
 empty!(s::OrderedSet{T}) where {T} = (empty!(s.dict); s)
 
@@ -75,7 +77,7 @@ function intersect(s::OrderedSet, sets...)
 end
 
 function setdiff(a::OrderedSet, b)
-    d = similar(a)
+    d = empty(a)
     for x in a
         if !(x in b)
             push!(d, x)

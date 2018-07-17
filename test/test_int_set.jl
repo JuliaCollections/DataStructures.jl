@@ -12,9 +12,9 @@ data_out = collect(s)
 @test all(map(d->in(d,data_out), data_in))
 @test length(data_out) == length(data_in)
 
-# eltype, similar
+# eltype, empty
 @test eltype(IntSet()) ===  Int
-@test isequal(similar(IntSet([1,2,3])), IntSet())
+@test isequal(empty(IntSet([1,2,3])), IntSet())
 
 # show
 @test sprint(show, IntSet()) == "IntSet([])"
@@ -58,9 +58,9 @@ setdiff!(s2, IntSet([2, 4, 5, 6]))
 # @test length(s) == 1
 # for b in s; b; end
 
-# Copy, copy!, similar
+# Copy, copy!, empty
 s1 = IntSet([1,2,3])
-s2 = similar(s1)
+s2 = empty(s1)
 copy!(s2, s1)
 s3 = copy(s2)
 @test s3 == s2 == s1
@@ -70,7 +70,7 @@ c1 = complement!(IntSet())
 pop!(c1, 1)
 pop!(c1, 2)
 pop!(c1, 3)
-c2 = similar(c1)
+c2 = empty(c1)
 copy!(c2, c1)
 c3 = copy(c2)
 c4 = complement(s1)
