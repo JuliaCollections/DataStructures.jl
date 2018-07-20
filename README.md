@@ -23,6 +23,7 @@ This package implements a variety of data structures, including
 -   Mutable Binary Heap
 -   Ordered Dicts and Sets
 -   Dictionaries with Defaults
+-   Weak-Key dicts using object-id as hash
 -   Trie
 -   Linked List
 -   Sorted Dict, Sorted Multi-Dict and Sorted Set

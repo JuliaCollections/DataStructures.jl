@@ -14,6 +14,7 @@ This package implements a variety of data structures, including
 -   Mutable Binary Heap
 -   Ordered Dicts and Sets
 -   Dictionaries with Defaults
+-   Weak-Key dicts using object-id as hash
 -   Trie
 -   Linked List
 -   Sorted Dict, Sorted Multi-Dict and Sorted Set
@@ -34,6 +35,7 @@ Pages = [
     "heaps.md",
     "ordered_containers.md",
     "default_dict.md",
+    "weakkeyid_dict.md",
     "trie.md",
     "linked_list.md",
     "intset.md",
