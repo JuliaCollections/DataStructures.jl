@@ -1,3 +1,6 @@
+using DataStructures, Test
+import DataStructures: IntSet
+
 ## IntSet
 
 @testset "IntSet" begin
@@ -9,14 +12,14 @@ data_out = collect(s)
 @test all(map(d->in(d,data_out), data_in))
 @test length(data_out) == length(data_in)
 
-# eltype, similar
+# eltype, empty
 @test eltype(IntSet()) ===  Int
-@test isequal(similar(IntSet([1,2,3])), IntSet())
+@test isequal(empty(IntSet([1,2,3])), IntSet())
 
 # show
 @test sprint(show, IntSet()) == "IntSet([])"
 @test sprint(show, IntSet([1,2,3])) == "IntSet([1, 2, 3])"
-@test contains(sprint(show, complement(IntSet())), "...,")
+@test occursin("...,", sprint(show, complement(IntSet())))
 
 
 s = IntSet([0,1,10,20,200,300,1000,10000,10002])
@@ -25,7 +28,7 @@ s = IntSet([0,1,10,20,200,300,1000,10000,10002])
 @test length(s) == 9
 @test pop!(s) == 10002
 @test length(s) == 8
-@test shift!(s) == 0
+@test popfirst!(s) == 0
 @test length(s) == 7
 @test !in(0,s)
 @test !in(10002,s)
@@ -55,9 +58,9 @@ setdiff!(s2, IntSet([2, 4, 5, 6]))
 # @test length(s) == 1
 # for b in s; b; end
 
-# Copy, copy!, similar
+# Copy, copy!, empty
 s1 = IntSet([1,2,3])
-s2 = similar(s1)
+s2 = empty(s1)
 copy!(s2, s1)
 s3 = copy(s2)
 @test s3 == s2 == s1
@@ -67,7 +70,7 @@ c1 = complement!(IntSet())
 pop!(c1, 1)
 pop!(c1, 2)
 pop!(c1, 3)
-c2 = similar(c1)
+c2 = empty(c1)
 copy!(c2, c1)
 c3 = copy(c2)
 c4 = complement(s1)
@@ -121,16 +124,16 @@ s = IntSet(1:2:10)
 @test s === delete!(s, 1)
 for i in s; pop!(s, i); end
 @test isempty(s)
-global x = 0
-@test 1 == pop!(()->(global x; x+=1), s, 100)
+x = 0
+@test 1 == pop!(()->(x+=1), s, 100)
 @test x == 1
 push!(s, 100)
 @test pop!(()->throw(ErrorException()), s, 100) == 100
 push!(s, 1:2:10...)
 @test pop!(s) == 9
 @test pop!(s) == 7
-@test shift!(s) == 1
-@test shift!(s) == 3
+@test popfirst!(s) == 1
+@test popfirst!(s) == 3
 @test collect(s) == [5]
 empty!(s)
 @test isempty(s)
@@ -144,8 +147,8 @@ c = complement(IntSet())
 @test_throws ArgumentError pop!(()->throw(ErrorException()), c, -1)
 @test pop!(c, 1, 0) == 0
 @test c === delete!(c, 1)
-@test shift!(c) == 0
-@test shift!(c) == 2
+@test popfirst!(c) == 0
+@test popfirst!(c) == 2
 @test_throws ArgumentError pop!(c)
 @test collect(complement(c)) == [0,1,2]
 @test empty!(c) == IntSet()

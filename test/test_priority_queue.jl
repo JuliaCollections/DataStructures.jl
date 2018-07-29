@@ -14,7 +14,7 @@ function test_issorted!(pq::PriorityQueue, priorities, rev=false)
             @test priorities[last] <= priorities[value]
         else
             @test priorities[value] <= priorities[last]
-        end            
+        end
         value = last
     end
 end
@@ -34,22 +34,14 @@ end
     r = rand(1:pmax, n)
     priorities = Dict(zip(1:n, r))
 
+    ks, vs = 1:n+1, rand(1:pmax, n)
+
     # building from a dict
     pq1 = PriorityQueue(priorities)
     test_issorted!(pq1, priorities)
 
     pq2 = PriorityQueue(priorities)
     test_isrequested!(pq2, 1:n)
-
-    # building from two lists (deprecated)
-    ks, vs = 1:n, rand(1:pmax, n)
-    println("\nThe following warning is expected:")
-    pq3 = PriorityQueue(ks,vs)
-
-    # building from two lists of different sizes - throws an error
-    ks, vs = 1:n+1, rand(1:pmax, n)
-    println("\nThe following warning is expected:")
-    @test_throws ArgumentError PriorityQueue(ks, vs)
 
     # building from Dict
     priorities = Dict(zip(ks, vs))
@@ -87,7 +79,7 @@ end
 
     pq11 = PriorityQueue(Pair{Char}['a'=>1,'b'=>2])
     @test peek(pq11) == ('a'=>1)
-    
+
     # duplicate key => ArgumentError
     @test_throws ArgumentError PriorityQueue('a'=>1, 'a'=>2)
 
@@ -95,7 +87,7 @@ end
     @test_throws ArgumentError PriorityQueue(['a'])
     @test_throws ArgumentError PriorityQueue(Reverse, ['a'])
     @test_throws ArgumentError PriorityQueue{Char,Int}(Base.Order.Reverse, ['a'])
-    
+
     # Silly test
     @test_throws ArgumentError PriorityQueue(Reverse, Reverse)
 
@@ -139,7 +131,7 @@ end
         enqueue!(pq, kv)
     end
     test_issorted!(pq, priorities)
-    
+
     # enqueing values via enqueue!
     pq = PriorityQueue()
     for (k, v) in priorities
@@ -205,7 +197,7 @@ end
     xs = heapify(10:-1:1)
     @test issorted([heappop!(xs) for _ in 1:10])
 
-    xs = Vector{Int}(0)
+    xs = Vector{Int}()
     for priority in values(priorities)
         heappush!(xs, priority)
     end

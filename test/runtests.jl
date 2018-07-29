@@ -1,9 +1,13 @@
-using Base.Test
 using DataStructures
-const IntSet = DataStructures.IntSet
-using Primes
+using Test
+using Random
+using Serialization
+
+import DataStructures: IntSet
 
 @test isempty(detect_ambiguities(Base, Core, DataStructures))
+
+using Primes
 
 tests = ["int_set",
          "deque",

@@ -38,11 +38,11 @@
     @test !isequal(OrderedSet{Any}([1,2,3,4]), OrderedSet{Int}([1,2,3]))
     @test !isequal(OrderedSet{Int}([1,2,3,4]), OrderedSet{Any}([1,2,3]))
 
-    # eltype, similar
-    s1 = similar(OrderedSet([1,"hello"]))
+    # eltype, empty
+    s1 = empty(OrderedSet([1,"hello"]))
     @test isequal(s1, OrderedSet())
     @test eltype(s1) === Any
-    s2 = similar(OrderedSet{Float32}([2.0f0,3.0f0,4.0f0]))
+    s2 = empty(OrderedSet{Float32}([2.0f0,3.0f0,4.0f0]))
     @test isequal(s2, OrderedSet())
     @test eltype(s2) === Float32
 
@@ -136,9 +136,13 @@
 
     # find
     s = OrderedSet([1,3,5,7])
-    @test findfirst(s,1) == 1
-    @test findfirst(s,7) == 4
-    @test findfirst(s,2) == 0
+    @test findfirst(isequal(1), s) == 1
+    @test findfirst(isequal(7), s) == 4
+    if VERSION >= v"0.7.0-DEV.3399"
+        @test findfirst(isequal(2), s) == nothing
+    else
+        @test findfirst(isequal(2), s) == 0    
+    end    
 
     # setdiff
     @test isequal(setdiff(OrderedSet([1,2,3]), OrderedSet()),        OrderedSet([1,2,3]))
@@ -196,7 +200,13 @@
     # TODO: returns false!
     #       == is not properly defined for OrderedSets
     #@test symdiff(OrderedSet([1,2,3,4]), OrderedSet([2,4,5,6])) == OrderedSet([1,3,5,6])
-    @test isequal(symdiff(OrderedSet([1,2,3,4]), OrderedSet([2,4,5,6])), OrderedSet([1,3,5,6]))
+
+    if VERSION >= v"0.7.0-DEV.3127"
+        # in Julia 0.7 symdiff always returns an array
+        @test isequal(symdiff(OrderedSet([1,2,3,4]), OrderedSet([2,4,5,6])), [1,3,5,6])
+    else
+        @test isequal(symdiff(OrderedSet([1,2,3,4]), OrderedSet([2,4,5,6])), OrderedSet([1,3,5,6]))
+    end
 
     # filter
     s = OrderedSet([1,2,3,4])

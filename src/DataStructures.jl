@@ -2,11 +2,11 @@ __precompile__()
 
 module DataStructures
 
-    import Base: <, <=, ==, length, isempty, start, next, done,
+    import Base: <, <=, ==, length, isempty, start, next, done, delete!,
                  show, dump, empty!, getindex, setindex!, get, get!,
                  in, haskey, keys, merge, copy, cat,
-                 push!, pop!, shift!, unshift!, insert!,
-                 union!, delete!, similar, sizehint!,
+                 push!, pop!, pushfirst!, popfirst!, insert!, lastindex,
+                 union!, delete!, similar, sizehint!, empty,
                  isequal, hash,
                  map, reverse,
                  first, last, eltype, getkey, values, sum,
@@ -14,18 +14,23 @@ module DataStructures
                  ReverseOrdering, Reverse, Lt,
                  isless,
                  union, intersect, symdiff, setdiff, issubset,
-                 find, searchsortedfirst, searchsortedlast, endof, in
+                 searchsortedfirst, searchsortedlast, in,
+                 eachindex, keytype, valtype
+
+    using InteractiveUtils: methodswith
+
+    export complement, complement!
 
     export Deque, Stack, Queue, CircularDeque
     export deque, enqueue!, dequeue!, dequeue_pair!, update!, reverse_iter
     export capacity, num_blocks, front, back, top, top_with_handle, sizehint!
 
-    export Accumulator, counter
+    export Accumulator, counter, reset!, inc!, dec!
+
     export ClassifiedCollections
     export classified_lists, classified_sets, classified_counters
 
     export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set, root_union!
-    export push!
 
     export AbstractHeap, compare, extract_all!
     export BinaryHeap, binary_minheap, binary_maxheap, nlargest, nsmallest
@@ -50,9 +55,7 @@ module DataStructures
 
     export MultiDict, enumerateall
 
-    import Base: eachindex, keytype, valtype
-
-    _include_string(str) = eval(parse(str))
+    export findkey
 
     include("delegate.jl")
 
@@ -100,42 +103,4 @@ module DataStructures
     export PriorityQueue, peek
 
     include("priorityqueue.jl")
-
-    # Deprecations
-
-    # Remove when Julia 0.7 (or whatever version is after v0.6) is released
-    @deprecate DefaultDictBase(default, ks::AbstractArray, vs::AbstractArray) DefaultDictBase(default, zip(ks, vs))
-    @deprecate DefaultDictBase(default, ks, vs) DefaultDictBase(default, zip(ks, vs))
-    @deprecate DefaultDictBase{K,V}(::Type{K}, ::Type{V}, default) DefaultDictBase{K,V}(default)
-
-    @deprecate DefaultDict(default, ks, vs) DefaultDict(default, zip(ks, vs))
-    @deprecate DefaultDict{K,V}(::Type{K}, ::Type{V}, default) DefaultDict{K,V}(default)
-
-    @deprecate DefaultOrderedDict(default, ks, vs) DefaultOrderedDict(default, zip(ks, vs))
-    @deprecate DefaultOrderedDict{K,V}(::Type{K}, ::Type{V}, default) DefaultOrderedDict{K,V}(default)
-
-    function SortedMultiDict(ks::AbstractVector{K},
-                             vs::AbstractVector{V},
-                             o::Ordering=Forward) where {K,V}
-        Base.depwarn("SortedMultiDict(ks, vs, o::Ordering=Forward) is deprecated.\n" * "Use SortedMultiDict(o, zip(ks,vs)) or SortedMultiDict(zip(ks, vs))", :SortedMultiDict)
-        if length(ks) != length(vs)
-            throw(ArgumentError("SortedMultiDict(ks,vs,o): ks and vs arrays must be the same length"))
-        end
-        SortedMultiDict(o, zip(ks,vs))
-    end
-
-    @deprecate PriorityQueue{K,V}(::Type{K}, ::Type{V}) PriorityQueue{K,V}()    
-    @deprecate PriorityQueue{K,V}(::Type{K}, ::Type{V}, o::Ordering) PriorityQueue{K,V,typeof(o)}(o)    
-    @deprecate (PriorityQueue{K,V,ForwardOrdering}() where {K,V}) PriorityQueue{K,V}()
-    
-    function PriorityQueue(ks::AbstractVector{K},
-                           vs::AbstractVector{V},
-                           o::Ordering=Forward) where {K,V}
-        Base.depwarn("PriorityQueue(ks, vs, o::Ordering=Forward) is deprecated.\n" * "Use PriorityQueue(o, zip(ks,vs)) or PriorityQueue(zip(ks, vs))", :PriorityQueue)
-        if length(ks) != length(vs)
-            throw(ArgumentError("PriorityQueue(ks,vs,o): ks and vs arrays must be the same length"))
-        end
-        PriorityQueue(o, zip(ks,vs))
-    end
-                                            
 end

@@ -11,7 +11,7 @@ mutable struct CircularDeque{T}
     last::Int
 end
 
-CircularDeque{T}(n::Int) where {T} = CircularDeque(Vector{T}(n), n, 0, 1, n)
+CircularDeque{T}(n::Int) where {T} = CircularDeque(Vector{T}(undef, n), n, 0, 1, n)
 
 Base.length(D::CircularDeque) = D.n
 Base.eltype(::Type{CircularDeque{T}}) where {T} = T
@@ -53,7 +53,7 @@ end
     v
 end
 
-@inline function Base.unshift!(D::CircularDeque, v)
+@inline function pushfirst!(D::CircularDeque, v)
     @boundscheck D.n < D.capacity || throw(BoundsError())
     D.n += 1
     tmp = D.first - 1
@@ -62,7 +62,7 @@ end
     D
 end
 
-@inline function Base.shift!(D::CircularDeque)
+@inline function popfirst!(D::CircularDeque)
     v = front(D)
     D.n -= 1
     tmp = D.first + 1
@@ -87,8 +87,8 @@ end
 
 # Iteration via getindex
 @inline Base.start(d::CircularDeque) = 1
-@inline Base.next(d::CircularDeque, i) = (_unsafe_getindex(d, i), i+1)
-@inline Base.done(d::CircularDeque, i) = i == d.n + 1
+@inline Base.next(d::CircularDeque, i::Int) = (_unsafe_getindex(d, i), i+1)
+@inline Base.done(d::CircularDeque, i::Int) = i == d.n + 1
 
 function Base.show(io::IO, D::CircularDeque{T}) where T
     print(io, "CircularDeque{$T}([")

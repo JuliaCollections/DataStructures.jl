@@ -28,7 +28,7 @@ println("push back 10^7 integers:")
 
 function batch_pushfront!(v::Container, n::Int, e::T) where {Container,T}
     for i = 1 : n
-        unshift!(v, e)
+        pushfirst!(v, e)
     end
 end
 

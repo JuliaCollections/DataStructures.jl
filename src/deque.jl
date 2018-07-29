@@ -14,7 +14,7 @@ mutable struct DequeBlock{T}
     next::DequeBlock{T}  # ref to next block
 
     function DequeBlock{T}(capa::Int, front::Int) where T
-        data = Vector{T}(capa)
+        data = Vector{T}(undef, capa)
         blk = new{T}(data, capa, front, front-1)
         blk.prev = blk
         blk.next = blk
@@ -115,7 +115,7 @@ end
 
 start(qi::DequeIterator{T}) where {T} = (qi.q.head, qi.q.head.front)
 
-function next(qi::DequeIterator{T}, s) where T
+function next(qi::DequeIterator{T}, s::Tuple) where T
     cb = s[1]
     i = s[2]
     x = cb.data[i]
@@ -129,7 +129,7 @@ function next(qi::DequeIterator{T}, s) where T
     (x, (cb, i))
 end
 
-done(q::DequeIterator{T}, s) where {T} = (s[2] > s[1].back)
+done(q::DequeIterator{T}, s::Tuple) where {T} = (s[2] > s[1].back)
 
 # Backwards deque iteration
 
@@ -141,9 +141,9 @@ start(qi::ReverseDequeIterator{T}) where {T} = (qi.q.rear, qi.q.rear.back)
 
 # We're finished when our index is less than the first index
 # of the current block (which can only happen on the first block)
-done(qi::ReverseDequeIterator{T}, s) where {T} = (s[2] < s[1].front)
+done(qi::ReverseDequeIterator{T}, s::Tuple) where {T} = (s[2] < s[1].front)
 
-function next(qi::ReverseDequeIterator{T}, s) where T
+function next(qi::ReverseDequeIterator{T}, s::Tuple) where T
     cb = s[1]
     i = s[2]
     x = cb.data[i]
@@ -161,8 +161,8 @@ end
 reverse_iter(q::Deque{T}) where {T} = ReverseDequeIterator{T}(q)
 
 start(q::Deque{T}) where {T} = start(DequeIterator{T}(q))
-next(q::Deque{T}, s) where {T} = next(DequeIterator{T}(q), s)
-done(q::Deque{T}, s) where {T} = done(DequeIterator{T}(q), s)
+next(q::Deque{T}, s::Tuple) where {T} = next(DequeIterator{T}(q), s)
+done(q::Deque{T}, s::Tuple) where {T} = done(DequeIterator{T}(q), s)
 
 Base.length(qi::DequeIterator{T}) where {T} = qi.q.len
 Base.length(qi::ReverseDequeIterator{T}) where {T} = qi.q.len
@@ -243,7 +243,7 @@ function push!(q::Deque{T}, x) where T  # push back
     q
 end
 
-function unshift!(q::Deque{T}, x) where T   # push front
+function pushfirst!(q::Deque{T}, x) where T   # push front
     head = q.head
 
     if isempty(head)
@@ -288,7 +288,7 @@ function pop!(q::Deque{T}) where T   # pop back
 end
 
 
-function shift!(q::Deque{T}) where T  # pop front
+function popfirst!(q::Deque{T}) where T  # pop front
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     head = q.head
     @assert head.back >= head.front

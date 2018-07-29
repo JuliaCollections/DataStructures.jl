@@ -9,16 +9,31 @@
     @test !haskey(ct, "abc")
     @test isempty(collect(keys(ct)))
 
-    push!(ct, "a")
+    # Test setindex!
+    ct["b"] = 2
+    @test ct["b"] == 2
+    ct["b"] = 0
+    @test ct["b"] == 0
+
+
+
+    inc!(ct, "a")
     @test haskey(ct, "a")
     @test ct["a"] == 1
 
-    push!(ct, "b", 2)
+    inc!(ct, "b", 2)
     @test haskey(ct, "b")
     @test ct["b"] == 2
 
+    # Test dec!
+    dec!(ct, "b")
+    @test ct["b"] == 1
+    dec!(ct, "b", 16)
+    @test ct["b"] == -15
+    ct["b"] = 2
+
     # Test convert
-    push!(ct, "b", 0x3)
+    inc!(ct, "b", 0x3)
     @test ct["b"] == 5
 
     @test !haskey(ct, "abc")
@@ -39,7 +54,7 @@
     @test ct2["b"] == 2
     @test ct2["c"] == 2
 
-    push!(ct, ct2)
+    merge!(ct, ct2)
     @test ct["a"] == 4
     @test ct["b"] == 7
     @test ct["c"] == 2
@@ -60,7 +75,7 @@
     @test ctm["b"] == 22
     @test ctm["c"] == 2
 
-    @test pop!(ctm, "b") == 22
+    @test reset!(ctm, "b") == 22
     @test !haskey(ctm, "b")
     @test ctm["b"] == 0
 
@@ -70,7 +85,7 @@
     @test push!(ct4, 1=>2) == 2
 
     ct5 = counter(Dict([("a",10), ("b",20)]))
-    @test merge(ct5)===ct5
+    @test merge(ct5)==ct5
     @test merge!(ct5)===ct5
     @test merge(ct5,ct5,ct5)==counter(Dict([("a",30), ("b",60)]))
 
@@ -85,24 +100,62 @@
 
     ct6 = counter(["a", "b" , "b", "c", "c", "c"])
     for ii in split("a b c")
-        push!(ct6, ii)
+        inc!(ct6, ii)
     end
     @test ct6["a"] == 2
     @test ct6["b"] == 3
     @test ct6["c"] == 4
     for ii in split("a b")
-        pop!(ct6, ii)
+        reset!(ct6, ii)
     end
     @test ct6["a"] == 0
     @test ct6["b"] == 0
     @test ct6["c"] == 4
 
-    s = ["y", "el", "sol", "se", "fue"]
-    @test counter(length(x) for x in s) == counter(map(length, s))
-  
-    # ambiguity resolution
-    ct7 = counter(Int)
-    @test_throws MethodError push!(ct7, 1=>2)
 
+    @testset "Generators" begin
+        s = ["y", "el", "sol", "se", "fue"]
+        @test counter(length(x) for x in s) == counter(map(length, s))
+    end
+
+    @testset "non-integer uses" begin
+        acc = Accumulator(Symbol, Float16)
+        acc[:a] = 1.5
+        @test acc[:a] ≈ 1.5
+        push!(acc, :a, 2.5)
+        @test acc[:a] ≈ 4.0
+        dec!(acc, :a)
+        @test acc[:a] ≈ 3.0
+    end
+
+    @testset "ambiguity resolution" begin
+        ct7 = counter(Int)
+        @test_throws MethodError push!(ct7, 1=>2)
+    end
+
+    @testset "nlargest" begin
+        @test nlargest(counter("abbbcddddda")) == ['d'=>5, 'b'=>3, 'a'=>2, 'c'=>1]
+        @test nlargest(counter("abbbccddddda"),2) == ['d'=>5, 'b'=>3]
+        @test nlargest(counter("a")) == ['a'=>1]
+
+        @test nlargest(counter("aaabbcc")) ∈ (['a'=>3,'b'=>2, 'c'=>2], ['a'=>3,'c'=>2, 'b'=>2])
+
+
+        @test_throws BoundsError nlargest(counter("a"),2)
+    end
+
+    @testset "nsmallest" begin
+        acc = counter("aabbbcccc")
+        @test nsmallest(acc) == ['a'=>2, 'b'=>3, 'c'=>4]
+        @test nsmallest(acc,2) == ['a'=>2, 'b'=>3]
+        acc['d']=0
+        @test nsmallest(acc,2) == ['d'=>0, 'a'=>2]
+
+        @test nsmallest(counter("aaabbcc")) ∈ (['b'=>2, 'c'=>2, 'a'=>3], ['c'=>2, 'b'=>2, 'a'=>3])
+
+        @test_throws BoundsError nsmallest(counter("a"),2)
+    end
 end # @testset Accumulators
+
+
 

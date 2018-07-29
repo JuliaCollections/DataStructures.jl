@@ -4,8 +4,8 @@ import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
              setindex!, getindex, length, isempty, start,
              next, done, keys, values, setdiff, setdiff!,
              union, union!, intersect, filter, filter!,
-             hash, eltype, KeyIterator, ValueIterator, convert, copy,
-             merge
+             hash, eltype, ValueIterator, convert, copy,
+             merge, empty
 
 """
     OrderedDict
@@ -13,7 +13,7 @@ import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
 `OrderedDict`s are  simply dictionaries  whose entries  have a  particular order.  The order
 refers to insertion order, which allows deterministic iteration over the dictionary or set.
 """
-mutable struct OrderedDict{K,V} <: Associative{K,V}
+mutable struct OrderedDict{K,V} <: AbstractDict{K,V}
     slots::Array{Int32,1}
     keys::Array{K,1}
     vals::Array{V,1}
@@ -21,7 +21,7 @@ mutable struct OrderedDict{K,V} <: Associative{K,V}
     dirty::Bool
 
     function OrderedDict{K,V}() where {K,V}
-        new{K,V}(zeros(Int32,16), Vector{K}(0), Vector{V}(0), 0, false)
+        new{K,V}(zeros(Int32,16), Vector{K}(), Vector{V}(), 0, false)
     end
     function OrderedDict{K,V}(kv) where {K,V}
         h = OrderedDict{K,V}()
@@ -56,23 +56,19 @@ copy(d::OrderedDict) = OrderedDict(d)
 # OrderedDict{K,V}(kv::Tuple{Vararg{Tuple{K,V}}})          = OrderedDict{K,V}(kv)
 # OrderedDict{K  }(kv::Tuple{Vararg{Tuple{K,Any}}})        = OrderedDict{K,Any}(kv)
 # OrderedDict{V  }(kv::Tuple{Vararg{Tuple{Any,V}}})        = OrderedDict{Any,V}(kv)
-_oldOrderedDict1 = "OrderedDict{V}(kv::Tuple{Vararg{Pair{TypeVar(:K),V}}}) = OrderedDict{Any,V}(kv)"
-_newOrderedDict1 = "OrderedDict{V}(kv::Tuple{Vararg{Pair{K,V} where K}})   = OrderedDict{Any,V}(kv)"
-OrderedDict(kv::Tuple{Vararg{Pair{K,V}}}) where {K,V}         = OrderedDict{K,V}(kv)
-OrderedDict(kv::Tuple{Vararg{Pair{K}}}) where {K}             = OrderedDict{K,Any}(kv)
-VERSION < v"0.6.0-dev.2123" ? _include_string(_oldOrderedDict1) : _include_string(_newOrderedDict1)
-OrderedDict(kv::Tuple{Vararg{Pair}})                   = OrderedDict{Any,Any}(kv)
+OrderedDict(kv::Tuple{Vararg{Pair{K,V}}}) where {K,V}       = OrderedDict{K,V}(kv)
+OrderedDict(kv::Tuple{Vararg{Pair{K}}}) where {K}           = OrderedDict{K,Any}(kv)
+OrderedDict(kv::Tuple{Vararg{Pair{K,V} where K}}) where {V} = OrderedDict{Any,V}(kv)
+OrderedDict(kv::Tuple{Vararg{Pair}})                        = OrderedDict{Any,Any}(kv)
 
 OrderedDict(kv::AbstractArray{Tuple{K,V}}) where {K,V} = OrderedDict{K,V}(kv)
 OrderedDict(kv::AbstractArray{Pair{K,V}}) where {K,V}  = OrderedDict{K,V}(kv)
-OrderedDict(kv::Associative{K,V}) where {K,V}          = OrderedDict{K,V}(kv)
+OrderedDict(kv::AbstractDict{K,V}) where {K,V}          = OrderedDict{K,V}(kv)
 
-_oldOrderedDict2 = "OrderedDict{V}(ps::Pair{TypeVar(:K),V}...,) = OrderedDict{Any,V}(ps)"
-_newOrderedDict2 = "OrderedDict{V}(ps::(Pair{K,V} where K)...,) = OrderedDict{Any,V}(ps)"
 OrderedDict(ps::Pair{K,V}...) where {K,V}          = OrderedDict{K,V}(ps)
 OrderedDict(ps::Pair{K}...,) where {K}             = OrderedDict{K,Any}(ps)
-VERSION < v"0.6.0-dev.2123" ? _include_string(_oldOrderedDict2) : _include_string(_newOrderedDict2)
-OrderedDict(ps::Pair...)                    = OrderedDict{Any,Any}(ps)
+OrderedDict(ps::(Pair{K,V} where K)...,) where {V} = OrderedDict{Any,V}(ps)
+OrderedDict(ps::Pair...)                           = OrderedDict{Any,Any}(ps)
 
 function OrderedDict(kv)
     try
@@ -91,7 +87,8 @@ dict_with_eltype(kv, ::Type{Tuple{K,V}}) where {K,V} = OrderedDict{K,V}(kv)
 dict_with_eltype(kv, ::Type{Pair{K,V}}) where {K,V} = OrderedDict{K,V}(kv)
 dict_with_eltype(kv, t) = OrderedDict{Any,Any}(kv)
 
-similar(d::OrderedDict{K,V}) where {K,V} = OrderedDict{K,V}()
+empty(d::OrderedDict{K,V}) where {K,V} = OrderedDict{K,V}()
+@deprecate similar(d::OrderedDict) empty(d)
 
 length(d::OrderedDict) = length(d.keys) - d.ndel
 isempty(d::OrderedDict) = (length(d)==0)
@@ -102,11 +99,11 @@ isempty(d::OrderedDict) = (length(d)==0)
 Property of associative containers, that is `true` if the container type has a
 defined order (such as `OrderedDict` and `SortedDict`), and `false` otherwise.
 """
-isordered(::Type{T}) where {T<:Associative} = false
+isordered(::Type{T}) where {T<:AbstractDict} = false
 isordered(::Type{T}) where {T<:OrderedDict} = true
 
 # conversion between OrderedDict types
-function convert(::Type{OrderedDict{K,V}}, d::Associative) where {K,V}
+function convert(::Type{OrderedDict{K,V}}, d::AbstractDict) where {K,V}
     if !isordered(typeof(d))
         Base.depwarn("Conversion to OrderedDict is deprecated for unordered associative containers (in this case, $(typeof(d))). Use an ordered or sorted associative type, such as SortedDict and OrderedDict.", :convert)
     end
@@ -284,11 +281,11 @@ end
 function _setindex!(h::OrderedDict, v, key, index)
     hk, hv = h.keys, h.vals
     #push!(h.keys, key)
-    ccall(:jl_array_grow_end, Void, (Any, UInt), hk, 1)
+    ccall(:jl_array_grow_end, Cvoid, (Any, UInt), hk, 1)
     nk = length(hk)
     @inbounds hk[nk] = key
     #push!(h.vals, v)
-    ccall(:jl_array_grow_end, Void, (Any, UInt), hv, 1)
+    ccall(:jl_array_grow_end, Cvoid, (Any, UInt), hv, 1)
     @inbounds hv[nk] = v
     @inbounds h.slots[index] = nk
     h.dirty = true
@@ -376,7 +373,7 @@ function get(default::Base.Callable, h::OrderedDict{K,V}, key) where {K,V}
 end
 
 haskey(h::OrderedDict, key) = (ht_keyindex(h, key, true) >= 0)
-in(key, v::KeyIterator{T}) where {T<:OrderedDict} = (ht_keyindex(v.dict, key, true) >= 0)
+in(key, v::Base.KeySet{K,T}) where {K,T<:OrderedDict{K}} = (ht_keyindex(v.dict, key, true) >= 0)
 
 function getkey(h::OrderedDict{K,V}, key, default) where {K,V}
     index = ht_keyindex(h, key, true)
@@ -409,8 +406,8 @@ end
 function _delete!(h::OrderedDict, index)
     @inbounds ki = h.slots[index]
     @inbounds h.slots[index] = -ki
-    ccall(:jl_arrayunset, Void, (Any, UInt), h.keys, ki-1)
-    ccall(:jl_arrayunset, Void, (Any, UInt), h.vals, ki-1)
+    ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.keys, ki-1)
+    ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.vals, ki-1)
     h.ndel += 1
     h.dirty = true
     h
@@ -426,13 +423,11 @@ function start(t::OrderedDict)
     t.ndel > 0 && rehash!(t)
     1
 end
-done(t::OrderedDict, i) = done(t.keys, i)
-next(t::OrderedDict, i) = (Pair(t.keys[i],t.vals[i]), i+1)
+done(t::OrderedDict, i::Int) = i > length(t.keys)
+next(t::OrderedDict, i::Int) = (Pair(t.keys[i],t.vals[i]), i+1)
+next(v::ValueIterator{T}, i::Int) where {T<:OrderedDict} = (v.dict.vals[i], i+1)
 
-next(v::KeyIterator{T}, i) where {T<:OrderedDict} = (v.dict.keys[i], i+1)
-next(v::ValueIterator{T}, i) where {T<:OrderedDict} = (v.dict.vals[i], i+1)
-
-function merge(d::OrderedDict, others::Associative...)
+function merge(d::OrderedDict, others::AbstractDict...)
     K, V = keytype(d), valtype(d)
     for other in others
         K = promote_type(K, keytype(other))

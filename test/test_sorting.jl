@@ -24,4 +24,8 @@
     @test sort(unordered; rev=true) == rev
     @test sort(unordered; byvalue=true) == rev
     @test sort(unordered; byvalue=true, rev=true) == forward
+
+    @testset "Bug DataStructures.jl/#394" begin
+        @test sort(Dict(k=>string(k) for k in 1:3))[1] == "1"
+    end
 end

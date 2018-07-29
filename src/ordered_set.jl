@@ -6,10 +6,10 @@
 # (see https://github.com/JuliaLang/julia/issues/5533)
 
 struct OrderedSet{T}
-    dict::OrderedDict{T,Void}
+    dict::OrderedDict{T,Nothing}
 
-    OrderedSet{T}() where {T} = new{T}(OrderedDict{T,Void}())
-    OrderedSet{T}(xs) where {T} = union!(new{T}(OrderedDict{T,Void}()), xs)
+    OrderedSet{T}() where {T} = new{T}(OrderedDict{T,Nothing}())
+    OrderedSet{T}(xs) where {T} = union!(new{T}(OrderedDict{T,Nothing}()), xs)
 end
 OrderedSet() = OrderedSet{Any}()
 OrderedSet(xs) = OrderedSet{eltype(xs)}(xs)
@@ -30,29 +30,31 @@ pop!(s::OrderedSet, x, deflt) = pop!(s.dict, x, deflt) == deflt ? deflt : x
 delete!(s::OrderedSet, x) = (delete!(s.dict, x); s)
 
 getindex(x::OrderedSet,i::Int) = x.dict.keys[i]
-endof(x::OrderedSet) = endof(x.dict.keys)
-# Needed on 0.7 to mimic array indexing.
-Base.nextind(::OrderedSet, i::Int) = i + 1
+lastindex(x::OrderedSet) = lastindex(x.dict.keys)
+Base.nextind(::OrderedSet, i::Int) = i + 1  # Needed on 0.7 to mimic array indexing.
+Base.keys(s::OrderedSet) = 1:length(s)
 
 union!(s::OrderedSet, xs) = (for x in xs; push!(s,x); end; s)
 setdiff!(s::OrderedSet, xs) = (for x in xs; delete!(s,x); end; s)
 setdiff!(s::Set, xs::OrderedSet) = (for x in xs; delete!(s,x); end; s)
 
-similar(s::OrderedSet{T}) where {T} = OrderedSet{T}()
-copy(s::OrderedSet) = union!(similar(s), s)
+empty(s::OrderedSet{T}) where {T} = OrderedSet{T}()
+@deprecate similar(s::OrderedSet) empty(s)
+
+copy(s::OrderedSet) = union!(empty(s), s)
 
 empty!(s::OrderedSet{T}) where {T} = (empty!(s.dict); s)
 
 start(s::OrderedSet)       = start(s.dict)
-done(s::OrderedSet, state) = done(s.dict, state)
+done(s::OrderedSet, state::Int) = done(s.dict, state)
 # NOTE: manually optimized to take advantage of OrderedDict representation
-next(s::OrderedSet, i)     = (s.dict.keys[i], i+1)
+next(s::OrderedSet, i::Int)     = (s.dict.keys[i], i+1)
 
 pop!(s::OrderedSet) = pop!(s.dict)[1]
 
 union(s::OrderedSet) = copy(s)
 function union(s::OrderedSet, sets...)
-    u = OrderedSet{Base.join_eltype(s, sets...)}()
+    u = OrderedSet{Base.promote_eltype(s, sets...)}()
     union!(u,s)
     for t in sets
         union!(u,t)
@@ -75,7 +77,7 @@ function intersect(s::OrderedSet, sets...)
 end
 
 function setdiff(a::OrderedSet, b)
-    d = similar(a)
+    d = empty(a)
     for x in a
         if !(x in b)
             push!(d, x)

@@ -33,12 +33,12 @@ end
 
 Removes an element from the front of the queue `s` and returns it.
 """
-dequeue!(s::Queue) = shift!(s.store)
+dequeue!(s::Queue) = popfirst!(s.store)
 
 # Iterators
 
 start(q::Queue) = start(q.store)
-next(q::Queue, s) = next(q.store, s)
-done(q::Queue, s) = done(q.store, s)
+next(q::Queue, s::Tuple) = next(q.store, s)
+done(q::Queue, s::Tuple) = done(q.store, s)
 
 reverse_iter(q::Queue) = reverse_iter(q.store)

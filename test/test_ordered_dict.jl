@@ -1,5 +1,6 @@
+using DataStructures, Test
 
-    @testset "OrderedDict" begin
+@testset "OrderedDict" begin
 
     # construction
 
@@ -18,7 +19,7 @@
     d['c'] = 1
     @test !isempty(d)
     @test_throws KeyError d[0.01]
-    @test isempty(similar(d))
+    @test isempty(empty(d))
     empty!(d)
     @test isempty(d)
 
@@ -129,7 +130,7 @@
 
     let _d = OrderedDict([("a", 0)])
         v = [k for k in filter(x->length(x)==1, collect(keys(_d)))]
-        @test isa(v, Vector{String}) || isa(v, Vector{ASCIIString})
+        @test isa(v, Vector{String})
     end
 
     let d = OrderedDict(((1, 2), (3, 4))),
@@ -212,7 +213,7 @@
     let
         local bar
         bestkey(d, key) = key
-        bestkey(d::Associative{K,V}, key) where {K<:AbstractString,V} = string(key)
+        bestkey(d::AbstractDict{K,V}, key) where {K<:AbstractString,V} = string(key)
         bar(x) = bestkey(x, :y)
         @test bar(OrderedDict([(:x, [1,2,5])])) == :y
         @test bar(OrderedDict([("x", [1,2,5])])) == "y"
@@ -357,5 +358,8 @@
             )
         )
     end
+
+    # Issue #400
+    @test filter(p->first(p) > 1, OrderedDict(1=>2, 3=>4)) isa OrderedDict
 
 end # @teestset OrderedDict
