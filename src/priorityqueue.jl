@@ -352,3 +352,4 @@ done(ct::PriorityQueue, i::Base.LegacyIterationCompat{I,T,S}) where {I>:Priority
 function next(ct::PriorityQueue{K,V}, i::Base.LegacyIterationCompat{I,T,S}) where {K,V,I>:PriorityQueue{K,V},T,S}
     (k, idx), i = next(pq.index, i)
     return (pq.xs[idx], i)
+end
