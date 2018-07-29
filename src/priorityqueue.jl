@@ -4,7 +4,7 @@
 # -------------
 
 """
-    PriorityQueue(K, V, [ord])
+    PriorityQueue{K, V}([ord])
 
 Construct a new [`PriorityQueue`](@ref), with keys of type
 `K` and values/priorites of type `V`.
