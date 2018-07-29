@@ -77,5 +77,5 @@
     # test fill!(cb, data)
     cb = CircularBuffer{Int}(3)
     fill!(cb, 42)
-    @test cb.buffer == [42, 42, 42]
+    @test Array(cb) == [42, 42, 42]
 end
