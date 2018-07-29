@@ -5,12 +5,15 @@ mutable struct Queue{T}
 end
 
 """
-    Queue(T[, blksize::Integer=1024])
+    Queue{T}([blksize::Integer=1024])
 
 Create a `Queue` object containing elements of type `T`.
 """
-Queue(ty::Type{T}) where {T} = Queue(Deque{T}())
-Queue(ty::Type{T}, blksize::Integer) where {T} = Queue(Deque{T}(blksize))
+Queue{T}() where {T} = Queue(Deque{T}())
+Queue{T}(blksize::Integer) where {T} = Queue(Deque{T}(blksize))
+
+@deprecate Queue(::Type{T}) where {T} Queue{T}()
+@deprecate Queue(::Type{T}, blksize::Integer) where {T} Queue{T}(blksize)
 
 isempty(s::Queue) = isempty(s.store)
 length(s::Queue) = length(s.store)
