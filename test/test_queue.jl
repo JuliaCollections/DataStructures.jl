@@ -1,5 +1,7 @@
 # Queue
 @testset "Queue" begin
+    s = Queue{Int}()
+    @test isa(s, Queue{Int})
 
     s = Queue{Int}(5)
     n = 100

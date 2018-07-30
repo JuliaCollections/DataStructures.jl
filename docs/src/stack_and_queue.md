@@ -6,7 +6,7 @@ type, which respectively provide interfaces for LIFO and FIFO access.
 Usage of Stack:
 
 ```julia
-s = Stack(Int)
+s = Stack{Int}()
 push!(s, x)
 x = top(s)
 x = pop!(s)
@@ -15,7 +15,7 @@ x = pop!(s)
 Usage of Queue:
 
 ```julia
-q = Queue(Int)
+q = Queue{Int}()
 enqueue!(q, x)
 x = front(q)
 x = back(q)
