@@ -146,11 +146,12 @@ end
     fill!(cb, data)
 
 Grows the buffer up-to capacity, and fills it entirely.
-Overwriting any existing elements.
+It doesn't overwrite existing elements.
 """
 function Base.fill!(cb::CircularBuffer, data)
-    fill!(cb.buffer, data)
-    cb.length = cb.capacity
+    for i in 1:capacity(cb)-length(cb)
+        push!(cb, data)
+    end
     cb
 end
 
