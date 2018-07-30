@@ -75,8 +75,16 @@
     @test_throws ArgumentError popfirst!(cb)
     
     @testset "fill!" begin
-        cb = CircularBuffer{Int}(3)
-        fill!(cb, 42)
-        @test Array(cb) == [42, 42, 42]
+        @testset "fill an empty buffer" begin
+            cb = CircularBuffer{Int}(3)
+            fill!(cb, 42)
+            @test Array(cb) == [42, 42, 42]
+        end
+        @testset "fill a non empty buffer" begin
+            cb = CircularBuffer{Int}(3)
+            push!(cb, 21)
+            fill!(cb, 42)
+            @test Array(cb) == [21, 42, 42]
+        end
     end
 end
