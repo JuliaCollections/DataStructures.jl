@@ -1,5 +1,9 @@
 """
-New items are pushed to the back of the list, overwriting values in a circular fashion.
+    CircularBuffer{T}(capacity)
+
+The CircularBuffer type implements a circular buffer of fixed capacity 
+where new items are pushed to the back of the list, overwriting values 
+in a circular fashion.
 """
 mutable struct CircularBuffer{T} <: AbstractVector{T}
     capacity::Int
@@ -10,6 +14,11 @@ mutable struct CircularBuffer{T} <: AbstractVector{T}
     CircularBuffer{T}(capacity::Int) where {T} = new{T}(capacity, 1, 0, Vector{T}(undef, capacity))
 end
 
+"""
+    empty!(cb)
+
+Reset the buffer.
+"""
 function Base.empty!(cb::CircularBuffer)
     cb.length = 0
     cb
@@ -32,15 +41,33 @@ end
     end
 end
 
+"""
+    cb[i]
+
+Get the i-th element of CircularBuffer.
+
+* `cb[1]` to get the element at the front
+* `cb[end]` to get the element at the back
+"""
 @inline Base.@propagate_inbounds function Base.getindex(cb::CircularBuffer, i::Int)
     cb.buffer[_buffer_index_checked(cb, i)]
 end
 
+"""
+    cb[i] = data
+
+Store data to the i-th element of CircularBuffer.
+"""
 @inline Base.@propagate_inbounds function Base.setindex!(cb::CircularBuffer, data, i::Int)
     cb.buffer[_buffer_index_checked(cb, i)] = data
     cb
 end
 
+"""
+    pop!(cb)
+
+Remove the element at the back.
+"""
 @inline function Base.pop!(cb::CircularBuffer)
     if cb.length == 0
         throw(ArgumentError("array must be non-empty"))
@@ -50,6 +77,11 @@ end
     cb.buffer[i]
 end
 
+"""
+    push!(cb)
+
+Add an element to the back and overwrite front if full.
+"""
 @inline function Base.push!(cb::CircularBuffer, data)
     # if full, increment and overwrite, otherwise push
     if cb.length == cb.capacity
@@ -61,6 +93,11 @@ end
     cb
 end
 
+"""
+    popfirst!(cb::CircularBuffer)
+
+Remove the first item from CircularBuffer.
+"""
 function popfirst!(cb::CircularBuffer)
     if cb.length == 0
         throw(ArgumentError("array must be non-empty"))
@@ -71,6 +108,11 @@ function popfirst!(cb::CircularBuffer)
     cb.buffer[i]
 end
 
+"""
+    pushfirst!(cb, data)
+
+Insert one or more items at the beginning of CircularBuffer.
+"""
 function pushfirst!(cb::CircularBuffer, data)
     # if full, decrement and overwrite, otherwise pushfirst
     if length(cb) == cb.capacity
@@ -83,6 +125,11 @@ function pushfirst!(cb::CircularBuffer, data)
     cb
 end
 
+"""
+    append!(cb, datavec)
+
+Push at most last `capacity` items.
+"""
 function Base.append!(cb::CircularBuffer, datavec::AbstractVector)
     # push at most last `capacity` items
     n = length(datavec)
@@ -92,16 +139,51 @@ function Base.append!(cb::CircularBuffer, datavec::AbstractVector)
     cb
 end
 
+"""
+    fill!(cb, data)
+
+Grows the buffer up-to capacity, and fills it entirely.
+Overwriting any existing elements.
+"""
 function Base.fill!(cb::CircularBuffer, data)
     fill!(cb.buffer, data)
     cb.length = cb.capacity
     cb
 end
 
+"""
+    length(cb)
+
+Return the number of elements currently in the buffer.
+"""
 Base.length(cb::CircularBuffer) = cb.length
+
+"""
+    size(cb)
+
+Return a tuple with the size of the buffer.
+"""
 Base.size(cb::CircularBuffer) = (length(cb),)
+
 Base.convert(::Type{Array}, cb::CircularBuffer{T}) where {T} = T[x for x in cb]
+
+"""
+    isempty(cb)
+
+Test whether the buffer is empty.
+"""
 Base.isempty(cb::CircularBuffer) = cb.length == 0
 
+""""
+    capacity(cb)
+
+Return capacity of CircularBuffer.
+"""
 capacity(cb::CircularBuffer) = cb.capacity
+
+"""
+    isfull(cb)
+
+Test whether the buffer is full.
+"""
 isfull(cb::CircularBuffer) = length(cb) == cb.capacity
