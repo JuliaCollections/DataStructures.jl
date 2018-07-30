@@ -21,7 +21,8 @@ makedocs(
         "linked_list.md",
         "intset.md",
         "sorted_containers.md",
-    ]
+    ],
+    modules = [DataStructures]
 )
 
 deploydocs(
