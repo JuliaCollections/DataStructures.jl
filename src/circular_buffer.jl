@@ -94,7 +94,7 @@ Add an element to the back and overwrite front if full.
 end
 
 """
-    popfirst!(cb::CircularBuffer)
+    popfirst!(cb)
 
 Remove the first item from CircularBuffer.
 """
