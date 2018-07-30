@@ -23,5 +23,5 @@ convert(Vector{Float64}, cb)  # convert items to type Float64
 eltype(cb)           # return type of items
 cb[1]                # get the element at the front
 cb[end]              # get the element at the back
-fill!(cb, data)      # grows the buffer up-to capacity, and fills it entirely. Overwriting any existing elements.
+fill!(cb, data)      # grows the buffer up-to capacity, and fills it entirely, preserving existing elements.
 ```
