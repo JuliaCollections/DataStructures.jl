@@ -8,8 +8,8 @@ efficiently.
 Usage:
 
 ```julia
-PriorityQueue(K, V)       # construct a new priority queue with keys of type K and priorities of type V
-PriorityQueue(K, V, ord)  # construct a new priority queue with the given types and ordering
+PriorityQueue{K, V}()     # construct a new priority queue with keys of type K and priorities of type V (forward ordering by default)
+PriorityQueue{K, V}(ord)  # construct a new priority queue with the given types and ordering ord (Base.Order.Forward or Base.Order.Reverse)
 enqueue!(pq, k, v)        # insert the key k into pq with priority v
 enqueue!(pq, k=>v)        # (same, using Pairs)
 dequeue!(pq)              # remove and return the lowest priority key
