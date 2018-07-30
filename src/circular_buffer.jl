@@ -1,9 +1,11 @@
 """
-    CircularBuffer{T}(capacity)
+    CircularBuffer{T}(n)
 
 The CircularBuffer type implements a circular buffer of fixed capacity 
 where new items are pushed to the back of the list, overwriting values 
 in a circular fashion.
+
+Allocate a buffer of elements of type `T` with maximum capacity `n`.
 """
 mutable struct CircularBuffer{T} <: AbstractVector{T}
     capacity::Int
@@ -96,7 +98,7 @@ end
 """
     popfirst!(cb)
 
-Remove the first item from CircularBuffer.
+Remove the first item (at the back) from CircularBuffer.
 """
 function popfirst!(cb::CircularBuffer)
     if cb.length == 0
@@ -111,7 +113,8 @@ end
 """
     pushfirst!(cb, data)
 
-Insert one or more items at the beginning of CircularBuffer.
+Insert one or more items at the beginning of CircularBuffer 
+and overwrite back if full.
 """
 function pushfirst!(cb::CircularBuffer, data)
     # if full, decrement and overwrite, otherwise pushfirst
