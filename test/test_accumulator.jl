@@ -119,7 +119,7 @@
     end
 
     @testset "non-integer uses" begin
-        acc = Accumulator(Symbol, Float16)
+        acc = Accumulator{Symbol, Float16}()
         acc[:a] = 1.5
         @test acc[:a] ≈ 1.5
         push!(acc, :a, 2.5)

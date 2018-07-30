@@ -6,8 +6,10 @@ end
 
 ## constructors
 
-Accumulator(::Type{T}, ::Type{V}) where {T,V<:Number} = Accumulator{T,V}(Dict{T,V}())
-counter(T::Type) = Accumulator(T,Int)
+Accumulator{T, V}() where {T,V<:Number} = Accumulator{T,V}(Dict{T,V}())
+@deprecate Accumulator(::Type{T}, ::Type{V}) where {T,V<:Number} Accumulator{T, V}()
+
+counter(T::Type) = Accumulator{T,Int}()
 
 counter(dct::Dict{T,V}) where {T,V<:Integer} = Accumulator{T,V}(copy(dct))
 
