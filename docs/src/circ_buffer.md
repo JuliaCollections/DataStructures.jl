@@ -23,7 +23,5 @@ convert(Vector{Float64}, cb)  # convert items to type Float64
 eltype(cb)           # return type of items
 cb[1]                # get the element at the front
 cb[end]              # get the element at the back
-popfirst!(cb) .      # remove the first item from CircularBuffer.
-pushfirst!(cb, data) # insert one or more items at the beginning of CircularBuffer.
 fill!(cb, data)      # grows the buffer up-to capacity, and fills it entirely. Overwriting any existing elements.
 ```
