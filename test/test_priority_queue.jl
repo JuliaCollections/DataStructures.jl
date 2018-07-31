@@ -176,6 +176,12 @@ end
     @test dequeue_pair!(pq) == ('e'=> 1)
     @test dequeue_pair!(pq, 'b') == ('b'=>4)
     @test length(pq) == 3
+
+    # delete!
+    pq = PriorityQueue(["a","b","c"],[2,3,1],Base.Order.Forward)
+    pq_out = delete!(pq, "b")
+    @test pq == pq_out
+    @test length(pq) == 2
 end
 
 @testset "LowLevelHeapOperations" begin

@@ -324,6 +324,29 @@ function next(pq::PriorityQueue{K,V}, i) where {K,V}
     return (pq.xs[idx], i)
 end
 
+"""
+    delete!(pq, key)
+
+Delete the mapping for the given key in a priority queue, and return the priority queue.
+# Examples
+```jldoctest
+julia> q = PriorityQueue(["a","b","c"],[2,3,1],Base.Order.Forward)
+DataStructures.PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
+  "c" => 1
+  "b" => 3
+  "a" => 2
+
+julia> delete!(q, "b")
+DataStructures.PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
+  "c" => 1
+  "a" => 2
+```
+"""
+function delete!(pq::PriorityQueue, key)
+    dequeue_pair!(pq, key)
+    pq
+end
+
 # resolve ambiguity
 done(ct::PriorityQueue, i::Base.LegacyIterationCompat{I,T,S}) where {I>:PriorityQueue,T,S} = done(pq.index, i)
 function next(ct::PriorityQueue{K,V}, i::Base.LegacyIterationCompat{I,T,S}) where {K,V,I>:PriorityQueue{K,V},T,S}
