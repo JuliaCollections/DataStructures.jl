@@ -18,7 +18,7 @@ classified_counters(K::Type, T::Type) = ClassifiedCollections(K, Accumulator{T, 
 
 _create_empty(::Type{Vector{T}}) where {T} = Vector{T}()
 _create_empty(::Type{Set{T}}) where {T} = Set{T}()
-_create_empty(::Type{Accumulator{T,V}}) where {T,V} = Accumulator(T, V)
+_create_empty(::Type{Accumulator{T,V}}) where {T,V} = Accumulator{T, V}()
 
 copy(cc::ClassifiedCollections{K, C}) where {K, C} = ClassifiedCollections{K, C}(copy(cc.map))
 

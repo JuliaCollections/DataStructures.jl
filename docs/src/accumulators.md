@@ -13,7 +13,7 @@ end
 There are different ways to construct an accumulator/counter:
 
 ```julia
-a = Accumulator(K, V)    # construct an accumulator with key-type K and
+a = Accumulator{K, V}()  # construct an accumulator with key-type K and
                          # accumulated value type V
 
 a = Accumulator(dict)    # construct an accumulator from a dictionary
