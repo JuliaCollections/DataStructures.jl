@@ -1,187 +1,203 @@
-
 @testset "Deque" begin
-
-    # empty dequeue
-
-    q = Deque{Int}()
-    @test length(q) == 0
-    @test isempty(q)
-    @test q.blksize == DataStructures.DEFAULT_DEQUEUE_BLOCKSIZE
-    @test_throws ArgumentError front(q)
-    @test_throws ArgumentError back(q)
-    @test length(sprint(dump,q)) >= 0
-
-    @test typeof(deque(Int)) === typeof(Deque{Int}())
-
-    q = DataStructures.DequeBlock{Int}(0,0)
-    @test length(q) == 0
-    @test capacity(q) == 0
-    @test isempty(q)
-    @test length(sprint(show,q)) >= 0
-
-    q = Deque{Int}(3)
-    @test length(q) == 0
-    @test isempty(q)
-    @test q.blksize == 3
-    @test num_blocks(q) == 1
-    @test_throws ArgumentError front(q)
-    @test_throws ArgumentError back(q)
-    @test isa(collect(q), Vector{Int})
-    @test collect(q) == Int[]
-
-    # push back
-
-    n = 10
-
-    for i = 1 : n
-        push!(q, i)
-        @test length(q) == i
-        @test isempty(q) == false
-        @test num_blocks(q) == div(i-1, 3) + 1
-
-        @test front(q) == 1
-        @test back(q) == i
-
-        k = 1
-        for j in q
-            @test j == k
-            k += 1
-        end
-        cq = collect(q)
-        @test isa(cq, Vector{Int})
-        @test cq == collect(1:i)
-        @test length(sprint(show,q)) >= 0
-    end
-
-    # pop back
-
-    for i = 1 : n
-        x = pop!(q)
-        @test length(q) == n - i
-        @test isempty(q) == (i == n)
-        @test num_blocks(q) == div(n-i-1, 3) + 1
-        @test x == n - i + 1
-
-        if !isempty(q)
-            @test front(q) == 1
-            @test back(q) == n - i
-        else
+    @testset "empty dequeue" begin
+        @testset "empty dequeue 1" begin
+            q = Deque{Int}()
+            @test length(q) == 0
+            @test isempty(q)
+            @test q.blksize == DataStructures.DEFAULT_DEQUEUE_BLOCKSIZE
             @test_throws ArgumentError front(q)
             @test_throws ArgumentError back(q)
+            @test length(sprint(dump,q)) >= 0
         end
 
-        cq = collect(q)
-        @test cq == collect(1:n-i)
-    end
+        @testset "empty dequeue 2" begin
+            @test typeof(deque(Int)) === typeof(Deque{Int}())
+        end
 
-    # push front
+        @testset "empty dequeue 3" begin
+            q = DataStructures.DequeBlock{Int}(0,0)
+            @test length(q) == 0
+            @test capacity(q) == 0
+            @test isempty(q)
+            @test length(sprint(show,q)) >= 0
+        end
 
-    q = Deque{Int}(3)
-
-    for i = 1 : n
-        pushfirst!(q, i)
-        @test length(q) == i
-        @test isempty(q) == false
-        @test num_blocks(q) == div(i-1, 3) + 1
-
-        @test front(q) == i
-        @test back(q) == 1
-
-        cq = collect(q)
-        @test isa(cq, Vector{Int})
-        @test cq == collect(i:-1:1)
-    end
-
-    # pop front
-
-    for i = 1 : n
-        x = popfirst!(q)
-        @test length(q) == n - i
-        @test isempty(q) == (i == n)
-        @test num_blocks(q) == div(n-i-1, 3) + 1
-        @test x == n - i + 1
-
-        if !isempty(q)
-            @test front(q) == n - i
-            @test back(q) == 1
-        else
+        @testset "empty dequeue 4" begin
+            q = Deque{Int}(3)
+            @test length(q) == 0
+            @test isempty(q)
+            @test q.blksize == 3
+            @test num_blocks(q) == 1
             @test_throws ArgumentError front(q)
             @test_throws ArgumentError back(q)
+            @test isa(collect(q), Vector{Int})
+            @test collect(q) == Int[]
         end
-
-        cq = collect(q)
-        @test cq == collect(n-i:-1:1)
     end
 
-    # random operations
+    @testset "Core Functionality" begin
+        n = 10
+        
+        @testset "push back / pop back" begin
+            q = Deque{Int}(3)
+            
+            @testset "push back" begin
+                for i = 1 : n
+                    push!(q, i)
+                    @test length(q) == i
+                    @test isempty(q) == false
+                    @test num_blocks(q) == div(i-1, 3) + 1
 
-    q = Deque{Int}(5)
-    r = Int[]
-    m = 100
+                    @test front(q) == 1
+                    @test back(q) == i
 
-    for k = 1 : m
-        la = rand(1:20)
-        x = rand(1:1000, la)
+                    k = 1
+                    for j in q
+                        @test j == k
+                        k += 1
+                    end
+                    cq = collect(q)
+                    @test isa(cq, Vector{Int})
+                    @test cq == collect(1:i)
+                    @test length(sprint(show,q)) >= 0
+                end
+            end
 
-        for i = 1 : la
-            if rand(Bool)
-                push!(r, x[i])
-                push!(q, x[i])
-            else
-                pushfirst!(r, x[i])
-                pushfirst!(q, x[i])
+            @testset "pop back" begin
+                for i = 1 : n
+                    x = pop!(q)
+                    @test length(q) == n - i
+                    @test isempty(q) == (i == n)
+                    @test num_blocks(q) == div(n-i-1, 3) + 1
+                    @test x == n - i + 1
+
+                    if !isempty(q)
+                        @test front(q) == 1
+                        @test back(q) == n - i
+                    else
+                        @test_throws ArgumentError front(q)
+                        @test_throws ArgumentError back(q)
+                    end
+
+                    cq = collect(q)
+                    @test cq == collect(1:n-i)
+                end
             end
         end
 
-        @test length(q) == length(r)
-        @test collect(q) == r
+        @testset "push front / pop front" begin
+            q = Deque{Int}(3)
 
-        lr = rand(1:length(r))
-        for i = 1 : lr
-            if rand(Bool)
-                pop!(r)
-                pop!(q)
-            else
-                popfirst!(r)
-                popfirst!(q)
+            @testset "push front" begin
+                for i = 1 : n
+                    pushfirst!(q, i)
+                    @test length(q) == i
+                    @test isempty(q) == false
+                    @test num_blocks(q) == div(i-1, 3) + 1
+
+                    @test front(q) == i
+                    @test back(q) == 1
+
+                    cq = collect(q)
+                    @test isa(cq, Vector{Int})
+                    @test cq == collect(i:-1:1)
+                end
+            end
+
+            @testset "pop front" begin
+                for i = 1 : n
+                    x = popfirst!(q)
+                    @test length(q) == n - i
+                    @test isempty(q) == (i == n)
+                    @test num_blocks(q) == div(n-i-1, 3) + 1
+                    @test x == n - i + 1
+
+                    if !isempty(q)
+                        @test front(q) == n - i
+                        @test back(q) == 1
+                    else
+                        @test_throws ArgumentError front(q)
+                        @test_throws ArgumentError back(q)
+                    end
+
+                    cq = collect(q)
+                    @test cq == collect(n-i:-1:1)
+                end
             end
         end
-
-        @test length(q) == length(r)
-        @test collect(q) == r
     end
 
-    # hash and ==
-    a = Deque{Int64}(2)
-    b = Deque{Int64}(3)
-    # Note: blksize does not distinguish == or hash
-    @test a == b
-    @test hash(a) === hash(b)
-    push!(a, 1)
-    @test a != b
-    push!(a, 2)
-    push!(b, 2, 1)
-    @test a != b
-    @test hash(a) !== hash(b)
-    popfirst!(b)
-    push!(b, 2)
-    @test a == b
-    @test hash(a) == hash(b)
+    @testset "random operations" begin
+        q = Deque{Int}(5)
+        r = Int[]
+        m = 100
 
-    # issue #38
+        for k = 1 : m
+            la = rand(1:20)
+            x = rand(1:1000, la)
 
-    q = Deque{Int}(1)
-    push!(q,1)
-    @test !isempty(q)
-    empty!(q)
-    @test isempty(q)
+            for i = 1 : la
+                if rand(Bool)
+                    push!(r, x[i])
+                    push!(q, x[i])
+                else
+                    pushfirst!(r, x[i])
+                    pushfirst!(q, x[i])
+                end
+            end
 
-    #empty!
-    q = Deque{Int}(1)
-    push!(q,1)
-    push!(q,2)
-    @test length(sprint(dump,q)) >= 0
-    @test typeof(empty!(q)) === typeof(Deque{Int}())
-    @test isempty(q)
+            @test length(q) == length(r)
+            @test collect(q) == r
+
+            lr = rand(1:length(r))
+            for i = 1 : lr
+                if rand(Bool)
+                    pop!(r)
+                    pop!(q)
+                else
+                    popfirst!(r)
+                    popfirst!(q)
+                end
+            end
+
+            @test length(q) == length(r)
+            @test collect(q) == r
+        end
+    end
+
+    @testset "hash and ==" begin
+        a = Deque{Int64}(2)
+        b = Deque{Int64}(3)
+        # Note: blksize does not distinguish == or hash
+        @test a == b
+        @test hash(a) === hash(b)
+        push!(a, 1)
+        @test a != b
+        push!(a, 2)
+        push!(b, 2, 1)
+        @test a != b
+        @test hash(a) !== hash(b)
+        popfirst!(b)
+        push!(b, 2)
+        @test a == b
+        @test hash(a) == hash(b)
+    end
+
+    @testset "issue #38" begin
+        q = Deque{Int}(1)
+        push!(q,1)
+        @test !isempty(q)
+        empty!(q)
+        @test isempty(q)
+    end
+
+    @testset "empty!" begin
+        q = Deque{Int}(1)
+        push!(q,1)
+        push!(q,2)
+        @test length(sprint(dump,q)) >= 0
+        @test typeof(empty!(q)) === typeof(Deque{Int}())
+        @test isempty(q)
+    end
 
 end # @testset Deque
