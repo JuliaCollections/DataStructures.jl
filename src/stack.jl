@@ -4,8 +4,11 @@ mutable struct Stack{T}
     store::Deque{T}
 end
 
-Stack(ty::Type{T}) where {T} = Stack(Deque{T}())
-Stack(ty::Type{T}, blksize::Integer) where {T} = Stack(Deque{T}(blksize))
+Stack{T}() where {T} = Stack(Deque{T}())
+@deprecate Stack(ty::Type{T}) where {T} Stack{T}()
+
+Stack{T}(blksize::Integer) where {T} = Stack(Deque{T}(blksize))
+@deprecate Stack(ty::Type{T}, blksize::Integer) where {T} Stack{T}(blksize::Integer)
 
 isempty(s::Stack) = isempty(s.store)
 length(s::Stack) = length(s.store)

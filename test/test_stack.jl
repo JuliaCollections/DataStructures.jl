@@ -2,8 +2,10 @@
 @testset "Stacks" begin
 
     # Stack
+    s = Stack{Int}()
+    @test isa(s, Stack{Int})
 
-    s = Stack(Int, 5)
+    s = Stack{Int}(5)
     n = 100
 
     @test isa(s, Stack{Int})
@@ -31,13 +33,13 @@
         @test length(s) == n - i
     end
     
-    s = Stack(Int,1)
+    s = Stack{Int}(1)
     push!(s, 10)
     @test length(empty!(s)) == 0
 
     #test that iter returns a LIFO collection
 
-    stk = Stack(Int, 10)
+    stk = Stack{Int}(10)
     #an array to check iteration sequence against
     arr = Int64[]
 
