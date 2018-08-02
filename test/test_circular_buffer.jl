@@ -1,4 +1,5 @@
 @testset "CircularBuffer" begin
+
     @testset "Core Functionality" begin
         cb = CircularBuffer{Int}(5)
         @testset "When empty" begin
