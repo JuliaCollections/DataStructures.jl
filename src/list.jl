@@ -124,8 +124,7 @@ function cat(lst::LinkedList, lsts::LinkedList...)
     reverse(l2)
 end
 
-start(l::Nil{T}) where {T} = l
-start(l::Cons{T}) where {T} = l
-done(l::Cons{T}, state::Cons{T}) where {T} = false
-done(l::LinkedList, state::Nil{T}) where {T} = true
-next(l::Cons{T}, state::Cons{T}) where {T} = (state.head, state.tail)
+iterate(l::LinkedList, ::Nil) = nothing
+function iterate(l::LinkedList, state::Cons = l)
+    state.head, state.tail
+end

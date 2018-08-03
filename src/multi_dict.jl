@@ -43,10 +43,7 @@ end
 
 @delegate MultiDict.d [ haskey, get, get!, getkey,
                         getindex, length, isempty, eltype,
-                        start, next, done, keys, values]
-# resolve ambiguity
-next(d::MultiDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:MultiDict,T,S} = next(d.d, state)
-done(d::MultiDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:MultiDict,T,S} = done(d.d, state)
+                        iterate, keys, values]
 
 sizehint!(d::MultiDict, sz::Integer) = (sizehint!(d.d, sz); d)
 copy(d::MultiDict) = MultiDict(d)
@@ -109,6 +106,7 @@ enumerateall(d::MultiDict) = EnumerateAll(d)
 
 length(e::EnumerateAll) = count(e.d)
 
+# FIXME: update to iterate
 function start(e::EnumerateAll)
     V = eltype(eltype(values(e.d)))
     vs = V[]

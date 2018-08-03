@@ -315,18 +315,10 @@ end
 
 
 # Unordered iteration through key value pairs in a PriorityQueue
-start(pq::PriorityQueue) = start(pq.index)
-
-done(pq::PriorityQueue, i) = done(pq.index, i)
-
-function next(pq::PriorityQueue{K,V}, i) where {K,V}
-    (k, idx), i = next(pq.index, i)
-    return (pq.xs[idx], i)
-end
-
-# resolve ambiguity
-done(ct::PriorityQueue, i::Base.LegacyIterationCompat{I,T,S}) where {I>:PriorityQueue,T,S} = done(pq.index, i)
-function next(ct::PriorityQueue{K,V}, i::Base.LegacyIterationCompat{I,T,S}) where {K,V,I>:PriorityQueue{K,V},T,S}
-    (k, idx), i = next(pq.index, i)
+iterate(pq::PriorityQueue) = iterate(pq.index)
+function iterate(pq::PriorityQueue, i)
+    state = iterate(pq.index, i)
+    state === nothing && return nothing
+    (k, idx), i = state
     return (pq.xs[idx], i)
 end
