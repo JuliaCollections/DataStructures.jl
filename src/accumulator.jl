@@ -58,12 +58,7 @@ sum(ct::Accumulator) = sum(values(ct.map))
 
 ## iteration
 
-start(ct::Accumulator) = start(ct.map)
-next(ct::Accumulator, state) = next(ct.map, state)
-done(ct::Accumulator, state) = done(ct.map, state)
-# resolve ambiguity
-next(ct::Accumulator, state::Base.LegacyIterationCompat{I,T,S}) where {I>:Accumulator,T,S} = next(ct.map, state)
-done(ct::Accumulator, state::Base.LegacyIterationCompat{I,T,S}) where {I>:Accumulator,T,S} = done(ct.map, state)
+iterate(ct::Accumulator, s...) = iterate(ct.map, s...)
 
 # manipulation
 

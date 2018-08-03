@@ -113,11 +113,8 @@ struct DequeIterator{T}
     q::Deque
 end
 
-start(qi::DequeIterator{T}) where {T} = (qi.q.head, qi.q.head.front)
-
-function next(qi::DequeIterator{T}, s::Tuple) where T
-    cb = s[1]
-    i = s[2]
+function iterate(qi::DequeIterator{T}, (cb, i) = (qi.q.head, qi.q.head.front)) where T
+    i > cb.back && return nothing
     x = cb.data[i]
 
     i += 1
@@ -129,23 +126,14 @@ function next(qi::DequeIterator{T}, s::Tuple) where T
     (x, (cb, i))
 end
 
-done(q::DequeIterator{T}, s::Tuple) where {T} = (s[2] > s[1].back)
-
 # Backwards deque iteration
 
 struct ReverseDequeIterator{T}
     q::Deque
 end
 
-start(qi::ReverseDequeIterator{T}) where {T} = (qi.q.rear, qi.q.rear.back)
-
-# We're finished when our index is less than the first index
-# of the current block (which can only happen on the first block)
-done(qi::ReverseDequeIterator{T}, s::Tuple) where {T} = (s[2] < s[1].front)
-
-function next(qi::ReverseDequeIterator{T}, s::Tuple) where T
-    cb = s[1]
-    i = s[2]
+function iterate(qi::ReverseDequeIterator{T}, (cb, i) = (qi.q.rear, qi.q.rear.back)) where T
+    i < cb.front && return nothing
     x = cb.data[i]
 
     i -= 1
@@ -160,9 +148,7 @@ end
 
 reverse_iter(q::Deque{T}) where {T} = ReverseDequeIterator{T}(q)
 
-start(q::Deque{T}) where {T} = start(DequeIterator{T}(q))
-next(q::Deque{T}, s::Tuple) where {T} = next(DequeIterator{T}(q), s)
-done(q::Deque{T}, s::Tuple) where {T} = done(DequeIterator{T}(q), s)
+iterate(q::Deque{T}, s...) where {T} = iterate(DequeIterator{T}(q), s...)
 
 Base.length(qi::DequeIterator{T}) where {T} = qi.q.len
 Base.length(qi::ReverseDequeIterator{T}) where {T} = qi.q.len

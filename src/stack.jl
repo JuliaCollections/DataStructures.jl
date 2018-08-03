@@ -24,8 +24,6 @@ pop!(s::Stack) = pop!(s.store)
 
 empty!(s::Stack) = (empty!(s.store); s)
 
-start(st::Stack) = start(reverse_iter(st.store))
-next(st::Stack, s::Tuple) = next(reverse_iter(st.store), s)
-done(st::Stack, s::Tuple) = done(reverse_iter(st.store), s)
+iterate(st::Stack, s...) = iterate(reverse_iter(st.store), s...)
 
 reverse_iter(s::Stack{T}) where {T} = DequeIterator{T}(s.store)

@@ -169,6 +169,7 @@ function in(n::Integer, s::IntSet)
     end
 end
 
+# FIXME: figure out how to update this to iterate
 # Use the next-set index as the state to prevent looking it up again in done
 start(s::IntSet) = next(s, 0)[2]
 function next(s::IntSet, i::Int, invert=false)

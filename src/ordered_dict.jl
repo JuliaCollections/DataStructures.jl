@@ -419,13 +419,13 @@ function delete!(h::OrderedDict, key)
     h
 end
 
-function start(t::OrderedDict)
-    t.ndel > 0 && rehash!(t)
-    1
+function iterate(t::OrderedDict, i = (t.ndel > 0 && rehash!(t); 1))
+    i > length(t.keys) ? nothing : (Pair(t.keys[i],t.vals[i]), i+1)
 end
-done(t::OrderedDict, i::Int) = i > length(t.keys)
-next(t::OrderedDict, i::Int) = (Pair(t.keys[i],t.vals[i]), i+1)
-next(v::ValueIterator{T}, i::Int) where {T<:OrderedDict} = (v.dict.vals[i], i+1)
+
+function iterate(v::ValueIterator{T}, i::Int) where {T<:OrderedDict}
+    i > length(v.dict.vals) ? nothing : (v.dict.vals[i], i+1)
+end
 
 function merge(d::OrderedDict, others::AbstractDict...)
     K, V = keytype(d), valtype(d)
