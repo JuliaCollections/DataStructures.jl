@@ -24,13 +24,6 @@ end
 eltype(s::IntSet) = Int
 sizehint!(s::IntSet, n::Integer) = (_resize0!(s.bits, n+1); s)
 
-# only required on 0.3:
-function first(itr::IntSet)
-    state = iterate(itr)
-    state === nothing && throw(ArgumentError("collection must be non-empty"))
-    return state[1]
-end
-
 # An internal function for setting the inclusion bit for a given integer n >= 0
 @inline function _setint!(s::IntSet, n::Integer, b::Bool)
     idx = n+1
