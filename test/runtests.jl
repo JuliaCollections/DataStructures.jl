@@ -7,8 +7,6 @@ import DataStructures: IntSet
 
 @test isempty(detect_ambiguities(Base, Core, DataStructures))
 
-using Primes
-
 tests = ["int_set",
          "deque",
          "circ_deque",
