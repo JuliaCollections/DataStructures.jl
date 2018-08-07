@@ -1,7 +1,7 @@
 #  multi-value dictionary (multidict)
 
 import Base: haskey, get, get!, getkey, delete!, pop!, empty!,
-             insert!, getindex, length, isempty,
+             insert!, getindex, length, isempty, iterate,
              keys, values, copy, similar,  push!,
              count, size, eltype, empty
 
@@ -109,22 +109,27 @@ length(e::EnumerateAll) = count(e.d)
 function iterate(e::EnumerateAll)
     V = eltype(eltype(values(e.d)))
     vs = V[]
-    dst, k, vs, vst = (iterate(e.d.d), nothing, vs, iterate(vs))
-    while vst === nothing
-        ((k, vs), dst) = iterate(e.d.d, dst)
-        vst = iterate(vs)
+    dstate = iterate(e.d.d)
+    vstate = iterate(vs)
+    dstate === nothing || vstate === nothing && return nothing
+    k = nothing
+    while vstate === nothing
+        ((k, vs), dst) = dstate
+        dstate = iterate(e.d.d, dst)
+        vstate = iterate(vs)
     end
-    v, vst = iterate(vs, vst)
-    ((k, v), (dst, k, vs, vst))
+    v, vst = vstate
+    return ((k, v), (dstate, k, vs, vstate))
 end
 
-function iterate(e::EnumerateAll, s::Tuple)
-    dst, k, vs, vst = s
-    vst === nothing && dst === nothing && return nothing
-    while vst === nothing
-        ((k, vs), dst) = iterate(e.d.d, dst)
-        vst = iterate(vs)
+function iterate(e::EnumerateAll, s)
+    dstate, k, vs, vstate = s
+    dstate === nothing || vstate === nothing && return nothing
+    while vstate === nothing
+        ((k, vs), dst) = dstate
+        dstate = iterate(e.d.d, dst)
+        vstate = iterate(vs)
     end
-    v, vst = iterate(vs, vst)
-    ((k, v), (dst, k, vs, vst))
+    v, vst = vstate
+    return ((k, v), (dstate, k, vs, vstate))
 end
