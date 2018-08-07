@@ -28,7 +28,7 @@ sizehint!(s::IntSet, n::Integer) = (_resize0!(s.bits, n+1); s)
 function first(itr::IntSet)
     state = iterate(itr)
     state === nothing && throw(ArgumentError("collection must be non-empty"))
-    iterate(itr, state)[1]
+    iterate(itr, state[2])[1]
 end
 
 # An internal function for setting the inclusion bit for a given integer n >= 0
@@ -181,9 +181,9 @@ function findnextidx(s::IntSet, i::Int, invert=false)
     return nextidx
 end
 
-Base.iterate(s::IntSet) = iterate(s, findnextidx(s, 0))
+iterate(s::IntSet) = iterate(s, findnextidx(s, 0))
 
-function Base.iterate(s::IntSet, i::Int, invert=false)
+function iterate(s::IntSet, i::Int, invert=false)
     i <= 0 && return nothing
     return (i-1, findnextidx(s, i, invert))
 end
