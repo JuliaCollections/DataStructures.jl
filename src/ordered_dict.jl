@@ -141,7 +141,7 @@ function rehash!(h::OrderedDict{K,V}, newsz = length(h.slots)) where {K,V}
 
     if h.ndel > 0
         ndel0 = h.ndel
-        ptrs = !isbits(K)
+        ptrs = !isbitstype(K)
         to = 1
         # TODO: to get the best performance we need to avoid reallocating these.
         # This algorithm actually works in place, unless the dict is modified
