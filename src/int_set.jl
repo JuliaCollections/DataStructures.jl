@@ -2,7 +2,7 @@
 
 import Base: similar, copy, copy!, eltype, push!, pop!, delete!,
              empty!, isempty, union, union!, intersect, intersect!,
-             setdiff, setdiff!, symdiff, symdiff!, in, start, next, done,
+             setdiff, setdiff!, symdiff, symdiff!, in,
              last, length, show, hash, issubset, ==, <=, <, unsafe_getindex,
              unsafe_setindex!, findnextnot, first, empty
 
@@ -23,13 +23,6 @@ function copy!(to::IntSet, from::IntSet)
 end
 eltype(s::IntSet) = Int
 sizehint!(s::IntSet, n::Integer) = (_resize0!(s.bits, n+1); s)
-
-# only required on 0.3:
-function first(itr::IntSet)
-    state = start(itr)
-    done(itr, state) && throw(ArgumentError("collection must be non-empty"))
-    next(itr, state)[1]
-end
 
 # An internal function for setting the inclusion bit for a given integer n >= 0
 @inline function _setint!(s::IntSet, n::Integer, b::Bool)
@@ -169,9 +162,7 @@ function in(n::Integer, s::IntSet)
     end
 end
 
-# Use the next-set index as the state to prevent looking it up again in done
-start(s::IntSet) = next(s, 0)[2]
-function next(s::IntSet, i::Int, invert=false)
+function findnextidx(s::IntSet, i::Int, invert=false)
     if s.inverse ⊻ invert
         # i+1 could rollover causing a BoundsError in findnext/findnextnot
         nextidx = i == typemax(Int) ? 0 : something(findnextnot(s.bits, i+1), 0)
@@ -180,12 +171,18 @@ function next(s::IntSet, i::Int, invert=false)
     else
         nextidx = i == typemax(Int) ? 0 : something(findnext(s.bits, i+1), 0)
     end
-    (i-1, nextidx)
+    return nextidx
 end
-done(s::IntSet, i::Int) = i <= 0
+
+iterate(s::IntSet) = iterate(s, findnextidx(s, 0))
+
+function iterate(s::IntSet, i::Int, invert=false)
+    i <= 0 && return nothing
+    return (i-1, findnextidx(s, i, invert))
+end
 
 # Nextnot iterates through elements *not* in the set
-nextnot(s::IntSet, i) = next(s, i, true)
+nextnot(s::IntSet, i) = iterate(s, i, true)
 
 function last(s::IntSet)
     l = length(s.bits)
@@ -206,9 +203,12 @@ function show(io::IO, s::IntSet)
     print(io, "IntSet([")
     first = true
     for n in s
-        if s.inverse && n > 2 && done(s, nextnot(s, n-3)[2])
-             print(io, ", ..., ", typemax(Int)-1)
-             break
+        if s.inverse && n > 2
+            state = nextnot(s, n - 3)
+            if state !== nothing && state[2] <= 0
+                print(io, ", ..., ", typemax(Int)-1)
+                break
+            end
          end
         !first && print(io, ", ")
         print(io, n)

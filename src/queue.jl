@@ -40,8 +40,6 @@ dequeue!(s::Queue) = popfirst!(s.store)
 
 # Iterators
 
-start(q::Queue) = start(q.store)
-next(q::Queue, s::Tuple) = next(q.store, s)
-done(q::Queue, s::Tuple) = done(q.store, s)
+iterate(q::Queue, s...) = iterate(q.store, s...)
 
 reverse_iter(q::Queue) = reverse_iter(q.store)

@@ -45,10 +45,14 @@ copy(s::OrderedSet) = union!(empty(s), s)
 
 empty!(s::OrderedSet{T}) where {T} = (empty!(s.dict); s)
 
-start(s::OrderedSet)       = start(s.dict)
-done(s::OrderedSet, state::Int) = done(s.dict, state)
+function iterate(s::OrderedSet)
+    state = iterate(s.dict)
+    state === nothing && return nothing
+    s, i = state
+    s[1], i
+end
 # NOTE: manually optimized to take advantage of OrderedDict representation
-next(s::OrderedSet, i::Int)     = (s.dict.keys[i], i+1)
+iterate(s::OrderedSet, i) = i > length(s.dict.keys) ? nothing : (s.dict.keys[i], i+1)
 
 pop!(s::OrderedSet) = pop!(s.dict)[1]
 

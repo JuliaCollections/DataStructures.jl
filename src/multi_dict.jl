@@ -1,8 +1,8 @@
 #  multi-value dictionary (multidict)
 
 import Base: haskey, get, get!, getkey, delete!, pop!, empty!,
-             insert!, getindex, length, isempty, start,
-             next, done, keys, values, copy, similar,  push!,
+             insert!, getindex, length, isempty, iterate,
+             keys, values, copy, similar,  push!,
              count, size, eltype, empty
 
 struct MultiDict{K,V}
@@ -43,10 +43,7 @@ end
 
 @delegate MultiDict.d [ haskey, get, get!, getkey,
                         getindex, length, isempty, eltype,
-                        start, next, done, keys, values]
-# resolve ambiguity
-next(d::MultiDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:MultiDict,T,S} = next(d.d, state)
-done(d::MultiDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:MultiDict,T,S} = done(d.d, state)
+                        iterate, keys, values]
 
 sizehint!(d::MultiDict, sz::Integer) = (sizehint!(d.d, sz); d)
 copy(d::MultiDict) = MultiDict(d)
@@ -109,23 +106,30 @@ enumerateall(d::MultiDict) = EnumerateAll(d)
 
 length(e::EnumerateAll) = count(e.d)
 
-function start(e::EnumerateAll)
+function iterate(e::EnumerateAll)
     V = eltype(eltype(values(e.d)))
     vs = V[]
-    (start(e.d.d), nothing, vs, start(vs))
-end
-
-function done(e::EnumerateAll, s::Tuple)
-    dst, k, vs, vst = s
-    done(vs, vst) && done(e.d.d, dst)
-end
-
-function next(e::EnumerateAll, s::Tuple)
-    dst, k, vs, vst = s
-    while done(vs, vst)
-        ((k, vs), dst) = next(e.d.d, dst)
-        vst = start(vs)
+    dstate = iterate(e.d.d)
+    vstate = iterate(vs)
+    dstate === nothing || vstate === nothing && return nothing
+    k = nothing
+    while vstate === nothing
+        ((k, vs), dst) = dstate
+        dstate = iterate(e.d.d, dst)
+        vstate = iterate(vs)
     end
-    v, vst = next(vs, vst)
-    ((k, v), (dst, k, vs, vst))
+    v, vst = vstate
+    return ((k, v), (dstate, k, vs, vstate))
+end
+
+function iterate(e::EnumerateAll, s)
+    dstate, k, vs, vstate = s
+    dstate === nothing || vstate === nothing && return nothing
+    while vstate === nothing
+        ((k, vs), dst) = dstate
+        dstate = iterate(e.d.d, dst)
+        vstate = iterate(vs)
+    end
+    v, vst = vstate
+    return ((k, v), (dstate, k, vs, vstate))
 end

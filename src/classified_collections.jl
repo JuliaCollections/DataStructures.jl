@@ -34,12 +34,7 @@ keys(cc::ClassifiedCollections) = keys(cc.map)
 
 ## iteration
 
-start(cc::ClassifiedCollections) = start(cc.map)
-next(cc::ClassifiedCollections, state) = next(cc.map, state)
-done(cc::ClassifiedCollections, state) = done(cc.map, state)
-# resolve ambiguity
-next(ct::ClassifiedCollections, state::Base.LegacyIterationCompat{I,T,S}) where {I>:ClassifiedCollections,T,S} = next(ct.map, state)
-done(ct::ClassifiedCollections, state::Base.LegacyIterationCompat{I,T,S}) where {I>:ClassifiedCollections,T,S} = done(ct.map, state)
+iterate(cc::ClassifiedCollections, s...) = iterate(cc.map, s...)
 
 # manipulation
 

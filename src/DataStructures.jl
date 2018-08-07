@@ -1,8 +1,6 @@
-__precompile__()
-
 module DataStructures
 
-    import Base: <, <=, ==, length, isempty, start, next, done, delete!,
+    import Base: <, <=, ==, length, isempty, iterate, delete!,
                  show, dump, empty!, getindex, setindex!, get, get!,
                  in, haskey, keys, merge, copy, cat,
                  push!, pop!, pushfirst!, popfirst!, insert!, lastindex,
@@ -16,6 +14,7 @@ module DataStructures
                  union, intersect, symdiff, setdiff, issubset,
                  searchsortedfirst, searchsortedlast, in,
                  eachindex, keytype, valtype
+    import Base: iterate
 
     using InteractiveUtils: methodswith
 

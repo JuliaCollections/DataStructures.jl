@@ -1,8 +1,8 @@
 # OrderedDict
 
 import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
-             setindex!, getindex, length, isempty, start,
-             next, done, keys, values, setdiff, setdiff!,
+             setindex!, getindex, length, isempty,
+             keys, values, setdiff, setdiff!,
              union, union!, intersect, filter, filter!,
              hash, eltype, ValueIterator, convert, copy,
              merge, empty
@@ -74,7 +74,7 @@ function OrderedDict(kv)
     try
         dict_with_eltype(kv, eltype(kv))
     catch e
-        if any(x->isempty(methods(x, (typeof(kv),))), [start, next, done]) ||
+        if any(x->isempty(methods(x, (typeof(kv),))), [iterate]) ||
             !all(x->isa(x,Union{Tuple,Pair}),kv)
             throw(ArgumentError("Dict(kv): kv needs to be an iterator of tuples or pairs"))
         else
@@ -141,7 +141,7 @@ function rehash!(h::OrderedDict{K,V}, newsz = length(h.slots)) where {K,V}
 
     if h.ndel > 0
         ndel0 = h.ndel
-        ptrs = !isbits(K)
+        ptrs = !isbitstype(K)
         to = 1
         # TODO: to get the best performance we need to avoid reallocating these.
         # This algorithm actually works in place, unless the dict is modified
@@ -419,13 +419,13 @@ function delete!(h::OrderedDict, key)
     h
 end
 
-function start(t::OrderedDict)
-    t.ndel > 0 && rehash!(t)
-    1
+function iterate(t::OrderedDict, i = (t.ndel > 0 && rehash!(t); 1))
+    i > length(t.keys) ? nothing : (Pair(t.keys[i],t.vals[i]), i+1)
 end
-done(t::OrderedDict, i::Int) = i > length(t.keys)
-next(t::OrderedDict, i::Int) = (Pair(t.keys[i],t.vals[i]), i+1)
-next(v::ValueIterator{T}, i::Int) where {T<:OrderedDict} = (v.dict.vals[i], i+1)
+
+function iterate(v::ValueIterator{T}, i::Int) where {T<:OrderedDict}
+    i > length(v.dict.vals) ? nothing : (v.dict.vals[i], i+1)
+end
 
 function merge(d::OrderedDict, others::AbstractDict...)
     K, V = keytype(d), valtype(d)

@@ -86,9 +86,9 @@ end
 end
 
 # Iteration via getindex
-@inline Base.start(d::CircularDeque) = 1
-@inline Base.next(d::CircularDeque, i::Int) = (_unsafe_getindex(d, i), i+1)
-@inline Base.done(d::CircularDeque, i::Int) = i == d.n + 1
+@inline function iterate(d::CircularDeque, i = 1)
+    i == d.n + 1 ? nothing : (_unsafe_getindex(d, i), i+1)
+end
 
 function Base.show(io::IO, D::CircularDeque{T}) where T
     print(io, "CircularDeque{$T}([")
