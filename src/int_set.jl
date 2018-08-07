@@ -169,10 +169,7 @@ function in(n::Integer, s::IntSet)
     end
 end
 
-# FIXME: figure out how to update this to iterate
-# Use the next-set index as the state to prevent looking it up again in done
-start(s::IntSet) = next(s, 0)[2]
-function next(s::IntSet, i::Int, invert=false)
+function findnextidx(s::IntSet, i::Int, invert=false)
     if s.inverse ⊻ invert
         # i+1 could rollover causing a BoundsError in findnext/findnextnot
         nextidx = i == typemax(Int) ? 0 : something(findnextnot(s.bits, i+1), 0)
@@ -181,12 +178,18 @@ function next(s::IntSet, i::Int, invert=false)
     else
         nextidx = i == typemax(Int) ? 0 : something(findnext(s.bits, i+1), 0)
     end
-    (i-1, nextidx)
+    return nextidx
 end
-done(s::IntSet, i::Int) = i <= 0
+
+Base.iterate(s::IntSet) = iterate(s, findnextidx(s, 0))
+
+function Base.iterate(s::IntSet, i::Int, invert=false)
+    i <= 0 && return nothing
+    return (i-1, findnextidx(s, i, invert))
+end
 
 # Nextnot iterates through elements *not* in the set
-nextnot(s::IntSet, i) = next(s, i, true)
+nextnot(s::IntSet, i) = iterate(s, i, true)
 
 function last(s::IntSet)
     l = length(s.bits)
