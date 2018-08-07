@@ -28,7 +28,7 @@ sizehint!(s::IntSet, n::Integer) = (_resize0!(s.bits, n+1); s)
 function first(itr::IntSet)
     state = iterate(itr)
     state === nothing && throw(ArgumentError("collection must be non-empty"))
-    iterate(itr, state[2])[1]
+    return state[1]
 end
 
 # An internal function for setting the inclusion bit for a given integer n >= 0
