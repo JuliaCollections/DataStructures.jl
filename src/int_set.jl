@@ -2,7 +2,7 @@
 
 import Base: similar, copy, copy!, eltype, push!, pop!, delete!,
              empty!, isempty, union, union!, intersect, intersect!,
-             setdiff, setdiff!, symdiff, symdiff!, in, start, next, done,
+             setdiff, setdiff!, symdiff, symdiff!, in,
              last, length, show, hash, issubset, ==, <=, <, unsafe_getindex,
              unsafe_setindex!, findnextnot, first, empty
 
@@ -26,9 +26,9 @@ sizehint!(s::IntSet, n::Integer) = (_resize0!(s.bits, n+1); s)
 
 # only required on 0.3:
 function first(itr::IntSet)
-    state = start(itr)
-    done(itr, state) && throw(ArgumentError("collection must be non-empty"))
-    next(itr, state)[1]
+    state = iterate(itr)
+    state === nothing && throw(ArgumentError("collection must be non-empty"))
+    iterate(itr, state)[1]
 end
 
 # An internal function for setting the inclusion bit for a given integer n >= 0
@@ -210,9 +210,12 @@ function show(io::IO, s::IntSet)
     print(io, "IntSet([")
     first = true
     for n in s
-        if s.inverse && n > 2 && done(s, nextnot(s, n-3)[2])
-             print(io, ", ..., ", typemax(Int)-1)
-             break
+        if s.inverse && n > 2
+            state = nextnot(s, n - 3)
+            if state !== nothing && state[2] <= 0
+                print(io, ", ..., ", typemax(Int)-1)
+                break
+            end
          end
         !first && print(io, ", ")
         print(io, n)

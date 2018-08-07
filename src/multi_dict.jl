@@ -1,8 +1,8 @@
 #  multi-value dictionary (multidict)
 
 import Base: haskey, get, get!, getkey, delete!, pop!, empty!,
-             insert!, getindex, length, isempty, start,
-             next, done, keys, values, copy, similar,  push!,
+             insert!, getindex, length, isempty,
+             keys, values, copy, similar,  push!,
              count, size, eltype, empty
 
 struct MultiDict{K,V}
@@ -106,24 +106,25 @@ enumerateall(d::MultiDict) = EnumerateAll(d)
 
 length(e::EnumerateAll) = count(e.d)
 
-# FIXME: update to iterate
-function start(e::EnumerateAll)
+function iterate(e::EnumerateAll)
     V = eltype(eltype(values(e.d)))
     vs = V[]
-    (start(e.d.d), nothing, vs, start(vs))
-end
-
-function done(e::EnumerateAll, s::Tuple)
-    dst, k, vs, vst = s
-    done(vs, vst) && done(e.d.d, dst)
-end
-
-function next(e::EnumerateAll, s::Tuple)
-    dst, k, vs, vst = s
-    while done(vs, vst)
-        ((k, vs), dst) = next(e.d.d, dst)
-        vst = start(vs)
+    dst, k, vs, vst = (iterate(e.d.d), nothing, vs, iterate(vs))
+    while vst === nothing
+        ((k, vs), dst) = iterate(e.d.d, dst)
+        vst = iterate(vs)
     end
-    v, vst = next(vs, vst)
+    v, vst = iterate(vs, vst)
+    ((k, v), (dst, k, vs, vst))
+end
+
+function iterate(e::EnumerateAll, s::Tuple)
+    dst, k, vs, vst = s
+    vst === nothing && dst === nothing && return nothing
+    while vst === nothing
+        ((k, vs), dst) = iterate(e.d.d, dst)
+        vst = iterate(vs)
+    end
+    v, vst = iterate(vs, vst)
     ((k, v), (dst, k, vs, vst))
 end

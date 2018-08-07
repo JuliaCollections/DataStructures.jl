@@ -1,8 +1,8 @@
 # OrderedDict
 
 import Base: haskey, get, get!, getkey, delete!, push!, pop!, empty!,
-             setindex!, getindex, length, isempty, start,
-             next, done, keys, values, setdiff, setdiff!,
+             setindex!, getindex, length, isempty,
+             keys, values, setdiff, setdiff!,
              union, union!, intersect, filter, filter!,
              hash, eltype, ValueIterator, convert, copy,
              merge, empty
@@ -74,7 +74,7 @@ function OrderedDict(kv)
     try
         dict_with_eltype(kv, eltype(kv))
     catch e
-        if any(x->isempty(methods(x, (typeof(kv),))), [start, next, done]) ||
+        if any(x->isempty(methods(x, (typeof(kv),))), [iterate]) ||
             !all(x->isa(x,Union{Tuple,Pair}),kv)
             throw(ArgumentError("Dict(kv): kv needs to be an iterator of tuples or pairs"))
         else

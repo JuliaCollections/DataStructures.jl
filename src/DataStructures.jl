@@ -14,7 +14,7 @@ module DataStructures
                  union, intersect, symdiff, setdiff, issubset,
                  searchsortedfirst, searchsortedlast, in,
                  eachindex, keytype, valtype
-    import Base: start, next, done
+    import Base: iterate
 
     using InteractiveUtils: methodswith
 

@@ -61,8 +61,10 @@ DefaultDictBase{K,V}(default::F; kwargs...) where {K,V,F} = DefaultDictBase{K,V,
 empty(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default; passkey=d.passkey)
 @deprecate similar(d::DefaultDictBase) empty(d)
 
-# FIXME: figure out how to update this selective behaviour
-next(v::Base.ValueIterator{T}, i::Int) where {T<:DefaultDictBase} = (v.dict.d.vals[i], Base.skip_deleted(v.dict.d,i+1))
+function iterate(v::Base.ValueIterator{T}, i::Int) where {T <: DefaultDictBase}
+    i > length(v.dict.d.vals) && return nothing
+    return (v.dict.d.vals[i], Base.skip_deleted(v.dict.d, i+1))
+end
 
 getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 

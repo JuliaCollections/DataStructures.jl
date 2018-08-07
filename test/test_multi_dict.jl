@@ -22,7 +22,7 @@
 
     @testset "Core Functionality" begin
         # setindex!, getindex, length, isempty, empty!, in
-        # copy, empty, get, haskey, getkey, start, next, done
+        # copy, empty, get, haskey, getkey, iterate
         d = MultiDict{Char,Int}()
 
         @test length(d) == 0

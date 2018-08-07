@@ -406,7 +406,7 @@ past-end token. Time: O(1)
 ## Iteration Over Sorted Containers
 
 As is standard in Julia, iteration over the containers is implemented
-via calls to three functions, `start`, `next` and `done`. It is usual
+via calls to the `iterate` function. It is usual
 practice, however, to call these functions implicitly with a for-loop
 rather than explicitly, so they are presented here in for-loop notation.
 Internally, all of these iterations are implemented with semitokens that

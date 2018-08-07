@@ -96,7 +96,7 @@
         # TODO: rehash
     end
 
-    @testset "start, done, next" begin
+    @testset "iterate" begin
         for data_in in ((7,8,4,5),
                         ("hello", 23, 2.7, (), [], (1,8)))
             s = OrderedSet(data_in)
