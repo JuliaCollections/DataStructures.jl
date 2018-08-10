@@ -118,13 +118,11 @@ and overwrite back if full.
 """
 function pushfirst!(cb::CircularBuffer, data)
     # if full, decrement and overwrite, otherwise pushfirst
-    if length(cb) == cb.capacity
-        cb.first = (cb.first == 1 ? cb.capacity : cb.first - 1)
-        cb[1] = data
-    else
+    cb.first = (cb.first == 1 ? cb.capacity : cb.first - 1)
+    if length(cb) < cb.capacity
         cb.length += 1
-        pushfirst!(cb.buffer, data)
     end
+    cb.buffer[cb.first] = data
     cb
 end
 

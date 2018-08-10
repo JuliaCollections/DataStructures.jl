@@ -57,6 +57,16 @@
         end
     end
     
+    @testset "Issue 429" begin
+        cb = CircularBuffer{Int}(5)
+        map(x -> pushfirst!(cb, x), 1:8)
+        pop!(cb)
+        pushfirst!(cb, 9)
+        @test length(cb.buffer) == cb.capacity
+        arr = convert(Array, cb)
+        @test arr == Int[9, 8, 7, 6, 5]
+    end
+
     @testset "Issue 379" begin
         cb = CircularBuffer{Int}(5)
         pushfirst!(cb, 1)
