@@ -206,8 +206,8 @@ import Base.Order.Reverse
         @testset "delete!" begin
             pq = PriorityQueue(Base.Order.Forward, "a"=>2, "b"=>3, "c"=>1)
             pq_out = delete!(pq, "b")
-            @test pq == pq_out
-            @test length(pq) == 2
+            @test pq === pq_out
+            @test Set(collect(pq)) == Set("a"=>2, "c"=>1)
         end
     end
 
