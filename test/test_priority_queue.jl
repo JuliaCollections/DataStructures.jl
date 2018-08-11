@@ -207,7 +207,7 @@ import Base.Order.Reverse
             pq = PriorityQueue(Base.Order.Forward, "a"=>2, "b"=>3, "c"=>1)
             pq_out = delete!(pq, "b")
             @test pq === pq_out
-            @test Set(collect(pq)) == Set("a"=>2, "c"=>1)
+            @test Set(collect(pq)) == Set(["a"=>2, "c"=>1])
         end
     end
 
