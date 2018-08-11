@@ -313,6 +313,26 @@ function dequeue_pair!(pq::PriorityQueue, key)
     dequeue_pair!(pq)
 end
 
+"""
+    delete!(pq, key)
+Delete the mapping for the given key in a priority queue, and return the priority queue.
+# Examples
+```jldoctest
+julia> q = PriorityQueue(Base.Order.Forward, "a"=>2, "b"=>3, "c"=>1)
+PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
+  "c" => 1
+  "b" => 3
+  "a" => 2
+julia> delete!(q, "b")
+DataStructures.PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
+  "c" => 1
+  "a" => 2
+```
+"""
+function delete!(pq::PriorityQueue, key)
+    dequeue_pair!(pq, key)
+    pq
+end
 
 # Unordered iteration through key value pairs in a PriorityQueue
 iterate(pq::PriorityQueue) = iterate(pq.index)
