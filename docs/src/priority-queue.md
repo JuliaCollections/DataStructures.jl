@@ -14,6 +14,7 @@ enqueue!(pq, k, v)        # insert the key k into pq with priority v
 enqueue!(pq, k=>v)        # (same, using Pairs)
 dequeue!(pq)              # remove and return the lowest priority key
 peek(pq)                  # return the lowest priority key without removing it
+delete!(pq, k)            # delete the mapping for the given key in a priority queue, and return the priority queue.
 ```
 
 `PriorityQueue` also behaves similarly to a `Dict` in that keys can be
