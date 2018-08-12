@@ -202,6 +202,13 @@ import Base.Order.Reverse
             @test dequeue_pair!(pq, 'b') == ('b'=>4)
             @test length(pq) == 3
         end
+
+        @testset "delete!" begin
+            pq = PriorityQueue(Base.Order.Forward, "a"=>2, "b"=>3, "c"=>1)
+            pq_out = delete!(pq, "b")
+            @test pq === pq_out
+            @test Set(collect(pq)) == Set(["a"=>2, "c"=>1])
+        end
     end
 
     @testset "LowLevelHeapOperations" begin
