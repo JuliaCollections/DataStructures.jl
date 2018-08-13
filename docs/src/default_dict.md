@@ -14,13 +14,13 @@ DefaultDict(default, kv)    # create a DefaultDict with a default value or funct
                             # optionally wrapping an existing dictionary
                             # or array of key-value pairs
 
-DefaultDict(KeyType, ValueType, default)   # create a DefaultDict with Dict type (KeyType,ValueType)
+DefaultDict{KeyType, ValueType}(default)   # create a DefaultDict with Dict type (KeyType,ValueType)
 
 DefaultOrderedDict(default, kv)     # create a DefaultOrderedDict with a default value or function,
                                     # optionally wrapping an existing dictionary
                                     # or array of key-value pairs
 
-DefaultOrderedDict(KeyType, ValueType, default) # create a DefaultOrderedDict with Dict type (KeyType,ValueType)
+DefaultOrderedDict{KeyType, ValueType}(default) # create a DefaultOrderedDict with Dict type (KeyType,ValueType)
 ```
 
 All constructors also take a `passkey::Bool=false` keyword argument which determines whether to pass along the `key`
@@ -28,70 +28,79 @@ argument when calling the default function. It has no effect when the key is jus
 
 Examples using `DefaultDict`:
 
-```julia
+```@setup DataStructures
+using DataStructures
+```
+
+```@repl DataStructures
 dd = DefaultDict(1)               # create an (Any=>Any) DefaultDict with a default value of 1
-dd = DefaultDict(AbstractString, Int, 0)  # create a (AbstractString=>Int) DefaultDict with a default value of 0
+```
 
-d = ['a'=>1, 'b'=>2]
+```@repl DataStructures
+dd = DefaultDict{AbstractString, Int}(0)  # create a (AbstractString=>Int) DefaultDict with a default value of 0
+```
+
+```@repl DataStructures
+d = Dict('a'=>1, 'b'=>2)
 dd = DefaultDict(0, d)            # provide a default value to an existing dictionary
-dd['c'] == 0                      # true
-#d['c'] == 0                      # false
+d['c']  # should raise a KeyError because 'c' key doesn't exist
+dd['c']
+```
 
+```@repl DataStructures
 dd = DefaultOrderedDict(time)     # call time() to provide the default value for an OrderedDict
-dd = DefaultDict(Dict)            # Create a dictionary of dictionaries
-                                  # Dict() is called to provide the default value
+dd = DefaultDict(Dict)            # Create a dictionary of dictionaries - Dict() is called to provide the default value
 dd = DefaultDict(()->myfunc())    # call function myfunc to provide the default value
+```
 
-# These all create the same default dict
-dd = DefaultDict(AbstractString, Vector{Int},
-                         () -> Vector{Int}())
-dd = DefaultDict(AbstractString, Vector{Int}, () -> Int[])
+These all create the same default dict
 
-# dd = DefaultDict(AbstractString, Vector{Int},     # **Note! Julia v0.4 and later only!
-#                  Vector{Int})             # the second Vector{Int} is called as a function
+```@repl DataStructures
+dd = DefaultDict{AbstractString, Vector{Int}}(() -> Vector{Int}())
+```
+
+```@repl DataStructures
+dd = DefaultDict{AbstractString, Vector{Int}}(() -> Int[])
+```
+
+```@repl DataStructures
+dd = DefaultDict{AbstractString, Vector{Int}}(Vector{Int})
 
 push!(dd["A"], 1)
+
 push!(dd["B"], 2)
 
-julia> dd
-DefaultDict{AbstractString,Array{Int64,1},Function} with 2 entries:
-  "B" => [2]
-  "A" => [1]
+dd
+```
 
-# create a Dictionary of type AbstractString=>DefaultDict{AbstractString, Int}, where the default of the
-# inner set of DefaultDicts is zero
-dd = DefaultDict(AbstractString, DefaultDict, () -> DefaultDict(AbstractString,Int,0))
+Create a Dictionary of type `AbstractString=>DefaultDict{AbstractString, Int}`, where the default of the inner set of `DefaultDict`s is zero
 
-# use DefaultDict to cache an expensive function call, i.e., memoize
-# https://en.wikipedia.org/wiki/Memoization
+```@repl DataStructures
+dd = DefaultDict{AbstractString, DefaultDict}(() -> DefaultDict{AbstractString,Int}(0))
+```
+
+Use `DefaultDict` to cache an expensive function call, i.e., [memoize](https://en.wikipedia.org/wiki/Memoization)
+
+```@repl DataStructures
 dd = DefaultDict{AbstractString, Int}(passkey=true) do key
     len = length(key)
     sleep(len)
     return len
 end
 
-julia> dd["hi"]  # slow
-2
+dd["hi"]  # slow
 
-julia> dd["ho"]  # slow
-2
+dd["ho"]  # slow
 
-julia> dd["hi"]  # fast
-2
+dd["hi"]  # fast
 ```
 
 Note that in the second-last example, we need to use a function to create each new `DefaultDict`.
 If we forget, we will end up using the same`DefaultDict` for all default values:
 
-```julia
-julia> dd = DefaultDict(AbstractString, DefaultDict, DefaultDict(AbstractString,Int,0));
-
-julia> dd["a"]
-DefaultDict{AbstractString,Int64,Int64,Dict{K,V}}()
-
-julia> dd["b"]["a"] = 1
-1
-
-julia> dd["a"]
-["a"=>1]
+```@repl DataStructures
+dd = DefaultDict{AbstractString, DefaultDict}(DefaultDict{AbstractString,Int}(0));
+dd["a"]
+dd["b"]["a"] = 1
+dd["a"]
 ```
