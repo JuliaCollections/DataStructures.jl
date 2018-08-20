@@ -692,12 +692,12 @@ packdeepcopy(sc)
 
 ```@docs
 merge(m::SortedDict{K,D,Ord},
-               others::Associative{K,D}...) where {K,D,Ord <: Ordering}
+               others::AbstractDict{K,D}...) where {K,D,Ord <: Ordering}
 ```
 
 ```@docs
 merge!(m::SortedDict{K,D,Ord},
-                others::Associative{K,D}...) where {K,D,Ord <: Ordering}
+                others::AbstractDict{K,D}...) where {K,D,Ord <: Ordering}
 ```
 
 ### Set operations
