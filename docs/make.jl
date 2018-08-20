@@ -27,7 +27,7 @@ makedocs(
 
 deploydocs(
     repo = "github.com/JuliaCollections/DataStructures.jl.git",
-    julia  = "1.0",
+    julia  = "0.7",
     latest = "master",
     target = "build",
     deps = nothing,  # we use the `format = :html`, without `mkdocs`
