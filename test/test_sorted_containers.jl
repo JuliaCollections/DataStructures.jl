@@ -1,11 +1,11 @@
 import Base.Ordering
 import Base.Forward
 import Base.Reverse
-import ..DataStructures.eq
+import DataStructures.eq
 import Base.lt
 import Base.ForwardOrdering
 import Base.ReverseOrdering
-import ..DataStructures.IntSemiToken
+import DataStructures.IntSemiToken
 
 struct CaseInsensitive <: Ordering
 end
@@ -40,7 +40,7 @@ end
 ## Function checkcorrectness checks a balanced tree for correctness.
 
 function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
-                          allowdups=false) where {K,D,Ord <: Ordering}
+                          allowdups=false)  where {K,D,Ord <: Ordering}
     dsz = size(t.data, 1)
     tsz = size(t.tree, 1)
     r = t.rootloc

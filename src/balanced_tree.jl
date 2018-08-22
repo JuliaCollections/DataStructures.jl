@@ -25,6 +25,13 @@
 ##  data nodes.
 
 
+macro invariant(expr)
+end
+
+macro invariant_support_statement(expr)
+end
+
+
 struct KDRec{K,D}
     parent::Int
     k::K
@@ -375,7 +382,7 @@ function insert!(t::BalancedTree23{K,D,Ord}, k, d, allowdups::Bool) where {K,D,O
     ## longer hold undefined references.
 
     if size(t.data,1) == 2
-        # @assert(t.rootloc == 1 && t.depth == 1)
+        @invariant t.rootloc == 1 && t.depth == 1
         t.tree[1] = TreeNode{K}(t.tree[1].child1, t.tree[1].child2,
                                 t.tree[1].child3, t.tree[1].parent,
                                 k, k)
@@ -486,7 +493,7 @@ function insert!(t::BalancedTree23{K,D,Ord}, k, d, allowdups::Bool) where {K,D,O
         ## If p1 is the root (i.e., we have encountered only 3-nodes during
         ## our ascent of the tree), then the root must be split.
         if p1 == t.rootloc
-            # @assert(curdepth == 1)
+            @invariant curdepth == 1
             splitroot = true
             break
         end
@@ -547,7 +554,7 @@ end
 
 function nextloc0(t, i::Int)
     ii = i
-    # @assert(i != 2 && i in t.useddatacells)
+    @invariant i != 2 && i in t.useddatacells
     @inbounds p = t.data[i].parent
     nextchild = 0
     depthp = t.depth
@@ -585,7 +592,7 @@ end
 
 
 function prevloc0(t::BalancedTree23, i::Int)
-    # @assert(i != 1 && i in t.useddatacells)
+    @invariant i != 1 && i in t.useddatacells
     ii = i
     @inbounds p = t.data[i].parent
     prevchild = 0
@@ -631,30 +638,30 @@ function compareInd(t::BalancedTree23, i1::Int, i2::Int)
     i2a = i2
     p1 = t.data[i1].parent
     p2 = t.data[i2].parent
-    # curdepth = t.depth
+    @invariant_support_statement curdepth = t.depth
     while true
-        # @assert(curdepth > 0)
+        @invariant curdepth > 0
         if p1 == p2
             if i1a == t.tree[p1].child1
-                # @assert(t.tree[p1].child2 == i2a || t.tree[p1].child3 == i2a)
+                @invariant t.tree[p1].child2 == i2a || t.tree[p1].child3 == i2a
                 return -1
             end
             if i1a == t.tree[p1].child2
                 if (t.tree[p1].child1 == i2a)
                     return 1
                 end
-                # @assert(t.tree[p1].child3 == i2a)
+                @invariant t.tree[p1].child3 == i2a
                 return -1
             end
-            # @assert(i1a == t.tree[p1].child3)
-            # @assert(t.tree[p1].child1 == i2a || t.tree[p1].child2 == i2a)
+            @invariant i1a == t.tree[p1].child3
+            @invariant t.tree[p1].child1 == i2a || t.tree[p1].child2 == i2a
             return 1
         end
         i1a = p1
         i2a = p2
         p1 = t.tree[i1a].parent
         p2 = t.tree[i2a].parent
-        # curdepth -= 1
+        @invariant_support_statement curdepth -= 1
     end
 end
 
@@ -713,7 +720,7 @@ function delete!(t::BalancedTree23{K,D,Ord}, it::Int) where {K,D,Ord<:Ordering}
         t.deletionchild[newchildcount] = c3
         t.deletionleftkey[newchildcount] = t.data[c3].k
     end
-    # @assert(newchildcount == 1 || newchildcount == 2)
+    @invariant newchildcount == 1 || newchildcount == 2
     push!(t.freedatainds, it)
     pop!(t.useddatacells,it)
     defaultKey = t.tree[1].splitkey1
@@ -744,7 +751,7 @@ function delete!(t::BalancedTree23{K,D,Ord}, it::Int) where {K,D,Ord<:Ordering}
                                     t.deletionleftkey[2], t.deletionleftkey[3])
             break
         end
-        # @assert(newchildcount == 1)
+        @invariant newchildcount == 1
         ## For the rest of this loop, we cover the case
         ## that p has one child.
 
@@ -896,7 +903,7 @@ function delete!(t::BalancedTree23{K,D,Ord}, it::Int) where {K,D,Ord<:Ordering}
             ## leftsib are reformed so that each has
             ## two children.
 
-            # @assert(t.tree[pparent].child3 == p)
+            @invariant t.tree[pparent].child3 == p
             leftsib = t.tree[pparent].child2
             lk = deletionleftkey1_valid ?
                        t.deletionleftkey[1] :
@@ -949,8 +956,8 @@ function delete!(t::BalancedTree23{K,D,Ord}, it::Int) where {K,D,Ord<:Ordering}
         curdepth -= 1
     end
     if mustdeleteroot
-        # @assert(!deletionleftkey1_valid)
-        # @assert(p == t.rootloc)
+        @invariant !deletionleftkey1_valid
+        @invariant p == t.rootloc
         t.rootloc = t.deletionchild[1]
         t.depth -= 1
         push!(t.freetreeinds, p)
@@ -993,7 +1000,7 @@ function delete!(t::BalancedTree23{K,D,Ord}, it::Int) where {K,D,Ord<:Ordering}
                 p = pparent
                 pparent = pparentnode.parent
                 curdepth -= 1
-                # @assert(curdepth > 0)
+                @invariant curdepth > 0
             end
         end
     end
