@@ -335,7 +335,7 @@ function delete!(pq::PriorityQueue, key)
 end
 
 # Unordered iteration through key value pairs in a PriorityQueue
-function Base.iterate(pq::PriorityQueue)
+function iterate(pq::PriorityQueue)
     state = iterate(pq.index)
     state == nothing && return nothing
     (k, idx), i = state
