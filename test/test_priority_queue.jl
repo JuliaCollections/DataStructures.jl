@@ -210,6 +210,15 @@ import Base.Order.Reverse
             @test Set(collect(pq)) == Set(["a"=>2, "c"=>1])
         end
     end
+    
+    @testset "Iteration" begin
+        io = IOBuffer()
+        pq = PriorityQueue('a'=>'A', 'b'=>'B', 'c'=>'C')
+        for (k, v) in pq
+            println(io, k, " => ", v)
+        end
+        @test String(take!(copy(io))) == "a => A\nc => C\nb => B\n"
+    end
 
     @testset "LowLevelHeapOperations" begin
         pmax = 1000
