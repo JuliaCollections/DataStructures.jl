@@ -217,7 +217,11 @@ import Base.Order.Reverse
         for (k, v) in pq
             println(io, k, " => ", v)
         end
-        @test String(take!(copy(io))) == "a => A\nc => C\nb => B\n"
+        if Sys.WORD_SIZE == 32
+            @test String(take!(copy(io))) == "b => B\nc => C\na => A\n"
+        else
+            @test String(take!(copy(io))) == "a => A\nc => C\nb => B\n"
+        end
     end
 
     @testset "LowLevelHeapOperations" begin
