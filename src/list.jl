@@ -1,9 +1,9 @@
 abstract type LinkedList{T} end
 
-mutable struct Nil{T} <: LinkedList{T}
+struct Nil{T} <: LinkedList{T}
 end
 
-mutable struct Cons{T} <: LinkedList{T}
+struct Cons{T} <: LinkedList{T}
     head::T
     tail::LinkedList{T}
 end

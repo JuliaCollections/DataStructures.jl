@@ -103,4 +103,9 @@
         @test collect(l10) == [2; 4; 5.6; 10.5]
     end
 
+    @testset "immutable" begin
+        @test isimmutable(list(1))
+        @test isimmutable(nil())
+    end
+
 end # @testset LinkedList
