@@ -5,11 +5,11 @@ CurrentModule = DataStructures
 ```
 
 Three sorted containers are provided: SortedDict, SortedMultiDict and
-SortedSet. *SortedDict* is similar to the built-in Julia type `Dict`
+SortedSet. _SortedDict_ is similar to the built-in Julia type `Dict`
 with the additional feature that the keys are stored in sorted order and
 can be efficiently iterated in this order. SortedDict is a subtype of
-Associative. It is generally slower than `Dict` because looking up a key
-requires an O(log *n*) tree search rather than an expected O(1)
+AbstractDict. It is generally slower than `Dict` because looking up a key
+requires an O(log _n_) tree search rather than an expected O(1)
 hash-table lookup time as with Dict. SortedDict is a parametrized type
 with three parameters, the key type `K`, the value type `V`, and the
 ordering type `O`. SortedSet has only keys; it is an alternative to the
@@ -23,8 +23,8 @@ same key are stored in order of insertion.
 The containers internally use a 2-3 tree, which is a kind of balanced
 tree and is described in many elementary data structure textbooks.
 
-The containers require two functions to compare keys: a *less-than* and
-*equals* function. With the default ordering argument, the comparison
+The containers require two functions to compare keys: a _less-than_ and
+_equals_ function. With the default ordering argument, the comparison
 functions are `isless(key1,key2)` (true when `key1 < key2`) and
 `isequal(key1,key2)` (true when `key1 == key2`) where `key1` and `key2`
 are keys. More details are provided below.
@@ -32,14 +32,14 @@ are keys. More details are provided below.
 ## Tokens for Sorted Containers
 
 The sorted container objects use a special type for indexing called a
-*token* defined as a two-entry tuple and aliased as `SDToken`,
+_token_ defined as a two-entry tuple and aliased as `SDToken`,
 `SMDToken`, and `SetToken` for SortedDict, SortedMultiDict and SortedSet
 respectively. A token is the address of a single data item in the
 container and can be dereferenced in time O(1).
 
 The first entry of a Token tuple is the container as a whole, and the
 second refers to the particular item. The second part is called a
-*semitoken*. The types for a semitoken are `SDSemiToken`,
+_semitoken_. The types for a semitoken are `SDSemiToken`,
 `SMDSemiToken`, and `SetSemiToken` for the three types of containers
 SortedDict, SortedMultiDict and SortedSet. These types are all aliases
 of `IntSemiToken`.
@@ -78,8 +78,8 @@ standard containers. Tokens can be explicitly advanced or regressed
 through the data in the sorted order; they are implicitly advanced or
 regressed via iteration loops defined below.
 
-A token may take two special values: the *before-start* value and the
-*past-end* value. These values act as lower and upper bounds on the
+A token may take two special values: the _before-start_ value and the
+_past-end_ value. These values act as lower and upper bounds on the
 actual data. The before-start token can be advanced, while the past-end
 token can be regressed. A dereferencing operation on either leads to an
 error.
@@ -90,7 +90,6 @@ should not extract this internal representation; these integers do not
 have a documented interpretation in terms of the container.
 
 ## Constructors for Sorted Containers
-
 
 ### `SortedDict` constructors
 
@@ -154,6 +153,7 @@ SortedMultiDict{K,D}(o::Ord, kv) where {K,D,Ord<:Ordering}
 ```
 
 ### `SortedSets` constructors
+
 ```@docs
 SortedSet{K, Ord <: Ordering}
 ```
@@ -177,11 +177,12 @@ SortedSet{K}(o::O) where {K,O<:Ordering}
 ## Complexity of Sorted Containers
 
 In the list of functions below, the running time of the various
-operations is provided. In these running times, *n* denotes the current
+operations is provided. In these running times, _n_ denotes the current
 size (number of items) in the container at the time of the function
-call, and *c* denotes the time needed to compare two keys.
+call, and _c_ denotes the time needed to compare two keys.
 
 ### Navigating the Containers
+
 ```@docs
 getindex(m::SortedDict, k_)
 ```
@@ -219,14 +220,14 @@ pair) pointed to by the token. Time: O(1)
 Argument `sc` is SortedDict, SortedMultiDict or SortedSet. This
 function returns the semitoken of the first item according to the
 sorted order in the container. If the container is empty, it returns
-the past-end semitoken. Time: O(log *n*)
+the past-end semitoken. Time: O(log _n_)
 
     endof(sc)
 
 Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
 function returns the semitoken of the last item according to the
 sorted order in the container. If the container is empty, it returns
-the before-start semitoken. Time: O(log *n*)
+the before-start semitoken. Time: O(log _n_)
 
 ```@docs
 first(sc::SortedDict)
@@ -271,7 +272,7 @@ semitoken. It is an error to invoke this function if `(sc,st)` is
 the past-end token. If `(sc,st)` is the before-start token, then
 this routine returns the semitoken of the first item in the sort
 order (i.e., the same semitoken returned by the `startof` function).
-Time: O(log *n*)
+Time: O(log _n_)
 
     regress((sc,st))
 
@@ -282,23 +283,23 @@ returns the before-start semitoken. It is an error to invoke this
 function if `(sc,st)` is the before-start token. If `(sc,st)` is the
 past-end token, then this routine returns the smitoken of the last
 item in the sort order (i.e., the same semitoken returned by the
-`endof` function). Time: O(log *n*)
+`endof` function). Time: O(log _n_)
 
     searchsortedfirst(sc,k)
 
 Argument `sc` is a SortedDict, SortedMultiDict or SortedSet and `k`
 is a key. This routine returns the semitoken of the first item in
 the container whose key is greater than or equal to `k`. If there is
-no such key, then the past-end semitoken is returned. Time: O(*c*
-log *n*)
+no such key, then the past-end semitoken is returned. Time: O(_c_
+log _n_)
 
     searchsortedlast(sc,k)
 
 Argument `sc` is a SortedDict, SortedMultiDict or SortedSet and `k`
 is a key. This routine returns the semitoken of the last item in the
 container whose key is less than or equal to `k`. If there is no
-such key, then the before-start semitoken is returned. Time: O(*c*
-log *n*)
+such key, then the before-start semitoken is returned. Time: O(_c_
+log _n_)
 
     searchsortedafter(sc,k)
 
@@ -306,7 +307,7 @@ Argument `sc` is a SortedDict, SortedMultiDict or SortedSet and `k`
 is an element of the key type. This routine returns the semitoken of
 the first item in the container whose key is greater than `k`. If
 there is no such key, then the past-end semitoken is returned. Time:
-O(*c* log *n*)
+O(_c_ log _n_)
 
     searchequalrange(sc,k)
 
@@ -316,7 +317,7 @@ pair is the semitoken addressing the first item in the container
 with key `k` and the second is the semitoken addressing the last
 item in the container with key `k`. If no item matches the given
 key, then the pair (past-end-semitoken, before-start-semitoken) is
-returned. Time: O(*c* log *n*)
+returned. Time: O(_c_ log _n_)
 
 ## Inserting & Deleting in Sorted Containers
 
@@ -356,7 +357,7 @@ SortedSet. This operation deletes the item addressed by `(sc,st)`.
 It is an error to call this on an entry that has already been
 deleted or on the before-start or past-end tokens. After this
 operation is complete, `(sc,st)` is an invalid token and cannot be
-used in any further operations. Time: O(log *n*)
+used in any further operations. Time: O(log _n_)
 
 ```@docs
 pop!(sc::SortedDict, k)
@@ -394,7 +395,7 @@ Similarly, for SortedSet it is mostly equivalent to comparing
 `deref((sc,st1))` to `deref((sc,st2))`. For SortedMultiDict, this
 function is not equivalent to a key comparison since two items in a
 SortedMultiDict with the same key are not necessarily the same item.
-Time: O(log *n*)
+Time: O(log _n_)
 
     status((sc, st))
 
@@ -411,7 +412,7 @@ practice, however, to call these functions implicitly with a for-loop
 rather than explicitly, so they are presented here in for-loop notation.
 Internally, all of these iterations are implemented with semitokens that
 are advanced via the `advance` operation. Each iteration of these loops
-requires O(log *n*) operations to advance the semitoken. If one loops
+requires O(log _n_) operations to advance the semitoken. If one loops
 over an entire container, then the amortized cost of advancing the
 semitoken drops to O(1).
 
@@ -628,7 +629,6 @@ k in collect(keys(sd))
 k in collect(keys(smd))
 ```
 
-
 ```@docs
 eltype(sc::SortedDict)
 ```
@@ -683,7 +683,7 @@ This returns a copy of `sc` in which the data is deep-copied, i.e.,
 the keys and values are replicated if they are mutable types. A
 semitoken for the original `sc` is a valid semitoken for the copy
 because this operation preserves the relative positions of the data
-in memory. Time O(*maxn*), where *maxn* denotes the maximum size
+in memory. Time O(_maxn_), where _maxn_ denotes the maximum size
 that `sc` has attained in the past.
 
 ```@docs
@@ -755,8 +755,8 @@ reverses the usual sorted order. This name must be imported
 `import Base.Reverse` if it is used.
 
 As an example of a custom ordering, suppose the keys are of type
-`String`, and the user wishes to order the keys ignoring case: *APPLE*,
-*berry* and *Cherry* would appear in that order, and *APPLE* and *aPPlE*
+`String`, and the user wishes to order the keys ignoring case: _APPLE_,
+_berry_ and _Cherry_ would appear in that order, and _APPLE_ and _aPPlE_
 would be indistinguishable in this ordering.
 
 The simplest approach is to define an ordering object of the form

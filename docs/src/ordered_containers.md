@@ -2,7 +2,7 @@
 
 `OrderedDicts` are simply dictionaries whose entries have a particular
 order. For `OrderedDicts` (and `OrderedSets`), order refers to
-*insertion order*, which allows deterministic iteration over the
+_insertion order_, which allows deterministic iteration over the
 dictionary or set:
 
 ```julia
@@ -20,10 +20,10 @@ collect(s) # => [π = 3.1415926535897...,
            #     φ = 1.6180339887498...]
 ```
 
-All standard `Associative` and `Dict` functions are available for
-`OrderedDicts`, and all `Set` operations are available for OrderedSets.
+All standard `Dict` functions are available for `OrderedDicts`, and
+all `Set` operations are available for `OrderedSets`.
 
-Note that to create an OrderedSet of a particular type, you must specify
+Note that to create an `OrderedSet` of a particular type, you must specify
 the type in curly-braces:
 
 ```julia
