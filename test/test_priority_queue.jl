@@ -210,6 +210,11 @@ import Base.Order.Reverse
             @test Set(collect(pq)) == Set(["a"=>2, "c"=>1])
         end
     end
+    
+    @testset "Iteration" begin
+        pq = PriorityQueue('a'=>'A')
+        @test collect(pq) == ['a' => 'A']
+    end
 
     @testset "LowLevelHeapOperations" begin
         pmax = 1000
