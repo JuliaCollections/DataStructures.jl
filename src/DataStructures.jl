@@ -92,9 +92,11 @@ module DataStructures
 
     export
         CircularBuffer,
+        CircularVectorBuffer,
         capacity,
         isfull
     include("circular_buffer.jl")
+    include("circular_vector_buffer.jl")
 
     export status
     export deref_key, deref_value, deref, advance, regress

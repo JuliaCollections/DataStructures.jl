@@ -25,6 +25,7 @@ tests = ["int_set",
          "list",
          "multi_dict",
          "circular_buffer",
+         "circular_vector_buffer",
          "sorting",
          "priority_queue"
         ]
