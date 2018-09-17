@@ -1,20 +1,17 @@
 module DataStructures
 
-    import Base: <, <=, ==, length, isempty, iterate, delete!,
-                 show, dump, empty!, getindex, setindex!, get, get!,
-                 in, haskey, keys, merge, copy, cat,
-                 push!, pop!, pushfirst!, popfirst!, insert!, lastindex,
-                 union!, delete!, similar, sizehint!, empty,
-                 isequal, hash,
-                 map, reverse,
-                 first, last, eltype, getkey, values, sum,
-                 merge, merge!, lt, Ordering, ForwardOrdering, Forward,
-                 ReverseOrdering, Reverse, Lt,
-                 isless,
-                 union, intersect, symdiff, setdiff, issubset,
-                 searchsortedfirst, searchsortedlast, in,
-                 eachindex, keytype, valtype
-    import Base: iterate
+    import Base: <, <=, ==, cat, copy, dump, eachindex, eltype, empty, first,
+                 get, getindex, getkey, hash, haskey, in, intersect, isempty,
+                 isequal, isless, issubset, iterate, keys, keytype, last,
+                 lastindex, length, lt, map, merge, reverse, searchsortedfirst,
+                 searchsortedlast, setdiff, show, similar, sum, symdiff, union,
+                 valtype, values,
+
+                 delete!, empty!, get!, insert!, merge!, pop!, popfirst!, push!,
+                 pushfirst!, setindex!, sizehint!, union!,
+
+                 Forward, ForwardOrdering, Lt, Ordering, Reverse,
+                 ReverseOrdering
 
     using InteractiveUtils: methodswith
 
