@@ -16,7 +16,8 @@ module DataStructures
                  eachindex, keytype, valtype
     import Base: iterate
 
-    using InteractiveUtils: methodswith
+    using OrderedCollections
+    import OrderedCollections: filter, filter!, isordered
 
     export complement, complement!
 
@@ -67,10 +68,8 @@ module DataStructures
     include("disjoint_set.jl")
     include("heaps.jl")
 
-    include("dict_support.jl")
-    include("ordered_dict.jl")
-    include("ordered_set.jl")
     include("default_dict.jl")
+    include("dict_support.jl")
     include("trie.jl")
 
     include("int_set.jl")
@@ -87,8 +86,6 @@ module DataStructures
     include("sorted_set.jl")
     include("tokens2.jl")
     include("container_loops.jl")
-
-    include("dict_sorting.jl")
 
     export
         CircularBuffer,
