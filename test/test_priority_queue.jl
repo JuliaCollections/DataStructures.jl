@@ -209,8 +209,17 @@ import Base.Order.Reverse
             @test pq === pq_out
             @test Set(collect(pq)) == Set(["a"=>2, "c"=>1])
         end
+
+        @testset "empty!" begin
+            pq = PriorityQueue(Base.Order.Forward, "a"=>2, "b"=>3, "c"=>1)
+            @test !isempty(pq)
+            empty!(pq)
+            @test isempty(pq)
+            enqueue!(pq, "a"=>2)
+            @test length(pq) == 1
+        end
     end
-    
+
     @testset "Iteration" begin
         pq = PriorityQueue('a'=>'A')
         @test collect(pq) == ['a' => 'A']
