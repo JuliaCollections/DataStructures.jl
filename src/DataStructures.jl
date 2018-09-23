@@ -1,20 +1,17 @@
 module DataStructures
 
-    import Base: <, <=, ==, length, isempty, iterate, delete!,
+    import Base: <, <=, ==, length, isempty, iterate,
                  show, dump, empty!, getindex, setindex!, get, get!,
-                 in, haskey, keys, merge, copy, cat,
+                 in, haskey, keys, merge, copy, cat, collect,
                  push!, pop!, pushfirst!, popfirst!, insert!, lastindex,
-                 union!, delete!, similar, sizehint!, empty,
-                 isequal, hash,
-                 map, reverse,
+                 union!, delete!, similar, sizehint!, empty, append!,
+                 isequal, hash, map, filter, reverse,
                  first, last, eltype, getkey, values, sum,
                  merge, merge!, lt, Ordering, ForwardOrdering, Forward,
                  ReverseOrdering, Reverse, Lt,
-                 isless,
-                 union, intersect, symdiff, setdiff, issubset,
+                 isless, union, intersect, symdiff, setdiff, issubset,
                  searchsortedfirst, searchsortedlast, in,
                  eachindex, keytype, valtype
-    import Base: iterate
 
     using OrderedCollections
     import OrderedCollections: filter, filter!, isordered
@@ -43,6 +40,7 @@ module DataStructures
 
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
            reverse
+    export MutableLinkedList
     export SortedDict, SortedMultiDict, SortedSet
     export SDToken, SDSemiToken, SMDToken, SMDSemiToken
     export SetToken, SetSemiToken
@@ -75,6 +73,7 @@ module DataStructures
     include("int_set.jl")
 
     include("list.jl")
+    include("mutable_list.jl")
     include("balanced_tree.jl")
     include("tokens.jl")
 
