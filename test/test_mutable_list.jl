@@ -84,6 +84,11 @@
                 @testset "delete" begin
                     delete!(l, n+1:2n)
                     @test l == MutableLinkedList{Int}(1:n...)
+                    for i = n:-1:1
+                        delete!(l, i)
+                    end
+                    @test l == MutableLinkedList{Int}()
+                    l = MutableLinkedList{Int}(1:n...)
                     @test_throws ArgumentError delete!(l, n-1:2n)
                     @test_throws ArgumentError delete!(l, 2n)
                 end
