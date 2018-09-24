@@ -6,8 +6,8 @@
         @test length(l1) == 0
         @test collect(l1) == Int[]
         @test eltype(l1) == Int
-        @test_throws ArgumentError pop!(l1)
-        @test_throws ArgumentError popfirst!(l1)
+        @test_throws BoundsError pop!(l1)
+        @test_throws BoundsError popfirst!(l1)
     end
 
     @testset "core functionality" begin
@@ -89,8 +89,8 @@
                     end
                     @test l == MutableLinkedList{Int}()
                     l = MutableLinkedList{Int}(1:n...)
-                    @test_throws ArgumentError delete!(l, n-1:2n)
-                    @test_throws ArgumentError delete!(l, 2n)
+                    @test_throws BoundsError delete!(l, n-1:2n)
+                    @test_throws BoundsError delete!(l, 2n)
                 end
 
                 @testset "copy" begin
