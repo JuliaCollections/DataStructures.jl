@@ -125,4 +125,14 @@
         end
     end
 
+    @testset "push! type conversion" begin # issue 399
+        h = binary_minheap(Float64)
+        push!(h, 3.0)
+        push!(h, 5)
+        push!(h, Rational(4, 8))
+        push!(h, Complex(10.1, 0.0))
+
+        @test isequal(h.valtree, [0.5, 5.0, 3.0, 10.1])
+    end
+
 end # @testset BinaryHeap

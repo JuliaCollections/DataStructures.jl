@@ -134,13 +134,12 @@ length(h::BinaryHeap) = length(h.valtree)
 
 isempty(h::BinaryHeap) = isempty(h.valtree)
 
-function push!(h::BinaryHeap{T}, v::T) where T
+function push!(h::BinaryHeap, v)
     valtree = h.valtree
     push!(valtree, v)
     _heap_bubble_up!(h.comparer, valtree, length(valtree))
     h
 end
-
 
 """
     top(h::BinaryHeap)
