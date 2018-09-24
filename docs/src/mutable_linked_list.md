@@ -1,6 +1,6 @@
 # Mutable Linked List
 
-The `MutableLinkedList` type implements a doubly-linked list with mutable nodes.
+The `MutableLinkedList` type implements a doubly linked list with mutable nodes.
 This data structure supports constant-time insertion/removal of elements
 at both ends of the list.
 
