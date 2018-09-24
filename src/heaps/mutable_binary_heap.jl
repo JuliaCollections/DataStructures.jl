@@ -197,12 +197,12 @@ length(h::MutableBinaryHeap) = length(h.nodes)
 
 isempty(h::MutableBinaryHeap) = isempty(h.nodes)
 
-function push!(h::MutableBinaryHeap{T}, v::T) where T
+function push!(h::MutableBinaryHeap{T}, v) where T
     nodes = h.nodes
     nodemap = h.node_map
     i = length(nodemap) + 1
     nd_id = length(nodes) + 1
-    push!(nodes, MutableBinaryHeapNode(v, i))
+    push!(nodes, MutableBinaryHeapNode(convert(T, v), i))
     push!(nodemap, nd_id)
     _heap_bubble_up!(h.comparer, nodes, nodemap, nd_id)
     i
@@ -228,15 +228,16 @@ pop!(h::MutableBinaryHeap{T}) where {T} = _binary_heap_pop!(h.comparer, h.nodes,
 Replace the element at index `i` in heap `h` with `v`.
 This is equivalent to `h[i]=v`.
 """
-function update!(h::MutableBinaryHeap{T}, i::Int, v::T) where T
+function update!(h::MutableBinaryHeap{T}, i::Int, v) where T
     nodes = h.nodes
     nodemap = h.node_map
     comp = h.comparer
 
     nd_id = nodemap[i]
     v0 = nodes[nd_id].value
-    nodes[nd_id] = MutableBinaryHeapNode(v, i)
-    if compare(comp, v, v0)
+    x = convert(T, v)
+    nodes[nd_id] = MutableBinaryHeapNode(x, i)
+    if compare(comp, x, v0)
         _heap_bubble_up!(comp, nodes, nodemap, nd_id)
     else
         _heap_bubble_down!(comp, nodes, nodemap, nd_id)

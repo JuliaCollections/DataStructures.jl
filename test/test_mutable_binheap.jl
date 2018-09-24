@@ -209,4 +209,16 @@ end
         end
     end
 
+    @testset "test push! and update! conversion" begin # issue 399
+        h = mutable_binary_minheap(Float64)
+        push!(h, 3.0)
+        push!(h, 5)
+        push!(h, Rational(4, 8))
+        push!(h, Complex(10.1, 0.0))
+        @test isequal(heap_values(h), [0.5, 5.0, 3.0, 10.1])
+
+        update!(h, 2, 20)
+        @test isequal(heap_values(h), [0.5, 10.1, 3.0, 20.0])
+    end
+
 end # @testset MutableBinheap
