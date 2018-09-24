@@ -23,7 +23,7 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
   "a" => 2
 ```
 """
-mutable struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
+struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
     # Binary heap of (element, priority) pairs.
     xs::Array{Pair{K,V}, 1}
     o::O
@@ -331,6 +331,12 @@ DataStructures.PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 ent
 """
 function delete!(pq::PriorityQueue, key)
     dequeue_pair!(pq, key)
+    pq
+end
+
+function empty!(pq::PriorityQueue)
+    empty!(pq.xs)
+    empty!(pq.index)
     pq
 end
 
