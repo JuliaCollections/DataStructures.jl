@@ -142,7 +142,7 @@ function delete!(l::MutableLinkedList, idx::Int)
 end
 
 function delete!(l::MutableLinkedList, r::UnitRange)
-    @boundscheck 0 < first(r) < last(r) <= l.len || throw(BoundsError(l, idx))
+    @boundscheck 0 < first(r) < last(r) <= l.len || throw(BoundsError(l, r))
     node = l.front
     for i = 1:first(r)
         node = node.next
