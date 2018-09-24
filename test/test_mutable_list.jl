@@ -6,8 +6,8 @@
         @test length(l1) == 0
         @test collect(l1) == Int[]
         @test eltype(l1) == Int
-        @test_throws BoundsError pop!(l1)
-        @test_throws BoundsError popfirst!(l1)
+        @test_throws ArgumentError pop!(l1)
+        @test_throws ArgumentError popfirst!(l1)
     end
 
     @testset "core functionality" begin
