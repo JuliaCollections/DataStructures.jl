@@ -49,8 +49,9 @@ eltype(l::MutableLinkedList{T}) where T = T
 first(l::MutableLinkedList) = l.front.next.data
 last(l::MutableLinkedList) = l.back.prev.data
 
-function ==(l1::MutableLinkedList, l2::MutableLinkedList)
-    typeof(l1) == typeof(l2) || return false
+==(l1::MutableLinkedList{T}, l2::MutableLinkedList{S}) where {T,S} = false
+
+function ==(l1::MutableLinkedList{T}, l2::MutableLinkedList{T}) where T
     length(l1) == length(l2) || return false
     for (i, j) in zip(l1, l2)
         i == j || return false
@@ -93,7 +94,7 @@ function copy(l::MutableLinkedList{T}) where T
 end
 
 function getindex(l::MutableLinkedList, idx::Int)
-    0 < idx <= l.len || throw(ArgumentError("Index out of bounds"))
+    @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
     node = l.front
     for i = 1:idx
         node = node.next
@@ -102,7 +103,7 @@ function getindex(l::MutableLinkedList, idx::Int)
 end
 
 function setindex!(l::MutableLinkedList{T}, data, idx::Int) where T
-    0 < idx <= l.len || throw(ArgumentError("Index out of bounds"))
+    @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
     node = l.front
     for i = 1:idx
         node = node.next
@@ -127,7 +128,7 @@ function append!(l::MutableLinkedList, elts...)
 end
 
 function delete!(l::MutableLinkedList, idx::Int)
-    0 < idx <= l.len || throw(ArgumentError("Index out of bounds"))
+    @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
     node = l.front
     for i = 1:idx
         node = node.next
@@ -141,7 +142,7 @@ function delete!(l::MutableLinkedList, idx::Int)
 end
 
 function delete!(l::MutableLinkedList, r::UnitRange)
-    0 < first(r) < last(r) <= l.len || throw(ArgumentError("Range out of bounds"))
+    @boundscheck 0 < first(r) < last(r) <= l.len || throw(BoundsError(l, idx))
     node = l.front
     for i = 1:first(r)
         node = node.next
@@ -206,12 +207,7 @@ function show(io::IO, node::ListNode)
 end
 
 function show(io::IO, l::MutableLinkedList)
-    print(io, "$(typeof(l))(")
-    middle=false
-    for item in l
-        middle && print(io, ", ")
-        print(io, item)
-        middle=true
-    end
-    print(io, ")")
+    print(io, typeof(l), '(')
+    join(io, l, ", ")
+    print(io, ')')
 end
