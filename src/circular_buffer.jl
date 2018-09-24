@@ -36,11 +36,9 @@ end
 @inline function _buffer_index(cb::CircularBuffer, i::Int)
     n = cb.capacity
     idx = cb.first + i - 1
-    if idx > n
-        idx - n
-    else
-        idx
-    end
+    idx > 0 && idx <= n && return idx
+    idx <= 0 && return n + idx % n
+    (idx - 1) % n + 1
 end
 
 """
