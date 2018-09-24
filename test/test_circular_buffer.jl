@@ -121,4 +121,17 @@
             @test Array(cb) == [21, 42, 42]
         end
     end
+
+    @testset "_buffer_index" begin
+        cb = CircularBuffer{Int}(5)
+        for i in 1:5
+            push!(cb, i)
+        end
+        k = 1
+        for j in -19:20
+            @test DataStructures._buffer_index(cb, j) == k
+            k += 1
+            if k > 5 k = 1 end
+        end
+    end
 end
