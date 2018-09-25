@@ -12,6 +12,7 @@
         
         @testset "With 1 element" begin
             push!(cb, 1)
+            @test_throws BoundsError cb[2]
             @test length(cb) == 1
             @test capacity(cb) == 5
             @test isfull(cb) == false
@@ -32,8 +33,10 @@
             @test cb[3] == 6
             @test cb[4] == 7
             @test cb[5] == 8
-            @test_throws BoundsError cb[6]
-            @test_throws BoundsError cb[3:6]
+            @test cb[20] == 8
+            @test cb[0] == 8
+            @test cb[-1] == 7
+            @test cb[-11] == 7
             @test cb[3:4] == Int[6,7]
             @test cb[[1,5]] == Int[4,8]
         end
@@ -119,19 +122,6 @@
             push!(cb, 21)
             fill!(cb, 42)
             @test Array(cb) == [21, 42, 42]
-        end
-    end
-
-    @testset "_buffer_index" begin
-        cb = CircularBuffer{Int}(5)
-        for i in 1:5
-            push!(cb, i)
-        end
-        k = 1
-        for j in -19:20
-            @test DataStructures._buffer_index(cb, j) == k
-            k += 1
-            if k > 5 k = 1 end
         end
     end
 end
