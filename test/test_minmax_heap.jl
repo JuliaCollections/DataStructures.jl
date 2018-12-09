@@ -1,5 +1,5 @@
 # tests for min-max heaps
-using NearestNeighborDescent: binary_minmax_heap, _make_binary_minmax_heap, is_minmax_heap, length, isempty, pop!, popmin!, popmax!, push!, top, min, max, empty!, ksmallest!, klargest!
+using DataStructures: _make_binary_minmax_heap, is_minmax_heap
 using Base.Order: Forward, Reverse
 
 @testset "Binary MinMax Heaps" begin
