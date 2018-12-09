@@ -1,14 +1,8 @@
-using Base.Order: lt, Ordering, Forward, Reverse, ForwardOrdering, ReverseOrdering
-import Base: length, isempty, empty!, push!, pop!, min, max
-import DataStructures: top
-
 ################################################
 #
 # minmax heap type and constructors
 #
 ################################################
-
-abstract type AbstractMinMaxHeap{T} <: AbstractHeap{T} end
 
 mutable struct BinaryMinMaxHeap{T} <: AbstractMinMaxHeap{T}
     valtree::Vector{T}
