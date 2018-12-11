@@ -30,7 +30,7 @@ binary_minmax_heap(xs::AbstractVector{T}) where {T} = BinaryMinMaxHeap{T}(xs)
 function _make_binary_minmax_heap(vt::Type{T}, xs) where {T}
     n = length(xs)
     valtree = copy(xs)
-    for i = n:-1:1
+    for i in n:-1:1
         _minmax_heap_trickle_down!(valtree, i)
     end
     valtree
@@ -153,7 +153,7 @@ function is_minmax_heap(A::AbstractVector)
     isheap = true
     N = length(A)
 
-    for i = 1:N
+    for i in 1:N
         if level(i)%2 == 0
             # min layer
             # check that A[i] < children A[i]
