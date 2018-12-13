@@ -22,9 +22,8 @@ BinaryMinMaxHeap(vt::Type{T}) where {T} = BinaryMinMaxHeap(Vector{T}())
 ################################################
 
 function _make_binary_minmax_heap(xs)
-    n = length(xs)
     valtree = copy(xs)
-    for i in n:-1:1
+    for i in length(xs):-1:1
         _minmax_heap_trickle_down!(valtree, i)
     end
     valtree
