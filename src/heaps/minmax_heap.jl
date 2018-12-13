@@ -116,7 +116,7 @@ end
 #
 ################################################
 
-@inline level(i) = round(Int, floor(log2(i)))
+@inline level(i) = floor(Int, log2(i))
 @inline lchild(i) = 2*i
 @inline rchild(i) = 2*i+1
 @inline children(i) = [lchild(i), rchild(i)]
