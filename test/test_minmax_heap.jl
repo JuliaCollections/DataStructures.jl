@@ -18,8 +18,8 @@ using Base.Order: Forward, Reverse
             h = BinaryMinMaxHeap(vs)
             @test length(h) == 10
             @test !isempty(h)
-            @test top(h) == min(h) == 1
-            @test max(h) == 20
+            @test top(h) == minimum(h) == 1
+            @test maximum(h) == 20
             @test is_minmax_heap(h.valtree)
         end
         
@@ -66,7 +66,7 @@ using Base.Order: Forward, Reverse
             @test popmin!(h) == 1
             @test length(h) == 2
             @test is_minmax_heap(h.valtree)
-            @test min(h) == 2
+            @test minimum(h) == 2
             for i = 1:20
                 A = rand(50)
                 h = BinaryMinMaxHeap(A)
@@ -85,12 +85,12 @@ using Base.Order: Forward, Reverse
             @test popmax!(h) == 3
             @test length(h) == 2
             @test is_minmax_heap(h.valtree)
-            @test max(h) == 2
+            @test maximum(h) == 2
             h = BinaryMinMaxHeap([1, 3, 2])
             @test popmax!(h) == 3
             @test length(h) == 2
             @test is_minmax_heap(h.valtree)
-            @test max(h) == 2
+            @test maximum(h) == 2
         end
     end
 

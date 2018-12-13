@@ -223,11 +223,11 @@ end
                         
 Get the top (minimum) of the heap.
 """
-@inline top(h::BinaryMinMaxHeap) = min(h)
+@inline top(h::BinaryMinMaxHeap) = minimum(h)
 
-@inline min(h::BinaryMinMaxHeap) = h.valtree[1]
+@inline minimum(h::BinaryMinMaxHeap) = h.valtree[1]
 
-function max(h::BinaryMinMaxHeap) 
+function maximum(h::BinaryMinMaxHeap) 
     valtree = h.valtree
     maxlen = min(length(valtree), 3)
     @inbounds m = maximum([valtree[i] for i in 1:maxlen])

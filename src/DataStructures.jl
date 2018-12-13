@@ -13,7 +13,7 @@ module DataStructures
                  isless,
                  union, intersect, symdiff, setdiff, issubset,
                  searchsortedfirst, searchsortedlast, in,
-                 eachindex, keytype, valtype, min, max
+                 eachindex, keytype, valtype, minimum, maximum
     import Base: iterate
 
     using OrderedCollections
