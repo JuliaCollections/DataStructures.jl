@@ -234,9 +234,7 @@ Get the top (minimum) of the heap.
 
 function maximum(h::BinaryMinMaxHeap) 
     valtree = h.valtree
-    maxlen = min(length(valtree), 3)
-    @inbounds m = maximum([valtree[i] for i in 1:maxlen])
-    m
+    return @inbounds maximum(valtree[1:min(end, 3)])
 end
                         
 
