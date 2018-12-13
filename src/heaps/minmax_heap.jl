@@ -119,19 +119,25 @@ end
 @inline level(i) = floor(Int, log2(i))
 @inline lchild(i) = 2*i
 @inline rchild(i) = 2*i+1
-@inline children(i) = [lchild(i), rchild(i)]
+@inline children(i) = (lchild(i), rchild(i))
 @inline hparent(i) = round(Int, floor(i/2))
 
 """
+    descendants(maxlen, i)
+
 Return the indices of all children and grandchildren of
 position `i`.
 """
-function descendants(N::T, i::T) where {T <: Integer}
+function descendants(maxlen::T, i::T) where {T <: Integer}
     _descendants = T[]
     for child in children(i)
-        append!(_descendants, [child, lchild(child), rchild(child)])
+        for desc in (child, lchild(child), rchild(child))
+            if desc ≤ maxlen
+                push!(_descendants, desc)
+            end
+        end
     end
-    return [d for d in _descendants if d ≤ N]
+    return _descendants
 end
 
 """
