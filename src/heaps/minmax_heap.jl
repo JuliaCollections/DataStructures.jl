@@ -82,10 +82,10 @@ function _minmax_heap_trickle_down!(A::AbstractVector, i::Integer)
 end
 
 function _minmax_heap_trickle_down!(A::AbstractVector, i::Integer, o::Ordering, x=A[i])
-    N = length(A)
-    if lchild(i) ≤ N
+                    
+    if lchild(i) ≤ length(A)
         # tuple (min(val, j1) max(val, j2))
-        ext = extrema((A[j], j) for j in descendants(N, i))
+        ext = extrema((A[j], j) for j in descendants(length(A), i))
         m = lt(o, ext[1], ext[2]) ? ext[1][2] : ext[2][2]
 
         if m ≥ 4*i
@@ -150,24 +150,23 @@ element is a child of the root.
 function is_minmax_heap(A::AbstractVector)
 
     isheap = true
-    N = length(A)
 
-    for i in 1:N
+    for i in 1:length(A)
         if level(i)%2 == 0
             # min layer
             # check that A[i] < children A[i]
             #    and grandchildren A[i]
-            for j in descendants(N, i)
+            for j in descendants(length(A), i)
                 isheap &= A[i] ≤ A[j]
             end
         else
             # max layer
-            for j in descendants(N, i)
+            for j in descendants(length(A), i)
                 isheap &= A[i] ≥ A[j]
             end
         end
     end
-    isheap
+    return isheap
 end
 
 ################################################
