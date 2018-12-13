@@ -15,7 +15,7 @@ using Base.Order: Forward, Reverse
         vs = [10, 4, 6, 1, 16, 2, 20, 17, 13, 5]
         
         @testset "make from array tests" begin
-            h = binary_minmax_heap(vs)
+            h = BinaryMinMaxHeap(vs)
             @test length(h) == 10
             @test !isempty(h)
             @test top(h) == min(h) == 1
@@ -26,13 +26,13 @@ using Base.Order: Forward, Reverse
         @testset "make from random arrays tests" begin
             for i = 1:20
                 A = rand(50)
-                vtree = _make_binary_minmax_heap(typeof(A), A)
+                vtree = _make_binary_minmax_heap(A)
                 @test is_minmax_heap(vtree)
             end
         end
         
         @testset "push! tests" begin
-            h = binary_minmax_heap(Int)
+            h = BinaryMinMaxHeap(Int)
             
             @test length(h) == 0
             @test isempty(h)
@@ -47,7 +47,7 @@ using Base.Order: Forward, Reverse
             @test is_minmax_heap(h.valtree)
             for i = 1:5
                 A = rand(20)
-                hs = binary_minmax_heap(A)
+                hs = BinaryMinMaxHeap(A)
                 for j = 1:4
                     push!(hs, rand())
                     @test is_minmax_heap(hs.valtree)
@@ -58,18 +58,18 @@ using Base.Order: Forward, Reverse
     
     @testset "pop! tests" begin
         @testset "popmin! tests" begin
-            h = binary_minmax_heap([1])
+            h = BinaryMinMaxHeap([1])
             @test popmin!(h) == 1
             @test length(h) == 0
             @test isempty(h)
-            h = binary_minmax_heap([1, 3, 2])
+            h = BinaryMinMaxHeap([1, 3, 2])
             @test popmin!(h) == 1
             @test length(h) == 2
             @test is_minmax_heap(h.valtree)
             @test min(h) == 2
             for i = 1:20
                 A = rand(50)
-                h = binary_minmax_heap(A)
+                h = BinaryMinMaxHeap(A)
                 minval = minimum(A)
                 @test popmin!(h) == minval
                 @test length(h) == 49
@@ -77,16 +77,16 @@ using Base.Order: Forward, Reverse
             end
         end
         @testset "popmax! tests" begin
-            h = binary_minmax_heap([1])
+            h = BinaryMinMaxHeap([1])
             @test popmax!(h) == 1
             @test length(h) == 0
             @test isempty(h)
-            h = binary_minmax_heap([1, 2, 3])
+            h = BinaryMinMaxHeap([1, 2, 3])
             @test popmax!(h) == 3
             @test length(h) == 2
             @test is_minmax_heap(h.valtree)
             @test max(h) == 2
-            h = binary_minmax_heap([1, 3, 2])
+            h = BinaryMinMaxHeap([1, 3, 2])
             @test popmax!(h) == 3
             @test length(h) == 2
             @test is_minmax_heap(h.valtree)
@@ -98,12 +98,12 @@ using Base.Order: Forward, Reverse
         @testset "ksmallest tests" begin
             A = rand(Int, 50)
             sorted_A = sort(A)
-            h = binary_minmax_heap(A)
+            h = BinaryMinMaxHeap(A)
             @test empty!(h) == sorted_A
             @test isempty(h)
             @test length(h) == 0
             
-            h = binary_minmax_heap(A)
+            h = BinaryMinMaxHeap(A)
             @test ksmallest!(h, 10) == sorted_A[1:10]
             @test !isempty(h)
             @test length(h) == 40
@@ -111,12 +111,12 @@ using Base.Order: Forward, Reverse
         @testset "klargest tests" begin
             A = rand(Int, 50)
             sorted_A = sort(A, order=Reverse)
-            h = binary_minmax_heap(A)
+            h = BinaryMinMaxHeap(A)
             @test empty!(h, Reverse) == sorted_A
             @test length(h) == 0
             @test isempty(h)
             
-            h = binary_minmax_heap(A)
+            h = BinaryMinMaxHeap(A)
             @test klargest!(h, 10) == sorted_A[1:10]
             @test length(h) == 40
             @test !isempty(h)
@@ -124,7 +124,7 @@ using Base.Order: Forward, Reverse
     end
     
     @testset "type conversion" begin
-        h = binary_minmax_heap(Float64)
+        h = BinaryMinMaxHeap(Float64)
         push!(h, 3.)
         push!(h, 5)
         push!(h, Rational(4, 8))
