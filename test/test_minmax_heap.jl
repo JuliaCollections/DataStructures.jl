@@ -103,7 +103,7 @@ using Base.Order: Forward, Reverse
     end
 
     @testset "popall!" begin
-        @testset "ksmallest tests" begin
+        @testset "popmin! tests" begin
             A = rand(Int, 50)
             sorted_A = sort(A)
             h = BinaryMinMaxHeap(A)
@@ -112,11 +112,11 @@ using Base.Order: Forward, Reverse
             @test length(h) == 0
             
             h = BinaryMinMaxHeap(A)
-            @test ksmallest!(h, 10) == sorted_A[1:10]
+            @test popmin!(h, 10) == sorted_A[1:10]
             @test !isempty(h)
             @test length(h) == 40
         end
-        @testset "klargest tests" begin
+        @testset "popmax! tests" begin
             A = rand(Int, 50)
             sorted_A = sort(A, order=Reverse)
             h = BinaryMinMaxHeap(A)
@@ -125,7 +125,7 @@ using Base.Order: Forward, Reverse
             @test isempty(h)
             
             h = BinaryMinMaxHeap(A)
-            @test klargest!(h, 10) == sorted_A[1:10]
+            @test popmax!(h, 10) == sorted_A[1:10]
             @test length(h) == 40
             @test !isempty(h)
         end

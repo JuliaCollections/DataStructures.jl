@@ -200,6 +200,16 @@ function popmin!(h::BinaryMinMaxHeap)
     return x
 end
 
+                        
+"""
+    popmin!(h::BinaryMinMaxHeap, k::Integer) -> vals
+                        
+Remove up to the `k` smallest values from the heap.
+"""
+@inline function popmin!(h::BinaryMinMaxHeap, k::Integer) 
+    return [popmin!(h) for _ in 1:min(length(h), k)]
+end
+
 """
     popmax!(h::BinaryMinMaxHeap) -> max
                         
@@ -216,6 +226,16 @@ function popmax!(h::BinaryMinMaxHeap)
     return x    
 end
 
+"""
+    popmax!(h::BinaryMinMaxHeap, k::Integer) -> vals
+                        
+Remove up to the `k` largest values from the heap.
+"""
+@inline function popmax!(h::BinaryMinMaxHeap, k::Integer) 
+    return [popmax!(h) for _ in 1:min(length(h), k)]                    
+end
+                        
+                        
 function push!(h::BinaryMinMaxHeap, v)
     valtree = h.valtree        
     push!(valtree, v)
@@ -247,13 +267,6 @@ the given ordering. Default is `Forward` (smallest to
 largest).
 """
 popall!(h::BinaryMinMaxHeap) = popall!(h, Forward)
-popall!(h::BinaryMinMaxHeap, ::ForwardOrdering) = ksmallest!(h, length(h))
-popall!(h::BinaryMinMaxHeap, ::ReverseOrdering) = klargest!(h, length(h))
+popall!(h::BinaryMinMaxHeap, ::ForwardOrdering) = popmin!(h, length(h))
+popall!(h::BinaryMinMaxHeap, ::ReverseOrdering) = popmax!(h, length(h))
 
-@inline function klargest!(h::BinaryMinMaxHeap, k::Integer) 
-    return [popmax!(h) for _ in 1:min(length(h), k)]                    
-end
-
-@inline function ksmallest!(h::BinaryMinMaxHeap, k::Integer) 
-    return [popmin!(h) for _ in 1:min(length(h), k)]
-end
