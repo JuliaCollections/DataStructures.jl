@@ -236,17 +236,19 @@ function maximum(h::BinaryMinMaxHeap)
     return @inbounds maximum(valtree[1:min(end, 3)])
 end
                         
+empty!(h::BinaryMinMaxHeap) = (empty!(h.valtree); h)
+                        
 
 """
-    empty!(h::BinaryMinMaxHeap, ::Ordering = Forward)
+    popall!(h::BinaryMinMaxHeap, ::Ordering = Forward)
                         
 Remove and return all the elements of `h` according to
 the given ordering. Default is `Forward` (smallest to 
 largest).
 """
-empty!(h::BinaryMinMaxHeap) = empty!(h, Forward)
-empty!(h::BinaryMinMaxHeap, ::ForwardOrdering) = ksmallest!(h, length(h))
-empty!(h::BinaryMinMaxHeap, ::ReverseOrdering) = klargest!(h, length(h))
+popall!(h::BinaryMinMaxHeap) = popall!(h, Forward)
+popall!(h::BinaryMinMaxHeap, ::ForwardOrdering) = ksmallest!(h, length(h))
+popall!(h::BinaryMinMaxHeap, ::ReverseOrdering) = klargest!(h, length(h))
 
 @inline function klargest!(h::BinaryMinMaxHeap, k::Integer) 
     return [popmax!(h) for _ in 1:min(length(h), k)]                    

@@ -93,13 +93,21 @@ using Base.Order: Forward, Reverse
             @test maximum(h) == 2
         end
     end
-
+    
     @testset "empty!" begin
+        h = BinaryMinMaxHeap([1, 4, 3, 10, 2])
+        ret = empty!(h)
+        @test ret === h
+        @test length(ret) == 0
+        @test isempty(ret)
+    end
+
+    @testset "popall!" begin
         @testset "ksmallest tests" begin
             A = rand(Int, 50)
             sorted_A = sort(A)
             h = BinaryMinMaxHeap(A)
-            @test empty!(h) == sorted_A
+            @test popall!(h) == sorted_A
             @test isempty(h)
             @test length(h) == 0
             
@@ -112,7 +120,7 @@ using Base.Order: Forward, Reverse
             A = rand(Int, 50)
             sorted_A = sort(A, order=Reverse)
             h = BinaryMinMaxHeap(A)
-            @test empty!(h, Reverse) == sorted_A
+            @test popall!(h, Reverse) == sorted_A
             @test length(h) == 0
             @test isempty(h)
             
