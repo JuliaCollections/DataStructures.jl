@@ -59,10 +59,15 @@ and have the same interface as other heaps with the following additions:
 # Let h be a min-max heap, k an integer
 minimum(h)     # return the smallest element
 maximum(h)     # return the largest element
+
 popmin!(h)     # remove and return the smallest element
 popmin!(h, k)  # remove and return the smallest k elements
+
 popmax!(h)     # remove and return the largest element
 popmax!(h, k)  # remove and return the largest k elements
+
+popall!(h)     # remove and return all the elements, sorted smallest to largest
+popall!(h, o)  # remove and return all the elements according to ordering o
 ```
 The usual `top(h)` and `pop!(h)` are defined to be `minimum(h)` and `popmin!(h)`, 
 respectively.
