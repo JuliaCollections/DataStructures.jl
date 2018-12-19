@@ -60,9 +60,8 @@ function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer)
 end
 
 function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer, o::Ordering, x=A[i])
-    gparent = hparent(hparent(i))
-    if i > hparent(i) > gparent >= 1
-        # i has grandparent
+    if hasgrandparent(i)
+        gparent = hparent(hparent(i))
         if lt(o, x, A[gparent])
             A[i] = A[gparent]
             A[gparent] = x
@@ -123,6 +122,7 @@ end
 @inline on_minlevel(i) = level(i) % 2 == 0 
 @inline haschildren(i, A) = lchild(i) ≤ length(A)
 @inline isgrandchild(j, i) = j > rchild(i)
+@inline hasgrandparent(i) = i ≥ 4 
 
 """
     descendants(maxlen, i)
