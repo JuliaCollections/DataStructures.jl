@@ -52,7 +52,8 @@ h = mutable_binary_maxheap([1,4,3,2])    # create a mutable min/max heap from a 
 ```
 
 ## Min-max heaps
-Min-max heaps maintain both the minimum _and_ the maximum of a set.
+Min-max heaps maintain the minimum _and_ the maximum of a set, 
+allowing both to be retrieved in constant (`O(1)`) time.
 The min-max heaps in this package are subtypes of `AbstractMinMaxHeap <: AbstractHeap`
 and have the same interface as other heaps with the following additions:
 ```julia
