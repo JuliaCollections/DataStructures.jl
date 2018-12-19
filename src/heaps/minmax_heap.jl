@@ -151,24 +151,21 @@ element is a child of the root.
 """
 function is_minmax_heap(A::AbstractVector)
 
-    isheap = true
-
     for i in 1:length(A)
         if on_minlevel(i)
-            # min layer
             # check that A[i] < children A[i]
             #    and grandchildren A[i]
             for j in descendants(length(A), i)
-                isheap &= A[i] ≤ A[j]
+                A[i] ≤ A[j] || return false
             end
         else
             # max layer
             for j in descendants(length(A), i)
-                isheap &= A[i] ≥ A[j]
+                A[i] ≥ A[j] || return false
             end
         end
     end
-    return isheap
+    return true
 end
 
 ################################################
