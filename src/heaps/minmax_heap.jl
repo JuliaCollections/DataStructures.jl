@@ -30,7 +30,7 @@ function _make_binary_minmax_heap(xs)
 end
 
 function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer)
-    if level(i) % 2 == 0
+    if on_minlevel(i)
         # min level
         if i > 1 && A[i] > A[hparent(i)]
             # swap to parent and bubble up max
@@ -73,7 +73,7 @@ function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer, o::Ordering, x=A
 end
 
 function _minmax_heap_trickle_down!(A::AbstractVector, i::Integer)
-    if level(i) % 2 == 0
+    if on_minlevel(i)
         _minmax_heap_trickle_down!(A, i, Forward)
     else
         _minmax_heap_trickle_down!(A, i, Reverse)
@@ -120,7 +120,8 @@ end
 @inline lchild(i) = 2*i
 @inline rchild(i) = 2*i+1
 @inline children(i) = (lchild(i), rchild(i))
- @inline hparent(i) = i ÷ 2
+@inline hparent(i) = i ÷ 2
+@inline on_minlevel(i) = level(i) % 2 == 0 
 
 """
     descendants(maxlen, i)
@@ -152,7 +153,7 @@ function is_minmax_heap(A::AbstractVector)
     isheap = true
 
     for i in 1:length(A)
-        if level(i)%2 == 0
+        if on_minlevel(i)
             # min layer
             # check that A[i] < children A[i]
             #    and grandchildren A[i]
