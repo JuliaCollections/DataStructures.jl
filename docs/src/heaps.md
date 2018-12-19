@@ -79,7 +79,7 @@ This package includes an implementation of a binary min-max heap (`BinaryMinMaxH
 
 Examples:
 ```julia
-h = BinaryMinMaxHeap(Int)          # create an empty min-max heap
+h = BinaryMinMaxHeap{Int}()          # create an empty min-max heap with integer values
 
 h = BinaryMinMaxHeap([1, 2, 3, 4]) # create a min-max heap from a vector
 ```
