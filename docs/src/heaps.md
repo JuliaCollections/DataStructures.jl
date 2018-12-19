@@ -73,6 +73,8 @@ The usual `top(h)` and `pop!(h)` are defined to be `minimum(h)` and `popmin!(h)`
 respectively.
 
 This package includes an implementation of a binary min-max heap (`BinaryMinMaxHeap`).
+> Atkinson, M.D., Sack, J., Santoro, N., & Strothotte, T. (1986). Min-Max > Heaps and Generalized Priority Queues. Commun. ACM, 29, 996-1000.
+> doi: [10.1145/6617.6621](https://doi.org/10.1145/6617.6621)
 
 Examples:
 ```julia
