@@ -32,7 +32,7 @@ using Base.Order: Forward, Reverse
         end
         
         @testset "push! tests" begin
-            h = BinaryMinMaxHeap(Int)
+            h = BinaryMinMaxHeap{Int}()
             
             @test length(h) == 0
             @test isempty(h)
@@ -132,7 +132,7 @@ using Base.Order: Forward, Reverse
     end
     
     @testset "type conversion" begin
-        h = BinaryMinMaxHeap(Float64)
+        h = BinaryMinMaxHeap{Float64}()
         push!(h, 3.)
         push!(h, 5)
         push!(h, Rational(4, 8))
