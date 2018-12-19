@@ -83,14 +83,12 @@ end
 
 function _minmax_heap_trickle_down!(A::AbstractVector, i::Integer, o::Ordering, x=A[i])
                     
-    # if there is at least one descendant
-    if lchild(i) ≤ length(A)
+    if haschildren(i, A)
         # get the index of the extremum (min or max) descendant
         extremum = o === Forward ? minimum : maximum
         _, m = extremum((A[j], j) for j in descendants(length(A), i))
 
-        if m ≥ 4*i
-            # m is a grandchild
+        if isgrandchild(m, i)
             if lt(o, A[m], A[i])
                 A[i] = A[m]
                 A[m] = x
@@ -123,6 +121,8 @@ end
 @inline children(i) = (lchild(i), rchild(i))
 @inline hparent(i) = i ÷ 2
 @inline on_minlevel(i) = level(i) % 2 == 0 
+@inline haschildren(i, A) = lchild(i) ≤ length(A)
+@inline isgrandchild(j, i) = j > rchild(i)
 
 """
     descendants(maxlen, i)
