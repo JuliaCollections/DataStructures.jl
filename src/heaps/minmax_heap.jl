@@ -120,7 +120,7 @@ end
 @inline lchild(i) = 2*i
 @inline rchild(i) = 2*i+1
 @inline children(i) = (lchild(i), rchild(i))
-@inline hparent(i) = round(Int, floor(i/2))
+ @inline hparent(i) = i ÷ 2
 
 """
     descendants(maxlen, i)
