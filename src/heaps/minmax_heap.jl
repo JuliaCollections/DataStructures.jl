@@ -84,7 +84,7 @@ function _minmax_heap_trickle_down!(A::AbstractVector, i::Integer, o::Ordering, 
     if haschildren(i, A)
         # get the index of the extremum (min or max) descendant
         extremum = o === Forward ? minimum : maximum
-        _, m = extremum((A[j], j) for j in descendants(length(A), i))
+        _, m = extremum((A[j], j) for j in children_and_grandchildren(length(A), i))
 
         if isgrandchild(m, i)
             if lt(o, A[m], A[i])
@@ -124,21 +124,21 @@ end
 @inline hasgrandparent(i) = i ≥ 4 
 
 """
-    descendants(maxlen, i)
+    children_and_grandchildren(maxlen, i)
 
 Return the indices of all children and grandchildren of
 position `i`.
 """
-function descendants(maxlen::T, i::T) where {T <: Integer}
-    _descendants = T[]
+function children_and_grandchildren(maxlen::T, i::T) where {T <: Integer}
+    _children_and_grandchildren = T[]
     for child in children(i)
         for desc in (child, lchild(child), rchild(child))
             if desc ≤ maxlen
-                push!(_descendants, desc)
+                push!(_children_and_grandchildren, desc)
             end
         end
     end
-    return _descendants
+    return _children_and_grandchildren
 end
 
 """
@@ -154,12 +154,12 @@ function is_minmax_heap(A::AbstractVector)
         if on_minlevel(i)
             # check that A[i] < children A[i]
             #    and grandchildren A[i]
-            for j in descendants(length(A), i)
+            for j in children_and_grandchildren(length(A), i)
                 A[i] ≤ A[j] || return false
             end
         else
             # max layer
-            for j in descendants(length(A), i)
+            for j in children_and_grandchildren(length(A), i)
                 A[i] ≥ A[j] || return false
             end
         end

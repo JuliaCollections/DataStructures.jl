@@ -1,5 +1,5 @@
 # tests for min-max heaps
-using DataStructures: _make_binary_minmax_heap, is_minmax_heap, descendants
+using DataStructures: _make_binary_minmax_heap, is_minmax_heap, children_and_grandchildren
 using Base.Order: Forward, Reverse
 
 @testset "Binary MinMax Heaps" begin
@@ -141,12 +141,12 @@ using Base.Order: Forward, Reverse
         @test h.valtree == [0.5, 10.1, 3.0, 5.0]
     end
     
-    @testset "descendants tests" begin
-        @test descendants(1, 1) == Int[]
-        @test descendants(2, 1) == [2]
-        @test descendants(3, 1) == [2, 3]
-        @test descendants(7, 1) == [2, 4, 5, 3, 6, 7]
-        @test descendants(10, 2) == [4, 8, 9, 5, 10]
+    @testset "children_and_grandchildren tests" begin
+        @test children_and_grandchildren(1, 1) == Int[]
+        @test children_and_grandchildren(2, 1) == [2]
+        @test children_and_grandchildren(3, 1) == [2, 3]
+        @test children_and_grandchildren(7, 1) == [2, 4, 5, 3, 6, 7]
+        @test children_and_grandchildren(10, 2) == [4, 8, 9, 5, 10]
     end
     
     @testset "throw errors tests" begin
