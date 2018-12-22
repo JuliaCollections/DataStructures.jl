@@ -31,7 +31,6 @@ end
 
 function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer)
     if on_minlevel(i)
-        # min level
         if i > 1 && A[i] > A[hparent(i)]
             # swap to parent and bubble up max
             tmp = A[i]
@@ -216,7 +215,7 @@ Remove the maximum value from the heap.
 """
 function popmax!(h::BinaryMinMaxHeap)
     valtree = h.valtree
-    @inbounds x, i = maximum([(valtree[j], j) for j in 1:min(length(valtree), 3)])
+    @inbounds x, i = maximum(((valtree[j], j) for j in 1:min(length(valtree), 3)))
     y = pop!(valtree)
     if !isempty(valtree) && i <= length(valtree)
         @inbounds valtree[i] = y
