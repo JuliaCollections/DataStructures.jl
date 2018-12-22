@@ -148,4 +148,17 @@ using Base.Order: Forward, Reverse
         @test descendants(7, 1) == [2, 4, 5, 3, 6, 7]
         @test descendants(10, 2) == [4, 8, 9, 5, 10]
     end
+    
+    @testset "throw errors tests" begin
+        h = BinaryMinMaxHeap{Int}()
+        @test_throws ArgumentError pop!(h)
+        @test_throws ArgumentError popmin!(h)
+        
+        @test_throws ArgumentError popmax!(h)
+        
+        @test_throws ArgumentError top(h)
+        @test_throws ArgumentError minimum(h)
+        @test_throws ArgumentError maximum(h)
+        
+    end
 end

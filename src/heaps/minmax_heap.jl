@@ -189,6 +189,7 @@ Remove the minimum value from the heap.
 """
 function popmin!(h::BinaryMinMaxHeap)
     valtree = h.valtree
+    !isempty(valtree) || throw(ArgumentError("heap must be non-empty"))
     x = valtree[1]
     y = pop!(valtree)
     if !isempty(valtree)
@@ -215,6 +216,7 @@ Remove the maximum value from the heap.
 """
 function popmax!(h::BinaryMinMaxHeap)
     valtree = h.valtree
+    !isempty(valtree) || throw(ArgumentError("heap must be non-empty"))
     @inbounds x, i = maximum(((valtree[j], j) for j in 1:min(length(valtree), 3)))
     y = pop!(valtree)
     if !isempty(valtree) && i <= length(valtree)
@@ -247,10 +249,15 @@ Get the top (minimum) of the heap.
 """
 @inline top(h::BinaryMinMaxHeap) = minimum(h)
 
-@inline minimum(h::BinaryMinMaxHeap) = h.valtree[1]
-
-function maximum(h::BinaryMinMaxHeap) 
+@inline function minimum(h::BinaryMinMaxHeap) 
     valtree = h.valtree
+    !isempty(h) || throw(ArgumentError("heap must be non-empty"))
+    return @inbounds h.valtree[1]
+end
+
+@inline function maximum(h::BinaryMinMaxHeap) 
+    valtree = h.valtree
+    !isempty(h) || throw(ArgumentError("heap must be non-empty"))
     return @inbounds maximum(valtree[1:min(end, 3)])
 end
                         
