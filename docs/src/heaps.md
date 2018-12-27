@@ -51,6 +51,39 @@ h = mutable_binary_minheap([1,4,3,2])
 h = mutable_binary_maxheap([1,4,3,2])    # create a mutable min/max heap from a vector
 ```
 
+## Min-max heaps
+Min-max heaps maintain the minimum _and_ the maximum of a set, 
+allowing both to be retrieved in constant (`O(1)`) time.
+The min-max heaps in this package are subtypes of `AbstractMinMaxHeap <: AbstractHeap`
+and have the same interface as other heaps with the following additions:
+```julia
+# Let h be a min-max heap, k an integer
+minimum(h)     # return the smallest element
+maximum(h)     # return the largest element
+
+popmin!(h)     # remove and return the smallest element
+popmin!(h, k)  # remove and return the smallest k elements
+
+popmax!(h)     # remove and return the largest element
+popmax!(h, k)  # remove and return the largest k elements
+
+popall!(h)     # remove and return all the elements, sorted smallest to largest
+popall!(h, o)  # remove and return all the elements according to ordering o
+```
+The usual `top(h)` and `pop!(h)` are defined to be `minimum(h)` and `popmin!(h)`, 
+respectively.
+
+This package includes an implementation of a binary min-max heap (`BinaryMinMaxHeap`).
+> Atkinson, M.D., Sack, J., Santoro, N., & Strothotte, T. (1986). Min-Max > Heaps and Generalized Priority Queues. Commun. ACM, 29, 996-1000.
+> doi: [10.1145/6617.6621](https://doi.org/10.1145/6617.6621)
+
+Examples:
+```julia
+h = BinaryMinMaxHeap{Int}()          # create an empty min-max heap with integer values
+
+h = BinaryMinMaxHeap([1, 2, 3, 4]) # create a min-max heap from a vector
+```
+
 # Functions using heaps
 
 Heaps can be used to extract the largest or smallest elements of an

@@ -13,7 +13,7 @@ module DataStructures
                  isless,
                  union, intersect, symdiff, setdiff, issubset,
                  searchsortedfirst, searchsortedlast, in,
-                 eachindex, keytype, valtype
+                 eachindex, keytype, valtype, minimum, maximum
     import Base: iterate
 
     using OrderedCollections
@@ -36,6 +36,7 @@ module DataStructures
     export BinaryHeap, binary_minheap, binary_maxheap, nlargest, nsmallest
     export MutableBinaryHeap, mutable_binary_minheap, mutable_binary_maxheap
     export heapify!, heapify, heappop!, heappush!, isheap
+    export BinaryMinMaxHeap, popmin!, popmax!, popall!
 
     export OrderedDict, OrderedSet
     export DefaultDict, DefaultOrderedDict
