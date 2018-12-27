@@ -55,7 +55,7 @@ end
     vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
 
     @testset "make mutable binary minheap" begin
-        h = mutable_binary_minheap(vs)
+        h = MutableBinaryMinHeap(vs)
 
         @test length(h) == 10
         @test !isempty(h)
@@ -65,7 +65,7 @@ end
     end
 
     @testset "make mutable binary maxheap" begin
-        h = mutable_binary_maxheap(vs)
+        h = MutableBinaryMaxHeap(vs)
 
         @test length(h) == 10
         @test !isempty(h)
@@ -75,7 +75,7 @@ end
     end
 
     @testset "hmin / push! / pop!" begin
-        hmin = mutable_binary_minheap(Int)
+        hmin = MutableBinaryMinHeap{Int}()
         @test length(hmin) == 0
         @test isempty(hmin)
 
@@ -106,7 +106,7 @@ end
     end
 
     @testset "hmax / push! / pop!" begin
-        hmax = mutable_binary_maxheap(Int)
+        hmax = MutableBinaryMaxHeap{Int}()
         @test length(hmax) == 0
         @test isempty(hmax)
 
@@ -138,7 +138,7 @@ end
     end
 
     @testset "hybrid push! and pop!" begin
-        h = mutable_binary_minheap(Int)
+        h = MutableBinaryMinHeap{Int}()
 
         push!(h, 5)
         push!(h, 10)
@@ -160,7 +160,7 @@ end
     end
 
     @testset "test update! and top_with_handle" begin
-        for (hf,m) = [(mutable_binary_minheap,-2.0), (mutable_binary_maxheap,2.0)]
+        for (hf,m) = [(MutableBinaryMinHeap,-2.0), (MutableBinaryMaxHeap,2.0)]
             xs = rand(100)
             h = hf(xs)
             @test length(h) == 100
@@ -210,7 +210,7 @@ end
     end
 
     @testset "test push! and update! conversion" begin # issue 399
-        h = mutable_binary_minheap(Float64)
+        h = MutableBinaryMinHeap{Float64}()
         push!(h, 3.0)
         push!(h, 5)
         push!(h, Rational(4, 8))
