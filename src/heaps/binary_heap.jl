@@ -106,15 +106,19 @@ mutable struct BinaryHeap{T,Comp} <: AbstractHeap{T}
     comparer::Comp
     valtree::Vector{T}
 
-    function BinaryHeap{T,Comp}(comp::Comp) where {T,Comp}
-        new{T,Comp}(comp, Vector{T}())
-    end
+    BinaryHeap{T,Comp}() where {T,Comp} = new{T,Comp}(Comp(), Vector{T}())
 
-    function BinaryHeap{T,Comp}(comp::Comp, xs) where {T,Comp}  # xs is an iterable collection of values
-        valtree = _make_binary_heap(comp, T, xs)
-        new{T,Comp}(comp, valtree)
+    function BinaryHeap{T,Comp}(xs::AbstractVector{T}) where {T,Comp} 
+        valtree = _make_binary_heap(Comp(), T, xs)
+        new{T,Comp}(Comp(), valtree)
     end
 end
+                            
+const BinaryMinHeap{T} = BinaryHeap{T, LessThan}
+const BinaryMaxHeap{T} = BinaryHeap{T, GreaterThan}
+                            
+BinaryMinHeap(xs::AbstractVector{T}) where T = BinaryMinHeap{T}(xs)
+BinaryMaxHeap(xs::AbstractVector{T}) where T = BinaryMaxHeap{T}(xs)
 
 function binary_minheap(ty::Type{T}) where T
     BinaryHeap{T,LessThan}(LessThan())
