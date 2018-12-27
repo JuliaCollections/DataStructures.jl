@@ -34,7 +34,7 @@ module DataStructures
 
     export AbstractHeap, compare, extract_all!
     export BinaryHeap, BinaryMinHeap, BinaryMaxHeap, nlargest, nsmallest
-    export MutableBinaryHeap, mutable_binary_minheap, mutable_binary_maxheap
+    export MutableBinaryHeap, MutableBinaryMinHeap, MutableBinaryMaxHeap
     export heapify!, heapify, heappop!, heappush!, isheap
     export BinaryMinMaxHeap, popmin!, popmax!, popall!
 
