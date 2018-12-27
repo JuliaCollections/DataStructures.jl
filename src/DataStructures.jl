@@ -33,7 +33,7 @@ module DataStructures
     export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set, root_union!
 
     export AbstractHeap, compare, extract_all!
-    export BinaryHeap, binary_minheap, binary_maxheap, nlargest, nsmallest
+    export BinaryHeap, BinaryMinHeap, BinaryMaxHeap, nlargest, nsmallest
     export MutableBinaryHeap, mutable_binary_minheap, mutable_binary_maxheap
     export heapify!, heapify, heappop!, heappush!, isheap
     export BinaryMinMaxHeap, popmin!, popmax!, popall!
