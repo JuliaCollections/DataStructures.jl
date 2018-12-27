@@ -155,23 +155,35 @@ mutable struct MutableBinaryHeap{VT, Comp} <: AbstractMutableHeap{VT,Int}
     nodes::Vector{MutableBinaryHeapNode{VT}}
     node_map::Vector{Int}
 
-    function MutableBinaryHeap{VT, Comp}(comp::Comp) where {VT, Comp}
+    function MutableBinaryHeap{VT, Comp}() where {VT, Comp}
         nodes = Vector{MutableBinaryHeapNode{VT}}()
         node_map = Vector{Int}()
-        new{VT, Comp}(comp, nodes, node_map)
+        new{VT, Comp}(Comp(), nodes, node_map)
     end
 
-    function MutableBinaryHeap{VT, Comp}(comp::Comp, xs) where {VT, Comp}  # xs is an iterable collection of values
-        nodes, node_map = _make_mutable_binary_heap(comp, VT, xs)
-        new{VT, Comp}(comp, nodes, node_map)
+    function MutableBinaryHeap{VT, Comp}(xs::AbstractVector{VT}) where {VT, Comp} 
+        nodes, node_map = _make_mutable_binary_heap(Comp(), VT, xs)
+        new{VT, Comp}(Comp(), nodes, node_map)
     end
 end
+                            
+const MutableBinaryMinHeap{T} = MutableBinaryHeap{T, LessThan}
+const MutableBinaryMaxHeap{T} = MutableBinaryHeap{T, GreaterThan}
+                            
+MutableBinaryMinHeap(xs::AbstractVector{T}) where T = MutableBinaryMinHeap{T}(xs)
+MutableBinaryMaxHeap(xs::AbstractVector{T}) where T = MutableBinaryMaxHeap{T}(xs)
 
-mutable_binary_minheap(ty::Type{T}) where {T} = MutableBinaryHeap{T,LessThan}(LessThan())
-mutable_binary_maxheap(ty::Type{T}) where {T} = MutableBinaryHeap{T,GreaterThan}(GreaterThan())
-
-mutable_binary_minheap(xs::AbstractVector{T}) where {T} = MutableBinaryHeap{T,LessThan}(LessThan(), xs)
-mutable_binary_maxheap(xs::AbstractVector{T}) where {T} = MutableBinaryHeap{T,GreaterThan}(GreaterThan(), xs)
+# deprecated constructors
+mutable_binary_minheap(::Type{T}) where T = MutableBinaryMinHeap{T}()
+mutable_binary_maxheap(::Type{T}) where T = MutableBinaryMaxHeap{T}()
+mutable_binary_minheap(xs::AbstractVector{T}) where T = MutableBinaryMinHeap(xs)
+mutable_binary_maxheap(xs::AbstractVector{T}) where T = MutableBinaryMaxHeap(xs)
+                            
+@deprecate mutable_binary_minheap(::Type{T}) where {T} MutableBinaryMinHeap{T}()
+@deprecate mutable_binary_minheap(xs::AbstractVector{T}) where {T} MutableBinaryMinHeap(xs)
+@deprecate mutable_binary_maxheap(::Type{T}) where {T} MutableBinaryMaxHeap{T}()
+@deprecate mutable_binary_maxheap(xs::AbstractVector{T}) where {T} MutableBinaryMaxHeap(xs)
+    
 
 function show(io::IO, h::MutableBinaryHeap)
     print(io, "MutableBinaryHeap(")
