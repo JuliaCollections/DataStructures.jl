@@ -103,4 +103,10 @@
         @test collect(l10) == [2; 4; 5.6; 10.5]
     end
 
+    @testset "test identity map" begin
+        ex = :(a+b+2 * 2 + foo(2))
+        l11 = list(ex.args...)
+        @test collect(map(x->x, l11)) == collect(l11)
+    end
+
 end # @testset LinkedList
