@@ -122,11 +122,6 @@ BinaryMaxHeap(xs::AbstractVector{T}) where T = BinaryMaxHeap{T}(xs)
 
 # deprecated constructors
                             
-binary_minheap(::Type{T}) where T = BinaryMinHeap{T}()
-binary_maxheap(::Type{T}) where T = BinaryMaxHeap{T}()
-binary_minheap(xs::AbstractVector{T}) where T = BinaryMinHeap(xs)
-binary_maxheap(xs::AbstractVector{T}) where T = BinaryMaxHeap(xs)
-                            
 @deprecate binary_minheap(::Type{T}) where {T} BinaryMinHeap{T}()
 @deprecate binary_minheap(xs::AbstractVector{T}) where {T} BinaryMinHeap(xs)
 @deprecate binary_maxheap(::Type{T}) where {T} BinaryMaxHeap{T}()

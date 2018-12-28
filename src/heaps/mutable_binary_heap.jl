@@ -174,10 +174,6 @@ MutableBinaryMinHeap(xs::AbstractVector{T}) where T = MutableBinaryMinHeap{T}(xs
 MutableBinaryMaxHeap(xs::AbstractVector{T}) where T = MutableBinaryMaxHeap{T}(xs)
 
 # deprecated constructors
-mutable_binary_minheap(::Type{T}) where T = MutableBinaryMinHeap{T}()
-mutable_binary_maxheap(::Type{T}) where T = MutableBinaryMaxHeap{T}()
-mutable_binary_minheap(xs::AbstractVector{T}) where T = MutableBinaryMinHeap(xs)
-mutable_binary_maxheap(xs::AbstractVector{T}) where T = MutableBinaryMaxHeap(xs)
                             
 @deprecate mutable_binary_minheap(::Type{T}) where {T} MutableBinaryMinHeap{T}()
 @deprecate mutable_binary_minheap(xs::AbstractVector{T}) where {T} MutableBinaryMinHeap(xs)
