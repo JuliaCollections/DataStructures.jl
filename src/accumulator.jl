@@ -130,7 +130,7 @@ end
 Resets the count of `x` to zero.
 Returns its former count.
 """
-reset!(ct::Accumulator, x) = pop!(ct.map, x)
+reset!(ct::Accumulator{<:Any,V}, x) where V = haskey(ct.map, x) ? pop!(ct.map, x) : zero(V)
 
 """
      nlargest(acc::Accumulator, [n])
@@ -182,4 +182,61 @@ nsmallest(acc::Accumulator, n) = partialsort!(collect(acc), 1:n, by=last, rev=fa
 @deprecate pop!(ct::Accumulator, x) reset!(ct, x)
 @deprecate push!(ct1::Accumulator, ct2::Accumulator) merge!(ct1,ct2)
 
+###########################################################
+## Multiset operations
 
+struct MultiplicyException{K,V} <: Exception
+    k::K
+    v::V
+end
+
+function Base.showerror(io::IO, err::MultiplicyException)
+    print(io, "When using an Accumulator as a Multiset, all elements must have positive multiplicy")
+    print(io, "element `$(err.k)` has multiplicy $(err.v)")
+end
+
+drop_nonpositive!(a::Accumulator, k) = (a[k] > 0 || reset!(a, k); nothing)
+
+
+support(a::Accumulator) = Set(k for (k,v) in a if v > 0)
+
+Base.setdiff(a::Accumulator, b) = setdiff(a, convert(typeof(a), b))
+
+function Base.setdiff(a::Accumulator, b::Accumulator)
+    ret = copy(a)
+    for (k, v) in b
+        v > 0 || throw(MultiplicyException(k, v))
+        ret[k] -= v # defaults to zero if not found
+        drop_nonpositive!(ret, k)
+    end
+    return ret
+end
+
+Base.issubset(a, b::T) where T<:Accumulator= issubset(convert(T, a), b)
+Base.issubset(a::Accumulator, b::Accumulator) = all(b[k] >= v for (k, v) in a)
+
+Base.union(a::Accumulator, b::Accumulator) = Base.union!(copy(a), b)
+function Base.union!(a::Accumulator, b::Accumulator)
+    for (kb, vb) in b
+        vb > 0 || throw(MultiplicyException(kb, vb))
+        a[kb] = max(a[kb], vb)
+    end
+    return a
+end
+
+
+Base.intersect(a::Accumulator, b::Accumulator) = Base.intersect!(copy(a), b)
+function Base.intersect!(a::Accumulator, b::Accumulator)
+    for (kb, vb) in b
+        vb > 0 || throw(MultiplicyException(kb, vb))
+        a[kb] = min(a[kb], vb)
+    end
+    # Need to do this bidirectionally, as anything not in both needs to be removed
+    for (ka,va) in a
+        va > 0 || throw(MultiplicyException(ka, va))
+        a[ka] = min(b[ka], va)
+    
+        drop_nonpositive!(a, ka) # Drop any that ended up zero
+    end
+    return a
+end
