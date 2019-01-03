@@ -5,7 +5,7 @@ using Serialization
 
 import DataStructures: IntSet
 
-@test isempty(detect_ambiguities(Base, Core, DataStructures))
+@test [] == detect_ambiguities(Base, Core, DataStructures)
 
 tests = ["int_set",
          "deque",
