@@ -32,7 +32,6 @@ function eltype_for_accumulator(seq::T) where {T<:Base.Generator}
 end
 
 
-
 copy(ct::Accumulator) = Accumulator(copy(ct.map))
 
 length(a::Accumulator) = length(a.map)
@@ -198,10 +197,6 @@ end
 drop_nonpositive!(a::Accumulator, k) = (a[k] > 0 || reset!(a, k); nothing)
 
 
-support(a::Accumulator) = Set(k for (k,v) in a if v > 0)
-
-Base.setdiff(a::Accumulator, b) = setdiff(a, convert(typeof(a), b))
-
 function Base.setdiff(a::Accumulator, b::Accumulator)
     ret = copy(a)
     for (k, v) in b
@@ -212,7 +207,6 @@ function Base.setdiff(a::Accumulator, b::Accumulator)
     return ret
 end
 
-Base.issubset(a, b::T) where T<:Accumulator= issubset(convert(T, a), b)
 Base.issubset(a::Accumulator, b::Accumulator) = all(b[k] >= v for (k, v) in a)
 
 Base.union(a::Accumulator, b::Accumulator) = Base.union!(copy(a), b)
@@ -233,7 +227,6 @@ function Base.intersect!(a::Accumulator, b::Accumulator)
     end
     # Need to do this bidirectionally, as anything not in both needs to be removed
     for (ka,va) in a
-        va > 0 || throw(MultiplicyException(ka, va))
         a[ka] = min(b[ka], va)
     
         drop_nonpositive!(a, ka) # Drop any that ended up zero
