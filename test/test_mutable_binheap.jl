@@ -220,5 +220,14 @@ end
         update!(h, 2, 20)
         @test isequal(heap_values(h), [0.5, 10.1, 3.0, 20.0])
     end
+    
+    # test deprecated constructors
+    @testset "deprecated constructors" begin
+        @test_deprecated mutable_binary_minheap(Int)
+        @test_deprecated mutable_binary_minheap([1., 2., 3.])
+        @test_deprecated mutable_binary_maxheap(Int)
+        @test_deprecated mutable_binary_maxheap([1., 2., 3.])
+    end
+    
 
 end # @testset MutableBinheap

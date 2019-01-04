@@ -134,5 +134,13 @@
 
         @test isequal(h.valtree, [0.5, 5.0, 3.0, 10.1])
     end
+    
+    # test deprecated constructors
+    @testset "deprecated constructors" begin
+        @test_deprecated binary_minheap(Int)
+        @test_deprecated binary_minheap([1., 2., 3.])
+        @test_deprecated binary_maxheap(Int)
+        @test_deprecated binary_maxheap([1., 2., 3.])
+    end
 
 end # @testset BinaryHeap
