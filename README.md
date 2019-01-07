@@ -17,7 +17,7 @@ This package implements a variety of data structures, including
 -   CircularDeque
 -   Stack
 -   Queue
--   Accumulators and Counters
+-   Accumulators and Counters (i.e. Multisets / Bags)
 -   Disjoint Sets
 -   Binary Heap
 -   Mutable Binary Heap

@@ -55,4 +55,31 @@ merge(a, a2)     # return a new accumulator/counter that combines (sums) the
                  # values/counts in both a and a2.
 ```
 
+merge is the multiset sum (Sometimes written ⊎) operation.
 
+## Use as a MultiSet
+
+An `Accumulator{T, <:Integer}` such as is returned by `counter`, is a [multiset](https://en.wikipedia.org/wiki/Multiset) or Bag, of objects of type `T`.
+If the count type is not an integer but a more general real number,
+then this is a form of fuzzy multiset.
+We support a number of operations to support the use of `Accumulators` as multisets.
+
+
+Note that these multiset operations will throw an error if the accumulator has negative or zero counts for any items,.
+
+```julia
+
+setdiff(a1, a2)          # The opposite of `merge` (i.e. multiset sum),
+                         # Returns `a1` with the count of items in `a2` removed, down to a minimum of zero
+                         # max(a1[v] - a2[v], 0) over all `v` in universe
+
+
+union(a1, a2)            # multiset union (sometimes called maximum, or lowest common multiple)
+                         # returns a new multiset with the counts being the higher of those in `a1` or `a2`.
+                         # max(a1[v], a2[v]) over all `v` in universe
+
+intersection(a1, a2)     # multiset intersection (sometimes called infimum or greatest common divisor)
+                         # returns a new multiset with the counts being the lowest of those in `a1` or `a2`.
+                         # Note that this means things not occurring in both with be removed (count zero).
+                         # min(a1[v], a2[v]) over all `v` in universe
+```
