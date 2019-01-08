@@ -189,7 +189,7 @@
             @test ∪(counter([1,2,3]), counter(Int[])) == counter([1,2,3])
         end
  
-        @testset "union" begin
+        @testset "intersect" begin
             @test ∩(counter([1,2,3]), counter([1,2,3])) == counter([1,2,3])
             @test ∩(counter([1,2,3]), counter([1,2,2,3])) == counter([1,2,3])
             @test ∩(counter([1,3]), counter([2,2])) == counter(Int[])
