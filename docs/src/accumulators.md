@@ -10,6 +10,8 @@ struct Accumulator{K, V<:Number}
 end
 ```
 
+## Constructors
+
 There are different ways to construct an accumulator/counter:
 
 ```julia
@@ -28,20 +30,29 @@ a = counter(seq)         # construct a counter by counting keys in a sequence
 a = counter(gen)         # construct a counter by counting keys in a generator
 ```
 
+## Usage
 Usage of an accumulator/counter:
 
 ```julia
 # let a and a2 be accumulators/counters
 
-a[x]             # get the current value/count for x.
-                 # if x was not added to a, it returns zero(V)
+a[x]             # get the current value/count for x,
+                 # if x was not added to a, it returns zero.
 
-push!(a, x)      # increment the value/count for x by 1
-push!(a, x, v)   # increment the value/count for x by v
-push!(a, a2)     # add all counts from a2 to a1
+a[x] = v         # sets the current value/count for `x` to `v`
 
-pop!(a, x)       # remove a key x from a, and return its current value
 
-merge(a, a2)     # return a new accumulator/counter that combines the
-                 # values/counts in both a and a2
+inc!(a, x)       # increment the value/count for x by 1
+inc!(a, x, v)    # increment the value/count for x by v
+
+dec!(a, x)       # decrement the value/count for x by 1
+dec!(a, x, v)    # decrement the value/count for x by v
+
+reset!(a, x)     # remove a key x from a, and return its current value
+
+merge!(a, a2)    # add all counts from a2 to a1
+merge(a, a2)     # return a new accumulator/counter that combines (sums) the
+                 # values/counts in both a and a2.
 ```
+
+
