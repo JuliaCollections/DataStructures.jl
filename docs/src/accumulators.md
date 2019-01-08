@@ -78,7 +78,7 @@ union(a1, a2)            # multiset union (sometimes called maximum, or lowest c
                          # returns a new multiset with the counts being the higher of those in `a1` or `a2`.
                          # max(a1[v], a2[v]) over all `v` in universe
 
-intersection(a1, a2)     # multiset intersection (sometimes called infimum or greatest common divisor)
+intersect(a1, a2)        # multiset intersection (sometimes called infimum or greatest common divisor)
                          # returns a new multiset with the counts being the lowest of those in `a1` or `a2`.
                          # Note that this means things not occurring in both with be removed (count zero).
                          # min(a1[v], a2[v]) over all `v` in universe
