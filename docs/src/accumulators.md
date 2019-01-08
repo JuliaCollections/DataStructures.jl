@@ -42,13 +42,13 @@ a[x]             # get the current value/count for x,
 a[x] = v         # sets the current value/count for `x` to `v`
 
 
-inc!(a, x)      # increment the value/count for x by 1
-inc!(a, x, v)   # increment the value/count for x by v
+inc!(a, x)       # increment the value/count for x by 1
+inc!(a, x, v)    # increment the value/count for x by v
 
-dec!(a, x)      # decrement the value/count for x by 1
-dec!(a, x, v)   # decrement the value/count for x by v
+dec!(a, x)       # decrement the value/count for x by 1
+dec!(a, x, v)    # decrement the value/count for x by v
 
-reset!(a, x)       # remove a key x from a, and return its current value
+reset!(a, x)     # remove a key x from a, and return its current value
 
 merge!(a, a2)    # add all counts from a2 to a1
 merge(a, a2)     # return a new accumulator/counter that combines (sums) the
