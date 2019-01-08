@@ -224,9 +224,11 @@ function Base.intersect!(a::Accumulator, b::Accumulator)
     for (kb, vb) in b
         vb > 0 || throw(MultiplicyException(kb, vb))
         a[kb] = min(a[kb], vb)
+        drop_nonpositive!(a, kb) # Drop any that ended up zero
     end
     # Need to do this bidirectionally, as anything not in both needs to be removed
     for (ka,va) in a
+        va > 0 || throw(MultiplicyException(ka, va))
         a[ka] = min(b[ka], va)
     
         drop_nonpositive!(a, ka) # Drop any that ended up zero
