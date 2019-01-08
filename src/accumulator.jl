@@ -184,24 +184,24 @@ nsmallest(acc::Accumulator, n) = partialsort!(collect(acc), 1:n, by=last, rev=fa
 ###########################################################
 ## Multiset operations
 
-struct MultiplicyException{K,V} <: Exception
+struct MultiplicityException{K,V} <: Exception
     k::K
     v::V
 end
 
-function Base.showerror(io::IO, err::MultiplicyException)
-    print(io, "When using an Accumulator as a Multiset, all elements must have positive multiplicy")
-    print(io, "element `$(err.k)` has multiplicy $(err.v)")
+function Base.showerror(io::IO, err::MultiplicityException)
+    print(io, "When using an Accumulator as a Multiset, all elements must have positive multiplicity")
+    print(io, " element `$(err.k)` has multiplicity $(err.v)")
 end
 
-drop_nonpositive!(a::Accumulator, k) = (a[k] > 0 || reset!(a, k); nothing)
+drop_nonpositive!(a::Accumulator, k) = (a[k] > 0 || delete!(a.map, k))
 
 
 function Base.setdiff(a::Accumulator, b::Accumulator)
     ret = copy(a)
     for (k, v) in b
-        v > 0 || throw(MultiplicyException(k, v))
-        ret[k] -= v # defaults to zero if not found
+        v > 0 || throw(MultiplicityException(k, v))
+        dec!(ret, k, v)
         drop_nonpositive!(ret, k)
     end
     return ret
@@ -209,26 +209,28 @@ end
 
 Base.issubset(a::Accumulator, b::Accumulator) = all(b[k] >= v for (k, v) in a)
 
-Base.union(a::Accumulator, b::Accumulator) = Base.union!(copy(a), b)
+Base.union(a::Accumulator, b::Accumulator, c::Accumulator...) = union(union(a,b), c...)
+Base.union(a::Accumulator, b::Accumulator) = union!(copy(a), b)
 function Base.union!(a::Accumulator, b::Accumulator)
     for (kb, vb) in b
-        vb > 0 || throw(MultiplicyException(kb, vb))
+        vb > 0 || throw(MultiplicityException(kb, vb))
         a[kb] = max(a[kb], vb)
     end
     return a
 end
 
 
-Base.intersect(a::Accumulator, b::Accumulator) = Base.intersect!(copy(a), b)
+Base.intersect(a::Accumulator, b::Accumulator, c::Accumulator...) = insersect(intersect(a,b), c...)
+Base.intersect(a::Accumulator, b::Accumulator) = intersect!(copy(a), b)
 function Base.intersect!(a::Accumulator, b::Accumulator)
     for (kb, vb) in b
-        vb > 0 || throw(MultiplicyException(kb, vb))
+        vb > 0 || throw(MultiplicityException(kb, vb))
         a[kb] = min(a[kb], vb)
         drop_nonpositive!(a, kb) # Drop any that ended up zero
     end
     # Need to do this bidirectionally, as anything not in both needs to be removed
     for (ka,va) in a
-        va > 0 || throw(MultiplicyException(ka, va))
+        va > 0 || throw(MultiplicityException(ka, va))
         a[ka] = min(b[ka], va)
     
         drop_nonpositive!(a, ka) # Drop any that ended up zero
