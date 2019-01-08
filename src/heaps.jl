@@ -99,7 +99,7 @@ function nextreme(comp::Comp, n::Int, arr::AbstractVector{T}) where {T, Comp}
         return sort(arr, lt = (x, y) -> compare(comp, y, x))
     end
 
-    buffer = BinaryHeap{T,Comp}(comp)
+    buffer = BinaryHeap{T,Comp}()
 
     for i = 1 : n
         @inbounds xi = arr[i]

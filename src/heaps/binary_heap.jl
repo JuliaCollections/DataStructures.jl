@@ -106,23 +106,26 @@ mutable struct BinaryHeap{T,Comp} <: AbstractHeap{T}
     comparer::Comp
     valtree::Vector{T}
 
-    function BinaryHeap{T,Comp}(comp::Comp) where {T,Comp}
-        new{T,Comp}(comp, Vector{T}())
-    end
+    BinaryHeap{T,Comp}() where {T,Comp} = new{T,Comp}(Comp(), Vector{T}())
 
-    function BinaryHeap{T,Comp}(comp::Comp, xs) where {T,Comp}  # xs is an iterable collection of values
-        valtree = _make_binary_heap(comp, T, xs)
-        new{T,Comp}(comp, valtree)
+    function BinaryHeap{T,Comp}(xs::AbstractVector{T}) where {T,Comp} 
+        valtree = _make_binary_heap(Comp(), T, xs)
+        new{T,Comp}(Comp(), valtree)
     end
 end
+                            
+const BinaryMinHeap{T} = BinaryHeap{T, LessThan}
+const BinaryMaxHeap{T} = BinaryHeap{T, GreaterThan}
+                            
+BinaryMinHeap(xs::AbstractVector{T}) where T = BinaryMinHeap{T}(xs)
+BinaryMaxHeap(xs::AbstractVector{T}) where T = BinaryMaxHeap{T}(xs)
 
-function binary_minheap(ty::Type{T}) where T
-    BinaryHeap{T,LessThan}(LessThan())
-end
-
-binary_maxheap(ty::Type{T}) where {T} = BinaryHeap{T,GreaterThan}(GreaterThan())
-binary_minheap(xs::AbstractVector{T}) where {T} = BinaryHeap{T,LessThan}(LessThan(), xs)
-binary_maxheap(xs::AbstractVector{T}) where {T} = BinaryHeap{T,GreaterThan}(GreaterThan(), xs)
+# deprecated constructors
+                            
+@deprecate binary_minheap(::Type{T}) where {T} BinaryMinHeap{T}()
+@deprecate binary_minheap(xs::AbstractVector{T}) where {T} BinaryMinHeap(xs)
+@deprecate binary_maxheap(::Type{T}) where {T} BinaryMaxHeap{T}()
+@deprecate binary_maxheap(xs::AbstractVector{T}) where {T} BinaryMaxHeap(xs)
 
 #################################################
 #

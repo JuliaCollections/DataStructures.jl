@@ -38,17 +38,17 @@ mutable binary heap (type `MutableBinaryHeap`) have been implemented.
 Examples of constructing a heap:
 
 ```julia
-h = binary_minheap(Int)
-h = binary_maxheap(Int)            # create an empty min/max binary heap of integers
+h = BinaryMinHeap{Int}()
+h = BinaryMaxHeap{Int}()          # create an empty min/max binary heap of integers
 
-h = binary_minheap([1,4,3,2])
-h = binary_maxheap([1,4,3,2])      # create a min/max heap from a vector
+h = BinaryMinHeap([1,4,3,2])
+h = BinaryMaxHeap([1,4,3,2])      # create a min/max heap from a vector
 
-h = mutable_binary_minheap(Int)
-h = mutable_binary_maxheap(Int)    # create an empty mutable min/max heap
+h = MutableBinaryMinHeap{Int}()
+h = MutableBinaryMaxHeap{Int}()   # create an empty mutable min/max heap
 
-h = mutable_binary_minheap([1,4,3,2])
-h = mutable_binary_maxheap([1,4,3,2])    # create a mutable min/max heap from a vector
+h = MutableBinaryMinHeap([1,4,3,2])
+h = MutableBinaryMaxHeap([1,4,3,2])    # create a mutable min/max heap from a vector
 ```
 
 ## Min-max heaps
