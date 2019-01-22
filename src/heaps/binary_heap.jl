@@ -152,3 +152,5 @@ Returns the element at the top of the heap `h`.
 @inline top(h::BinaryHeap) = h.valtree[1]
 
 pop!(h::BinaryHeap{T}) where {T} = _binary_heap_pop!(h.comparer, h.valtree)
+                            
+getindex(h::BinaryHeap, i::Int) = h.valtree[i]
