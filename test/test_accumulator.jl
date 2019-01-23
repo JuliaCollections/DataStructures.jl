@@ -174,12 +174,32 @@
 
         @test_throws BoundsError nsmallest(counter("a"),2)
     end
+    
+    @testset "reset!" begin
+        ct = counter("abbbcddddda") # ['d'=>5, 'b'=>3, 'a'=>2, 'c'=>1]
+        @test reset!(ct, 'b') == 3
+        @test ct == counter("acddddda")
+        
+        @test reset!(ct, 'x') == 0
+    end
 
     @testset "Multiset" begin
+        @testset "issubset" begin
+            @test issubset(counter([1,2,3]), counter([1,2,3]))
+            @test !issubset(counter([1,2,3,4]), counter([1,2,3]))
+            @test issubset(counter([1,2]), counter([1,2,3]))
+            
+            @test !issubset(counter([1,2,3]), counter([1,2,3,3]))
+            @test !issubset(counter([1,2,3,3]), counter([1,2,3]))
+        end
+        
         @testset "setdiff" begin
             @test setdiff(counter([1,2,3]), counter([2, 4])) == counter([3, 1])
             @test setdiff(counter([1,2,3]), counter([2,2,4])) == counter([3, 1])
             @test setdiff(counter([1,2,2,2,3]), counter([2,2,4])) == counter([1,2,3])
+            
+            nonmultiset = counter(Dict([("a",-10), ("b",20)]))
+            @test_throws DataStructures.MultiplicityException setdiff(counter("aabbcc"). nonmultiset)
         end
         
         @testset "union" begin
@@ -187,6 +207,10 @@
             @test ∪(counter([1,2,3]), counter([1,2,2,3])) == counter([1,2,2,3])
             @test ∪(counter([1,3]), counter([2,2])) == counter([1,2,2,3])
             @test ∪(counter([1,2,3]), counter(Int[])) == counter([1,2,3])
+            
+            nonmultiset = counter(Dict([("a",-10), ("b",20)]))
+            @test_throws DataStructures.MultiplicityException ∪(counter("aabbcc"). nonmultiset)
+            @test_throws DataStructures.MultiplicityException ∪(nonmultiset, counter("aabbcc"))
         end
  
         @testset "intersect" begin
@@ -194,6 +218,11 @@
             @test ∩(counter([1,2,3]), counter([1,2,2,3])) == counter([1,2,3])
             @test ∩(counter([1,3]), counter([2,2])) == counter(Int[])
             @test ∩(counter([1,2,3]), counter(Int[])) == counter(Int[])
+            
+            
+            nonmultiset = counter(Dict([("a",-10), ("b",20)]))
+            @test_throws DataStructures.MultiplicityException ∩(counter("aabbcc"). nonmultiset)
+            @test_throws DataStructures.MultiplicityException ∩(nonmultiset, counter("aabbcc"))
         end
 
 
