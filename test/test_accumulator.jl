@@ -199,7 +199,7 @@
             @test setdiff(counter([1,2,2,2,3]), counter([2,2,4])) == counter([1,2,3])
             
             nonmultiset = counter(Dict([("a",-10), ("b",20)]))
-            @test_throws DataStructures.MultiplicityException setdiff(counter("aabbcc"). nonmultiset)
+            @test_throws DataStructures.MultiplicityException setdiff(counter("aabbcc"), nonmultiset)
         end
         
         @testset "union" begin
@@ -209,7 +209,7 @@
             @test ∪(counter([1,2,3]), counter(Int[])) == counter([1,2,3])
             
             nonmultiset = counter(Dict([("a",-10), ("b",20)]))
-            @test_throws DataStructures.MultiplicityException ∪(counter("aabbcc"). nonmultiset)
+            @test_throws DataStructures.MultiplicityException ∪(counter("aabbcc"), nonmultiset)
             @test_throws DataStructures.MultiplicityException ∪(nonmultiset, counter("aabbcc"))
         end
  
@@ -221,7 +221,7 @@
             
             
             nonmultiset = counter(Dict([("a",-10), ("b",20)]))
-            @test_throws DataStructures.MultiplicityException ∩(counter("aabbcc"). nonmultiset)
+            @test_throws DataStructures.MultiplicityException ∩(counter("aabbcc"), nonmultiset)
             @test_throws DataStructures.MultiplicityException ∩(nonmultiset, counter("aabbcc"))
         end
 
