@@ -209,8 +209,8 @@
             @test ∪(counter([1,2,3]), counter(Int[])) == counter([1,2,3])
             
             nonmultiset = counter(Dict([("a",-10), ("b",20)]))
-            @test_throws DataStructures.MultiplicityException ∪(counter("aabbcc"), nonmultiset)
-            @test_throws DataStructures.MultiplicityException ∪(nonmultiset, counter("aabbcc"))
+            @test_throws DataStructures.MultiplicityException (counter("aabbcc") ∪ nonmultiset)
+            @test_throws DataStructures.MultiplicityException (nonmultiset ∪ counter("aabbcc"))
         end
  
         @testset "intersect" begin
@@ -221,8 +221,8 @@
             
             
             nonmultiset = counter(Dict([("a",-10), ("b",20)]))
-            @test_throws DataStructures.MultiplicityException ∩(counter("aabbcc"), nonmultiset)
-            @test_throws DataStructures.MultiplicityException ∩(nonmultiset, counter("aabbcc"))
+            @test_throws DataStructures.MultiplicityException (counter("aabbcc") ∩ nonmultiset)
+            @test_throws DataStructures.MultiplicityException (nonmultiset ∩ counter("aabbcc"))
         end
 
 
