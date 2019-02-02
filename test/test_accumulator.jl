@@ -183,6 +183,16 @@
         @test reset!(ct, 'x') == 0
     end
 
+    @testset "copy" begin
+        orig = counter("aabbbcccc")
+        dup = copy(orig)
+        @test orig == dup
+        
+        # Modifying copy should not modify original
+        inc!(orig, 'a')
+        @test orig == dup
+    end
+    
     @testset "Multiset" begin
         @testset "issubset" begin
             @test issubset(counter([1,2,3]), counter([1,2,3]))
@@ -226,7 +236,7 @@
         end
 
 
-
+    
 
     end
 
