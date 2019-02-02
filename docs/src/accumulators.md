@@ -70,7 +70,7 @@ Note that these operations will throw an error if the accumulator has negative o
 ```julia
 
 setdiff(a1, a2)          # The opposite of `merge` (i.e. multiset sum),
-                         # Returns `a1` with the count of items in `a2` removed, down to a minimum of zero
+                         # returns a new multiset with the count of items in `a2` removed from `a1`, down to a minimum of zero
                          # `max(a1[v] - a2[v], 0)` over all `v` in the universe
 
 
