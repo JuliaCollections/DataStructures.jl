@@ -55,7 +55,7 @@ merge(a, a2)     # return a new accumulator/counter that combines the
                  # `a1[v] + a2[v]` over all `v` in the universe
 ```
 
-`merge` is the multiset sum (Sometimes written ⊎) operation.
+`merge` is the multiset sum operation (sometimes written ⊎).
 
 ## Use as a multiset
 
