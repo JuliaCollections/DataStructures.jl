@@ -214,8 +214,8 @@ Base.union(a::Accumulator, b::Accumulator) = union!(copy(a), b)
 function Base.union!(a::Accumulator, b::Accumulator)
     for (kb, vb) in b
         va = a[kb]
-        vb > 0 || throw(MultiplicityException(kb, vb))
-        va > 0 || throw(MultiplicityException(kb, va))
+        vb >= 0 || throw(MultiplicityException(kb, vb))
+        va >= 0 || throw(MultiplicityException(kb, va))
         a[kb] = max(va, vb)
     end
     return a
@@ -225,17 +225,15 @@ end
 Base.intersect(a::Accumulator, b::Accumulator, c::Accumulator...) = insersect(intersect(a,b), c...)
 Base.intersect(a::Accumulator, b::Accumulator) = intersect!(copy(a), b)
 function Base.intersect!(a::Accumulator, b::Accumulator)
-    for (kb, vb) in b
-        vb > 0 || throw(MultiplicityException(kb, vb))
-        a[kb] = min(a[kb], vb)
-        drop_nonpositive!(a, kb) # Drop any that ended up zero
-    end
-    # Need to do this bidirectionally, as anything not in both needs to be removed
-    for (ka,va) in a
-        va > 0 || throw(MultiplicityException(ka, va))
-        a[ka] = min(b[ka], va)
-    
-        drop_nonpositive!(a, ka) # Drop any that ended up zero
+    for k in union(keys(a), keys(b)) # union not interection as we want to check both multiplicties
+        va = a[k]
+        vb = b[k]
+        va >= 0 || throw(MultiplicityException(k, va))
+        vb >= 0 || throw(MultiplicityException(k, vb))
+        
+        a[k] = min(va, vb)
+        drop_nonpositive!(a, k) # Drop any that ended up zero
     end
     return a
 end
+
