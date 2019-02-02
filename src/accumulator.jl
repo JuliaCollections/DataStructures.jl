@@ -215,7 +215,7 @@ function Base.union!(a::Accumulator, b::Accumulator)
     for (kb, vb) in b
         va = a[kb]
         vb > 0 || throw(MultiplicityException(kb, vb))
-        va > 0 || throw(MultiplicityException(ka, va))
+        va > 0 || throw(MultiplicityException(kb, va))
         a[kb] = max(va, vb)
     end
     return a
