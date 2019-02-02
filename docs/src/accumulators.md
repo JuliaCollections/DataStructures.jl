@@ -62,7 +62,7 @@ merge(a, a2)     # return a new accumulator/counter that combines the
 An `Accumulator{T, <:Integer} where T` such as is returned by `counter`,
 is a [multiset](https://en.wikipedia.org/wiki/Multiset) or Bag, of objects of type `T`.
 If the count type is not an integer but a more general real number, then this is a form of fuzzy multiset.
-We support a number of operations supporting the use of `Accumulators` as multisets.
+We support a number of operations supporting the use of `Accumulator`s as multisets.
 
 
 Note that these operations will throw an error if the accumulator has negative or zero counts for any items.
