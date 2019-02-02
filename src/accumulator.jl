@@ -213,8 +213,10 @@ Base.union(a::Accumulator, b::Accumulator, c::Accumulator...) = union(union(a,b)
 Base.union(a::Accumulator, b::Accumulator) = union!(copy(a), b)
 function Base.union!(a::Accumulator, b::Accumulator)
     for (kb, vb) in b
+        va = a[kb]
         vb > 0 || throw(MultiplicityException(kb, vb))
-        a[kb] = max(a[kb], vb)
+        va > 0 || throw(MultiplicityException(ka, va))
+        a[kb] = max(va, vb)
     end
     return a
 end
