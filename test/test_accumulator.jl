@@ -190,7 +190,7 @@
         
         # Modifying copy should not modify original
         inc!(orig, 'a')
-        @test orig == dup
+        @test orig != dup
     end
     
     @testset "Multiset" begin
