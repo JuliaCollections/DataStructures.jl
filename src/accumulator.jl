@@ -190,7 +190,7 @@ struct MultiplicityException{K,V} <: Exception
 end
 
 function Base.showerror(io::IO, err::MultiplicityException)
-    print(io, "When using an Accumulator as a Multiset, all elements must have positive multiplicity")
+    print(io, "When using an `Accumulator` as a multiset, all elements must have positive multiplicity")
     print(io, " element `$(err.k)` has multiplicity $(err.v)")
 end
 
