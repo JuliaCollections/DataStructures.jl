@@ -52,7 +52,7 @@ reset!(a, x)     # remove a key x from a, and return its current value
 merge!(a, a2)    # add all counts from a2 to a1
 merge(a, a2)     # return a new accumulator/counter that combines the
                  # values/counts in both a and a2
-                 # `a1[v] + a2[v]` over all `v` in the universe
+                 # `a[v] + a2[v]` over all `v` in the universe
 ```
 
 `merge` is the multiset sum operation (sometimes written ⊎).
