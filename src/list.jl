@@ -67,9 +67,9 @@ end
 
 map(f::Base.Callable, l::Nil) = l
 
-function map(f::Base.Callable, l::Cons)
+function map(f::Base.Callable, l::Cons{T}) where T
     first = f(l.head)
-    l2 = cons(first, nil(typeof(first)))
+    l2 = cons(first, nil(typeof(first) <: T ? T : typeof(first)))
     for h in l.tail
         l2 = cons(f(h), l2)
     end

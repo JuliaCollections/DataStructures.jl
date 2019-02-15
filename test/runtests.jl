@@ -5,7 +5,7 @@ using Serialization
 
 import DataStructures: IntSet
 
-@test isempty(detect_ambiguities(Base, Core, DataStructures))
+@test [] == detect_ambiguities(Base, Core, DataStructures)
 
 tests = ["int_set",
          "deque",
@@ -18,6 +18,7 @@ tests = ["int_set",
          "disjoint_set",
          "binheap",
          "mutable_binheap",
+         "minmax_heap",
          "default_dict",
          "trie",
          "list",

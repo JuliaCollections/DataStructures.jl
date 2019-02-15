@@ -6,7 +6,7 @@
         vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
 
         @testset "make min heap" begin
-            h = binary_minheap(vs)
+            h = BinaryMinHeap(vs)
 
             @test length(h) == 10
             @test !isempty(h)
@@ -15,7 +15,7 @@
         end
 
         @testset "make max heap" begin
-            h = binary_maxheap(vs)
+            h = BinaryMaxHeap(vs)
 
             @test length(h) == 10
             @test !isempty(h)
@@ -25,7 +25,7 @@
 
         @testset "push!" begin
             @testset "push! hmin" begin
-                hmin = binary_minheap(Int)
+                hmin = BinaryMinHeap{Int}()
                 @test length(hmin) == 0
                 @test isempty(hmin)
 
@@ -56,7 +56,7 @@
             end
 
             @testset "push! hmax" begin
-                hmax = binary_maxheap(Int)
+                hmax = BinaryMaxHeap{Int}()
                 @test length(hmax) == 0
                 @test isempty(hmax)
 
@@ -89,7 +89,7 @@
     end
 
     @testset "hybrid push! and pop!" begin
-        h = binary_minheap(Int)
+        h = BinaryMinHeap{Int}()
 
         @testset "push1" begin
             push!(h, 5)
@@ -123,6 +123,24 @@
             @test sort(ss, lt = >)[1:min(n, end)] == nlargest(n, ss)
             @test sort(ss, lt = <)[1:min(n, end)] == nsmallest(n, ss)
         end
+    end
+
+    @testset "push! type conversion" begin # issue 399
+        h = BinaryMinHeap{Float64}()
+        push!(h, 3.0)
+        push!(h, 5)
+        push!(h, Rational(4, 8))
+        push!(h, Complex(10.1, 0.0))
+
+        @test isequal(h.valtree, [0.5, 5.0, 3.0, 10.1])
+    end
+    
+    # test deprecated constructors
+    @testset "deprecated constructors" begin
+        @test_deprecated binary_minheap(Int)
+        @test_deprecated binary_minheap([1., 2., 3.])
+        @test_deprecated binary_maxheap(Int)
+        @test_deprecated binary_maxheap([1., 2., 3.])
     end
 
 end # @testset BinaryHeap

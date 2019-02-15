@@ -32,7 +32,6 @@ function eltype_for_accumulator(seq::T) where {T<:Base.Generator}
 end
 
 
-
 copy(ct::Accumulator) = Accumulator(copy(ct.map))
 
 length(a::Accumulator) = length(a.map)
@@ -130,7 +129,7 @@ end
 Resets the count of `x` to zero.
 Returns its former count.
 """
-reset!(ct::Accumulator, x) = pop!(ct.map, x)
+reset!(ct::Accumulator{<:Any,V}, x) where V = haskey(ct.map, x) ? pop!(ct.map, x) : zero(V)
 
 """
      nlargest(acc::Accumulator, [n])
@@ -182,4 +181,59 @@ nsmallest(acc::Accumulator, n) = partialsort!(collect(acc), 1:n, by=last, rev=fa
 @deprecate pop!(ct::Accumulator, x) reset!(ct, x)
 @deprecate push!(ct1::Accumulator, ct2::Accumulator) merge!(ct1,ct2)
 
+###########################################################
+## Multiset operations
+
+struct MultiplicityException{K,V} <: Exception
+    k::K
+    v::V
+end
+
+function Base.showerror(io::IO, err::MultiplicityException)
+    print(io, "When using an `Accumulator` as a multiset, all elements must have positive multiplicity")
+    print(io, " element `$(err.k)` has multiplicity $(err.v)")
+end
+
+drop_nonpositive!(a::Accumulator, k) = (a[k] > 0 || delete!(a.map, k))
+
+
+function Base.setdiff(a::Accumulator, b::Accumulator)
+    ret = copy(a)
+    for (k, v) in b
+        v > 0 || throw(MultiplicityException(k, v))
+        dec!(ret, k, v)
+        drop_nonpositive!(ret, k)
+    end
+    return ret
+end
+
+Base.issubset(a::Accumulator, b::Accumulator) = all(b[k] >= v for (k, v) in a)
+
+Base.union(a::Accumulator, b::Accumulator, c::Accumulator...) = union(union(a,b), c...)
+Base.union(a::Accumulator, b::Accumulator) = union!(copy(a), b)
+function Base.union!(a::Accumulator, b::Accumulator)
+    for (kb, vb) in b
+        va = a[kb]
+        vb >= 0 || throw(MultiplicityException(kb, vb))
+        va >= 0 || throw(MultiplicityException(kb, va))
+        a[kb] = max(va, vb)
+    end
+    return a
+end
+
+
+Base.intersect(a::Accumulator, b::Accumulator, c::Accumulator...) = insersect(intersect(a,b), c...)
+Base.intersect(a::Accumulator, b::Accumulator) = intersect!(copy(a), b)
+function Base.intersect!(a::Accumulator, b::Accumulator)
+    for k in union(keys(a), keys(b)) # union not interection as we want to check both multiplicties
+        va = a[k]
+        vb = b[k]
+        va >= 0 || throw(MultiplicityException(k, va))
+        vb >= 0 || throw(MultiplicityException(k, vb))
+        
+        a[k] = min(va, vb)
+        drop_nonpositive!(a, k) # Drop any that ended up zero
+    end
+    return a
+end
 

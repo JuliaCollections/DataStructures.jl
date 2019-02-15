@@ -50,6 +50,8 @@ abstract type AbstractHeap{VT} end
 
 abstract type AbstractMutableHeap{VT,HT} <: AbstractHeap{VT} end
 
+abstract type AbstractMinMaxHeap{VT} <: AbstractHeap{VT} end
+
 # comparer
 
 struct LessThan
@@ -66,6 +68,7 @@ compare(c::GreaterThan, x, y) = x > y
 include("heaps/binary_heap.jl")
 include("heaps/mutable_binary_heap.jl")
 include("heaps/arrays_as_heaps.jl")
+include("heaps/minmax_heap.jl")
 
 # generic functions
 
@@ -96,7 +99,7 @@ function nextreme(comp::Comp, n::Int, arr::AbstractVector{T}) where {T, Comp}
         return sort(arr, lt = (x, y) -> compare(comp, y, x))
     end
 
-    buffer = BinaryHeap{T,Comp}(comp)
+    buffer = BinaryHeap{T,Comp}()
 
     for i = 1 : n
         @inbounds xi = arr[i]
