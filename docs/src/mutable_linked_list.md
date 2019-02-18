@@ -32,5 +32,5 @@ pop!(l)                           # remove element from end of list
 popfirst!(l)                      # remove element from beginning of list
 ```
 
-`MutableLinkedList` implements the Iterator interface; iterating over the list
+`MutableLinkedList` implements the Iterator interface, iterating over the list
 from first to last.
