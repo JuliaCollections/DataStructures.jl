@@ -70,12 +70,26 @@ function ==(l1::MutableLinkedList{T}, l2::MutableLinkedList{T}) where T
 end
 
 function map(f::Base.Callable, l::MutableLinkedList{T}) where T
-    S = typeof(f(first(l)))
-    l2 = MutableLinkedList{S <: T ? T : S}()
-    for h in l
-        push!(l2, f(h))
+    if isempty(l) && f isa Function
+        S = Core.Compiler.return_type(f, (T,))
+        return MutableLinkedList{S}()
+    elseif isempty(l) && f isa Type
+        return MutableLinkedList{f}()
+    else
+        S = typeof(f(first(l)))
+        l2 = MutableLinkedList{S}()
+        for h in l
+            el = f(h)
+            if el isa S
+                push!(l2, el)
+            else
+                R = typejoin(S, typeof(el))
+                l2 = MutableLinkedList{R}(collect(l2)...)
+                push!(l2, el)
+            end
+        end
+        return l2
     end
-    return l2
 end
 
 function filter(f::Function, l::MutableLinkedList{T}) where T
