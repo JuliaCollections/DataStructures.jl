@@ -39,8 +39,12 @@ function MutableLinkedList{T}(elts...) where T
     return l
 end
 
-iterate(l::MutableLinkedList) = l.len == 0 ? nothing : (l.front.next.data, l.front.next.next)
-iterate(l::MutableLinkedList, n::ListNode) = n.next == n ? nothing : (n.data, n.next)
+iterate(l::MutableLinkedList) = begin
+    l.len == 0 ? nothing : (l.front.next.data, l.front.next.next)
+end
+iterate(l::MutableLinkedList, n::ListNode) = begin
+    n.next == n ? nothing : (n.data, n.next)
+end
 
 isempty(l::MutableLinkedList) = l.len == 0
 length(l::MutableLinkedList) = l.len
