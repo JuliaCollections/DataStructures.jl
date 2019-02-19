@@ -59,8 +59,9 @@ function ==(l1::MutableLinkedList{T}, l2::MutableLinkedList{T}) where T
     return true
 end
 
-function map(f::Function, l::MutableLinkedList{T}) where T
-    l2 = MutableLinkedList{T}()
+function map(f::Base.Callable, l::MutableLinkedList{T}) where T
+    S = typeof(f(first(l)))
+    l2 = MutableLinkedList{S <: T ? T : S}()
     for h in l
         push!(l2, f(h))
     end
