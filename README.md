@@ -24,7 +24,7 @@ This package implements a variety of data structures, including
 -   Ordered Dicts and Sets
 -   Dictionaries with Defaults
 -   Trie
--   Linked List
+-   Linked List and Mutable Linked List
 -   Sorted Dict, Sorted Multi-Dict and Sorted Set
 -   DataStructures.IntSet
 -   Priority Queue
