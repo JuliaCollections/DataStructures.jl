@@ -50,10 +50,13 @@ isempty(l::MutableLinkedList) = l.len == 0
 length(l::MutableLinkedList) = l.len
 collect(l::MutableLinkedList{T}) where T = T[x for x in l]
 eltype(l::MutableLinkedList{T}) where T = T
+lastindex(l::MutableLinkedList) = l.len
+
 function first(l::MutableLinkedList)
     isempty(l) && throw(ArgumentError("List is empty"))
     return l.front.next.data
 end
+
 function last(l::MutableLinkedList)
     isempty(l) && throw(ArgumentError("List is empty"))
     return l.back.prev.data
