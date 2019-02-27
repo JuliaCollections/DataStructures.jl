@@ -127,6 +127,22 @@ function getindex(l::MutableLinkedList, idx::Int)
     return node.data
 end
 
+function getindex(l::MutableLinkedList{T}, r::UnitRange) where T
+    @boundscheck 0 < first(r) < last(r) <= l.len || throw(BoundsError(l, r))
+    l2 = MutableLinkedList{T}()
+    node = l.front
+    for i = 1:first(r)
+        node = node.next
+    end
+    len = length(r)
+    for j in 1:len
+        push!(l2, node.data)
+        node = node.next
+    end
+    l2.len = len
+    return l2
+end
+
 function setindex!(l::MutableLinkedList{T}, data, idx::Int) where T
     @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
     node = l.front
