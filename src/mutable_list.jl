@@ -167,7 +167,6 @@ function append!(l::MutableLinkedList, elts...)
     for elt in elts
         push!(l, elt)
     end
-    l.len += length(elts)
     return l
 end
 
