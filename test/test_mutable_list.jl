@@ -3,6 +3,7 @@
     @testset "empty list" begin
         l1 = MutableLinkedList{Int}()
         @test MutableLinkedList() == MutableLinkedList{Any}()
+        @test iterate(l1) === nothing
         @test isempty(l1)
         @test length(l1) == 0
         @test lastindex(l1) == 0
@@ -35,6 +36,12 @@
                     @test isempty(l) == false
                     for (j, k) in enumerate(l)
                         @test j == k
+                    end
+                    if i > 2
+                        l1 = MutableLinkedList{Int32}(1:i...)
+                        io = IOBuffer()
+                        @test sprint(io -> show(io, iterate(l1))) == "(1, DataStructures.ListNode{Int32}(2))"
+                        @test sprint(io -> show(io, iterate(l, l.node.next.next))) == "(2, DataStructures.ListNode{Int64}(3))"
                     end
                     cl = collect(l)
                     @test isa(cl, Vector{Int})
@@ -137,12 +144,18 @@
                 end
 
                 @testset "show" begin
-                    l = MutableLinkedList{Int}(1:n...)
-                    @test show(l.front.next) == print("$(typeof(l.front.next))(l.front.next.data)")
-                    @test show(l) == begin print("MutableLinkedList{Int}(")
-                                           print(join(l, ","))
-                                           print(")")
-                                       end
+                    l = MutableLinkedList{Int32}(1:n...)
+                    let
+                        io = IOBuffer()
+                        @test sprint(io -> show(io, l.node.next)) == "$(typeof(l.node.next))($(l.node.next.data))"
+                        begin io1 = IOBuffer()
+                              write(io1, "MutableLinkedList{Int32}(");
+                              write(io1, join(l, ", "));
+                              write(io1, ")")
+                              io1.ptr = 1
+                              @test sprint(io -> show(io, l)) == read(io1, String)
+                        end
+                    end
                 end
             end
         end
