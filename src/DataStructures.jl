@@ -11,7 +11,7 @@ module DataStructures
                  ReverseOrdering, Reverse, Lt,
                  isless, union, intersect, symdiff, setdiff, issubset,
                  searchsortedfirst, searchsortedlast, in,
-                 eachindex, keytype, valtype, minimum, maximum
+                 eachindex, keytype, valtype, minimum, maximum, size
 
     using OrderedCollections
     import OrderedCollections: filter, filter!, isordered
