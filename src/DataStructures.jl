@@ -28,6 +28,8 @@ module DataStructures
     export classified_lists, classified_sets, classified_counters
 
     export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set, root_union!
+    
+    export FenwickTree, bit, size, update, getsum
 
     export AbstractHeap, compare, extract_all!
     export BinaryHeap, BinaryMinHeap, BinaryMaxHeap, nlargest, nsmallest
@@ -72,6 +74,8 @@ module DataStructures
     include("trie.jl")
 
     include("int_set.jl")
+
+    include("fenwick.jl")
 
     include("list.jl")
     include("mutable_list.jl")

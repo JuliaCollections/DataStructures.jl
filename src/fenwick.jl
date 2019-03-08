@@ -1,15 +1,15 @@
-mutable struct fenwick{T}
+mutable struct FenwickTree{T}
     BIT::Vector{T}
     n::Integer
 end
 
-fenwick{T}() where T = fenwick{T}(0)
-fenwick{T}(n::Integer) where T = fenwick{T}(fill(zero(T), n), n)
+FenwickTree{T}() where T = FenwickTree{T}(0)
+FenwickTree{T}(n::Integer) where T = FenwickTree{T}(fill(zero(T), n), n)
 
-bit(F::fenwick{T}) where T = F.BIT
-size(F::fenwick{T}) where T = F.BIT
+bit(F::FenwickTree{T}) where T = F.BIT
+size(F::FenwickTree{T}) where T = F.n
 
-function update(F::fenwick{T}, ind::Int, val::T) where T
+function update(F::FenwickTree{T}, ind::Int, val::T) where T
     i = ind
     N = F.n
     (i in 1:N) || throw(DomainError(i, "$i should be in between 1 and $N"))
@@ -19,12 +19,12 @@ function update(F::fenwick{T}, ind::Int, val::T) where T
     end
 end
 
-function update(F::fenwick{T}, left::Int, right::Int, val::T) where T
+function update(F::FenwickTree{T}, left::Int, right::Int, val::T) where T
     update(F, left, +val)
     update(F, right, -val)
 end
 
-function getsum(F::fenwick{T}, ind::Int) where T
+function getsum(F::FenwickTree{T}, ind::Int) where T
     sum = zero(T)
     i = ind
     N = F.n
@@ -35,4 +35,3 @@ function getsum(F::fenwick{T}, ind::Int) where T
     end
     sum
 end
-
