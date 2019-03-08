@@ -21,7 +21,7 @@ end
 
 function update(F::FenwickTree{T}, left::Int, right::Int, val::T) where T
     update(F, left, +val)
-    update(F, right, -val)
+    update(F, right + 1, -val)
 end
 
 function getsum(F::FenwickTree{T}, ind::Int) where T
