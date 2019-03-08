@@ -20,7 +20,7 @@ map(f, l)                         # return list with f applied to elements
 filter(f, l)                      # return list of elements where f(el) == true
 reverse(l)                        # return reversed list
 copy(l)                           # return a copy of list
-getindex(l, idx)                  # get value at index
+getindex(l, idx)   || l[idx]      # get value at index
 getindex(l, range) || l[range]    # get values within range a:b
 setindex!(l, data, idx)           # set value at index to data
 append!(l1, l2)                   # attach l2 at the end of l1
