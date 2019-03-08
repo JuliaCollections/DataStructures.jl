@@ -1,36 +1,86 @@
+"""
+    FenwickTree{T}(n)
+    
+Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) of length `n`.
+ 
+"""
 mutable struct FenwickTree{T}
-    BIT::Vector{T}
+    bit::Vector{T}
     n::Integer
 end
 
 FenwickTree{T}() where T = FenwickTree{T}(0)
-FenwickTree{T}(n::Integer) where T = FenwickTree{T}(fill(zero(T), n), n)
+FenwickTree{T}(n::Integer) where T = FenwickTree{T}(zeros(T, n), n)
 
-bit(F::FenwickTree{T}) where T = F.BIT
-size(F::FenwickTree{T}) where T = F.n
+"""
+    FenwickTree(arr::AbstractArray) 
+    
+Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) from `arr`.
+ 
+"""
+function FenwickTree(a::T) where T <: AbstractVector
+    FenwickTree{eltype(a)}(a, size(a)[1])
+end
 
-function update(F::FenwickTree{T}, ind::Int, val::T) where T
+bit(F::FenwickTree{T}) where T = F.bit
+length(F::FenwickTree{T}) where T = F.n
+
+"""
+    update!(F::FenwickTree{T}, ind, val::T)
+
+Update the value of the [`FenwickTree`] by `val` from the index `ind` upto the length of the Fenwick Tree.
+
+""" 
+function update!(F::FenwickTree{T}, ind::Int, val::T) where T
     i = ind
-    N = F.n
-    (i in 1:N) || throw(DomainError(i, "$i should be in between 1 and $N"))
-    while i <= N
-        F.BIT[i] += val
+    n = F.n
+    (i in 1:n) || throw(DomainError(i, "$i should be in between 1 and $n"))
+    while i <= n
+        F.bit[i] += val
         i += i&(-i)
     end
 end
 
-function update(F::FenwickTree{T}, left::Int, right::Int, val::T) where T
-    update(F, left, +val)
-    update(F, right + 1, -val)
+"""
+    update!(F::FenwickTree{T}, left, right, val::T)
+
+Update the value of the [`FenwickTree`] by `val` from the index `left` upto the index `right`.
+
+"""    
+function update!(F::FenwickTree{T}, left::Int, right::Int, val::T) where T
+    update!(F, left, +val)
+    update!(F, right+1, -val)
 end
 
-function getsum(F::FenwickTree{T}, ind::Int) where T
+"""
+    sum(F::FenwickTree{T}, ind)
+    
+Return the cumulative sum from index 1 upto `ind` of the [`FenwickTree`](@ref)
+
+# Examples
+```
+julia> f = FenwickTree{Int}(6)
+julia> update!(f, 2, 5)
+julia> sum(f, 1)
+ 0
+julia> sum(f, 3)
+ 5
+julia> update!(f, 1, 4, 3)
+julia> sum(f, 1)
+ 3
+julia> sum(f, 3)
+ 8
+julia> sum(f, 6)
+ 5
+```
+"""
+function sum(F::FenwickTree{T}, ind::Int) where T
     sum = zero(T)
     i = ind
-    N = F.n
-    (i in 1:N) || throw(DomainError(i, "$i should be in between 1 and $N"))
+    n = F.n
+    (i in 1:n) || throw(DomainError(i, "$i should be in between 1 and $n"))
     while i > 0 
-        sum += F.BIT[i]
+        sum += F.bit[i]
         i -= i&(-i)
     end
     sum

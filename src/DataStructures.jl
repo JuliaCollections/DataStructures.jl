@@ -29,7 +29,7 @@ module DataStructures
 
     export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set, root_union!
     
-    export FenwickTree, bit, size, update, getsum
+    export FenwickTree, bit, length, update!, sum
 
     export AbstractHeap, compare, extract_all!
     export BinaryHeap, BinaryMinHeap, BinaryMaxHeap, nlargest, nsmallest
