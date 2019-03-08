@@ -41,14 +41,7 @@
                         l1 = MutableLinkedList{Int32}(1:i...)
                         io = IOBuffer()
                         @test sprint(io -> show(io, iterate(l1))) == "(1, DataStructures.ListNode{Int32}(2))"
-<<<<<<< HEAD
-<<<<<<< HEAD
-                        @test sprint(io -> show(io, iterate(l, l.node.next.next))) == "(2, DataStructures.ListNode{Int64}(3))"
-=======
->>>>>>> 5767f1a... Fix iterate test
-=======
-                        @test sprint(io -> show(io, iterate(l, l.node.next.next))) == "(2, DataStructures.ListNode{Int32}(3))"
->>>>>>> f7806fd... fix test error
+                        @test sprint(io -> show(io, iterate(l1, l1.node.next.next))) == "(2, DataStructures.ListNode{Int32}(3))"
                     end
                     cl = collect(l)
                     @test isa(cl, Vector{Int})
