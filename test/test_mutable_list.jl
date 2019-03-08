@@ -37,7 +37,7 @@
                     for (j, k) in enumerate(l)
                         @test j == k
                     end
-                    if i > 2
+                    if i > 3
                         l1 = MutableLinkedList{Int32}(1:i...)
                         io = IOBuffer()
                         @test sprint(io -> show(io, iterate(l1))) == "(1, DataStructures.ListNode{Int32}(2))"
@@ -145,17 +145,14 @@
 
                 @testset "show" begin
                     l = MutableLinkedList{Int32}(1:n...)
-                    let
-                        io = IOBuffer()
-                        @test sprint(io -> show(io, l.node.next)) == "$(typeof(l.node.next))($(l.node.next.data))"
-                        begin io1 = IOBuffer()
-                              write(io1, "MutableLinkedList{Int32}(");
-                              write(io1, join(l, ", "));
-                              write(io1, ")")
-                              io1.ptr = 1
-                              @test sprint(io -> show(io, l)) == read(io1, String)
-                        end
-                    end
+                    io = IOBuffer()
+                    @test sprint(io -> show(io, l.node.next)) == "$(typeof(l.node.next))($(l.node.next.data))"
+                    io1 = IOBuffer()
+                    write(io1, "MutableLinkedList{Int32}(");
+                    write(io1, join(l, ", "));
+                    write(io1, ")")
+                    seekstart(io1)
+                    @test sprint(io -> show(io, l)) == read(io1, String)
                 end
             end
         end
