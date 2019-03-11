@@ -4,8 +4,8 @@ mutable struct ListNode{T}
     next::ListNode{T}
     function ListNode{T}() where T
         node = new{T}()
-        node.prev = node
         node.next = node
+        node.prev = node
         return node
     end
     function ListNode{T}(data) where T
@@ -16,15 +16,13 @@ end
 
 mutable struct MutableLinkedList{T}
     len::Int
-    front::ListNode{T}
-    back::ListNode{T}
+    node::ListNode{T}
     function MutableLinkedList{T}() where T
         l = new{T}()
         l.len = 0
-        l.front = ListNode{T}()
-        l.back = ListNode{T}()
-        l.front.next = l.back
-        l.back.prev = l.front
+        l.node = ListNode{T}()
+        l.node.next = l.node
+        l.node.prev = l.node
         return l
     end
 end
@@ -40,23 +38,26 @@ function MutableLinkedList{T}(elts...) where T
 end
 
 iterate(l::MutableLinkedList) = begin
-    l.len == 0 ? nothing : (l.front.next.data, l.front.next.next)
+    l.len == 0 ? nothing : (l.node.next.data, l.node.next.next)
 end
 iterate(l::MutableLinkedList, n::ListNode) = begin
-    n.next == n ? nothing : (n.data, n.next)
+    n === l.node ? nothing : (n.data, n.next)
 end
 
 isempty(l::MutableLinkedList) = l.len == 0
 length(l::MutableLinkedList) = l.len
 collect(l::MutableLinkedList{T}) where T = T[x for x in l]
 eltype(l::MutableLinkedList{T}) where T = T
+lastindex(l::MutableLinkedList) = l.len
+
 function first(l::MutableLinkedList)
     isempty(l) && throw(ArgumentError("List is empty"))
-    return l.front.next.data
+    return l.node.next.data
 end
+
 function last(l::MutableLinkedList)
     isempty(l) && throw(ArgumentError("List is empty"))
-    return l.back.prev.data
+    return l.node.prev.data
 end
 
 ==(l1::MutableLinkedList{T}, l2::MutableLinkedList{S}) where {T,S} = false
@@ -120,16 +121,32 @@ end
 
 function getindex(l::MutableLinkedList, idx::Int)
     @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
-    node = l.front
+    node = l.node
     for i = 1:idx
         node = node.next
     end
     return node.data
 end
 
+function getindex(l::MutableLinkedList{T}, r::UnitRange) where T
+    @boundscheck 0 < first(r) < last(r) <= l.len || throw(BoundsError(l, r))
+    l2 = MutableLinkedList{T}()
+    node = l.node
+    for i = 1:first(r)
+        node = node.next
+    end
+    len = length(r)
+    for j in 1:len
+        push!(l2, node.data)
+        node = node.next
+    end
+    l2.len = len
+    return l2
+end
+
 function setindex!(l::MutableLinkedList{T}, data, idx::Int) where T
     @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
-    node = l.front
+    node = l.node
     for i = 1:idx
         node = node.next
     end
@@ -138,8 +155,8 @@ function setindex!(l::MutableLinkedList{T}, data, idx::Int) where T
 end
 
 function append!(l1::MutableLinkedList{T}, l2::MutableLinkedList{T}) where T
-    l1.back.prev.next = l2.front.next
-    l2.front.next.prev = l1.back.prev
+    l1.node.prev.next = l2.node.next
+    l2.node.next.prev = l1.node.prev
     l1.len += length(l2)
     return l1
 end
@@ -148,13 +165,12 @@ function append!(l::MutableLinkedList, elts...)
     for elt in elts
         push!(l, elt)
     end
-    l.len += length(elts)
     return l
 end
 
 function delete!(l::MutableLinkedList, idx::Int)
     @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
-    node = l.front
+    node = l.node
     for i = 1:idx
         node = node.next
     end
@@ -168,7 +184,7 @@ end
 
 function delete!(l::MutableLinkedList, r::UnitRange)
     @boundscheck 0 < first(r) < last(r) <= l.len || throw(BoundsError(l, r))
-    node = l.front
+    node = l.node
     for i = 1:first(r)
         node = node.next
     end
@@ -185,43 +201,43 @@ function delete!(l::MutableLinkedList, r::UnitRange)
 end
 
 function push!(l::MutableLinkedList{T}, data) where T
-    last = l.back.prev
+    oldlast = l.node.prev
     node = ListNode{T}(data)
-    node.next = l.back
-    node.prev = last
-    l.back.prev = node
-    last.next = node
+    node.next = l.node
+    node.prev = oldlast
+    l.node.prev = node
+    oldlast.next = node
     l.len += 1
     return l
 end
 
 function pushfirst!(l::MutableLinkedList{T}, data) where T
-    first = l.front.next
+    oldfirst = l.node.next
     node = ListNode{T}(data)
-    node.prev = l.front
-    node.next = first
-    l.front.next = node
-    first.prev = node
+    node.prev = l.node
+    node.next = oldfirst
+    l.node.next = node
+    oldfirst.prev = node
     l.len += 1
     return l
 end
 
 function pop!(l::MutableLinkedList)
     isempty(l) && throw(ArgumentError("List must be non-empty"))
-    last = l.back.prev.prev
-    data = l.back.prev.data
-    last.next = l.back
-    l.back.prev = last
+    last = l.node.prev.prev
+    data = l.node.prev.data
+    last.next = l.node
+    l.node.prev = last
     l.len -= 1
     return data
 end
 
 function popfirst!(l::MutableLinkedList)
     isempty(l) && throw(ArgumentError("List must be non-empty"))
-    first = l.front.next.next
-    data = l.front.next.data
-    first.prev = l.front
-    l.front.next = first
+    first = l.node.next.next
+    data = l.node.next.data
+    first.prev = l.node
+    l.node.next = first
     l.len -= 1
     return data
 end
