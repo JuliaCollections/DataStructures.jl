@@ -4,9 +4,9 @@ import Base.Order.Reverse
 
 
 @testset "PriorityQueue" begin
-
+    
     # Test dequeing in sorted order.
-    function test_issorted!(pq::PriorityQueue, priorities, rev=false)
+    function test_issorted!(pq::AbstractPriorityQueue, priorities, rev=false)
         last = dequeue!(pq)
         while !isempty(pq)
             value = dequeue!(pq)
@@ -19,7 +19,7 @@ import Base.Order.Reverse
         end
     end
 
-    function test_isrequested!(pq::PriorityQueue, keys)
+    function test_isrequested!(pq::AbstractPriorityQueue, keys)
         i = 0
         while !isempty(pq)
             krqst =  keys[i+=1]
@@ -255,4 +255,102 @@ import Base.Order.Reverse
         end
     end
 
+    
+
 end # @testset "PriorityQueue"
+
+@testset "IntPriorityQueue" begin
+
+    pmax = 1000
+    n = 10000
+    r = rand(1:pmax, n)
+    min_val = minimum(r)
+    max_val = maximum(r)
+    priorities = zip(1:n, r)
+
+    @testset "Constructors" begin
+        
+        @testset "Empty constructor" begin
+            pq0 = IntPriorityQueue(n)
+            for i in 1:n
+                pq0[i] = r[i]
+            end
+
+            @test peek(pq0).second == min_val
+        end
+
+
+        @testset "building from Dict" begin
+            pq1 = IntPriorityQueue(Dict(priorities), n)
+
+            @test peek(pq1).second == min_val
+        end
+
+        @testset "parameterized constructor tests pq2" begin
+            pq2 = IntPriorityQueue{Int,Int}(priorities, n)
+            @test peek(pq2).second == min_val
+        end
+
+        @testset "parameterized constructor tests pq3" begin
+            pq3 = IntPriorityQueue{Int,Int}(Reverse, priorities, n)
+            @test peek(pq3).second == max_val
+        end
+
+        @testset "construction from pairs" begin
+
+            @testset "pq8" begin
+                pq8 = IntPriorityQueue([2=>1, 1=>2], 2)
+                @test peek(pq8) == (2=>1)
+            end
+
+            @testset "pq9" begin
+                pq9 = IntPriorityQueue(2, (2=>1), (1=>2))
+                @test peek(pq9) == (2=>1)
+            end
+
+            @testset "pq10" begin
+                pq10 = IntPriorityQueue(Reverse, 2, (2=>1), (1=>2))
+                @test peek(pq10) == (1=>2)
+            end
+
+            @testset "pq11" begin
+                pq11 = IntPriorityQueue(Pair{Int}[2=>1,1=>2], 2,)
+                @test peek(pq11) == (2=>1)
+            end
+        end
+
+        @testset "Errors Thrown" begin
+            @test_throws ArgumentError IntPriorityQueue(-1)
+            @test_throws ArgumentError IntPriorityQueue(priorities, -1)
+            @test_throws ArgumentError IntPriorityQueue(priorities, div(n, 2))
+            @test_throws ArgumentError IntPriorityQueue([1=>2, 1=>3], 1)
+
+            @test_throws ArgumentError IntPriorityQueue{Int, Int}(Reverse, [1, 2, 3], 1)
+            @test_throws ArgumentError IntPriorityQueue{Int, Int}(Reverse, [1=>2, 1=>3], 1)
+
+            @test_throws ArgumentError IntPriorityQueue(Reverse, Reverse)
+        end
+    end
+
+    @testset "dequeuing" begin
+        pq = IntPriorityQueue(priorities, n)
+        removed = dequeue_pair!(pq)
+        @test removed.second == minimum(r)
+        @test haskey(pq, removed.first) == false
+    end
+
+    @testset "get" begin
+        pq = IntPriorityQueue(priorities, n)
+        @test get(pq, 1, 0) == r[1]
+        @test get(pq, n+1, 0) == 0
+    end
+
+    @testset "Iteration" begin
+        pq = IntPriorityQueue(priorities, n)
+        pq2 = IntPriorityQueue(n)
+        for kv in pq
+            enqueue!(pq2, kv)
+        end
+        @test peek(pq).second == peek(pq2).second
+    end
+end

@@ -96,7 +96,7 @@ module DataStructures
     export status
     export deref_key, deref_value, deref, advance, regress
 
-    export PriorityQueue, peek
+    export AbstractPriorityQueue, PriorityQueue, IntPriorityQueue, peek
 
     include("priorityqueue.jl")
 end
