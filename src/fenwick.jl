@@ -1,3 +1,4 @@
+import Base.getindex
 """
     FenwickTree{T}(n)
     
@@ -19,7 +20,13 @@ Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) from `a
  
 """
 function FenwickTree(a::T) where T <: AbstractVector
-    FenwickTree{eltype(a)}(a, size(a)[1])
+    U = eltype(a)
+    n = size(a)[1]
+    bit = FenwickTree{U}(n)
+    @boundscheck for i = 1:n
+        update!(bit, i, a[i])
+    end
+    bit
 end
 
 bit(F::FenwickTree{T}) where T = F.bit
@@ -35,7 +42,7 @@ function update!(F::FenwickTree{T}, ind::Int, val::T) where T
     i = ind
     n = F.n
     (i in 1:n) || throw(DomainError(i, "$i should be in between 1 and $n"))
-    while i <= n
+    @boundscheck while i <= n
         F.bit[i] += val
         i += i&(-i)
     end
@@ -79,9 +86,11 @@ function sum(F::FenwickTree{T}, ind::Int) where T
     i = ind
     n = F.n
     (i in 1:n) || throw(DomainError(i, "$i should be in between 1 and $n"))
-    while i > 0 
+    @boundscheck while i > 0 
         sum += F.bit[i]
         i -= i&(-i)
     end
     sum
 end
+
+getindex(F::FenwickTree{T}, ind::Integer) where T = sum(F, ind)
