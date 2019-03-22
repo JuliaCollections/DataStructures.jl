@@ -19,7 +19,7 @@ Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) from `a
  
 """
 function FenwickTree(a::AbstractVector{U}) where U
-    n = length(a)
+    n = size(a)[1]
     bit = FenwickTree{U}(n)
     @inbounds for i = 1:n
         update!(bit, i, a[i])
@@ -27,8 +27,8 @@ function FenwickTree(a::AbstractVector{U}) where U
     bit
 end
 
-bit(F::FenwickTree) = F.bit
-length(F::FenwickTree) = F.n
+bit(F::FenwickTree{T}) where T = F.bit
+length(F::FenwickTree{T}) where T = F.n
 
 """
     update!(F::FenwickTree{T}, ind, val::T)
@@ -40,11 +40,7 @@ function update!(F::FenwickTree{T}, ind::Int, val::T) where T
     i = ind
     n = F.n
     @boundscheck 1 <= i <= n || throw(ArgumentError("$i should be in between 1 and $n"))
-<<<<<<< HEAD
     @inbounds while i <= n
-=======
-    @boundscheck while i <= n
->>>>>>> 5fe911d2798e04778b30e779c86657d016415e37
         F.bit[i] += val
         i += i&(-i)
     end
@@ -90,11 +86,7 @@ function sum(F::FenwickTree{T}, ind::Int) where T
     i = ind
     n = F.n
     @boundscheck 1 <= i <= n || throw(ArgumentError("$i should be in between 1 and $n"))
-<<<<<<< HEAD
     @inbounds while i > 0 
-=======
-    @boundscheck while i > 0 
->>>>>>> 5fe911d2798e04778b30e779c86657d016415e37
         sum += F.bit[i]
         i -= i&(-i)
     end
