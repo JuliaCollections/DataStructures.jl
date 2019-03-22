@@ -11,7 +11,7 @@
         
         arr = [1.2, 8.7, 7.2, 3.5]
         F3 = FenwickTree(arr)
-        @test bit(F3) == arr
+        @test F3[1] == 1.2
         @test length(F3) == size(arr)[1]
     end
     
