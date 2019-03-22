@@ -19,7 +19,7 @@ Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) from `a
  
 """
 function FenwickTree(a::AbstractVector{U}) where U
-    n = size(a)[1]
+    n = length(a)
     bit = FenwickTree{U}(n)
     @inbounds for i = 1:n
         update!(bit, i, a[i])
