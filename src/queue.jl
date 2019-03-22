@@ -43,3 +43,11 @@ dequeue!(s::Queue) = popfirst!(s.store)
 iterate(q::Queue, s...) = iterate(q.store, s...)
 
 reverse_iter(q::Queue) = reverse_iter(q.store)
+
+function show(io::IO, q::Queue)
+    elements = collect(q)
+    summary(io, q, axes(elements))
+    isempty(q) && return
+    println(io, ":")
+    Base.print_array(io, elements)
+end

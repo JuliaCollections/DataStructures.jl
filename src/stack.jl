@@ -27,3 +27,11 @@ empty!(s::Stack) = (empty!(s.store); s)
 iterate(st::Stack, s...) = iterate(reverse_iter(st.store), s...)
 
 reverse_iter(s::Stack{T}) where {T} = DequeIterator{T}(s.store)
+
+function show(io::IO, s::Stack)
+    elements = collect(s)
+    summary(io, s, axes(elements))
+    isempty(s) && return
+    println(io, ":")
+    Base.print_array(io, elements)
+end

@@ -90,11 +90,10 @@ end
     i == d.n + 1 ? nothing : (_unsafe_getindex(d, i), i+1)
 end
 
-function Base.show(io::IO, D::CircularDeque{T}) where T
-    print(io, "CircularDeque{$T}([")
-    for i = 1:length(D)
-        print(io, D[i])
-        i < length(D) && print(io, ',')
-    end
-    print(io, "])")
+function show(io::IO, cb::CircularDeque)
+    elem = collect(cb)
+    summary(io, cb, axes(elem))
+    isempty(cb) && return
+    println(io, ":")
+    Base.print_array(io, elem)
 end
