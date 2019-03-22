@@ -46,8 +46,12 @@ end
 
 function show(io::IO, blk::DequeBlock)  # avoids recursion into prev and next
     x = view(blk.data, blk.front:blk.back)
-    summary(io, blk, axes(x))
-    print(io, " (capa = $(blk.capa), front = $(blk.front), back = $(blk.back))")
+    if VERSION < v"1.2-DEV"
+        summary(io, blk, axes(x))
+    else
+        Base.array_summary(io, blk, axes(x))
+    end
+    print(io, "(capa = $(blk.capa), front = $(blk.front), back = $(blk.back))")
     isempty(blk) && return
     println(io, ":")
     Base.print_array(io, x)
@@ -163,7 +167,11 @@ Base.collect(q::Deque{T}) where {T} = T[x for x in q]
 
 function Base.show(io::IO, q::Deque)
     elem = collect(q)
-    summary(io, q, axes(elem))
+    if VERSION < v"1.2-DEV"
+        summary(io, q, axes(elem))
+    else
+        Base.array_summary(io, q, axes(elem))
+    end
     isempty(q) && return
     println(io, ":")
     Base.print_array(io, elem)

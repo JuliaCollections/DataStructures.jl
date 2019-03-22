@@ -45,9 +45,13 @@ iterate(q::Queue, s...) = iterate(q.store, s...)
 reverse_iter(q::Queue) = reverse_iter(q.store)
 
 function show(io::IO, q::Queue)
-    elements = collect(q)
-    summary(io, q, axes(elements))
+    elem = collect(q)
+    if VERSION < v"1.2-DEV"
+        summary(io, q, axes(elem))
+    else
+        Base.array_summary(io, q, axes(elem))
+    end
     isempty(q) && return
     println(io, ":")
-    Base.print_array(io, elements)
+    Base.print_array(io, elem)
 end

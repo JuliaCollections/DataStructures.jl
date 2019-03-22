@@ -92,7 +92,11 @@ end
 
 function show(io::IO, cb::CircularDeque)
     elem = collect(cb)
-    summary(io, cb, axes(elem))
+    if VERSION < v"1.2-DEV"
+        summary(io, cb, axes(elem))
+    else
+        Base.array_summary(io, cb, axes(elem))
+    end
     isempty(cb) && return
     println(io, ":")
     Base.print_array(io, elem)
