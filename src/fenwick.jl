@@ -29,7 +29,7 @@ function FenwickTree(a::T) where T <: AbstractVector
     bit
 end
 
-bit(F::FenwickTree{T}) where T = F.bit
+bit(F::FenwickTree) = F.bit
 length(F::FenwickTree) = F.n
 
 """
