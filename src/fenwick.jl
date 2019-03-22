@@ -85,7 +85,7 @@ function sum(F::FenwickTree{T}, ind::Int) where T
     sum = zero(T)
     i = ind
     n = F.n
-    (i in 1:n) || throw(DomainError(i, "$i should be in between 1 and $n"))
+    @boundscheck 1 <= i <= n || throw(ArgumentError("$i should be in between 1 and $n"))
     @boundscheck while i > 0 
         sum += F.bit[i]
         i -= i&(-i)
