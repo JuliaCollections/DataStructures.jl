@@ -41,7 +41,7 @@ Update the value of the [`FenwickTree`] by `val` from the index `ind` upto the l
 function update!(F::FenwickTree{T}, ind::Int, val::T) where T
     i = ind
     n = F.n
-    (i in 1:n) || throw(DomainError(i, "$i should be in between 1 and $n"))
+    @boundscheck 1 <= i <= n || throw(ArgumentError("$i should be in between 1 and $n"))
     @boundscheck while i <= n
         F.bit[i] += val
         i += i&(-i)
