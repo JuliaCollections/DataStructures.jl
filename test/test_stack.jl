@@ -93,7 +93,7 @@
         @test sprint((io,x) -> show(IOContext(io, :limit=>true), x), s) == "50-element Stack{$(intstr)}:\n 50\n 49\n 48\n 47\n 46\n 45\n 44\n 43\n 42\n 41\n  ⋮\n  9\n  8\n  7\n  6\n  5\n  4\n  3\n  2\n  1"
         pop!(s)
         @test sprint(show, s) == "49-element Stack{$(intstr)}:\n 49\n 48\n 47\n 46\n 45\n 44\n 43\n 42\n 41\n 40\n 39\n 38\n 37\n 36\n 35\n 34\n 33\n 32\n 31\n 30\n 29\n 28\n 27\n 26\n 25\n 24\n 23\n 22\n 21\n 20\n 19\n 18\n 17\n 16\n 15\n 14\n 13\n 12\n 11\n 10\n  9\n  8\n  7\n  6\n  5\n  4\n  3\n  2\n  1"
-        @test sprint((io,x) -> show(IOContext(io, :limit=>true), x), s) == "49-element Stack{Int64}:\n 49\n 48\n 47\n 46\n 45\n 44\n 43\n 42\n 41\n 40\n  ⋮\n  9\n  8\n  7\n  6\n  5\n  4\n  3\n  2\n  1"
+        @test sprint((io,x) -> show(IOContext(io, :limit=>true), x), s) == "49-element Stack{$(intstr)}:\n 49\n 48\n 47\n 46\n 45\n 44\n 43\n 42\n 41\n 40\n  ⋮\n  9\n  8\n  7\n  6\n  5\n  4\n  3\n  2\n  1"
     end
 
 end # @testset Stack
