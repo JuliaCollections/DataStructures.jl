@@ -70,7 +70,7 @@ function inc!(ft::FenwickTree{T}, range::AbstractUnitRange, val) where T
 end
 
 """
-    dec!(ft::FenwickTree{T}, range::AbstractUnitRange, val::T)
+    dec!(ft::FenwickTree{T}, range::AbstractUnitRange, val)
 
 Decreases the value of the [`FenwickTree`] by `val` from the indices in `range`.
 
