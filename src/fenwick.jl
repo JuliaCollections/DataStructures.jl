@@ -9,7 +9,6 @@ mutable struct FenwickTree{T}
     n::Integer
 end
 
-FenwickTree{T}() where T = FenwickTree{T}(0)
 FenwickTree{T}(n::Integer) where T = FenwickTree{T}(zeros(T, n), n)
 
 """
@@ -19,7 +18,7 @@ Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) from `a
  
 """
 function FenwickTree(a::AbstractVector{U}) where U
-    n = size(a)[1]
+    n = length(a)
     tree = FenwickTree{U}(n)
     @inbounds for i = 1:n
         inc!(tree, i, a[i])
@@ -27,7 +26,7 @@ function FenwickTree(a::AbstractVector{U}) where U
     tree
 end
 
-length(ft::FenwickTree{T}) where T = ft.n
+length(ft::FenwickTree) = ft.n
 
 """
     inc!(ft::FenwickTree{T}, ind, val)
@@ -35,7 +34,7 @@ length(ft::FenwickTree{T}) where T = ft.n
 Increases the value of the [`FenwickTree`] by `val` from the index `ind` upto the length of the Fenwick Tree.
 
 """ 
-function inc!(ft::FenwickTree{T}, ind::Int, val) where T
+function inc!(ft::FenwickTree{T}, ind::Integer, val = 1) where T
     val0 = convert(T, val)
     i = ind
     n = ft.n
@@ -47,12 +46,12 @@ function inc!(ft::FenwickTree{T}, ind::Int, val) where T
 end
 
 """
-    dec!(ft::FenwickTree{T}, ind, val)
+    dec!(ft::FenwickTree, ind, val)
 
 Decreases the value of the [`FenwickTree`] by `val` from the index `ind` upto the length of the Fenwick Tree.
 
 """ 
-dec!(ft::FenwickTree{T}, ind::Int, val) where T = inc!(ft, ind, -val)
+dec!(ft::FenwickTree, ind::Integer, val = 1) = inc!(ft, ind, -val)
 
 """
     inc!(ft::FenwickTree{T}, range::AbstractUnitRange, val)
@@ -60,7 +59,7 @@ dec!(ft::FenwickTree{T}, ind::Int, val) where T = inc!(ft, ind, -val)
 Increases the value of the [`FenwickTree`] by `val` from the indices in `range`.
 
 """    
-function inc!(ft::FenwickTree{T}, range::AbstractUnitRange, val) where T
+function inc!(ft::FenwickTree{T}, range::AbstractUnitRange, val = 1) where T
     val0 = convert(T, val)
     left, right = range.start, range.stop
     inc!(ft, left, +val0)
@@ -70,12 +69,12 @@ function inc!(ft::FenwickTree{T}, range::AbstractUnitRange, val) where T
 end
 
 """
-    dec!(ft::FenwickTree{T}, range::AbstractUnitRange, val)
+    dec!(ft::FenwickTree, range::AbstractUnitRange, val)
 
 Decreases the value of the [`FenwickTree`] by `val` from the indices in `range`.
 
 """    
-dec!(ft::FenwickTree{T}, range::AbstractUnitRange, val) where T = inc!(ft, range, -val)
+dec!(ft::FenwickTree, range::AbstractUnitRange, val = 1) = inc!(ft, range, -val)
 
 """
     prefixsum(ft::FenwickTree{T}, ind)
@@ -99,7 +98,7 @@ julia> prefixsum(f, 6)
  5
 ```
 """
-function prefixsum(ft::FenwickTree{T}, ind::Int) where T
+function prefixsum(ft::FenwickTree{T}, ind::Integer) where T
     sum = zero(T)
     i = ind
     n = ft.n
