@@ -101,8 +101,9 @@ end
         end
 
         # test pop!
-        @test isequal(extract_all!(hmin), [1, 2, 3, 4, 7, 8, 9, 10, 14, 16])
-        @test isempty(hmin)    
+        @test delete!(hmin,nodes[1].handle) == nodes[1].value
+       # @test isequal(extract_all!(hmin), [1, 2, 3, 4, 7, 8, 9, 10, 14, 16])
+       # @test isempty(hmin)    
     end
 
     @testset "hmax / push! / pop!" begin
@@ -157,6 +158,16 @@ end
         @test pop!(h) == 2
         @test isequal(heap_values(h), [7, 10])
         @test isequal(list_values(h), [10, 7])
+        empty!(h.nodes)
+        vs=[1,2,4,6,3]
+        h1=MutableBinaryMinHeap(vs)
+        @test delete!(h1,4) == 6
+        @test pop!(h1) == 1
+        @test pop!(h1) == 2
+        @test pop!(h1) == 3
+        @test pop!(h1) == 4
+        @test isempty(h1)
+        
     end
 
     @testset "test update! and top_with_handle" begin

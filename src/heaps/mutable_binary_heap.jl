@@ -251,6 +251,36 @@ function update!(h::MutableBinaryHeap{T}, i::Int, v) where T
         _heap_bubble_down!(comp, nodes, nodemap, nd_id)
     end
 end
+"""
+    delete!{T}(h::MutableBinaryHeap{T}, i::Int)
+
+Delete the element present at index `i` from heap `h` .    
+"""
+function delete!(h::MutableBinaryHeap{T}, i::Int) where T
+    nodes = h.nodes
+    nodemap = h.node_map
+    comp = h.comparer
+
+    nd_id = nodemap[i]
+    rt = nodes[nd_id]
+    v0 = rt.value 
+    @inbounds nodemap[rt.handle] = 0
+
+    if length(nodes) == 1
+        #clear
+        empty!(nodes)
+    else
+        #place last node to removed one
+        @inbounds nodes[nd_id] = new_rt = pop!(nodes)
+        @inbounds nodemap[new_rt.handle] = 1
+
+        if length(nodes) > 1
+            _heap_bubble_down!(comp, nodes, nodemap, nd_id)
+        end
+    end
+    v0
+end
+        
 
 setindex!(h::MutableBinaryHeap, v, i::Int) = update!(h, i, v)
 getindex(h::MutableBinaryHeap, i::Int) = h.nodes[h.node_map[i]].value
