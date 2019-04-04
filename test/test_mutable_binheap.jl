@@ -101,9 +101,8 @@ end
         end
 
         # test pop!
-        @test delete!(hmin,nodes[1].handle) == nodes[1].value
-       # @test isequal(extract_all!(hmin), [1, 2, 3, 4, 7, 8, 9, 10, 14, 16])
-       # @test isempty(hmin)    
+        @test isequal(extract_all!(hmin), [1, 2, 3, 4, 7, 8, 9, 10, 14, 16])
+        @test isempty(hmin)    
     end
 
     @testset "hmax / push! / pop!" begin
