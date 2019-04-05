@@ -157,16 +157,25 @@ end
         @test pop!(h) == 2
         @test isequal(heap_values(h), [7, 10])
         @test isequal(list_values(h), [10, 7])
-        empty!(h.nodes)
-        vs=[1,2,4,6,3]
-        h1=MutableBinaryMinHeap(vs)
-        @test delete!(h1,4) == 6
-        @test pop!(h1) == 1
-        @test pop!(h1) == 2
-        @test pop!(h1) == 3
-        @test pop!(h1) == 4
-        @test isempty(h1)
         
+    end
+
+    @testset "test delete!" begin
+        vs=[1,2,4,6,3]
+        h = MutableBinaryMinHeap(vs)
+
+        @test delete!(h,4) == 6
+        @test pop!(h) == 1
+        @test pop!(h) == 2
+        @test_throws BoundsError delete!(h,10)
+        @test_throws BoundsError delete!(h,0)
+        @test_throws BoundsError delete!(h,-5)
+        @test pop!(h) == 3
+        push!(h,2)
+        @test pop!(h) == 2
+        @test pop!(h) == 4
+        @test isempty(h)
+
     end
 
     @testset "test update! and top_with_handle" begin
