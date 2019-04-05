@@ -51,30 +51,19 @@ end
 Decreases the value of the [`FenwickTree`] by `val` from the index `ind` upto the length of the Fenwick Tree.
 
 """ 
-dec!(ft::FenwickTree, ind::Integer, val = 1) = inc!(ft, ind, -val)
+dec!(ft::FenwickTree, ind::Integer, val = 1 ) = inc!(ft, ind, -val)
 
 """
-    inc!(ft::FenwickTree{T}, range::AbstractUnitRange, val)
+    incdec!(ft::FenwickTree{T}, left, right, val)
 
-Increases the value of the [`FenwickTree`] by `val` from the indices in `range`.
+Increases the value of the [`FenwickTree`] by `val` from the indices from `left` and decreases it from the `right`.
 
 """    
-function inc!(ft::FenwickTree{T}, range::AbstractUnitRange, val = 1) where T
+function incdec!(ft::FenwickTree{T}, left::Integer, right::Integer, val = one(T)) where T
     val0 = convert(T, val)
-    left, right = range.start, range.stop
-    inc!(ft, left, +val0)
-    if (right+1 <= length(ft))
-        dec!(ft, right+1, val0)
-    end
+    inc!(ft, left, val0)
+    dec!(ft, right, val0)
 end
-
-"""
-    dec!(ft::FenwickTree, range::AbstractUnitRange, val)
-
-Decreases the value of the [`FenwickTree`] by `val` from the indices in `range`.
-
-"""    
-dec!(ft::FenwickTree, range::AbstractUnitRange, val = 1) = inc!(ft, range, -val)
 
 """
     prefixsum(ft::FenwickTree{T}, ind)
@@ -88,13 +77,6 @@ julia> inc!(f, 2, 5)
 julia> prefixsum(f, 1)
  0
 julia> prefixsum(f, 3)
- 5
-julia> inc!(f, 1:4, 3)
-julia> prefixsum(f, 1)
- 3
-julia> prefixsum(f, 3)
- 8
-julia> prefixsum(f, 6)
  5
 ```
 """
