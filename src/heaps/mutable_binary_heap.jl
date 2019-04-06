@@ -252,11 +252,11 @@ function update!(h::MutableBinaryHeap{T}, i::Int, v) where T
     end
 end
 """
-    delete!{T}(h::MutableBinaryHeap{T}, i::Int)
+    pop!{T}(h::MutableBinaryHeap{T}, i::Int)
 
-Delete the element present at index `i` from heap `h` .    
+Pops the element present at index `i` from heap `h` .    
 """
-function delete!(h::MutableBinaryHeap{T}, i::Int) where T
+function pop!(h::MutableBinaryHeap{T}, i::Int) where T
     nodes = h.nodes
     nodemap = h.node_map
     comp = h.comparer
@@ -280,7 +280,15 @@ function delete!(h::MutableBinaryHeap{T}, i::Int) where T
     end
     v0
 end
-        
+"""
+    delete!{T}(h::MutableBinaryHeap{T}, i::Int)
+
+Deletes the element present at index `i` from heap `h` . 
+"""     
+function delete!(h::MutableBinaryHeap{T}, i::Int) where T
+    pop!(h,i)
+    h
+end
 
 setindex!(h::MutableBinaryHeap, v, i::Int) = update!(h, i, v)
 getindex(h::MutableBinaryHeap, i::Int) = h.nodes[h.node_map[i]].value
