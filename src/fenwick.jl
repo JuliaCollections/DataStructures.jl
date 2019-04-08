@@ -1,18 +1,18 @@
+struct FenwickTree{T}
+    bi_tree::Vector{T} #bi_tree is shorthand for Binary Indexed Tree, an alternative name for Fenwick Tree
+    n::Int
+end
+
 """
     FenwickTree{T}(n)
     
 Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) of length `n`.
  
 """
-struct FenwickTree{T}
-    bi_tree::Vector{T} #bi_tree is shorthand for Binary Indexed Tree, an alternative name for Fenwick Tree
-    n::Int
-end
-
 FenwickTree{T}(n::Integer) where T = FenwickTree{T}(zeros(T, n), n)
 
 """
-    FenwickTree(arr::AbstractArray) 
+    FenwickTree(counts::AbstractArray) 
     
 Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) from an array of `counts`
  
