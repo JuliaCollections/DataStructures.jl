@@ -14,7 +14,7 @@ FenwickTree{T}(n::Integer) where T = FenwickTree{T}(zeros(T, n), n)
 """
     FenwickTree(arr::AbstractArray) 
     
-Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) from `arr`.
+Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) from an array of `counts`
  
 """
 function FenwickTree(a::AbstractVector{U}) where U
