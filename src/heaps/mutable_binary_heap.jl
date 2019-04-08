@@ -101,10 +101,10 @@ function _heap_bubble_down!(comp::Comp,
 end
 
 function _binary_heap_pop!(comp::Comp,
-    nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}) where {Comp,T}
+    nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int) where {Comp,T}
 
-    # extract root node
-    rt = nodes[1]
+    # extract  node
+    rt = nodes[nd_id]
     v = rt.value
     @inbounds nodemap[rt.handle] = 0
 
@@ -112,12 +112,12 @@ function _binary_heap_pop!(comp::Comp,
         # clear
         empty!(nodes)
     else
-        # place last node to root
-        @inbounds nodes[1] = new_rt = pop!(nodes)
-        @inbounds nodemap[new_rt.handle] = 1
+        # place last node to removed one
+        @inbounds nodes[nd_id] = new_rt = pop!(nodes)
+        @inbounds nodemap[new_rt.handle] = nd_id
 
         if length(nodes) > 1
-            _heap_bubble_down!(comp, nodes, nodemap, 1)
+            _heap_bubble_down!(comp, nodes, nodemap, nd_id)
         end
     end
     v
@@ -228,7 +228,7 @@ function top_with_handle(h::MutableBinaryHeap)
     return el.value, el.handle
 end
 
-pop!(h::MutableBinaryHeap{T}) where {T} = _binary_heap_pop!(h.comparer, h.nodes, h.node_map)
+pop!(h::MutableBinaryHeap{T}) where {T} = _binary_heap_pop!(h.comparer, h.nodes, h.node_map, 1)
 
 """
     update!{T}(h::MutableBinaryHeap{T}, i::Int, v::T)
@@ -251,42 +251,14 @@ function update!(h::MutableBinaryHeap{T}, i::Int, v) where T
         _heap_bubble_down!(comp, nodes, nodemap, nd_id)
     end
 end
-"""
-    pop!{T}(h::MutableBinaryHeap{T}, i::Int)
 
-Pops the element present at index `i` from heap `h` .    
-"""
-function pop!(h::MutableBinaryHeap{T}, i::Int) where T
-    nodes = h.nodes
-    nodemap = h.node_map
-    comp = h.comparer
-
-    nd_id = nodemap[i]
-    rt = nodes[nd_id]
-    v0 = rt.value 
-    @inbounds nodemap[rt.handle] = 0
-
-    if length(nodes) == 1
-        #clear
-        empty!(nodes)
-    else
-        #place last node to removed one
-        @inbounds nodes[nd_id] = new_rt = pop!(nodes)
-        @inbounds nodemap[new_rt.handle] = 1
-
-        if length(nodes) > 1
-            _heap_bubble_down!(comp, nodes, nodemap, nd_id)
-        end
-    end
-    v0
-end
 """
     delete!{T}(h::MutableBinaryHeap{T}, i::Int)
 
-Deletes the element present at index `i` from heap `h` . 
+Deletes the element present at node_id `i` from heap `h` . 
 """     
 function delete!(h::MutableBinaryHeap{T}, i::Int) where T
-    pop!(h,i)
+    _binary_heap_pop!(h.comparer, h.nodes, h.node_map, i)
     h
 end
 
