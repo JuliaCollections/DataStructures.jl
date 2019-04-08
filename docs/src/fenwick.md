@@ -5,12 +5,12 @@ The `FenwickTree` type is data structures which is used for handling increment a
 Usage:
 
 ```julia
-FenwickTree{T}(n)     	  					# Constructs a Fenwick Tree of length `n`
-FenwickTree{T}(counts) 	  					# Constructs a Fenwick Tree from an array of `counts`
-inc!(ft, ind, val)		  					# Increases the value of the FenwickTree `ft` by `val` from the index `ind` upto the length of `ft`
-dec!(ft, ind, val)		  					# Decreases the value of the FenwickTree `ft` by `val` from the index `ind` upto the length of `ft`
-incdec!(ft, left, right, val)               # Increases the value of the FenwickTree `ft` by `val` from the indices from `left` and decreases it from the `right`
-prefixsum(ft, ind)                  		# Return the cumulative sum from index 1 upto `ind` of the FenwickTree `ft`
+FenwickTree{T}(n) # Constructs a Fenwick Tree of length `n`
+FenwickTree{T}(counts)  # Constructs a Fenwick Tree from an array of `counts`
+inc!(ft, ind, val)  # Increases the value of the FenwickTree `ft` by `val` from the index `ind` upto the length of `ft`
+dec!(ft, ind, val)  # Decreases the value of the FenwickTree `ft` by `val` from the index `ind` upto the length of `ft`
+incdec!(ft, left, right, val)  # Increases the value of the FenwickTree `ft` by `val` from the indices from `left` and decreases it from the `right`
+prefixsum(ft, ind)  # Return the cumulative sum from index 1 upto `ind` of the FenwickTree `ft`
 ```
 
 Examples:
