@@ -22,6 +22,14 @@
         @test prefixsum(f1, 5) == 7
         @test prefixsum(f1, 4) == 0
         
+        dec!(f1, 7, 2)
+        @test prefixsum(f1, 8) == 5
+        @test prefixsum(f1, 6) == 7
+        
+        incdec!(f1, 2, 6, 3)
+        @test prefixsum(f1, 3) == 3
+        @test prefixsum(f1, 7) == 5
+        
         @test_throws ArgumentError inc!(f1, 11)
         @test_throws ArgumentError inc!(f1, 0)
     end
