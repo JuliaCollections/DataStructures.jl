@@ -11,7 +11,7 @@ module DataStructures
                  ReverseOrdering, Reverse, Lt,
                  isless, union, intersect, symdiff, setdiff, issubset,
                  searchsortedfirst, searchsortedlast, in,
-                 eachindex, keytype, valtype, minimum, maximum
+                 eachindex, keytype, valtype, minimum, maximum, size
 
     using OrderedCollections
     import OrderedCollections: filter, filter!, isordered
@@ -28,6 +28,8 @@ module DataStructures
     export classified_lists, classified_sets, classified_counters
 
     export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set, root_union!
+    
+    export FenwickTree, length, inc!, dec!, incdec!, prefixsum
 
     export AbstractHeap, compare, extract_all!
     export BinaryHeap, BinaryMinHeap, BinaryMaxHeap, nlargest, nsmallest
@@ -72,6 +74,8 @@ module DataStructures
     include("trie.jl")
 
     include("int_set.jl")
+
+    include("fenwick.jl")
 
     include("list.jl")
     include("mutable_list.jl")
