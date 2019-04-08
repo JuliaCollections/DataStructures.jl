@@ -7,7 +7,7 @@ All heaps in this package are derived from `AbstractHeap`, and provide
 the following interface:
 
 ```julia
-# Let h be a heap, i be a handle, and v be a value.
+# Let h be a heap, i be a handle, id be a node_id, and v be a value.
 
 length(h)         # returns the number of elements
 
@@ -18,6 +18,9 @@ push!(h, v)       # add a value to the heap
 top(h)            # return the top value of a heap
 
 pop!(h)           # removes the top value, and returns it
+
+delete!(h,id)     # removes the node having node_id as id from heap 
+
 ```
 
 Mutable heaps (values can be changed after being pushed to a heap) are
