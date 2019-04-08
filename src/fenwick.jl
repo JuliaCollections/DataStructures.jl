@@ -6,7 +6,7 @@ Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) of leng
 """
 struct FenwickTree{T}
     bi_tree::Vector{T} #bi_tree is shorthand for Binary Indexed Tree, an alternative name for Fenwick Tree
-    n::Integer
+    n::Int
 end
 
 FenwickTree{T}(n::Integer) where T = FenwickTree{T}(zeros(T, n), n)
