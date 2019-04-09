@@ -12,6 +12,7 @@ makedocs(
         "circ_deque.md",
         "stack_and_queue.md",
         "priority-queue.md",
+        "fenwick.md",
         "accumulators.md",
         "disjoint_sets.md",
         "heaps.md",

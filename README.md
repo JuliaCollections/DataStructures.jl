@@ -28,6 +28,7 @@ This package implements a variety of data structures, including
 -   Sorted Dict, Sorted Multi-Dict and Sorted Set
 -   DataStructures.IntSet
 -   Priority Queue
+-   Fenwick Tree
 
 Resources
 ---------
