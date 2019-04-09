@@ -35,6 +35,8 @@ struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
         new{K,V,O}(Vector{Pair{K,V}}(), o, Dict{K, Int}())
     end
 
+    PriorityQueue{K, V, O}(xs::Array{Pair{K,V}, 1}, o::O, index::Dict{K, Int}) where {K,V,O<:Ordering} = new(xs, o, index)
+
     function PriorityQueue{K,V,O}(o::O, itr) where {K,V,O<:Ordering}
         xs = Vector{Pair{K,V}}(undef, length(itr))
         index = Dict{K, Int}()
@@ -55,6 +57,10 @@ struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
         pq
     end
 end
+
+# A copy constructor
+PriorityQueue(xs::Array{Pair{K,V}, 1}, o::O, index::Dict{K, Int}) where {K,V,O<:Ordering} =
+    PriorityQueue{K,V,O}(xs, o, index)
 
 # Any-Any constructors
 PriorityQueue(o::Ordering=Forward) = PriorityQueue{Any,Any,typeof(o)}(o)
@@ -342,11 +348,66 @@ end
 
 # Unordered iteration through key value pairs in a PriorityQueue
 function _iterate(pq::PriorityQueue, state)
-    state == nothing && return nothing
     (k, idx), i = state
     return (pq.xs[idx], i)
 end
+_iterate(pq::PriorityQueue, ::Nothing) = nothing
 
 iterate(pq::PriorityQueue) = _iterate(pq, iterate(pq.index))
-
 iterate(pq::PriorityQueue, i) = _iterate(pq, iterate(pq.index, i))
+
+"""
+    PQOrderedIterator{K, V, O <: Ordering}
+
+Provides an ordered iterator interface to iterate a [`PriorityQueue`](@ref).
+
+```jldoctest
+
+julia> pq = PriorityQueue(["a" => 10, "b" => 5, "c" => 15])
+PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
+  "c" => 15
+  "b" => 5
+  "a" => 10
+
+julia> collect(pq)
+3-element Array{Pair{String,Int64},1}:
+ "c" => 15
+ "b" => 5 
+ "a" => 10
+
+julia> it = PQOrderedIterator(pq)
+PQOrderedIterator{String,Int64,Base.Order.ForwardOrdering}(PriorityQueue("c"=>15,"b"=>5,"a"=>10))
+
+julia> collect(it)
+3-element Array{Pair{String,Int64},1}:
+ "b" => 5 
+ "a" => 10
+ "c" => 15
+```
+"""
+mutable struct PQOrderedIterator{K, V, O <: Ordering}
+    pq::PriorityQueue{K, V, O}
+    PQOrderedIterator{K, V, O}(pq::PriorityQueue{K, V, O}) where {K, V, O <: Ordering} = new(pq)
+end
+
+PQOrderedIterator(pq::PriorityQueue{K, V, O}) where {K, V, O <: Ordering} = PQOrderedIterator{K, V, O}(pq)
+
+iterate(it::PQOrderedIterator, ::Nothing) = nothing
+
+function iterate(it::PQOrderedIterator{K, V, O}, state::PriorityQueue{K, V, O}) where {K, V, O <: Ordering}
+    isempty(state) && return nothing
+    return dequeue_pair!(state), state
+end
+    
+function iterate(it::PQOrderedIterator)
+    pq = it.pq
+    isempty(pq) && return nothing
+    state = PriorityQueue(copy(pq.xs), pq.o, copy(pq.index))
+    return dequeue_pair!(state), state
+end
+
+Base.IteratorSize(it::PQOrderedIterator) = Base.SizeUnknown()
+
+Base.eltype(it::PQOrderedIterator{K, V, O}) where {K, V, O <: Ordering} = Pair{K, V}
+
+Base.similar(it::PQOrderedIterator) = Vector{eltype(it)}()

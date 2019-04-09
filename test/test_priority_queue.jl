@@ -225,6 +225,13 @@ import Base.Order.Reverse
         @test collect(pq) == ['a' => 'A']
     end
 
+    @testset "OrderedIteration" begin
+        pq = PriorityQueue(["a" => 10, "b" => 5, "c" => 15])
+        @test Set(collect(pq)) == Set(["a" => 10, "b" => 5, "c" => 15])
+        it = PQOrderedIterator(pq)
+        @test collect(it) == ["b" => 5, "a" => 10, "c" => 15]
+    end
+
     @testset "LowLevelHeapOperations" begin
         pmax = 1000
         n = 10000
