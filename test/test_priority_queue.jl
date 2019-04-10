@@ -114,10 +114,12 @@ import Base.Order.Reverse
             @test peek(pq1) == ('a'=>1)
             @test get(pq1, 'a', 0) == 1
             @test get(pq1, 'c', 0) == 0
+            @test get!(pq1, 'b', 20) == 2
             @test dequeue!(pq1) == 'a'
             @test dequeue!(pq1) == 'b'
             @test get!(pq1, 'c', 0) == 0
             @test peek(pq1) == ('c'=>0)
+            @test get!(pq1, 'c', 3) == 0
         end
 
         pmax = 1000
