@@ -165,15 +165,26 @@ function force_up!(pq::PriorityQueue, i::Integer)
     pq.xs[i] = x
 end
 
-function getindex(pq::PriorityQueue{K,V}, key) where {K,V}
+function getindex(pq::PriorityQueue, key)
     pq.xs[pq.index[key]].second
 end
 
 
-function get(pq::PriorityQueue{K,V}, key, deflt) where {K,V}
+function get(pq::PriorityQueue, key, default)
     i = get(pq.index, key, 0)
-    i == 0 ? deflt : pq.xs[i].second
+    i == 0 ? default : pq.xs[i].second
 end
+
+function get!(pq::PriorityQueue, key, default)
+    i = get(pq.index, key, 0)
+    if i == 0
+        enqueue!(pq, key, default)
+        return default
+    else
+        return pq.xs[i].second
+    end
+end
+
 
 
 # Change the priority of an existing element, or equeue it if it isn't present.
