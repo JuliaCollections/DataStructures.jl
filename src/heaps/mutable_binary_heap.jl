@@ -103,7 +103,7 @@ end
 function _binary_heap_pop!(comp::Comp,
     nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int) where {Comp,T}
 
-    # extract  node
+    # extract node
     rt = nodes[nd_id]
     v = rt.value
     @inbounds nodemap[rt.handle] = 0
