@@ -175,6 +175,17 @@ function get(pq::PriorityQueue{K,V}, key, deflt) where {K,V}
     i == 0 ? deflt : pq.xs[i].second
 end
 
+function get!(pq::PriorityQueue{K,V}, key, deflt) where {K,V}
+    i = get(pq.index, key, 0)
+    if i == 0
+        enqueue!(pq, key, deflt)
+        return deflt
+    else
+        return pq.xs[i].second
+    end
+end
+
+
 
 # Change the priority of an existing element, or equeue it if it isn't present.
 function setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
