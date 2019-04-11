@@ -175,7 +175,11 @@ end
         @test pop!(h) == 2
         @test pop!(h) == 6
         @test isempty(h)
-     
+        #bubble_up test
+        vv = [1, 9, 22, 17, 11, 33, 27, 21, 19]
+        hp = MutableBinaryMinHeap(vv)
+        delete!(hp, 6)
+        @test isequal(extract_all!(hp), [1, 9, 11, 17, 19, 21, 22, 27])
     end
 
     @testset "test update! and top_with_handle" begin

@@ -112,12 +112,16 @@ function _binary_heap_pop!(comp::Comp,
         # clear
         empty!(nodes)
     else
-        # place last node to removed one
+        # move the last node to the position of the removed node
         @inbounds nodes[nd_id] = new_rt = pop!(nodes)
         @inbounds nodemap[new_rt.handle] = nd_id
 
         if length(nodes) > 1
-            _heap_bubble_down!(comp, nodes, nodemap, nd_id)
+            if compare(comp, new_rt.value, v)
+                _heap_bubble_up!(comp, nodes, nodemap, nd_id)
+            else
+                _heap_bubble_down!(comp, nodes, nodemap, nd_id)
+            end
         end
     end
     v

@@ -19,8 +19,6 @@ top(h)            # return the top value of a heap
 
 pop!(h)           # removes the top value, and returns it
 
-delete!(h,id)     # removes the node having node_id as id from heap 
-
 ```
 
 Mutable heaps (values can be changed after being pushed to a heap) are
@@ -31,6 +29,8 @@ provides the following interface:
 i = push!(h, v)              # adds a value to the heap and and returns a handle to v
 
 update!(h, i, v)             # updates the value of an element (referred to by the handle i)
+
+delete!(h, id)               # deletes the node present at node_index id from the heap
 
 v, i = top_with_handle(h)    # returns the top value of a heap and its handle
 ```
