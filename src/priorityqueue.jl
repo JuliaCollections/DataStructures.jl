@@ -357,6 +357,28 @@ function empty!(pq::PriorityQueue)
     pq
 end
 
+empty(pq::PriorityQueue) = PriorityQueue(empty(pq.xs), pq.o, empty(pq.index))
+
+function merge!(d::AbstractDict{K, V}, other::PriorityQueue{K, V}) where {K, V}
+    next = iterate(other, false)
+    while next !== nothing
+        (k, v), state = next
+        d[k] = v
+        next = iterate(other, state)
+    end
+    return d
+end
+
+function merge!(combine::Function, d::AbstractDict{K, V}, other::PriorityQueue{K, V}) where {K, V}
+    next = iterate(other, false)
+    while next !== nothing
+        (k, v), state = next
+        d[k] = haskey(d, k) ? combine(d[k], v) : v
+        next = iterate(other, state)
+    end
+    return d
+end
+
 # Opaque not to be exported. 
 mutable struct _PQIteratorState{K, V, O <: Ordering}
     pq::PriorityQueue{K, V, O}
