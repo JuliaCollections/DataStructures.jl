@@ -100,7 +100,7 @@ module DataStructures
     export status
     export deref_key, deref_value, deref, advance, regress
 
-    export PriorityQueue, peek, PQOrderedIterator
+    export PriorityQueue, peek
 
     include("priorityqueue.jl")
 end

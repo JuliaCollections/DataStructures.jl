@@ -225,15 +225,30 @@ import Base.Order.Reverse
     end
 
     @testset "Iteration" begin
-        pq = PriorityQueue('a'=>'A')
-        @test collect(pq) == ['a' => 'A']
+        pq = PriorityQueue(["a" => 10, "b" => 5, "c" => 15])
+        @test collect(pq)         == ["b" => 5, "a" => 10, "c" => 15]
+        @test collect(keys(pq))   == ["b", "a", "c"]
+        @test collect(values(pq)) == [5, 10, 15]
     end
 
-    @testset "OrderedIteration" begin
+    @testset "UnorderedIteration" begin
         pq = PriorityQueue(["a" => 10, "b" => 5, "c" => 15])
-        @test Set(collect(pq)) == Set(["a" => 10, "b" => 5, "c" => 15])
-        it = PQOrderedIterator(pq)
-        @test collect(it) == ["b" => 5, "a" => 10, "c" => 15]
+        res = Pair{String, Int}[]
+        next = iterate(pq, false)
+        while next !== nothing
+            p, i = next
+            push!(res, p)
+            next = iterate(pq, i)
+        end
+        @test Set(res) == Set(["a" => 10, "b" => 5, "c" => 15])
+        empty!(res)
+        next = iterate(pq, true)
+        while next !== nothing
+            p, i = next
+            push!(res, p)
+            next = iterate(pq, i)
+        end
+        @test res == ["b" => 5, "a" => 10, "c" => 15]
     end
 
     @testset "LowLevelHeapOperations" begin
