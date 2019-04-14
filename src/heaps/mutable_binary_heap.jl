@@ -259,7 +259,7 @@ end
 """
     delete!{T}(h::MutableBinaryHeap{T}, i::Int)
 
-Deletes the element present at index `i` from heap `h` . 
+Deletes the element with handle `i` from heap `h` . 
 """     
 function delete!(h::MutableBinaryHeap{T}, i::Int) where T
      nd_id = h.node_map[i]

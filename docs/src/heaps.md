@@ -30,7 +30,7 @@ i = push!(h, v)              # adds a value to the heap and and returns a handle
 
 update!(h, i, v)             # updates the value of an element (referred to by the handle i)
 
-delete!(h, i)               # deletes the node present at index i from the heap
+delete!(h, i)               # deletes the node with handle i from the heap
 
 v, i = top_with_handle(h)    # returns the top value of a heap and its handle
 ```
