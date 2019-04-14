@@ -101,10 +101,10 @@ function _heap_bubble_down!(comp::Comp,
 end
 
 function _binary_heap_pop!(comp::Comp,
-    nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}) where {Comp,T}
+    nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int=1) where {Comp,T}
 
-    # extract root node
-    rt = nodes[1]
+    # extract node
+    rt = nodes[nd_id]
     v = rt.value
     @inbounds nodemap[rt.handle] = 0
 
@@ -112,12 +112,16 @@ function _binary_heap_pop!(comp::Comp,
         # clear
         empty!(nodes)
     else
-        # place last node to root
-        @inbounds nodes[1] = new_rt = pop!(nodes)
-        @inbounds nodemap[new_rt.handle] = 1
+        # move the last node to the position of the removed node
+        @inbounds nodes[nd_id] = new_rt = pop!(nodes)
+        @inbounds nodemap[new_rt.handle] = nd_id
 
         if length(nodes) > 1
-            _heap_bubble_down!(comp, nodes, nodemap, 1)
+            if compare(comp, new_rt.value, v)
+                _heap_bubble_up!(comp, nodes, nodemap, nd_id)
+            else
+                _heap_bubble_down!(comp, nodes, nodemap, nd_id)
+            end
         end
     end
     v
@@ -250,6 +254,17 @@ function update!(h::MutableBinaryHeap{T}, i::Int, v) where T
     else
         _heap_bubble_down!(comp, nodes, nodemap, nd_id)
     end
+end
+
+"""
+    delete!{T}(h::MutableBinaryHeap{T}, i::Int)
+
+Deletes the element with handle `i` from heap `h` . 
+"""     
+function delete!(h::MutableBinaryHeap{T}, i::Int) where T
+     nd_id = h.node_map[i]
+    _binary_heap_pop!(h.comparer, h.nodes, h.node_map, nd_id)
+    h
 end
 
 setindex!(h::MutableBinaryHeap, v, i::Int) = update!(h, i, v)

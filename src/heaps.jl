@@ -37,6 +37,9 @@
 #   - update!(h, i, v)    updates the value of an element
 #                         (referred to by the handle i)
 #
+#   - delete!(h, i)      deletes the node with
+#                         handle i from the heap
+#
 #   - top_with_handle(h)  return the top value of a heap
 #                         and its handle
 #
