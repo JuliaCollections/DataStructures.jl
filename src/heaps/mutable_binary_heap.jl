@@ -259,10 +259,11 @@ end
 """
     delete!{T}(h::MutableBinaryHeap{T}, i::Int)
 
-Deletes the element present at node_id `i` from heap `h` . 
+Deletes the element present at index `i` from heap `h` . 
 """     
 function delete!(h::MutableBinaryHeap{T}, i::Int) where T
-    _binary_heap_pop!(h.comparer, h.nodes, h.node_map, i)
+     nd_id = h.node_map[i]
+    _binary_heap_pop!(h.comparer, h.nodes, h.node_map, nd_id)
     h
 end
 
