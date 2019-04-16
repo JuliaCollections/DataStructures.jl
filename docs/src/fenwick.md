@@ -23,3 +23,26 @@ julia> prefixsum(f, 1)
 julia> prefixsum(f, 3)
  5
 ```
+
+There is an alternative form of the data structure, which enables us to handle suffix-sums of an array efficiently. This form of implementation supports dynamic sizing of the data structure.
+
+
+```julia
+SuffixFenwickTree{T}(n) # Constructs a suffix Fenwick Tree of length `n` which can handle suffix sums
+SuffixFenwickTree{T}(counts)  # Constructs a suffix Fenwick Tree from an array of `counts`
+inc!(ft, ind, val)  # Increases the value of the SuffixFenwickTree `ft` by `val` from the start of `ft` upto the index `ind`
+dec!(ft, ind, val)  # Decreases the value of the SuffixFenwickTree `ft` by `val` from the start of `ft` upto the index `ind`
+suffixsum(ft, ind)  # Return the cumulative sum from index `ind` upto the length of the SuffixFenwickTree `ft`
+```
+
+Examples:
+
+```julia
+julia> f = SuffixFenwickTree{Int}(6)
+julia> inc!(f, 2, 5)
+julia> suffixsum(f, 1)
+ 5
+julia> suffixsum(f, 3)
+ 0
+```
+
