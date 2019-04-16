@@ -6,7 +6,7 @@ end
 """
     SuffixFenwickTree{T}(n)
     
-Constructs a [`SuffixFenwickTree`](https://en.wikipedia.org/wiki/SuffixFenwick_tree) of length `n`.
+Constructs a [`SuffixFenwickTree`](https://stackoverflow.com/questions/21995930/dynamic-i-e-variable-size-fenwick-tree) of length `n`.
  
 """
 SuffixFenwickTree{T}(n::Integer) where T = SuffixFenwickTree{T}(zeros(T, n), n)
