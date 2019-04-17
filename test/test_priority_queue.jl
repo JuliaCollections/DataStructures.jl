@@ -254,16 +254,10 @@ import Base.Order.Reverse
     # Copy and merge operations in PriorityQueue utilize unordered
     # iteration
     @testset "Copy and Merge" begin
+        v = [i for i=10000:-1:1]
+        pq1 = PriorityQueue(zip(v, 10 .* v))
+        @test collect(copy!(Dict{Int, Int}(), pq1)) != collect(pq1)
         pq = PriorityQueue(["a" => 10, "b" => 5, "c" => 15])
-        cpq = copy(pq)
-        res = Pair{String, Int}[]
-        next = iterate(cpq, false)
-        while next !== nothing
-            p, i = next
-            pushfirst!(res, p)
-            next = iterate(cpq, i)
-        end
-        @test res == ["a" => 10, "b" => 5, "c" => 15]
         sd = SortedDict(["d"=>6, "e"=>4])
         merge!(sd, pq)
         @test collect(sd) == ["a" => 10, "b" => 5, "c" => 15, "d" => 6, "e" => 4]
