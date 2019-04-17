@@ -268,6 +268,8 @@ import Base.Order.Reverse
         @test collect(sd) == ["a" => 10, "b" => 5, "c" => 21, "e" => 4]
         pq1 = empty(pq)
         @test length(pq1) == 0
+        pq1 = copy(pq)
+        @test pq1 isa PriorityQueue
     end
 
     @testset "LowLevelHeapOperations" begin
