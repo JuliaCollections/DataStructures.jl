@@ -359,7 +359,9 @@ end
 
 empty(pq::PriorityQueue) = PriorityQueue(empty(pq.xs), pq.o, empty(pq.index))
 
-function merge!(d::SortedDict{K, V, O1}, other::PriorityQueue{K, V, O}) where {K, V, O <: Ordering, O1 <: Ordering}
+merge!(d::SortedDict, other::PriorityQueue) = invoke(merge!, Tuple{AbstractDict, PriorityQueue}, d, other)
+
+function merge!(d::AbstractDict, other::PriorityQueue)
     next = iterate(other, false)
     while next !== nothing
         (k, v), state = next
@@ -369,17 +371,7 @@ function merge!(d::SortedDict{K, V, O1}, other::PriorityQueue{K, V, O}) where {K
     return d
 end
 
-function merge!(d::AbstractDict{K, V}, other::PriorityQueue{K, V, O}) where {K, V, O <: Ordering}
-    next = iterate(other, false)
-    while next !== nothing
-        (k, v), state = next
-        d[k] = v
-        next = iterate(other, state)
-    end
-    return d
-end
-
-function merge!(combine::Function, d::AbstractDict{K, V}, other::PriorityQueue{K, V, O}) where {K, V, O <:Ordering}
+function merge!(combine::Function, d::AbstractDict, other::PriorityQueue)
     next = iterate(other, false)
     while next !== nothing
         (k, v), state = next
@@ -423,5 +415,4 @@ function iterate(pq::PriorityQueue, state::_PQIteratorState)
 end
     
 iterate(pq::PriorityQueue, i) = _iterate(pq, iterate(pq.index, i))
-
 
