@@ -256,7 +256,7 @@ import Base.Order.Reverse
     @testset "Copy and Merge" begin
         v = [i for i=10000:-1:1]
         pq1 = PriorityQueue(zip(v, 10 .* v))
-        @test collect(copy!(Dict{Int, Int}(), pq1)) != collect(pq1)
+        @test collect(copy!(Dict(), pq1)) != collect(pq1)
         pq = PriorityQueue(["a" => 10, "b" => 5, "c" => 15])
         sd = SortedDict(["d"=>6, "e"=>4])
         merge!(sd, pq)
