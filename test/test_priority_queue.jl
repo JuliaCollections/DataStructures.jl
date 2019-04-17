@@ -263,6 +263,11 @@ import Base.Order.Reverse
         @test collect(sd) == ["a" => 10, "b" => 5, "c" => 15, "d" => 6, "e" => 4]
         d = merge!(Dict("d"=> 6), pq)
         @test Set(collect(d)) == Set(["c" => 15, "b" => 5, "a" => 10, "d" => 6])
+        sd = SortedDict(["c"=>6, "e"=>4])
+        merge!(+, sd, pq)
+        @test collect(sd) == ["a" => 10, "b" => 5, "c" => 21, "e" => 4]
+        pq1 = empty(pq)
+        @test length(pq1) == 0
     end
 
     @testset "LowLevelHeapOperations" begin
