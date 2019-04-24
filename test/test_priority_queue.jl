@@ -225,8 +225,51 @@ import Base.Order.Reverse
     end
 
     @testset "Iteration" begin
-        pq = PriorityQueue('a'=>'A')
-        @test collect(pq) == ['a' => 'A']
+        pq = PriorityQueue(["a" => 10, "b" => 5, "c" => 15])
+        @test collect(pq)         == ["b" => 5, "a" => 10, "c" => 15]
+        @test collect(keys(pq))   == ["b", "a", "c"]
+        @test collect(values(pq)) == [5, 10, 15]
+    end
+
+    @testset "UnorderedIteration" begin
+        pq = PriorityQueue(["a" => 10, "b" => 5, "c" => 15])
+        res = Pair{String, Int}[]
+        next = iterate(pq, false)
+        while next !== nothing
+            p, i = next
+            push!(res, p)
+            next = iterate(pq, i)
+        end
+        @test Set(res) == Set(["a" => 10, "b" => 5, "c" => 15])
+        empty!(res)
+        next = iterate(pq, true)
+        while next !== nothing
+            p, i = next
+            push!(res, p)
+            next = iterate(pq, i)
+        end
+        @test res == ["b" => 5, "a" => 10, "c" => 15]
+    end
+
+    # Copy and merge operations in PriorityQueue utilize unordered
+    # iteration
+    @testset "Copy and Merge" begin
+        v = [i for i=10000:-1:1]
+        pq1 = PriorityQueue(zip(v, 10 .* v))
+        @test collect(merge!(Dict(), pq1)) != collect(pq1)
+        pq = PriorityQueue(["a" => 10, "b" => 5, "c" => 15])
+        sd = SortedDict(["d"=>6, "e"=>4])
+        merge!(sd, pq)
+        @test collect(sd) == ["a" => 10, "b" => 5, "c" => 15, "d" => 6, "e" => 4]
+        d = merge!(Dict("d"=> 6), pq)
+        @test Set(collect(d)) == Set(["c" => 15, "b" => 5, "a" => 10, "d" => 6])
+        sd = SortedDict(["c"=>6, "e"=>4])
+        merge!(+, sd, pq)
+        @test collect(sd) == ["a" => 10, "b" => 5, "c" => 21, "e" => 4]
+        pq1 = empty(pq)
+        @test length(pq1) == 0
+        pq1 = copy(pq)
+        @test pq1 isa PriorityQueue
     end
 
     @testset "LowLevelHeapOperations" begin

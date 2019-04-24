@@ -35,6 +35,8 @@ struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
         new{K,V,O}(Vector{Pair{K,V}}(), o, Dict{K, Int}())
     end
 
+    PriorityQueue{K, V, O}(xs::Array{Pair{K,V}, 1}, o::O, index::Dict{K, Int}) where {K,V,O<:Ordering} = new(xs, o, index)
+
     function PriorityQueue{K,V,O}(o::O, itr) where {K,V,O<:Ordering}
         xs = Vector{Pair{K,V}}(undef, length(itr))
         index = Dict{K, Int}()
@@ -55,6 +57,10 @@ struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
         pq
     end
 end
+
+# A copy constructor
+PriorityQueue(xs::Array{Pair{K,V}, 1}, o::O, index::Dict{K, Int}) where {K,V,O<:Ordering} =
+    PriorityQueue{K,V,O}(xs, o, index)
 
 # Any-Any constructors
 PriorityQueue(o::Ordering=Forward) = PriorityQueue{Any,Any,typeof(o)}(o)
@@ -351,13 +357,62 @@ function empty!(pq::PriorityQueue)
     pq
 end
 
+empty(pq::PriorityQueue) = PriorityQueue(empty(pq.xs), pq.o, empty(pq.index))
+
+merge!(d::SortedDict, other::PriorityQueue) = invoke(merge!, Tuple{AbstractDict, PriorityQueue}, d, other)
+
+function merge!(d::AbstractDict, other::PriorityQueue)
+    next = iterate(other, false)
+    while next !== nothing
+        (k, v), state = next
+        d[k] = v
+        next = iterate(other, state)
+    end
+    return d
+end
+
+function merge!(combine::Function, d::AbstractDict, other::PriorityQueue)
+    next = iterate(other, false)
+    while next !== nothing
+        (k, v), state = next
+        d[k] = haskey(d, k) ? combine(d[k], v) : v
+        next = iterate(other, state)
+    end
+    return d
+end
+
+# Opaque not to be exported. 
+mutable struct _PQIteratorState{K, V, O <: Ordering}
+    pq::PriorityQueue{K, V, O}
+    _PQIteratorState{K, V, O}(pq::PriorityQueue{K, V, O}) where {K, V, O <: Ordering} = new(pq)
+end
+
+_PQIteratorState(pq::PriorityQueue{K, V, O}) where {K, V, O <: Ordering} = _PQIteratorState{K, V, O}(pq)
+
 # Unordered iteration through key value pairs in a PriorityQueue
+# O(n) iteration.
 function _iterate(pq::PriorityQueue, state)
-    state == nothing && return nothing
     (k, idx), i = state
     return (pq.xs[idx], i)
 end
+_iterate(pq::PriorityQueue, ::Nothing) = nothing
 
-iterate(pq::PriorityQueue) = _iterate(pq, iterate(pq.index))
+iterate(pq::PriorityQueue, ::Nothing) = nothing
 
+function iterate(pq::PriorityQueue, ordered::Bool=true)
+    if ordered 
+        isempty(pq) && return nothing
+        state = _PQIteratorState(PriorityQueue(copy(pq.xs), pq.o, copy(pq.index)))
+        return dequeue_pair!(state.pq), state
+    else
+        _iterate(pq, iterate(pq.index))
+    end
+end
+
+function iterate(pq::PriorityQueue, state::_PQIteratorState)
+    isempty(state.pq) && return nothing
+    return dequeue_pair!(state.pq), state
+end
+    
 iterate(pq::PriorityQueue, i) = _iterate(pq, iterate(pq.index, i))
+
