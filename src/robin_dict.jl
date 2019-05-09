@@ -1,5 +1,6 @@
+import Base: setindex!, sizehint!, empty!, isempty, length, getindex
 
- import Base: setindex!, sizehint!, empty!
+const LOAD_FACTOR = 0.90
 
 mutable struct RobinDict{K,V} <: AbstractDict{K,V}
     #there is no need to maintain an table_size as an additional variable
@@ -10,19 +11,20 @@ mutable struct RobinDict{K,V} <: AbstractDict{K,V}
     count::Int
     totalcost::Int
     maxprobe::Int    # length of longest probe
-    
+    idxfloor::Int
+
     function RobinDict{K, V}() where {K, V}
         n = 16 # default size of an empty Dict in Julia
-        new(zeros(UInt, n), Vector{K}(undef, n), Vector{V}(undef, n), 0, 0, 0)
+        new(zeros(UInt, n), Vector{K}(undef, n), Vector{V}(undef, n), zeros(Int, n), 0, 0, 0, 0)
     end
 
     function RobinDict{K, V}(d::RobinDict{K, V}) where {K, V}
-        new(copy(d.slots), copy(d.keys), copy(d.vals), d.count, d.totalcost, d.maxprobe)
+        new(copy(d.slots), copy(d.keys), copy(d.vals), copy(d.dibs), d.count, d.totalcost, d.maxprobe, d.idxfloor)
     end
-    
-    function RobinDict{K, V}(slots, keys, vals, count, totalcost, maxprobe) where {K, V}
-        new(slots, keys, vals, count, totalcost, maxprobe)
-    end     
+
+    function RobinDict{K, V}(slots, keys, vals, dibs, count, totalcost, maxprobe, idxfloor) where {K, V}
+        new(slots, keys, dibs, vals, count, totalcost, maxprobe, idxfloor)
+    end
 end
 
 function RobinDict{K,V}(kv) where {K, V}
@@ -42,39 +44,112 @@ function RobinDict{K,V}(ps::Pair...) where {K, V}
     return h
 end
 
+RobinDict() = RobinDict{Any,Any}()
+RobinDict(kv::Tuple{}) = RobinDict()
+
+RobinDict(ps::Pair{K,V}...) where {K,V} = RobinDict{K,V}(ps)
+RobinDict(ps::Pair...) = RobinDict(ps)
+
 # default hashing scheme used by Julia
 hashindex(key, sz) = (((hash(key)%Int) & (sz-1)) + 1)::Int
 
-# insert algorithm 
-function rh_insert!(h::RobinDict{K, V}, key) where {K, V}
+# insert algorithm
+function rh_insert!(h::RobinDict{K, V}, key, val) where {K, V}
     # table full
-    if h.count == length(h.keys) 
+    if h.count == length(h.keys)
         return -1
     end
-    
+    ckey, cval, cdibs = key, val, 0
     sz = length(h.keys)
-    index = hashkey(key, ) # this is going to be critical
-    # understand and then implement, task for tomorrow
-end
-    
-function setindex!(h::RobinDict{K,V}, v0, key0) where {K, V}
-    key = convert(K, key0)
-    isequal(key, key0) || throw(ArgumentError("$key0 is not a valid key for type $K"))
-    setindex!(h, v0, key)
+    index = hashindex(ckey, cdibs)
+    @inbounds while h.slots[index] != 0x0
+        if h.dibs[index] < cdibs
+            h.vals[index], cval = cval, h.vals[index]
+            h.keys[index], ckey = ckey, h.keys[index]
+            h.maxprobe = max(h.maxprobe, cdibs)
+            h.dibs[index], cdibs = cdibs, h.dibs[index]
+        end
+        cdibs += 1
+        h.totalcost += 1
+        index = (index & (sz - 1)) + 1
+    end
+    # println("Successfully inserted at $index")
+    @inbounds h.slots[index] = 0x1
+    @inbounds h.vals[index] = cval
+    @inbounds h.keys[index] = ckey
+    @inbounds h.dibs[index] = cdibs
+    h.totalcost += 1
+    h.maxprobe = max(h.maxprobe, cdibs)
+    if h.idxfloor == 0
+        h.idxfloor = index
+    else
+        h.idxfloor = min(h.idxfloor, index)
+    end
+    h.count += 1
+    return index
 end
 
-function setindex!(h::Dict{K,V}, v0, key::K) where {K, V}
+@propagate_inbound isslotempty(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x0
+@propagate_inbound isslotfilled(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x1
+@propagate_inbound isslotdeleted(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x2
+
+function setindex!(h::RobinDict{K,V}, key0, v0) where {K, V}
+    key = convert(K, key0)
+    isequal(key, key0) || throw(ArgumentError("$key0 is not a valid key for type $K"))
+    _setindex!(h, key, v0)
+end
+
+function _setindex!(h::RobinDict{K,V}, key::K, v0) where {K, V}
     v = convert(V, v0)
-    index = rh_insert!(h, key)
+    index = rh_insert!(h, key, v)
     if index > 0
-        @inbounds h.keys[index] = key
-        @inbounds h.vals[index] = v
+        println("Successfully inserted at $index")
     else
         throw(error("Dictionary table full"))
     end
     h
 end
 
+isempty(d::RobinDict) = (d.count == 0)
+length(d::RobinDict) = d.count
 
+function empty!(h::RobinDict{K,V}) where {K, V}
+    fill!(h.slots, 0x0)
+    sz = length(h.slots)
+    empty!(h.dibs)
+    empty!(h.keys)
+    empty!(h.vals)
+    resize!(h.keys, sz)
+    resize!(h.vals, sz)
+    resize!(h.dibs, sz)
+    h.count = 0
+    h.maxprobe = 0
+    h.totalcost = 0
+    h.idxfloor = 0
+    return h
+end
+ 
+function rh_search(h::RobinDict{K, V}, key::K) where {K, V}
+	sz = length(h.keys)
+	index = hashindex(key, sz)
+	cdibs = 0
+	while true
+		if h.slots[index] == 0x0
+			return -1
+		elseif cdibs > h.dibs[index]
+			return -1
+		elseif h.keys[index] == key 
+			return index
+		end
+		index = (index & (sz - 1)) + 1
+		cdibs += 1
+	end
+end
+
+function getindex(h::RobinDict{K, V}, key0) where {K, V}
+	key = convert(K, key0)
+	index = rh_search(h, key)
+	@inbounds return (index < 0) ? throw(KeyError(key)) : h.vals[index]
+end
 
 
