@@ -1,4 +1,4 @@
-import Base: setindex!, sizehint!, empty!, isempty, length, getindex
+import Base: setindex!, sizehint!, empty!, isempty, length, getindex, getkey, haskey, iterate, @propagate_inbounds
 
 const LOAD_FACTOR = 0.90
 
@@ -94,9 +94,9 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
     return index
 end
 
-isslotempty(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x0
-isslotfilled(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x1
-isslotdeleted(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x2
+@propagate_inbounds isslotempty(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x0
+@propagate_inbounds isslotfilled(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x1
+@propagate_inbounds isslotdeleted(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x2
 
 function setindex!(h::RobinDict{K,V}, v0, key0) where {K, V}
     key = convert(K, key0)
@@ -108,7 +108,7 @@ function _setindex!(h::RobinDict{K,V}, key::K, v0) where {K, V}
     v = convert(V, v0)
     index = rh_insert!(h, key, v)
     if index > 0
-        println("Successfully inserted at $index")
+        # println("Successfully inserted at $index")
     else
         throw(error("Dictionary table full"))
     end
@@ -157,4 +157,33 @@ function getindex(h::RobinDict{K, V}, key0) where {K, V}
 	@inbounds return (index < 0) ? throw(KeyError(key)) : h.vals[index]
 end
 
+haskey(h::RobinDict, key) = (rh_search(h, key) > 0) 
 
+function getkey(h::RobinDict{K,V}, key, default) where {K, V}
+    index = rh_search(h, key)
+    @inbounds return (index < 0) ? default : h.keys[index]::K
+end
+
+function skip_deleted(h::RobinDict, i)
+    L = length(h.slots)
+    for i = i:L
+        @inbounds if isslotfilled(h,i)
+            return  i
+        end
+    end
+    return 0
+end
+
+function skip_deleted_floor!(h::RobinDict)
+    idx = skip_deleted(h, h.idxfloor)
+    if idx != 0
+        h.idxfloor = idx
+    end
+    idx
+end
+
+@propagate_inbounds _iterate(t::RobinDict{K,V}, i) where {K,V} = i == 0 ? nothing : (Pair{K,V}(t.keys[i],t.vals[i]), i == typemax(Int) ? 0 : i+1)
+@propagate_inbounds function iterate(t::RobinDict)
+    _iterate(t, skip_deleted_floor!(t))
+end
+@propagate_inbounds iterate(t::RobinDict, i) = _iterate(t, skip_deleted(t, i))
