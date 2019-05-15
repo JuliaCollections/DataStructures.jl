@@ -1,4 +1,4 @@
-import Base: setindex!, sizehint!, empty!, isempty, length, getindex, getkey, haskey, iterate, @propagate_inbounds
+import Base: setindex!, sizehint!, empty!, isempty, length, getindex, getkey, haskey, iterate, @propagate_inbounds, pop!, delete!, get, isbitstype
 
 const LOAD_FACTOR = 0.90
 
@@ -157,7 +157,13 @@ function getindex(h::RobinDict{K, V}, key0) where {K, V}
 	@inbounds return (index < 0) ? throw(KeyError(key)) : h.vals[index]
 end
 
+# function get(default::Callable, h::RobinDict{K,V}, key) where {K, V}
+#     index = rh_search(h, key)
+#     @inbounds return (index < 0) ? default() : h.vals[index]::V
+# end
+
 haskey(h::RobinDict, key) = (rh_search(h, key) > 0) 
+# in(key, v::KeySet{<:Any, <:RobinDict}) = (rh_search(v.dict, key) >= 0)
 
 function getkey(h::RobinDict{K,V}, key, default) where {K, V}
     index = rh_search(h, key)
@@ -172,6 +178,51 @@ function skip_deleted(h::RobinDict, i)
         end
     end
     return 0
+end
+
+function rh_delete!(h::RobinDict{K, V}, index) where {K, V}
+    if index < 0
+        return false;
+    else
+        @inbounds h.slots[index] = 0x2
+        isbitstype(K) || ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.keys, index-1)
+        isbitstype(V) || ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.vals, index-1)
+        h.count -= 1
+        return true
+    end
+end
+
+function _pop!(h::RobinDict, index)
+    @inbounds val = h.vals[index]
+    rh_delete!(h, index)
+    return val
+end
+
+function pop!(h::RobinDict{K, V}, key::K) where {K, V}
+    index = rh_search(h, key)
+    return index > 0 ? _pop!(h, index) : throw(KeyError(key))
+end
+
+function pop!(h::RobinDict{K, V}, key::K, default) where {K, V}
+    index = rh_search(h, key)
+    return index > 0 ? _pop!(h, index) : default
+end
+
+function pop!(h::RobinDict)
+    isempty(h) && throw(ArgumentError("dict must be non-empty"))
+    idx = skip_deleted_floor!(h)
+    @inbounds key = h.keys[idx]
+    @inbounds val = h.vals[idx]
+    rh_delete!(h, idx)
+    key => val
+end
+
+function delete!(h::RobinDict{K, V}, key::K) where {K, V}
+    index = rh_search(h, key)
+    if index > 0
+        rh_delete!(h, index)
+    end
+    return h
 end
 
 function skip_deleted_floor!(h::RobinDict)
