@@ -12,15 +12,15 @@ If an order is not given, the priority queue is min-ordered using
 the default comparison for `V`.
 
 A `PriorityQueue` acts like a `Dict`, mapping values to their
-priorities, with the addition of a `dequeue!` function to remove the
-lowest priority element.
+priorities, with the addition of `dequeue!` and  `dequeue_pair!` functions
+to remove the lowest priority element and pair, respectively.
 
 ```jldoctest
-julia> a = PriorityQueue(["a","b","c"],[2,3,1],Base.Order.Forward)
+julia> a = PriorityQueue(["a"=>2,"b"=>3,"c"=>1],Base.Order.Forward)
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
   "c" => 1
-  "b" => 3
   "a" => 2
+  "b" => 3
 ```
 """
 struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
