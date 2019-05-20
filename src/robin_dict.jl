@@ -37,7 +37,7 @@ end
 RobinDict{K,V}(p::Pair) where {K,V} = setindex!(RobinDict{K,V}(), p.second, p.first)
 function RobinDict{K,V}(ps::Pair...) where {K, V}
     h = RobinDict{K,V}()
-#     sizehint!(h, length(ps))
+    sizehint!(h, length(ps))
     for p in ps
         h[p.first] = p.second
     end
@@ -159,6 +159,16 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
     h.maxprobe = maxprobe
     @assert h.totalcost == totalcost0
     return h
+end
+
+function sizehint!(d::IdDict, newsz)
+    newsz = _tablesz(newsz*2)  # *2 for keys and values in same array
+    oldsz = length(d.ht)
+    # grow at least 25%
+    if newsz < (oldsz*5)>>2
+        return d
+    end
+    rehash!(d, newsz)
 end
 
 @propagate_inbounds isslotempty(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x0
