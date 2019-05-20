@@ -1,6 +1,6 @@
-import Base: setindex!, sizehint!, empty!, isempty, length, getindex, getkey, haskey, iterate, @propagate_inbounds, pop!, delete!, get, isbitstype
+import Base: setindex!, sizehint!, empty!, isempty, length, getindex, getkey, haskey, iterate, @propagate_inbounds, pop!, delete!, get, isbitstype 
 
-const LOAD_FACTOR = 0.90
+const LOAD_FACTOR = 0.80
 
 mutable struct RobinDict{K,V} <: AbstractDict{K,V}
     #there is no need to maintain an table_size as an additional variable
@@ -34,7 +34,7 @@ function RobinDict{K,V}(kv) where {K, V}
     end
     h
 end
-RobinDict{K,V}(p::Pair) where {K,V} = setindex!(Dict{K,V}(), p.second, p.first)
+RobinDict{K,V}(p::Pair) where {K,V} = setindex!(RobinDict{K,V}(), p.second, p.first)
 function RobinDict{K,V}(ps::Pair...) where {K, V}
     h = RobinDict{K,V}()
 #     sizehint!(h, length(ps))
@@ -52,6 +52,8 @@ RobinDict(ps::Pair...) = RobinDict(ps)
 
 # default hashing scheme used by Julia
 hashindex(key, sz) = (((hash(key)%Int) & (sz-1)) + 1)::Int
+
+_tablesz(x::Integer) = x < 16 ? 16 : one(x)<<((sizeof(x)<<3)-leading_zeros(x-1))
 
 # insert algorithm
 function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
@@ -94,6 +96,71 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
     return index
 end
 
+#rehash! algorithm
+function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
+    olds = h.slots
+    oldk = h.keys
+    oldv = h.vals
+    oldd = h.dibs
+    sz = length(olds)
+    newsz = _tablesz(newsz)
+    h.totalcost += 1
+    h.idxfloor = 1
+    if h.count == 0
+        resize!(h.slots, newsz)
+        fill!(h.slots, 0)
+        resize!(h.keys, sz)
+        resize!(h.vals, sz)
+        resize!(h.dibs, sz)
+        h.count = 0
+        h.maxprobe = 0
+        h.totalcost = 0
+        h.idxfloor = 0
+        return h
+    end
+
+    slots = zeros(UInt8,newsz)
+    keys = Vector{K}(undef, newsz)
+    vals = Vector{V}(undef, newsz)
+    dibs = Vector{Int}(undef, newsz)
+    fill!(dibs, 0)
+    totalcost0 = h.totalcost
+    count = 0
+    maxprobe = 0
+
+    for i = 1:sz
+        @inbounds if olds[i] == 0x1
+            k = oldk[i]
+            v = oldv[i]
+            d = dibs[i]
+            index0 = index = hashindex(k, newsz)
+            while slots[index] != 0
+                index = (index & (newsz-1)) + 1
+            end
+            probe = (index - index0) & (newsz-1)
+            probe > maxprobe && (maxprobe = probe)
+            slots[index] = 0x1
+            keys[index] = k
+            vals[index] = v
+            dibs[index] = d
+            count += 1
+
+            if h.totalcost != totalcost0
+                # if `h` is changed by a finalizer, retry
+                return rehash!(h, newsz)
+            end
+        end
+    end
+
+    h.slots = slots
+    h.keys = keys
+    h.vals = vals
+    h.count = count
+    h.maxprobe = maxprobe
+    @assert h.totalcost == totalcost0
+    return h
+end
+
 @propagate_inbounds isslotempty(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x0
 @propagate_inbounds isslotfilled(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x1
 @propagate_inbounds isslotdeleted(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x2
@@ -106,12 +173,10 @@ end
 
 function _setindex!(h::RobinDict{K,V}, key::K, v0) where {K, V}
     v = convert(V, v0)
+    sz = length(h.keys)
+    (h.count > LOAD_FACTOR * sz) && rehash!(h, h.count > 64000 ? h.count*2 : h.count*4)
     index = rh_insert!(h, key, v)
-    if index > 0
-        # println("Successfully inserted at $index")
-    else
-        throw(error("Dictionary table full"))
-    end
+    @assert index > 0
     h
 end
 
