@@ -399,7 +399,7 @@ log *n*)
 """
 function get(default_::Union{Function,Type}, m::SortedDict{K,D}, k_) where {K,D}
     i, exactfound = findkey(m.bt, convert(K, k_))
-    return exactfound ? m.bt.data[i].d : convert(D, default_())
+    return exactfound ? m.bt.data[i].d : default_()
 end
 
 get(m::SortedDict, k_, default_) = get(()->default_, m, k_)
@@ -440,7 +440,7 @@ than `k`. Time: O(*c* log *n*)
 """
 function getkey(m::SortedDict{K,D,Ord}, k_, default_) where {K,D,Ord <: Ordering}
     i, exactfound = findkey(m.bt, convert(K, k_))
-    exactfound ? m.bt.data[i].k : convert(K, default_)
+    exactfound ? m.bt.data[i].k : default_
 end
 
 ## Function delete! deletes an item at a given
