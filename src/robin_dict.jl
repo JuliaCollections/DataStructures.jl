@@ -3,6 +3,9 @@ import Base: setindex!, sizehint!, empty!, isempty, length, getindex, getkey, ha
 # the load factor arter which the dictionary `rehash` happens
 const ROBIN_DICT_LOAD_FACTOR = 0.80
 
+# the maximum average probe length using Robin Hood hashing 
+const AVG_PROBE_LENGTH = 8
+
 mutable struct RobinDict{K,V} <: AbstractDict{K,V}
     #there is no need to maintain an table_size as an additional variable
     slots::Array{UInt8,1} # indicator, to be used later on
@@ -81,6 +84,7 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
     end
 
     @inbounds if h.slots[index] == 0x1 && h.keys[index] == ckey
+        h.vals[index] = cval
         return index
     end
 
@@ -133,6 +137,7 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
     totalcost0 = h.totalcost
     count = 0
     maxprobe = 0
+    idxfloor = h.idxfloor
 
     for i = 1:sz
         @inbounds if olds[i] == 0x1
@@ -145,6 +150,7 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
             end
             probe = (index - index0) & (newsz-1)
             probe > maxprobe && (maxprobe = probe)
+            index < idxfloor && (idxfloor = index)
             slots[index] = 0x1
             keys[index] = k
             vals[index] = v
@@ -164,6 +170,7 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
     h.dibs = dibs
     h.count = count
     h.maxprobe = maxprobe
+    h.idxfloor = idxfloor
     @assert h.totalcost == totalcost0
     return h
 end
@@ -219,7 +226,7 @@ end
 function rh_search(h::RobinDict{K, V}, key::K) where {K, V}
 	sz = length(h.keys)
 	index = hashindex(key, sz)
-	cdibs = 0
+    cdibs = 0
 	while true
 		if h.slots[index] == 0x0
 			return -1
@@ -229,7 +236,6 @@ function rh_search(h::RobinDict{K, V}, key::K) where {K, V}
 			return index
 		end
 		index = (index & (sz - 1)) + 1
-		cdibs += 1
 	end
 end
 
@@ -250,16 +256,6 @@ haskey(h::RobinDict, key) = (rh_search(h, key) > 0)
 function getkey(h::RobinDict{K,V}, key, default) where {K, V}
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default : h.keys[index]::K
-end
-
-function skip_deleted(h::RobinDict, i)
-    L = length(h.slots)
-    for i = i:L
-        @inbounds if isslotfilled(h,i)
-            return  i
-        end
-    end
-    return 0
 end
 
 # backward shift deletion by not keeping any tombstones
@@ -283,12 +279,16 @@ function rh_delete!(h::RobinDict{K, V}, index) where {K, V}
     next = (index & (sz - 1)) + 1
 
     while next != index0 
-        h.slots[curr] = h.slots[next]
-        h.vals[curr] = h.vals[next]
-        h.keys[curr] = h.keys[next]
-        h.dibs[curr] = (h.dibs[next] > 0) ? (h.dibs[next] - 1) : 0
-        curr = next
-        next = (next & (sz-1)) + 1
+        if h.dibs[next] > 0
+            h.slots[curr] = h.slots[next]
+            h.vals[curr] = h.vals[next]
+            h.keys[curr] = h.keys[next]
+            h.dibs[curr] = (h.dibs[next] - 1)
+            curr = next
+            next = (next & (sz-1)) + 1
+        else
+            break
+        end
     end
 
     #curr is at the last position, reset back to normal
@@ -298,7 +298,8 @@ function rh_delete!(h::RobinDict{K, V}, index) where {K, V}
     h.dibs[curr] = 0
     h.count -= 1
     h.totalcost += 1
-
+    # this is necessary because key at idxfloor might get deleted 
+    h.idxfloor = get_idxfloor(h)
     return h
 end
 
@@ -320,7 +321,7 @@ end
 
 function pop!(h::RobinDict)
     isempty(h) && throw(ArgumentError("dict must be non-empty"))
-    idx = skip_deleted_floor!(h)
+    idx = h.idxfloor
     @inbounds key = h.keys[idx]
     @inbounds val = h.vals[idx]
     rh_delete!(h, idx)
@@ -335,16 +336,28 @@ function delete!(h::RobinDict{K, V}, key::K) where {K, V}
     return h
 end
 
-function skip_deleted_floor!(h::RobinDict)
-    idx = skip_deleted(h, h.idxfloor)
-    if idx != 0
-        h.idxfloor = idx
+function get_idxfloor(h::RobinDict)
+    @inbounds for i = 1 : length(h.slots)
+        if h.slots[i] == 0x1
+            return i
+        end
     end
-    idx
+    return 0
 end
 
-@propagate_inbounds _iterate(t::RobinDict{K,V}, i) where {K,V} = i == 0 ? nothing : (Pair{K,V}(t.keys[i],t.vals[i]), i == typemax(Int) ? 0 : i+1)
-@propagate_inbounds function iterate(t::RobinDict)
-    _iterate(t, skip_deleted_floor!(t))
+function get_next_filled(h::RobinDict, i)
+    L = length(h.slots)
+    (1 <= i <= L) || return 0 
+    for j = i:L
+        @inbounds if h.slots[j] == 0x1
+            return  j
+        end
+    end
+    return 0
 end
-@propagate_inbounds iterate(t::RobinDict, i) = _iterate(t, skip_deleted(t, i))
+
+@propagate_inbounds _iterate(t::RobinDict{K,V}, i) where {K,V} = i == 0 ? nothing : (Pair{K,V}(t.keys[i],t.vals[i]), i == typemax(Int) ? 0 : get_next_filled(t, i+1))
+@propagate_inbounds function iterate(t::RobinDict)
+    _iterate(t, t.idxfloor)
+end
+@propagate_inbounds iterate(t::RobinDict, i) = _iterate(t, get_next_filled(t, i))
