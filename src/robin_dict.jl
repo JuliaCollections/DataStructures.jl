@@ -1,4 +1,4 @@
-import Base: setindex!, sizehint!, empty!, isempty, length, getindex, getkey, haskey, iterate, @propagate_inbounds, pop!, delete!, get, isbitstype 
+import Base: setindex!, sizehint!, empty!, isempty, length, getindex, getkey, haskey, iterate, @propagate_inbounds, pop!, delete!, get, isbitstype, isiterable
 
 # the load factor arter which the dictionary `rehash` happens
 const ROBIN_DICT_LOAD_FACTOR = 0.80
@@ -16,18 +16,19 @@ mutable struct RobinDict{K,V} <: AbstractDict{K,V}
     totalcost::Int
     maxprobe::Int    # length of longest probe
     idxfloor::Int
+    max_lf :: Float32
 
     function RobinDict{K, V}() where {K, V}
         n = 16 # default size of an empty Dict in Julia
-        new(zeros(UInt, n), Vector{K}(undef, n), Vector{V}(undef, n), zeros(Int, n), 0, 0, 0, 0)
+        new(zeros(UInt, n), Vector{K}(undef, n), Vector{V}(undef, n), zeros(Int, n), 0, 0, 0, 0, 0)
     end
 
     function RobinDict{K, V}(d::RobinDict{K, V}) where {K, V}
-        new(copy(d.slots), copy(d.keys), copy(d.vals), copy(d.dibs), d.count, d.totalcost, d.maxprobe, d.idxfloor)
+        new(copy(d.slots), copy(d.keys), copy(d.vals), copy(d.dibs), d.count, d.totalcost, d.maxprobe, d.idxfloor, d.max_lf)
     end
 
-    function RobinDict{K, V}(slots, keys, vals, dibs, count, totalcost, maxprobe, idxfloor) where {K, V}
-        new(slots, keys, dibs, vals, count, totalcost, maxprobe, idxfloor)
+    function RobinDict{K, V}(slots, keys, vals, dibs, count, totalcost, maxprobe, idxfloor, max_lf) where {K, V}
+        new(slots, keys, dibs, vals, count, totalcost, maxprobe, idxfloor, max_lf)
     end
 end
 
@@ -53,6 +54,18 @@ RobinDict(kv::Tuple{}) = RobinDict()
 
 RobinDict(ps::Pair{K,V}...) where {K,V} = RobinDict{K,V}(ps)
 RobinDict(ps::Pair...) = RobinDict(ps)
+
+function RobinDict(kv)
+    try
+        dict_with_eltype((K, V) -> RobinDict{K, V}, kv, eltype(kv))
+    catch
+        if !isiterable(typeof(kv)) || !all(x->isa(x,Union{Tuple,Pair}),kv)
+            throw(ArgumentError("RobinDict(kv): kv needs to be an iterator of tuples or pairs"))
+        else
+            rethrow()
+        end
+    end
+end
 
 # default hashing scheme used by Julia
 hashindex(key, sz) = (((hash(key)%Int) & (sz-1)) + 1)::Int
@@ -218,7 +231,6 @@ end
 
 @propagate_inbounds isslotempty(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x0
 @propagate_inbounds isslotfilled(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x1
-@propagate_inbounds isslotdeleted(h::RobinDict{K, V}, i) where {K, V} = h.slots[i] == 0x2
 
 function setindex!(h::RobinDict{K,V}, v0, key0) where {K, V}
     key = convert(K, key0)
@@ -230,6 +242,7 @@ function _setindex!(h::RobinDict{K,V}, key::K, v0) where {K, V}
     v = convert(V, v0)
     sz = length(h.keys)
     (h.count > ROBIN_DICT_LOAD_FACTOR * sz) && rehash!(h, h.count > 64000 ? h.count*2 : h.count*4)
+    h.max_lf = max(h.max_lf, h.count / sz)
     index = rh_insert!(h, key, v)
     @assert index > 0
     h
