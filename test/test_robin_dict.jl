@@ -88,3 +88,53 @@ end
 	end
 end
 
+@testset "KeyError" begin
+    let z = RobinDict()
+        get_KeyError = false
+        try
+            z["a"]
+        catch _e123_
+            get_KeyError = isa(_e123_,KeyError)
+        end
+        @test get_KeyError
+    end
+end
+
+@testset "Filter function" begin
+    _d = RobinDict("a"=>0)
+    @test isa([k for k in filter(x->length(x)==1, collect(keys(_d)))], Vector{String})
+end
+
+@testset "typeof" begin
+    d = RobinDict(((1, 2), (3, 4)))
+    @test d[1] === 2
+    @test d[3] === 4
+    d2 = RobinDict(1 => 2, 3 => 4)
+    d3 = RobinDict((1 => 2, 3 => 4))
+    @test d == d2 == d3
+    @test typeof(d) == typeof(d2) == typeof(d3) == RobinDict{Int,Int}
+
+    d = RobinDict(((1, 2), (3, "b")))
+    @test d[1] === 2
+    @test d[3] == "b"
+    d2 = RobinDict(1 => 2, 3 => "b")
+    d3 = RobinDict((1 => 2, 3 => "b"))
+    @test d == d2 == d3
+    @test typeof(d) == typeof(d2) == typeof(d3) == RobinDict{Int,Any}
+
+    d = RobinDict(((1, 2), ("a", 4)))
+    @test d[1] === 2
+    @test d["a"] === 4
+    d2 = RobinDict(1 => 2, "a" => 4)
+    d3 = RobinDict((1 => 2, "a" => 4))
+    @test d == d2 == d3
+    @test typeof(d) == typeof(d2) == typeof(d3) == RobinDict{Any,Int}
+
+    d = RobinDict(((1, 2), ("a", "b")))
+    @test d[1] === 2
+    @test d["a"] == "b"
+    d2 = RobinDict(1 => 2, "a" => "b")
+    d3 = RobinDict((1 => 2, "a" => "b"))
+    @test d == d2 == d3
+    @test typeof(d) == typeof(d2) == typeof(d3) == RobinDict{Any,Any}
+end
