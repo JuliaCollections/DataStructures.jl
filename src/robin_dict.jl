@@ -1,10 +1,7 @@
-import Base: setindex!, sizehint!, empty!, isempty, length, getindex, getkey, haskey, iterate, @propagate_inbounds, pop!, delete!, get, isbitstype, isiterable
+import Base: setindex!, sizehint!, empty!, isempty, length, getindex, getkey, haskey, iterate, @propagate_inbounds, pop!, delete!, get, isbitstype, in, isiterable, dict_with_eltype, KeySet, Callable
 
 # the load factor arter which the dictionary `rehash` happens
 const ROBIN_DICT_LOAD_FACTOR = 0.80
-
-# the maximum average probe length using Robin Hood hashing 
-const AVG_PROBE_LENGTH = 8
 
 mutable struct RobinDict{K,V} <: AbstractDict{K,V}
     #there is no need to maintain an table_size as an additional variable
@@ -40,7 +37,7 @@ function RobinDict{K,V}(kv) where {K, V}
     h
 end
 RobinDict{K,V}(p::Pair) where {K,V} = setindex!(RobinDict{K,V}(), p.second, p.first)
-function RobinDict{K,V}(ps::Pair...) where {K, V}
+function RobinDict{K,V}(ps::Pair{K, V}...) where {K, V}
     h = RobinDict{K,V}()
     sizehint!(h, length(ps))
     for p in ps
@@ -52,20 +49,36 @@ end
 RobinDict() = RobinDict{Any,Any}()
 RobinDict(kv::Tuple{}) = RobinDict()
 
+RobinDict(kv::Tuple{Vararg{Pair{K,V}}}) where {K,V}       = RobinDict{K,V}(kv)
+RobinDict(kv::Tuple{Vararg{Pair{K}}}) where {K}           = RobinDict{K,Any}(kv)
+RobinDict(kv::Tuple{Vararg{Pair{K,V} where K}}) where {V} = RobinDict{Any,V}(kv)
+RobinDict(kv::Tuple{Vararg{Pair}})                        = RobinDict{Any,Any}(kv)
+
+RobinDict(kv::AbstractArray{Tuple{K,V}}) where {K,V} = RobinDict{K,V}(kv)
+RobinDict(kv::AbstractArray{Pair{K,V}}) where {K,V}  = RobinDict{K,V}(kv)
+RobinDict(kv::AbstractDict{K,V}) where {K,V} = RobinDict{K,V}(kv)
+
 RobinDict(ps::Pair{K,V}...) where {K,V} = RobinDict{K,V}(ps)
-RobinDict(ps::Pair...) = RobinDict(ps)
+RobinDict(ps::Pair{K}...,) where {K}             = RobinDict{K,Any}(ps)
+RobinDict(ps::(Pair{K,V} where K)...,) where {V} = RobinDict{Any,V}(ps)
+RobinDict(ps::Pair...) = RobinDict{Any,Any}(ps)
 
 function RobinDict(kv)
     try
-        dict_with_eltype((K, V) -> RobinDict{K, V}, kv, eltype(kv))
-    catch
-        if !isiterable(typeof(kv)) || !all(x->isa(x,Union{Tuple,Pair}),kv)
+        dict_with_eltype(kv, eltype(kv))
+    catch e
+        if isempty(methods(iterate, (typeof(kv),))) ||
+            !all(x->isa(x,Union{Tuple,Pair}),kv)
             throw(ArgumentError("RobinDict(kv): kv needs to be an iterator of tuples or pairs"))
         else
-            rethrow()
+            rethrow(e)
         end
     end
 end
+
+dict_with_eltype(kv, ::Type{Tuple{K,V}}) where {K,V} = RobinDict{K,V}(kv)
+dict_with_eltype(kv, ::Type{Pair{K,V}}) where {K,V} = RobinDict{K,V}(kv)
+dict_with_eltype(kv, t) = RobinDict{Any,Any}(kv)
 
 # default hashing scheme used by Julia
 hashindex(key, sz) = (((hash(key)%Int) & (sz-1)) + 1)::Int
@@ -270,7 +283,7 @@ end
 function rh_search(h::RobinDict{K, V}, key::K) where {K, V}
 	sz = length(h.keys)
 	index = hashindex(key, sz)
-    cdibs = 1
+	cdibs = 1
 	while true
 		if h.slots[index] == 0x0
 			return -1
@@ -289,13 +302,36 @@ function getindex(h::RobinDict{K, V}, key0) where {K, V}
 	@inbounds return (index < 0) ? throw(KeyError(key)) : h.vals[index]
 end
 
-# function get(default::Callable, h::RobinDict{K,V}, key) where {K, V}
-#     index = rh_search(h, key)
-#     @inbounds return (index < 0) ? default() : h.vals[index]::V
-# end
+function get(h::RobinDict{K,V}, key, default) where {K, V}
+    index = rh_search(h, key)
+    @inbounds return (index < 0) ? default : h.vals[index]::V
+end
+
+function get(default::Callable, h::RobinDict{K,V}, key) where {K, V}
+    index = rh_search(h, key)
+    @inbounds return (index < 0) ? default() : h.vals[index]::V
+end
+
+function get!(default::Callable, h::RobinDict{K,V}, key0) where {K, V}
+    key = convert(K, key0)
+    if !isequal(key, key0)
+        throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
+    end
+    return _get!(default, h, key)
+end
+
+function _get!(default::Callable, h::RobinDict{K,V}, key::K) where V where K
+    index = rh_search(h, key)
+    
+    index > 0 && return h.vals[index]
+
+    v = convert(V, default())
+    rh_insert!(h, key, v)
+    return v
+end
 
 haskey(h::RobinDict, key) = (rh_search(h, key) > 0) 
-# in(key, v::KeySet{<:Any, <:RobinDict}) = (rh_search(v.dict, key) >= 0)
+in(key, v::KeySet{<:Any, <:RobinDict}) = (rh_search(v.dict, key) >= 0)
 
 function getkey(h::RobinDict{K,V}, key, default) where {K, V}
     index = rh_search(h, key)
