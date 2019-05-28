@@ -65,7 +65,7 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
     if h.count == length(h.keys)
         return -1
     end
-    ckey, cval, cdibs = key, val, 0
+    ckey, cval, cdibs = key, val, 1
     sz = length(h.keys)
     index = hashindex(ckey, sz)
     @inbounds while true
@@ -82,7 +82,8 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
         h.totalcost += 1
         index = (index & (sz - 1)) + 1
     end
-
+    
+    
     @inbounds if h.slots[index] == 0x1 && h.keys[index] == ckey
         h.vals[index] = cval
         return index
@@ -95,8 +96,59 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
     @inbounds h.slots[index] = 0x1
     @inbounds h.vals[index] = cval
     @inbounds h.keys[index] = ckey
+    
+    @assert cdibs > 0
     @inbounds h.dibs[index] = cdibs
+    
     h.totalcost += 1
+    h.maxprobe = max(h.maxprobe, cdibs)
+    if h.idxfloor == 0
+        h.idxfloor = index
+    else
+        h.idxfloor = min(h.idxfloor, index)
+    end
+    return index
+end
+
+#same as rh_insert but totalcost doesn't increase here
+function rh_insert_for_rehash!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
+    # table full
+    if h.count == length(h.keys)
+        return -1
+    end
+    ckey, cval, cdibs = key, val, 1
+    sz = length(h.keys)
+    index = hashindex(ckey, sz)
+    @inbounds while true
+        if (h.slots[index] == 0x0) || (h.slots[index] == 0x1 && h.keys[index] == ckey)
+            break
+        end
+        if h.dibs[index] < cdibs
+            h.vals[index], cval = cval, h.vals[index]
+            h.keys[index], ckey = ckey, h.keys[index]
+            h.maxprobe = max(h.maxprobe, cdibs)
+            h.dibs[index], cdibs = cdibs, h.dibs[index]
+        end
+        cdibs += 1
+        index = (index & (sz - 1)) + 1
+    end
+    
+    @inbounds if h.slots[index] == 0x1 && h.keys[index] == ckey
+        h.vals[index] = cval
+        return index
+    end
+
+    @inbounds if h.slots[index] == 0x0
+        h.count += 1
+    end
+
+    @inbounds h.slots[index] = 0x1
+    @inbounds h.vals[index] = cval
+    @inbounds h.keys[index] = ckey
+    
+    @assert cdibs > 0
+    @inbounds h.dibs[index] = cdibs
+    
     h.maxprobe = max(h.maxprobe, cdibs)
     if h.idxfloor == 0
         h.idxfloor = index
@@ -129,48 +181,27 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
         return h
     end
 
-    slots = zeros(UInt8,newsz)
-    keys = Vector{K}(undef, newsz)
-    vals = Vector{V}(undef, newsz)
-    dibs = Vector{Int}(undef, newsz)
-    fill!(dibs, 0)
+    h.slots = zeros(UInt8,newsz)
+    h.keys = Vector{K}(undef, newsz)
+    h.vals = Vector{V}(undef, newsz)
+    h.dibs = Vector{Int}(undef, newsz)
+    fill!(h.dibs, 0)
     totalcost0 = h.totalcost
-    count = 0
-    maxprobe = 0
-    idxfloor = h.idxfloor
+    h.count = 0
+    h.maxprobe = 0
+    h.idxfloor = 0
 
     for i = 1:sz
         @inbounds if olds[i] == 0x1
             k = oldk[i]
             v = oldv[i]
-            d = dibs[i]
-            index0 = index = hashindex(k, newsz)
-            while slots[index] != 0
-                index = (index & (newsz-1)) + 1
-            end
-            probe = (index - index0) & (newsz-1)
-            probe > maxprobe && (maxprobe = probe)
-            index < idxfloor && (idxfloor = index)
-            slots[index] = 0x1
-            keys[index] = k
-            vals[index] = v
-            dibs[index] = d
-            count += 1
-
+            rh_insert_for_rehash!(h, k, v)
             if h.totalcost != totalcost0
                 # if `h` is changed by a finalizer, retry
                 return rehash!(h, newsz)
             end
         end
     end
-
-    h.slots = slots
-    h.keys = keys
-    h.vals = vals
-    h.dibs = dibs
-    h.count = count
-    h.maxprobe = maxprobe
-    h.idxfloor = idxfloor
     @assert h.totalcost == totalcost0
     return h
 end
@@ -226,7 +257,7 @@ end
 function rh_search(h::RobinDict{K, V}, key::K) where {K, V}
 	sz = length(h.keys)
 	index = hashindex(key, sz)
-    cdibs = 0
+    cdibs = 1
 	while true
 		if h.slots[index] == 0x0
 			return -1
@@ -268,19 +299,19 @@ function rh_delete!(h::RobinDict{K, V}, index) where {K, V}
     sz = length(h.keys)
     while true
         index0 = (index0 & (sz - 1)) + 1
-        if h.slots[index0] == 0x0
+        if h.slots[index0] == 0x0 || h.slots[index0] == 0x1 && h.dibs[index0] == 1
             break
         end
     end
-    #index0 represents the first empty slot in linear probe
+    #index0 represents the position before which we have to shift backwards 
     
     # the backwards shifting algorithm
     curr = index
     next = (index & (sz - 1)) + 1
-
+    
     while next != index0 
-        if h.dibs[next] > 0
-            h.slots[curr] = h.slots[next]
+        if h.dibs[next] > 1
+            h.slots[curr] = 0x1
             h.vals[curr] = h.vals[next]
             h.keys[curr] = h.keys[next]
             h.dibs[curr] = (h.dibs[next] - 1)
@@ -290,12 +321,15 @@ function rh_delete!(h::RobinDict{K, V}, index) where {K, V}
             break
         end
     end
-
+    
     #curr is at the last position, reset back to normal
-    h.slots[curr] = 0x0
-    ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.keys, index-1)
-    ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.vals, index-1)
-    h.dibs[curr] = 0
+    if (h.slots[curr] == 0x1)
+        h.slots[curr] = 0x0
+        ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.keys, curr-1)
+        ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.vals, curr-1)
+        h.dibs[curr] = 0
+    end
+
     h.count -= 1
     h.totalcost += 1
     # this is necessary because key at idxfloor might get deleted 
