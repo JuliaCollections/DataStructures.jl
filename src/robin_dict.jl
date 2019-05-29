@@ -302,17 +302,28 @@ function getindex(h::RobinDict{K, V}, key0) where {K, V}
 	@inbounds return (index < 0) ? throw(KeyError(key)) : h.vals[index]
 end
 
-function get(h::RobinDict{K,V}, key, default) where {K, V}
+function get(h::RobinDict{K,V}, key0, default) where {K, V}
+    isa(convert(K, key0), MethodError) && throw(MethodError("Cannot `convert` an object of type $(typeof(key0)) to an object of type $K"))
+    key = convert(K, key0)
+    if !isequal(key, key0)
+        throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
+    end
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default : h.vals[index]::V
 end
 
-function get(default::Callable, h::RobinDict{K,V}, key) where {K, V}
+function get(default::Callable, h::RobinDict{K,V}, key0) where {K, V}
+    isa(convert(K, key0), MethodError) && throw(MethodError("Cannot `convert` an object of type $(typeof(key0)) to an object of type $K"))
+    key = convert(K, key0) 
+    if !isequal(key, key0)
+        throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
+    end
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default() : h.vals[index]::V
 end
 
 function get!(default::Callable, h::RobinDict{K,V}, key0) where {K, V}
+    isa(convert(K, key0), MethodError) && throw(MethodError("Cannot `convert` an object of type $(typeof(key0)) to an object of type $K"))
     key = convert(K, key0)
     if !isequal(key, key0)
         throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
