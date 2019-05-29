@@ -138,3 +138,16 @@ end
     @test d == d2 == d3
     @test typeof(d) == typeof(d2) == typeof(d3) == RobinDict{Any,Any}
 end
+
+@testset "type of RobinDict constructed from varargs of Pairs" begin
+    @test RobinDict(1=>1, 2=>2.0) isa RobinDict{Int,Any}
+    @test RobinDict(1=>1, 2.0=>2) isa RobinDict{Any,Int}
+    @test RobinDict(1=>1.0, 2.0=>2) isa RobinDict{Any,Any}
+
+    for T in (Nothing, Missing)
+        @test RobinDict(1=>1, 2=>T()) isa RobinDict{Int,Any}
+        @test RobinDict(1=>T(), 2=>2) isa RobinDict{Int,Any}
+        @test RobinDict(1=>1, T()=>2) isa RobinDict{Any,Int}
+        @test RobinDict(T()=>1, 2=>2) isa RobinDict{Any,Int}
+    end
+end
