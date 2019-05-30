@@ -200,3 +200,89 @@ end
     @test eq(RobinDict{Int,Int}(), RobinDict{AbstractString,AbstractString}())
 end
 
+@testset "equality special cases" begin
+    @test RobinDict(1=>0.0) == RobinDict(1=>-0.0)
+    @test !isequal(RobinDict(1=>0.0), RobinDict(1=>-0.0))
+
+    @test RobinDict(0.0=>1) != RobinDict(-0.0=>1)
+    @test !isequal(RobinDict(0.0=>1), RobinDict(-0.0=>1))
+
+    @test RobinDict(1=>NaN) != RobinDict(1=>NaN)
+    @test isequal(RobinDict(1=>NaN), RobinDict(1=>NaN))
+
+    # @test RobinDict(NaN=>1) == RobinDict(NaN=>1)
+    # @test isequal(RobinDict(NaN=>1), RobinDict(NaN=>1))
+
+    @test ismissing(RobinDict(1=>missing) == RobinDict(1=>missing))
+    @test isequal(RobinDict(1=>missing), RobinDict(1=>missing))
+
+    # @test RobinDict(missing=>1) == RobinDict(missing=>1)
+    # @test isequal(RobinDict(missing=>1), RobinDict(missing=>1))
+end
+
+@testset "get!" begin 
+    f(x) = x^2
+    d = RobinDict(8=>19)
+    @test get!(d, 8, 5) == 19
+    @test get!(d, 19, 2) == 2
+
+    @test get!(d, 42) do  # d is updated with f(2)
+        f(2)
+    end == 4
+
+    @test get!(d, 42) do  # d is not updated
+        f(200)
+    end == 4
+
+    @test get(d, 13) do   # d is not updated
+        f(4)
+    end == 16
+
+    @test d == RobinDict(8=>19, 19=>2, 42=>4)
+end
+
+@testset "push!" begin
+    d = RobinDict()
+    @test push!(d, 'a' => 1) === d
+    @test d['a'] == 1
+    @test push!(d, 'b' => 2, 'c' => 3) === d
+    @test d['b'] == 2
+    @test d['c'] == 3
+    @test push!(d, 'd' => 4, 'e' => 5, 'f' => 6) === d
+    @test d['d'] == 4
+    @test d['e'] == 5
+    @test d['f'] == 6
+    @test length(d) == 6
+end
+
+@testset "pop!" begin
+    d = RobinDict(1=>2, 3=>4)
+    @test pop!(d, 1) == 2
+    @test_throws KeyError pop!(d, 1)
+    @test pop!(d, 1, 0) == 0
+    @test pop!(d) == (3=>4)
+    @test_throws ArgumentError pop!(d)
+end
+
+@testset "keys as a set" begin
+    d = RobinDict(1=>2, 3=>4)
+    @test keys(d) isa AbstractSet
+    @test empty(keys(d)) isa AbstractSet
+    let i = keys(d) ∩ Set([1,2])
+        @test i isa AbstractSet
+        @test i == Set([1])
+    end
+    @test Set(string(k) for k in keys(d)) == Set(["1","3"])
+end
+
+@testset "find" begin
+    @test findall(isequal(1), RobinDict(:a=>1, :b=>2)) == [:a]
+    @test sort(findall(isequal(1), RobinDict(:a=>1, :b=>1))) == [:a, :b]
+    @test isempty(findall(isequal(1), RobinDict()))
+    @test isempty(findall(isequal(1), RobinDict(:a=>2, :b=>3)))
+
+    @test findfirst(isequal(1), RobinDict(:a=>1, :b=>2)) == :a
+    @test findfirst(isequal(1), RobinDict(:a=>1, :b=>1, :c=>3)) in (:a, :b)
+    @test findfirst(isequal(1), RobinDict()) === nothing
+    @test findfirst(isequal(1), RobinDict(:a=>2, :b=>3)) === nothing
+end
