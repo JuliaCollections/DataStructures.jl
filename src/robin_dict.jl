@@ -639,7 +639,7 @@ RobinDict{String,Int64} with 1 entry:
   "a" => 1
 ```
 """
-function delete!(h::RobinDict{K, V}, key::K) where {K, V}
+function delete!(h::RobinDict{K, V}, key0) where {K, V}
     isa(convert(K, key0), MethodError) && throw(MethodError("Cannot `convert` an object of type $(typeof(key0)) to an object of type $K"))
     key = convert(K, key0) 
     if !isequal(key, key0)
