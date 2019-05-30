@@ -322,6 +322,8 @@ function get(default::Callable, h::RobinDict{K,V}, key0) where {K, V}
     @inbounds return (index < 0) ? default() : h.vals[index]::V
 end
 
+get!(h::RobinDict{K,V}, key0, default) where {K,V} = get!(()->default, h, key0)
+
 function get!(default::Callable, h::RobinDict{K,V}, key0) where {K, V}
     isa(convert(K, key0), MethodError) && throw(MethodError("Cannot `convert` an object of type $(typeof(key0)) to an object of type $K"))
     key = convert(K, key0)
