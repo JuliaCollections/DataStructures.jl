@@ -1,4 +1,7 @@
-import Base: setindex!, sizehint!, empty!, isempty, length, getindex, getkey, haskey, iterate, @propagate_inbounds, pop!, delete!, get, get!, isbitstype, in, isiterable, dict_with_eltype, KeySet, Callable
+import Base: setindex!, sizehint!, empty!, isempty, length,
+             getindex, getkey, haskey, iterate, @propagate_inbounds,
+             pop!, delete!, get, get!, isbitstype, in, hashindex,
+             isiterable, dict_with_eltype, KeySet, Callable, _tablesz
 
 # the load factor arter which the dictionary `rehash` happens
 const ROBIN_DICT_LOAD_FACTOR = 0.80
@@ -90,9 +93,9 @@ RobinDict(ps::Pair...) = RobinDict{Any,Any}(ps)
 
 function RobinDict(kv)
     try
-        dict_with_eltype(kv, eltype(kv))
+        dict_with_eltype((K, V) -> RobinDict{K, V}, kv, eltype(kv))
     catch e
-        if isempty(methods(iterate, (typeof(kv),))) ||
+    if !isiterable(typeof(kv)) || !all(x -> isa(x, Union{Tuple,Pair}), kv)
             !all(x->isa(x,Union{Tuple,Pair}),kv)
             throw(ArgumentError("RobinDict(kv): kv needs to be an iterator of tuples or pairs"))
         else
@@ -100,15 +103,6 @@ function RobinDict(kv)
         end
     end
 end
-
-dict_with_eltype(kv, ::Type{Tuple{K,V}}) where {K,V} = RobinDict{K,V}(kv)
-dict_with_eltype(kv, ::Type{Pair{K,V}}) where {K,V} = RobinDict{K,V}(kv)
-dict_with_eltype(kv, t) = RobinDict{Any,Any}(kv)
-
-# default hashing scheme used by Julia
-hashindex(key, sz) = (((hash(key)%Int) & (sz-1)) + 1)::Int
-
-_tablesz(x::Integer) = x < 16 ? 16 : one(x)<<((sizeof(x)<<3)-leading_zeros(x-1))
 
 # insert algorithm
 function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
@@ -384,7 +378,6 @@ end
 get!(f::Function, collection, key)
 
 function get!(default::Callable, h::RobinDict{K,V}, key0) where {K, V}
-    isa(convert(K, key0), MethodError) && throw(MethodError("Cannot `convert` an object of type $(typeof(key0)) to an object of type $K"))
     key = convert(K, key0)
     if !isequal(key, key0)
         throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
@@ -428,7 +421,6 @@ julia> get(d, "c", 3)
 get(collection, key, default)
 
 function get(h::RobinDict{K,V}, key0, default) where {K, V}
-    isa(convert(K, key0), MethodError) && throw(MethodError("Cannot `convert` an object of type $(typeof(key0)) to an object of type $K"))
     key = convert(K, key0)
     if !isequal(key, key0)
         throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
@@ -455,7 +447,6 @@ end
 get(::Function, collection, key)
 
 function get(default::Callable, h::RobinDict{K,V}, key0) where {K, V}
-    isa(convert(K, key0), MethodError) && throw(MethodError("Cannot `convert` an object of type $(typeof(key0)) to an object of type $K"))
     key = convert(K, key0) 
     if !isequal(key, key0)
         throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
@@ -506,7 +497,6 @@ julia> getkey(D, 'd', 'a')
 ```
 """
 function getkey(h::RobinDict{K,V}, key0, default) where {K, V}
-    isa(convert(K, key0), MethodError) && throw(MethodError("Cannot `convert` an object of type $(typeof(key0)) to an object of type $K"))
     key = convert(K, key0) 
     if !isequal(key, key0)
         throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
@@ -570,7 +560,6 @@ function _pop!(h::RobinDict, index)
 end
 
 function pop!(h::RobinDict{K, V}, key0) where {K, V}
-    isa(convert(K, key0), MethodError) && throw(MethodError("Cannot `convert` an object of type $(typeof(key0)) to an object of type $K"))
     key = convert(K, key0) 
     if !isequal(key, key0)
         throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
@@ -604,7 +593,6 @@ julia> pop!(d, "e", 4)
 pop!(collection, key, default)
 
 function pop!(h::RobinDict{K, V}, key0, default) where {K, V}
-    isa(convert(K, key0), MethodError) && throw(MethodError("Cannot `convert` an object of type $(typeof(key0)) to an object of type $K"))
     key = convert(K, key0) 
     if !isequal(key, key0)
         throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
@@ -640,7 +628,6 @@ RobinDict{String,Int64} with 1 entry:
 ```
 """
 function delete!(h::RobinDict{K, V}, key0) where {K, V}
-    isa(convert(K, key0), MethodError) && throw(MethodError("Cannot `convert` an object of type $(typeof(key0)) to an object of type $K"))
     key = convert(K, key0) 
     if !isequal(key, key0)
         throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))

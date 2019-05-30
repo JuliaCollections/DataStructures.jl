@@ -55,6 +55,7 @@ module DataStructures
     export orderobject, ordtype, Lt, compare, onlysemitokens
 
     export MultiDict, enumerateall
+    export RobinDict
 
     export findkey
 
@@ -90,7 +91,7 @@ module DataStructures
     include("sorted_set.jl")
     include("tokens2.jl")
     include("container_loops.jl")
-
+    include("robin_dict.jl")
     export
         CircularBuffer,
         capacity,

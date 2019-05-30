@@ -1,6 +1,3 @@
-using Test, Random
-
-include("../src/robin_dict.jl")
 
 @testset "Constructors" begin
     h1 = RobinDict()
