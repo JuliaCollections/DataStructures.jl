@@ -55,15 +55,15 @@ mutable struct RobinDict{K,V} <: AbstractDict{K,V}
     end
 end
 
-function RobinDict{K,V}(kv) where {K, V}
+function RobinDict{K,V}(kv) where V where K
     h = RobinDict{K,V}()
     for (k,v) in kv
         h[k] = v
     end
-    h
+    return h
 end
 RobinDict{K,V}(p::Pair) where {K,V} = setindex!(RobinDict{K,V}(), p.second, p.first)
-function RobinDict{K,V}(ps::Pair...) where {K, V}
+function RobinDict{K,V}(ps::Pair...) where V where K
     h = RobinDict{K,V}()
     sizehint!(h, length(ps))
     for p in ps
@@ -77,11 +77,24 @@ RobinDict(kv::Tuple{}) = RobinDict()
 copy(d::RobinDict) = RobinDict(d)
 
 RobinDict(ps::Pair{K,V}...) where {K,V} = RobinDict{K,V}(ps)
-RobinDict(ps::Pair...) = RobinDict(ps)
+RobinDict(ps::Pair...)                  = RobinDict(ps)
+
+function RobinDict(d::AbstractDict{K, V}) where {K, V}
+    h = RobinDict{K, V}()
+    for (k, v) in collect(d)
+        h[k] = v
+    end
+    h
+end
 
 function RobinDict(kv)
     try
-        dict_with_eltype((K, V) -> RobinDict{K, V}, kv, eltype(kv))
+        d = dict_with_eltype((K, V) -> RobinDict{K, V}, kv, eltype(kv))
+        if isa(d, Dict)
+            return RobinDict(d)
+        else
+            return d
+        end
     catch e
     if !isiterable(typeof(kv)) || !all(x -> isa(x, Union{Tuple,Pair}), kv)
             !all(x->isa(x,Union{Tuple,Pair}),kv)
