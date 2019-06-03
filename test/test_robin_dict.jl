@@ -82,6 +82,14 @@ end
 	        @test k in [3, 8, 6]
 	    end
 	end
+    
+    let y = RobinDict{Any, Int}(3=>3, 5=>5, "8"=>8, 6=>6)
+        pop!(y, "8")
+        for k in keys(y)
+            RobinDict{Int,Int}(y)
+            @test k in [3, 5, 6]
+        end
+    end
 end
 
 @testset "KeyError" begin
@@ -136,15 +144,15 @@ end
 end
 
 @testset "type of RobinDict constructed from varargs of Pairs" begin
-    @test RobinDict(1=>1, 2=>2.0) isa RobinDict{Int,Any}
-    @test RobinDict(1=>1, 2.0=>2) isa RobinDict{Any,Int}
-    @test RobinDict(1=>1.0, 2.0=>2) isa RobinDict{Any,Any}
+    @test RobinDict(1=>1, 2=>2.0) isa RobinDict{Int,Real}
+    @test RobinDict(1=>1, 2.0=>2) isa RobinDict{Real,Int}
+    @test RobinDict(1=>1.0, 2.0=>2) isa RobinDict{Real,Real}
 
     for T in (Nothing, Missing)
-        @test RobinDict(1=>1, 2=>T()) isa RobinDict{Int,Any}
-        @test RobinDict(1=>T(), 2=>2) isa RobinDict{Int,Any}
-        @test RobinDict(1=>1, T()=>2) isa RobinDict{Any,Int}
-        @test RobinDict(T()=>1, 2=>2) isa RobinDict{Any,Int}
+        @test RobinDict(1=>1, 2=>T()) isa RobinDict{Int,Union{Int,T}}
+        @test RobinDict(1=>T(), 2=>2) isa RobinDict{Int,Union{Int,T}}
+        @test RobinDict(1=>1, T()=>2) isa RobinDict{Union{Int,T},Int}
+        @test RobinDict(T()=>1, 2=>2) isa RobinDict{Union{Int,T},Int}
     end
 end
 
@@ -288,6 +296,14 @@ end
     @test haskey(h, 1) == true
     @test haskey(h, 2) == true
     @test haskey(h, 3) == false
+    @test_throws MethodError haskey(h, "1")
+end
+
+@testset "getkey" begin
+    h = RobinDict(1=>2, 3 => 6, 5=>10)
+    @test getkey(h, 1, 7) == 1
+    @test getkey(h, 4, 6) == 6
+    @test_throws MethodError getkey(h, "1", 8)
 end
 
 @testset "empty" begin
@@ -303,3 +319,4 @@ end
     @test h.totalcost == 0
     @test length(h.dibs) == length(h.keys) == length(h.vals) == length0
 end
+
