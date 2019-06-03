@@ -448,7 +448,7 @@ end
 function rh_delete!(h::RobinDict{K, V}, index) where {K, V}
     @assert index > 0
 
-    #this assumes that  the key is present in the dictionary at index 
+    # this assumes that there is a key/value present in the dictionary at index
     index0 = index
     sz = length(h.keys)
     @inbounds while true
@@ -485,7 +485,7 @@ function rh_delete!(h::RobinDict{K, V}, index) where {K, V}
     h.count -= 1
     h.totalcost += 1
     # this is necessary because key at idxfloor might get deleted 
-    h.idxfloor = get_idxfloor(h)
+    h.idxfloor = get_next_filled(h, h.idxfloor)
     return h
 end
 
@@ -586,7 +586,7 @@ end
 
 function get_next_filled(h::RobinDict, i)
     L = length(h.keys)
-    (1 <= i <= L) || return 0 
+    (1 <= i <= L) || return 0
     for j = i:L
         @inbounds if isslotfilled(h, j)
             return  j
