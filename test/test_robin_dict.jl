@@ -8,7 +8,6 @@
     @test length(h1.keys) == 16
     @test length(h1.vals) == 16
     @test length(h1.dibs) == 16
-    @test length(h1.slots) == 16
     @test eltype(h1) == Pair{Any, Any}
     @test keytype(h1) == Any
     @test valtype(h1) == Any
