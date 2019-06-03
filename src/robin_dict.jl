@@ -63,7 +63,7 @@ function RobinDict{K,V}(kv) where {K, V}
     h
 end
 RobinDict{K,V}(p::Pair) where {K,V} = setindex!(RobinDict{K,V}(), p.second, p.first)
-function RobinDict{K,V}(ps::Pair{K, V}...) where {K, V}
+function RobinDict{K,V}(ps::Pair...) where {K, V}
     h = RobinDict{K,V}()
     sizehint!(h, length(ps))
     for p in ps
@@ -76,19 +76,8 @@ RobinDict() = RobinDict{Any,Any}()
 RobinDict(kv::Tuple{}) = RobinDict()
 copy(d::RobinDict) = RobinDict(d)
 
-RobinDict(kv::Tuple{Vararg{Pair{K,V}}}) where {K,V}       = RobinDict{K,V}(kv)
-RobinDict(kv::Tuple{Vararg{Pair{K}}}) where {K}           = RobinDict{K,Any}(kv)
-RobinDict(kv::Tuple{Vararg{Pair{K,V} where K}}) where {V} = RobinDict{Any,V}(kv)
-RobinDict(kv::Tuple{Vararg{Pair}})                        = RobinDict{Any,Any}(kv)
-
-RobinDict(kv::AbstractArray{Tuple{K,V}}) where {K,V} = RobinDict{K,V}(kv)
-RobinDict(kv::AbstractArray{Pair{K,V}}) where {K,V}  = RobinDict{K,V}(kv)
-RobinDict(kv::AbstractDict{K,V}) where {K,V} = RobinDict{K,V}(kv)
-
 RobinDict(ps::Pair{K,V}...) where {K,V} = RobinDict{K,V}(ps)
-RobinDict(ps::Pair{K}...,) where {K}             = RobinDict{K,Any}(ps)
-RobinDict(ps::(Pair{K,V} where K)...,) where {V} = RobinDict{Any,V}(ps)
-RobinDict(ps::Pair...) = RobinDict{Any,Any}(ps)
+RobinDict(ps::Pair...) = RobinDict(ps)
 
 function RobinDict(kv)
     try
@@ -106,9 +95,8 @@ end
 # insert algorithm
 function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
     # table full
-    if h.count == length(h.keys)
-        return -1
-    end
+    @assert h.count != length(h.keys)
+    
     ckey, cval, cdibs = key, val, 1
     sz = length(h.keys)
     index = hashindex(ckey, sz)
@@ -259,7 +247,7 @@ function rh_search(h::RobinDict{K, V}, key::K) where {K, V}
 	sz = length(h.keys)
 	index = hashindex(key, sz)
 	cdibs = 1
-	while true
+	@inbounds while true
 		if h.dibs[index] == 0
 			return -1
 		elseif cdibs > h.dibs[index]
@@ -315,7 +303,7 @@ end
 """
 get!(f::Function, collection, key)
 
-function get!(default::Callable, h::RobinDict{K,V}, key0) where {K, V}
+function get!(default::Callable, h::RobinDict{K,V}, key0::K) where {K, V}
     key = convert(K, key0)
     if !isequal(key, key0)
         throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
@@ -585,6 +573,7 @@ end
 
 function get_next_filled(h::RobinDict, i)
     L = length(h.keys)
+    (1 <= i <= L) || return 0 
     for j = i:L
         @inbounds if isslotfilled(h, j)
             return  j
