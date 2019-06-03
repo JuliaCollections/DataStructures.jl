@@ -55,7 +55,7 @@ module DataStructures
     export orderobject, ordtype, Lt, compare, onlysemitokens
 
     export MultiDict, enumerateall
-    export RobinDict
+    export RobinDict, get_idxfloor
 
     export findkey
 

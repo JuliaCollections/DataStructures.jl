@@ -318,9 +318,6 @@ get!(f::Function, collection, key)
 
 function get!(default::Callable, h::RobinDict{K,V}, key0::K) where {K, V}
     key = convert(K, key0)
-    if !isequal(key, key0)
-        throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
-    end
     return _get!(default, h, key)
 end
 
@@ -361,9 +358,6 @@ get(collection, key, default)
 
 function get(h::RobinDict{K,V}, key0, default) where {K, V}
     key = convert(K, key0)
-    if !isequal(key, key0)
-        throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
-    end
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default : h.vals[index]::V
 end
@@ -387,9 +381,6 @@ get(::Function, collection, key)
 
 function get(default::Callable, h::RobinDict{K,V}, key0) where {K, V}
     key = convert(K, key0) 
-    if !isequal(key, key0)
-        throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
-    end
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default() : h.vals[index]::V
 end
@@ -437,9 +428,6 @@ julia> getkey(D, 'd', 'a')
 """
 function getkey(h::RobinDict{K,V}, key0, default) where {K, V}
     key = convert(K, key0) 
-    if !isequal(key, key0)
-        throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
-    end
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default : h.keys[index]::K
 end
@@ -497,9 +485,6 @@ end
 
 function pop!(h::RobinDict{K, V}, key0) where {K, V}
     key = convert(K, key0) 
-    if !isequal(key, key0)
-        throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
-    end
     index = rh_search(h, key)
     return index > 0 ? _pop!(h, index) : throw(KeyError(key))
 end
@@ -530,9 +515,6 @@ pop!(collection, key, default)
 
 function pop!(h::RobinDict{K, V}, key0, default) where {K, V}
     key = convert(K, key0) 
-    if !isequal(key, key0)
-        throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
-    end
     index = rh_search(h, key)
     return index > 0 ? _pop!(h, index) : default
 end
@@ -565,9 +547,6 @@ RobinDict{String,Int64} with 1 entry:
 """
 function delete!(h::RobinDict{K, V}, key0) where {K, V}
     key = convert(K, key0) 
-    if !isequal(key, key0)
-        throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
-    end
     index = rh_search(h, key)
     if index > 0
         rh_delete!(h, index)

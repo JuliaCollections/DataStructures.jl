@@ -90,6 +90,11 @@ end
             @test k in [3, 5, 6]
         end
     end
+
+    d = @inferred RobinDict(Pair(1,1), Pair(2,2), Pair(3,3))
+    @test isa(d, RobinDict)
+    @test d == RobinDict(1=>1, 2=>2, 3=>3)
+    @test eltype(d) == Pair{Int,Int}
 end
 
 @testset "KeyError" begin
@@ -320,3 +325,26 @@ end
     @test length(h.dibs) == length(h.keys) == length(h.vals) == length0
 end
 
+@testset "ArgumentError" begin
+    @test_throws ArgumentError RobinDict(0)
+    @test_throws ArgumentError RobinDict([1])
+    @test_throws ArgumentError RobinDict([(1,2),0])
+end
+
+@testset "empty tuple" begin
+    h = RobinDict(())
+    @test length(h) == 0
+end
+
+@testset "get_idxfloor" begin
+    h = RobinDict()
+    @test get_idxfloor(h) == 0
+    
+    h["a"] = 1
+    h[2] = "b"
+    @test h.idxfloor == get_idxfloor(h)
+    pop!(h)
+    @test h.idxfloor == get_idxfloor(h)
+    pop!(h)
+    @test h.idxfloor == get_idxfloor(h) == 0 
+end
