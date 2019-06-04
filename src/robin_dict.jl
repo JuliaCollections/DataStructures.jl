@@ -33,7 +33,7 @@ RobinDict{String,Int64} with 2 entries:
 """
 mutable struct RobinDict{K,V} <: AbstractDict{K,V}
     #there is no need to maintain an table_size as an additional variable
-    dibs::Array{Int,1} # distance to initial bucket - critical for implementation
+    dibs::Array{Int8,1} # distance to initial bucket - critical for implementation
     keys::Array{K,1}
     vals::Array{V,1}
     count::Int
@@ -43,7 +43,7 @@ mutable struct RobinDict{K,V} <: AbstractDict{K,V}
 
     function RobinDict{K, V}() where {K, V}
         n = 16 # default size of an empty Dict in Julia
-        new(zeros(Int, n), Vector{K}(undef, n), Vector{V}(undef, n), 0, 0, 0, 0)
+        new(zeros(Int8, n), Vector{K}(undef, n), Vector{V}(undef, n), 0, 0, 0, 0)
     end
 
     function RobinDict{K, V}(d::RobinDict{K, V}) where {K, V}
@@ -173,7 +173,7 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
 
     h.keys = Vector{K}(undef, newsz)
     h.vals = Vector{V}(undef, newsz)
-    h.dibs = Vector{Int}(undef, newsz)
+    h.dibs = Vector{Int8}(undef, newsz)
     fill!(h.dibs, 0)
     totalcost0 = h.totalcost
     h.count = 0
