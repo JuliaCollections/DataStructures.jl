@@ -81,7 +81,7 @@ RobinDict(ps::Pair...)                  = RobinDict(ps)
 
 function RobinDict(d::AbstractDict{K, V}) where {K, V}
     h = RobinDict{K, V}()
-    for (k, v) in collect(d)
+    for (k, v) in d
         h[k] = v
     end
     h
