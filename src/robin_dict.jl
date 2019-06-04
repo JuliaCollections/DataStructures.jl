@@ -4,7 +4,7 @@ import Base: setindex!, sizehint!, empty!, isempty, length, copy,
              isiterable, dict_with_eltype, KeySet, Callable, _tablesz
 
 # the load factor arter which the dictionary `rehash` happens
-const ROBIN_DICT_LOAD_FACTOR = 0.90
+const ROBIN_DICT_LOAD_FACTOR = 0.70
 
 """
     RobinDict([itr])
@@ -213,7 +213,7 @@ end
 function _setindex!(h::RobinDict{K,V}, key::K, v0) where {K, V}
     v = convert(V, v0)
     sz = length(h.keys)
-    (h.count > ROBIN_DICT_LOAD_FACTOR * sz) && rehash!(h, h.count > 64000 ? h.count*2 : h.count*4)
+    (h.count > ROBIN_DICT_LOAD_FACTOR * sz) && rehash!(h, 2*sz)
     index = rh_insert!(h, key, v)
     @assert index > 0
     h.totalcost += 1
