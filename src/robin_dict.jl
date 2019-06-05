@@ -213,7 +213,7 @@ end
 function _setindex!(h::RobinDict{K,V}, key::K, v0) where {K, V}
     v = convert(V, v0)
     sz = length(h.keys)
-    (h.count > ROBIN_DICT_LOAD_FACTOR * sz) && rehash!(h, 2*sz)
+    (h.count > ROBIN_DICT_LOAD_FACTOR * sz) && rehash!(h, (sz)<<2)
     index = rh_insert!(h, key, v)
     @assert index > 0
     h.totalcost += 1
