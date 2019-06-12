@@ -16,6 +16,8 @@ mutable struct CircularBuffer{T} <: AbstractVector{T}
     CircularBuffer{T}(capacity::Int) where {T} = new{T}(capacity, 1, 0, Vector{T}(undef, capacity))
 end
 
+CircularBuffer(capacity::Int) = CircularBuffer{Any}(capacity)
+
 """
     empty!(cb)
 
