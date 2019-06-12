@@ -44,6 +44,11 @@
         end
     end
     
+    @testset "other constructor" begin
+        cb = CircularBuffer(10)
+        @test length(cb) == 0
+        @test typeof(cb) <: CircularBuffer{Any}
+    end
     
     @testset "pushfirst" begin
         cb = CircularBuffer{Int}(5)  # New, empty one for full test coverage
