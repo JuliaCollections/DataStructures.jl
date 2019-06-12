@@ -58,7 +58,7 @@ end
 """
     cb[i] = data
 
-Store data to the i-th element of CircularBuffer.
+Store data to the `i`-th element of `CircularBuffer`.
 """
 @inline Base.@propagate_inbounds function Base.setindex!(cb::CircularBuffer, data, i::Int)
     cb.buffer[_buffer_index_checked(cb, i)] = data
@@ -98,7 +98,7 @@ end
 """
     popfirst!(cb)
 
-Remove the first item (at the back) from CircularBuffer.
+Remove the element from the front of the `CircularBuffer`.
 """
 function popfirst!(cb::CircularBuffer)
     if cb.length == 0
