@@ -2,6 +2,8 @@
 
     @testset "Core Functionality" begin
         D = CircularDeque{Int}(5)
+        intstr = sprint(show, Int)
+        @test sprint(show, D) == "0-element CircularDeque{$(intstr)}"
         @test eltype(D) == Int
         @test capacity(D) == 5
         @test length(D) == 0
@@ -21,11 +23,7 @@
         @test popfirst!(D) === 1
         @test front(D) === 2
         @test back(D) === 5
-        io = IOBuffer()
-        print(io, Int)
-        intstr = String(take!(io))
-        print(io, D)
-        @test String(take!(io)) == "CircularDeque{$intstr}([2,3,4,5])"
+        @test sprint(show, D) == "4-element CircularDeque{$(intstr)}:\n 2\n 3\n 4\n 5"
         push!(D, 6)
         @test front(D) === 2
         @test back(D) === 6
