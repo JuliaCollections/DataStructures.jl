@@ -33,25 +33,26 @@ RobinDict{String,Int64} with 2 entries:
 """
 mutable struct RobinDict{K,V} <: AbstractDict{K,V}
     #there is no need to maintain an table_size as an additional variable
-    dibs::Array{Int8,1} # distance to initial bucket - critical for implementation
+    # dibs::Array{Int8,1} # distance to initial bucket - critical for implementation
+    hashes::Vector{UInt32}
     keys::Array{K,1}
     vals::Array{V,1}
     count::Int
     totalcost::Int
-    maxprobe::Int    # length of longest probe
+    maxprobe::Int   # length of longest probe
     idxfloor::Int
 
     function RobinDict{K, V}() where {K, V}
         n = 16 # default size of an empty Dict in Julia
-        new(zeros(Int8, n), Vector{K}(undef, n), Vector{V}(undef, n), 0, 0, 0, 0)
+        new(zeros(UInt32, n), Vector{K}(undef, n), Vector{V}(undef, n), 0, 0, 0, 0)
     end
 
     function RobinDict{K, V}(d::RobinDict{K, V}) where {K, V}
-        new(copy(d.dibs), copy(d.keys), copy(d.vals), d.count, d.totalcost, d.maxprobe, d.idxfloor)
+        new(copy(d.hashes), copy(d.keys), copy(d.vals), d.count, d.totalcost, d.maxprobe, d.idxfloor)
     end
 
-    function RobinDict{K, V}(keys, vals, dibs, count, totalcost, maxprobe, idxfloor) where {K, V}
-        new(dibs, keys, vals, count, totalcost, maxprobe, idxfloor)
+    function RobinDict{K, V}(keys, vals, hashes, count, totalcost, maxprobe, idxfloor) where {K, V}
+        new(hashes, keys, vals, count, totalcost, maxprobe, idxfloor)
     end
 end
 
@@ -105,65 +106,81 @@ function RobinDict(kv)
     end
 end
 
+hash_key(key) = ((hash(key)%UInt32) & 0xffffffff)|1
+desired_index(hash, sz) = ((hash) & (sz -1)) + 1
+
+function calculate_distance(h::RobinDict{K, V}, index) where {K, V} 
+    @assert isslotfilled(h, index)
+    sz = length(h.keys)
+    @inbounds index_init = desired_index(h.hashes[index], sz)
+    return (index - index_init + sz) & (sz - 1)
+end
+
 # insert algorithm
 function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
     # table full
     @assert h.count != length(h.keys)
     
-    ckey, cval, cdibs = key, val, 1
+    ckey, cval, chash = key, val, hash_key(key)
     sz = length(h.keys)
-    index = hashindex(ckey, sz)
+    index_init = desired_index(chash, sz)
+
+    index_curr = index_init
+    probe_distance = 0
+    probe_current = 0
     @inbounds while true
-    	if (h.dibs[index] == 0) || (h.dibs[index] > 0 && h.keys[index] == ckey)
-    		break
-    	end
-        if h.dibs[index] < cdibs
-            h.vals[index], cval = cval, h.vals[index]
-            h.keys[index], ckey = ckey, h.keys[index]
-            h.maxprobe = max(h.maxprobe, cdibs)
-            h.dibs[index], cdibs = cdibs, h.dibs[index]
+        if (isslotempty(h, index_curr)) || (isslotfilled(h, index_curr) && h.keys[index_curr] == ckey)
+            break
         end
-        cdibs += 1
-        index = (index & (sz - 1)) + 1
+        probe_distance = calculate_distance(h, index_curr)
+
+        if probe_current > probe_distance
+            h.vals[index_curr], cval = cval, h.vals[index_curr]
+            h.keys[index_curr], ckey = ckey, h.keys[index_curr]
+            h.hashes[index_curr], chash = chash, h.hashes[index_curr]
+            probe_current = probe_distance
+        end
+        probe_current += 1
+        index_curr = (index_curr & (sz - 1)) + 1
     end
     
-    
-    @inbounds if h.dibs[index] > 0 && h.keys[index] == ckey
-        h.vals[index] = cval
-        return index
+    @inbounds if isslotfilled(h, index_curr) && h.keys[index_curr] == ckey
+        h.vals[index_curr] = cval
+        return index_curr
     end
 
-    @inbounds if h.dibs[index] == 0
-    	h.count += 1
+    @inbounds if isslotempty(h, index_curr)
+        h.count += 1
     end
 
-    @inbounds h.vals[index] = cval
-    @inbounds h.keys[index] = ckey
+    @inbounds h.vals[index_curr] = cval
+    @inbounds h.keys[index_curr] = ckey
+    @inbounds h.hashes[index_curr] = chash
     
-    @assert cdibs > 0
-    @inbounds h.dibs[index] = cdibs
+    @assert probe_current >= 0
     
-    h.maxprobe = max(h.maxprobe, cdibs)
+    h.maxprobe = max(h.maxprobe, probe_current)
     if h.idxfloor == 0
-        h.idxfloor = index
+        h.idxfloor = index_curr
     else
-        h.idxfloor = min(h.idxfloor, index)
+        h.idxfloor = min(h.idxfloor, index_curr)
     end
-    return index
+    return index_curr
 end
 
 #rehash! algorithm
 function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
     oldk = h.keys
     oldv = h.vals
-    oldd = h.dibs
-    sz = length(oldd)
+    oldh = h.hashes
+    sz = length(oldk)
     newsz = _tablesz(newsz)
     h.totalcost += 1
     if h.count == 0
         resize!(h.keys, sz)
         resize!(h.vals, sz)
-        resize!(h.dibs, sz)
+        resize!(h.hashes, newsz)
+        fill!(h.hashes, 0)
         h.count = 0
         h.maxprobe = 0
         h.totalcost = 0
@@ -173,15 +190,14 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
 
     h.keys = Vector{K}(undef, newsz)
     h.vals = Vector{V}(undef, newsz)
-    h.dibs = Vector{Int8}(undef, newsz)
-    fill!(h.dibs, 0)
+    h.hashes = zeros(UInt32,newsz)
     totalcost0 = h.totalcost
     h.count = 0
     h.maxprobe = 0
     h.idxfloor = 0
 
     for i = 1:sz
-        @inbounds if oldd[i] > 0
+        @inbounds if oldh[i] != 0
             k = oldk[i]
             v = oldv[i]
             rh_insert!(h, k, v)
@@ -201,8 +217,9 @@ function sizehint!(d::RobinDict, newsz)
     rehash!(d, newsz)
 end
 
-@propagate_inbounds isslotempty(h::RobinDict{K, V}, i) where {K, V} = h.dibs[i] == 0
-@propagate_inbounds isslotfilled(h::RobinDict{K, V}, i) where {K, V} = h.dibs[i] > 0
+@propagate_inbounds isslotfilled(h::RobinDict, index) = (h.hashes[index] != 0)
+@propagate_inbounds isslotempty(h::RobinDict, index) = (h.hashes[index] == 0)
+
 
 function setindex!(h::RobinDict{K,V}, v0, key0) where {K, V}
     key = convert(K, key0)
@@ -213,7 +230,7 @@ end
 function _setindex!(h::RobinDict{K,V}, key::K, v0) where {K, V}
     v = convert(V, v0)
     sz = length(h.keys)
-    (h.count > ROBIN_DICT_LOAD_FACTOR * sz) && rehash!(h, (sz)<<2)
+    (h.count > ROBIN_DICT_LOAD_FACTOR * sz) && rehash!(h, sz<<2)
     index = rh_insert!(h, key, v)
     @assert index > 0
     h.totalcost += 1
@@ -242,13 +259,13 @@ RobinDict{String,Int64} with 0 entries
 ```
 """
 function empty!(h::RobinDict{K,V}) where {K, V}
-    sz = length(h.dibs)
-    empty!(h.dibs)
+    sz = length(h.keys)
+    empty!(h.hashes)
     empty!(h.keys)
     empty!(h.vals)
     resize!(h.keys, sz)
     resize!(h.vals, sz)
-    resize!(h.dibs, sz)
+    resize!(h.hashes, sz)
     h.count = 0
     h.maxprobe = 0
     h.totalcost = 0
@@ -257,19 +274,20 @@ function empty!(h::RobinDict{K,V}) where {K, V}
 end
  
 function rh_search(h::RobinDict{K, V}, key::K) where {K, V}
-	sz = length(h.keys)
-	index = hashindex(key, sz)
-	cdibs = 1
-	@inbounds while true
-		if h.dibs[index] == 0
-			return -1
-		elseif cdibs > h.dibs[index]
-			return -1
-		elseif h.keys[index] == key 
-			return index
-		end
-		index = (index & (sz - 1)) + 1
-	end
+    sz = length(h.keys)
+    chash = hash_key(key)
+    index = desired_index(chash, sz)
+    cdibs = 0
+    @inbounds while true
+        if isslotempty(h, index)
+            return -1
+        elseif cdibs > calculate_distance(h, index)
+            return -1
+        elseif h.keys[index] == key && h.hashes[index] == chash
+            return index
+        end
+        index = (index & (sz - 1)) + 1
+    end
 end
 
 """
@@ -441,7 +459,7 @@ function rh_delete!(h::RobinDict{K, V}, index) where {K, V}
     sz = length(h.keys)
     @inbounds while true
         index0 = (index0 & (sz - 1)) + 1
-        if isslotempty(h, index0) || isslotfilled(h, index0) && h.dibs[index0] == 1
+        if isslotempty(h, index0) || calculate_distance(h, index0) == 0
             break
         end
     end
@@ -451,24 +469,18 @@ function rh_delete!(h::RobinDict{K, V}, index) where {K, V}
     curr = index
     next = (index & (sz - 1)) + 1
     
-    @inbounds while next != index0 
-        if h.dibs[next] > 1
-            h.vals[curr] = h.vals[next]
-            h.keys[curr] = h.keys[next]
-            h.dibs[curr] = (h.dibs[next] - 1)
-            curr = next
-            next = (next & (sz-1)) + 1
-        else
-            break
-        end
+    @inbounds while next != index0
+        h.vals[curr] = h.vals[next]
+        h.keys[curr] = h.keys[next]
+        h.hashes[curr] = h.hashes[next]
+        curr = next
+        next = (next & (sz-1)) + 1
     end
     
     #curr is at the last position, reset back to normal
-    @inbounds if isslotfilled(h, curr)
-        ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.keys, curr-1)
-        ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.vals, curr-1)
-        h.dibs[curr] = 0
-    end
+    ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.keys, curr-1)
+    ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.vals, curr-1)
+    @inbounds h.hashes[curr] = 0x0
 
     h.count -= 1
     h.totalcost += 1

@@ -7,7 +7,7 @@
     @test h1.idxfloor == 0
     @test length(h1.keys) == 16
     @test length(h1.vals) == 16
-    @test length(h1.dibs) == 16
+    @test length(h1.hashes) == 16
     @test eltype(h1) == Pair{Any, Any}
     @test keytype(h1) == Any
     @test valtype(h1) == Any
@@ -316,13 +316,13 @@ end
     for i=1:1000
         h[i] = i+1
     end
-    length0 = length(h.dibs)
+    length0 = length(h.hashes)
     empty!(h)
     @test h.count == 0
     @test h.maxprobe == 0
     @test h.idxfloor == 0
     @test h.totalcost == 0
-    @test length(h.dibs) == length(h.keys) == length(h.vals) == length0
+    @test length(h.hashes) == length(h.keys) == length(h.vals) == length0
 end
 
 @testset "ArgumentError" begin
