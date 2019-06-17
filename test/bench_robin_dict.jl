@@ -1,4 +1,4 @@
-using BenchmarkTools, Random, DataStructures, Printf
+using BenchmarkTools, Random, DataStructures, Printf, Plots, Statistics
 
 include("../src/robin_dict.jl")
 
@@ -156,3 +156,72 @@ end
 
 @printf("	add_entries for Dict{String, String}()\n")
 @btime add_entries(Dict{String, String}(), entries3)
+
+
+## Plots
+
+get_load_factor(h::AbstractDict) = (h.count / length(h.keys))
+get_maxprobe(h::AbstractDict) = h.maxprobe
+
+function get_mean_dibs(h::RobinDict)
+	sz = length(h.keys)
+	dibs = zeros(Int8, sz)
+	for i = 1:sz
+		if isslotfilled(h, i)
+			dibs[i] = calculate_distance(h, i)
+		end
+	end
+	mean(dibs)
+end
+
+function get_median_dibs(h::RobinDict)
+	sz = length(h.keys)
+	dibs = zeros(Int8, sz)
+	for i = 1:sz
+		if isslotfilled(h, i)
+			dibs[i] = calculate_distance(h, i)
+		end
+	end
+	median(dibs)
+end
+
+function plot_helper_add_entries(h::RobinDict, entries::Vector{Pair{K, V}}) where {K, V}
+	num = 0
+	sz = length(entries)
+	sq = floor(sqrt(sz))
+	x = Int[]
+	lf = Float32[]
+	maxprobe = Int[]
+	xx = Int[]
+	dibs = Float32[]
+	for (k, v) in entries
+		push!(x, num)
+		push!(lf, get_load_factor(h))
+		push!(maxprobe, get_maxprobe(h))
+		if (num % sq == 0)
+			push!(dibs, get_mean_dibs(h))
+			push!(xx, num)
+		end
+		h[k] = v
+		num += 1
+	end
+	push!(x, num)
+	push!(lf, get_load_factor(h))
+	push!(maxprobe, get_maxprobe(h))
+	if (num % sq == 0)
+			push!(dibs, get_mean_dibs(h))
+			push!(xx, num)
+	end
+	y = [lf maxprobe]
+	png(plot(x, y, label = ["Load Factor", "maxprobe"]), "lf_and_max_probe_$(Int(sz/1000))K")
+	png(plot(xx, dibs, label = ["DIB"]), "dibs_$(Int(sz/1000))K")
+end
+
+sample1 = rand(Int, 10^6, 2)
+entries1 = Vector{Pair{Int, Int}}()
+sizehint!(entries1, 10^6)
+for i = 1 : 10^6
+	push!(entries1, Pair{Int, Int}(sample1[i, 1], sample1[i, 2]))
+end
+
+plot_helper_add_entries(RobinDict{Int, Int}(), entries1)
