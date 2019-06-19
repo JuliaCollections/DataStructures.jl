@@ -129,7 +129,7 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
     probe_distance = 0
     probe_current = 0
     @inbounds while true
-        if (isslotempty(h, index_curr)) || (isslotfilled(h, index_curr) && h.keys[index_curr] == ckey)
+        if (isslotempty(h, index_curr)) || (isslotfilled(h, index_curr) && isequal(h.keys[index_curr], ckey))
             break
         end
         probe_distance = calculate_distance(h, index_curr)
@@ -144,7 +144,7 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
         index_curr = (index_curr & (sz - 1)) + 1
     end
     
-    @inbounds if isslotfilled(h, index_curr) && h.keys[index_curr] == ckey
+    @inbounds if isslotfilled(h, index_curr) && isequal(h.keys[index_curr], ckey)
         h.vals[index_curr] = cval
         return index_curr
     end
@@ -283,7 +283,7 @@ function rh_search(h::RobinDict{K, V}, key::K) where {K, V}
             return -1
         elseif cdibs > calculate_distance(h, index)
             return -1
-        elseif h.keys[index] == key && h.hashes[index] == chash
+        elseif h.hashes[index] == chash && (h.keys[index] === key || isequal(h.keys[index], key))
             return index
         end
         index = (index & (sz - 1)) + 1
