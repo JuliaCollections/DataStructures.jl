@@ -1,7 +1,7 @@
 import Base: setindex!, sizehint!, empty!, isempty, length, copy,
              getindex, getkey, haskey, iterate, @propagate_inbounds,
              pop!, delete!, get, get!, isbitstype, in, hashindex, isbitsunion,
-             isiterable, dict_with_eltype, KeySet, Callable, _tablesz
+             isiterable, dict_with_eltype, KeySet, Callable, _tablesz, filter!
 
 # the load factor arter which the dictionary `rehash` happens
 const ROBIN_DICT_LOAD_FACTOR = 0.70
@@ -97,7 +97,7 @@ function RobinDict(kv)
             return d
         end
     catch e
-    if !isiterable(typeof(kv)) || !all(x -> isa(x, Union{Tuple,Pair}), kv)
+        if !isiterable(typeof(kv)) || !all(x -> isa(x, Union{Tuple,Pair}), kv)
             !all(x->isa(x,Union{Tuple,Pair}),kv)
             throw(ArgumentError("RobinDict(kv): kv needs to be an iterator of tuples or pairs"))
         else
@@ -591,3 +591,5 @@ end
     _iterate(t, t.idxfloor)
 end
 @propagate_inbounds iterate(t::RobinDict, i) = _iterate(t, get_next_filled(t, i))
+
+filter!(f, d::RobinDict) = Base.filter_in_one_pass!(f, d)
