@@ -1,4 +1,4 @@
-import Base: setindex!, sizehint!, empty!, isempty, length, copy,
+import Base: setindex!, sizehint!, empty!, isempty, length, copy, empty,
              getindex, getkey, haskey, iterate, @propagate_inbounds,
              pop!, delete!, get, get!, isbitstype, in, hashindex, isbitsunion,
              isiterable, dict_with_eltype, KeySet, Callable, _tablesz, filter!
@@ -76,6 +76,7 @@ end
 RobinDict() = RobinDict{Any,Any}()
 RobinDict(kv::Tuple{}) = RobinDict()
 copy(d::RobinDict) = RobinDict(d)
+empty(d::RobinDict, ::Type{K}, ::Type{V}) where {K, V} = RobinDict{K, V}()
 
 RobinDict(ps::Pair{K,V}...) where {K,V} = RobinDict{K,V}(ps)
 RobinDict(ps::Pair...)                  = RobinDict(ps)
@@ -90,12 +91,7 @@ end
 
 function RobinDict(kv)
     try
-        d = dict_with_eltype((K, V) -> RobinDict{K, V}, kv, eltype(kv))
-        if isa(d, Dict)
-            return RobinDict(d)
-        else
-            return d
-        end
+        return dict_with_eltype((K, V) -> RobinDict{K, V}, kv, eltype(kv))
     catch e
         if !isiterable(typeof(kv)) || !all(x -> isa(x, Union{Tuple,Pair}), kv)
             !all(x->isa(x,Union{Tuple,Pair}),kv)
