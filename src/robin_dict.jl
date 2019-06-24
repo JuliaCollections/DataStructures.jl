@@ -1,6 +1,6 @@
 import Base: setindex!, sizehint!, empty!, isempty, length, copy,
              getindex, getkey, haskey, iterate, @propagate_inbounds,
-             pop!, delete!, get, get!, isbitstype, in, hashindex,
+             pop!, delete!, get, get!, isbitstype, in, hashindex, isbitsunion,
              isiterable, dict_with_eltype, KeySet, Callable, _tablesz
 
 # the load factor arter which the dictionary `rehash` happens
@@ -106,7 +106,7 @@ function RobinDict(kv)
     end
 end
 
-hash_key(key) = ((hash(key)%UInt32) & 0xffffffff)|1
+hash_key(key) = (hash(key)%UInt32) | 0x80000000
 desired_index(hash, sz) = ((hash) & (sz -1)) + 1
 
 function calculate_distance(h::RobinDict{K, V}, index) where {K, V} 
@@ -478,8 +478,8 @@ function rh_delete!(h::RobinDict{K, V}, index) where {K, V}
     end
     
     #curr is at the last position, reset back to normal
-    ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.keys, curr-1)
-    ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.vals, curr-1)
+    isbitstype(K) || isbitsunion(K) || ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.keys, curr-1)
+    isbitstype(V) || isbitsunion(V) || ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.vals, curr-1)
     @inbounds h.hashes[curr] = 0x0
 
     h.count -= 1
