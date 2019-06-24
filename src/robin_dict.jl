@@ -32,8 +32,6 @@ RobinDict{String,Int64} with 2 entries:
 ```
 """
 mutable struct RobinDict{K,V} <: AbstractDict{K,V}
-    #there is no need to maintain an table_size as an additional variable
-    # dibs::Array{Int8,1} # distance to initial bucket - critical for implementation
     hashes::Vector{UInt32}
     keys::Array{K,1}
     vals::Array{V,1}
@@ -41,15 +39,15 @@ mutable struct RobinDict{K,V} <: AbstractDict{K,V}
     totalcost::Int
     maxprobe::Int   # length of longest probe
     idxfloor::Int
+end
 
-    function RobinDict{K, V}() where {K, V}
-        n = 16 # default size of an empty Dict in Julia
-        new(zeros(UInt32, n), Vector{K}(undef, n), Vector{V}(undef, n), 0, 0, 0, 0)
-    end
+function RobinDict{K, V}() where {K, V}
+    n = 16
+    RobinDict{K, V}(zeros(UInt32, n), Vector{K}(undef, n), Vector{V}(undef, n), 0, 0, 0, 0)
+end
 
-    function RobinDict{K, V}(d::RobinDict{K, V}) where {K, V}
-        new(copy(d.hashes), copy(d.keys), copy(d.vals), d.count, d.totalcost, d.maxprobe, d.idxfloor)
-    end
+function RobinDict{K, V}(d::RobinDict{K, V}) where {K, V}
+    RobinDict{K, V}(copy(d.hashes), copy(d.keys), copy(d.vals), d.count, d.totalcost, d.maxprobe, d.idxfloor)
 end
 
 function RobinDict{K,V}(kv) where V where K
