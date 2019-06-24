@@ -50,10 +50,6 @@ mutable struct RobinDict{K,V} <: AbstractDict{K,V}
     function RobinDict{K, V}(d::RobinDict{K, V}) where {K, V}
         new(copy(d.hashes), copy(d.keys), copy(d.vals), d.count, d.totalcost, d.maxprobe, d.idxfloor)
     end
-
-    function RobinDict{K, V}(keys, vals, hashes, count, totalcost, maxprobe, idxfloor) where {K, V}
-        new(hashes, keys, vals, count, totalcost, maxprobe, idxfloor)
-    end
 end
 
 function RobinDict{K,V}(kv) where V where K
@@ -81,13 +77,7 @@ empty(d::RobinDict, ::Type{K}, ::Type{V}) where {K, V} = RobinDict{K, V}()
 RobinDict(ps::Pair{K,V}...) where {K,V} = RobinDict{K,V}(ps)
 RobinDict(ps::Pair...)                  = RobinDict(ps)
 
-function RobinDict(d::AbstractDict{K, V}) where {K, V}
-    h = RobinDict{K, V}()
-    for (k, v) in d
-        h[k] = v
-    end
-    h
-end
+RobinDict(d::AbstractDict{K, V}) where {K, V} = RobinDict{K, V}(d)
 
 function RobinDict(kv)
     try
