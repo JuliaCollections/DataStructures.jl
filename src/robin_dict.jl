@@ -91,7 +91,7 @@ function RobinDict(kv)
 end
 
 hash_key(key) = (hash(key)%UInt32) | 0x80000000
-desired_index(hash, sz) = ((hash) & (sz -1)) + 1
+desired_index(hash, sz) = ((hash) & (sz - 1)) + 1
 
 function calculate_distance(h::RobinDict{K, V}, index) where {K, V} 
     @assert isslotfilled(h, index)
