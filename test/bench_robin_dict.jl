@@ -174,7 +174,7 @@ function get_mean_dibs(h::RobinDict)
 	mean(dibs)
 end
 
-function get_median_dibs(h::RobinDict)
+function get_variance_dibs(h::RobinDict)
 	sz = length(h.keys)
 	dibs = zeros(Int8, sz)
 	for i = 1:sz
@@ -182,7 +182,7 @@ function get_median_dibs(h::RobinDict)
 			dibs[i] = calculate_distance(h, i)
 		end
 	end
-	median(dibs)
+	var(dibs)
 end
 
 function plot_helper_add_entries(h::RobinDict, entries::Vector{Pair{K, V}}) where {K, V}
@@ -193,13 +193,15 @@ function plot_helper_add_entries(h::RobinDict, entries::Vector{Pair{K, V}}) wher
 	lf = Float32[]
 	maxprobe = Int[]
 	xx = Int[]
-	dibs = Float32[]
+	mean_dibs = Float32[]
+	var_dibs = Float32[]
 	for (k, v) in entries
 		push!(x, num)
 		push!(lf, get_load_factor(h))
 		push!(maxprobe, get_maxprobe(h))
 		if (num % sq == 0)
-			push!(dibs, get_mean_dibs(h))
+			push!(mean_dibs, get_mean_dibs(h))
+			push!(var_dibs, get_variance_dibs(h))
 			push!(xx, num)
 		end
 		h[k] = v
@@ -209,12 +211,14 @@ function plot_helper_add_entries(h::RobinDict, entries::Vector{Pair{K, V}}) wher
 	push!(lf, get_load_factor(h))
 	push!(maxprobe, get_maxprobe(h))
 	if (num % sq == 0)
-			push!(dibs, get_mean_dibs(h))
-			push!(xx, num)
+		push!(mean_dibs, get_mean_dibs(h))
+		push!(var_dibs, get_variance_dibs(h))
+		push!(xx, num)
 	end
 	y = [lf maxprobe]
-	png(plot(x, y, label = ["Load Factor", "maxprobe"]), "lf_and_max_probe_$(Int(sz/1000))K")
-	png(plot(xx, dibs, label = ["DIB"]), "dibs_$(Int(sz/1000))K")
+	yy = [mean_dibs var_dibs]
+	png(plot(x, y, label = ["Load Factor", "maxprobe"]), "lf_and_max_probe_$(Int(sz/1000))K @$(ROBIN_DICT_LOAD_FACTOR) L.F")
+	png(plot(xx, yy, label = ["mean(DIB)", "var(DIB)"]), "dibs_$(Int(sz/1000))K  @$(ROBIN_DICT_LOAD_FACTOR) L.F")
 end
 
 sample1 = rand(Int, 10^6, 2)

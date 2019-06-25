@@ -152,6 +152,52 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
     return index_curr
 end
 
+function rh_insert_for_rehash!(h_new::RobinDict{K, V}, key::K, val::V, hash::UInt32) where {K, V}
+    # table full
+    @assert h_new.count != length(h_new.keys)
+    
+    ckey, cval, chash = key, val, hash
+    sz = length(h_new.keys)
+    index_init = desired_index(chash, sz)
+
+    index_curr = index_init
+    probe_distance = 0
+    probe_current = 0
+    @inbounds while true
+        if (isslotempty(h_new, index_curr))
+            break
+        end
+        probe_distance = calculate_distance(h_new, index_curr)
+
+        if probe_current > probe_distance
+            h_new.vals[index_curr], cval = cval, h_new.vals[index_curr]
+            h_new.keys[index_curr], ckey = ckey, h_new.keys[index_curr]
+            h_new.hashes[index_curr], chash = chash, h_new.hashes[index_curr]
+            probe_current = probe_distance
+        end
+        probe_current += 1
+        index_curr = (index_curr & (sz - 1)) + 1
+    end
+
+    @inbounds if isslotempty(h_new, index_curr)
+        h_new.count += 1
+    end
+
+    @inbounds h_new.vals[index_curr] = cval
+    @inbounds h_new.keys[index_curr] = ckey
+    @inbounds h_new.hashes[index_curr] = chash
+    
+    @assert probe_current >= 0
+    
+    h_new.maxprobe = max(h_new.maxprobe, probe_current)
+    if h_new.idxfloor == 0
+        h_new.idxfloor = index_curr
+    else
+        h_new.idxfloor = min(h_new.idxfloor, index_curr)
+    end
+    return index_curr
+end
+
 #rehash! algorithm
 function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
     oldk = h.keys
@@ -176,6 +222,7 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
     h.vals = Vector{V}(undef, newsz)
     h.hashes = zeros(UInt32,newsz)
     totalcost0 = h.totalcost
+    maxprobe0 = h.maxprobe
     h.count = 0
     h.maxprobe = 0
     h.idxfloor = 0
@@ -184,10 +231,9 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
         @inbounds if oldh[i] != 0
             k = oldk[i]
             v = oldv[i]
-            rh_insert!(h, k, v)
+            rh_insert_for_rehash!(h, k, v, oldh[i])
         end
     end
-    h.totalcost = totalcost0
     return h
 end
 
