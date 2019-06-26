@@ -360,34 +360,34 @@ end
 
 @testset "invariants" begin
     h1 = RobinDict{Int, Int}()
-    for i in 1:100
+    for i in 1:300
         h1[i] = i
     end
     
     for i in 1:length(h1.keys)
-        if isslotfilled(h1, i)
+        if h1.hashes[i] != 0
             @test hash_key(h1.keys[i]) == h1.hashes[i]
         end
     end
 
     h2 = RobinDict{Float64, Float64}()
-    for i in 1:100
+    for i in 1:300
         h2[rand()] = rand()
     end
     
     for i in 1:length(h2.keys)
-        if isslotfilled(h2, i)
+        if h2.hashes[i] != 0
             @test hash_key(h2.keys[i]) == h2.hashes[i]
         end
     end
 
     h3 = RobinDict{String, Int}()
-    for i in 1:100
+    for i in 1:300
         h3[randstring()] = i
     end
     
     for i in 1:length(h3.keys)
-        if isslotfilled(h3, i)
+        if h3.hashes[i] != 0
             @test hash_key(h3.keys[i]) == h3.hashes[i]
         end
     end
