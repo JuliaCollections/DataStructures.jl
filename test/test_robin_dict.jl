@@ -1,3 +1,4 @@
+include("../src/robin_dict.jl")
 
 @testset "Constructors" begin
     h1 = RobinDict()
@@ -365,7 +366,7 @@ end
     end
     
     for i in 1:length(h1.keys)
-        if h1.hashes[i] != 0
+        if isslotfilled(h1, i)
             @test hash_key(h1.keys[i]) == h1.hashes[i]
         end
     end
@@ -376,7 +377,7 @@ end
     end
     
     for i in 1:length(h2.keys)
-        if h2.hashes[i] != 0
+        if isslotfilled(h2, i)
             @test hash_key(h2.keys[i]) == h2.hashes[i]
         end
     end
@@ -387,7 +388,7 @@ end
     end
     
     for i in 1:length(h3.keys)
-        if h3.hashes[i] != 0
+        if isslotfilled(h3, i)
             @test hash_key(h3.keys[i]) == h3.hashes[i]
         end
     end
@@ -398,7 +399,7 @@ end
     end
     sz = length(h.keys)
     for i in 1:sz
-        if h.hashes[i] != 0
+        if isslotfilled(h, i)
             hash = h.hashes[i]
             des_ind = desired_index(hash, sz)
             dist = calculate_distance(h, i)
