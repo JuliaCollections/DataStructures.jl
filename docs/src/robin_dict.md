@@ -2,7 +2,7 @@
 
 `RobinDict` is simply a dictionary which uses Robin Hood hashing technique in the background for performing standard `Dict` operations.
 
-The function calls of `RobinDict` replicates that of `Dict`.
+The function-calls of `RobinDict` replicates that of `Dict`.
 
 Examples:
 
