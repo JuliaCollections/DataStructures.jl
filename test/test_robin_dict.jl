@@ -112,6 +112,15 @@ end
 @testset "Filter function" begin
     _d = RobinDict("a"=>0)
     @test isa([k for k in filter(x->length(x)==1, collect(keys(_d)))], Vector{String})
+    
+    h = RobinDict{Int, Int}()
+    for i in 1:100
+        h[i] = i
+    end
+    filter!(x->isodd(x.first), h)
+    for i in 1:2:100
+        @test h[i] == i
+    end
 end
 
 @testset "typeof" begin
@@ -219,14 +228,14 @@ end
     @test RobinDict(1=>NaN) != RobinDict(1=>NaN)
     @test isequal(RobinDict(1=>NaN), RobinDict(1=>NaN))
 
-    # @test RobinDict(NaN=>1) == RobinDict(NaN=>1)
-    # @test isequal(RobinDict(NaN=>1), RobinDict(NaN=>1))
+    @test RobinDict(NaN=>1) == RobinDict(NaN=>1)
+    @test isequal(RobinDict(NaN=>1), RobinDict(NaN=>1))
 
     @test ismissing(RobinDict(1=>missing) == RobinDict(1=>missing))
     @test isequal(RobinDict(1=>missing), RobinDict(1=>missing))
 
-    # @test RobinDict(missing=>1) == RobinDict(missing=>1)
-    # @test isequal(RobinDict(missing=>1), RobinDict(missing=>1))
+    @test RobinDict(missing=>1) == RobinDict(missing=>1)
+    @test isequal(RobinDict(missing=>1), RobinDict(missing=>1))
 end
 
 @testset "get!" begin 
@@ -348,3 +357,56 @@ end
     pop!(h)
     @test h.idxfloor == get_idxfloor(h) == 0 
 end
+
+@testset "invariants" begin
+    h1 = RobinDict{Int, Int}()
+    for i in 1:100
+        h1[i] = i
+    end
+    
+    for i in 1:length(h1.keys)
+        if isslotfilled(h1, i)
+            @test hash_key(h1.keys[i]) == h1.hashes[i]
+        end
+    end
+
+    h2 = RobinDict{Float64, Float64}()
+    for i in 1:100
+        h2[rand()] = rand()
+    end
+    
+    for i in 1:length(h2.keys)
+        if isslotfilled(h2, i)
+            @test hash_key(h2.keys[i]) == h2.hashes[i]
+        end
+    end
+
+    h3 = RobinDict{String, Int}()
+    for i in 1:100
+        h3[randstring()] = i
+    end
+    
+    for i in 1:length(h3.keys)
+        if isslotfilled(h3, i)
+            @test hash_key(h3.keys[i]) == h3.hashes[i]
+        end
+    end
+
+    h = RobinDict()
+    for i = 1:500
+        h[i] = i+1
+    end
+    sz = length(h.keys)
+    for i in 1:sz
+        if isslotfilled(h, i)
+            hash = h.hashes[i]
+            des_ind = desired_index(hash, sz)
+            dist = calculate_distance(h, i)
+            @test dist == (i - des_ind)
+            @test dist <= h.maxprobe
+            for j in des_ind:i-1
+                @test desired_index(h.hashes[j], sz) <= des_ind
+            end
+        end
+    end
+end 
