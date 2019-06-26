@@ -398,7 +398,7 @@ end
     end
     sz = length(h.keys)
     for i in 1:sz
-        if isslotfilled(h, i)
+        if h.hashes[i] != 0
             hash = h.hashes[i]
             des_ind = desired_index(hash, sz)
             dist = calculate_distance(h, i)
