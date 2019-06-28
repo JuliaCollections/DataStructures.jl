@@ -399,16 +399,18 @@ end
             isslotfilled(h, i) || continue
             (min_idx == 0) && (min_idx = i)
             @assert hash_key(h.keys[i]) == h.hashes[i]
-            @assert (h.hashes[i] & 0x7fffffff) != 0
+            @assert (h.hashes[i] & 0x80000000) != 0
             cnt += 1
             @assert typeof(h.hashes[i]) == UInt32
             des_ind = desired_index(h.hashes[i], sz)
-            pos_diff = i - des_ind
-            if pos_diff < 0
-                pos_diff += sz
+            pos_diff = 0
+            if (i >= des_ind)
+                pos_diff = i - des_ind
+            else
+                pos_diff = sz - des_ind + i
             end
             dist = calculate_distance(h, i)
-            @test dist == pos_diff
+            @assert dist == pos_diff
             max_disp = max(max_disp, dist)
             distlast = (i != 1) ? isslotfilled(h, i-1) ? calculate_distance(h, i-1) : 0 : isslotfilled(h, sz) ? calculate_distance(h, sz) : 0
             @assert dist <= distlast + 1
