@@ -399,8 +399,9 @@ end
             isslotfilled(h, i) || continue
             (min_idx == 0) && (min_idx = i)
             @assert hash_key(h.keys[i]) == h.hashes[i]
-            @assert (h.hashes[i] & 0x80000000) != 0
+            @assert (h.hashes[i] & 0x7fffffff) != 0
             cnt += 1
+            @assert typeof(h.hashes[i]) == UInt32
             des_ind = desired_index(h.hashes[i], sz)
             pos_diff = i - des_ind
             if pos_diff < 0

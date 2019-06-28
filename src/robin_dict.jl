@@ -88,7 +88,7 @@ function RobinDict(kv)
     end
 end
 
-hash_key(key) = (hash(key)%UInt32) | 0x80000000
+hash_key(key) = (hash(key)%UInt32) & 0x7fffffff
 desired_index(hash, sz) = ((hash) & (sz - 1)) + 1
 
 function calculate_distance(h::RobinDict{K, V}, index) where {K, V} 
