@@ -36,18 +36,16 @@ mutable struct RobinDict{K,V} <: AbstractDict{K,V}
     keys::Array{K,1}
     vals::Array{V,1}
     count::Int
-    totalcost::Int
-    maxprobe::Int   # length of longest probe
     idxfloor::Int
 end
 
 function RobinDict{K, V}() where {K, V}
     n = 16
-    RobinDict{K, V}(zeros(UInt32, n), Vector{K}(undef, n), Vector{V}(undef, n), 0, 0, 0, 0)
+    RobinDict{K, V}(zeros(UInt32, n), Vector{K}(undef, n), Vector{V}(undef, n), 0, 0)
 end
 
 function RobinDict{K, V}(d::RobinDict{K, V}) where {K, V}
-    RobinDict{K, V}(copy(d.hashes), copy(d.keys), copy(d.vals), d.count, d.totalcost, d.maxprobe, d.idxfloor)
+    RobinDict{K, V}(copy(d.hashes), copy(d.keys), copy(d.vals), d.count, d.idxfloor)
 end
 
 function RobinDict{K,V}(kv) where V where K
@@ -143,7 +141,6 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
     
     @assert probe_current >= 0
     
-    h.maxprobe = max(h.maxprobe, probe_current)
     if h.idxfloor == 0
         h.idxfloor = index_curr
     else
@@ -189,7 +186,6 @@ function rh_insert_for_rehash!(h_new::RobinDict{K, V}, key::K, val::V, hash::UIn
     
     @assert probe_current >= 0
     
-    h_new.maxprobe = max(h_new.maxprobe, probe_current)
     if h_new.idxfloor == 0
         h_new.idxfloor = index_curr
     else
@@ -205,15 +201,12 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
     oldh = h.hashes
     sz = length(oldk)
     newsz = _tablesz(newsz)
-    h.totalcost += 1
     if h.count == 0
         resize!(h.keys, sz)
         resize!(h.vals, sz)
         resize!(h.hashes, newsz)
         fill!(h.hashes, 0)
         h.count = 0
-        h.maxprobe = 0
-        h.totalcost = 0
         h.idxfloor = 0
         return h
     end
@@ -221,10 +214,7 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
     h.keys = Vector{K}(undef, newsz)
     h.vals = Vector{V}(undef, newsz)
     h.hashes = zeros(UInt32,newsz)
-    totalcost0 = h.totalcost
-    maxprobe0 = h.maxprobe
     h.count = 0
-    h.maxprobe = 0
     h.idxfloor = 0
 
     for i = 1:sz
@@ -263,7 +253,6 @@ function _setindex!(h::RobinDict{K,V}, key::K, v0) where {K, V}
     (h.count > ROBIN_DICT_LOAD_FACTOR * sz) && rehash!(h, sz<<2)
     index = rh_insert!(h, key, v)
     @assert index > 0
-    h.totalcost += 1
     h
 end
 
@@ -297,8 +286,6 @@ function empty!(h::RobinDict{K,V}) where {K, V}
     resize!(h.vals, sz)
     resize!(h.hashes, sz)
     h.count = 0
-    h.maxprobe = 0
-    h.totalcost = 0
     h.idxfloor = 0
     return h
 end
@@ -513,7 +500,6 @@ function rh_delete!(h::RobinDict{K, V}, index) where {K, V}
     @inbounds h.hashes[curr] = 0x0
 
     h.count -= 1
-    h.totalcost += 1
     # this is necessary because key at idxfloor might get deleted 
     h.idxfloor = get_next_filled(h, h.idxfloor)
     return h
