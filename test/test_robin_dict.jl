@@ -408,7 +408,7 @@ end
                 pos_diff += sz
             end
             dist = calculate_distance(h, i)
-            @assert dist == pos_diff
+            @test dist == pos_diff
             max_disp = max(max_disp, dist)
             distlast = (i != 1) ? isslotfilled(h, i-1) ? calculate_distance(h, i-1) : 0 : isslotfilled(h, sz) ? calculate_distance(h, sz) : 0
             @assert dist <= distlast + 1
