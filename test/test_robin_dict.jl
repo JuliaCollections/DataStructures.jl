@@ -402,9 +402,13 @@ end
             @assert (h.hashes[i] & 0x80000000) != 0
             cnt += 1
             des_ind = desired_index(h.hashes[i], sz)
+            pos_diff = i - des_ind
+            if pos_diff < 0
+                pos_diff += sz
+            end
             dist = calculate_distance(h, i)
             @assert dist <= h.maxprobe
-            @assert (dist == i - des_ind) || (dist == des_ind - i + sz)
+            @assert dist == pos_diff
             distlast = (i != 1) ? isslotfilled(h, i-1) ? calculate_distance(h, i-1) : 0 : isslotfilled(h, sz) ? 0 : calculate_distance(h, sz)
             @assert dist <= distlast + 1
         end
