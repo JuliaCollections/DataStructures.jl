@@ -393,21 +393,27 @@ end
         end
     end
 
+    function check_invariants(h::RobinDict)
+        cnt = 0
+        sz = length(h.keys)
+        for i=1:length(h.keys)
+            isslotfilled(h, i) || continue
+            @assert hash_key(h.keys[i]) == h.hashes[i]
+            @assert (h.hashes[i] & 0x80000000) != 0
+            cnt += 1
+            des_ind = desired_index(h.hashes[i], sz)
+            dist = calculate_distance(h, i)
+            @assert dist <= h.maxprobe
+            @assert (dist == i - des_ind) || (dist == des_ind - i + sz)
+            distlast = (i != 1) ? isslotfilled(h, i-1) ? calculate_distance(h, i-1) : 0 : isslotfilled(h, sz) ? 0 : calculate_distance(h, sz)
+            @assert dist <= distlast + 1
+        end
+        @assert cnt == length(h)
+    end
+
     h = RobinDict()
-    for i = 1:500
+    for i = 1:1000
         h[i] = i+1
     end
-    sz = length(h.keys)
-    for i in 1:sz
-        if isslotfilled(h, i)
-            hash = h.hashes[i]
-            des_ind = desired_index(hash, sz)
-            dist = calculate_distance(h, i)
-            @test dist == (i - des_ind)
-            @test dist <= h.maxprobe
-            for j in des_ind:i-1
-                @test desired_index(h.hashes[j], sz) <= des_ind
-            end
-        end
-    end
+    check_invariants(h)
 end 
