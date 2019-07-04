@@ -1,8 +1,8 @@
 # RobinDict
 
-`RobinDict` is simply a dictionary which uses Robin Hood hashing technique in the background for performing standard `Dict` operations.
+`RobinDict` provides a standard dictionary, conforming to the AbstractDict protocol, which uses the Robin Hood hashing algorithm with backward-shift deletion to provide improved average performance over Dict.
 
-The function-calls of `RobinDict` replicates that of `Dict`.
+The interface of `RobinDict` replicates that of `Dict`.
 
 Examples:
 
