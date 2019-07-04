@@ -3,7 +3,7 @@ import Base: setindex!, sizehint!, empty!, isempty, length, copy, empty,
              pop!, delete!, get, get!, isbitstype, in, hashindex, isbitsunion,
              isiterable, dict_with_eltype, KeySet, Callable, _tablesz, filter!
 
-# the load factor arter which the dictionary `rehash` happens
+# the load factor after which the dictionary `rehash` happens
 const ROBIN_DICT_LOAD_FACTOR = 0.70
 
 """

@@ -161,7 +161,6 @@ end
 ## Plots
 
 get_load_factor(h::AbstractDict) = (h.count / length(h.keys))
-get_maxprobe(h::AbstractDict) = h.maxprobe
 
 function get_mean_dibs(h::RobinDict)
 	sz = length(h.keys)
@@ -191,14 +190,12 @@ function plot_helper_add_entries(h::RobinDict, entries::Vector{Pair{K, V}}) wher
 	sq = floor(sqrt(sz))
 	x = Int[]
 	lf = Float32[]
-	maxprobe = Int[]
 	xx = Int[]
 	mean_dibs = Float32[]
 	var_dibs = Float32[]
 	for (k, v) in entries
 		push!(x, num)
 		push!(lf, get_load_factor(h))
-		push!(maxprobe, get_maxprobe(h))
 		if (num % sq == 0)
 			push!(mean_dibs, get_mean_dibs(h))
 			push!(var_dibs, get_variance_dibs(h))
@@ -209,15 +206,14 @@ function plot_helper_add_entries(h::RobinDict, entries::Vector{Pair{K, V}}) wher
 	end
 	push!(x, num)
 	push!(lf, get_load_factor(h))
-	push!(maxprobe, get_maxprobe(h))
 	if (num % sq == 0)
 		push!(mean_dibs, get_mean_dibs(h))
 		push!(var_dibs, get_variance_dibs(h))
 		push!(xx, num)
 	end
-	y = [lf maxprobe]
+	y = [lf]
 	yy = [mean_dibs var_dibs]
-	png(plot(x, y, label = ["Load Factor", "maxprobe"]), "lf_and_max_probe_$(Int(sz/1000))K @$(ROBIN_DICT_LOAD_FACTOR) L.F")
+	png(plot(x, y, label = ["Load Factor"]), "lf_$(Int(sz/1000))K @$(ROBIN_DICT_LOAD_FACTOR) L.F")
 	png(plot(xx, yy, label = ["mean(DIB)", "var(DIB)"]), "dibs_$(Int(sz/1000))K  @$(ROBIN_DICT_LOAD_FACTOR) L.F")
 end
 
