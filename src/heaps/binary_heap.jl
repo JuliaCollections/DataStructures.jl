@@ -108,24 +108,18 @@ mutable struct BinaryHeap{T,Comp} <: AbstractHeap{T}
 
     BinaryHeap{T,Comp}() where {T,Comp} = new{T,Comp}(Comp(), Vector{T}())
 
-    function BinaryHeap{T,Comp}(xs::AbstractVector{T}) where {T,Comp} 
+    function BinaryHeap{T,Comp}(xs::AbstractVector{T}) where {T,Comp}
         valtree = _make_binary_heap(Comp(), T, xs)
         new{T,Comp}(Comp(), valtree)
     end
 end
-                            
+
 const BinaryMinHeap{T} = BinaryHeap{T, LessThan}
 const BinaryMaxHeap{T} = BinaryHeap{T, GreaterThan}
-                            
+
 BinaryMinHeap(xs::AbstractVector{T}) where T = BinaryMinHeap{T}(xs)
 BinaryMaxHeap(xs::AbstractVector{T}) where T = BinaryMaxHeap{T}(xs)
 
-# deprecated constructors
-                            
-@deprecate binary_minheap(::Type{T}) where {T} BinaryMinHeap{T}()
-@deprecate binary_minheap(xs::AbstractVector{T}) where {T} BinaryMinHeap(xs)
-@deprecate binary_maxheap(::Type{T}) where {T} BinaryMaxHeap{T}()
-@deprecate binary_maxheap(xs::AbstractVector{T}) where {T} BinaryMaxHeap(xs)
 
 #################################################
 #

@@ -5,10 +5,7 @@ mutable struct Stack{T}
 end
 
 Stack{T}() where {T} = Stack(Deque{T}())
-@deprecate Stack(ty::Type{T}) where {T} Stack{T}()
-
 Stack{T}(blksize::Integer) where {T} = Stack(Deque{T}(blksize))
-@deprecate Stack(ty::Type{T}, blksize::Integer) where {T} Stack{T}(blksize::Integer)
 
 isempty(s::Stack) = isempty(s.store)
 length(s::Stack) = length(s.store)

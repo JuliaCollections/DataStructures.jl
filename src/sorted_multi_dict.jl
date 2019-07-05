@@ -477,6 +477,5 @@ empty). Time: O(1)
 """
 empty(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord<:Ordering} =
    SortedMultiDict{K,D}(orderobject(m))
-@deprecate similar(m::SortedMultiDict) empty(m)
 
 isordered(::Type{T}) where {T<:SortedMultiDict} = true

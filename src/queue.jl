@@ -12,9 +12,6 @@ Create a `Queue` object containing elements of type `T`.
 Queue{T}() where {T} = Queue(Deque{T}())
 Queue{T}(blksize::Integer) where {T} = Queue(Deque{T}(blksize))
 
-@deprecate Queue(::Type{T}) where {T} Queue{T}()
-@deprecate Queue(::Type{T}, blksize::Integer) where {T} Queue{T}(blksize)
-
 isempty(s::Queue) = isempty(s.store)
 length(s::Queue) = length(s.store)
 

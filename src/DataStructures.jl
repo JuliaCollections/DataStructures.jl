@@ -15,6 +15,8 @@ module DataStructures
 
     using OrderedCollections
     import OrderedCollections: filter, filter!, isordered
+    export OrderedDict, OrderedSet, LittleDict
+    export DefaultDict, DefaultOrderedDict
 
     export complement, complement!
 
@@ -28,7 +30,7 @@ module DataStructures
     export classified_lists, classified_sets, classified_counters
 
     export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set, root_union!
-    
+
     export FenwickTree, length, inc!, dec!, incdec!, prefixsum
 
     export AbstractHeap, compare, extract_all!
@@ -37,8 +39,6 @@ module DataStructures
     export heapify!, heapify, heappop!, heappush!, isheap
     export BinaryMinMaxHeap, popmin!, popmax!, popall!
 
-    export OrderedDict, OrderedSet
-    export DefaultDict, DefaultOrderedDict
     export Trie, subtrie, keys_with_prefix, path
 
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
