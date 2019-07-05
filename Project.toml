@@ -8,6 +8,7 @@ OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 
 [compat]
 OrderedCollections = "1.1.0"
+julia = "1"
 
 [extras]
 Primes = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
