@@ -13,6 +13,7 @@ This package implements a variety of data structures, including
 -   Binary Heap
 -   Mutable Binary Heap
 -   Ordered Dicts and Sets
+-   RobinDict
 -   Dictionaries with Defaults
 -   Trie
 -   Linked List and Mutable Linked List
@@ -34,6 +35,7 @@ Pages = [
     "heaps.md",
     "ordered_containers.md",
     "default_dict.md",
+    "robin_dict.md",
     "trie.md",
     "linked_list.md",
     "mutable_linked_list.md"
