@@ -6,10 +6,6 @@
 
         s = Stack{Int}(5)
         @test isa(s, Stack{Int})
-
-        # deprecated
-        # s = Stack(Int)
-        # s = Stack(Int, 5)
     end
 
     @testset "Core Functionality" begin
@@ -41,7 +37,7 @@
             @test length(s) == n - i
         end
     end
-    
+
     @testset "empty!" begin
         s = Stack{Int}(1)
         push!(s, 10)

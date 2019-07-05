@@ -65,7 +65,7 @@ SortedSet{K}() where {K} = SortedSet{K,ForwardOrdering}(Forward)
 """
     SortedSet{K}(o)
 
-Construct a `SortedSet` of keys of type `K` with ordering given according 
+Construct a `SortedSet` of keys of type `K` with ordering given according
 `o` parameter.
 """
 SortedSet{K}(o::O) where {K,O<:Ordering} = SortedSet{K,O}(o)
@@ -563,4 +563,3 @@ type and with the same ordering as `sc` but with no entries (i.e.,
 empty). Time: O(1)
 """
 empty(m::SortedSet{K,Ord}) where {K,Ord<:Ordering} = SortedSet{K,Ord}(orderobject(m))
-@deprecate similar(m::SortedSet) empty(m)

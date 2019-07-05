@@ -52,7 +52,7 @@
                     @test isequal(extract_all!(hmin), [1, 2, 3, 4, 7, 8, 9, 10, 14, 16])
                     @test isempty(hmin)
                 end
-                
+
             end
 
             @testset "push! hmax" begin
@@ -82,10 +82,10 @@
                 @testset "pop! hmax" begin
                     @test isequal(extract_all!(hmax), [16, 14, 10, 9, 8, 7, 4, 3, 2, 1])
                     @test isempty(hmax)
-                end                
+                end
             end
-        end        
-        
+        end
+
     end
 
     @testset "hybrid push! and pop!" begin
@@ -134,13 +134,4 @@
 
         @test isequal(h.valtree, [0.5, 5.0, 3.0, 10.1])
     end
-    
-    # test deprecated constructors
-    @testset "deprecated constructors" begin
-        @test_deprecated binary_minheap(Int)
-        @test_deprecated binary_minheap([1., 2., 3.])
-        @test_deprecated binary_maxheap(Int)
-        @test_deprecated binary_maxheap([1., 2., 3.])
-    end
-
 end # @testset BinaryHeap

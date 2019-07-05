@@ -6,10 +6,6 @@
 
         s = Queue{Int}(5)
         @test isa(s, Queue{Int})
-        
-        # deprecated
-        # s = Queue(Int)
-        # s = Queue(Int, 5)
     end
 
     @testset "Core Functionality" begin

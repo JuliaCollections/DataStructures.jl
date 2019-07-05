@@ -7,10 +7,8 @@ end
 ## constructors
 
 Accumulator{T, V}() where {T,V<:Number} = Accumulator{T,V}(Dict{T,V}())
-@deprecate Accumulator(::Type{T}, ::Type{V}) where {T,V<:Number} Accumulator{T, V}()
 
 counter(T::Type) = Accumulator{T,Int}()
-
 counter(dct::Dict{T,V}) where {T,V<:Integer} = Accumulator{T,V}(copy(dct))
 
 """
@@ -176,11 +174,6 @@ nsmallest(acc::Accumulator) = sort!(collect(acc), by=last, rev=false)
 nsmallest(acc::Accumulator, n) = partialsort!(collect(acc), 1:n, by=last, rev=false)
 
 
-
-## Deprecations
-@deprecate pop!(ct::Accumulator, x) reset!(ct, x)
-@deprecate push!(ct1::Accumulator, ct2::Accumulator) merge!(ct1,ct2)
-
 ###########################################################
 ## Multiset operations
 
@@ -230,10 +223,9 @@ function Base.intersect!(a::Accumulator, b::Accumulator)
         vb = b[k]
         va >= 0 || throw(MultiplicityException(k, va))
         vb >= 0 || throw(MultiplicityException(k, vb))
-        
+
         a[k] = min(va, vb)
         drop_nonpositive!(a, k) # Drop any that ended up zero
     end
     return a
 end
-

@@ -249,5 +249,3 @@ end
 issubset(a::IntSet, b::IntSet) = isequal(a, intersect(a,b))
 <(a::IntSet, b::IntSet) = (a<=b) && !isequal(a,b)
 <=(a::IntSet, b::IntSet) = issubset(a, b)
-
-@deprecate similar(s::IntSet) empty(s)
