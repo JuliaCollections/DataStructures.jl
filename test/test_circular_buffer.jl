@@ -126,4 +126,34 @@
             @test Array(cb) == [21, 42, 42]
         end
     end
+
+    @testset "constructing from iterator" begin
+        # when eltype is known
+        C = CircularBuffer(1:3)
+        @test_skip eltype(C) == Int
+        @test capacity(C) == 3
+        @test length(C) == 3
+
+        # when eltype is not known
+        struct MyIter
+            n::Int
+        end
+        Base.iterate(M::MyIter, state=1) = state > M.n ? nothing : (iseven(state) ? ('a', state+1) : (1, state+1))
+        Base.length(M::MyIter) = M.n
+
+        C = CircularBuffer(MyIter(10))
+        @test_skip eltype(C) == Any
+        @test capacity(C) == 10
+        @test length(C) == 10
+
+        # when length is not known
+        struct MyIter2
+            n::Int
+        end
+        Base.iterate(M::MyIter2, state=1) = state > M.n ? nothing : (iseven(state) ? ('a', state+1) : (1, state+1))
+        Base.IteratorSize(::MyIter2) = Base.SizeUnknown()
+
+        @test_throws MethodError CircularBuffer(MyIter2(10))
+    end
+
 end

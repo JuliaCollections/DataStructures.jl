@@ -80,6 +80,16 @@ Create a deque of type `T`.
 """
 deque(::Type{T}) where {T} = Deque{T}()
 
+# constructor for iterator
+function Deque(iter)
+    n = length(iter)
+    d = deque(eltype(iter))
+    for e in iter
+        push!(d, e)
+    end
+    d
+end
+
 isempty(q::Deque) = q.len == 0
 length(q::Deque) = q.len
 num_blocks(q::Deque) = q.nblocks
