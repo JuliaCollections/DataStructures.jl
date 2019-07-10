@@ -3,6 +3,7 @@
     @testset "Core Functionality" begin
         D = CircularDeque{Int}(5)
         @test eltype(D) == Int
+        @test eltype(typeof(D)) == Int
         @test capacity(D) == 5
         @test length(D) == 0
         @test isempty(D)

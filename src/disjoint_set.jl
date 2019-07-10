@@ -24,6 +24,7 @@ end
 
 length(s::IntDisjointSets) = length(s.parents)
 num_groups(s::IntDisjointSets) = s.ngroups
+Base.eltype(::Type{IntDisjointSets}) = Int
 
 
 # find the root element of the subset that contains x
@@ -127,6 +128,7 @@ end
 
 length(s::DisjointSets) = length(s.internal)
 num_groups(s::DisjointSets) = num_groups(s.internal)
+Base.eltype(::Type{DisjointSets{T}}) where T = T
 
 """
     find_root{T}(s::DisjointSets{T}, x::T)

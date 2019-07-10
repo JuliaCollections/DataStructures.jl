@@ -54,6 +54,15 @@ end
 
     vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
 
+    @testset "basic tests" begin
+        h = MutableBinaryMinHeap{Int}()
+
+        @test length(h) == 0
+        @test isempty(h)
+        @test eltype(h) == Int
+        @test eltype(typeof(h)) == Int
+    end
+
     @testset "make mutable binary minheap" begin
         h = MutableBinaryMinHeap(vs)
 

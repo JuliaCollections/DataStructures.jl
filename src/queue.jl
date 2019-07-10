@@ -14,6 +14,7 @@ Queue{T}(blksize::Integer) where {T} = Queue(Deque{T}(blksize))
 
 isempty(s::Queue) = isempty(s.store)
 length(s::Queue) = length(s.store)
+Base.eltype(::Type{Queue{T}}) where T = T
 
 front(s::Queue) = front(s.store)
 back(s::Queue) = back(s.store)

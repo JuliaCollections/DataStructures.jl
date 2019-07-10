@@ -47,7 +47,7 @@ end
 isempty(l::MutableLinkedList) = l.len == 0
 length(l::MutableLinkedList) = l.len
 collect(l::MutableLinkedList{T}) where T = T[x for x in l]
-eltype(l::MutableLinkedList{T}) where T = T
+Base.eltype(::Type{<:MutableLinkedList{T}}) where T = T
 lastindex(l::MutableLinkedList) = l.len
 
 function first(l::MutableLinkedList)

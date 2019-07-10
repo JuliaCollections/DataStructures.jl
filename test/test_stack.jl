@@ -15,6 +15,8 @@
         @test isa(s, Stack{Int})
         @test length(s) == 0
         @test isempty(s)
+        @test eltype(s) == Int
+        @test eltype(typeof(s)) == Int
         @test_throws ArgumentError top(s)
         @test_throws ArgumentError pop!(s)
 

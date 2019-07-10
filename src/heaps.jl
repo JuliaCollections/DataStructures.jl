@@ -75,6 +75,8 @@ include("heaps/minmax_heap.jl")
 
 # generic functions
 
+Base.eltype(::Type{<:AbstractHeap{T}}) where T = T
+
 function extract_all!(h::AbstractHeap{VT}) where VT
     n = length(h)
     r = Vector{VT}(undef, n)

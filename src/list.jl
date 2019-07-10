@@ -1,5 +1,7 @@
 abstract type LinkedList{T} end
 
+Base.eltype(::Type{<:LinkedList{T}}) where T = T
+
 mutable struct Nil{T} <: LinkedList{T}
 end
 
