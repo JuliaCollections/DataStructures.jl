@@ -1,3 +1,15 @@
+struct KnownLengthIter
+    n::Int
+end
+Base.iterate(M::KnownLengthIter, state=1) = state > M.n ? nothing : (iseven(state) ? ('a', state+1) : (1, state+1))
+Base.length(M::KnownLengthIter) = M.n
+
+struct UnknownLengthIter
+    n::Int
+end
+Base.iterate(M::UnknownLengthIter, state=1) = state > M.n ? nothing : (iseven(state) ? ('a', state+1) : (1, state+1))
+Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
+
 @testset "CircularDeque" begin
 
     @testset "Core Functionality" begin
@@ -90,25 +102,13 @@
         @test length(D) == 3
 
         # when eltype is not known
-        struct MyIter
-            n::Int
-        end
-        Base.iterate(M::MyIter, state=1) = state > M.n ? nothing : (iseven(state) ? ('a', state+1) : (1, state+1))
-        Base.length(M::MyIter) = M.n
-
-        D = CircularDeque(MyIter(10))
+        D = CircularDeque(KnownLengthIter(10))
         @test_skip eltype(D) == Any
         @test capacity(D) == 10
         @test length(D) == 10
 
         # when length is not known
-        struct MyIter2
-            n::Int
-        end
-        Base.iterate(M::MyIter2, state=1) = state > M.n ? nothing : (iseven(state) ? ('a', state+1) : (1, state+1))
-        Base.IteratorSize(::MyIter2) = Base.SizeUnknown()
-
-        @test_throws MethodError CircularDeque(MyIter2(10))
+        @test_throws MethodError CircularDeque(UnknownLengthIter(10))
     end
 end
 
