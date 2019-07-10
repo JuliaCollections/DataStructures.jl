@@ -9,6 +9,7 @@ Stack{T}(blksize::Integer) where {T} = Stack(Deque{T}(blksize))
 
 isempty(s::Stack) = isempty(s.store)
 length(s::Stack) = length(s.store)
+Base.eltype(::Type{Stack{T}}) where T = T
 
 top(s::Stack) = back(s.store)
 

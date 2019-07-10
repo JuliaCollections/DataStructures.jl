@@ -21,7 +21,7 @@ function copy!(to::IntSet, from::IntSet)
     to.inverse = from.inverse
     to
 end
-eltype(s::IntSet) = Int
+Base.eltype(::Type{IntSet}) = Int
 sizehint!(s::IntSet, n::Integer) = (_resize0!(s.bits, n+1); s)
 
 # An internal function for setting the inclusion bit for a given integer n >= 0

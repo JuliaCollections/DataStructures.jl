@@ -11,7 +11,8 @@ import DataStructures: IntSet
     end
 
     @testset "eltype, empty" begin
-        @test eltype(IntSet()) ===  Int
+        @test eltype(IntSet()) == Int
+        @test eltype(typeof(IntSet())) == Int
         @test isequal(empty(IntSet([1,2,3])), IntSet())
     end
 

@@ -180,8 +180,7 @@ end
 Returns the key type for SortedSet.
 This function may also be applied to the type itself. Time: O(1)
 """
-@inline eltype(m::SortedSet{K,Ord}) where {K,Ord <: Ordering} = K
-@inline eltype(::Type{SortedSet{K,Ord}}) where {K,Ord <: Ordering} = K
+@inline Base.eltype(::Type{SortedSet{K,Ord}}) where {K,Ord <: Ordering} = K
 
 """
     keytype(sc)

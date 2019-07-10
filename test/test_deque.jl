@@ -4,6 +4,8 @@
             q = Deque{Int}()
             @test length(q) == 0
             @test isempty(q)
+            @test eltype(q) == Int
+            @test eltype(typeof(q)) == Int
             @test q.blksize == DataStructures.DEFAULT_DEQUEUE_BLOCKSIZE
             @test_throws ArgumentError front(q)
             @test_throws ArgumentError back(q)

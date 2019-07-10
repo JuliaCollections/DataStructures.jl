@@ -83,6 +83,7 @@ deque(::Type{T}) where {T} = Deque{T}()
 isempty(q::Deque) = q.len == 0
 length(q::Deque) = q.len
 num_blocks(q::Deque) = q.nblocks
+Base.eltype(::Type{Deque{T}}) where T = T
 
 """
     front(q::Deque)

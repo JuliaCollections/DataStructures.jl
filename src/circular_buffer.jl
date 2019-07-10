@@ -162,6 +162,8 @@ Return the number of elements currently in the buffer.
 """
 Base.length(cb::CircularBuffer) = cb.length
 
+Base.eltype(::Type{CircularBuffer{T}}) where T = T
+
 """
     size(cb)
 

@@ -5,6 +5,8 @@
 
         @testset "basic tests" begin
             @test length(s) == 10
+            @test eltype(s) == Int
+            @test eltype(typeof(s)) == Int
             @test num_groups(s) == 10
 
             for i = 1:10
@@ -55,6 +57,8 @@
         @testset "basic tests" begin
             @test length(s) == 10
             @test num_groups(s) == 10
+            @test eltype(s) == Int
+            @test eltype(typeof(s)) == Int
 
             r = [find_root(s, i) for i in 1 : 10]
             @test isequal(r, collect(1:10))

@@ -13,6 +13,8 @@
         n = 100
 
         @test length(s) == 0
+        @test eltype(s) == Int
+        @test eltype(typeof(s)) == Int
         @test isempty(s)
         @test_throws ArgumentError front(s)
         @test_throws ArgumentError back(s)

@@ -3,6 +3,8 @@
         f1 = FenwickTree{Float64}(5)
         @test f1.bi_tree == zeros(5)
         @test length(f1) == 5
+        @test eltype(f1) == Float64
+        @test eltype(typeof(f1)) == Float64
         
         arr = [1.2, 8.7, 7.2, 3.5]
         f3 = FenwickTree(arr)

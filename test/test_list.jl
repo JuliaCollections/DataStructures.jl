@@ -1,5 +1,12 @@
 @testset "LinkedList" begin
 
+    @testset "basic tests" begin
+        l = list(2, 3)
+        @test length(l) == 2
+        @test eltype(l) == Int
+        @test eltype(typeof(l)) == Int
+    end
+
     @testset "l0" begin
         l0 = nil(Char)
         @test length(l0) == 0

@@ -27,6 +27,7 @@ function FenwickTree(a::AbstractVector{U}) where U
 end
 
 length(ft::FenwickTree) = ft.n
+Base.eltype(::Type{FenwickTree{T}}) where T = T
 
 """
     inc!(ft::FenwickTree{T}, ind, val)

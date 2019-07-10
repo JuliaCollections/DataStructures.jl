@@ -10,6 +10,15 @@ using Base.Order: Forward, Reverse
         @test is_minmax_heap([])
         @test is_minmax_heap([rand()])
     end
+
+    @testset "basic tests" begin
+        h = BinaryMinMaxHeap{Int}()
+
+        @test length(h) == 0
+        @test isempty(h)
+        @test eltype(h) == Int
+        @test eltype(typeof(h)) == Int
+    end
     
     @testset "make heap tests" begin
         vs = [10, 4, 6, 1, 16, 2, 20, 17, 13, 5]

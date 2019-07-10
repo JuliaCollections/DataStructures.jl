@@ -8,6 +8,8 @@
             @test_throws BoundsError first(cb)
             @test isempty(cb) == true
             @test isfull(cb) == false
+            @test eltype(cb) == Int
+            @test eltype(typeof(cb)) == Int
         end
         
         @testset "With 1 element" begin
