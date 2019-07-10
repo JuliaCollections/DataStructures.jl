@@ -202,4 +202,31 @@
         @test isempty(q)
     end
 
+    @testset "constructing from iterator" begin
+        # when eltype is known
+        D = Deque(1:3)
+        @test_skip eltype(D) == Int
+        @test length(D) == 3
+
+        # when eltype is not known
+        struct MyIter
+            n::Int
+        end
+        Base.iterate(M::MyIter, state=1) = state > M.n ? nothing : (iseven(state) ? ('a', state+1) : (1, state+1))
+        Base.length(M::MyIter) = M.n
+
+        D = Deque(MyIter(10))
+        @test_skip eltype(D) == Any
+        @test length(D) == 10
+
+        # when length is not known
+        struct MyIter2
+            n::Int
+        end
+        Base.iterate(M::MyIter2, state=1) = state > M.n ? nothing : (iseven(state) ? ('a', state+1) : (1, state+1))
+        Base.IteratorSize(::MyIter2) = Base.SizeUnknown()
+
+        @test_throws MethodError Deque(MyIter2(10))
+    end
+
 end # @testset Deque

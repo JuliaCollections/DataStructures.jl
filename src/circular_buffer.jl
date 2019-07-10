@@ -12,11 +12,16 @@ mutable struct CircularBuffer{T} <: AbstractVector{T}
     first::Int
     length::Int
     buffer::Vector{T}
-
-    CircularBuffer{T}(capacity::Int) where {T} = new{T}(capacity, 1, 0, Vector{T}(undef, capacity))
 end
 
-CircularBuffer(capacity) = CircularBuffer{Any}(capacity)
+CircularBuffer{T}(capacity::Int) where {T} = CircularBuffer{T}(capacity, 1, 0, Vector{T}(undef, capacity))
+CircularBuffer(capacity::Int) = CircularBuffer{Any}(capacity)
+
+# constructor for iterator
+function CircularBuffer(iter)
+    n = length(iter)
+    CircularBuffer{eltype(iter)}(n, 1, n, collect(iter))
+end
 
 """
     empty!(cb::CircularBuffer)
