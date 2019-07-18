@@ -13,7 +13,8 @@ PriorityQueue{K, V}(ord)  # construct a new priority queue with the given types 
 enqueue!(pq, k, v)        # insert the key k into pq with priority v
 enqueue!(pq, k=>v)        # (same, using Pairs)
 dequeue!(pq)              # remove and return the lowest priority key
-peek(pq)                  # return the lowest priority key without removing it
+dequeue_pair!(pq)         # remove and return the lowest priorty key and value
+peek(pq)                  # return the lowest priority key and value without removing it
 delete!(pq, k)            # delete the mapping for the given key in a priority queue, and return the priority queue.
 ```
 
