@@ -8,6 +8,9 @@ function add_entries(h::AbstractDict, entries::Vector{Pair{K, V}}) where {K, V}
 	end
 end
 
+find_key_present(h::AbstractDict, entry) = h[entry]
+find_key_absent(h::AbstractDict, entry) = getkey(h, entry, -1)
+
 @printf(".\nSample #1 Key => Integer , Size => 10^6 entries\n.\n")
 
 sample1 = rand(Int, 10^6, 2)
@@ -17,17 +20,57 @@ for i = 1 : 10^6
 	push!(entries1, Pair{Int, Int}(sample1[i, 1], sample1[i, 2]))
 end
 
-@printf("	add_entries for RobinDict()\n")
-@btime add_entries(RobinDict(), entries1)
+h = RobinDict()
+d = Dict()
+@printf("	add_entries for RobinDict{Any, Any}()\n")
+@btime add_entries(h, entries1)
 
-@printf("	add_entries for Dict()\n")
-@btime add_entries(Dict(), entries1)
+@printf("	find_key_present for RobinDict{Any, Any}()\n") 
+hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 
+@printf("	find_key_absent for RobinDict{Any, Any}()\n")
+@btime find_key_absent(h, 1000005)
+
+@printf("	empty! for RobinDict()\n")
+@btime empty!(h)
+
+@printf("	add_entries for Dict{Any, Any}()\n")
+@btime add_entries(d, entries1)
+
+@printf("	find_key_present for Dict{Any, Any}()\n")
+dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+
+@printf("	find_key_absent for Dict{Any, Any}()\n")
+@btime find_key_absent(d, 1000005)
+
+@printf("	empty! for Dict()\n")
+@btime empty!(d)
+
+h = RobinDict{Int, Int}()
+d = Dict{Int, Int}()
 @printf("	add_entries for RobinDict{Int, Int}()\n")
-@btime add_entries(RobinDict{Int, Int}(), entries1)
+@btime add_entries(h, entries1)
+
+@printf("	find_key_present for RobinDict{Int, Int}()\n")
+hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
+
+@printf("	find_key_absent for RobinDict{Int, Int}()\n")
+@btime find_key_absent(h, 1000005)
+
+@printf("	empty! for RobinDict()\n")
+@btime empty!(h)
 
 @printf("	add_entries for Dict{Int, Int}()\n")
-@btime add_entries(Dict{Int, Int}(), entries1)
+@btime add_entries(d, entries1)
+
+@printf("	find_key_present for Dict{Int, Int}()\n")
+dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+
+@printf("	find_key_absent for Dict{Int, Int}()\n")
+@btime find_key_absent(d, 1000005)
+
+@printf("	empty! for Dict()\n")
+@btime empty!(d)
 
 @printf(".\nSample #2 Key => Float32 , Size => 10^6 entries\n.\n")
 
@@ -38,18 +81,57 @@ for i = 1 : 10^6
 	push!(entries2, Pair{Float32, Float32}(sample1[i, 1], sample1[i, 2]))
 end
 
-@printf("	add_entries for RobinDict()\n")
-@btime add_entries(RobinDict(), entries2)
+h = RobinDict()
+d = Dict()
+@printf("	add_entries for RobinDict{Any, Any}()\n")
+@btime add_entries(h, entries2)
 
-@printf("	add_entries for Dict()\n")
-@btime add_entries(Dict(), entries2)
+@printf("	find_key_present for RobinDict{Any, Any}()\n")
+hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 
+@printf("	find_key_absent for RobinDict{Any, Any}()\n")
+@btime find_key_absent(h, 1000005)
+
+@printf("	empty! for RobinDict()\n")
+@btime empty!(h)
+
+@printf("	add_entries for Dict{Any, Any}()\n")
+@btime add_entries(d, entries2)
+
+@printf("	find_key_present for Dict{Any, Any}()\n")
+dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+
+@printf("	find_key_absent for Dict{Any, Any}()\n")
+@btime find_key_absent(d, 1000005)
+
+@printf("	empty! for Dict()\n")
+@btime empty!(d)
+
+h = RobinDict{Float32, Float32}()
+d = Dict{Float32, Float32}()
 @printf("	add_entries for RobinDict{Float32, Float32}()\n")
-@btime add_entries(RobinDict{Float32, Float32}(), entries2)
+@btime add_entries(h, entries2)
+
+@printf("	find_key_present for RobinDict{Float32, Float32}()\n")
+hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
+
+@printf("	find_key_absent for RobinDict{Float32, Float32}()\n")
+@btime find_key_absent(h, 1000005)
+
+@printf("	empty! for RobinDict()\n")
+@btime empty!(h)
 
 @printf("	add_entries for Dict{Float32, Float32}()\n")
-@btime add_entries(Dict{Float32, Float32}(), entries2)
+@btime add_entries(d, entries2)
 
+@printf("	find_key_present for Dict{Float32, Float32}()\n")
+dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+
+@printf("	find_key_absent for Dict{Float32, Float32}()\n")
+@btime find_key_absent(d, 1000005)
+
+@printf("	empty! for Dict()\n")
+@btime empty!(d)
 
 
 @printf(".\nSample #3 Key => String , Size => 10^6 entries\n.\n")
@@ -60,17 +142,58 @@ for i = 1 : 10^6
 	push!(entries3, Pair{String, String}(randstring(), randstring()))
 end
 
-@printf("	add_entries for RobinDict()\n")
-@btime add_entries(RobinDict(), entries3)
+h = RobinDict()
+d = Dict()
+@printf("	add_entries for RobinDict{Any, Any}()\n")
+@btime add_entries(h, entries3)
 
-@printf("	add_entries for Dict()\n")
-@btime add_entries(Dict(), entries3)
+@printf("	find_key_present for RobinDict{Any, Any}()\n")
+hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 
+@printf("	find_key_absent for RobinDict{Any, Any}()\n")
+@btime find_key_absent(h, "absc")
+
+@printf("	empty! for RobinDict()\n")
+@btime empty!(h)
+
+@printf("	add_entries for Dict{Any, Any}()\n")
+@btime add_entries(d, entries3)
+
+@printf("	find_key_present for Dict{Any, Any}()\n")
+dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+
+@printf("	find_key_absent for Dict{Any, Any}()\n")
+@btime find_key_absent(d, "abcd")
+
+@printf("	empty! for Dict()\n")
+@btime empty!(d)
+
+h = RobinDict{String, String}()
+d = Dict{String, String}()
 @printf("	add_entries for RobinDict{String, String}()\n")
-@btime add_entries(RobinDict{String, String}(), entries3)
+@btime add_entries(h, entries3)
+
+@printf("	find_key_present for RobinDict{String, String}()\n")
+hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
+
+@printf("	find_key_absent for RobinDict{String, String}()\n")
+@btime find_key_absent(h, "abcd")
+
+@printf("	empty! for RobinDict()\n")
+@btime empty!(h)
 
 @printf("	add_entries for Dict{String, String}()\n")
-@btime add_entries(Dict{String, String}(), entries3)
+@btime add_entries(d, entries3)
+
+@printf("	find_key_present for Dict{String, String}()\n")
+dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+
+@printf("	find_key_absent for Dict{String, String}()\n")
+@btime find_key_absent(d, "abcd")
+
+@printf("	empty! for Dict()\n")
+@btime empty!(d)
+
 
 @printf(".\nSample #4 Key => Integer , Size => 10^7 entries\n.\n")
 
@@ -81,17 +204,57 @@ for i = 1 : 10^7
 	push!(entries1, Pair{Int, Int}(sample1[i, 1], sample1[i, 2]))
 end
 
-@printf("	add_entries for RobinDict()\n")
-@btime add_entries(RobinDict(), entries1)
+h = RobinDict()
+d = Dict()
+@printf("	add_entries for RobinDict{Any, Any}()\n")
+@btime add_entries(h, entries1)
 
-@printf("	add_entries for Dict()\n")
-@btime add_entries(Dict(), entries1)
+@printf("	find_key_present for RobinDict{Any, Any}()\n")
+hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 
+@printf("	find_key_absent for RobinDict{Any, Any}()\n")
+@btime find_key_absent(h, 1000005)
+
+@printf("	empty! for RobinDict()\n")
+@btime empty!(h)
+
+@printf("	add_entries for Dict{Any, Any}()\n")
+@btime add_entries(d, entries1)
+
+@printf("	find_key_present for Dict{Any, Any}()\n")
+dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+
+@printf("	find_key_absent for Dict{Any, Any}()\n")
+@btime find_key_absent(d, 1000005)
+
+@printf("	empty! for Dict()\n")
+@btime empty!(d)
+
+h = RobinDict{Int, Int}()
+d = Dict{Int, Int}()
 @printf("	add_entries for RobinDict{Int, Int}()\n")
-@btime add_entries(RobinDict{Int, Int}(), entries1)
+@btime add_entries(h, entries1)
+
+@printf("	find_key_present for RobinDict{Int, Int}()\n")
+hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
+
+@printf("	find_key_absent for RobinDict{Int, Int}()\n")
+@btime find_key_absent(h, 1000005)
+
+@printf("	empty! for RobinDict()\n")
+@btime empty!(h)
 
 @printf("	add_entries for Dict{Int, Int}()\n")
-@btime add_entries(Dict{Int, Int}(), entries1)
+@btime add_entries(d, entries1)
+
+@printf("	find_key_present for Dict{Int, Int}()\n")
+dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+
+@printf("	find_key_absent for Dict{Int, Int}()\n")
+@btime find_key_absent(d, 1000005)
+
+@printf("	empty! for Dict()\n")
+@btime empty!(d)
 
 @printf(".\nSample #5 Key => Integer , Size => 10^5 entries\n.\n")
 
@@ -102,17 +265,58 @@ for i = 1 : 10^5
 	push!(entries1, Pair{Int, Int}(sample1[i, 1], sample1[i, 2]))
 end
 
-@printf("	add_entries for RobinDict()\n")
-@btime add_entries(RobinDict(), entries1)
+h = RobinDict()
+d = Dict()
+@printf("	add_entries for RobinDict{Any, Any}()\n")
+@btime add_entries(h, entries1)
 
-@printf("	add_entries for Dict()\n")
-@btime add_entries(Dict(), entries1)
+@printf("	find_key_present for RobinDict{Any, Any}()\n")
+hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 
+@printf("	find_key_absent for RobinDict{Any, Any}()\n")
+@btime find_key_absent(h, 1000005)
+
+@printf("	empty! for RobinDict()\n")
+@btime empty!(h)
+
+@printf("	add_entries for Dict{Any, Any}()\n")
+@btime add_entries(d, entries1)
+
+@printf("	find_key_present for Dict{Any, Any}()\n")
+dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+
+@printf("	find_key_absent for Dict{Any, Any}()\n")
+@btime find_key_absent(d, 1000005)
+
+@printf("	empty! for Dict()\n")
+@btime empty!(d)
+
+h = RobinDict{Int, Int}()
+d = Dict{Int, Int}()
 @printf("	add_entries for RobinDict{Int, Int}()\n")
-@btime add_entries(RobinDict{Int, Int}(), entries1)
+@btime add_entries(h, entries1)
+
+@printf("	find_key_present for RobinDict{Int, Int}()\n")
+hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
+
+@printf("	find_key_absent for RobinDict{Int, Int}()\n")
+@btime find_key_absent(h, 1000005)
+
+@printf("	empty! for RobinDict()\n")
+@btime empty!(h)
 
 @printf("	add_entries for Dict{Int, Int}()\n")
-@btime add_entries(Dict{Int, Int}(), entries1)
+@btime add_entries(d, entries1)
+
+@printf("	find_key_present for Dict{Int, Int}()\n")
+dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+
+@printf("	find_key_absent for Dict{Int, Int}()\n")
+@btime find_key_absent(d, 1000005)
+
+@printf("	empty! for Dict()\n")
+@btime empty!(d)
+
 
 @printf(".\nSample #6 Key => Float32 , Size => 10^5 entries\n.\n")
 
@@ -123,18 +327,57 @@ for i = 1 : 10^5
 	push!(entries2, Pair{Float32, Float32}(sample1[i, 1], sample1[i, 2]))
 end
 
-@printf("	add_entries for RobinDict()\n")
-@btime add_entries(RobinDict(), entries2)
+h = RobinDict()
+d = Dict()
+@printf("	add_entries for RobinDict{Any, Any}()\n")
+@btime add_entries(h, entries2)
 
-@printf("	add_entries for Dict()\n")
-@btime add_entries(Dict(), entries2)
+@printf("	find_key_present for RobinDict{Any, Any}()\n")
+hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 
+@printf("	find_key_absent for RobinDict{Any, Any}()\n")
+@btime find_key_absent(h, 1000005)
+
+@printf("	empty! for RobinDict()\n")
+@btime empty!(h)
+
+@printf("	add_entries for Dict{Any, Any}()\n")
+@btime add_entries(d, entries2)
+
+@printf("	find_key_present for Dict{Any, Any}()\n")
+dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+
+@printf("	find_key_absent for Dict{Any, Any}()\n")
+@btime find_key_absent(d, 1000005)
+
+@printf("	empty! for Dict()\n")
+@btime empty!(d)
+
+h = RobinDict{Float32, Float32}()
+d = Dict{Float32, Float32}()
 @printf("	add_entries for RobinDict{Float32, Float32}()\n")
-@btime add_entries(RobinDict{Float32, Float32}(), entries2)
+@btime add_entries(h, entries2)
+
+@printf("	find_key_present for RobinDict{Float32, Float32}()\n")
+hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
+
+@printf("	find_key_absent for RobinDict{Float32, Float32}()\n")
+@btime find_key_absent(h, 1000005)
+
+@printf("	empty! for RobinDict()\n")
+@btime empty!(h)
 
 @printf("	add_entries for Dict{Float32, Float32}()\n")
-@btime add_entries(Dict{Float32, Float32}(), entries2)
+@btime add_entries(d, entries2)
 
+@printf("	find_key_present for Dict{Float32, Float32}()\n")
+dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+
+@printf("	find_key_absent for Dict{Float32, Float32}()\n")
+@btime find_key_absent(d, 1000005)
+
+@printf("	empty! for Dict()\n")
+@btime empty!(d)
 
 
 @printf(".\nSample #7 Key => String , Size => 10^5 entries\n.\n")
@@ -145,17 +388,58 @@ for i = 1 : 10^5
 	push!(entries3, Pair{String, String}(randstring(), randstring()))
 end
 
-@printf("	add_entries for RobinDict()\n")
-@btime add_entries(RobinDict(), entries3)
+h = RobinDict()
+d = Dict()
+@printf("	add_entries for RobinDict{Any, Any}()\n")
+@btime add_entries(h, entries3)
 
-@printf("	add_entries for Dict()\n")
-@btime add_entries(Dict(), entries3)
+@printf("	find_key_present for RobinDict{Any, Any}()\n")
+hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 
+@printf("	find_key_absent for RobinDict{Any, Any}()\n")
+@btime find_key_absent(h, "absc")
+
+@printf("	empty! for RobinDict()\n")
+@btime empty!(h)
+
+@printf("	add_entries for Dict{Any, Any}()\n")
+@btime add_entries(d, entries3)
+
+@printf("	find_key_present for Dict{Any, Any}()\n")
+dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+
+@printf("	find_key_absent for Dict{Any, Any}()\n")
+@btime find_key_absent(d, "abcd")
+
+@printf("	empty! for Dict()\n")
+@btime empty!(d)
+
+h = RobinDict{String, String}()
+d = Dict{String, String}()
 @printf("	add_entries for RobinDict{String, String}()\n")
-@btime add_entries(RobinDict{String, String}(), entries3)
+@btime add_entries(h, entries3)
+
+@printf("	find_key_present for RobinDict{String, String}()\n")
+hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
+
+@printf("	find_key_absent for RobinDict{String, String}()\n")
+@btime find_key_absent(h, "abcd")
+
+@printf("	empty! for RobinDict()\n")
+@btime empty!(h)
 
 @printf("	add_entries for Dict{String, String}()\n")
-@btime add_entries(Dict{String, String}(), entries3)
+@btime add_entries(d, entries3)
+
+@printf("	find_key_present for Dict{String, String}()\n")
+dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+
+@printf("	find_key_absent for Dict{String, String}()\n")
+@btime find_key_absent(d, "abcd")
+
+@printf("	empty! for Dict()\n")
+@btime empty!(d)
+
 
 
 ## Plots
