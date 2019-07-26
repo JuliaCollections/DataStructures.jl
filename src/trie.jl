@@ -33,7 +33,8 @@ Trie(kv::AbstractVector{Tuple{K,V}}) where {K<:AbstractString,V} = Trie{V}(kv)
 Trie(kv::AbstractDict{K,V}) where {K<:AbstractString,V} = Trie{V}(kv)
 Trie(ks::AbstractVector{K}) where {K<:AbstractString} = Trie{Nothing}(ks, similar(ks, Nothing))
 
-function setindex!(t::Trie{T}, val::T, key::AbstractString) where T
+function setindex!(t::Trie{T}, val, key::AbstractString) where T
+    value = convert(T, val) # we don't want to iterate before finding out it fails
     node = t
     for char in key
         if !haskey(node.children, char)
@@ -42,7 +43,7 @@ function setindex!(t::Trie{T}, val::T, key::AbstractString) where T
         node = node.children[char]
     end
     node.is_key = true
-    node.value = val
+    node.value = value
 end
 
 function getindex(t::Trie, key::AbstractString)
