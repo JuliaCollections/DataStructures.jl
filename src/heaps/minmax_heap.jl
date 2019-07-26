@@ -182,6 +182,11 @@ isempty(h::BinaryMinMaxHeap) = isempty(h.valtree)
 """
 @inline pop!(h::BinaryMinMaxHeap) = popmin!(h)
 
+function sizehint!(h::BinaryMinMaxHeap, s::Integer)
+    sizehint!(h.valtree, s)
+    return h
+end
+
 """
     popmin!(h::BinaryMinMaxHeap) -> min
                         
