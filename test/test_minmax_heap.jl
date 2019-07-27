@@ -18,6 +18,7 @@ using Base.Order: Forward, Reverse
         @test isempty(h)
         @test eltype(h) == Int
         @test eltype(typeof(h)) == Int
+        @test sizehint!(h, 100) === h
     end
     
     @testset "make heap tests" begin
