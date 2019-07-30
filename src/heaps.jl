@@ -12,8 +12,8 @@
 #   node of the heap and thus update its value.
 #
 #   Each heap type must implement all of the following
-#   functions. Here, let h be a heap, i be a handle, and
-#   v be a value.
+#   functions. Here, let h be a heap, i be a handle,
+#   v be a value and s be a size.
 #
 #   - length(h)           returns the number of elements
 #
@@ -22,7 +22,7 @@
 #
 #   - push!(h, v)         add a value to the heap
 #
-#   - sizehint!(h)         set size hint to a heap
+#   - sizehint!(h, s)     set size hint to a heap
 #
 #   - top(h)              return the top value of a heap
 #

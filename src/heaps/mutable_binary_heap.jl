@@ -220,6 +220,12 @@ function push!(h::MutableBinaryHeap{T}, v) where T
     i
 end
 
+function sizehint!(h::MutableBinaryHeap, s::Integer)
+    sizehint!(h.nodes, s)
+    sizehint!(h.node_map, s)
+    return h
+end
+
 @inline top(h::MutableBinaryHeap) = h.nodes[1].value
 
 """

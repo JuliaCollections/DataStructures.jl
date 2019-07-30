@@ -138,6 +138,11 @@ function push!(h::BinaryHeap, v)
     h
 end
 
+function sizehint!(h::BinaryHeap, s::Integer)
+    sizehint!(h.valtree, s)
+    return h
+end
+
 """
     top(h::BinaryHeap)
 
