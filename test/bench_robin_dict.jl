@@ -11,6 +11,8 @@ end
 find_key_present(h::AbstractDict, entry) = h[entry]
 find_key_absent(h::AbstractDict, entry) = getkey(h, entry, -1)
 
+delete_one_key(h::AbstractDict) = pop!(h)
+
 @printf(".\nSample #1 Key => Integer , Size => 10^6 entries\n.\n")
 
 sample1 = rand(Int, 10^6, 2)
@@ -31,17 +33,28 @@ hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 @printf("	find_key_absent for RobinDict{Any, Any}()\n")
 @btime find_key_absent(h, 1000005)
 
-@printf("	empty! for RobinDict()\n")
+@printf("	delete_one_key for RobinDict{Any, Any}()\n")
+@btime delete_one_key(x) setup = (x = copy(h)) samples = 100 evals = 10;
+
+@printf("	empty! for RobinDict{Any, Any}()\n")
 @btime empty!(h)
 
 @printf("	add_entries for Dict{Any, Any}()\n")
 @btime add_entries(d, entries1)
 
 @printf("	find_key_present for Dict{Any, Any}()\n")
-dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+i = d.idxfloor
+while d.slots[Main.i] != 0x1
+	Main.i += 1
+end
+dval = d.keys[i]; 
+@btime find_key_present(d, dval)
 
 @printf("	find_key_absent for Dict{Any, Any}()\n")
 @btime find_key_absent(d, 1000005)
+
+@printf("	delete_one_key for Dict{Any, Any}()\n")
+@btime delete_one_key(x) setup = (x = copy(d)) samples = 100 evals = 10;
 
 @printf("	empty! for Dict()\n")
 @btime empty!(d)
@@ -57,19 +70,24 @@ hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 @printf("	find_key_absent for RobinDict{Int, Int}()\n")
 @btime find_key_absent(h, 1000005)
 
-@printf("	empty! for RobinDict()\n")
+@printf("	empty! for RobinDict{Int, Int}()\n")
 @btime empty!(h)
 
 @printf("	add_entries for Dict{Int, Int}()\n")
 @btime add_entries(d, entries1)
 
 @printf("	find_key_present for Dict{Int, Int}()\n")
-dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+i = d.idxfloor
+while d.slots[Main.i] != 0x1
+	Main.i += 1
+end
+dval = d.keys[i];
+@btime find_key_present(d, dval)
 
 @printf("	find_key_absent for Dict{Int, Int}()\n")
 @btime find_key_absent(d, 1000005)
 
-@printf("	empty! for Dict()\n")
+@printf("	empty! for Dict{Int, Int}()\n")
 @btime empty!(d)
 
 @printf(".\nSample #2 Key => Float32 , Size => 10^6 entries\n.\n")
@@ -99,7 +117,12 @@ hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 @btime add_entries(d, entries2)
 
 @printf("	find_key_present for Dict{Any, Any}()\n")
-dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+i = d.idxfloor
+while d.slots[Main.i] != 0x1
+	Main.i += 1
+end
+dval = d.keys[i];
+@btime find_key_present(d, dval)
 
 @printf("	find_key_absent for Dict{Any, Any}()\n")
 @btime find_key_absent(d, 1000005)
@@ -125,7 +148,12 @@ hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 @btime add_entries(d, entries2)
 
 @printf("	find_key_present for Dict{Float32, Float32}()\n")
-dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+i = d.idxfloor
+while d.slots[Main.i] != 0x1
+	Main.i += 1
+end
+dval = d.keys[i];
+@btime find_key_present(d, dval)
 
 @printf("	find_key_absent for Dict{Float32, Float32}()\n")
 @btime find_key_absent(d, 1000005)
@@ -160,7 +188,12 @@ hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 @btime add_entries(d, entries3)
 
 @printf("	find_key_present for Dict{Any, Any}()\n")
-dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+i = d.idxfloor
+while d.slots[Main.i] != 0x1
+	Main.i += 1
+end
+dval = d.keys[i];
+@btime find_key_present(d, dval)
 
 @printf("	find_key_absent for Dict{Any, Any}()\n")
 @btime find_key_absent(d, "abcd")
@@ -186,7 +219,12 @@ hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 @btime add_entries(d, entries3)
 
 @printf("	find_key_present for Dict{String, String}()\n")
-dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+i = d.idxfloor
+while d.slots[Main.i] != 0x1
+	Main.i += 1
+end
+dval = d.keys[i];
+@btime find_key_present(d, dval)
 
 @printf("	find_key_absent for Dict{String, String}()\n")
 @btime find_key_absent(d, "abcd")
@@ -222,7 +260,12 @@ hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 @btime add_entries(d, entries1)
 
 @printf("	find_key_present for Dict{Any, Any}()\n")
-dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+i = d.idxfloor
+while d.slots[Main.i] != 0x1
+	Main.i += 1
+end
+dval = d.keys[i];
+@btime find_key_present(d, dval)
 
 @printf("	find_key_absent for Dict{Any, Any}()\n")
 @btime find_key_absent(d, 1000005)
@@ -248,7 +291,12 @@ hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 @btime add_entries(d, entries1)
 
 @printf("	find_key_present for Dict{Int, Int}()\n")
-dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+i = d.idxfloor
+while d.slots[Main.i] != 0x1
+	Main.i += 1
+end
+dval = d.keys[i];
+@btime find_key_present(d, dval)
 
 @printf("	find_key_absent for Dict{Int, Int}()\n")
 @btime find_key_absent(d, 1000005)
@@ -283,7 +331,12 @@ hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 @btime add_entries(d, entries1)
 
 @printf("	find_key_present for Dict{Any, Any}()\n")
-dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+i = d.idxfloor
+while d.slots[Main.i] != 0x1
+	Main.i += 1
+end
+dval = d.keys[i];
+@btime find_key_present(d, dval)
 
 @printf("	find_key_absent for Dict{Any, Any}()\n")
 @btime find_key_absent(d, 1000005)
@@ -309,7 +362,12 @@ hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 @btime add_entries(d, entries1)
 
 @printf("	find_key_present for Dict{Int, Int}()\n")
-dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+i = d.idxfloor
+while d.slots[Main.i] != 0x1
+	Main.i += 1
+end
+dval = d.keys[i];
+@btime find_key_present(d, dval)
 
 @printf("	find_key_absent for Dict{Int, Int}()\n")
 @btime find_key_absent(d, 1000005)
@@ -345,7 +403,12 @@ hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 @btime add_entries(d, entries2)
 
 @printf("	find_key_present for Dict{Any, Any}()\n")
-dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+i = d.idxfloor
+while d.slots[Main.i] != 0x1
+	Main.i += 1
+end
+dval = d.keys[i];
+@btime find_key_present(d, dval)
 
 @printf("	find_key_absent for Dict{Any, Any}()\n")
 @btime find_key_absent(d, 1000005)
@@ -371,7 +434,12 @@ hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 @btime add_entries(d, entries2)
 
 @printf("	find_key_present for Dict{Float32, Float32}()\n")
-dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+i = d.idxfloor
+while d.slots[Main.i] != 0x1
+	Main.i += 1
+end
+dval = d.keys[i];
+@btime find_key_present(d, dval)
 
 @printf("	find_key_absent for Dict{Float32, Float32}()\n")
 @btime find_key_absent(d, 1000005)
@@ -406,7 +474,12 @@ hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 @btime add_entries(d, entries3)
 
 @printf("	find_key_present for Dict{Any, Any}()\n")
-dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+i = d.idxfloor
+while d.slots[Main.i] != 0x1
+	Main.i += 1
+end
+dval = d.keys[i];
+@btime find_key_present(d, dval)
 
 @printf("	find_key_absent for Dict{Any, Any}()\n")
 @btime find_key_absent(d, "abcd")
@@ -432,15 +505,18 @@ hval = h.keys[h.idxfloor]; @btime find_key_present(h, hval)
 @btime add_entries(d, entries3)
 
 @printf("	find_key_present for Dict{String, String}()\n")
-dval = d.keys[d.idxfloor]; @btime find_key_present(d, dval)
+i = d.idxfloor
+while d.slots[Main.i] != 0x1
+	Main.i += 1
+end
+dval = d.keys[i];
+@btime find_key_present(d, dval)
 
 @printf("	find_key_absent for Dict{String, String}()\n")
 @btime find_key_absent(d, "abcd")
 
 @printf("	empty! for Dict()\n")
 @btime empty!(d)
-
-
 
 ## Plots
 
