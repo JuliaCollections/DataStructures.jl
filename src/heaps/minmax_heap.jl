@@ -280,3 +280,4 @@ popall!(h::BinaryMinMaxHeap) = popall!(h, Forward)
 popall!(h::BinaryMinMaxHeap, ::ForwardOrdering) = popmin!(h, length(h))
 popall!(h::BinaryMinMaxHeap, ::ReverseOrdering) = popmax!(h, length(h))
 
+getindex(h::BinaryMinMaxHeap, i::Int) = h.valtree[i]
