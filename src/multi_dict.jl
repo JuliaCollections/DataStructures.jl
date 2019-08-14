@@ -27,7 +27,7 @@ function multi_dict_with_eltype(kvs, ::Type{Tuple{K,V}}) where {K,V}
 end
 multi_dict_with_eltype(kvs, t) = MultiDict{Any,Any}(kvs)
 
-MultiDict(ps::Pair{K,V}...) where {K,V<:AbstractArray} = MultiDict{K, eltype(V)}(ps)
+
 MultiDict(kv::AbstractArray{Pair{K,V}}) where {K,V}  = MultiDict(kv...)
 function MultiDict(ps::Pair{K,V}...) where {K,V}
     md = MultiDict{K,V}()
@@ -56,20 +56,16 @@ empty!(d::MultiDict) = (empty!(d.d); d)
 
 function insert!(d::MultiDict{K,V}, k, v) where {K,V}
     if !haskey(d.d, k)
-        d.d[k] = isa(v, AbstractArray) ? eltype(v)[] : V[]
-    end
-    if isa(v, AbstractArray)
-        append!(d.d[k], v)
-    else
-        push!(d.d[k], v)
-    end
+        d.d[k] = V[]
+    end    
+    push!(d.d[k], v)    
     return d
 end
 
 function in(pr::(Tuple{Any,Any}), d::MultiDict{K,V}) where {K,V}
     k = convert(K, pr[1])
     v = get(d,k,Base.secret_table_token)
-    (v !== Base.secret_table_token) && (isa(pr[2], AbstractArray) ? v == pr[2] : pr[2] in v)
+    (v !== Base.secret_table_token) && (pr[2] in v)
 end
 
 function pop!(d::MultiDict, key, default)
