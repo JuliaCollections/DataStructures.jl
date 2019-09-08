@@ -1,36 +1,35 @@
 # Benchmark on heaps
 
 using DataStructures
+using BenchmarkTools
 
-# benchmark function
-
-function benchmark_heap(title::String, h::AbstractHeap, xs::Vector{Float64})
-    @assert isempty(h)
-
-    # warming
-    push!(h, 0.5)
-    pop!(h)
-
-    # bench
+function push_heap(h::AbstractHeap, xs::Vector{Float64})
     n = length(xs)
 
-    t1 = @elapsed for i = 1 : n
+    for i = 1 : n
         push!(h, xs[i])
     end
-    t2 = @elapsed for i = 1 : n
-        pop!(h)
-    end
-
-    @printf("   On %-24s:  push.elapsed = %7.4fs  pop.elapsed = %7.4fs\n", title, t1, t2)
 end
 
+function pop_heap(h::AbstractHeap)
+    n = length(h)
 
-# Benchmark on push! and pop!
+    for i = 1 : n
+        pop!(h)
+    end
+end
 
 xs = rand(10^6)
 
-h_bin  = binary_minheap(Float64)
-h_mbin = mutable_binary_minheap(Float64)
-
-benchmark_heap("BinaryHeap", h_bin, xs)
-benchmark_heap("MutableBinaryHeap", h_mbin, xs)
+println("BinaryHeap Push: ",
+    @belapsed push_heap(h, $xs) setup=(h=BinaryMinHeap{Float64}())
+)
+println("BinaryHeap Pop: ",
+    @belapsed pop_heap(h) setup=(h=BinaryMinHeap{Float64}(); push_heap(h, $xs))
+)
+println("MutableBinaryHeap Push: ",
+    @belapsed push_heap(h, $xs) setup=(h=MutableBinaryMinHeap{Float64}())
+)
+println("MutableBinaryHeap Pop: ",
+    @belapsed pop_heap(h) setup=(h=MutableBinaryMinHeap{Float64}(); push_heap(h, $xs))
+)
