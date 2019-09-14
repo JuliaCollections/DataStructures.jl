@@ -4,6 +4,16 @@ using Base.Order: Forward, Reverse
 
 @testset "Binary MinMax Heaps" begin
 
+    @testset "construct heap" begin
+        vs = [10, 4, 6, 1, 16, 2, 20, 17, 13, 5]
+
+        BinaryMinMaxHeap{Int}()
+
+        BinaryMinMaxHeap(vs)
+
+        @test true
+    end
+
     @testset "is_minmax_heap tests" begin
         mmheap = [0, 10, 9, 2, 3, 4, 5]
         @test is_minmax_heap(mmheap)

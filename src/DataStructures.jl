@@ -30,7 +30,7 @@ module DataStructures
     export IntDisjointSets, DisjointSets, num_groups, find_root!, in_same_set, root_union!
     export FenwickTree, length, inc!, dec!, incdec!, prefixsum
 
-    export AbstractHeap, compare, extract_all!
+    export AbstractHeap, compare, extract_all!, extract_all_rev!
     export BinaryHeap, BinaryMinHeap, BinaryMaxHeap, nlargest, nsmallest
     export MutableBinaryHeap, MutableBinaryMinHeap, MutableBinaryMaxHeap
     export heapify!, heapify, heappop!, heappush!, isheap

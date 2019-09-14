@@ -44,7 +44,7 @@ function percolate_up!(xs::AbstractArray, i::Integer, x=xs[i], o::Ordering=Forwa
     xs[i] = x
 end
 
-percolate_up!(xs::AbstractArray{T}, i::Integer, o::Ordering) where {T} = percolate_up!(xs, i, xs[i], o)
+percolate_up!(xs::AbstractArray, i::Integer, o::Ordering) = percolate_up!(xs, i, xs[i], o)
 
 """
     heappop!(v, [ord])
@@ -69,12 +69,12 @@ For efficiency, this function does not check that the array is indeed heap-order
 """
 function heappush!(xs::AbstractArray, x, o::Ordering=Forward)
     push!(xs, x)
-    percolate_up!(xs, length(xs), x, o)
+    percolate_up!(xs, length(xs), o)
     return xs
 end
 
 
-# Turn an arbitrary array into a binary min-heap in linear time.
+# Turn an arbitrary array into a binary min-heap (by default) in linear time.
 """
     heapify!(v, ord::Ordering=Forward)
 
@@ -111,6 +111,7 @@ julia> heapify(a, Base.Order.Reverse)
  2
 ```
 """
+# Todo, benchmarking shows copy(xs) outperforms copyto!(similar(xs), xs) for 10^6 Float64
 heapify(xs::AbstractArray, o::Ordering=Forward) = heapify!(copyto!(similar(xs), xs), o)
 
 """
