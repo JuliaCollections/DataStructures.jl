@@ -106,11 +106,11 @@ mutable struct BinaryHeap{T,Comp} <: AbstractHeap{T}
     comparer::Comp
     valtree::Vector{T}
 
-    BinaryHeap{T,Comp}() where {T,Comp} = new{T,Comp}(Comp(), Vector{T}())
+    BinaryHeap{T,Comp}(; comparer::Comp = Comp()) where {T,Comp} = new{T,Comp}(comparer, Vector{T}())
 
-    function BinaryHeap{T,Comp}(xs::AbstractVector{T}) where {T,Comp}
-        valtree = _make_binary_heap(Comp(), T, xs)
-        new{T,Comp}(Comp(), valtree)
+    function BinaryHeap{T,Comp}(xs::AbstractVector{T}; comparer::Comp = Comp()) where {T,Comp}
+        valtree = _make_binary_heap(comparer, T, xs)
+        new{T,Comp}(comparer, valtree)
     end
 end
 
