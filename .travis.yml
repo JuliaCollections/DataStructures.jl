@@ -22,6 +22,23 @@ after_success:
 # https://juliadocs.github.io/Documenter.jl/stable/man/hosting/#.travis.yml-Configuration-1
 jobs:
   include:
+    - name: "Benchmark"
+      julia: 1.2
+      os: linux
+      before_script:
+        - git fetch origin '+refs/heads/master:refs/remotes/origin/master'
+        - git branch baseline origin/master
+        # Run benchmark outside `script` so that it's hidden by default:
+        - julia --project=benchmark -e '
+              using Pkg; Pkg.instantiate();
+              include("benchmark/runjudge.jl");'
+
+      script:
+        - julia --project=benchmark -e '
+              using Pkg; Pkg.instantiate();
+              include("benchmark/pprintjudge.jl");'
+      after_success: skip
+      if: type = pull_request
     - stage: "Documentation"
       julia: 1.2
       os: linux
