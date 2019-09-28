@@ -8,6 +8,7 @@ import DataStructures: IntSet
 @test [] == detect_ambiguities(Base, Core, DataStructures)
 
 tests = ["int_set",
+         "sparse_int_set",
          "deque",
          "circ_deque",
          "sorted_containers",
@@ -28,7 +29,7 @@ tests = ["int_set",
          "sorting",
          "priority_queue", 
          "fenwick", 
-         "robin_dict"
+         "robin_dict",
         ]
 
 if length(ARGS) > 0
