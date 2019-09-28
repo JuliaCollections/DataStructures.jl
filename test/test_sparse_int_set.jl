@@ -128,7 +128,7 @@ import DataStructures: SparseIntSet
         # @test_throws ArgumentError pop!(()->throw(ErrorException()), c, -1)
         @test pop!(c, 1, 0) == 0
         @test popfirst!(c) == 2
-        @test popfirst!(c) == 512
+        @test popfirst!(c) == DataStructures.INT_PER_PAGE
         @test (empty!(c);cleanup!(c)) == SparseIntSet()
     end
 
@@ -153,7 +153,7 @@ import DataStructures: SparseIntSet
         @test intersect(complement(SparseIntSet(5:12)), complement(SparseIntSet(7:10))) ==
               intersect(complement(SparseIntSet(7:10)), complement(SparseIntSet(5:12))) == complement(SparseIntSet(5:12))
 
-        @test intersect(SparseIntSet(1:10), SparseIntSet(1:4), 1:5, [1,2,10]) == SparseIntSet(1:2)
+        @test intersect!(SparseIntSet(1:10), SparseIntSet(1:4), 1:5, [1,2,10]) == SparseIntSet(1:2)
     end
 
     @testset "Setdiff" begin
@@ -199,6 +199,14 @@ import DataStructures: SparseIntSet
         @test [i for i in s] == [1, 2, 100, 1000]
         @test pop!(s) == 1000
         @test s == SparseIntSet([1, 2, 100])
+        push!(s, 5000)
+        push!(s, 2000)
+        pop!(s, 5000)
+        @test all(iszero, s.reverse[end])
+        @test length(s.reverse) == ceil(5000/DataStructures.INT_PER_PAGE)
+        cleanup!(s)
+        @test length(s.reverse) == ceil(2000/DataStructures.INT_PER_PAGE)
+
     end
 
     @testset "other 2" begin
