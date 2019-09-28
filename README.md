@@ -29,6 +29,7 @@ This package implements a variety of data structures, including
 -   DataStructures.IntSet
 -   Priority Queue
 -   Fenwick Tree
+-   SparseIntSet
 
 Resources
 ---------

@@ -46,15 +46,6 @@ function in(i, s::SparseIntSet)
 	isassigned(s.reverse, pageid) && @inbounds s.reverse[pageid][offset] != 0
 end
 
-@propagate_inbounds function packed_id(s::SparseIntSet, i::Integer)
-	pageid, offset = pageid_offset(s, i)
-	return s.reverse[pageid][offset]
-end
-
-@propagate_inbounds function reverse_id(s::SparseIntSet, i::Integer)
-	return s.packed[i]
-end
-
 length(s::SparseIntSet) = length(s.packed)
 
 function assure!(s::SparseIntSet, pageid)
@@ -247,7 +238,6 @@ function in_excluded(id, it)
 end
 
 @inline id_tids(it, state) = (id = it.shortest_set.packed[state]; return id, map(x -> findfirst_packed_id(id, x), it.valid_sets))
-#TODO cleanup
 @propagate_inbounds function iterate(it::ZippedSparseIntSetIterator, state=1)
 	if state > length(it)
 		return nothing
