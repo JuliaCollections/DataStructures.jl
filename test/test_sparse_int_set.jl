@@ -231,7 +231,7 @@ import DataStructures: SparseIntSet
     	it = zip(a, b, c, d, e)
     	for (ia, ib, ic, id, ie) in it
 	    	s1 += a.packed[ia] + b.packed[ib] + c.packed[ic] + d.packed[id] + e.packed[ie]
-	    	s2 += 5 * current_id(it)
+	    	s2 += 5 * it.current_id
 	    end
 	    @test s1 == s2 == 5*(6+12)
     	s1 = 0
@@ -239,7 +239,7 @@ import DataStructures: SparseIntSet
     	it = zip(a, b, c, d, exclude=(e,))
     	for (ia, ib, ic, id) in it
 	    	s1 += a.packed[ia] + b.packed[ib] + c.packed[ic] + d.packed[id]
-	    	s2 += 4 * current_id(it)
+	    	s2 += 4 * it.current_id
 	    end
 	    @test s1 == s2 == 4*24
 	end
