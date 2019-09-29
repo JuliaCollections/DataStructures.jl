@@ -45,7 +45,7 @@ import DataStructures: SparseIntSet
     end
 
     @testset "issue #7851" begin
-        @test_throws ArgumentError SparseIntSet(-1)
+        @test_throws DomainError SparseIntSet(-1)
         @test !(-1 in SparseIntSet(1:10))
     end
     @testset "Copy, copy!, empty" begin
@@ -73,7 +73,7 @@ import DataStructures: SparseIntSet
     @testset "Push, union" begin
         # Push, union
         s1 = SparseIntSet()
-        @test_throws ArgumentError push!(s1, -1)
+        @test_throws DomainError push!(s1, -1)
         push!(s1, 1, 10, 100, 1000)
         @test collect(s1) == [1, 10, 100, 1000]
         push!(s1, 606)
@@ -166,7 +166,7 @@ import DataStructures: SparseIntSet
         s2 = complement(SparseIntSet(3:5))
         @test setdiff(s1, s2) == setdiff(s1, [1:2; 6:100]) == SparseIntSet(3:5)
         @test isempty(setdiff(complement(SparseIntSet()), complement(SparseIntSet())))
-        @test setdiff(complement(SparseIntSet(4)), complement(SparseIntSet(3:5))) == SparseIntSet(3,5)
+        @test setdiff(complement(SparseIntSet(4)), complement(SparseIntSet(3:5))) == SparseIntSet((3,5))
         @test setdiff(complement(SparseIntSet(1:5)), complement(SparseIntSet(3:10))) == SparseIntSet([6, 7, 8, 9, 10])
         @test setdiff(complement(SparseIntSet(2:2:10)), SparseIntSet(1:5)) == complement(SparseIntSet([1:5; 6:2:10]))
         @test setdiff!(complement(SparseIntSet(5)), complement(SparseIntSet(5))) == SparseIntSet()
@@ -225,7 +225,7 @@ import DataStructures: SparseIntSet
     	b = SparseIntSet([6, 12, 24, 1000, 2000, 3000])
     	c = SparseIntSet(2:2:100)
     	d = SparseIntSet(6:3:100)
-    	e = SparseIntSet(6, 12)
+    	e = SparseIntSet((6, 12))
     	s1 = 0
     	s2 = 0
     	it = zip(a, b, c, d, e)
