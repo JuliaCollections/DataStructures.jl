@@ -12,17 +12,6 @@ SparseIntSet() = SparseIntSet(Int[], Vector{Int}[])
 
 SparseIntSet(indices) = union!(SparseIntSet(), indices)
 
-# function SparseIntSet(indices)
-#     set = SparseIntSet()
-#     for i in indices
-#         i <= 0 && throw(DomainError("Only positive Ints allowed."))
-#         push!(set, i)
-#     end
-#     return set
-# end
-
-# SparseIntSet(i...) = SparseIntSet(i)
-
 eltype(::Type{SparseIntSet}) = Int
 
 empty(::SparseIntSet) = SparseIntSet()
@@ -57,6 +46,11 @@ end
 
 length(s::SparseIntSet) = length(s.packed)
 
+# This makes sure that when adding (pushing) an Int,
+# it's respective page is allocated and put at the index of the reverse such that
+# pageid_offset works as intended.
+# Pages will be allocated only once, when pushing an Int that belongs to them.
+# Other not used pages (created during resize!) will be undefs until one Int belonging to them gets added. 
 function assure!(s::SparseIntSet, pageid)
     if pageid > length(s.reverse)
         resize!(s.reverse, pageid - 1)
@@ -259,5 +253,3 @@ end
     it.current_id = id
     return tids, state + 1
 end
-
-current_id(x::ZippedSparseIntSetIterator) = x.current_id
