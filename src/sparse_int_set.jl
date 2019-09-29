@@ -3,7 +3,7 @@ import Base: @propagate_inbounds, zip
 const INT_PER_PAGE = div(ccall(:jl_getpagesize, Clong, ()), sizeof(Int))
 
 #TODO: Batch creation and allocation
-mutable struct SparseIntSet
+struct SparseIntSet
     packed ::Vector{Int}
     reverse::Vector{Vector{Int}}
 end
@@ -29,8 +29,14 @@ isempty(s::SparseIntSet) = isempty(s.packed)
 copy(s::SparseIntSet) = copy!(SparseIntSet(), s)
 
 function copy!(to::SparseIntSet, from::SparseIntSet)
-    to.packed = copy(from.packed)
-    to.reverse = deepcopy(from.reverse)
+    resize!(to.packed, length(from.packed))
+    to.packed .= from.packed
+    resize!(to.reverse, length(from.reverse))
+    for i in eachindex(from.reverse)
+        if isassigned(from.reverse, i)
+            to.reverse[i] = copy(from.reverse[i])
+        end
+    end
     return to
 end
 
@@ -134,12 +140,7 @@ end
 intersect!(s1::SparseIntSet, ss...) = intersect!(s1, intersect(ss...))
 
 #Is there a more performant way to do this?
-function intersect!(s1::SparseIntSet, ns)
-    s = intersect(s1, ns)
-    s1.packed= s.packed
-    s1.reverse = s.reverse
-    return s1
-end
+intersect!(s1::SparseIntSet, ns) = copy!(s1, intersect(s1, ns))
 
 setdiff(s::SparseIntSet, ns) = setdiff!(copy(s), ns)
 setdiff!(s::SparseIntSet, ns) = (for n in ns; pop!(s, n, nothing); end; s)
@@ -171,7 +172,7 @@ function complement!(b::SparseIntSet, a::SparseIntSet)
     return b
 end
 #Can this be optimized?
-complement!(a::SparseIntSet) = (b = complement(a); a.packed = b.packed; a.reverse = b.reverse; return a)
+complement!(a::SparseIntSet) = copy!(a, complement(a))
 
 <(a::SparseIntSet, b::SparseIntSet) = (a<=b) && !isequal(a,b)
 <=(a::SparseIntSet, b::SparseIntSet) = issubset(a, b)
@@ -190,7 +191,7 @@ function cleanup!(s::SparseIntSet)
     indices = eachindex(s.reverse)
     last_page_id = findlast(isused, indices)
     if last_page_id === nothing
-        s.reverse = Vector{Int}[]
+        empty!(s.reverse)
         return s
     else
         new_pages    = Vector{Vector{Int}}(undef, last_page_id)
@@ -199,7 +200,13 @@ function cleanup!(s::SparseIntSet)
                 new_pages[i] = s.reverse[i]
             end
         end
-        s.reverse = new_pages
+        empty!(s.reverse)
+        resize!(s.reverse, last_page_id)
+        for i in eachindex(new_pages)
+            if isassigned(new_pages, i)
+                s.reverse[i] = new_pages[i]
+            end
+        end
         return s
     end
 end
