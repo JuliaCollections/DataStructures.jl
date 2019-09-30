@@ -68,7 +68,8 @@ function pop_push(y)
 	push!(y, 5199)
 end
 
-SUITE["SparseIntSet"]["pop push"] = @benchmarkable pop_push(y) setup=(y=SparseIntSet(); push!(y, 5199))
+SUITE["SparseIntSet"]["pop push worst case"] = @benchmarkable pop_push(y) setup=(y=SparseIntSet(); push!(y, 5199))
+SUITE["SparseIntSet"]["pop push"] = @benchmarkable pop_push(y) setup=(y=SparseIntSet(); push!(y, 5199); push!(y, 5200))
 
 function iterate_one_bench(x)
 	t = 0
