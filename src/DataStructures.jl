@@ -105,5 +105,5 @@ module DataStructures
 
     include("priorityqueue.jl")
     include("sparse_int_set.jl")
-    export SparseIntSet, cleanup!
+    export SparseIntSet, dirty_pop!, cleanup!
 end

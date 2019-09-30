@@ -129,7 +129,7 @@ import DataStructures: SparseIntSet
         @test pop!(c, 1, 0) == 0
         @test popfirst!(c) == 2
         @test popfirst!(c) == DataStructures.INT_PER_PAGE
-        @test (empty!(c);cleanup!(c)) == SparseIntSet()
+        @test empty!(c) == SparseIntSet()
     end
 
     @testset "Intersect" begin
@@ -201,8 +201,7 @@ import DataStructures: SparseIntSet
         @test s == SparseIntSet([1, 2, 100])
         push!(s, 5000)
         push!(s, 2000)
-        pop!(s, 5000)
-        @test all(iszero, s.reverse[end])
+        dirty_pop!(s, 5000)
         @test length(s.reverse) == ceil(5000/DataStructures.INT_PER_PAGE)
         cleanup!(s)
         @test length(s.reverse) == ceil(2000/DataStructures.INT_PER_PAGE)
