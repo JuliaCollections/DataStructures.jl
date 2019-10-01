@@ -39,6 +39,25 @@
             @test length(s) == n - i
         end
     end
+    
+    @testset "==" begin
+        s = Stack{Int}()
+        t = Stack{Int}()
+        
+        @test s == t
+        push!(s, 10)
+        @test s != t
+        push!(t, 10)
+        @test s == t
+        push!(t, 20)
+        @test s != t
+        
+        @testset "different types" begin
+            r = Stack{Float32}()
+            push!(r, 10)
+            @test s == r
+        end
+    end
 
     @testset "empty!" begin
         s = Stack{Int}(1)
