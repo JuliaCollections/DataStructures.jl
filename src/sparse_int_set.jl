@@ -4,7 +4,7 @@ const INT_PER_PAGE = div(ccall(:jl_getpagesize, Clong, ()), sizeof(Int))
 
 
 #TODO: Batch creation and allocation
-struct SparseIntSet
+mutable struct SparseIntSet
     packed ::Vector{Int}
     reverse::Vector{Vector{Int}}
     counters::Vector{Int}  # counts the number of real elements in each page of reverse. 
@@ -30,17 +30,9 @@ isempty(s::SparseIntSet) = isempty(s.packed)
 copy(s::SparseIntSet) = copy!(SparseIntSet(), s)
 
 function copy!(to::SparseIntSet, from::SparseIntSet)
-    resize!(to.packed, length(from.packed))
-    to.packed .= from.packed
-    lreverse = length(from.reverse)
-    resize!(to.reverse, lreverse)
-    for i in eachindex(from.reverse)
-        if isassigned(from.reverse, i)
-            to.reverse[i] = copy(from.reverse[i])
-        end
-    end
-    resize!(to.counters, lreverse)
-    to.counters .= from.counters
+    to.packed   = copy(from.packed)
+    to.reverse  = deepcopy(from.reverse)
+    to.counters = copy(from.counters)
     return to
 end
 
@@ -224,29 +216,27 @@ function findfirst_packed_id(i, s::SparseIntSet)
 end
 
 function cleanup!(s::SparseIntSet)
-    if any(iszero, s.counters)
-        isused = x -> isassigned(s.reverse, x) && s.counters[x] != 0
-        last_page_id = findlast(!iszero, s.counters)
-        if last_page_id === nothing
-            empty!(s.reverse)
-            empty!(s.counters)
-            return s
-        else
-            new_pages    = Vector{Vector{Int}}(undef, last_page_id)
-            new_counters = zeros(Int, last_page_id)
-            for i in eachindex(s.reverse)
-                if isused(i)
-                    new_pages[i] = s.reverse[i]
-                    new_counters[i] = s.counters[i]
-                end
-            end
-            resize!(s.reverse, last_page_id)
-            resize!(s.counters, last_page_id)
-            s.reverse .= new_pages
-            s.counters .= new_counters
-            return s
-        end
+    last_page_id = findlast(!iszero, s.counters)
+    if last_page_id === nothing
+        empty!(s.reverse)
+        empty!(s.counters)
+        return s
     else
+        # shrink anything off the end
+        resize!(s.counters, last_page_id)
+        resize!(s.reverse, last_page_id)
+
+        # Now we need to undef any page in `reverse` that is empty.
+        # so we are allocating new pages, and then will copy it across.
+        # since can't assign `undef` directly.
+        new_pages = Vector{Vector{Int}}(undef, last_page_id)
+        for i in eachindex(s.reverse)
+            isused =  s.counters[i] !== 0 && isassigned(s.reverse, i)
+            if isused
+                new_pages[i] = s.reverse[i]
+            end
+        end
+        s.reverse .= new_pages
         return s
     end
 end
