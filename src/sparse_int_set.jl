@@ -7,7 +7,7 @@ const INT_PER_PAGE = div(ccall(:jl_getpagesize, Clong, ()), sizeof(Int))
 struct SparseIntSet
     packed ::Vector{Int}
     reverse::Vector{Vector{Int}}
-    counters::Vector{Int}
+    counters::Vector{Int}  # counts the number of real elements in each page of reverse. 
 end
 
 SparseIntSet() = SparseIntSet(Int[], Vector{Int}[], Int[])
@@ -141,7 +141,7 @@ end
 
 function pop!(s::SparseIntSet, id::Integer, default)
     id < 0 && throw(ArgumentError("Int to pop needs to be positive."))
-    in(id, s) ? (@inbounds pop!(s, id)) : default
+    return in(id, s) ? (@inbounds pop!(s, id)) : default
 end
 popfirst!(s::SparseIntSet) = pop!(s, first(s))
 
@@ -150,7 +150,12 @@ iterate(set::SparseIntSet, args...) = iterate(set.packed, args...)
 last(s::SparseIntSet) = isempty(s) ? throw(ArgumentError("Empty set has no last element.")) : last(s.packed)
 
 union(s::SparseIntSet, ns) = union!(copy(s), ns)
-union!(s::SparseIntSet, ns) = (for n in ns; push!(s, n); end; s)
+function union!(s::SparseIntSet, ns)
+    for n in ns
+        push!(s, n)
+    end
+    return s
+end
 
 intersect(s1::SparseIntSet) = copy(s1)
 intersect(s1::SparseIntSet, ss...) = intersect(s1, intersect(ss...))
@@ -168,11 +173,16 @@ intersect!(s1::SparseIntSet, ss...) = intersect!(s1, intersect(ss...))
 intersect!(s1::SparseIntSet, ns) = copy!(s1, intersect(s1, ns))
 
 setdiff(s::SparseIntSet, ns) = setdiff!(copy(s), ns)
-setdiff!(s::SparseIntSet, ns) = (for n in ns; pop!(s, n, nothing); end; s)
+function setdiff!(s::SparseIntSet, ns)
+    for n in ns
+        pop!(s, n, nothing)
+    end
+    return s
+end
 
 function ==(s1::SparseIntSet, s2::SparseIntSet)
     length(s1) != length(s2) && return false
-    return all(x -> in(x, s1), s2)
+    return all(in(s1), s2)
 end
 
 issubset(a::SparseIntSet, b::SparseIntSet) = isequal(a, intersect(a, b))
@@ -184,7 +194,7 @@ function complement!(b::SparseIntSet, a::SparseIntSet)
         if !isassigned(a.reverse, i)
             resize!(b.reverse, i)
             resize!(b.counters, i)
-            new_ids = (i-1)*INT_PER_PAGE+1:(i)*INT_PER_PAGE
+            new_ids = ((i - 1) * INT_PER_PAGE + 1) : (i * INT_PER_PAGE)
             append!(b.packed, new_ids)
             b.reverse[i] = collect(new_ids)
             b.counters[i] = INT_PER_PAGE
@@ -201,7 +211,7 @@ end
 #Can this be optimized?
 complement!(a::SparseIntSet) = copy!(a, complement(a))
 
-<(a::SparseIntSet, b::SparseIntSet) = (a<=b) && !isequal(a,b)
+<(a::SparseIntSet, b::SparseIntSet) = ( a<=b ) && !isequal(a, b)
 <=(a::SparseIntSet, b::SparseIntSet) = issubset(a, b)
 
 function findfirst_packed_id(i, s::SparseIntSet)
@@ -258,6 +268,7 @@ zip(s::SparseIntSet...;kwargs...) = ZippedSparseIntSetIterator(s...;kwargs...)
 
 @inline length(it::ZippedSparseIntSetIterator) = length(it.shortest_set)
 
+# we know it is not in_excluded, as there are no excluded
 in_excluded(id, it::ZippedSparseIntSetIterator{VT,Tuple{}}) where {VT} = false
 
 function in_excluded(id, it)
@@ -279,7 +290,7 @@ end
         return nothing
     end
     id, tids = id_tids(it, state)
-    while !all(x -> x!=0, tids) || in_excluded(id, it)
+    while any(iszero, tids) || in_excluded(id, it)
         state += 1
         if state > length(it)
             return nothing
