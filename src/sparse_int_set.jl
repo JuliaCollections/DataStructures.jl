@@ -218,10 +218,8 @@ end
 function cleanup!(s::SparseIntSet)
     last_page_id = findlast(!iszero, s.counters)
     if last_page_id === nothing
-        empty!(s.reverse)
-        empty!(s.counters)
-        return s
-    else
+        return empty!(s)
+    elseif any(iszero, s.counters)
         # shrink anything off the end
         resize!(s.counters, last_page_id)
         resize!(s.reverse, last_page_id)
