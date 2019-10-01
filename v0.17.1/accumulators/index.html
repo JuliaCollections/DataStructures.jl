@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Accumulators and Counters · DataStructures.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>DataStructures.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">DataStructures.jl</a></li><li><a class="toctext" href="../deque/">Deque</a></li><li><a class="toctext" href="../circ_buffer/">CircularBuffer</a></li><li><a class="toctext" href="../circ_deque/">CircularDeque</a></li><li><a class="toctext" href="../stack_and_queue/">Stack and Queue</a></li><li><a class="toctext" href="../priority-queue/">Priority Queue</a></li><li><a class="toctext" href="../fenwick/">Fenwick Tree</a></li><li class="current"><a class="toctext" href>Accumulators and Counters</a><ul class="internal"><li><a class="toctext" href="#Constructors-1">Constructors</a></li><li><a class="toctext" href="#Usage-1">Usage</a></li><li><a class="toctext" href="#Use-as-a-multiset-1">Use as a multiset</a></li></ul></li><li><a class="toctext" href="../disjoint_sets/">Disjoint Sets</a></li><li><a class="toctext" href="../heaps/">Heaps</a></li><li><a class="toctext" href="../ordered_containers/">OrderedDicts and OrderedSets</a></li><li><a class="toctext" href="../default_dict/">DefaultDict and DefaultOrderedDict</a></li><li><a class="toctext" href="../trie/">Trie</a></li><li><a class="toctext" href="../linked_list/">Linked List</a></li><li><a class="toctext" href="../mutable_linked_list/">Mutable Linked List</a></li><li><a class="toctext" href="../intset/">DataStructures.IntSet</a></li><li><a class="toctext" href="../sorted_containers/">Sorted Containers</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href>Accumulators and Counters</a></li></ul><a class="edit-page" href="https://github.com/JuliaCollections/DataStructures.jl/blob/master/docs/src/accumulators.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Accumulators and Counters</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Accumulators-and-Counters-1" href="#Accumulators-and-Counters-1">Accumulators and Counters</a></h1><p>A accumulator, as defined below, is a data structure that maintains an accumulated number for each key. This is a counter when the accumulated values reflect the counts:</p><pre><code class="language-julia">struct Accumulator{K, V&lt;:Number}
+    map::Dict{K, V}
+end</code></pre><h2><a class="nav-anchor" id="Constructors-1" href="#Constructors-1">Constructors</a></h2><p>There are different ways to construct an accumulator/counter:</p><pre><code class="language-julia">a = Accumulator{K, V}()  # construct an accumulator with key-type K and
+                         # accumulated value type V
+
+a = Accumulator(dict)    # construct an accumulator from a dictionary
+
+a = counter(K)           # construct a counter, i.e. an accumulator with
+                         # key type K and value type Int
+
+a = counter(dict)        # construct a counter from a dictionary
+
+a = counter(seq)         # construct a counter by counting keys in a sequence
+
+a = counter(gen)         # construct a counter by counting keys in a generator</code></pre><h2><a class="nav-anchor" id="Usage-1" href="#Usage-1">Usage</a></h2><p>Usage of an accumulator/counter:</p><pre><code class="language-julia"># let a and a2 be accumulators/counters
+
+a[x]             # get the current value/count for x,
+                 # if x was not added to a, it returns zero.
+
+a[x] = v         # sets the current value/count for `x` to `v`
+
+inc!(a, x)       # increment the value/count for x by 1
+inc!(a, x, v)    # increment the value/count for x by v
+
+dec!(a, x)       # decrement the value/count for x by 1
+dec!(a, x, v)    # decrement the value/count for x by v
+
+reset!(a, x)     # remove a key x from a, and return its current value
+
+merge!(a, a2)    # add all counts from a2 to a1
+merge(a, a2)     # return a new accumulator/counter that combines the
+                 # values/counts in both a and a2
+                 # `a[v] + a2[v]` over all `v` in the universe</code></pre><p><code>merge</code> is the multiset sum operation (sometimes written ⊎).</p><h2><a class="nav-anchor" id="Use-as-a-multiset-1" href="#Use-as-a-multiset-1">Use as a multiset</a></h2><p>An <code>Accumulator{T, &lt;:Integer} where T</code> such as is returned by <code>counter</code>, is a <a href="https://en.wikipedia.org/wiki/Multiset">multiset</a> or Bag, of objects of type <code>T</code>. If the count type is not an integer but a more general real number, then this is a form of fuzzy multiset. We support a number of operations supporting the use of <code>Accumulator</code>s as multisets.</p><p>Note that these operations will throw an error if the accumulator has negative or zero counts for any items.</p><pre><code class="language-julia">
+setdiff(a1, a2)          # The opposite of `merge` (i.e. multiset sum),
+                         # returns a new multiset with the count of items in `a2` removed from `a1`, down to a minimum of zero
+                         # `max(a1[v] - a2[v], 0)` over all `v` in the universe
+
+
+union(a1, a2)            # multiset union (sometimes called maximum, or lowest common multiple)
+                         # returns a new multiset with the counts being the higher of those in `a1` or `a2`.
+                         # `max(a1[v], a2[v])` over all `v` in the universe
+
+intersect(a1, a2)        # multiset intersection (sometimes called infimum or greatest common divisor)
+                         # returns a new multiset with the counts being the lowest of those in `a1` or `a2`.
+                         # Note that this means things not occurring in both with be removed (count zero).
+                         # `min(a1[v], a2[v])` over all `v` in the universe</code></pre><footer><hr/><a class="previous" href="../fenwick/"><span class="direction">Previous</span><span class="title">Fenwick Tree</span></a><a class="next" href="../disjoint_sets/"><span class="direction">Next</span><span class="title">Disjoint Sets</span></a></footer></article></body></html>
