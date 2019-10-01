@@ -6,5 +6,4 @@ The idea is to have one **packed** `Vector` storing all the `Int`s contained in 
 Most behavior is similar to a normal `IntSet`, however `collect`, `first` and `last` are with respected to the **packed** vector, in which the ordering is not guaranteed. 
 The **reverse** `Vector` is paged, meaning that it is a `Vector{Vector{Int}}` where each of the `Vector{Int}`s has the length of one memory page of `Int`s. Every time an index that was not yet in the range of the already present pages, a new one will be created and added to the **reverse**, allowing for dynamical growth. 
 Popping the last `Int` of a particular page will automatically trigger `cleanup!` which cleans up the memory of any pages that aren't in use. 
-This is a pretty slow operation, to circumvent this one can use `dirty_pop!` which will not trigger the cleanup. The `cleanup!` call adds approximately 30% overhead if nothing actually needs to be cleaned.
-The `complement` of a `SparseIntSet` is defined with respect to the pages that are in use.
+The `complement` of a `SparseIntSet` is defined with respect to the pages that have ever been used.
