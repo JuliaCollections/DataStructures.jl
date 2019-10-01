@@ -25,3 +25,5 @@ empty!(s::Stack) = (empty!(s.store); s)
 iterate(st::Stack, s...) = iterate(reverse_iter(st.store), s...)
 
 reverse_iter(s::Stack{T}) where {T} = DequeIterator{T}(s.store)
+
+==(x::Stack, y::Stack) = x.store == y.store

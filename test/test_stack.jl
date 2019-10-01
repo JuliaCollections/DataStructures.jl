@@ -38,6 +38,21 @@
             @test isempty(s) == (i == n)
             @test length(s) == n - i
         end
+        
+        s = Stack{Int}()
+        t = Stack{Int}()
+        
+        @test s == t
+        push!(s, 10)
+        @test s != t
+        push!(t, 10)
+        @test s == t
+        push!(t, 20)
+        @test s != t
+        
+        r = Stack{Float32}()
+        push!(r, 10)
+        @test s == r
     end
 
     @testset "empty!" begin
