@@ -41,6 +41,28 @@
             @test isempty(s) == (i == n)
             @test length(s) == n - i
         end
+
+        s = Queue{Int}()
+        for i = 1 : n
+            enqueue!(s, i)
+        end
+        @test !isempty(s)
+        empty!(s)
+        @test isempty(s)
+
+        t = Queue{Int}()
+        
+        @test s == t
+        enqueue!(s, 10)
+        @test s != t
+        enqueue!(t, 10)
+        @test s == t
+        enqueue!(t, 20)
+        @test s != t
+
+        r = Queue{Float32}()
+        enqueue!(r, 10)
+        @test s == r
     end
 
     @testset "iter should return a FIFO collection" begin

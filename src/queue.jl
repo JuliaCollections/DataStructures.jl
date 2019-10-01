@@ -36,8 +36,12 @@ Removes an element from the front of the queue `s` and returns it.
 """
 dequeue!(s::Queue) = popfirst!(s.store)
 
+empty!(s::Queue) = (empty!(s.store); s)
+
 # Iterators
 
 iterate(q::Queue, s...) = iterate(q.store, s...)
 
 reverse_iter(q::Queue) = reverse_iter(q.store)
+
+==(x::Queue, y::Queue) = x.store == y.store
