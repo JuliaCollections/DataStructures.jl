@@ -79,7 +79,12 @@ function push!(s::SparseIntSet, i::Integer)
     return s
 end
 
-push!(s::SparseIntSet, is::Integer...) = (for i in is; push!(s, i); end; return s)
+function push!(s::SparseIntSet, is::Integer...)
+    for i in is
+        push!(s, i)
+    end
+    return s
+end
 
 @propagate_inbounds function pop!(s::SparseIntSet)
     if isempty(s)
@@ -201,37 +206,12 @@ complement!(a::SparseIntSet) = copy!(a, complement(a))
 
 function findfirst_packed_id(i, s::SparseIntSet)
     pageid, offset = pageid_offset(s, i)
-    if isassigned(s.reverse, pageid)
-        @inbounds id = s.reverse[pageid][offset]
-        return id
+    if pageid > length(s.counters) || s.counters[pageid] == 0
+        return 0
     end
-    return 0
+    @inbounds id = s.reverse[pageid][offset]
+    return id
 end
-
-function cleanup!(s::SparseIntSet)
-    last_page_id = findlast(!iszero, s.counters)
-    if last_page_id === nothing
-        return empty!(s)
-    elseif any(iszero, s.counters)
-        # shrink anything off the end
-        resize!(s.counters, last_page_id)
-        resize!(s.reverse, last_page_id)
-
-        # Now we need to undef any page in `reverse` that is empty.
-        # so we are allocating new pages, and then will copy it across.
-        # since can't assign `undef` directly.
-        new_pages = Vector{Vector{Int}}(undef, last_page_id)
-        for i in eachindex(s.reverse)
-            isused =  s.counters[i] !== 0 && isassigned(s.reverse, i)
-            if isused
-                new_pages[i] = s.reverse[i]
-            end
-        end
-        s.reverse .= new_pages
-        return s
-    end
-end
-
 
 collect(s::SparseIntSet) = s.packed
 
@@ -240,9 +220,9 @@ mutable struct ZippedSparseIntSetIterator{VT,IT}
     valid_sets::VT
     shortest_set::SparseIntSet
     excluded_sets::IT
-    function ZippedSparseIntSetIterator(valid_sets::SparseIntSet...;exclude::NTuple{N, SparseIntSet}=()) where{N}
-        shortest = valid_sets[findmin(map(x->length(x), valid_sets))[2]]
-        new{typeof(valid_sets), typeof(exclude)}(zero(eltype(shortest)), valid_sets, shortest, exclude)
+    function ZippedSparseIntSetIterator(valid_sets::SparseIntSet...; exclude::NTuple{N, SparseIntSet}=()) where{N}
+        shortest = valid_sets[findmin(map(length, valid_sets))[2]]
+        new{typeof(valid_sets), NTuple{N, SparseIntSet}}(0, valid_sets, shortest, exclude)
     end
 end
 
