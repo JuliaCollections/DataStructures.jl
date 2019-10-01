@@ -43,6 +43,34 @@
         end
     end
 
+    @testset "==" begin
+        t = Queue{Int}()
+        s = Queue{Int}()
+        
+        @test s == t
+        enqueue!(s, 10)
+        @test s != t
+        enqueue!(t, 10)
+        @test s == t
+        enqueue!(t, 20)
+        @test s != t
+
+        @testset "different types" begin
+            r = Queue{Float32}()
+            enqueue!(r, 10)
+            @test s == r
+        end
+    end
+    
+    @testset "emptyness" begin
+        s = Queue{Int}()
+        enqueue!(s, 1)
+        enqueue!(s, 3)
+        @test !isempty(s)
+        empty!(s)
+        @test isempty(s)
+    end
+    
     @testset "iter should return a FIFO collection" begin
         q = Queue{Int}(10)
         n = 100
