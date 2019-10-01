@@ -201,10 +201,8 @@ import DataStructures: SparseIntSet
         @test s == SparseIntSet([1, 2, 100])
         push!(s, 5000)
         push!(s, 2000)
-        dirty_pop!(s, 5000)
-        @test length(s.reverse) == ceil(5000/DataStructures.INT_PER_PAGE)
-        cleanup!(s)
-        @test length(s.reverse) == ceil(2000/DataStructures.INT_PER_PAGE)
+        pop!(s, 5000)
+        @test s.reverse[end] === DataStructures.NULL_INT_PAGE
 
     end
 
