@@ -1,6 +1,7 @@
 import Base: @propagate_inbounds, zip
 
 const INT_PER_PAGE = div(ccall(:jl_getpagesize, Clong, ()), sizeof(Int))
+# we use this to mark pages not in use, it must never be written to.
 const NULL_INT_PAGE = Vector{Int}()
 
 #TODO: Batch creation and allocation
@@ -56,10 +57,10 @@ function push!(s::SparseIntSet, i::Integer)
     plen = length(pages)
 
     if pageid > plen
-        #create new null pages up to pageid and a virgin one at pageid
+        # Create new null pages up to pageid and fresh (zero-filled) one at pageid
         sizehint!(pages, pageid)
         sizehint!(s.counters, pageid)
-        for i = 1:pageid - plen - 1
+        for i in 1:pageid - plen - 1
             push!(pages, NULL_INT_PAGE)
             push!(s.counters, 0)
         end
@@ -213,7 +214,7 @@ function findfirst_packed_id(i, s::SparseIntSet)
     return id
 end
 
-collect(s::SparseIntSet) = s.packed
+collect(s::SparseIntSet) = copy(s.packed)
 
 mutable struct ZippedSparseIntSetIterator{VT,IT}
     current_id::Int
