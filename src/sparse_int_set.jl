@@ -4,7 +4,6 @@ const INT_PER_PAGE = div(ccall(:jl_getpagesize, Clong, ()), sizeof(Int))
 # we use this to mark pages not in use, it must never be written to.
 const NULL_INT_PAGE = Vector{Int}()
 
-#TODO: Batch creation and allocation
 mutable struct SparseIntSet
     packed ::Vector{Int}
     reverse::Vector{Vector{Int}}
@@ -32,7 +31,16 @@ copy(s::SparseIntSet) = copy!(SparseIntSet(), s)
 
 function copy!(to::SparseIntSet, from::SparseIntSet)
     to.packed = copy(from.packed)
-    to.reverse = deepcopy(from.reverse)
+    #we want to keep the null pages === NULL_INT_PAGE
+    resize!(to.reverse, length(from.reverse))
+    for i in eachindex(from.reverse)
+        page = from.reverse[i]
+        if page === NULL_INT_PAGE
+            to.reverse[i] = NULL_INT_PAGE
+        else
+            to.reverse[i] = copy(from.reverse[i])
+        end
+    end
     to.counters = copy(from.counters)
     return to
 end
@@ -44,7 +52,12 @@ end
 
 function in(i, s::SparseIntSet)
     pageid, offset = pageid_offset(s, i)
-    isassigned(s.reverse, pageid) && @inbounds s.reverse[pageid][offset] != 0
+    if pageid > length(s.reverse)
+        return false
+    else
+        page = @inbounds s.reverse[pageid]
+        return page !== NULL_INT_PAGE &&  @inbounds page[offset] != 0
+    end
 end
 
 length(s::SparseIntSet) = length(s.packed)
@@ -106,13 +119,13 @@ end
         throw(BoundsError(s, id))
     end
     @inbounds begin
-        packed_endid           = s.packed[end] 
+        packed_endid = s.packed[end] 
         from_page, from_offset = pageid_offset(s, id)
-        to_page, to_offset     = pageid_offset(s, packed_endid)
+        to_page, to_offset = pageid_offset(s, packed_endid)
 
-        packed_id                         = s.reverse[from_page][from_offset]
-        s.packed[packed_id]               = packed_endid
-        s.reverse[to_page][to_offset]     = s.reverse[from_page][from_offset]
+        packed_id = s.reverse[from_page][from_offset]
+        s.packed[packed_id] = packed_endid
+        s.reverse[to_page][to_offset] = s.reverse[from_page][from_offset]
         s.reverse[from_page][from_offset] = 0
         s.counters[from_page] -= 1
         pop!(s.packed)
@@ -174,33 +187,6 @@ function ==(s1::SparseIntSet, s2::SparseIntSet)
 end
 
 issubset(a::SparseIntSet, b::SparseIntSet) = isequal(a, intersect(a, b))
-
-complement(a::SparseIntSet) = complement!(SparseIntSet(), a)
-function complement!(b::SparseIntSet, a::SparseIntSet)
-    empty!(b)
-    for i in eachindex(a.reverse)
-        if a.reverse[i] === NULL_INT_PAGE
-            new_ids = ((i - 1) * INT_PER_PAGE + 1) : (i * INT_PER_PAGE)
-            append!(b.packed, new_ids)
-            if i > length(b.reverse)
-                push!(b.reverse, collect(new_ids)) 
-                push!(b.counters, INT_PER_PAGE)
-            else
-                b.reverse[i] = collect(new_ids)
-                b.counters[i] = INT_PER_PAGE
-            end
-        else
-            for offset in 1:INT_PER_PAGE
-                if a.reverse[i][offset] == 0
-                    push!(b, INT_PER_PAGE*(i-1) + offset)
-                end
-            end
-        end
-    end
-    return b
-end
-#Can this be optimized?
-complement!(a::SparseIntSet) = copy!(a, complement(a))
 
 <(a::SparseIntSet, b::SparseIntSet) = ( a<=b ) && !isequal(a, b)
 <=(a::SparseIntSet, b::SparseIntSet) = issubset(a, b)

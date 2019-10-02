@@ -31,6 +31,35 @@ import DataStructures: SparseIntSet
         @test_throws ArgumentError first(SparseIntSet())
         @test_throws ArgumentError last(SparseIntSet())
         t = copy(s)
+        s = SparseIntSet()
+        push!(s, 1, 2, 100)
+        @test 1 in s
+        @test !(3 in s)
+        @test 2 in s
+        @test 100 in s
+        @test !(101 in s)
+        @test !(1000 in s)
+        @test first(s) == 1
+        @test last(s) == 100
+        @test s == SparseIntSet([1, 2, 100])
+        push!(s, 1000)
+        @test [i for i in s] == [1, 2, 100, 1000]
+        @test pop!(s) == 1000
+        @test s == SparseIntSet([1, 2, 100])
+        push!(s, 5000)
+        push!(s, 2000)
+        pop!(s, 5000)
+        @test s.reverse[end] === DataStructures.NULL_INT_PAGE
+        b = 1:1000
+        s = SparseIntSet(b)
+        @test collect(s) == collect(b)
+        @test length(s) == length(b)
+        @test pop!(s, 100) == 100
+        @test_throws BoundsError pop!(s, 100)
+        @test pop!(s, 100, 1) == 1
+        @test pop!(s, 99, 1) == 99
+        @test !in(500000, s)
+        @test !in(99, s)
     end
 
     @testset "setdiff / symdiff" begin
@@ -51,23 +80,23 @@ import DataStructures: SparseIntSet
     @testset "Copy, copy!, empty" begin
         s1 = SparseIntSet([1,2,3])
         s2 = empty(s1)
+        push!(s2, 10000)
+        @test !in(10000, s1)
         copy!(s2, s1)
+        @test !in(10000, s2)
+        push!(s2, 10000)
+        @test !in(10000, s1)
         s3 = copy(s2)
+        push!(s3, 1000)
+        @test !in(1000, s2)
+        pop!(s3, 1000)
+        pop!(s2, 10000)
+        @test in(10000, s3)
+        pop!(s3, 10000)
         @test s3 == s2 == s1
         @test collect(s3) == collect(s2) == [1,2,3]
-    end
 
-    @testset "complement! / pop!" begin
-        s1 = SparseIntSet([1,2,3])
-        c1 = complement!(SparseIntSet([1,2,3]))
-        
-        c2 = empty(c1)
-        copy!(c2, c1)
-        c3 = copy(c2)
-        c4 = complement(s1)
-        @test c1 == c2 == c3 == c4
-        @test last(c1) == DataStructures.INT_PER_PAGE
-        @test last(complement(SparseIntSet([1,2,3]))) == DataStructures.INT_PER_PAGE
+
     end
 
     @testset "Push, union" begin
@@ -84,18 +113,6 @@ import DataStructures: SparseIntSet
         union!(s3, [1, 606, 1000])
         s4 = union(SparseIntSet([1, 100, 1000]), SparseIntSet([10, 100, 606]))
         @test s1 == s2 == s3 == s4
-
-        c1 = complement(s1)
-        @test !(1 in c1)
-        push!(c1, 1)
-        @test 1 in c1
-        push!(c1, 10, 100, 10)
-        @test collect(complement(c1)) == [606, 1000]
-        c2 = complement(SparseIntSet([606, 1000, 2000]))
-        @test c2 === union!(c2, c1)
-        c3 = union!(complement(SparseIntSet([10, 606, 1000])), complement(SparseIntSet([2, 606, 1000, 2000])))
-        @test c3 == union(complement(SparseIntSet([2, 606, 1000, 2000])), complement(SparseIntSet([10, 606, 1000])))
-        @test c2 == c3
     end
 
     @testset "pop!, delete!" begin
@@ -117,41 +134,17 @@ import DataStructures: SparseIntSet
         @test collect(s) == [3]
         empty!(s)
         @test isempty(s)
-
-        c = complement(SparseIntSet([1]))
-        push!(c, 1)
-        @test pop!(c, 1) == 1
-        @test !(1 in c)
-        @test_throws BoundsError pop!(c, 1)
-        @test_throws ArgumentError pop!(c, -1)
-        @test_throws ArgumentError pop!(c, -1, 1)
-        # @test_throws ArgumentError pop!(()->throw(ErrorException()), c, -1)
-        @test pop!(c, 1, 0) == 0
-        @test popfirst!(c) == 2
-        @test popfirst!(c) == DataStructures.INT_PER_PAGE
-        @test empty!(c) == SparseIntSet()
     end
 
     @testset "Intersect" begin
         @test isempty(intersect(SparseIntSet()))
         @test isempty(intersect(SparseIntSet(1:10), SparseIntSet()))
         @test isempty(intersect(SparseIntSet(), SparseIntSet(1:10)))
-        @test isempty(intersect(SparseIntSet(), complement(SparseIntSet())))
-        @test isempty(intersect(SparseIntSet(), complement(SparseIntSet(1:10))))
-        @test isempty(intersect(complement(SparseIntSet()), SparseIntSet()))
-        @test isempty(intersect(complement(SparseIntSet(1:10)), SparseIntSet()))
 
         @test intersect(SparseIntSet([1,2,3])) == SparseIntSet([1,2,3])
-        @test intersect(complement!(SparseIntSet(1)), SparseIntSet(2)) ==
-              intersect(SparseIntSet(2), complement!(SparseIntSet(1))) == SparseIntSet(2)
 
         @test intersect(SparseIntSet(1:7), SparseIntSet(3:10)) ==
               intersect(SparseIntSet(3:10), SparseIntSet(1:7)) == SparseIntSet(3:7)
-        @test intersect(complement(SparseIntSet([1:2; 11:16])), SparseIntSet(1:7)) ==
-              intersect(SparseIntSet(1:7), complement(SparseIntSet([1:2; 11:16]))) == SparseIntSet(3:7)
-
-        @test intersect(complement(SparseIntSet(5:12)), complement(SparseIntSet(7:10))) ==
-              intersect(complement(SparseIntSet(7:10)), complement(SparseIntSet(5:12))) == complement(SparseIntSet(5:12))
 
         @test intersect!(SparseIntSet(1:10), SparseIntSet(1:4), 1:5, [1,2,10]) == SparseIntSet(1:2)
     end
@@ -163,14 +156,8 @@ import DataStructures: SparseIntSet
         @test s1 == s2 == SparseIntSet(2:2:100)
 
         s1 = SparseIntSet(1:10)
-        s2 = complement(SparseIntSet(3:5))
+        s2 = SparseIntSet([1:2; 6:100])
         @test setdiff(s1, s2) == setdiff(s1, [1:2; 6:100]) == SparseIntSet(3:5)
-        @test isempty(setdiff(complement(SparseIntSet()), complement(SparseIntSet())))
-        @test setdiff(complement(SparseIntSet(4)), complement(SparseIntSet(3:5))) == SparseIntSet((3,5))
-        @test setdiff(complement(SparseIntSet(1:5)), complement(SparseIntSet(3:10))) == SparseIntSet([6, 7, 8, 9, 10])
-        @test setdiff(complement(SparseIntSet(2:2:10)), SparseIntSet(1:5)) == complement(SparseIntSet([1:5; 6:2:10]))
-        @test setdiff!(complement(SparseIntSet(5)), complement(SparseIntSet(5))) == SparseIntSet()
-        @test setdiff!(complement(SparseIntSet(1:2:10)), complement(SparseIntSet(1:10))) == SparseIntSet(2:2:10)
     end
 
     @testset "Subsets, equality" begin
@@ -178,45 +165,7 @@ import DataStructures: SparseIntSet
         @test !(SparseIntSet(2:2:10) < SparseIntSet(2:2:10))
         @test SparseIntSet(2:2:10) <= SparseIntSet(2:10)
         @test SparseIntSet(2:2:10) <= SparseIntSet(2:2:10)
-        @test SparseIntSet(1) < complement!(SparseIntSet([5]))
-        @test SparseIntSet(1) <= complement!(SparseIntSet([20]))
-        @test !(SparseIntSet(1) < complement!(SparseIntSet(1)))
     end
-
-    @testset "other 1" begin
-        s = SparseIntSet()
-        push!(s, 1, 2, 100)
-        @test 1 in s
-        @test !(3 in s)
-        @test 2 in s
-        @test 100 in s
-        @test !(101 in s)
-        @test !(1000 in s)
-        @test first(s) == 1
-        @test last(s) == 100
-        @test s == SparseIntSet([1, 2, 100])
-        push!(s, 1000)
-        @test [i for i in s] == [1, 2, 100, 1000]
-        @test pop!(s) == 1000
-        @test s == SparseIntSet([1, 2, 100])
-        push!(s, 5000)
-        push!(s, 2000)
-        pop!(s, 5000)
-        @test s.reverse[end] === DataStructures.NULL_INT_PAGE
-
-    end
-
-    @testset "other 2" begin
-        b = 1:1000
-        s = SparseIntSet(b)
-        @test collect(s) == collect(b)
-        @test length(s) == length(b)
-        @test pop!(s, 100) == 100
-        @test_throws BoundsError pop!(s, 100)
-        @test pop!(s, 100, 1) == 1
-        @test pop!(s, 99, 1) == 99
-    end
-
     @testset "zip" begin
     	a = SparseIntSet([1,2,3,5, 6, 9, 12, 24])
     	b = SparseIntSet([6, 12, 24, 1000, 2000, 3000])
