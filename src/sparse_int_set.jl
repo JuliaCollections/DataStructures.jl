@@ -200,14 +200,13 @@ end
 
 collect(s::SparseIntSet) = copy(s.packed)
 
-mutable struct ZippedSparseIntSetIterator{VT,IT}
-    current_id::Int
+struct ZippedSparseIntSetIterator{VT,IT}
     valid_sets::VT
     shortest_set::SparseIntSet
     excluded_sets::IT
     function ZippedSparseIntSetIterator(valid_sets::SparseIntSet...; exclude::NTuple{N, SparseIntSet}=()) where{N}
         shortest = valid_sets[findmin(map(length, valid_sets))[2]]
-        new{typeof(valid_sets), NTuple{N, SparseIntSet}}(0, valid_sets, shortest, exclude)
+        new{typeof(valid_sets), NTuple{N, SparseIntSet}}(valid_sets, shortest, exclude)
     end
 end
 
@@ -237,14 +236,14 @@ Base.@propagate_inbounds function iterate(it::ZippedSparseIntSetIterator, state=
         return nothing
     end
     id, tids = id_tids(it, state)
+    il = length(it)
     while any(iszero, tids) || in_excluded(id, it)
         state += 1
-        if state > length(it)
+        if state > il
             return nothing
         end
 
         id, tids = id_tids(it, state)
     end
-    it.current_id = id
     return tids, state + 1
 end
