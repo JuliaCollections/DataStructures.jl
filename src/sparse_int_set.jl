@@ -1,5 +1,3 @@
-import Base: @propagate_inbounds, zip
-
 const INT_PER_PAGE = div(ccall(:jl_getpagesize, Clong, ()), sizeof(Int))
 # we use this to mark pages not in use, it must never be written to.
 const NULL_INT_PAGE = Vector{Int}()
@@ -100,7 +98,7 @@ function push!(s::SparseIntSet, is::Integer...)
     return s
 end
 
-@propagate_inbounds function pop!(s::SparseIntSet)
+Base.@propagate_inbounds function pop!(s::SparseIntSet)
     if isempty(s)
         throw(ArgumentError("Cannot pop an empty set."))
     end
@@ -112,7 +110,7 @@ end
     return id
 end
 
-@propagate_inbounds function pop!(s::SparseIntSet, id::Integer)
+Base.@propagate_inbounds function pop!(s::SparseIntSet, id::Integer)
     id < 0 && throw(ArgumentError("Int to pop needs to be positive."))
 
     @boundscheck if !in(id, s)
@@ -213,7 +211,7 @@ mutable struct ZippedSparseIntSetIterator{VT,IT}
     end
 end
 
-zip(s::SparseIntSet...;kwargs...) = ZippedSparseIntSetIterator(s...;kwargs...)
+Base.zip(s::SparseIntSet...;kwargs...) = ZippedSparseIntSetIterator(s...;kwargs...)
 
 @inline length(it::ZippedSparseIntSetIterator) = length(it.shortest_set)
 
@@ -234,7 +232,7 @@ end
     return id, map(x -> findfirst_packed_id(id, x), it.valid_sets)
 end
 
-@propagate_inbounds function iterate(it::ZippedSparseIntSetIterator, state=1)
+Base.@propagate_inbounds function iterate(it::ZippedSparseIntSetIterator, state=1)
     if state > length(it)
         return nothing
     end
