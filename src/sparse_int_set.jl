@@ -232,14 +232,14 @@ end
 end
 
 Base.@propagate_inbounds function iterate(it::ZippedSparseIntSetIterator, state=1)
-    if state > length(it)
+    iterator_length = length(it)
+    if state > iterator_length
         return nothing
     end
     id, tids = id_tids(it, state)
-    il = length(it)
     while any(iszero, tids) || in_excluded(id, it)
         state += 1
-        if state > il
+        if state > iterator_length
             return nothing
         end
 
