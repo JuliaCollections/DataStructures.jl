@@ -187,10 +187,6 @@ call, and _c_ denotes the time needed to compare two keys.
 getindex(m::SortedDict, k_)
 ```
 
-```@docs
-find(m::SortedDict, k_)
-```
-
     deref((sc, st))
 
 Argument `(sc,st)` is a token (i.e., `sc` is a container and `st` is
@@ -645,10 +641,6 @@ valtype(sc::SortedDict)
 
 ```@docs
 ordtype(sc::SortedDict)
-```
-
-```@docs
-similar(sc::SortedDict)
 ```
 
 ```@docs
