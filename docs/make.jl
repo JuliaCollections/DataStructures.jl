@@ -1,9 +1,9 @@
 using Documenter
 using DataStructures
 
+DocMeta.setdocmeta!(DataStructures, :DocTestSetup, :(using DataStructures); recursive=true)
 
 makedocs(
-    format = :html,
     sitename = "DataStructures.jl",
     pages = [
         "index.md",
@@ -24,7 +24,8 @@ makedocs(
         "intset.md",
         "sorted_containers.md",
     ],
-    modules = [DataStructures]
+    modules = [DataStructures],
+    format = Documenter.HTML()
 )
 
 deploydocs(

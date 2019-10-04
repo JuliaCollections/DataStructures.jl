@@ -1,3 +1,7 @@
+```@meta
+DocTestSetup = :(using DataStructures)
+```
+
 # Priority Queue
 
 The `PriorityQueue` type provides a basic priority queue implementation
@@ -23,21 +27,25 @@ inserted and priorities accessed or changed using indexing notation.
 
 Examples:
 
-```julia
+```jldoctest
 julia> # Julia code
        pq = PriorityQueue();
 
 julia> # Insert keys with associated priorities
        pq["a"] = 10; pq["b"] = 5; pq["c"] = 15; pq
-DataStructures.PriorityQueue{Any,Any,Base.Order.ForwardOrdering} with 3 entries:
-  "c" => 15
+PriorityQueue{Any,Any,Base.Order.ForwardOrdering} with 3 entries:
   "b" => 5
   "a" => 10
+  "c" => 15
 
 julia> # Change the priority of an existing key
        pq["a"] = 0; pq
-DataStructures.PriorityQueue{Any,Any,Base.Order.ForwardOrdering} with 3 entries:
-  "c" => 15
-  "b" => 5
+PriorityQueue{Any,Any,Base.Order.ForwardOrdering} with 3 entries:
   "a" => 0
+  "b" => 5
+  "c" => 15
+```
+
+```@meta
+DocTestSetup = nothing
 ```
