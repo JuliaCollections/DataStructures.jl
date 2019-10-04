@@ -1,6 +1,7 @@
 using Documenter
 using DataStructures
 
+DocMeta.setdocmeta!(DataStructures, :DocTestSetup, :(using DataStructures); recursive=true)
 
 makedocs(
     sitename = "DataStructures.jl",

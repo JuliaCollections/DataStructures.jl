@@ -16,11 +16,11 @@ priorities, with the addition of a `dequeue!` function to remove the
 lowest priority element.
 
 ```jldoctest
-julia> a = PriorityQueue(["a","b","c"],[2,3,1],Base.Order.Forward)
+julia> PriorityQueue(Base.Order.Forward, "a" => 2, "b" => 3, "c" => 1)
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
   "c" => 1
-  "b" => 3
   "a" => 2
+  "b" => 3
 ```
 """
 struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
@@ -218,15 +218,15 @@ Insert the a key `k` into a priority queue `pq` with priority `v`.
 ```jldoctest
 julia> a = PriorityQueue(PriorityQueue("a"=>1, "b"=>2, "c"=>3))
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
-  "c" => 3
-  "b" => 2
   "a" => 1
+  "b" => 2
+  "c" => 3
 
 julia> enqueue!(a, "d"=>4)
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 4 entries:
-  "c" => 3
-  "b" => 2
   "a" => 1
+  "b" => 2
+  "c" => 3
   "d" => 4
 ```
 """
@@ -257,19 +257,19 @@ enqueue!(pq::PriorityQueue{K,V}, kv) where {K,V} = enqueue!(pq, Pair{K,V}(kv.fir
 Remove and return the lowest priority key from a priority queue.
 
 ```jldoctest
-julia> a = PriorityQueue(["a","b","c"],[2,3,1],Base.Order.Forward)
+julia> a = PriorityQueue(Base.Order.Forward, ["a" => 2, "b" => 3, "c" => 1])
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
   "c" => 1
-  "b" => 3
   "a" => 2
+  "b" => 3
 
 julia> dequeue!(a)
 "c"
 
 julia> a
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
-  "b" => 3
   "a" => 2
+  "b" => 3
 ```
 """
 function dequeue!(pq::PriorityQueue)
@@ -297,19 +297,19 @@ end
 Remove and return a the lowest priority key and value from a priority queue as a pair.
 
 ```jldoctest
-julia> a = PriorityQueue(["a","b","c"],[2,3,1],Base.Order.Forward)
+julia> a = PriorityQueue(Base.Order.Forward, "a" => 2, "b" => 3, "c" => 1)
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
   "c" => 1
-  "b" => 3
   "a" => 2
+  "b" => 3
 
 julia> dequeue_pair!(a)
 "c" => 1
 
 julia> a
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
-  "b" => 3
   "a" => 2
+  "b" => 3
 ```
 """
 function dequeue_pair!(pq::PriorityQueue)
@@ -338,10 +338,10 @@ Delete the mapping for the given key in a priority queue, and return the priorit
 julia> q = PriorityQueue(Base.Order.Forward, "a"=>2, "b"=>3, "c"=>1)
 PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
   "c" => 1
-  "b" => 3
   "a" => 2
+  "b" => 3
 julia> delete!(q, "b")
-DataStructures.PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
+PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
   "c" => 1
   "a" => 2
 ```
@@ -381,7 +381,7 @@ function merge!(combine::Function, d::AbstractDict, other::PriorityQueue)
     return d
 end
 
-# Opaque not to be exported. 
+# Opaque not to be exported.
 mutable struct _PQIteratorState{K, V, O <: Ordering}
     pq::PriorityQueue{K, V, O}
     _PQIteratorState{K, V, O}(pq::PriorityQueue{K, V, O}) where {K, V, O <: Ordering} = new(pq)
@@ -400,7 +400,7 @@ _iterate(pq::PriorityQueue, ::Nothing) = nothing
 iterate(pq::PriorityQueue, ::Nothing) = nothing
 
 function iterate(pq::PriorityQueue, ordered::Bool=true)
-    if ordered 
+    if ordered
         isempty(pq) && return nothing
         state = _PQIteratorState(PriorityQueue(copy(pq.xs), pq.o, copy(pq.index)))
         return dequeue_pair!(state.pq), state
@@ -413,6 +413,5 @@ function iterate(pq::PriorityQueue, state::_PQIteratorState)
     isempty(state.pq) && return nothing
     return dequeue_pair!(state.pq), state
 end
-    
-iterate(pq::PriorityQueue, i) = _iterate(pq, iterate(pq.index, i))
 
+iterate(pq::PriorityQueue, i) = _iterate(pq, iterate(pq.index, i))
