@@ -6,19 +6,19 @@ enqueue!(pq, k=&gt;v)        # (same, using Pairs)
 dequeue!(pq)              # remove and return the lowest priority key
 dequeue_pair!(pq)         # remove and return the lowest priorty key and value
 peek(pq)                  # return the lowest priority key and value without removing it
-delete!(pq, k)            # delete the mapping for the given key in a priority queue, and return the priority queue.</code></pre><p><code>PriorityQueue</code> also behaves similarly to a <code>Dict</code> in that keys can be inserted and priorities accessed or changed using indexing notation.</p><p>Examples:</p><pre><code class="language-julia">julia&gt; # Julia code
+delete!(pq, k)            # delete the mapping for the given key in a priority queue, and return the priority queue.</code></pre><p><code>PriorityQueue</code> also behaves similarly to a <code>Dict</code> in that keys can be inserted and priorities accessed or changed using indexing notation.</p><p>Examples:</p><pre><code class="language-julia-repl">julia&gt; # Julia code
        pq = PriorityQueue();
 
 julia&gt; # Insert keys with associated priorities
        pq[&quot;a&quot;] = 10; pq[&quot;b&quot;] = 5; pq[&quot;c&quot;] = 15; pq
-DataStructures.PriorityQueue{Any,Any,Base.Order.ForwardOrdering} with 3 entries:
-  &quot;c&quot; =&gt; 15
+PriorityQueue{Any,Any,Base.Order.ForwardOrdering} with 3 entries:
   &quot;b&quot; =&gt; 5
   &quot;a&quot; =&gt; 10
+  &quot;c&quot; =&gt; 15
 
 julia&gt; # Change the priority of an existing key
        pq[&quot;a&quot;] = 0; pq
-DataStructures.PriorityQueue{Any,Any,Base.Order.ForwardOrdering} with 3 entries:
-  &quot;c&quot; =&gt; 15
+PriorityQueue{Any,Any,Base.Order.ForwardOrdering} with 3 entries:
+  &quot;a&quot; =&gt; 0
   &quot;b&quot; =&gt; 5
-  &quot;a&quot; =&gt; 0</code></pre><footer><hr/><a class="previous" href="../stack_and_queue/"><span class="direction">Previous</span><span class="title">Stack and Queue</span></a><a class="next" href="../fenwick/"><span class="direction">Next</span><span class="title">Fenwick Tree</span></a></footer></article></body></html>
+  &quot;c&quot; =&gt; 15</code></pre><footer><hr/><a class="previous" href="../stack_and_queue/"><span class="direction">Previous</span><span class="title">Stack and Queue</span></a><a class="next" href="../fenwick/"><span class="direction">Next</span><span class="title">Fenwick Tree</span></a></footer></article></body></html>
