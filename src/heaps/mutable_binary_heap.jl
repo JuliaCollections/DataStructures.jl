@@ -165,25 +165,25 @@ mutable struct MutableBinaryHeap{VT, Comp} <: AbstractMutableHeap{VT,Int}
         new{VT, Comp}(Comp(), nodes, node_map)
     end
 
-    function MutableBinaryHeap{VT, Comp}(xs::AbstractVector{VT}) where {VT, Comp} 
+    function MutableBinaryHeap{VT, Comp}(xs::AbstractVector{VT}) where {VT, Comp}
         nodes, node_map = _make_mutable_binary_heap(Comp(), VT, xs)
         new{VT, Comp}(Comp(), nodes, node_map)
     end
 end
-                            
+
 const MutableBinaryMinHeap{T} = MutableBinaryHeap{T, LessThan}
 const MutableBinaryMaxHeap{T} = MutableBinaryHeap{T, GreaterThan}
-                            
+
 MutableBinaryMinHeap(xs::AbstractVector{T}) where T = MutableBinaryMinHeap{T}(xs)
 MutableBinaryMaxHeap(xs::AbstractVector{T}) where T = MutableBinaryMaxHeap{T}(xs)
 
 # deprecated constructors
-                            
+
 @deprecate mutable_binary_minheap(::Type{T}) where {T} MutableBinaryMinHeap{T}()
 @deprecate mutable_binary_minheap(xs::AbstractVector{T}) where {T} MutableBinaryMinHeap(xs)
 @deprecate mutable_binary_maxheap(::Type{T}) where {T} MutableBinaryMaxHeap{T}()
 @deprecate mutable_binary_maxheap(xs::AbstractVector{T}) where {T} MutableBinaryMaxHeap(xs)
-    
+
 
 function show(io::IO, h::MutableBinaryHeap)
     print(io, "MutableBinaryHeap(")
@@ -265,8 +265,8 @@ end
 """
     delete!{T}(h::MutableBinaryHeap{T}, i::Int)
 
-Deletes the element with handle `i` from heap `h` . 
-"""     
+Deletes the element with handle `i` from heap `h` .
+"""
 function delete!(h::MutableBinaryHeap{T}, i::Int) where T
      nd_id = h.node_map[i]
     _binary_heap_pop!(h.comparer, h.nodes, h.node_map, nd_id)

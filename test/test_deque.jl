@@ -39,10 +39,10 @@
 
     @testset "Core Functionality" begin
         n = 10
-        
+
         @testset "push back / pop back" begin
             q = Deque{Int}(3)
-            
+
             @testset "push back" begin
                 for i = 1 : n
                     push!(q, i)

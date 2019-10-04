@@ -113,7 +113,7 @@ end
 
         # test pop!
         @test isequal(extract_all!(hmin), [1, 2, 3, 4, 7, 8, 9, 10, 14, 16])
-        @test isempty(hmin)    
+        @test isempty(hmin)
     end
 
     @testset "hmax / push! / pop!" begin
@@ -168,7 +168,7 @@ end
         @test pop!(h) == 2
         @test isequal(heap_values(h), [7, 10])
         @test isequal(list_values(h), [10, 7])
-        
+
     end
 
     @testset "test delete!" begin
@@ -254,7 +254,7 @@ end
         update!(h, 2, 20)
         @test isequal(heap_values(h), [0.5, 10.1, 3.0, 20.0])
     end
-    
+
     # test deprecated constructors
     @testset "deprecated constructors" begin
         @test_deprecated mutable_binary_minheap(Int)
@@ -262,6 +262,6 @@ end
         @test_deprecated mutable_binary_maxheap(Int)
         @test_deprecated mutable_binary_maxheap([1., 2., 3.])
     end
-    
+
 
 end # @testset MutableBinheap

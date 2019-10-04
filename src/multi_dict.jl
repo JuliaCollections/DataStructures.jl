@@ -57,8 +57,8 @@ empty!(d::MultiDict) = (empty!(d.d); d)
 function insert!(d::MultiDict{K,V}, k, v) where {K,V}
     if !haskey(d.d, k)
         d.d[k] = V[]
-    end    
-    push!(d.d[k], v)    
+    end
+    push!(d.d[k], v)
     return d
 end
 

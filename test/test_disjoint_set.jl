@@ -114,7 +114,7 @@
             @test find_root(a,"a") == union!(a,"b","c")
             union!(a,"c","d")
             # Now they should be in same set, and a is transitively connected to d
-            @test in_same_set(a,"a", "d") 
+            @test in_same_set(a,"a", "d")
             # Root element should thus be same for all:
             @test all(find_root(a,first(elems)) .== map(x->find_root(a,x),elems))
 

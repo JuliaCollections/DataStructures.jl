@@ -27,8 +27,8 @@ tests = ["int_set",
          "multi_dict",
          "circular_buffer",
          "sorting",
-         "priority_queue", 
-         "fenwick", 
+         "priority_queue",
+         "fenwick",
          "robin_dict",
         ]
 

@@ -381,7 +381,7 @@ function merge!(combine::Function, d::AbstractDict, other::PriorityQueue)
     return d
 end
 
-# Opaque not to be exported. 
+# Opaque not to be exported.
 mutable struct _PQIteratorState{K, V, O <: Ordering}
     pq::PriorityQueue{K, V, O}
     _PQIteratorState{K, V, O}(pq::PriorityQueue{K, V, O}) where {K, V, O <: Ordering} = new(pq)
@@ -400,7 +400,7 @@ _iterate(pq::PriorityQueue, ::Nothing) = nothing
 iterate(pq::PriorityQueue, ::Nothing) = nothing
 
 function iterate(pq::PriorityQueue, ordered::Bool=true)
-    if ordered 
+    if ordered
         isempty(pq) && return nothing
         state = _PQIteratorState(PriorityQueue(copy(pq.xs), pq.o, copy(pq.index)))
         return dequeue_pair!(state.pq), state
@@ -413,6 +413,5 @@ function iterate(pq::PriorityQueue, state::_PQIteratorState)
     isempty(state.pq) && return nothing
     return dequeue_pair!(state.pq), state
 end
-    
-iterate(pq::PriorityQueue, i) = _iterate(pq, iterate(pq.index, i))
 
+iterate(pq::PriorityQueue, i) = _iterate(pq, iterate(pq.index, i))
