@@ -104,4 +104,6 @@ module DataStructures
     export PriorityQueue, peek
 
     include("priorityqueue.jl")
+    include("sparse_int_set.jl")
+    export SparseIntSet
 end

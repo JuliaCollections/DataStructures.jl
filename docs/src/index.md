@@ -41,5 +41,6 @@ Pages = [
     "mutable_linked_list.md"
     "intset.md",
     "sorted_containers.md",
+    "sparse_int_set.md"
 ]
 ```
