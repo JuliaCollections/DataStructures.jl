@@ -3,7 +3,6 @@ using DataStructures
 
 
 makedocs(
-    format = :html,
     sitename = "DataStructures.jl",
     pages = [
         "index.md",
@@ -24,7 +23,8 @@ makedocs(
         "intset.md",
         "sorted_containers.md",
     ],
-    modules = [DataStructures]
+    modules = [DataStructures],
+    format = Documenter.HTML()
 )
 
 deploydocs(
