@@ -65,7 +65,7 @@
             @test popfirst!(D) === i
         end
     end
-    
+
     @testset "pushfirst! works on an empty deque" begin
         # Test that pushfirst! works on an empty deque, and that front/back give the right answer
         D = CircularDeque{Int}(5)

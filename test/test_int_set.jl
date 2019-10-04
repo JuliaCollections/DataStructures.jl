@@ -78,7 +78,7 @@ import DataStructures: IntSet
     @testset "complement! / pop!" begin
         c1 = complement!(IntSet())
         s1 = IntSet([1,2,3])
-        
+
         pop!(c1, 1)
         pop!(c1, 2)
         pop!(c1, 3)

@@ -5,7 +5,7 @@ const NULL_INT_PAGE = Vector{Int}()
 mutable struct SparseIntSet
     packed ::Vector{Int}
     reverse::Vector{Vector{Int}}
-    counters::Vector{Int}  # counts the number of real elements in each page of reverse. 
+    counters::Vector{Int}  # counts the number of real elements in each page of reverse.
 end
 
 SparseIntSet() = SparseIntSet(Int[], Vector{Int}[], Int[])
@@ -117,7 +117,7 @@ Base.@propagate_inbounds function pop!(s::SparseIntSet, id::Integer)
         throw(BoundsError(s, id))
     end
     @inbounds begin
-        packed_endid = s.packed[end] 
+        packed_endid = s.packed[end]
         from_page, from_offset = pageid_offset(s, id)
         to_page, to_offset = pageid_offset(s, packed_endid)
 
@@ -144,7 +144,7 @@ function pop!(s::SparseIntSet, id::Integer, default)
 end
 popfirst!(s::SparseIntSet) = pop!(s, first(s))
 
-iterate(set::SparseIntSet, args...) = iterate(set.packed, args...) 
+iterate(set::SparseIntSet, args...) = iterate(set.packed, args...)
 
 last(s::SparseIntSet) = isempty(s) ? throw(ArgumentError("Empty set has no last element.")) : last(s.packed)
 

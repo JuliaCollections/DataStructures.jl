@@ -91,7 +91,7 @@ v0.4.2 / 2016-01-13
 ==================
 
   * Fix OrderedDict constructors (with tests)
-  * Add IntSet to DataStructures 
+  * Add IntSet to DataStructures
     (see #114, https://github.com/JuliaLang/julia/pull/10065)
   * Dead code, tree.jl removal
 
@@ -341,7 +341,7 @@ v0.2.5 / 2013-10-08
   * Revised implementation of Deque, without using Union(Nothing, DequeBlock).
   * Fixed the doc regarding API for heaps: binary_heap -> binary_{min|max}heap and mutable_binary_heap -> mutable_binary_{min|max}heap
   * Added 1 missing API call to the documentation
-  * Fixed bugs related to Dequeue functions front and back. 
+  * Fixed bugs related to Dequeue functions front and back.
     * Front would give garbage data when called on a newly created queue, and back when popping a queue from the front.
   * Implemented simple show method inside Dequeue to hide unnecessary (large!) implementation detail from the client, in particular when using REPL
 
@@ -374,4 +374,3 @@ v0.2.5 / 2013-10-08
   * add stack and queue (tested)
   * add Dequeue (tested)
   * Initial commit
-

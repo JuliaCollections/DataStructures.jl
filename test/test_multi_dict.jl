@@ -61,8 +61,8 @@
 
         @testset "in" begin
             @test in(('c', 1), d)
-            @test in(('a', 1), d)            
-            @test in(('a', 2), d)            
+            @test in(('a', 1), d)
+            @test in(('a', 2), d)
         end
 
         @testset "isempty / empty!" begin
@@ -79,7 +79,7 @@
             @test pop!(d, 'a') == 1
             @test !haskey(d, 'a')
             @test pop!(d, 'b', 0) == 0
-        end 
+        end
     end
 
     @testset "delete!" begin

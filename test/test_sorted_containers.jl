@@ -1637,14 +1637,14 @@ end
 @testset "SortedContainers" begin
     @test testSortedDictBasic()
     @test testSortedDictMethods()
-    @test testSortedDictLoops()    
+    @test testSortedDictLoops()
     @test testSortedDictOrderings()
     @test testSortedMultiDict()
     @test testSortedSet()
     @test testSortedDictConstructors()
     @test testSortedMultiDictConstructors()
 
-    
+
     # test all the errors of sorted containers
     m = SortedDict(Dict("a" => 6, "bb" => 9))
     @test_throws KeyError println(m["b"])
@@ -1690,6 +1690,6 @@ end
     @test_throws ArgumentError ((2,5) in m1)
 
 
-    
-    
+
+
 end

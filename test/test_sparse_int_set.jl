@@ -186,4 +186,4 @@ import DataStructures: SparseIntSet
 	    @test s1 == 4*24
 	end
 
-end 
+end

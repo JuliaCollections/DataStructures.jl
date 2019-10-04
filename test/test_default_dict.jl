@@ -198,7 +198,7 @@ import DataStructures: DefaultDictBase
         @testset "issue #216" begin
             @test DataStructures.isordered(DefaultOrderedDict{Int, String})
         end
-    
+
     end
 
 end

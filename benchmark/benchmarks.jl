@@ -108,4 +108,3 @@ SUITE["SparseIntSet"]["iterate two"] =
 
 SUITE["SparseIntSet"]["iterate two exclude one"] =
 	@benchmarkable iterate_two_exclude_one_bench(x,y,z) setup=x_y_z_setup
-

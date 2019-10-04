@@ -91,7 +91,7 @@ end
 hash_key(key) = (hash(key)%UInt32) | 0x80000000
 desired_index(hash, sz) = (hash & (sz - 1)) + 1
 
-function calculate_distance(h::RobinDict{K, V}, index) where {K, V} 
+function calculate_distance(h::RobinDict{K, V}, index) where {K, V}
     @assert isslotfilled(h, index)
     sz = length(h.keys)
     @inbounds index_init = desired_index(h.hashes[index], sz)
@@ -102,7 +102,7 @@ end
 function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
     # table full
     @assert h.count != length(h.keys)
-    
+
     ckey, cval, chash = key, val, hash_key(key)
     sz = length(h.keys)
     index_init = desired_index(chash, sz)
@@ -125,7 +125,7 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
         probe_current += 1
         index_curr = (index_curr & (sz - 1)) + 1
     end
-    
+
     @inbounds if isslotfilled(h, index_curr) && isequal(h.keys[index_curr], ckey)
         h.vals[index_curr] = cval
         return index_curr
@@ -138,9 +138,9 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
     @inbounds h.vals[index_curr] = cval
     @inbounds h.keys[index_curr] = ckey
     @inbounds h.hashes[index_curr] = chash
-    
+
     @assert probe_current >= 0
-    
+
     if h.idxfloor == 0
         h.idxfloor = index_curr
     else
@@ -152,7 +152,7 @@ end
 function rh_insert_for_rehash!(h_new::RobinDict{K, V}, key::K, val::V, hash::UInt32) where {K, V}
     # table full
     @assert h_new.count != length(h_new.keys)
-    
+
     ckey, cval, chash = key, val, hash
     sz = length(h_new.keys)
     index_init = desired_index(chash, sz)
@@ -183,9 +183,9 @@ function rh_insert_for_rehash!(h_new::RobinDict{K, V}, key::K, val::V, hash::UIn
     @inbounds h_new.vals[index_curr] = cval
     @inbounds h_new.keys[index_curr] = ckey
     @inbounds h_new.hashes[index_curr] = chash
-    
+
     @assert probe_current >= 0
-    
+
     if h_new.idxfloor == 0
         h_new.idxfloor = index_curr
     else
@@ -289,7 +289,7 @@ function empty!(h::RobinDict{K,V}) where {K, V}
     h.idxfloor = 0
     return h
 end
- 
+
 function rh_search(h::RobinDict{K, V}, key::K) where {K, V}
     sz = length(h.keys)
     chash = hash_key(key)
@@ -358,7 +358,7 @@ end
 
 function _get!(default::Callable, h::RobinDict{K,V}, key::K) where V where K
     index = rh_search(h, key)
-    
+
     index > 0 && return h.vals[index]
 
     v = convert(V, default())
@@ -415,7 +415,7 @@ end
 get(::Function, collection, key)
 
 function get(default::Callable, h::RobinDict{K,V}, key0) where {K, V}
-    key = convert(K, key0) 
+    key = convert(K, key0)
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default() : h.vals[index]::V
 end
@@ -439,7 +439,7 @@ julia> haskey(D, 'c')
 false
 ```
 """
-haskey(h::RobinDict, key) = (rh_search(h, key) > 0) 
+haskey(h::RobinDict, key) = (rh_search(h, key) > 0)
 in(key, v::KeySet{<:Any, <:RobinDict}) = (rh_search(v.dict, key) >= 0)
 
 """
@@ -462,7 +462,7 @@ julia> getkey(D, 'd', 'a')
 ```
 """
 function getkey(h::RobinDict{K,V}, key0, default) where {K, V}
-    key = convert(K, key0) 
+    key = convert(K, key0)
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default : h.keys[index]::K
 end
@@ -480,12 +480,12 @@ function rh_delete!(h::RobinDict{K, V}, index) where {K, V}
             break
         end
     end
-    #index0 represents the position before which we have to shift backwards 
-    
+    #index0 represents the position before which we have to shift backwards
+
     # the backwards shifting algorithm
     curr = index
     next = (index & (sz - 1)) + 1
-    
+
     @inbounds while next != index0
         h.vals[curr] = h.vals[next]
         h.keys[curr] = h.keys[next]
@@ -493,14 +493,14 @@ function rh_delete!(h::RobinDict{K, V}, index) where {K, V}
         curr = next
         next = (next & (sz-1)) + 1
     end
-    
+
     #curr is at the last position, reset back to normal
     isbitstype(K) || isbitsunion(K) || ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.keys, curr-1)
     isbitstype(V) || isbitsunion(V) || ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.vals, curr-1)
     @inbounds h.hashes[curr] = 0x0
 
     h.count -= 1
-    # this is necessary because key at idxfloor might get deleted 
+    # this is necessary because key at idxfloor might get deleted
     h.idxfloor = get_next_filled(h, h.idxfloor)
     return h
 end
@@ -512,7 +512,7 @@ function _pop!(h::RobinDict, index)
 end
 
 function pop!(h::RobinDict{K, V}, key0) where {K, V}
-    key = convert(K, key0) 
+    key = convert(K, key0)
     index = rh_search(h, key)
     return index > 0 ? _pop!(h, index) : throw(KeyError(key))
 end
@@ -542,7 +542,7 @@ julia> pop!(d, "e", 4)
 pop!(collection, key, default)
 
 function pop!(h::RobinDict{K, V}, key0, default) where {K, V}
-    key = convert(K, key0) 
+    key = convert(K, key0)
     index = rh_search(h, key)
     return index > 0 ? _pop!(h, index) : default
 end
@@ -574,7 +574,7 @@ RobinDict{String,Int64} with 1 entry:
 ```
 """
 function delete!(h::RobinDict{K, V}, key0) where {K, V}
-    key = convert(K, key0) 
+    key = convert(K, key0)
     index = rh_search(h, key)
     if index > 0
         rh_delete!(h, index)

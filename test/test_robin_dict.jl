@@ -82,7 +82,7 @@ end
 	        @test k in [3, 8, 6]
 	    end
 	end
-    
+
     let y = RobinDict{Any, Int}(3=>3, 5=>5, "8"=>8, 6=>6)
         pop!(y, "8")
         for k in keys(y)
@@ -112,7 +112,7 @@ end
 @testset "Filter function" begin
     _d = RobinDict("a"=>0)
     @test isa([k for k in filter(x->length(x)==1, collect(keys(_d)))], Vector{String})
-    
+
     h = RobinDict{Int, Int}()
     for i in 1:100
         h[i] = i
@@ -238,7 +238,7 @@ end
     @test isequal(RobinDict(missing=>1), RobinDict(missing=>1))
 end
 
-@testset "get!" begin 
+@testset "get!" begin
     f(x) = x^2
     d = RobinDict(8=>19)
     @test get!(d, 8, 5) == 19
@@ -346,14 +346,14 @@ end
 @testset "get_idxfloor" begin
     h = RobinDict()
     @test get_idxfloor(h) == 0
-    
+
     h["a"] = 1
     h[2] = "b"
     @test h.idxfloor == get_idxfloor(h)
     pop!(h)
     @test h.idxfloor == get_idxfloor(h)
     pop!(h)
-    @test h.idxfloor == get_idxfloor(h) == 0 
+    @test h.idxfloor == get_idxfloor(h) == 0
 end
 
 @testset "invariants" begin
@@ -361,7 +361,7 @@ end
     for i in 1:300
         h1[i] = i
     end
-    
+
     for i in 1:length(h1.keys)
         if isslotfilled(h1, i)
             @test hash_key(h1.keys[i]) == h1.hashes[i]
@@ -372,7 +372,7 @@ end
     for i in 1:300
         h2[rand()] = rand()
     end
-    
+
     for i in 1:length(h2.keys)
         if isslotfilled(h2, i)
             @test hash_key(h2.keys[i]) == h2.hashes[i]
@@ -383,7 +383,7 @@ end
     for i in 1:300
         h3[randstring()] = i
     end
-    
+
     for i in 1:length(h3.keys)
         if isslotfilled(h3, i)
             @test hash_key(h3.keys[i]) == h3.hashes[i]
@@ -424,4 +424,4 @@ end
         h[i] = i+1
     end
     check_invariants(h)
-end 
+end
