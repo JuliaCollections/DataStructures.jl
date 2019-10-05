@@ -212,7 +212,7 @@ end
 
 Base.zip(s::SparseIntSet...;kwargs...) = ZippedSparseIntSetIterator(s...;kwargs...)
 
-@inline length(it::ZippedSparseIntSetIterator) = length(it.shortest_set)
+length(it::ZippedSparseIntSetIterator) = length(it.shortest_set)
 
 # we know it is not in_excluded, as there are no excluded
 in_excluded(id, it::ZippedSparseIntSetIterator{VT,Tuple{}}) where {VT} = false
@@ -226,24 +226,25 @@ function in_excluded(id, it)
     return false
 end
 
-@inline function id_tids(it, state)
-    id = it.shortest_set.packed[state]
-    return id, map(x -> findfirst_packed_id(id, x), it.valid_sets)
+function in_valid(id, it)
+    for e in it.valid_sets
+        if !in(id, e)
+            return false
+        end
+    end
+    return true
 end
 
-Base.@propagate_inbounds function iterate(it::ZippedSparseIntSetIterator, state=1)
+function iterate(it::ZippedSparseIntSetIterator, state=1)
     iterator_length = length(it)
     if state > iterator_length
         return nothing
     end
-    id, tids = id_tids(it, state)
-    while any(iszero, tids) || in_excluded(id, it)
-        state += 1
-        if state > iterator_length
-            return nothing
-        end
-
-        id, tids = id_tids(it, state)
-    end
-    return tids, state + 1
+    for i in state:iterator_length
+	    @inbounds id = it.shortest_set.packed[i]
+		if in_valid(id, it) && !in_excluded(id, it)
+			return map(x->findfirst_packed_id(id, x), it.valid_sets), i + 1
+		end
+	end
+	return nothing
 end
