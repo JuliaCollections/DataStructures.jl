@@ -241,10 +241,10 @@ end
         return nothing
     end
     for i in state:iterator_length
-	    @inbounds id = it.shortest_set.packed[i]
-		if in_valid(id, it) && !in_excluded(id, it)
-			return map(x->findfirst_packed_id(id, x), it.valid_sets), i + 1
-		end
-	end
-	return nothing
+        @inbounds id = it.shortest_set.packed[i]
+        if in_valid(id, it) && !in_excluded(id, it)
+            return map(x->findfirst_packed_id(id, x), it.valid_sets), i + 1
+        end
+    end
+    return nothing
 end
