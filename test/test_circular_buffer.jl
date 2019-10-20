@@ -132,4 +132,28 @@
             @test Array(cb) == [21, 42, 42]
         end
     end
+
+    @testset "resize!" begin
+        @testset "resize an empty buffer" begin
+            cb = CircularBuffer{Int}(3)
+            resize!(cb, 10)
+            @test isempty(cb) && capacity(cb) == 10
+        end
+        @testset "resize a non empty buffer to smaller size" begin
+            cb = CircularBuffer{Int}(10)
+            append!(cb, -7:10)
+            resize!(cb, 6)
+            @test cb == 1:6
+            append!(cb, 7:8)
+            @test cb == 3:8
+        end
+        @testset "resize a non empty buffer to larger size" begin
+            cb = CircularBuffer{Int}(10)
+            append!(cb, -7:10)
+            resize!(cb, 15)
+            @test cb == 1:10
+            append!(cb, 11:20)
+            @test cb == 6:20
+        end
+    end
 end
