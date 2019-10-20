@@ -193,3 +193,26 @@ capacity(cb::CircularBuffer) = cb.capacity
 Test whether the buffer is full.
 """
 isfull(cb::CircularBuffer) = length(cb) == cb.capacity
+
+"""
+    first(cb)
+
+Get the first element of CircularBuffer.
+"""
+Base.@propagate_inbounds function Base.first(cb::CircularBuffer)
+    @boundscheck if cb.length == 0
+        throw(BoundsError(cb, 1))
+    end
+    cb.buffer[cb.first]
+end
+"""
+    last(cb)
+
+Get the last element of CircularBuffer.
+"""
+Base.@propagate_inbounds function Base.last(cb::CircularBuffer)
+    @boundscheck if cb.length == 0
+        throw(BoundsError(cb, 1))
+    end
+    cb.buffer[_buffer_index(cb, cb.length)]
+end

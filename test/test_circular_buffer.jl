@@ -6,6 +6,7 @@
             @test length(cb) == 0
             @test capacity(cb) == 5
             @test_throws BoundsError first(cb)
+            @test_throws BoundsError last(cb)
             @test isempty(cb) == true
             @test isfull(cb) == false
             @test eltype(cb) == Int
@@ -17,6 +18,7 @@
             @test length(cb) == 1
             @test capacity(cb) == 5
             @test isfull(cb) == false
+            @test first(cb) == last(cb)
         end
 
         @testset "Appending many elements" begin
@@ -38,6 +40,8 @@
             @test_throws BoundsError cb[3:6]
             @test cb[3:4] == Int[6,7]
             @test cb[[1,5]] == Int[4,8]
+            @test first(cb) == 4
+            @test last(cb) == 8
         end
 
         @testset "setindex" begin
