@@ -28,3 +28,16 @@ julia --project=benchmark -e '
     include("benchmark/runjudge.jl");
     include("benchmark/pprintjudge.jl");'
 ```
+
+### To compare against baseline locally (without re-running baseline):
+
+Running the above baseline comparison produces a `benchmark/result-baseline.json` file which is
+used as a refrence for new changes.
+If the baseline remains unchanged during development, then it is unnecessary to regenerate this file,
+and the following command may be used to save benchmarking time.
+```
+julia --project=benchmark -e '
+    using Pkg; Pkg.instantiate();
+    include("benchmark/incrementalrunjudge.jl");
+    include("benchmark/pprintjudge.jl");'
+```
