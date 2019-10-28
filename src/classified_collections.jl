@@ -8,7 +8,7 @@ mutable struct ClassifiedCollections{K, Collection}
     map::Dict{K, Collection}
 
     function ClassifiedCollections{K, Collection}(map) where {K, Collection}
-        @warn "ClassifiedCollections will be removed from DataStructures.jl in a future release."
+        @warn "ClassifiedCollections will be removed from DataStructures.jl in v0.18."
         return new(map)
     end
 end
