@@ -58,6 +58,14 @@ end
 
 const DEFAULT_DEQUEUE_BLOCKSIZE = 1024
 
+"""
+    Deque{T}
+
+The Deque type implements a double-ended queue using a list of blocks.
+This data structure supports constant-time insertion/removal 
+of elements at both ends of a sequence.
+
+"""
 mutable struct Deque{T}
     nblocks::Int
     blksize::Int
@@ -187,6 +195,11 @@ end
 
 # Manipulation
 
+"""
+    empty!(q::Deque{T})
+
+Reset the deque.
+"""
 function empty!(q::Deque{T}) where T
     # release all blocks except the head
     if q.nblocks > 1
@@ -208,6 +221,11 @@ function empty!(q::Deque{T}) where T
 end
 
 
+"""
+    push!(q::Deque{T}, x)
+
+Add an element to the back
+"""
 function push!(q::Deque{T}, x) where T  # push back
     rear = q.rear
 
@@ -230,7 +248,12 @@ function push!(q::Deque{T}, x) where T  # push back
     q
 end
 
-function pushfirst!(q::Deque{T}, x) where T   # push front
+"""
+    pushfirst!(q::Deque{T}, x)
+
+Add an element to the front
+"""
+function pushfirst!(q::Deque{T}, x) where T
     head = q.head
 
     if isempty(head)
@@ -254,6 +277,11 @@ function pushfirst!(q::Deque{T}, x) where T   # push front
     q
 end
 
+"""
+    pop!(q::Deque{T})
+
+Remove the element at the back
+"""
 function pop!(q::Deque{T}) where T   # pop back
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     rear = q.rear
@@ -274,7 +302,11 @@ function pop!(q::Deque{T}) where T   # pop back
     x
 end
 
+"""
+    popfirst!(q::Deque{T})
 
+Remove the element at the front
+"""
 function popfirst!(q::Deque{T}) where T  # pop front
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     head = q.head
