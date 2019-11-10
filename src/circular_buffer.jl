@@ -19,7 +19,7 @@ end
 CircularBuffer(capacity) = CircularBuffer{Any}(capacity)
 
 """
-    empty!(cb)
+    empty!(cb::CircularBuffer)
 
 Reset the buffer.
 """
@@ -68,7 +68,7 @@ Store data to the `i`-th element of `CircularBuffer`.
 end
 
 """
-    pop!(cb)
+    pop!(cb::CircularBuffer)
 
 Remove the element at the back.
 """
@@ -82,7 +82,7 @@ Remove the element at the back.
 end
 
 """
-    push!(cb)
+    push!(cb::CircularBuffer, data)
 
 Add an element to the back and overwrite front if full.
 """
@@ -98,7 +98,7 @@ Add an element to the back and overwrite front if full.
 end
 
 """
-    popfirst!(cb)
+    popfirst!(cb::CircularBuffer)
 
 Remove the element from the front of the `CircularBuffer`.
 """
@@ -113,7 +113,7 @@ function popfirst!(cb::CircularBuffer)
 end
 
 """
-    pushfirst!(cb, data)
+    pushfirst!(cb::CircularBuffer, data)
 
 Insert one or more items at the beginning of CircularBuffer
 and overwrite back if full.
@@ -129,7 +129,7 @@ function pushfirst!(cb::CircularBuffer, data)
 end
 
 """
-    append!(cb, datavec)
+    append!(cb::CircularBuffer, datavec::AbstractVector)
 
 Push at most last `capacity` items.
 """
@@ -143,7 +143,7 @@ function Base.append!(cb::CircularBuffer, datavec::AbstractVector)
 end
 
 """
-    fill!(cb, data)
+    fill!(cb::CircularBuffer, data)
 
 Grows the buffer up-to capacity, and fills it entirely.
 It doesn't overwrite existing elements.
@@ -156,7 +156,7 @@ function Base.fill!(cb::CircularBuffer, data)
 end
 
 """
-    length(cb)
+    length(cb::CircularBuffer)
 
 Return the number of elements currently in the buffer.
 """
@@ -165,7 +165,7 @@ Base.length(cb::CircularBuffer) = cb.length
 Base.eltype(::Type{CircularBuffer{T}}) where T = T
 
 """
-    size(cb)
+    size(cb::CircularBuffer)
 
 Return a tuple with the size of the buffer.
 """
@@ -174,28 +174,28 @@ Base.size(cb::CircularBuffer) = (length(cb),)
 Base.convert(::Type{Array}, cb::CircularBuffer{T}) where {T} = T[x for x in cb]
 
 """
-    isempty(cb)
+    isempty(cb::CircularBuffer)
 
 Test whether the buffer is empty.
 """
 Base.isempty(cb::CircularBuffer) = cb.length == 0
 
 """"
-    capacity(cb)
+    capacity(cb::CircularBuffer)
 
 Return capacity of CircularBuffer.
 """
 capacity(cb::CircularBuffer) = cb.capacity
 
 """
-    isfull(cb)
+    isfull(cb::CircularBuffer)
 
 Test whether the buffer is full.
 """
 isfull(cb::CircularBuffer) = length(cb) == cb.capacity
 
 """
-    first(cb)
+    first(cb::CircularBuffer)
 
 Get the first element of CircularBuffer.
 """
@@ -206,7 +206,7 @@ Base.@propagate_inbounds function Base.first(cb::CircularBuffer)
     cb.buffer[cb.first]
 end
 """
-    last(cb)
+    last(cb::CircularBuffer)
 
 Get the last element of CircularBuffer.
 """
