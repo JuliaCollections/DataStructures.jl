@@ -235,5 +235,5 @@ function Base.resize!(cb::CircularBuffer{T}, n::Int) where {T}
         cb.capacity = n
         cb.length = len_new
     end
-    cb
+    return cb
 end
