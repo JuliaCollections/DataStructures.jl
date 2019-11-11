@@ -226,7 +226,7 @@ function Base.resize!(cb::CircularBuffer{T}, n::Int) where {T}
     if n != capacity(cb)
         buf_new = Vector{T}(undef, n)
         len_new = min(length(cb), n)
-        for i = 1 : len_new
+        for i in 1 : len_new
             @inbounds buf_new[i] = cb[i]
         end
 
