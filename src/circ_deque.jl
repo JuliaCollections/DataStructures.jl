@@ -13,10 +13,32 @@ end
 
 CircularDeque{T}(n::Int) where {T} = CircularDeque(Vector{T}(undef, n), n, 0, 1, n)
 
+"""
+    length(D::CircularDeque)
+
+Return the number of elements currently in the circular deque
+"""
 Base.length(D::CircularDeque) = D.n
+
+"""
+    eltype(D::CircularDeque)
+
+Return type of items of the circular deque
+"""
 Base.eltype(::Type{CircularDeque{T}}) where {T} = T
+
+"""
+    capacity(D::CircularDeque)
+
+Return the capacity of the circular deque
+"""
 capacity(D::CircularDeque) = D.capacity
 
+"""
+    empty!(D::CircularDeque)
+
+Reset the circular deque.
+"""
 function Base.empty!(D::CircularDeque)
     D.n = 0
     D.first = 1
@@ -24,18 +46,38 @@ function Base.empty!(D::CircularDeque)
     D
 end
 
+"""
+    isempty!(D::CircularDeque)
+
+Check the circular deque is empty or not
+"""
 Base.isempty(D::CircularDeque) = D.n == 0
 
+"""
+    front(D::CircularDeque)
+
+Add an element to the front
+"""
 @inline function front(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
     D.buffer[D.first]
 end
 
+"""
+    back(D::CircularDeque)
+
+Add an element to the back
+"""
 @inline function back(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
     D.buffer[D.last]
 end
 
+"""
+    push!(D::CircularDeque, v)
+
+Add an element to the back
+"""
 @inline function Base.push!(D::CircularDeque, v)
     @boundscheck D.n < D.capacity || throw(BoundsError()) # prevent overflow
     D.n += 1
@@ -45,6 +87,11 @@ end
     D
 end
 
+"""
+    pop!(D::CircularDeque)
+
+Remove an element at the back
+"""
 @inline function Base.pop!(D::CircularDeque)
     v = back(D)
     D.n -= 1
@@ -53,6 +100,11 @@ end
     v
 end
 
+"""
+    pushfirst!(D::CircularDeque, v)
+
+Add an element to the front
+"""
 @inline function pushfirst!(D::CircularDeque, v)
     @boundscheck D.n < D.capacity || throw(BoundsError())
     D.n += 1
@@ -62,6 +114,11 @@ end
     D
 end
 
+"""
+    pushfirst!(D::CircularDeque)
+
+Remove the element at the front
+"""
 @inline function popfirst!(D::CircularDeque)
     v = front(D)
     D.n -= 1
