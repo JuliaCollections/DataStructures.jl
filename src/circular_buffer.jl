@@ -216,6 +216,7 @@ Base.@propagate_inbounds function Base.last(cb::CircularBuffer)
     end
     cb.buffer[_buffer_index(cb, cb.length)]
 end
+
 """
     resize!(cb, n)
 
