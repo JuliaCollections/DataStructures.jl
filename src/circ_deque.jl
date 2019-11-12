@@ -13,18 +13,7 @@ end
 
 CircularDeque{T}(n::Int) where {T} = CircularDeque(Vector{T}(undef, n), n, 0, 1, n)
 
-"""
-    length(D::CircularDeque)
-
-Return the number of elements currently in the circular deque
-"""
 Base.length(D::CircularDeque) = D.n
-
-"""
-    eltype(D::CircularDeque)
-
-Return type of items of the circular deque
-"""
 Base.eltype(::Type{CircularDeque{T}}) where {T} = T
 
 """
@@ -34,11 +23,6 @@ Return the capacity of the circular deque
 """
 capacity(D::CircularDeque) = D.capacity
 
-"""
-    empty!(D::CircularDeque)
-
-Reset the circular deque.
-"""
 function Base.empty!(D::CircularDeque)
     D.n = 0
     D.first = 1
@@ -46,11 +30,6 @@ function Base.empty!(D::CircularDeque)
     D
 end
 
-"""
-    isempty!(D::CircularDeque)
-
-Check the circular deque is empty or not
-"""
 Base.isempty(D::CircularDeque) = D.n == 0
 
 """
@@ -73,11 +52,6 @@ Add an element to the back
     D.buffer[D.last]
 end
 
-"""
-    push!(D::CircularDeque, v)
-
-Add an element to the back
-"""
 @inline function Base.push!(D::CircularDeque, v)
     @boundscheck D.n < D.capacity || throw(BoundsError()) # prevent overflow
     D.n += 1
@@ -87,11 +61,6 @@ Add an element to the back
     D
 end
 
-"""
-    pop!(D::CircularDeque)
-
-Remove an element at the back
-"""
 @inline function Base.pop!(D::CircularDeque)
     v = back(D)
     D.n -= 1
