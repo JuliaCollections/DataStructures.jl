@@ -15,6 +15,12 @@ CircularDeque{T}(n::Int) where {T} = CircularDeque(Vector{T}(undef, n), n, 0, 1,
 
 Base.length(D::CircularDeque) = D.n
 Base.eltype(::Type{CircularDeque{T}}) where {T} = T
+
+"""
+    capacity(D::CircularDeque)
+
+Return the capacity of the circular deque
+"""
 capacity(D::CircularDeque) = D.capacity
 
 function Base.empty!(D::CircularDeque)
@@ -26,11 +32,21 @@ end
 
 Base.isempty(D::CircularDeque) = D.n == 0
 
+"""
+    front(D::CircularDeque)
+
+Add an element to the front
+"""
 @inline function front(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
     D.buffer[D.first]
 end
 
+"""
+    back(D::CircularDeque)
+
+Add an element to the back
+"""
 @inline function back(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
     D.buffer[D.last]
@@ -53,6 +69,11 @@ end
     v
 end
 
+"""
+    pushfirst!(D::CircularDeque, v)
+
+Add an element to the front
+"""
 @inline function pushfirst!(D::CircularDeque, v)
     @boundscheck D.n < D.capacity || throw(BoundsError())
     D.n += 1
@@ -62,6 +83,11 @@ end
     D
 end
 
+"""
+    pushfirst!(D::CircularDeque)
+
+Remove the element at the front
+"""
 @inline function popfirst!(D::CircularDeque)
     v = front(D)
     D.n -= 1
