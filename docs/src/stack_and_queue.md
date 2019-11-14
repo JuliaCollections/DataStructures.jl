@@ -6,10 +6,40 @@ type, which respectively provide interfaces for LIFO and FIFO access.
 Usage of Stack:
 
 ```julia
-s = Stack{Int}()
-push!(s, x)
-x = top(s)
-x = pop!(s)
+s = Stack{Int}()    # create a stack
+isempty(s)          # check whether the stack is empty
+length(s)           # get the number of elements
+eltype(s)           # get the type of elements
+push!(s, 1)         # push back a item
+top(s)              # get a first item
+pop!(s)             # get and remove a first item
+empty!(s)           # make a stack empty
+iterate(s::Stack)   # Get a LIFO iterator of a stack
+reverse_iter(s::Stack{T}) # Get a FILO iterator of a stack
+s1 == s2            # check whether the two stacks are same
+```
+
+Examples of Stack:
+
+```julia
+julia> s = Stack{Int}() # create a stack
+Stack{Int64}(Deque [Int64[]])
+
+julia> push!(s, 1) # push back a item
+Stack{Int64}(Deque [[1]])
+
+julia> x = top(s) # get a first item
+1
+
+julia> length(s)
+1
+
+julia> x = pop!(s) # get and remove a first item
+1
+
+julia> length(s)
+0
+
 ```
 
 Usage of Queue:
