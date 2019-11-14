@@ -51,11 +51,6 @@ pop!(s::Stack) = pop!(s.store)
 
 empty!(s::Stack) = (empty!(s.store); s)
 
-"""
-    iterate(s::Stack)
-
-Get a LIFO iterator of a stack
-"""
 iterate(st::Stack, s...) = iterate(reverse_iter(st.store), s...)
 
 """
