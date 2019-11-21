@@ -7,9 +7,10 @@ end
 ## constructors
 
 Accumulator{T, V}() where {T,V<:Number} = Accumulator{T,V}(Dict{T,V}())
+Accumulator(map::AbstractDict) = Accumulator(Dict(map))
 
 counter(T::Type) = Accumulator{T,Int}()
-counter(dct::Dict{T,V}) where {T,V<:Integer} = Accumulator{T,V}(copy(dct))
+counter(dct::AbstractDict{T,V}) where {T,V<:Integer} = Accumulator{T,V}(Dict(dct))
 
 """
     counter(seq)
