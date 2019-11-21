@@ -219,9 +219,6 @@ Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
         D = Deque(KnownLengthIter(10))
         @test_skip eltype(D) == Any
         @test length(D) == 10
-
-        # when length is not known
-        @test_throws MethodError Deque(UnknownLengthIter(10))
     end
 
 end # @testset Deque

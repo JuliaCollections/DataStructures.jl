@@ -10,7 +10,7 @@ end
 Create a `Queue` object containing elements of type `T`.
 """
 Queue{T}() where {T} = Queue(Deque{T}())
-Queue{T}(blksize::Integer) where {T} = Queue(Deque{T}(blksize))
+Queue{T}(blksize::Integer) where {T} = Queue(Deque{T}(blksize=blksize))
 
 isempty(s::Queue) = isempty(s.store)
 length(s::Queue) = length(s.store)
