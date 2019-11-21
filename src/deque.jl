@@ -85,7 +85,6 @@ Deque{T}()
 Create a deque of type `T`.
 """
 function Deque(iter; blksize=DEFAULT_DEQUEUE_BLOCKSIZE)
-    n = length(iter)
     d = Deque{eltype(iter)}(; blksize=blksize)
     for e in iter
         push!(d, e)
