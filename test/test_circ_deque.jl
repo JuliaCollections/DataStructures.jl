@@ -101,9 +101,9 @@ Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
         @test capacity(D) == 3
         @test length(D) == 3
 
-        # when eltype is not known
+        # when eltype is Any
         D = CircularDeque(KnownLengthIter(10))
-        @test_skip eltype(D) == Any
+        @test eltype(D) == Any
         @test capacity(D) == 10
         @test length(D) == 10
 

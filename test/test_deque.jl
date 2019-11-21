@@ -33,7 +33,7 @@ Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
         end
 
         @testset "empty dequeue 3" begin
-            q = Deque{Int}(3)
+            q = Deque{Int}(blksize=3)
             @test length(q) == 0
             @test isempty(q)
             @test q.blksize == 3
@@ -49,8 +49,7 @@ Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
         n = 10
 
         @testset "push back / pop back" begin
-            q = Deque{Int}(3)
-
+            q = Deque{Int}(blksize=3)
             @testset "push back" begin
                 for i = 1 : n
                     push!(q, i)
@@ -96,7 +95,7 @@ Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
         end
 
         @testset "push front / pop front" begin
-            q = Deque{Int}(3)
+            q = Deque{Int}(blksize=3)
 
             @testset "push front" begin
                 for i = 1 : n
@@ -138,7 +137,7 @@ Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
     end
 
     @testset "random operations" begin
-        q = Deque{Int}(5)
+        q = Deque{Int}(blksize=5)
         r = Int[]
         m = 100
 
@@ -176,8 +175,8 @@ Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
     end
 
     @testset "hash and ==" begin
-        a = Deque{Int64}(2)
-        b = Deque{Int64}(3)
+        a = Deque{Int64}(blksize=2)
+        b = Deque{Int64}(blksize=3)
         # Note: blksize does not distinguish == or hash
         @test a == b
         @test hash(a) === hash(b)
@@ -194,7 +193,7 @@ Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
     end
 
     @testset "issue #38" begin
-        q = Deque{Int}(1)
+        q = Deque{Int}(blksize=1)
         push!(q,1)
         @test !isempty(q)
         empty!(q)
@@ -202,7 +201,7 @@ Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
     end
 
     @testset "empty!" begin
-        q = Deque{Int}(1)
+        q = Deque{Int}(blksize=1)
         push!(q,1)
         push!(q,2)
         @test length(sprint(dump,q)) >= 0

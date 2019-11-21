@@ -91,6 +91,7 @@ function Deque(iter; blksize=DEFAULT_DEQUEUE_BLOCKSIZE)
     end
     d
 end
+Deque(; blksize=DEFAULT_DEQUEUE_BLOCKSIZE) = Deque{Any}(; blksize=blksize)
 
 @deprecate deque(::Type{T}) where {T} Deque{T}()
 
