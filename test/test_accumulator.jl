@@ -95,7 +95,7 @@
         for f in (Accumulator, counter)
             ct_odict = f(OrderedDict(kv))
             ct_dict = f(Dict(kv))
-            @test ct_odict isa Accumulator{Symbol,Int}
+            @test ct_odict isa Accumulator{Symbol, Int}
             @test ct_odict == ct_dict
         end
     end
