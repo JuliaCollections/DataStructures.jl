@@ -25,10 +25,6 @@ Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
         end
 
         @testset "empty dequeue 2" begin
-            @test typeof(deque(Int)) === typeof(Deque{Int}())
-        end
-
-        @testset "empty dequeue 3" begin
             q = DataStructures.DequeBlock{Int}(0,0)
             @test length(q) == 0
             @test capacity(q) == 0
@@ -36,7 +32,7 @@ Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
             @test length(sprint(show,q)) >= 0
         end
 
-        @testset "empty dequeue 4" begin
+        @testset "empty dequeue 3" begin
             q = Deque{Int}(3)
             @test length(q) == 0
             @test isempty(q)

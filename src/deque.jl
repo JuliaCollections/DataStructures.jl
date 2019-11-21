@@ -81,17 +81,17 @@ mutable struct Deque{T}
     Deque{T}() where {T} = Deque{T}(DEFAULT_DEQUEUE_BLOCKSIZE)
 end
 
+@deprecate deque(::Type{T}) where {T} Deque{T}()
+
+# constructor for iterator
 """
-    deque(T)
+    Deque{T}()
 
 Create a deque of type `T`.
 """
-deque(::Type{T}) where {T} = Deque{T}()
-
-# constructor for iterator
-function Deque(iter)
+function Deque(iter; blksize=DEFAULT_DEQUEUE_BLOCKSIZE)
     n = length(iter)
-    d = deque(eltype(iter))
+    d = Deque{eltype(iter)}(blksize)
     for e in iter
         push!(d, e)
     end
