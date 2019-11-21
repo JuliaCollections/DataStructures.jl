@@ -94,6 +94,7 @@ end
 Deque(; blksize=DEFAULT_DEQUEUE_BLOCKSIZE) = Deque{Any}(; blksize=blksize)
 
 @deprecate deque(::Type{T}) where {T} Deque{T}()
+@deprecate deque(blksize::Int) Deque(blksize=blksize)
 
 
 isempty(q::Deque) = q.len == 0
