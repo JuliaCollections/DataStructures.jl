@@ -15,6 +15,7 @@ module DataStructures
                  zero, checkbounds
 
 
+    using Compat # Provides Base.Order.ReverseOrdering(). May remove this line with julia 1.4
     using OrderedCollections
     import OrderedCollections: filter, filter!, isordered
     export OrderedDict, OrderedSet, LittleDict
