@@ -4,7 +4,7 @@
 a Stack for Last In First Out(LIFO) access
 
 # Examples
-```julia-repl
+```jldoctest
 julia> s = Stack{Int}() # create a stack
 Stack{Int64}(Deque [Int64[]])
 
