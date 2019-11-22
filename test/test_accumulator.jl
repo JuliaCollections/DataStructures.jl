@@ -90,6 +90,16 @@
         @test ctm["b"] == 0
     end
 
+    @testset "From AbstractDict" begin
+        kv = (:a => 1, :b => 2)
+        for f in (Accumulator, counter)
+            ct_odict = f(OrderedDict(kv))
+            ct_dict = f(Dict(kv))
+            @test ct_odict isa Accumulator{Symbol, Int}
+            @test ct_odict == ct_dict
+        end
+    end
+
     @testset "From Pair" begin
         ct4 = counter(Pair{Int,Int})
         @test isa(ct4, Accumulator{Pair{Int,Int}})
