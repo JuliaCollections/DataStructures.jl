@@ -4,7 +4,7 @@ struct FenwickTree{T}
 end
 
 """
-    FenwickTree{T}(n)
+    FenwickTree{T}(n::Integer)
 
 Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) of length `n`.
 
@@ -30,7 +30,7 @@ length(ft::FenwickTree) = ft.n
 Base.eltype(::Type{FenwickTree{T}}) where T = T
 
 """
-    inc!(ft::FenwickTree{T}, ind, val)
+    inc!(ft::FenwickTree{T}, ind::Integer, val)
 
 Increases the value of the [`FenwickTree`] by `val` from the index `ind` upto the length of the Fenwick Tree.
 
@@ -47,7 +47,7 @@ function inc!(ft::FenwickTree{T}, ind::Integer, val = 1) where T
 end
 
 """
-    dec!(ft::FenwickTree, ind, val)
+    dec!(ft::FenwickTree, ind::Integer, val)
 
 Decreases the value of the [`FenwickTree`] by `val` from the index `ind` upto the length of the Fenwick Tree.
 
@@ -55,7 +55,7 @@ Decreases the value of the [`FenwickTree`] by `val` from the index `ind` upto th
 dec!(ft::FenwickTree, ind::Integer, val = 1 ) = inc!(ft, ind, -val)
 
 """
-    incdec!(ft::FenwickTree{T}, left, right, val)
+    incdec!(ft::FenwickTree{T}, left::Integer, right::Integer, val)
 
 Increases the value of the [`FenwickTree`] by `val` from the indices from `left` and decreases it from the `right`.
 
@@ -67,7 +67,7 @@ function incdec!(ft::FenwickTree{T}, left::Integer, right::Integer, val = one(T)
 end
 
 """
-    prefixsum(ft::FenwickTree{T}, ind)
+    prefixsum(ft::FenwickTree{T}, ind::Integer)
 
 Return the cumulative sum from index 1 upto `ind` of the [`FenwickTree`](@ref)
 
