@@ -8,6 +8,7 @@ This package implements a variety of data structures, including
 -   Stack
 -   Queue
 -   Priority Queue
+-   Fenwick Tree
 -   Accumulators and Counters
 -   Disjoint Sets
 -   Binary Heap
@@ -30,6 +31,7 @@ Pages = [
     "circ_deque.md",
     "stack_and_queue.md",
     "priority-queue.md",
+    "fenwick.md",
     "accumulators.md",
     "disjoint_sets.md",
     "heaps.md",
