@@ -1,5 +1,10 @@
 #A counter type
 
+"""
+    Accumulator{T, V<:Number}
+
+A accumulator is a data structure that maintains an accumulated number for each key.
+"""
 struct Accumulator{T, V<:Number} <: AbstractDict{T,V}
     map::Dict{T,V}
 end
@@ -61,11 +66,11 @@ iterate(ct::Accumulator, s...) = iterate(ct.map, s...)
 # manipulation
 
 """
-    inc!(ct, x, [v=1])
+    inc!(ct::Accumulator, x, [v=1])
 
 Increments the count for `x` by `v` (defaulting to one)
 """
-inc!(ct::Accumulator, x, a::Number) = (ct[x] += a)
+inc!(ct::Accumulator, x, v::Number) = (ct[x] += v)
 inc!(ct::Accumulator{T,V}, x) where {T,V} = inc!(ct, x, one(V))
 
 # inc! is preferred over push!, but we need to provide push! for the Bag interpreation
@@ -79,17 +84,17 @@ push!(ct::Accumulator, x::Pair)  = inc!(ct, x)
 
 
 """
-    dec!(ct, x, [v=1])
+    dec!(ct::Accumulator, x, [v=1])
 
 Decrements the count for `x` by `v` (defaulting to one)
 """
-dec!(ct::Accumulator, x, a::Number) = (ct[x] -= a)
+dec!(ct::Accumulator, x, v::Number) = (ct[x] -= v)
 dec!(ct::Accumulator{T,V}, x) where {T,V} = dec!(ct, x, one(V))
 
 #TODO: once we are done deprecating `pop!` for `reset!` then add `pop!` as an alias for `dec!`
 
 """
-    merge!(ct1, others...)
+    merge!(ct1::Accumulator, others...)
 
 Merges the other counters into `ctl`,
 summing the counts for all elements.
@@ -125,8 +130,7 @@ end
 """
     reset!(ct::Accumulator, x)
 
-Resets the count of `x` to zero.
-Returns its former count.
+Remove a key `x` from an accumulator, and return its current value
 """
 reset!(ct::Accumulator{<:Any,V}, x) where V = haskey(ct.map, x) ? pop!(ct.map, x) : zero(V)
 
