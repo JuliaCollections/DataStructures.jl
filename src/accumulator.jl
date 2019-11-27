@@ -3,7 +3,8 @@
 """
     Accumulator{T, V<:Number}
 
-A accumulator is a data structure that maintains an accumulated number for each key.
+A accumulator is a data structure that maintains an accumulated total for each key.
+The particular case where those totals are integers is a counter.
 """
 struct Accumulator{T, V<:Number} <: AbstractDict{T,V}
     map::Dict{T,V}
