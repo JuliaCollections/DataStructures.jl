@@ -73,20 +73,29 @@ mutable struct Deque{T}
     head::DequeBlock{T}
     rear::DequeBlock{T}
 
-    function Deque{T}(blksize::Int) where T
+    function Deque{T}(; blksize=DEFAULT_DEQUEUE_BLOCKSIZE) where T
         head = rear = rear_deque_block(T, blksize)
         new{T}(1, blksize, 0, head, rear)
     end
-
-    Deque{T}() where {T} = Deque{T}(DEFAULT_DEQUEUE_BLOCKSIZE)
 end
 
 """
-    deque(T)
+Deque{T}()
 
 Create a deque of type `T`.
 """
-deque(::Type{T}) where {T} = Deque{T}()
+function Deque(iter; blksize=DEFAULT_DEQUEUE_BLOCKSIZE)
+    d = Deque{eltype(iter)}(; blksize=blksize)
+    for e in iter
+        push!(d, e)
+    end
+    d
+end
+Deque(; blksize=DEFAULT_DEQUEUE_BLOCKSIZE) = Deque{Any}(; blksize=blksize)
+
+@deprecate deque(::Type{T}) where {T} Deque{T}()
+@deprecate deque(blksize::Int) Deque(blksize=blksize)
+
 
 isempty(q::Deque) = q.len == 0
 length(q::Deque) = q.len

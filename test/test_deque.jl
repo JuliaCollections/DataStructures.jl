@@ -1,3 +1,15 @@
+struct KnownLengthIter
+    n::Int
+end
+Base.iterate(M::KnownLengthIter, state=1) = state > M.n ? nothing : (iseven(state) ? ('a', state+1) : (1, state+1))
+Base.length(M::KnownLengthIter) = M.n
+
+struct UnknownLengthIter
+    n::Int
+end
+Base.iterate(M::UnknownLengthIter, state=1) = state > M.n ? nothing : (iseven(state) ? ('a', state+1) : (1, state+1))
+Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
+
 @testset "Deque" begin
     @testset "empty dequeue" begin
         @testset "empty dequeue 1" begin
@@ -13,10 +25,6 @@
         end
 
         @testset "empty dequeue 2" begin
-            @test typeof(deque(Int)) === typeof(Deque{Int}())
-        end
-
-        @testset "empty dequeue 3" begin
             q = DataStructures.DequeBlock{Int}(0,0)
             @test length(q) == 0
             @test capacity(q) == 0
@@ -24,8 +32,8 @@
             @test length(sprint(show,q)) >= 0
         end
 
-        @testset "empty dequeue 4" begin
-            q = Deque{Int}(3)
+        @testset "empty dequeue 3" begin
+            q = Deque{Int}(blksize=3)
             @test length(q) == 0
             @test isempty(q)
             @test q.blksize == 3
@@ -41,8 +49,7 @@
         n = 10
 
         @testset "push back / pop back" begin
-            q = Deque{Int}(3)
-
+            q = Deque{Int}(blksize=3)
             @testset "push back" begin
                 for i = 1 : n
                     push!(q, i)
@@ -88,7 +95,7 @@
         end
 
         @testset "push front / pop front" begin
-            q = Deque{Int}(3)
+            q = Deque{Int}(blksize=3)
 
             @testset "push front" begin
                 for i = 1 : n
@@ -130,7 +137,7 @@
     end
 
     @testset "random operations" begin
-        q = Deque{Int}(5)
+        q = Deque{Int}(blksize=5)
         r = Int[]
         m = 100
 
@@ -168,8 +175,8 @@
     end
 
     @testset "hash and ==" begin
-        a = Deque{Int64}(2)
-        b = Deque{Int64}(3)
+        a = Deque{Int64}(blksize=2)
+        b = Deque{Int64}(blksize=3)
         # Note: blksize does not distinguish == or hash
         @test a == b
         @test hash(a) === hash(b)
@@ -186,7 +193,7 @@
     end
 
     @testset "issue #38" begin
-        q = Deque{Int}(1)
+        q = Deque{Int}(blksize=1)
         push!(q,1)
         @test !isempty(q)
         empty!(q)
@@ -194,12 +201,24 @@
     end
 
     @testset "empty!" begin
-        q = Deque{Int}(1)
+        q = Deque{Int}(blksize=1)
         push!(q,1)
         push!(q,2)
         @test length(sprint(dump,q)) >= 0
         @test typeof(empty!(q)) === typeof(Deque{Int}())
         @test isempty(q)
+    end
+
+    @testset "constructing from iterator" begin
+        # when eltype is known
+        D = Deque(1:3)
+        @test_skip eltype(D) == Int
+        @test length(D) == 3
+
+        # when eltype is not known
+        D = Deque(KnownLengthIter(10))
+        @test_skip eltype(D) == Any
+        @test length(D) == 10
     end
 
 end # @testset Deque
