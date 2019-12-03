@@ -8,7 +8,7 @@ using Base.Order: Forward, Reverse
         vs = [10, 4, 6, 1, 16, 2, 20, 17, 13, 5]
 
         BinaryMinMaxHeap{Int}()
-
+        BinaryMinMaxHeap{Int}(vs)
         BinaryMinMaxHeap(vs)
 
         @test true
