@@ -112,7 +112,7 @@ mutable struct BinaryHeap{T,Comp} <: AbstractHeap{T}
         new{T,Comp}(comp, valtree)
     end
 end
-BinaryHeap{T,Comp}(xs::AbstractVector{T}) where {T,Comp} = BinaryHeap(Comp(), xs::AbstractVector{T})
+BinaryHeap{T,Comp}(xs::AbstractVector{T}) where {T,Comp} = BinaryHeap{T,Comp}(Comp(), xs::AbstractVector{T})
 
 const BinaryMinHeap{T} = BinaryHeap{T, LessThan}
 const BinaryMaxHeap{T} = BinaryHeap{T, GreaterThan}
