@@ -86,7 +86,7 @@ end
 """
     pushfirst!(D::CircularDeque)
 
-Remove the element at the first
+Remove the element at the front.
 """
 @inline function popfirst!(D::CircularDeque)
     v = first(D)
