@@ -24,7 +24,7 @@ eltype(a)           # return type of items
 *Note:* Julia's `Vector` type also provides this interface, and thus can
 be used as a deque. However, the `CircularDeque` type in this package is
 implemented as a circular buffer, and thus avoids copying elements when
-modifications are made to the first of the vector.
+modifications are made to the front of the vector.
 
 Benchmarks show that the performance of `CircularDeque` is several times
 faster than `Deque`.
