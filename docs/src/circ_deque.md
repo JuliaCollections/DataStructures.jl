@@ -13,7 +13,7 @@ empty!(a)           # reset the deque
 capacity(a)         # return capacity
 length(a)           # get the number of elements currently in the deque
 push!(a, 10)        # add an element to the last
-pop!(a)             # remove an element from the last
+pop!(a)             # remove an element from the back
 pushfirst!(a, 20)   # add an element to the first
 popfirst!(a)        # remove an element from the first
 first(a)            # get the element at the front
