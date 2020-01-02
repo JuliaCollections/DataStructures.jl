@@ -37,6 +37,7 @@ Base.isempty(D::CircularDeque) = D.n == 0
 
 Add an element to the first
 """
+@deprecate front(x) first(x)
 @inline function first(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
     D.buffer[D.first]
