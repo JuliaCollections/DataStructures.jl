@@ -17,7 +17,7 @@ pop!(a)             # remove an element from the back
 pushfirst!(a, 20)   # add an element to the front
 popfirst!(a)        # remove an element from the first
 first(a)            # get the element at the front
-last(a)             # get the element at the last
+last(a)             # get the element at the back
 eltype(a)           # return type of items
 ```
 
