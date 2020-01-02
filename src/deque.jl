@@ -6,16 +6,16 @@
 #######################################
 
 mutable struct DequeBlock{T}
-    data::Vector{T}  # only data[front:back] is valid
+    data::Vector{T}  # only data[first:last] is valid
     capa::Int
-    front::Int
-    back::Int
+    first::Int
+    last::Int
     prev::DequeBlock{T}  # ref to previous block
     next::DequeBlock{T}  # ref to next block
 
-    function DequeBlock{T}(capa::Int, front::Int) where T
+    function DequeBlock{T}(capa::Int, first::Int) where T
         data = Vector{T}(undef, capa)
-        blk = new{T}(data, capa, front, front-1)
+        blk = new{T}(data, capa, first, first-1)
         blk.prev = blk
         blk.next = blk
         blk
@@ -29,24 +29,24 @@ rear_deque_block(ty::Type{T}, n::Int) where {T} = DequeBlock{T}(n, 1)
 head_deque_block(ty::Type{T}, n::Int) where {T} = DequeBlock{T}(n, n+1)
 
 capacity(blk::DequeBlock) = blk.capa
-length(blk::DequeBlock) = blk.back - blk.front + 1
-isempty(blk::DequeBlock) = blk.back < blk.front
+length(blk::DequeBlock) = blk.last - blk.first + 1
+isempty(blk::DequeBlock) = blk.last < blk.first
 ishead(blk::DequeBlock) = blk.prev === blk
 isrear(blk::DequeBlock) =  blk.next === blk
 
 
 # reset the block to empty, and position
 
-function reset!(blk::DequeBlock{T}, front::Int) where T
-    blk.front = front
-    blk.back = front - 1
+function reset!(blk::DequeBlock{T}, first::Int) where T
+    blk.first = first
+    blk.last = first - 1
     blk.prev = blk
     blk.next = blk
 end
 
 function show(io::IO, blk::DequeBlock)  # avoids recursion into prev and next
-    x = blk.data[blk.front:blk.back]
-    print(io, "$(typeof(blk))(capa = $(blk.capa), front = $(blk.front), back = $(blk.back)): $x")
+    x = blk.data[blk.first:blk.last]
+    print(io, "$(typeof(blk))(capa = $(blk.capa), first = $(blk.first), last = $(blk.last)): $x")
 end
 
 
@@ -94,25 +94,25 @@ num_blocks(q::Deque) = q.nblocks
 Base.eltype(::Type{Deque{T}}) where T = T
 
 """
-    front(q::Deque)
+    first(q::Deque)
 
 Returns the first element of the deque `q`.
 """
-function front(q::Deque)
+function first(q::Deque)
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     blk = q.head
-    blk.data[blk.front]
+    blk.data[blk.first]
 end
 
 """
-    back(q::Deque)
+    last(q::Deque)
 
 Returns the last element of the deque `q`.
 """
-function back(q::Deque)
+function last(q::Deque)
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     blk = q.rear
-    blk.data[blk.back]
+    blk.data[blk.last]
 end
 
 
@@ -122,12 +122,12 @@ struct DequeIterator{T}
     q::Deque
 end
 
-function iterate(qi::DequeIterator{T}, (cb, i) = (qi.q.head, qi.q.head.front)) where T
-    i > cb.back && return nothing
+function iterate(qi::DequeIterator{T}, (cb, i) = (qi.q.head, qi.q.head.first)) where T
+    i > cb.last && return nothing
     x = cb.data[i]
 
     i += 1
-    if i > cb.back && !isrear(cb)
+    if i > cb.last && !isrear(cb)
         cb = cb.next
         i = 1
     end
@@ -141,15 +141,15 @@ struct ReverseDequeIterator{T}
     q::Deque
 end
 
-function iterate(qi::ReverseDequeIterator{T}, (cb, i) = (qi.q.rear, qi.q.rear.back)) where T
-    i < cb.front && return nothing
+function iterate(qi::ReverseDequeIterator{T}, (cb, i) = (qi.q.rear, qi.q.rear.last)) where T
+    i < cb.first && return nothing
     x = cb.data[i]
 
     i -= 1
     # If we're past the beginning of a block, go to the previous one
-    if i < cb.front && !ishead(cb)
+    if i < cb.first && !ishead(cb)
         cb = cb.prev
-        i = cb.back
+        i = cb.last
     end
 
     (x, (cb, i))
@@ -175,8 +175,8 @@ function dump(io::IO, q::Deque)
     cb::DequeBlock = q.head
     i = 1
     while true
-        print(io, "block $i [$(cb.front):$(cb.back)] ==> ")
-        for j = cb.front : cb.back
+        print(io, "block $i [$(cb.first):$(cb.last)] ==> ")
+        for j = cb.first : cb.last
             print(io, cb.data[j])
             print(io, ' ')
         end
@@ -230,15 +230,15 @@ function push!(q::Deque{T}, x) where T
     rear = q.rear
 
     if isempty(rear)
-        rear.front = 1
-        rear.back = 0
+        rear.first = 1
+        rear.last = 0
     end
 
-    if rear.back < rear.capa
-        @inbounds rear.data[rear.back += 1] = convert(T, x)
+    if rear.last < rear.capa
+        @inbounds rear.data[rear.last += 1] = convert(T, x)
     else
         new_rear = rear_deque_block(T, q.blksize)
-        new_rear.back = 1
+        new_rear.last = 1
         new_rear.data[1] = convert(T, x)
         new_rear.prev = rear
         q.rear = rear.next = new_rear
@@ -258,16 +258,16 @@ function pushfirst!(q::Deque{T}, x) where T
 
     if isempty(head)
         n = head.capa
-        head.front = n + 1
-        head.back = n
+        head.first = n + 1
+        head.last = n
     end
 
-    if head.front > 1
-        @inbounds head.data[head.front -= 1] = convert(T, x)
+    if head.first > 1
+        @inbounds head.data[head.first -= 1] = convert(T, x)
     else
         n::Int = q.blksize
         new_head = head_deque_block(T, n)
-        new_head.front = n
+        new_head.first = n
         new_head.data[n] = convert(T, x)
         new_head.next = head
         q.head = head.prev = new_head
@@ -285,11 +285,11 @@ Remove the element at the back
 function pop!(q::Deque{T}) where T
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     rear = q.rear
-    @assert rear.back >= rear.front
+    @assert rear.last >= rear.first
 
-    @inbounds x = rear.data[rear.back]
-    rear.back -= 1
-    if rear.back < rear.front
+    @inbounds x = rear.data[rear.last]
+    rear.last -= 1
+    if rear.last < rear.first
         if q.nblocks > 1
             # release and detach the rear block
             empty!(rear.data)
@@ -310,11 +310,11 @@ Remove the element at the front
 function popfirst!(q::Deque{T}) where T
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     head = q.head
-    @assert head.back >= head.front
+    @assert head.last >= head.first
 
-    @inbounds x = head.data[head.front]
-    head.front += 1
-    if head.back < head.front
+    @inbounds x = head.data[head.first]
+    head.first += 1
+    if head.last < head.first
         if q.nblocks > 1
             # release and detach the head block
             empty!(head.data)
