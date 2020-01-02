@@ -72,7 +72,7 @@ end
 """
     pushfirst!(D::CircularDeque, v)
 
-Add an element to the first
+Add an element to the front.
 """
 @inline function pushfirst!(D::CircularDeque, v)
     @boundscheck D.n < D.capacity || throw(BoundsError())
