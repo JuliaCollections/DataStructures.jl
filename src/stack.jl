@@ -40,7 +40,7 @@ Base.eltype(::Type{Stack{T}}) where T = T
 
 Get a top item from a stack
 """
-top(s::Stack) = back(s.store)
+top(s::Stack) = last(s.store)
 
 function push!(s::Stack, x)
     push!(s.store, x)
