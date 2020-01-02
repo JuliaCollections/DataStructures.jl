@@ -12,7 +12,7 @@ isempty(a)          # test whether the deque is empty
 empty!(a)           # reset the deque
 capacity(a)         # return capacity
 length(a)           # get the number of elements currently in the deque
-push!(a, 10)        # add an element to the last
+push!(a, 10)        # add an element to the front
 pop!(a)             # remove an element from the back
 pushfirst!(a, 20)   # add an element to the first
 popfirst!(a)        # remove an element from the first
