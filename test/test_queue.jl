@@ -16,14 +16,14 @@
         @test eltype(s) == Int
         @test eltype(typeof(s)) == Int
         @test isempty(s)
-        @test_throws ArgumentError first(s)
-        @test_throws ArgumentError last(s)
+        @test_throws ArgumentError front(s)
+        @test_throws ArgumentError back(s)
         @test_throws ArgumentError dequeue!(s)
 
         for i = 1 : n
             enqueue!(s, i)
-            @test first(s) == 1
-            @test last(s) == i
+            @test front(s) == 1
+            @test back(s) == i
             @test !isempty(s)
             @test length(s) == i
         end
@@ -32,11 +32,11 @@
             x = dequeue!(s)
             @test x == i
             if i < n
-                @test first(s) == i + 1
-                @test last(s) == n
+                @test front(s) == i + 1
+                @test back(s) == n
             else
-                @test_throws ArgumentError first(s)
-                @test_throws ArgumentError last(s)
+                @test_throws ArgumentError front(s)
+                @test_throws ArgumentError back(s)
             end
             @test isempty(s) == (i == n)
             @test length(s) == n - i

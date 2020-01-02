@@ -14,8 +14,8 @@ push!(a, 10)        # add an element to the back
 pop!(a)             # remove an element from the back
 pushfirst!(a, 20)   # add an element to the front
 popfirst!(a)        # remove an element from the front
-first(a)            # get the element at the front
-last(a)             # get the element at the back
+front(a)            # get the element at the front
+back(a)             # get the element at the back
 ```
 
 *Note:* Julia's `Vector` type also provides this interface, and thus can

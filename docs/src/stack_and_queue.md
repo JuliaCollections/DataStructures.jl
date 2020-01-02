@@ -24,8 +24,8 @@ Usage of Queue:
 ```julia
 q = Queue{Int}()
 enqueue!(q, x)
-x = first(q)
-x = last(q)
+x = front(q)
+x = back(q)
 x = dequeue!(q)
 ```
 
