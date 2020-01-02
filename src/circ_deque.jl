@@ -45,7 +45,7 @@ end
 """
     last(D::CircularDeque)
 
-Add an element to the last
+Add an element to the back.
 """
 @inline function last(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
