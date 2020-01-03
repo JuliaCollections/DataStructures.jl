@@ -37,7 +37,6 @@ Base.isempty(D::CircularDeque) = D.n == 0
 
 Get the item at the front of the queue.
 """
-#@deprecate front(x) first(x)
 @inline function first(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
     D.buffer[D.first]
