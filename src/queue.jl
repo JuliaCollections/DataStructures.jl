@@ -16,8 +16,8 @@ isempty(s::Queue) = isempty(s.store)
 length(s::Queue) = length(s.store)
 Base.eltype(::Type{Queue{T}}) where T = T
 
-front(s::Queue) = front(s.store)
-back(s::Queue) = back(s.store)
+first(s::Queue) = first(s.store)
+last(s::Queue) = last(s.store)
 
 """
     enqueue!(s::Queue, x)

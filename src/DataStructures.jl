@@ -22,7 +22,7 @@ module DataStructures
 
     export Deque, Stack, Queue, CircularDeque
     export deque, enqueue!, dequeue!, dequeue_pair!, update!, reverse_iter
-    export capacity, num_blocks, front, back, top, top_with_handle, sizehint!
+    export capacity, num_blocks, top_with_handle, sizehint!
 
     export Accumulator, counter, reset!, inc!, dec!
 
@@ -59,6 +59,7 @@ module DataStructures
 
     export findkey
 
+    include("deprecations.jl")
     include("delegate.jl")
 
     include("deque.jl")
