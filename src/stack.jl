@@ -36,9 +36,9 @@ length(s::Stack) = length(s.store)
 Base.eltype(::Type{Stack{T}}) where T = T
 
 """
-    top(s::Stack)
+    first(s::Stack)
 
-Get a top item from a stack
+Get the top item from the stack. Sometimes called peek.
 """
 first(s::Stack) = last(s.store)
 
