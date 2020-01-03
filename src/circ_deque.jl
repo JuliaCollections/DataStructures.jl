@@ -35,7 +35,7 @@ Base.isempty(D::CircularDeque) = D.n == 0
 """
     first(D::CircularDeque)
 
-Add an element to the first
+Add an element to the front.
 """
 #@deprecate front(x) first(x)
 @inline function first(D::CircularDeque)
