@@ -1,3 +1,4 @@
+
 # Stack and Queue
 
 The `Stack` and `Queue` types are a light-weight wrapper of a deque
@@ -11,7 +12,7 @@ isempty(s)                  # check whether the stack is empty
 length(s)                   # get the number of elements
 eltype(s)                   # get the type of elements
 push!(s, 1)                 # push back a item
-top(s)                      # get a first item
+first(s)                    # get an item from the top of stack
 pop!(s)                     # get and remove a first item
 empty!(s)                   # make a stack empty
 iterate(s::Stack)           # Get a LIFO iterator of a stack
