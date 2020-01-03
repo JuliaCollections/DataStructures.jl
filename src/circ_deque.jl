@@ -84,7 +84,7 @@ Add an element to the front.
 end
 
 """
-    pushfirst!(D::CircularDeque)
+    popfirst!(D::CircularDeque)
 
 Remove the element at the front.
 """
