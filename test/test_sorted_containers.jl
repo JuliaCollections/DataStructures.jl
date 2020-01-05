@@ -373,7 +373,7 @@ function testSortedDictMethods()
         d2 = pop!(m1, i, -1.0)
         my_assert(d2 == -1.0)
         d3 = pop!(m1, i, nothing)
-        my_assert(isnothing(d3))
+        my_assert(d3 == nothing)
 
         if i % 200 == 0
             checkcorrectness(m1.bt, false)
@@ -1709,7 +1709,12 @@ end
     @test_throws ArgumentError (("a",6) in m)
     @test_throws ArgumentError ((2,5) in m1)
 
-
-
+    s = SortedSet([10,30,50])
+    @test pop!(s,10) == 10
+    @test pop!(s,30,-1) == 30
+    @test pop!(s,30, nothing) == nothing
+    @test pop!(s,50, nothing) == 50
+    @test pop!(s,50, nothing) == nothing
+    @test isempty(s)
 
 end
