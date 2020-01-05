@@ -361,6 +361,26 @@ function testSortedDictMethods()
     end
     my_assert(isempty(m1))
     my_assert(length(m1) == 0)
+    N = 1000
+    for i = 2:N
+        m1[i] = convert(Float64,i) ^ 2
+    end
+    my_assert(!isempty(m1))
+    my_assert(length(m1) == N - 1)
+    for i = 2 : N
+        d = pop!(m1, i, -1.0)
+        my_assert(d == convert(Float64,i)^2)
+        d2 = pop!(m1, i, -1.0)
+        my_assert(d2 == -1.0)
+        d3 = pop!(m1, i, nothing)
+        my_assert(isnothing(d3))
+
+        if i % 200 == 0
+            checkcorrectness(m1.bt, false)
+        end
+    end
+    my_assert(isempty(m1))
+    my_assert(length(m1) == 0)
     for i = N : -1 : 2
         m1[i] = convert(Float64,i) ^ 2
         if i % 200 == 0
