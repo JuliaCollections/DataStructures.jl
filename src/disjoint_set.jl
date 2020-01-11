@@ -111,6 +111,7 @@ mutable struct DisjointSets{T}
     revmap::Vector{T}
     internal::IntDisjointSets
 
+    DisjointSets{T}() where T = new{T}(Dict{T,Int}(), Vector{T}(), IntDisjointSets(0))
     function DisjointSets{T}(xs) where T    # xs must be iterable
         imap = Dict{T,Int}()
         rmap = Vector{T}()
@@ -124,6 +125,15 @@ mutable struct DisjointSets{T}
         end
         new{T}(imap, rmap, IntDisjointSets(n))
     end
+end
+
+DisjointSets() = DisjointSets{Any}()
+DisjointSets(T::Type) = DisjointSets{T}()
+DisjointSets(xs::T) where T = DisjointSets{eltype(T)}(xs)
+DisjointSets(xs::T...) where T = DisjointSets{T}(xs)
+DisjointSets{T}(xs::T...) where T = DisjointSets{T}(xs)
+function DisjointSets(xs::T) where {T<:Base.Generator}
+    return DisjointSets{Base.@default_eltype(xs)}(xs)
 end
 
 length(s::DisjointSets) = length(s.internal)

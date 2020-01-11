@@ -54,6 +54,16 @@
         # DisjointSets supports arbitrary indices
         s = DisjointSets{Int}(1:10)
 
+        @testset "constructor" begin
+            @test DisjointSets() isa DisjointSets{Any}
+            @test DisjointSets(Int) isa DisjointSets{eltype(Int)}
+            @test DisjointSets{Int}(1:10) isa DisjointSets{Int}
+            @test DisjointSets{Float64}(1.0:10.0...) isa DisjointSets{Float64}
+            @test DisjointSets(collect(1:10)) isa DisjointSets{Int}
+            @test DisjointSets(collect(1.0:10.0)...) isa DisjointSets{Float64}
+            @test DisjointSets(x*im for x = 1:10) isa DisjointSets{Complex{eltype(Int)}}
+        end
+
         @testset "basic tests" begin
             @test length(s) == 10
             @test num_groups(s) == 10
