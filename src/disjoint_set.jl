@@ -128,17 +128,21 @@ mutable struct DisjointSets{T}
 end
 
 DisjointSets() = DisjointSets{Any}()
-DisjointSets(T::Type) = DisjointSets{T}()
-DisjointSets(xs::T) where T = DisjointSets{eltype(T)}(xs)
+DisjointSets(::Type{T}) where T = DisjointSets{T}()
 DisjointSets(xs::T...) where T = DisjointSets{T}(xs)
 DisjointSets{T}(xs::T...) where T = DisjointSets{T}(xs)
-function DisjointSets(xs::T) where {T<:Base.Generator}
-    return DisjointSets{Base.@default_eltype(xs)}(xs)
+DisjointSets(xs) = _DisjointSets(xs, Base.IteratorEltype(xs))
+_DisjointSets(xs, ::Base.HasEltype) = DisjointSets{eltype(xs)}(xs)
+function _DisjointSets(xs, ::Base.EltypeUnknown)
+    T = Base.@default_eltype(xs)
+    (isconcretetype(T) || T === Union{}) || return grow_to!(DisjointSets{T}(), xs)
+    return DisjointSets{T}(xs)
 end
 
 length(s::DisjointSets) = length(s.internal)
 num_groups(s::DisjointSets) = num_groups(s.internal)
 Base.eltype(::Type{DisjointSets{T}}) where T = T
+empty(s::DisjointSets{T}, ::Type{U}=T) where {T,U} = DisjointSets{U}()
 
 """
     find_root{T}(s::DisjointSets{T}, x::T)
