@@ -26,7 +26,6 @@ length(s::IntDisjointSets) = length(s.parents)
 num_groups(s::IntDisjointSets) = s.ngroups
 Base.eltype(::Type{IntDisjointSets}) = Int
 
-
 # find the root element of the subset that contains x
 # path compression is implemented here
 #
@@ -128,7 +127,6 @@ mutable struct DisjointSets{T}
 end
 
 DisjointSets() = DisjointSets{Any}()
-DisjointSets(::Type{T}) where T = DisjointSets{T}()
 DisjointSets(xs::T...) where T = DisjointSets{T}(xs)
 DisjointSets{T}(xs::T...) where T = DisjointSets{T}(xs)
 DisjointSets(xs) = _DisjointSets(xs, Base.IteratorEltype(xs))
