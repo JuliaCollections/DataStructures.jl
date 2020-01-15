@@ -26,7 +26,6 @@ length(s::IntDisjointSets) = length(s.parents)
 num_groups(s::IntDisjointSets) = s.ngroups
 Base.eltype(::Type{IntDisjointSets}) = Int
 
-
 # find the root element of the subset that contains x
 # path compression is implemented here
 #
@@ -111,6 +110,7 @@ mutable struct DisjointSets{T}
     revmap::Vector{T}
     internal::IntDisjointSets
 
+    DisjointSets{T}() where T = new{T}(Dict{T,Int}(), Vector{T}(), IntDisjointSets(0))
     function DisjointSets{T}(xs) where T    # xs must be iterable
         imap = Dict{T,Int}()
         rmap = Vector{T}()
@@ -126,9 +126,21 @@ mutable struct DisjointSets{T}
     end
 end
 
+DisjointSets() = DisjointSets{Any}()
+DisjointSets(xs::T...) where T = DisjointSets{T}(xs)
+DisjointSets{T}(xs::T...) where T = DisjointSets{T}(xs)
+DisjointSets(xs) = _DisjointSets(xs, Base.IteratorEltype(xs))
+_DisjointSets(xs, ::Base.HasEltype) = DisjointSets{eltype(xs)}(xs)
+function _DisjointSets(xs, ::Base.EltypeUnknown)
+    T = Base.@default_eltype(xs)
+    (isconcretetype(T) || T === Union{}) || return grow_to!(DisjointSets{T}(), xs)
+    return DisjointSets{T}(xs)
+end
+
 length(s::DisjointSets) = length(s.internal)
 num_groups(s::DisjointSets) = num_groups(s.internal)
 Base.eltype(::Type{DisjointSets{T}}) where T = T
+empty(s::DisjointSets{T}, ::Type{U}=T) where {T,U} = DisjointSets{U}()
 
 """
     find_root{T}(s::DisjointSets{T}, x::T)
