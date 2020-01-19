@@ -61,6 +61,8 @@
             @test DisjointSets(collect(1:10)) isa DisjointSets{Int}
             @test DisjointSets(collect(1.0:10.0)...) isa DisjointSets{Float64}
             @test DisjointSets(x*im for x = 1:10) isa DisjointSets{Complex{Int}}
+            g = (x % 2 == 0 ? x+1//x : x*im for x = 1:10)
+            @test DisjointSets(g) isa DisjointSets{Number}
         end
 
         @testset "basic tests" begin
@@ -70,6 +72,10 @@
             @test eltype(typeof(s)) == Int
             @test length(empty(s)) == num_groups(empty(s)) == 0
             @test empty(s) isa DisjointSets{eltype(s)}
+            @test collect(s) == collect(1:10)
+            s1 = DisjointSets{Int}(1:10)
+            @test sizehint!(s1, 100) === s1
+            @test length(s1) == 100
 
             r = [find_root(s, i) for i in 1 : 10]
             @test isequal(r, collect(1:10))
@@ -116,6 +122,7 @@
         @testset "Some tests using non-integer disjoint sets" begin
             elems = ["a", "b", "c", "d"]
             a = DisjointSets{AbstractString}(elems)
+            @test collect(a) == ["a", "b", "c", "d"]
             union!(a, "a", "b")
             @test in_same_set(a,"a","b")
             @test find_root(a,"a") == find_root(a,"b")

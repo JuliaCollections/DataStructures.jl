@@ -13,7 +13,7 @@
 #
 ############################################################
 
-mutable struct IntDisjointSets
+mutable struct IntDisjointSets <: AbstractSet{Int}
     parents::Vector{Int}
     ranks::Vector{Int}
     ngroups::Int
@@ -62,7 +62,7 @@ function union!(s::IntDisjointSets, x::Integer, y::Integer)
     parents = s.parents
     xroot = find_root_impl!(parents, x)
     yroot = find_root_impl!(parents, y)
-    xroot != yroot ?  root_union!(s, xroot, yroot) : xroot
+    xroot != yroot ? root_union!(s, xroot, yroot) : xroot
 end
 
 # form a new set that is the union of the two sets whose root elements are
@@ -105,7 +105,7 @@ end
 #
 ############################################################
 
-mutable struct DisjointSets{T}
+mutable struct DisjointSets{T} <: AbstractSet{T}
     intmap::Dict{T,Int}
     revmap::Vector{T}
     internal::IntDisjointSets
@@ -133,14 +133,23 @@ DisjointSets(xs) = _DisjointSets(xs, Base.IteratorEltype(xs))
 _DisjointSets(xs, ::Base.HasEltype) = DisjointSets{eltype(xs)}(xs)
 function _DisjointSets(xs, ::Base.EltypeUnknown)
     T = Base.@default_eltype(xs)
-    (isconcretetype(T) || T === Union{}) || return grow_to!(DisjointSets{T}(), xs)
+    (isconcretetype(T) || T === Union{}) || return Base.grow_to!(DisjointSets{T}(), xs)
     return DisjointSets{T}(xs)
 end
+
+iterate(s::DisjointSets) = iterate(s.revmap)
+iterate(s::DisjointSets, i) = iterate(s.revmap, i)
 
 length(s::DisjointSets) = length(s.internal)
 num_groups(s::DisjointSets) = num_groups(s.internal)
 Base.eltype(::Type{DisjointSets{T}}) where T = T
 empty(s::DisjointSets{T}, ::Type{U}=T) where {T,U} = DisjointSets{U}()
+function sizehint!(s::DisjointSets, n::Integer)
+    sizehint!(s.intmap, n)
+    sizehint!(s.revmap, n)
+    s.internal = IntDisjointSets(n)
+    return s
+end
 
 """
     find_root{T}(s::DisjointSets{T}, x::T)
