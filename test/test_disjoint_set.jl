@@ -73,9 +73,10 @@
             @test length(empty(s)) == num_groups(empty(s)) == 0
             @test empty(s) isa DisjointSets{eltype(s)}
             @test collect(s) == collect(1:10)
-            s1 = DisjointSets{Int}(1:10)
+            g = (x % 2 == 0 ? x+1//x : x*im for x = 1:10)
+            s1 = DisjointSets(g)
+            @test length(s1) == 10
             @test sizehint!(s1, 100) === s1
-            @test length(s1) == 100
 
             r = [find_root(s, i) for i in 1 : 10]
             @test isequal(r, collect(1:10))

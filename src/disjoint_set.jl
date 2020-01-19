@@ -13,7 +13,7 @@
 #
 ############################################################
 
-mutable struct IntDisjointSets <: AbstractSet{Int}
+mutable struct IntDisjointSets
     parents::Vector{Int}
     ranks::Vector{Int}
     ngroups::Int
@@ -147,7 +147,6 @@ empty(s::DisjointSets{T}, ::Type{U}=T) where {T,U} = DisjointSets{U}()
 function sizehint!(s::DisjointSets, n::Integer)
     sizehint!(s.intmap, n)
     sizehint!(s.revmap, n)
-    s.internal = IntDisjointSets(n)
     return s
 end
 
