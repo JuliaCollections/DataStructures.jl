@@ -17,12 +17,12 @@
         @test isempty(s)
         @test eltype(s) == Int
         @test eltype(typeof(s)) == Int
-        @test_throws ArgumentError top(s)
+        @test_throws ArgumentError first(s)
         @test_throws ArgumentError pop!(s)
 
         for i = 1 : n
             push!(s, i)
-            @test top(s) == i
+            @test first(s) == i
             @test !isempty(s)
             @test length(s) == i
         end
@@ -31,9 +31,9 @@
             x = pop!(s)
             @test x == n - i + 1
             if i < n
-                @test top(s) == n - i
+                @test first(s) == n - i
             else
-                @test_throws ArgumentError top(s)
+                @test_throws ArgumentError first(s)
             end
             @test isempty(s) == (i == n)
             @test length(s) == n - i

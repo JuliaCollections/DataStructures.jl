@@ -33,21 +33,21 @@ end
 Base.isempty(D::CircularDeque) = D.n == 0
 
 """
-    front(D::CircularDeque)
+    first(D::CircularDeque)
 
-Add an element to the front
+Get the item at the front of the queue.
 """
-@inline function front(D::CircularDeque)
+@inline function first(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
     D.buffer[D.first]
 end
 
 """
-    back(D::CircularDeque)
+    last(D::CircularDeque)
 
-Add an element to the back
+Get the item from the back of the queue.
 """
-@inline function back(D::CircularDeque)
+@inline function last(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
     D.buffer[D.last]
 end
@@ -62,7 +62,7 @@ end
 end
 
 @inline function Base.pop!(D::CircularDeque)
-    v = back(D)
+    v = last(D)
     D.n -= 1
     tmp = D.last - 1
     D.last = ifelse(tmp < 1, D.capacity, tmp)
@@ -72,7 +72,7 @@ end
 """
     pushfirst!(D::CircularDeque, v)
 
-Add an element to the front
+Add an element to the front.
 """
 @inline function pushfirst!(D::CircularDeque, v)
     @boundscheck D.n < D.capacity || throw(BoundsError())
@@ -84,12 +84,12 @@ Add an element to the front
 end
 
 """
-    pushfirst!(D::CircularDeque)
+    popfirst!(D::CircularDeque)
 
-Remove the element at the front
+Remove the element at the front.
 """
 @inline function popfirst!(D::CircularDeque)
-    v = front(D)
+    v = first(D)
     D.n -= 1
     tmp = D.first + 1
     D.first = ifelse(tmp > D.capacity, 1, tmp)

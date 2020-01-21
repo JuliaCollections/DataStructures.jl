@@ -236,17 +236,27 @@ end
 
 
 """
-    pop!(sc, k)
+    pop!(sc, k[, default])
 
 Deletes the item with key `k` in SortedDict or SortedSet `sc` and
 returns the value that was associated with `k` in the case of
-SortedDict or `k` itself in the case of SortedSet. A `KeyError`
-results if `k` is not in `sc`. Time: O(*c* log *n*)
+SortedDict or `k` itself in the case of SortedSet. If `k` is not in `sc`
+return `default`, or throw a `KeyError` if `default` is not specified.
+Time: O(*c* log *n*)
 """
 @inline function pop!(m::SortedSet, k_)
     k = convert(keytype(m),k_)
     i, exactfound = findkey(m.bt, k)
     !exactfound && throw(KeyError(k_))
+    d = m.bt.data[i].d
+    delete!(m.bt, i)
+    k
+end
+
+@inline function pop!(m::SortedSet, k_, default)
+    k = convert(keytype(m),k_)
+    i, exactfound = findkey(m.bt, k)
+    !exactfound && return default
     d = m.bt.data[i].d
     delete!(m.bt, i)
     k

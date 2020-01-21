@@ -12,12 +12,12 @@ isempty(a)          # test whether the deque is empty
 empty!(a)           # reset the deque
 capacity(a)         # return capacity
 length(a)           # get the number of elements currently in the deque
-push!(a, 10)        # add an element to the back
+push!(a, 10)        # add an element to the front
 pop!(a)             # remove an element from the back
 pushfirst!(a, 20)   # add an element to the front
-popfirst!(a)        # remove an element from the front
-front(a)            # get the element at the front
-back(a)             # get the element at the back
+popfirst!(a)        # remove an element from the first
+first(a)            # get the element at the front
+last(a)             # get the element at the back
 eltype(a)           # return type of items
 ```
 

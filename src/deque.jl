@@ -98,7 +98,7 @@ Base.eltype(::Type{Deque{T}}) where T = T
 
 Returns the first element of the deque `q`.
 """
-function front(q::Deque)
+function first(q::Deque)
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     blk = q.head
     blk.data[blk.front]
@@ -109,7 +109,7 @@ end
 
 Returns the last element of the deque `q`.
 """
-function back(q::Deque)
+function last(q::Deque)
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     blk = q.rear
     blk.data[blk.back]
