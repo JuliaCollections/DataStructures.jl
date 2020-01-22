@@ -13,6 +13,14 @@
 #
 ############################################################
 
+"""
+    IntDisjointSets(n::Integer)
+
+A forest of disjoint sets of integers, which is a data structure 
+(also called a union–find data structure or merge–find set) 
+that tracks a set of elements partitioned 
+into a number of disjoint (non-overlapping) subsets.
+"""
 mutable struct IntDisjointSets
     parents::Vector{Int}
     ranks::Vector{Int}
@@ -23,13 +31,17 @@ mutable struct IntDisjointSets
 end
 
 length(s::IntDisjointSets) = length(s.parents)
+
+"""
+    num_groups(s::IntDisjointSets)
+
+Get a number of groups.
+"""
 num_groups(s::IntDisjointSets) = s.ngroups
 Base.eltype(::Type{IntDisjointSets}) = Int
 
 # find the root element of the subset that contains x
 # path compression is implemented here
-#
-
 function find_root_impl!(parents::Array{Int}, x::Integer)
     p = parents[x]
     @inbounds if parents[p] != p
@@ -47,6 +59,12 @@ function _find_root_impl!(parents::Array{Int}, x::Integer)
     p
 end
 
+"""
+    find_root!(s::IntDisjointSets, x::Integer)
+
+Find the root element of the subset that contains an Integer x.
+Path compression is implemented here.
+"""
 find_root(s::IntDisjointSets, x::Integer) = find_root_impl!(s.parents, x)
 
 """
@@ -56,8 +74,12 @@ Returns `true` if `x` and `y` belong to the same subset in `s` and `false` other
 """
 in_same_set(s::IntDisjointSets, x::Integer, y::Integer) = find_root(s, x) == find_root(s, y)
 
-# merge the subset containing x and that containing y into one
-# and return the root of the new set.
+"""
+    union!(s::IntDisjointSets, x::Integer, y::Integer)
+
+Merge the subset containing x and that containing y into one
+and return the root of the new set.
+"""
 function union!(s::IntDisjointSets, x::Integer, y::Integer)
     parents = s.parents
     xroot = find_root_impl!(parents, x)
@@ -65,9 +87,13 @@ function union!(s::IntDisjointSets, x::Integer, y::Integer)
     xroot != yroot ?  root_union!(s, xroot, yroot) : xroot
 end
 
-# form a new set that is the union of the two sets whose root elements are
-# x and y and return the root of the new set
-# assume x ≠ y (unsafe)
+"""
+    root_union!(s::IntDisjointSets, x::Integer, y::Integer)
+
+Form a new set that is the union of the two sets whose root elements are
+x and y and return the root of the new set.
+Assume x ≠ y (unsafe).
+"""
 function root_union!(s::IntDisjointSets, x::Integer, y::Integer)
     parents = s.parents
     rks = s.ranks
@@ -84,9 +110,13 @@ function root_union!(s::IntDisjointSets, x::Integer, y::Integer)
     x
 end
 
-# make a new subset with an automatically chosen new element x
-# returns the new element
-#
+
+"""
+    push!(s::IntDisjointSets)
+    
+Make a new subset with an automatically chosen new element x.
+Returns the new element.
+"""
 function push!(s::IntDisjointSets)
     x = length(s) + 1
     push!(s.parents, x)
@@ -96,15 +126,14 @@ function push!(s::IntDisjointSets)
 end
 
 
-############################################################
-#
-#  A forest of disjoint sets of arbitrary value type T
-#
-#  It is a wrapper of IntDisjointSets, which uses a
-#  dictionary to map the input value to an internal index
-#
-############################################################
+"""
+    DisjointSets{T}(xs)
 
+A forest of disjoint sets of arbitrary value type T.
+
+It is a wrapper of IntDisjointSets, which uses a
+dictionary to map the input value to an internal index.
+"""
 mutable struct DisjointSets{T}
     intmap::Dict{T,Int}
     revmap::Vector{T}
@@ -138,6 +167,12 @@ function _DisjointSets(xs, ::Base.EltypeUnknown)
 end
 
 length(s::DisjointSets) = length(s.internal)
+
+"""
+    num_groups(s::DisjointSets)
+
+Get a number of groups.
+"""
 num_groups(s::DisjointSets) = num_groups(s.internal)
 Base.eltype(::Type{DisjointSets{T}}) where T = T
 empty(s::DisjointSets{T}, ::Type{U}=T) where {T,U} = DisjointSets{U}()
@@ -149,12 +184,38 @@ Finds the root element of the subset in `s` which has the element `x` as a membe
 """
 find_root(s::DisjointSets{T}, x::T) where {T} = s.revmap[find_root(s.internal, s.intmap[x])]
 
+"""
+    in_same_set(s::DisjointSets{T}, x::T, y::T)
+
+Returns `true` if `x` and `y` belong to the same subset in `s` and `false` otherwise.
+"""
 in_same_set(s::DisjointSets{T}, x::T, y::T) where {T} = in_same_set(s.internal, s.intmap[x], s.intmap[y])
 
+"""
+    union!(s::DisjointSets{T}, x::T, y::T)
+
+Merge the subset containing x and that containing y into one
+and return the root of the new set.
+"""
 union!(s::DisjointSets{T}, x::T, y::T) where {T} = s.revmap[union!(s.internal, s.intmap[x], s.intmap[y])]
 
+
+"""
+    root_union!(s::DisjointSets{T}, x::T, y::T)
+
+Form a new set that is the union of the two sets whose root elements are
+x and y and return the root of the new set.
+Assume x ≠ y (unsafe).
+"""
 root_union!(s::DisjointSets{T}, x::T, y::T) where {T} = s.revmap[root_union!(s.internal, s.intmap[x], s.intmap[y])]
 
+
+"""
+    push!(s::DisjointSets{T}, x::T)
+    
+Make a new subset with an automatically chosen new element x.
+Returns the new element.
+"""
 function push!(s::DisjointSets{T}, x::T) where T
     id = push!(s.internal)
     s.intmap[x] = id
