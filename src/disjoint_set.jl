@@ -16,9 +16,9 @@
 """
     IntDisjointSets(n::Integer)
 
-A forest of disjoint sets of integers, which is a data structure 
-(also called a union–find data structure or merge–find set) 
-that tracks a set of elements partitioned 
+A forest of disjoint sets of integers, which is a data structure
+(also called a union–find data structure or merge–find set)
+that tracks a set of elements partitioned
 into a number of disjoint (non-overlapping) subsets.
 """
 mutable struct IntDisjointSets
@@ -112,7 +112,7 @@ end
 
 """
     push!(s::IntDisjointSets)
-    
+
 Make a new subset with an automatically chosen new element x.
 Returns the new element.
 """
@@ -216,7 +216,7 @@ root_union!(s::DisjointSets{T}, x::T, y::T) where {T} = s.revmap[root_union!(s.i
 
 """
     push!(s::DisjointSets{T}, x::T)
-    
+
 Make a new subset with an automatically chosen new element x.
 Returns the new element.
 """
