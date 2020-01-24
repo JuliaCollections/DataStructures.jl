@@ -16,9 +16,9 @@
 """
     IntDisjointSets(n::Integer)
 
-A forest of disjoint sets of integers, which is a data structure 
-(also called a union–find data structure or merge–find set) 
-that tracks a set of elements partitioned 
+A forest of disjoint sets of integers, which is a data structure
+(also called a union–find data structure or merge–find set)
+that tracks a set of elements partitioned
 into a number of disjoint (non-overlapping) subsets.
 """
 mutable struct IntDisjointSets
@@ -84,7 +84,7 @@ function union!(s::IntDisjointSets, x::Integer, y::Integer)
     parents = s.parents
     xroot = find_root_impl!(parents, x)
     yroot = find_root_impl!(parents, y)
-    xroot != yroot ?  root_union!(s, xroot, yroot) : xroot
+    xroot != yroot ? root_union!(s, xroot, yroot) : xroot
 end
 
 """
@@ -110,10 +110,9 @@ function root_union!(s::IntDisjointSets, x::Integer, y::Integer)
     x
 end
 
-
 """
     push!(s::IntDisjointSets)
-    
+
 Make a new subset with an automatically chosen new element x.
 Returns the new element.
 """
@@ -125,7 +124,6 @@ function push!(s::IntDisjointSets)
     return x
 end
 
-
 """
     DisjointSets{T}(xs)
 
@@ -134,7 +132,7 @@ A forest of disjoint sets of arbitrary value type T.
 It is a wrapper of IntDisjointSets, which uses a
 dictionary to map the input value to an internal index.
 """
-mutable struct DisjointSets{T}
+mutable struct DisjointSets{T} <: AbstractSet{T}
     intmap::Dict{T,Int}
     revmap::Vector{T}
     internal::IntDisjointSets
@@ -162,9 +160,12 @@ DisjointSets(xs) = _DisjointSets(xs, Base.IteratorEltype(xs))
 _DisjointSets(xs, ::Base.HasEltype) = DisjointSets{eltype(xs)}(xs)
 function _DisjointSets(xs, ::Base.EltypeUnknown)
     T = Base.@default_eltype(xs)
-    (isconcretetype(T) || T === Union{}) || return grow_to!(DisjointSets{T}(), xs)
+    (isconcretetype(T) || T === Union{}) || return Base.grow_to!(DisjointSets{T}(), xs)
     return DisjointSets{T}(xs)
 end
+
+iterate(s::DisjointSets) = iterate(s.revmap)
+iterate(s::DisjointSets, i) = iterate(s.revmap, i)
 
 length(s::DisjointSets) = length(s.internal)
 
@@ -176,6 +177,11 @@ Get a number of groups.
 num_groups(s::DisjointSets) = num_groups(s.internal)
 Base.eltype(::Type{DisjointSets{T}}) where T = T
 empty(s::DisjointSets{T}, ::Type{U}=T) where {T,U} = DisjointSets{U}()
+function sizehint!(s::DisjointSets, n::Integer)
+    sizehint!(s.intmap, n)
+    sizehint!(s.revmap, n)
+    return s
+end
 
 """
     find_root{T}(s::DisjointSets{T}, x::T)
@@ -199,7 +205,6 @@ and return the root of the new set.
 """
 union!(s::DisjointSets{T}, x::T, y::T) where {T} = s.revmap[union!(s.internal, s.intmap[x], s.intmap[y])]
 
-
 """
     root_union!(s::DisjointSets{T}, x::T, y::T)
 
@@ -209,10 +214,9 @@ Assume x ≠ y (unsafe).
 """
 root_union!(s::DisjointSets{T}, x::T, y::T) where {T} = s.revmap[root_union!(s.internal, s.intmap[x], s.intmap[y])]
 
-
 """
     push!(s::DisjointSets{T}, x::T)
-    
+
 Make a new subset with an automatically chosen new element x.
 Returns the new element.
 """
