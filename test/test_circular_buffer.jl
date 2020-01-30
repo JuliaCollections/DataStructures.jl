@@ -1,3 +1,15 @@
+struct KnownLengthIter
+    n::Int
+end
+Base.iterate(M::KnownLengthIter, state=1) = state > M.n ? nothing : (iseven(state) ? ('a', state+1) : (1, state+1))
+Base.length(M::KnownLengthIter) = M.n
+
+struct UnknownLengthIter
+    n::Int
+end
+Base.iterate(M::UnknownLengthIter, state=1) = state > M.n ? nothing : (iseven(state) ? ('a', state+1) : (1, state+1))
+Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
+
 @testset "CircularBuffer" begin
 
     @testset "Core Functionality" begin
@@ -132,4 +144,22 @@
             @test Array(cb) == [21, 42, 42]
         end
     end
+
+    @testset "constructing from iterator" begin
+        # when eltype is known
+        C = CircularBuffer(1:3)
+        @test_skip eltype(C) == Int
+        @test capacity(C) == 3
+        @test length(C) == 3
+
+        # when eltype is not known
+        C = CircularBuffer(KnownLengthIter(10))
+        @test_skip eltype(C) == Any
+        @test capacity(C) == 10
+        @test length(C) == 10
+
+        # when length is not known
+        @test_throws MethodError CircularBuffer(UnknownLengthIter(10))
+    end
+
 end

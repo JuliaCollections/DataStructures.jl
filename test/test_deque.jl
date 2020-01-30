@@ -1,3 +1,15 @@
+struct KnownLengthIter
+    n::Int
+end
+Base.iterate(M::KnownLengthIter, state=1) = state > M.n ? nothing : (iseven(state) ? ('a', state+1) : (1, state+1))
+Base.length(M::KnownLengthIter) = M.n
+
+struct UnknownLengthIter
+    n::Int
+end
+Base.iterate(M::UnknownLengthIter, state=1) = state > M.n ? nothing : (iseven(state) ? ('a', state+1) : (1, state+1))
+Base.IteratorSize(::UnknownLengthIter) = Base.SizeUnknown()
+
 @testset "Deque" begin
     @testset "empty dequeue" begin
         @testset "empty dequeue 1" begin
@@ -200,6 +212,21 @@
         @test length(sprint(dump,q)) >= 0
         @test typeof(empty!(q)) === typeof(Deque{Int}())
         @test isempty(q)
+    end
+
+    @testset "constructing from iterator" begin
+        # when eltype is known
+        D = Deque(1:3)
+        @test_skip eltype(D) == Int
+        @test length(D) == 3
+
+        # when eltype is not known
+        D = Deque(KnownLengthIter(10))
+        @test_skip eltype(D) == Any
+        @test length(D) == 10
+
+        # when length is not known
+        @test_throws MethodError Deque(UnknownLengthIter(10))
     end
 
 end # @testset Deque
