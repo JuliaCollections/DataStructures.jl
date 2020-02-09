@@ -66,7 +66,7 @@ import DataStructures: DefaultDictBase
 
                 @test d['z'] == 26
                 @test d['@'] == 1
-                @test length(d) == 27
+                @test length(d) == 26
                 @test delete!(d, '@') === d
                 @test length(d) == 26
 
@@ -103,13 +103,13 @@ import DataStructures: DefaultDictBase
             end
             @test g["foobar"] == 6
             @test calls == 1
-            @test length(g) == 1
+            @test length(g) == 0
             @test g["baz"] == 3
             @test calls == 2
-            @test length(g) == 2
+            @test length(g) == 0
             @test g["foobar"] == 6
-            @test calls == 2
-            @test length(g) == 2
+            @test calls == 3
+            @test length(g) == 0
 
             @testset "Incorrect Usage" begin
                 bad_dds = [
@@ -124,9 +124,24 @@ import DataStructures: DefaultDictBase
             end
         end
 
-        # Alternate constructor
-        @test isa(DefaultDict(0.0), DefaultDict{Any, Any, Float64})
-        @test isa(DefaultDict(0.0, [(1, 1.0)]), DefaultDict{Int, Float64, Float64})
+        @testset "Alternate constructor" begin
+            @test isa(DefaultDict(0.0), DefaultDict{Any, Any, Float64})
+            @test isa(DefaultDict(0.0, [(1, 1.0)]), DefaultDict{Int, Float64, Float64})
+        end
+
+        @testset "Differently typed default" begin
+            # https://github.com/JuliaCollections/DataStructures.jl/issues/575
+            @testset "default: $def" for def in (missing, Missing, ()->missing)
+                dd_missing = DefaultDict(def, Dict(i => i for i in 1:3))
+                @test dd_missing[0] isa Missing
+            end
+        end
+
+        @testset "+=" begin
+            dd = DefaultDict(0, Dict('a'=>1, 'b'=>2))
+            dd['c'] += 10
+            @test dd['c'] == 10
+        end
     end
 
     @testset "DefaultOrderedDict" begin
@@ -173,7 +188,7 @@ import DataStructures: DefaultDictBase
 
                 @test d['z'] == 26
                 @test d['@'] == 1
-                @test length(d) == 27
+                @test length(d) == 26
                 @test delete!(d, '@') === d
                 @test length(d) == 26
 
@@ -198,7 +213,5 @@ import DataStructures: DefaultDictBase
         @testset "issue #216" begin
             @test DataStructures.isordered(DefaultOrderedDict{Int, String})
         end
-
     end
-
 end
