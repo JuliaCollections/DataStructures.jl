@@ -138,7 +138,7 @@ mutable struct DisjointSets{T} <: AbstractSet{T}
     internal::IntDisjointSets
 
     DisjointSets{T}() where T = new{T}(Dict{T,Int}(), Vector{T}(), IntDisjointSets(0))
-    function DisjointSets{T}(xs) where T    # xs must be iterable
+    function DisjointSets{T}(xs) where T  # xs must be iterable
         imap = Dict{T,Int}()
         rmap = Vector{T}()
         n = length(xs)
@@ -154,8 +154,6 @@ mutable struct DisjointSets{T} <: AbstractSet{T}
 end
 
 DisjointSets() = DisjointSets{Any}()
-DisjointSets(xs::T...) where T = DisjointSets{T}(xs)
-DisjointSets{T}(xs::T...) where T = DisjointSets{T}(xs)
 DisjointSets(xs) = _DisjointSets(xs, Base.IteratorEltype(xs))
 _DisjointSets(xs, ::Base.HasEltype) = DisjointSets{eltype(xs)}(xs)
 function _DisjointSets(xs, ::Base.EltypeUnknown)

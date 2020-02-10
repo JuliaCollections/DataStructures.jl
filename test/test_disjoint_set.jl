@@ -57,12 +57,17 @@
         @testset "constructor" begin
             @test DisjointSets() isa DisjointSets{Any}
             @test DisjointSets{Int}(1:10) isa DisjointSets{Int}
-            @test DisjointSets{Float64}(1.0:10.0...) isa DisjointSets{Float64}
+            @test DisjointSets{Float64}(1.0:10.0) isa DisjointSets{Float64}
             @test DisjointSets(collect(1:10)) isa DisjointSets{Int}
-            @test DisjointSets(collect(1.0:10.0)...) isa DisjointSets{Float64}
+            @test DisjointSets(collect(1.0:10.0)) isa DisjointSets{Float64}
             @test DisjointSets(x*im for x = 1:10) isa DisjointSets{Complex{Int}}
             g = (x % 2 == 0 ? x+1//x : x*im for x = 1:10)
             @test DisjointSets(g) isa DisjointSets{Number}
+
+            # https://github.com/JuliaCollections/DataStructures.jl/issues/570
+            @test DisjointSets(Any[1,2,3]) isa DisjointSets
+            @test DisjointSets{Any}(Any[1,2,3]) isa DisjointSets{Any}
+            @test DisjointSets{Int}(Any[1,2,3]) isa DisjointSets{Int}
         end
 
         @testset "basic tests" begin
