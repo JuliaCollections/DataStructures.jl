@@ -15,6 +15,7 @@
 
         @testset "With 1 element" begin
             push!(cb, 1)
+            @test_throws BoundsError cb[2]
             @test length(cb) == 1
             @test capacity(cb) == 5
             @test isfull(cb) == false
@@ -36,8 +37,10 @@
             @test cb[3] == 6
             @test cb[4] == 7
             @test cb[5] == 8
-            @test_throws BoundsError cb[6]
-            @test_throws BoundsError cb[3:6]
+            @test cb[20] == 8
+            @test cb[0] == 8
+            @test cb[-1] == 7
+            @test cb[-11] == 7
             @test cb[3:4] == Int[6,7]
             @test cb[[1,5]] == Int[4,8]
             @test first(cb) == 4
