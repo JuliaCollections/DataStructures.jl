@@ -14,6 +14,7 @@ end
 
 Accumulator{T, V}() where {T,V<:Number} = Accumulator{T,V}(Dict{T,V}())
 Accumulator(map::AbstractDict) = Accumulator(Dict(map))
+Accumulator(ps::Pair...) = Accumulator(Dict(ps))
 
 counter(T::Type) = Accumulator{T,Int}()
 counter(dct::AbstractDict{T, V}) where {T, V<:Integer} = Accumulator{T, V}(Dict(dct))
@@ -234,4 +235,19 @@ function Base.intersect!(a::Accumulator, b::Accumulator)
         drop_nonpositive!(a, k) # Drop any that ended up zero
     end
     return a
+end
+function Base.show(io::IO, acc::Accumulator{T,V}) where {T,V}
+    l = length(acc)
+    if l>0
+        print(io, "Accumulator(")
+    else
+        print(io,"Accumulator{$T,$V}(")
+    end
+    for (count, (k, v)) in enumerate(acc)
+        print(io, k, " => ", v)
+        if count < l
+            print(io, ", ")
+        end
+    end
+    print(io, ")")
 end
