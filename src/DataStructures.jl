@@ -38,6 +38,8 @@ module DataStructures
     export MutableBinaryHeap, MutableBinaryMinHeap, MutableBinaryMaxHeap
     export heapify!, heapify, heappop!, heappush!, isheap
     export BinaryMinMaxHeap, popmin!, popmax!, popall!
+    export MutableFibonacciHeapNode,FibonacciHeap,push!,top,show,merge!,delete!,pop!,popmin!,minimum,minimum_with_handle
+
 
     export Trie, subtrie, keys_with_prefix, path
 
@@ -58,6 +60,7 @@ module DataStructures
     export RobinDict
 
     export findkey
+
 
     include("deprecations.jl")
     include("delegate.jl")
