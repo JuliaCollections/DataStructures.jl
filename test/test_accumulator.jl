@@ -51,6 +51,17 @@
         @test sum(ct) == 6
     end
 
+    @testset "From Pairs" begin 
+        acc = Accumulator("a" => 2, "b" => 3, "c" => 1)
+        @test isa(acc,Accumulator{String,Int})
+        @test haskey(acc,"a")
+        @test haskey(acc,"b")
+        @test haskey(acc,"c")
+        @test acc["a"] == 2
+        @test acc["b"] == 3
+        @test acc["c"] == 1
+    end
+
     @testset "From Vector" begin
         ct2 = counter(["a", "a", "b", "b", "a", "c", "c"])
         @test isa(ct2, Accumulator{String,Int})
@@ -245,7 +256,10 @@
             @test_throws DataStructures.MultiplicityException (nonmultiset ∩ counter("aabbcc"))
         end
 
-
+        @testset "show" begin
+            @test sprint(show,Accumulator(1 => 3)) == "Accumulator(1 => 3)"
+            @test sprint(show,Accumulator(1 => 3, 3 => 4)) == "Accumulator(3 => 4, 1 => 3)"
+        end
 
 
     end
