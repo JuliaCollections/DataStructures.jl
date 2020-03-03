@@ -327,6 +327,6 @@ eachindex(smd::SDMIncludeLast{SortedMultiDict{K,D,Ord}} where {K,D,Ord <: Orderi
 eachindex(ss::SSIncludeLast) = onlysemitokens(ss)
 
 
-empty!(m::SAContainer) =  empty!(m.bt)
+empty!(m::SAContainer) = (empty!(m.bt); m)
 length(m::SAContainer) = length(m.bt.data) - length(m.bt.freedatainds) - 2
 isempty(m::SAContainer) = length(m) == 0
