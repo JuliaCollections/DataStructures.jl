@@ -39,6 +39,9 @@ Base.eltype(::Type{Stack{T}}) where T = T
     first(s::Stack)
 
 Get the top item from the stack. Sometimes called peek.
+
+Throws an `ArgumentError` if the stack is empty. This check
+can be disabled with `@inbounds`.
 """
 Base.@propagate_inbounds first(s::Stack) = last(s.store)
 
@@ -47,6 +50,14 @@ function push!(s::Stack, x)
     s
 end
 
+"""
+    pop!(s::Stack)
+
+Remove the top item from the stack and return it.
+
+Throws an `ArgumentError` if the stack is empty. This check
+can be disabled with `@inbounds`.
+"""
 Base.@propagate_inbounds pop!(s::Stack) = pop!(s.store)
 
 empty!(s::Stack) = (empty!(s.store); s)

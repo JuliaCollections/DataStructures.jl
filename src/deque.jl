@@ -97,6 +97,9 @@ Base.eltype(::Type{Deque{T}}) where T = T
     front(q::Deque)
 
 Returns the first element of the deque `q`.
+
+Throws an `ArgumentError` if the deque is empty. This check
+can be disabled with `@inbounds`.
 """
 @inline Base.@propagate_inbounds function first(q::Deque)
     @boundscheck isempty(q) && throw(ArgumentError("Deque must be non-empty"))
@@ -108,6 +111,9 @@ end
     back(q::Deque)
 
 Returns the last element of the deque `q`.
+
+Throws an `ArgumentError` if the deque is empty. This check
+can be disabled with `@inbounds`.
 """
 @inline Base.@propagate_inbounds function last(q::Deque)
     @boundscheck isempty(q) && throw(ArgumentError("Deque must be non-empty"))
@@ -281,6 +287,9 @@ end
     pop!(q::Deque{T})
 
 Remove the element at the back
+
+Throws an `ArgumentError` if the deque is empty. This check
+can be disabled with `@inbounds`.
 """
 @inline function pop!(q::Deque{T}) where T
     @boundscheck isempty(q) && throw(ArgumentError("Deque must be non-empty"))
@@ -306,6 +315,9 @@ end
     popfirst!(q::Deque{T})
 
 Remove the element at the front
+
+Throws an `ArgumentError` if the deque is empty. This check
+can be disabled with `@inbounds`.
 """
 @inline function popfirst!(q::Deque{T}) where T
     @boundscheck isempty(q) && throw(ArgumentError("Deque must be non-empty"))
