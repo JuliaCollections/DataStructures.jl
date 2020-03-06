@@ -1,6 +1,5 @@
 struct FenwickTree{T}
     bi_tree::Vector{T} #bi_tree is shorthand for Binary Indexed Tree, an alternative name for Fenwick Tree
-    n::Int
 end
 
 """
@@ -9,7 +8,7 @@ end
 Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) of length `n`.
 
 """
-FenwickTree{T}(n::Integer) where T = FenwickTree{T}(zeros(T, n), n)
+FenwickTree{T}(n::Integer) where T = FenwickTree{T}(zeros(T, n))
 
 """
     FenwickTree(counts::AbstractArray)
@@ -26,7 +25,7 @@ function FenwickTree(a::AbstractVector{U}) where U
     tree
 end
 
-length(ft::FenwickTree) = ft.n
+length(ft::FenwickTree) = length(ft.bi_tree)
 Base.eltype(::Type{FenwickTree{T}}) where T = T
 
 """
@@ -38,7 +37,7 @@ Increases the value of the [`FenwickTree`] by `val` from the index `ind` upto th
 function inc!(ft::FenwickTree{T}, ind::Integer, val = 1) where T
     val0 = convert(T, val)
     i = ind
-    n = ft.n
+    n = length(ft)
     @boundscheck 1 <= i <= n || throw(ArgumentError("$i should be in between 1 and $n"))
     @inbounds while i <= n
         ft.bi_tree[i] += val0
@@ -84,7 +83,7 @@ julia> prefixsum(f, 3)
 function prefixsum(ft::FenwickTree{T}, ind::Integer) where T
     sum = zero(T)
     i = ind
-    n = ft.n
+    n = length(ft)
     @boundscheck 1 <= i <= n || throw(ArgumentError("$i should be in between 1 and $n"))
     @inbounds while i > 0
         sum += ft.bi_tree[i]
