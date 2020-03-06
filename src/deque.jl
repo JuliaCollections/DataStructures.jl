@@ -94,7 +94,7 @@ num_blocks(q::Deque) = q.nblocks
 Base.eltype(::Type{Deque{T}}) where T = T
 
 """
-    front(q::Deque)
+    first(q::Deque)
 
 Returns the first element of the deque `q`.
 
@@ -108,7 +108,7 @@ can be disabled with `@inbounds`.
 end
 
 """
-    back(q::Deque)
+    last(q::Deque)
 
 Returns the last element of the deque `q`.
 
