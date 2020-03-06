@@ -40,14 +40,14 @@ Base.eltype(::Type{Stack{T}}) where T = T
 
 Get the top item from the stack. Sometimes called peek.
 """
-first(s::Stack) = last(s.store)
+Base.@propagate_inbounds first(s::Stack) = last(s.store)
 
 function push!(s::Stack, x)
     push!(s.store, x)
     s
 end
 
-pop!(s::Stack) = pop!(s.store)
+Base.@propagate_inbounds pop!(s::Stack) = pop!(s.store)
 
 empty!(s::Stack) = (empty!(s.store); s)
 
