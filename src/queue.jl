@@ -16,8 +16,13 @@ isempty(s::Queue) = isempty(s.store)
 length(s::Queue) = length(s.store)
 Base.eltype(::Type{Queue{T}}) where T = T
 
-first(s::Queue) = first(s.store)
-last(s::Queue) = last(s.store)
+Base.@propagate_inbounds function first(s::Queue)
+    return first(s.store)
+end
+
+Base.@propagate_inbounds function last(s::Queue)
+    return last(s.store)
+end
 
 """
     enqueue!(s::Queue, x)
@@ -34,7 +39,9 @@ end
 
 Removes an element from the front of the queue `s` and returns it.
 """
-dequeue!(s::Queue) = popfirst!(s.store)
+Base.@propagate_inbounds function dequeue!(s::Queue)
+    return popfirst!(s.store)
+end
 
 empty!(s::Queue) = (empty!(s.store); s)
 
