@@ -1,8 +1,8 @@
 mutable struct GenericFenwickTree{F, T}
     bi_tree::Vector{T}
-    function GenericFenwickTree{F, T}(n::Integer) where {F, T}
-        new{F, T}(zeros(T, n))
-    end
+    
+    GenericFenwickTree{F, T}(n::Integer) where {F, T} = new{F, T}(zeros(T, n))
+    
     function GenericFenwickTree{F}(a::AbstractVector{U}) where {F, U}
         n = length(a)
         gft = GenericFenwickTree{F, U}(n)
