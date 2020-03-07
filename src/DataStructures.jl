@@ -31,7 +31,7 @@ module DataStructures
 
     export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set, root_union!
 
-    export GenericFenwickTree, length, inc!, dec!, incdec!, prefixsum, suffixsum
+    export FenwickTree, SuffixFenwickTree, length, inc!, dec!, incdec!, prefixsum, suffixsum
 
     export AbstractHeap, compare, extract_all!
     export BinaryHeap, BinaryMinHeap, BinaryMaxHeap, nlargest, nsmallest
