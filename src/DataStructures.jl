@@ -10,7 +10,7 @@ module DataStructures
                  merge, merge!, lt, Ordering, ForwardOrdering, Forward,
                  ReverseOrdering, Reverse, Lt,
                  isless, union, intersect, symdiff, setdiff, issubset,
-                 searchsortedfirst, searchsortedlast, in,
+                 searchsortedfirst, searchsortedlast, in, resize!,
                  eachindex, keytype, valtype, minimum, maximum, size
 
     using OrderedCollections
