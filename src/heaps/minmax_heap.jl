@@ -26,7 +26,7 @@ function _make_binary_minmax_heap(xs)
     for i in length(xs):-1:1
         _minmax_heap_trickle_down!(valtree, i)
     end
-    valtree
+    return valtree
 end
 
 function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer)
@@ -55,7 +55,6 @@ function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer)
             _minmax_heap_bubble_up!(A, i, Reverse)
         end
     end
-   return
 end
 
 function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer, o::Ordering, x=A[i])
@@ -67,7 +66,6 @@ function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer, o::Ordering, x=A
             _minmax_heap_bubble_up!(A, gparent, o)
         end
     end
-    return
 end
 
 function _minmax_heap_trickle_down!(A::AbstractVector, i::Integer)
@@ -76,7 +74,6 @@ function _minmax_heap_trickle_down!(A::AbstractVector, i::Integer)
     else
         _minmax_heap_trickle_down!(A, i, Reverse)
     end
-    return
 end
 
 function _minmax_heap_trickle_down!(A::AbstractVector, i::Integer, o::Ordering, x=A[i])
@@ -104,7 +101,6 @@ function _minmax_heap_trickle_down!(A::AbstractVector, i::Integer, o::Ordering, 
             end
         end
     end
-    return
 end
 
 ################################################

@@ -58,7 +58,7 @@ function heappop!(xs::AbstractArray, o::Ordering=Forward)
     if !isempty(xs)
         percolate_down!(xs, 1, y, o)
     end
-    x
+    return x
 end
 
 """
@@ -70,7 +70,7 @@ For efficiency, this function does not check that the array is indeed heap-order
 function heappush!(xs::AbstractArray, x, o::Ordering=Forward)
     push!(xs, x)
     percolate_up!(xs, length(xs), x, o)
-    xs
+    return xs
 end
 
 
@@ -84,7 +84,7 @@ function heapify!(xs::AbstractArray, o::Ordering=Forward)
     for i in heapparent(length(xs)):-1:1
         percolate_down!(xs, i, o)
     end
-    xs
+    return xs
 end
 
 """
@@ -139,5 +139,5 @@ function isheap(xs::AbstractArray, o::Ordering=Forward)
             return false
         end
     end
-    true
+    return true
 end
