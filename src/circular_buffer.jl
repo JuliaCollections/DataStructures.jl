@@ -25,7 +25,7 @@ Reset the buffer.
 """
 function Base.empty!(cb::CircularBuffer)
     cb.length = 0
-    cb
+    return cb
 end
 
 Base.@propagate_inbounds function _buffer_index_checked(cb::CircularBuffer, i::Int)
@@ -38,11 +38,7 @@ end
 @inline function _buffer_index(cb::CircularBuffer, i::Int)
     n = cb.capacity
     idx = cb.first + i - 1
-    if idx > n
-        idx - n
-    else
-        idx
-    end
+    return ifelse(idx > n, idx - n, idx)
 end
 
 """
@@ -64,7 +60,7 @@ Store data to the `i`-th element of `CircularBuffer`.
 """
 @inline Base.@propagate_inbounds function Base.setindex!(cb::CircularBuffer, data, i::Int)
     cb.buffer[_buffer_index_checked(cb, i)] = data
-    cb
+    return cb
 end
 
 """
@@ -73,12 +69,10 @@ end
 Remove the element at the back.
 """
 @inline function Base.pop!(cb::CircularBuffer)
-    if cb.length == 0
-        throw(ArgumentError("array must be non-empty"))
-    end
+    (cb.length == 0) && throw(ArgumentError("array must be non-empty"))
     i = _buffer_index(cb, cb.length)
     cb.length -= 1
-    cb.buffer[i]
+    return cb.buffer[i]
 end
 
 """
@@ -94,7 +88,7 @@ Add an element to the back and overwrite front if full.
         cb.length += 1
     end
     cb.buffer[_buffer_index(cb, cb.length)] = data
-    cb
+    return cb
 end
 
 """
@@ -109,7 +103,7 @@ function popfirst!(cb::CircularBuffer)
     i = cb.first
     cb.first = (cb.first + 1 > cb.capacity ? 1 : cb.first + 1)
     cb.length -= 1
-    cb.buffer[i]
+    return cb.buffer[i]
 end
 
 """
@@ -125,7 +119,7 @@ function pushfirst!(cb::CircularBuffer, data)
         cb.length += 1
     end
     cb.buffer[cb.first] = data
-    cb
+    return cb
 end
 
 """
@@ -139,7 +133,7 @@ function Base.append!(cb::CircularBuffer, datavec::AbstractVector)
     for i in max(1, n-capacity(cb)+1):n
         push!(cb, datavec[i])
     end
-    cb
+    return cb
 end
 
 """
@@ -152,7 +146,7 @@ function Base.fill!(cb::CircularBuffer, data)
     for i in 1:capacity(cb)-length(cb)
         push!(cb, data)
     end
-    cb
+    return cb
 end
 
 """
@@ -200,10 +194,8 @@ isfull(cb::CircularBuffer) = length(cb) == cb.capacity
 Get the first element of CircularBuffer.
 """
 Base.@propagate_inbounds function Base.first(cb::CircularBuffer)
-    @boundscheck if cb.length == 0
-        throw(BoundsError(cb, 1))
-    end
-    cb.buffer[cb.first]
+    @boundscheck (cb.length == 0) && throw(BoundsError(cb, 1))
+    return cb.buffer[cb.first]
 end
 """
     last(cb::CircularBuffer)
@@ -211,8 +203,6 @@ end
 Get the last element of CircularBuffer.
 """
 Base.@propagate_inbounds function Base.last(cb::CircularBuffer)
-    @boundscheck if cb.length == 0
-        throw(BoundsError(cb, 1))
-    end
-    cb.buffer[_buffer_index(cb, cb.length)]
+    @boundscheck (cb.length == 0) && throw(BoundsError(cb, 1))
+    return cb.buffer[_buffer_index(cb, cb.length)]
 end
