@@ -1,14 +1,14 @@
 # FIFO queue
 
-mutable struct Queue{T}
-    store::Deque{T}
-end
-
 """
     Queue{T}([blksize::Integer=1024])
 
 Create a `Queue` object containing elements of type `T`.
 """
+mutable struct Queue{T}
+    store::Deque{T}
+end
+
 Queue{T}() where {T} = Queue(Deque{T}())
 Queue{T}(blksize::Integer) where {T} = Queue(Deque{T}(blksize))
 
