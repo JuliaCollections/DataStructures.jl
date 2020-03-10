@@ -1,7 +1,7 @@
 """
-    Stack{T}
+    Stack{T}([blksize::Integer=1024])
 
-a Stack for Last In First Out(LIFO) access
+Create a `Stack` object containing elements of type `T` for Last In First Out (LIFO) access.
 
 # Examples
 ```jldoctest
