@@ -6,7 +6,7 @@ mutable struct GenericFenwickTree{F, T}
     function GenericFenwickTree{F}(a::AbstractVector{U}) where {F, U}
         n = length(a)
         gft = GenericFenwickTree{F, U}(n)
-        @inbounds for i = 1:n
+        @inbounds for i in 1:n
             inc!(gft, i, a[i])
         end
         return gft
@@ -141,7 +141,7 @@ function resize!(sft::SuffixFenwickTree{T}, size::Int) where T
     n0 = length(sft)
     resize!(sft.bi_tree, size)
     z = zero(T)
-    @inbounds for i = n0+1: size
+    @inbounds for i in n0+1 : size
         sft.bi_tree[i] = z
     end
     return sft
