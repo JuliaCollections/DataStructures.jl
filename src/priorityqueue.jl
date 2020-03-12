@@ -171,7 +171,7 @@ function force_up!(pq::PriorityQueue, i::Integer)
     pq.xs[i] = x
 end
 
-function getindex(pq::PriorityQueue, key) = pq.xs[pq.index[key]].second
+getindex(pq::PriorityQueue, key) = pq.xs[pq.index[key]].second
 
 function get(pq::PriorityQueue, key, default)
     i = get(pq.index, key, 0)
