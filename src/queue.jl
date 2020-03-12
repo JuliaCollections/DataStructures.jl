@@ -26,7 +26,7 @@ Inserts the value `x` to the end of the queue `s`.
 """
 function enqueue!(s::Queue, x)
     push!(s.store, x)
-    s
+    return s
 end
 
 """
