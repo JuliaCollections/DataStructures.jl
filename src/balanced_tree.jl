@@ -75,14 +75,14 @@ end
 function initializeTree!(tree::Array{TreeNode{K},1}) where K
     resize!(tree,1)
     tree[1] = TreeNode{K}(K, 1, 2, 0, 0)
-    nothing
+    return nothing
 end
 
 function initializeData!(data::Array{KDRec{K,D},1}) where {K,D}
     resize!(data, 2)
     data[1] = KDRec{K,D}(1)
     data[2] = KDRec{K,D}(1)
-    nothing
+    return nothing
 end
 
 
@@ -254,7 +254,7 @@ function empty!(t::BalancedTree23)
     t.freedatainds = Vector{Int}()
     empty!(t.useddatacells)
     push!(t.useddatacells, 1, 2)
-    nothing
+    return nothing
 end
 
 ## Default implementations of eq for Forward, Reverse
@@ -314,7 +314,7 @@ function findkeyless(t::BalancedTree23, k)
             cmp3le_leaf(t.ord, thisnode, k)
     curnode = cmp == 1 ? thisnode.child1 :
               cmp == 2 ? thisnode.child2 : thisnode.child3
-    curnode
+    return curnode
 end
 
 
@@ -325,7 +325,7 @@ end
 
 function replaceparent!(data::Array{KDRec{K,D},1}, whichind::Int, newparent::Int) where {K,D}
     data[whichind] = KDRec{K,D}(newparent, data[whichind].k, data[whichind].d)
-    nothing
+    return nothing
 end
 
 function replaceparent!(tree::Array{TreeNode{K},1}, whichind::Int, newparent::Int) where K
@@ -333,7 +333,7 @@ function replaceparent!(tree::Array{TreeNode{K},1}, whichind::Int, newparent::In
                                  tree[whichind].child3, newparent,
                                  tree[whichind].splitkey1,
                                  tree[whichind].splitkey2)
-    nothing
+    return nothing
 end
 
 
@@ -540,7 +540,7 @@ function insert!(t::BalancedTree23{K,D,Ord}, k, d, allowdups::Bool) where {K,D,O
         t.rootloc = newrootloc
         t.depth += 1
     end
-    true, newind
+    return true, newind
 end
 
 
@@ -1004,5 +1004,5 @@ function delete!(t::BalancedTree23{K,D,Ord}, it::Int) where {K,D,Ord<:Ordering}
             end
         end
     end
-    nothing
+    return nothing
 end
