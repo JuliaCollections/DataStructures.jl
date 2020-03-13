@@ -33,7 +33,7 @@ function counter(seq)
 end
 
 eltype_for_accumulator(seq::T) where T = eltype(T)
-function eltype_for_accumulator(seq::Base.Generator}
+function eltype_for_accumulator(seq::Base.Generator)
     Base.@default_eltype(seq)
 end
 
