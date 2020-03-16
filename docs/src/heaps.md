@@ -86,6 +86,31 @@ h = BinaryMinMaxHeap{Int}()          # create an empty min-max heap with integer
 
 h = BinaryMinMaxHeap([1, 2, 3, 4]) # create a min-max heap from a vector
 ```
+## Fibonacci heap
+Fibonacci heap the get-minimum operation takes constant (O(1)) amortized time.The insert and decrease key operations also work in constant amortized time.Deleting an element (most often used in the special case of deleting the minimum element) works in O(log n) amortized time,.
+The fibonacci heap in this package are subtypes of `AbstractHeap`
+and have the same interface as other heaps with the following additions:
+```julia
+# Let h be a fibonacci heap, k an integer
+minimum(h)     # return the smallest element
+
+popmin!(h)     # remove and return the smallest element
+
+merge!(h1,h2)  # merge heaps `h1` and `h2` into single heap
+```
+The usual `top(h)` and `pop!(h)` are defined to be `minimum(h)` and `popmin!(h)`,
+respectively.
+
+This package includes an implementation of a fibonacci heap (`FibonacciHeap`).
+> Fredman, Michael Lawrence; Tarjan, Robert E. (July 1987). "Fibonacci heaps and their uses in improved network optimization algorithms"
+>  doi: [10.1145/28869.28874](https://doi.org/10.1145/28869.28874)
+
+Examples:
+```julia
+h = FibonacciHeap{Int}()          # create an empty Fibonacci heap with integer values
+
+h = FibonacciHeap([1, 2, 3, 4]) # create a Fibonacci heap from a vector
+```
 
 # Functions using heaps
 
