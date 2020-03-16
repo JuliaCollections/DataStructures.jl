@@ -72,6 +72,7 @@ include("heaps/binary_heap.jl")
 include("heaps/mutable_binary_heap.jl")
 include("heaps/arrays_as_heaps.jl")
 include("heaps/minmax_heap.jl")
+include("heaps/fibonacci_heap.jl")
 
 # generic functions
 
@@ -80,7 +81,7 @@ Base.eltype(::Type{<:AbstractHeap{T}}) where T = T
 function extract_all!(h::AbstractHeap{VT}) where VT
     n = length(h)
     r = Vector{VT}(undef, n)
-    for i = 1 : n
+    for i = 1:n
         r[i] = pop!(h)
     end
     r
@@ -89,7 +90,7 @@ end
 function extract_all_rev!(h::AbstractHeap{VT}) where VT
     n = length(h)
     r = Vector{VT}(undef, n)
-    for i = 1 : n
+    for i = 1:n
         r[n + 1 - i] = pop!(h)
     end
     r
@@ -97,21 +98,21 @@ end
 
 # Array functions using heaps
 
-function nextreme(comp::Comp, n::Int, arr::AbstractVector{T}) where {T, Comp}
+function nextreme(comp::Comp, n::Int, arr::AbstractVector{T}) where {T,Comp}
     if n <= 0
         return T[] # sort(arr)[1:n] returns [] for n <= 0
     elseif n >= length(arr)
-        return sort(arr, lt = (x, y) -> compare(comp, y, x))
+        return sort(arr, lt = (x, y)->compare(comp, y, x))
     end
 
     buffer = BinaryHeap{T,Comp}()
 
-    for i = 1 : n
+    for i = 1:n
         @inbounds xi = arr[i]
         push!(buffer, xi)
     end
 
-    for i = n + 1 : length(arr)
+    for i = n + 1:length(arr)
         @inbounds xi = arr[i]
         if compare(comp, top(buffer), xi)
             # This could use a pushpop method
