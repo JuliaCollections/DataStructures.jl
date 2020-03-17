@@ -87,6 +87,32 @@ h = BinaryMinMaxHeap{Int}()          # create an empty min-max heap with integer
 h = BinaryMinMaxHeap([1, 2, 3, 4]) # create a min-max heap from a vector
 ```
 
+## Binomial heap
+Binomial heaps allow union of two heaps in O(logn) time.
+The Binomial heap in this package are subtypes of `AbstractHeap`
+and have the same interface as other heaps with the following additions:
+```julia
+# Let h be a min-max heap, k an integer
+minimum(h)     # return the smallest element
+
+popmin!(h)     # remove and return the smallest element
+
+popall!(h)     # remove and return all the elements, sorted smallest to largest
+```
+The usual `top(h)` and `pop!(h)` are defined to be `minimum(h)` and `popmin!(h)`,
+respectively.
+
+This package includes an implementation of a binomial heap (`BinomialHeap`).
+> Cormen, Thomas H.; Leiserson, Charles E.; Rivest, Ronald L.; Stein, Clifford (2001) [1990]. "Chapter 19: Binomial Heaps". Introduction to Algorithms (2nd ed.). MIT Press and McGraw-Hill. pp. 455–475. 
+>ISBN 0-262-03293-7.
+
+Examples:
+```julia
+h = MutableBinomialHeap{Int}()          # create an empty binomial heap with integer values
+
+h = MutableBinomialHeap([1, 2, 3, 4]) # create a binomial heap from a vector
+```
+
 # Functions using heaps
 
 Heaps can be used to extract the largest or smallest elements of an
