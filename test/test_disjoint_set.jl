@@ -4,12 +4,18 @@
         for T in [Int, UInt8, Int8, UInt16, Int16, UInt32, Int32, UInt64]
             @testset "eltype = $(T)" begin
                 s = IntDisjointSets(T(10))
+                s2 = IntDisjointSets{T}(10)
+
 
                 @testset "basic tests" begin
                     @test length(s) == 10
+                    @test length(s2) == 10
                     @test eltype(s) == T
+                    @test eltype(s2) == T
                     @test eltype(typeof(s)) == T
+                    @test eltype(typeof(s2)) == T
                     @test num_groups(s) == T(10)
+                    @test num_groups(s2) == T(10)
 
                     for i = 1:10
                         @test find_root(s, T(i)) == T(i)

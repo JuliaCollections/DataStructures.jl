@@ -107,10 +107,10 @@ function root_union!(s::IntDisjointSets{T}, x::T, y::T) where {T<:Integer}
     if xrank < yrank
         x, y = y, x
     elseif xrank == yrank
-        rks[x] += 1
+        rks[x] += one(T)
     end
     @inbounds parents[y] = x
-    s.ngroups -= 1
+    s.ngroups -= one(T)
     return x
 end
 
@@ -124,10 +124,10 @@ capacity of the set would be exceeded.
 function push!(s::IntDisjointSets{T}) where {T<:Integer}
     l = length(s)
     l < typemax(T) || throw(ArgumentError(_intdisjointsets_bounds_err_msg(T))) 
-    x = l + 1
+    x = l + one(T)
     push!(s.parents, x)
-    push!(s.ranks, 0)
-    s.ngroups += 1
+    push!(s.ranks, zero(T))
+    s.ngroups += one(T)
     return x
 end
 
