@@ -44,7 +44,7 @@ first(s::Stack) = last(s.store)
 
 function push!(s::Stack, x)
     push!(s.store, x)
-    s
+    return s
 end
 
 pop!(s::Stack) = pop!(s.store)

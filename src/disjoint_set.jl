@@ -47,7 +47,7 @@ function find_root_impl!(parents::Array{Int}, x::Integer)
     @inbounds if parents[p] != p
         parents[x] = p = _find_root_impl!(parents, p)
     end
-    p
+    return p
 end
 
 # unsafe version of the above
@@ -56,7 +56,7 @@ function _find_root_impl!(parents::Array{Int}, x::Integer)
     @inbounds if parents[p] != p
         parents[x] = p = _find_root_impl!(parents, p)
     end
-    p
+    return p
 end
 
 """
@@ -106,8 +106,8 @@ function root_union!(s::IntDisjointSets, x::Integer, y::Integer)
         rks[x] += 1
     end
     @inbounds parents[y] = x
-    @inbounds s.ngroups -= 1
-    x
+    s.ngroups -= 1
+    return x
 end
 
 """
@@ -224,5 +224,5 @@ function push!(s::DisjointSets{T}, x::T) where T
     id = push!(s.internal)
     s.intmap[x] = id
     push!(s.revmap,x) # Note, this assumes invariant: length(s.revmap) == id
-    x
+    return x
 end

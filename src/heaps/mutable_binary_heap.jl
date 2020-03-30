@@ -124,7 +124,7 @@ function _binary_heap_pop!(comp::Comp,
             end
         end
     end
-    v
+    return v
 end
 
 function _make_mutable_binary_heap(comp::Comp, ty::Type{T}, values) where {Comp,T}
@@ -217,7 +217,7 @@ function push!(h::MutableBinaryHeap{T}, v) where T
     push!(nodes, MutableBinaryHeapNode(convert(T, v), i))
     push!(nodemap, nd_id)
     _heap_bubble_up!(h.comparer, nodes, nodemap, nd_id)
-    i
+    return i
 end
 
 function sizehint!(h::MutableBinaryHeap, s::Integer)
@@ -270,7 +270,7 @@ Deletes the element with handle `i` from heap `h` .
 function delete!(h::MutableBinaryHeap{T}, i::Int) where T
      nd_id = h.node_map[i]
     _binary_heap_pop!(h.comparer, h.nodes, h.node_map, nd_id)
-    h
+    return h
 end
 
 setindex!(h::MutableBinaryHeap, v, i::Int) = update!(h, i, v)
