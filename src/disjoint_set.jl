@@ -60,7 +60,7 @@ function _find_root_impl!(parents::Array{Int}, x::Integer)
 end
 
 """
-    find_root!(s::IntDisjointSets, x::Integer)
+    find_root(s::IntDisjointSets, x::Integer)
 
 Find the root element of the subset that contains an Integer x.
 Path compression is implemented here.
