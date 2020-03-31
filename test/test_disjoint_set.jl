@@ -17,7 +17,7 @@
                     @test num_groups(s2) == T(10)
 
                     for i = 1:10
-                        @test find_root(s, T(i)) == T(i)
+                        @test find_root!(s, T(i)) == T(i)
                     end
                     @test_throws BoundsError find_root(s, T(11))
 
