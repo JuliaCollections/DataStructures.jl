@@ -191,11 +191,11 @@ function sizehint!(s::DisjointSets, n::Integer)
 end
 
 """
-    find_root{T}(s::DisjointSets{T}, x::T)
+    find_root!{T}(s::DisjointSets{T}, x::T)
 
 Finds the root element of the subset in `s` which has the element `x` as a member.
 """
-find_root(s::DisjointSets{T}, x::T) where {T} = s.revmap[find_root(s.internal, s.intmap[x])]
+find_root!(s::DisjointSets{T}, x::T) where {T} = s.revmap[find_root!(s.internal, s.intmap[x])]
 
 """
     in_same_set(s::DisjointSets{T}, x::T, y::T)
