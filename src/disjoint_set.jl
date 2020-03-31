@@ -76,7 +76,7 @@ find_root!(s::IntDisjointSets{T}, x::T) where {T<:Integer} = find_root_impl!(s.p
 
 Returns `true` if `x` and `y` belong to the same subset in `s` and `false` otherwise.
 """
-in_same_set(s::IntDisjointSets{T}, x::T, y::T) where {T<:Integer} = find_root(s, x) == find_root(s, y)
+in_same_set(s::IntDisjointSets{T}, x::T, y::T) where {T<:Integer} = find_root!(s, x) == find_root!(s, y)
 
 """
     union!(s::IntDisjointSets{T}, x::T, y::T)
