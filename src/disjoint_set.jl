@@ -69,7 +69,7 @@ end
 Find the root element of the subset that contains an member x.
 Path compression is implemented here.
 """
-find_root(s::IntDisjointSets{T}, x::T) where {T<:Integer} = find_root_impl!(s.parents, x)
+find_root!(s::IntDisjointSets{T}, x::T) where {T<:Integer} = find_root_impl!(s.parents, x)
 
 """
     in_same_set(s::IntDisjointSets{T}, x::T, y::T)
