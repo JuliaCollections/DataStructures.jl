@@ -6,7 +6,6 @@
                 s = IntDisjointSets(T(10))
                 s2 = IntDisjointSets{T}(10)
 
-
                 @testset "basic tests" begin
                     @test length(s) == 10
                     @test length(s2) == 10
