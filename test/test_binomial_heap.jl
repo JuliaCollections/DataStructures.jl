@@ -11,7 +11,7 @@ function heap_values(h::MutableBinomialHeap{VT}) where VT
     for i = 1:h.cumm_nodecount
         val = nothing
         try
-            val = findNode(h, i)
+            val = find_node(h, i)
             vs[k] = val.data
             k += 1
         catch _    
@@ -21,15 +21,15 @@ function heap_values(h::MutableBinomialHeap{VT}) where VT
     vs
 end
 
-function checkTree(node::Union{MutableBinomialHeapNode{T},Nothing}) where T
+function check_tree(node::Union{MutableBinomialHeapNode{T},Nothing}) where T
     if node === nothing 
         return true
     end
     if node.parent !== nothing && node.data < node.parent.data 
         return false
     end
-    return checkTree(node.child)
-    return checkTree(node.sibling)
+    return check_tree(node.child)
+    return check_tree(node.sibling)
 end
 
 function verify_heap(h::MutableBinomialHeap{T}) where {T}
@@ -39,7 +39,7 @@ function verify_heap(h::MutableBinomialHeap{T}) where {T}
     end
     a::Vector{Int} = []
     for i = 1:n
-        if !checkTree(h.rootList[i])
+        if !check_tree(h.rootList[i])
             return false
         end
         push!(a, h.rootList[i].degree)
@@ -73,6 +73,15 @@ end
         @test top(h) == 1
         @test isequal(heap_values(h), vs)
         @test sizehint!(h, 100) === h
+    end
+
+    @testset "setindex! and getindex" begin
+        h = MutableBinomialHeap(vs)
+
+        @test getindex(h, 1) == 4
+        @test getindex(h, 10) == 7
+        setindex!(h, 5, 1)
+        @test getindex(h, 1) == 5
     end
 
     @testset "h / push! / pop!" begin
@@ -198,8 +207,9 @@ end
         vs2 = [5,6,7,2]
         h1 = MutableBinomialHeap{Int}(vs1)
         h2 = MutableBinomialHeap{Int}(vs2)
-        union!(h1, h2)
+        _union!(h1, h2)
         @test verify_heap(h1)
         @test isequal(heap_values(h1), [1,3,4,8,5,6,7,2])
     end
+
 end # @testset BinaryHeap
