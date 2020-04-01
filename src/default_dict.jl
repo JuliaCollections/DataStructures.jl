@@ -66,15 +66,15 @@ function iterate(v::Base.ValueIterator{T}, i::Int) where {T <: DefaultDictBase}
     return (v.dict.d.vals[i], Base.skip_deleted(v.dict.d, i+1))
 end
 
-getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
+getindex(d::DefaultDictBase, key) = get(d.d, key, d.default)
 
 function getindex(d::DefaultDictBase{K,V,F}, key) where {K,V,F<:Base.Callable}
     if d.passkey
-        return get!(d.d, key) do
+        return get(d.d, key) do
             d.default(key)
         end
     else
-        return get!(d.d, key) do
+        return get(d.d, key) do
             d.default()
         end
     end
