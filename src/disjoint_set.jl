@@ -13,23 +13,27 @@
 #
 ############################################################
 
+_intdisjointsets_bounds_err_msg(T) = "the maximum number of elements in IntDisjointSets{$T} is $(typemax(T))"
+
 """
-    IntDisjointSets(n::Integer)
+    IntDisjointSets{T<:Integer}(n::Integer)
 
 A forest of disjoint sets of integers, which is a data structure
 (also called a union–find data structure or merge–find set)
 that tracks a set of elements partitioned
 into a number of disjoint (non-overlapping) subsets.
 """
-mutable struct IntDisjointSets
-    parents::Vector{Int}
-    ranks::Vector{Int}
-    ngroups::Int
+mutable struct IntDisjointSets{T<:Integer}
+    parents::Vector{T}
+    ranks::Vector{T}
+    ngroups::T
 
     # creates a disjoint set comprised of n singletons
-    IntDisjointSets(n::Integer) = new(collect(1:n), zeros(Int, n), n)
+    # IntDisjointSets(n::T) where {T<:Integer} = new(collect(Base.OneTo(n)), zeros(T, n), n)
 end
 
+IntDisjointSets(n::T) where {T<:Integer} = IntDisjointSets{T}(collect(Base.OneTo(n)), zeros(T, n), n)
+IntDisjointSets{T}(n::Integer) where {T<:Integer} = IntDisjointSets{T}(collect(Base.OneTo(T(n))), zeros(T, T(n)), T(n))
 length(s::IntDisjointSets) = length(s.parents)
 
 """
@@ -38,11 +42,11 @@ length(s::IntDisjointSets) = length(s.parents)
 Get a number of groups.
 """
 num_groups(s::IntDisjointSets) = s.ngroups
-Base.eltype(::Type{IntDisjointSets}) = Int
+Base.eltype(::Type{IntDisjointSets{T}}) where {T<:Integer} = T
 
 # find the root element of the subset that contains x
 # path compression is implemented here
-function find_root_impl!(parents::Array{Int}, x::Integer)
+function find_root_impl!(parents::Vector{T}, x::Integer) where {T<:Integer}
     p = parents[x]
     @inbounds if parents[p] != p
         parents[x] = p = _find_root_impl!(parents, p)
@@ -51,7 +55,7 @@ function find_root_impl!(parents::Array{Int}, x::Integer)
 end
 
 # unsafe version of the above
-function _find_root_impl!(parents::Array{Int}, x::Integer)
+function _find_root_impl!(parents::Vector{T}, x::Integer) where {T<:Integer}
     @inbounds p = parents[x]
     @inbounds if parents[p] != p
         parents[x] = p = _find_root_impl!(parents, p)
@@ -60,27 +64,27 @@ function _find_root_impl!(parents::Array{Int}, x::Integer)
 end
 
 """
-    find_root!(s::IntDisjointSets, x::Integer)
+    find_root!(s::IntDisjointSets{T}, x::T)
 
-Find the root element of the subset that contains an Integer x.
+Find the root element of the subset that contains an member x.
 Path compression is implemented here.
 """
-find_root(s::IntDisjointSets, x::Integer) = find_root_impl!(s.parents, x)
+find_root!(s::IntDisjointSets{T}, x::T) where {T<:Integer} = find_root_impl!(s.parents, x)
 
 """
-    in_same_set(s::IntDisjointSets, x::Integer, y::Integer)
+    in_same_set(s::IntDisjointSets{T}, x::T, y::T)
 
 Returns `true` if `x` and `y` belong to the same subset in `s` and `false` otherwise.
 """
-in_same_set(s::IntDisjointSets, x::Integer, y::Integer) = find_root(s, x) == find_root(s, y)
+in_same_set(s::IntDisjointSets{T}, x::T, y::T) where {T<:Integer} = find_root!(s, x) == find_root!(s, y)
 
 """
-    union!(s::IntDisjointSets, x::Integer, y::Integer)
+    union!(s::IntDisjointSets{T}, x::T, y::T)
 
 Merge the subset containing x and that containing y into one
 and return the root of the new set.
 """
-function union!(s::IntDisjointSets, x::Integer, y::Integer)
+function union!(s::IntDisjointSets{T}, x::T, y::T) where {T<:Integer}
     parents = s.parents
     xroot = find_root_impl!(parents, x)
     yroot = find_root_impl!(parents, y)
@@ -88,13 +92,13 @@ function union!(s::IntDisjointSets, x::Integer, y::Integer)
 end
 
 """
-    root_union!(s::IntDisjointSets, x::Integer, y::Integer)
+    root_union!(s::IntDisjointSets{T}, x::T, y::T)
 
 Form a new set that is the union of the two sets whose root elements are
 x and y and return the root of the new set.
 Assume x ≠ y (unsafe).
 """
-function root_union!(s::IntDisjointSets, x::Integer, y::Integer)
+function root_union!(s::IntDisjointSets{T}, x::T, y::T) where {T<:Integer}
     parents = s.parents
     rks = s.ranks
     @inbounds xrank = rks[x]
@@ -103,24 +107,27 @@ function root_union!(s::IntDisjointSets, x::Integer, y::Integer)
     if xrank < yrank
         x, y = y, x
     elseif xrank == yrank
-        rks[x] += 1
+        rks[x] += one(T)
     end
     @inbounds parents[y] = x
-    s.ngroups -= 1
+    s.ngroups -= one(T)
     return x
 end
 
 """
-    push!(s::IntDisjointSets)
+    push!(s::IntDisjointSets{T})
 
 Make a new subset with an automatically chosen new element x.
-Returns the new element.
+Returns the new element. Throw an `ArgumentError` if the
+capacity of the set would be exceeded.
 """
-function push!(s::IntDisjointSets)
-    x = length(s) + 1
+function push!(s::IntDisjointSets{T}) where {T<:Integer}
+    l = length(s)
+    l < typemax(T) || throw(ArgumentError(_intdisjointsets_bounds_err_msg(T))) 
+    x = l + one(T)
     push!(s.parents, x)
-    push!(s.ranks, 0)
-    s.ngroups += 1
+    push!(s.ranks, zero(T))
+    s.ngroups += one(T)
     return x
 end
 
@@ -129,13 +136,13 @@ end
 
 A forest of disjoint sets of arbitrary value type T.
 
-It is a wrapper of IntDisjointSets, which uses a
+It is a wrapper of IntDisjointSets{Int}, which uses a
 dictionary to map the input value to an internal index.
 """
 mutable struct DisjointSets{T} <: AbstractSet{T}
     intmap::Dict{T,Int}
     revmap::Vector{T}
-    internal::IntDisjointSets
+    internal::IntDisjointSets{Int}
 
     DisjointSets{T}() where T = new{T}(Dict{T,Int}(), Vector{T}(), IntDisjointSets(0))
     function DisjointSets{T}(xs) where T    # xs must be iterable
@@ -184,11 +191,11 @@ function sizehint!(s::DisjointSets, n::Integer)
 end
 
 """
-    find_root{T}(s::DisjointSets{T}, x::T)
+    find_root!{T}(s::DisjointSets{T}, x::T)
 
 Finds the root element of the subset in `s` which has the element `x` as a member.
 """
-find_root(s::DisjointSets{T}, x::T) where {T} = s.revmap[find_root(s.internal, s.intmap[x])]
+find_root!(s::DisjointSets{T}, x::T) where {T} = s.revmap[find_root!(s.internal, s.intmap[x])]
 
 """
     in_same_set(s::DisjointSets{T}, x::T, y::T)
