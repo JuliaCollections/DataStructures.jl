@@ -41,16 +41,16 @@ function show(io::IO, _heap::MutableBinomialHeap{T}) where T
     end
     print(io, "(")
     for i = 1:n
-        printTree(io, list[i])
+        print_tree(io, list[i])
     end
     print(io, ")")
 end
 
-function printTree(io::IO, h::Union{MutableBinomialHeapNode{T},Nothing}) where T
+function print_tree(io::IO, h::Union{MutableBinomialHeapNode{T},Nothing}) where T
     while h !== nothing 
         print(io, h.data)
         print(io, ",")
-        printTree(io, h.child) 
+        print_tree(io, h.child) 
         h = h.sibling; 
     end
 end
@@ -61,16 +61,15 @@ end
 #################################################
 # make Binomial_heap from Vector
 function _make_binomial_heap(xs::AbstractVector{T}, Typ::Type{T}) where T
-    len = length(xs)
     BinomialHeap = MutableBinomialHeap{Typ}()
-    for i = 1:len
-        push!(BinomialHeap, xs[i])
+    for x in xs
+        push!(BinomialHeap, x)
     end
     BinomialHeap
 end
 
 # This function merge two Binomial Trees. 
-function mergeBinomialTrees(b1::MutableBinomialHeapNode{T}, b2::MutableBinomialHeapNode{T}) where T 
+function merge_binomial_trees!(b1::MutableBinomialHeapNode{T}, b2::MutableBinomialHeapNode{T}) where T 
     if b1.data > b2.data
         b1, b2 = b2, b1
     end
@@ -80,10 +79,10 @@ function mergeBinomialTrees(b1::MutableBinomialHeapNode{T}, b2::MutableBinomialH
     b1.degree += 1 
     return b1
 end
-# adjust function rearranges the heap so that 
+# adjust! function rearranges the heap so that 
 # heap is in increasing order of degree and 
 # no two binomial trees have same degree in this heap 
-function adjust(heap::MutableBinomialHeap{T}) where T
+function adjust!(heap::MutableBinomialHeap{T}) where T
     _heap = heap.rootList
     n = length(_heap)
     if n <= 1
@@ -112,7 +111,7 @@ function adjust(heap::MutableBinomialHeap{T}) where T
             j += 1
             k += 1  
         elseif _heap[i].degree == _heap[j].degree
-            temp = mergeBinomialTrees(_heap[i], _heap[j])
+            temp = merge_binomial_trees!(_heap[i], _heap[j])
             _heap[i] = temp
             @inbounds _heap[j] = nothing
             filter!(e->e ≠ nothing, _heap)
@@ -123,15 +122,15 @@ function adjust(heap::MutableBinomialHeap{T}) where T
     end
 end
 
-function insertATreeInHeap(_heap::MutableBinomialHeap{T}, tree::MutableBinomialHeapNode{T}) where T 
+function insert_tree_in_heap!(_heap::MutableBinomialHeap{T}, tree::MutableBinomialHeapNode{T}) where T 
     temp = MutableBinomialHeap{T}()
     push!(temp.rootList, tree)
-    union!(_heap, temp, true)
-    adjust(_heap)
+    _union!(_heap, temp, true)
+    adjust!(_heap)
     return
 end   
-function removeMinFromTreeReturnBHeap(tree::MutableBinomialHeapNode{T}) where T 
-    heap::Vector{Union{Nothing,MutableBinomialHeapNode{T}}} = []
+function remove_min__from_tree!(tree::MutableBinomialHeapNode{T}) where T 
+    heap = Union{Nothing,MutableBinomialHeapNode{T}}[]
     temp = tree.child; 
     while temp !== nothing 
         lo = temp 
@@ -142,11 +141,11 @@ function removeMinFromTreeReturnBHeap(tree::MutableBinomialHeapNode{T}) where T
     return reverse!(heap) 
 end
 
-function extractMin!(heap::MutableBinomialHeap{T}) where T
+function extract_min!(heap::MutableBinomialHeap{T}) where T
     _heap = heap.rootList
     new_heap = MutableBinomialHeap{T}()
     lo = MutableBinomialHeap{T}()
-    (val, temp) = top_elem_with_handle(heap)
+    temp = top_element_node(heap)
     it = iterate(_heap)
     while it !== nothing
         if it[1] != temp
@@ -154,30 +153,30 @@ function extractMin!(heap::MutableBinomialHeap{T}) where T
         end
         it = iterate(_heap, it[2])
     end
-    lo.rootList = removeMinFromTreeReturnBHeap(temp)
+    lo.rootList = remove_min__from_tree!(temp)
     new_heap.nodecount = heap.nodecount - 1
-    union!(new_heap, lo, false)
-    adjust(new_heap)
+    _union!(new_heap, lo, false)
+    adjust!(new_heap)
     heap.rootList = new_heap.rootList
     heap.nodecount -= 1
     return temp.data
 end
 
-function findhelper(node::Union{MutableBinomialHeapNode{T},Nothing}, i::Int) where T
+function find_helper(node::Union{MutableBinomialHeapNode{T},Nothing}, i::Int) where T
     if node === nothing 
         return nothing
     end
     if node.handle == i 
         return node
     end
-    res = findhelper(node.child, i)
+    res = find_helper(node.child, i)
     if res !== nothing 
         return res
     end
-    return findhelper(node.sibling, i)
+    return find_helper(node.sibling, i)
 end
     
-function findNode(heap::MutableBinomialHeap{T}, i::Int) where T 
+function find_node(heap::MutableBinomialHeap{T}, i::Int) where T 
     _heap = heap.rootList
     node = nothing
     n = length(_heap)
@@ -185,7 +184,7 @@ function findNode(heap::MutableBinomialHeap{T}, i::Int) where T
         return nothing
     end
     for j = 1:n
-        node = findhelper(_heap[j], i)
+        node = find_helper(_heap[j], i)
         if node !== nothing
             break
         end
@@ -195,10 +194,9 @@ function findNode(heap::MutableBinomialHeap{T}, i::Int) where T
     end
     return node
 end
-function increaseKey!(node::MutableBinomialHeapNode{T}, new_val::T) where T
+function increase_key!(node::MutableBinomialHeapNode{T}, new_val::T) where T
     node.data = new_val
     child = node.child
-
     while child !== nothing && node.data > child.data
         node.data, child.data = child.data, node.data
         node.handle, child.handle = child.handle, node.handle
@@ -206,9 +204,9 @@ function increaseKey!(node::MutableBinomialHeapNode{T}, new_val::T) where T
         child = child.child
     end
 end
-function decreaseKey!(heap::MutableBinomialHeap{T}, i::Int, new_val) where T
+function decrease_key!(heap::MutableBinomialHeap{T}, i::Int, new_val) where T
     new_val = convert(T, new_val)
-    node = findNode(heap, i)
+    node = find_node(heap, i)
     if node === nothing
         return 
     end
@@ -221,16 +219,19 @@ function decreaseKey!(heap::MutableBinomialHeap{T}, i::Int, new_val) where T
             node = parent
             parent = parent.parent
         end
-    else increaseKey!(node, new_val)
+    else increase_key!(node, new_val)
     end
 end
 
-function top_elem_with_handle(heap::MutableBinomialHeap{T}) where T 
+function top_element_node(heap::MutableBinomialHeap{T}) where T 
     _heap = heap.rootList
     if length(_heap) == 0
         return nothing
     end
     it = iterate(_heap)
+    if it === nothing
+        throw(HeapBoundsError("attempt to access $(heap.nodecount) MutableBinomialHeap{$(T)} at index [$(heap.nodecount + 1)]"))
+    end
     @inbounds temp = _heap[1]
     while it !== nothing
         elem, state = it
@@ -239,15 +240,15 @@ function top_elem_with_handle(heap::MutableBinomialHeap{T}) where T
         end
         it = iterate(_heap, state) 
     end
-    return (temp.data, temp)
+    return temp
 end
 
-function update_handle(c::Int, h::MutableBinomialHeap)
+function update_handle!(c::Int, h::MutableBinomialHeap)
     node::Union{Nothing,MutableBinomialHeapNode{T}} where T = nothing 
     for i = 1:h.cumm_nodecount
         node = nothing
         try
-            node = findNode(h, i)
+            node = find_node(h, i)
             node.handle = node.handle + c
         catch _
             continue
@@ -255,10 +256,12 @@ function update_handle(c::Int, h::MutableBinomialHeap)
     end
 end
 
-function union!(h1::MutableBinomialHeap{T}, h2::MutableBinomialHeap{T}, flag::Bool) where T
+# update_handle_flag determines how _union! is used
+# When explicitly called to merge two binomial heaps it is set true.
+function _union!(h1::MutableBinomialHeap{T}, h2::MutableBinomialHeap{T}, update_handle_flag::Bool) where T
     _new = MutableBinomialHeap{T}()
-    if flag
-        update_handle(h1.cumm_nodecount, h2)
+    if update_handle_flag
+        update_handle!(h1.cumm_nodecount, h2)
     end
     l1 = h1.rootList
     l2 = h2.rootList
@@ -288,14 +291,14 @@ function union!(h1::MutableBinomialHeap{T}, h2::MutableBinomialHeap{T}, flag::Bo
         iter2 = iterate(l2, state2)
     end
     h1.rootList = _new.rootList
-    adjust(h1)
+    adjust!(h1)
     return 
 end
 
 function push!(_heap::MutableBinomialHeap{T}, key) where T
     handle = _heap.cumm_nodecount + 1
     temp = MutableBinomialHeapNode(convert(T, key), handle)
-    insertATreeInHeap(_heap, temp)
+    insert_tree_in_heap!(_heap, temp)
     _heap.nodecount = _heap.nodecount + 1
     _heap.cumm_nodecount = _heap.cumm_nodecount + 1
     return temp.handle
@@ -310,11 +313,11 @@ length(h::MutableBinomialHeap) = h.nodecount
 isempty(h::MutableBinomialHeap) = isempty(h.rootList)
 
 """
-union!(h1::MutableBinomialHeap, h2::MutableBinomialHeap)
+_union!(h1::MutableBinomialHeap, h2::MutableBinomialHeap)
 
 merges heap `h2` into heap `h1`
 """
-union!(h1::MutableBinomialHeap, h2::MutableBinomialHeap) = union!(h1, h2, true)
+_union!(h1::MutableBinomialHeap, h2::MutableBinomialHeap) = _union!(h1, h2, true)
 
 
 function sizehint!(h::MutableBinomialHeap, s::Integer)
@@ -324,15 +327,15 @@ end
 
 @inline top(heap::MutableBinomialHeap) =  top_with_handle(heap)[1]
 
-minimum(heap::MutableBinomialHeap) =  top_with_handle(heap)[1]
+@inline minimum(heap::MutableBinomialHeap) =  top_with_handle(heap)[1]
 """
 top_with_handle(h::MutableBinomialHeap)
 
 Returns the minimum element of the heap `h` and its handle.
 """
 function top_with_handle(h::MutableBinomialHeap) 
-    (val, node) = top_elem_with_handle(h)
-    return (val, node.handle)
+    node = top_element_node(h)
+    return (node.data, node.handle)
 end
 
 """
@@ -340,14 +343,14 @@ pop!(h::MutableBinomialHeap)
 
 Returns the minimum element of the heap `h` and its handle and alo deletes it from heap
 """
-pop!(h::MutableBinomialHeap{T}) where {T} = extractMin!(h)
-popmin!(h::MutableBinomialHeap{T}) where {T} = extractMin!(h)
+pop!(h::MutableBinomialHeap{T}) where {T} = extract_min!(h)
+popmin!(h::MutableBinomialHeap{T}) where {T} = extract_min!(h)
 """
 update!{T}(h::MutableBinomialHeap{T}, i::Int, new_val::T)
 
 Replace the element having handle 'i' in heap `h` with `new_val`.
 """
-update!(h::MutableBinomialHeap{T}, i::Int, new_val) where T = decreaseKey!(h, i, new_val)
+update!(h::MutableBinomialHeap{T}, i::Int, new_val) where T = decrease_key!(h, i, new_val)
 
 """
 delete!{T}(h::MutableBinomialHeap{T}, i::Int)
@@ -359,10 +362,10 @@ function delete!(heap::MutableBinomialHeap{T}, i::Int) where T
     if n == 0
         return nothing
     end
-    decreaseKey!(heap, i, typemin(T)) 
-    extractMin!(heap)
+    decrease_key!(heap, i, typemin(T)) 
+    extract_min!(heap)
     return heap
 end
 
 setindex!(h::MutableBinomialHeap, v, i::Int) = update!(h, i, v)
-getindex(h::MutableBinomialHeap, i::Int) =  findNode(h, i).data
+getindex(h::MutableBinomialHeap, i::Int) =  find_node(h, i).data
