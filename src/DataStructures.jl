@@ -29,7 +29,7 @@ module DataStructures
     export ClassifiedCollections
     export classified_lists, classified_sets, classified_counters
 
-    export IntDisjointSets, DisjointSets, num_groups, find_root!, in_same_set, root_union!
+    export IntDisjointSets, DisjointSets, num_groups, find_root, find_root!, in_same_set, root_union!
 
     export FenwickTree, length, inc!, dec!, incdec!, prefixsum
 
@@ -69,6 +69,7 @@ module DataStructures
     include("accumulator.jl")
     include("classified_collections.jl")
     include("disjoint_set.jl")
+    const find_root = find_root!  # remove when deprecating find_root. See deprecations.jl
     include("heaps.jl")
 
     include("default_dict.jl")
