@@ -83,7 +83,7 @@ julia> prefixsum(f, 3)
 """
 function prefixsum(ft::FenwickTree{T}, ind::Integer) where T
     sum = zero(T)
-    if ind < 1
+    ind < 1 && return sum
         return 0
     end
     i = ind
