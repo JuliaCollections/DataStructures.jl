@@ -59,7 +59,6 @@ module DataStructures
 
     export findkey
 
-    include("deprecations.jl")
     include("delegate.jl")
 
     include("deque.jl")
@@ -107,4 +106,6 @@ module DataStructures
     include("priorityqueue.jl")
     include("sparse_int_set.jl")
     export SparseIntSet
+
+    include("deprecations.jl")
 end
