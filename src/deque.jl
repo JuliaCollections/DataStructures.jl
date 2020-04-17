@@ -61,10 +61,9 @@ const DEFAULT_DEQUEUE_BLOCKSIZE = 1024
 """
     Deque{T}
 
-The Deque type implements a double-ended queue using a list of blocks.
-This data structure supports constant-time insertion/removal 
-of elements at both ends of a sequence.
-
+Create a `Deque` object containing elements of type `T`. `Deque` is implemented as
+a double-ended queue using a list of blocks, which allows constant-time insertion and
+removal of elements at both ends.
 """
 mutable struct Deque{T}
     nblocks::Int
@@ -84,7 +83,7 @@ end
 """
     deque(T)
 
-Create a deque of type `T`.
+Create a `Deque` object containing elements of type `T`.
 """
 deque(::Type{T}) where {T} = Deque{T}()
 
