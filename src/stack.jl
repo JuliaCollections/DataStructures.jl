@@ -31,6 +31,13 @@ end
 Stack{T}() where {T} = Stack(Deque{T}())
 Stack{T}(blksize::Integer) where {T} = Stack(Deque{T}(blksize))
 
+"""
+    stack(T)
+
+Create a `Stack` object containing elements of type `T`.
+"""
+stack(::Type{T}) where {T} = Stack{T}()
+
 isempty(s::Stack) = isempty(s.store)
 length(s::Stack) = length(s.store)
 Base.eltype(::Type{Stack{T}}) where T = T

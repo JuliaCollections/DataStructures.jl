@@ -8,6 +8,10 @@
         @test isa(s, Stack{Int})
     end
 
+    @testset "empty stack" begin
+        @test typeof(stack(Int)) === typeof(Stack{Int}())
+    end
+
     @testset "Core Functionality" begin
         s = Stack{Int}(5)
         n = 100

@@ -12,6 +12,13 @@ end
 Queue{T}() where {T} = Queue(Deque{T}())
 Queue{T}(blksize::Integer) where {T} = Queue(Deque{T}(blksize))
 
+"""
+    queue(T)
+
+Create a `Queue` object containing elements of type `T`.
+"""
+queue(::Type{T}) where {T} = Queue{T}()
+
 isempty(s::Queue) = isempty(s.store)
 length(s::Queue) = length(s.store)
 Base.eltype(::Type{Queue{T}}) where T = T

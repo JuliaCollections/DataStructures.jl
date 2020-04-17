@@ -8,6 +8,10 @@
         @test isa(s, Queue{Int})
     end
 
+    @testset "empty queue" begin
+        @test typeof(queue(Int)) === typeof(Queue{Int}())
+    end
+
     @testset "Core Functionality" begin
         s = Queue{Int}(5)
         n = 100
