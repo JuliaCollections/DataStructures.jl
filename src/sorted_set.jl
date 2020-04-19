@@ -15,7 +15,7 @@ Construct a SortedSet using keys given by iterable `iter` (e.g., an
 array) and ordering object `o`. The ordering object defaults to
 `Forward` if not specified.
 """
-mutable struct SortedSet{K, Ord <: Ordering}
+mutable struct SortedSet{K, Ord <: Ordering} <: AbstractSet{K}
     bt::BalancedTree23{K,Nothing,Ord}
 
     function SortedSet{K,Ord}(o::Ord=Forward, iter=[]) where {K,Ord<:Ordering}
