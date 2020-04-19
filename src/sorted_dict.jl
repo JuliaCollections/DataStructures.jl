@@ -453,8 +453,9 @@ Returns `sc`. Time: O(*c* log *n*)
 """
 @inline function delete!(m::SortedDict, k_)
     i, exactfound = findkey(m.bt, convert(keytype(m), k_))
-    !exactfound && throw(KeyError(k_))
-    delete!(m.bt, i)
+    if exactfound
+        delete!(m.bt, i)
+    end
     m
 end
 
