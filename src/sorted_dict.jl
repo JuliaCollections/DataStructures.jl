@@ -24,7 +24,7 @@ mutable struct SortedDict{K, D, Ord <: Ordering} <: AbstractDict{K,D}
                 s[p.first] = p.second
             end
         else
-            for (k,v) in kv
+            for (k, v) in kv
                 s[k] = v
             end
         end
@@ -210,7 +210,7 @@ either side of an assignment statement. Time: O(1)
 """
 @inline function setindex!(m::SortedDict{K,D,Ord}, d_, k_) where {K, D, Ord <: Ordering}
     insert!(m.bt, convert(K,k_), convert(D,d_), false)
-    m
+    return m
 end
 
 ## push! is an alternative to insert!; it returns the container.
@@ -224,11 +224,8 @@ return value is `sc`. Time: O(*c* log *n*)
 """
 @inline function push!(m::SortedDict{K,D}, pr::Pair) where {K,D}
     insert!(m.bt, convert(K, pr[1]), convert(D, pr[2]), false)
-    m
+    return m
 end
-
-
-
 
 ## This function looks up a key in the tree;
 ## if not found, then it returns a marker for the
@@ -475,7 +472,7 @@ Time: O(*c* log *n*)
     !exactfound && throw(KeyError(k_))
     d = m.bt.data[i].d
     delete!(m.bt, i)
-    d
+    return d
 end
 
 @inline function pop!(m::SortedDict, k_, default)
@@ -483,7 +480,7 @@ end
     !exactfound && return default
     d = m.bt.data[i].d
     delete!(m.bt, i)
-    d
+    return d
 end
 
 
@@ -548,7 +545,7 @@ deletions. Time: O(*cn* log *n*)
 function packcopy(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering}
     w = SortedDict(Dict{K,D}(), orderobject(m))
     mergetwo!(w,m)
-    w
+    return w
 end
 
 """
@@ -565,7 +562,7 @@ function packdeepcopy(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering}
         newv = deepcopy(v)
         w[newk] = newv
     end
-    w
+    return w
 end
 
 """
@@ -606,7 +603,7 @@ function merge(m::SortedDict{K,D,Ord},
                others::AbstractDict{K,D}...) where {K,D,Ord <: Ordering}
     result = packcopy(m)
     merge!(result, others...)
-    result
+    return result
 end
 
 

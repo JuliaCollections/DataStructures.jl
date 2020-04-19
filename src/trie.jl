@@ -7,7 +7,7 @@ mutable struct Trie{T}
         self = new{T}()
         self.children = Dict{Char,Trie{T}}()
         self.is_key = false
-        self
+        return self
     end
 
     function Trie{T}(ks, vs) where T
@@ -63,7 +63,7 @@ function subtrie(t::Trie, prefix::AbstractString)
             node = node.children[char]
         end
     end
-    node
+    return node
 end
 
 function haskey(t::Trie, key::AbstractString)
@@ -76,7 +76,7 @@ function get(t::Trie, key::AbstractString, notfound)
     if node != nothing && node.is_key
         return node.value
     end
-    notfound
+    return notfound
 end
 
 function keys(t::Trie, prefix::AbstractString="", found=AbstractString[])
@@ -86,7 +86,7 @@ function keys(t::Trie, prefix::AbstractString="", found=AbstractString[])
     for (char,child) in t.children
         keys(child, string(prefix,char), found)
     end
-    found
+    return found
 end
 
 function keys_with_prefix(t::Trie, prefix::AbstractString)

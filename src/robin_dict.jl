@@ -253,7 +253,7 @@ function _setindex!(h::RobinDict{K,V}, key::K, v0) where {K, V}
     (h.count > ROBIN_DICT_LOAD_FACTOR * sz) && rehash!(h, sz<<2)
     index = rh_insert!(h, key, v)
     @assert index > 0
-    h
+    return h
 end
 
 isempty(d::RobinDict) = (d.count == 0)
@@ -553,7 +553,7 @@ function pop!(h::RobinDict)
     @inbounds key = h.keys[idx]
     @inbounds val = h.vals[idx]
     rh_delete!(h, idx)
-    key => val
+    return key => val
 end
 
 """

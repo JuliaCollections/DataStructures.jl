@@ -19,7 +19,7 @@ function copy!(to::IntSet, from::IntSet)
     resize!(to.bits, length(from.bits))
     copyto!(to.bits, from.bits)
     to.inverse = from.inverse
-    to
+    return to
 end
 Base.eltype(::Type{IntSet}) = Int
 sizehint!(s::IntSet, n::Integer) = (_resize0!(s.bits, n+1); s)
@@ -33,7 +33,7 @@ sizehint!(s::IntSet, n::Integer) = (_resize0!(s.bits, n+1); s)
         _resize0!(s.bits, ifelse(newlen<0, typemax(Int), newlen))
     end
     unsafe_setindex!(s.bits, b, idx) # Use @inbounds once available
-    s
+    return s
 end
 
 # An internal function to resize a bitarray and ensure the newly allocated
@@ -42,7 +42,7 @@ end
     len = length(b)
     resize!(b, newlen)
     len < newlen && @inbounds(b[len+1:newlen] .= false) # resize! gives dirty memory
-    b
+    return b
 end
 
 # An internal function that resizes a bitarray so it matches the length newlen
@@ -112,7 +112,7 @@ function intersect(s1::IntSet, ns)
     for n in ns
         n in s1 && push!(s, n)
     end
-    s
+    return s
 end
 intersect(s1::IntSet, s2::IntSet) = intersect!(copy(s1), s2)
 function intersect!(s1::IntSet, s2::IntSet)
@@ -122,7 +122,7 @@ function intersect!(s1::IntSet, s2::IntSet)
     elseif !s1.inverse &  s2.inverse;  e = _matchlength!(s1.bits, l); map!(>, s1.bits, s1.bits, s2.bits); append!(s1.bits, e)
     else #= s1.inverse &  s2.inverse=# e = _matchlength!(s1.bits, l); map!(|, s1.bits, s1.bits, s2.bits); append!(s1.bits, e)
     end
-    s1
+    return s1
 end
 
 setdiff(s::IntSet, ns) = setdiff!(copy(s), ns)
@@ -134,7 +134,7 @@ function setdiff!(s1::IntSet, s2::IntSet)
     elseif !s1.inverse &  s2.inverse;  _resize0!(s1.bits, l);         map!(&, s1.bits, s1.bits, s2.bits)
     else #= s1.inverse &  s2.inverse=# _resize0!(s1.bits, l);         map!(<, s1.bits, s1.bits, s2.bits); s1.inverse = false
     end
-    s1
+    return s1
 end
 
 symdiff(s::IntSet, ns) = symdiff!(copy(s), ns)
@@ -143,14 +143,14 @@ function symdiff!(s::IntSet, n::Integer)
     0 <= n < typemax(Int) || throw(ArgumentError(_intset_bounds_err_msg))
     val = (n in s) ⊻ !s.inverse
     _setint!(s, n, val)
-    s
+    return s
 end
 function symdiff!(s1::IntSet, s2::IntSet)
     e = _matchlength!(s1.bits, length(s2.bits))
     map!(⊻, s1.bits, s1.bits, s2.bits)
     s2.inverse && (s1.inverse = !s1.inverse)
     append!(s1.bits, e)
-    s1
+    return s1
 end
 
 function in(n::Integer, s::IntSet)
@@ -243,7 +243,7 @@ function hash(s::IntSet, h::UInt)
     # Only hash the bits array up to the last-set bit to prevent extra empty
     # bits from changing the hash result
     l = findprev(s.bits, length(s.bits))
-    hash(unsafe_getindex(s.bits, 1:l), h) ⊻ hash(s.inverse) ⊻ hashis_seed
+    return hash(unsafe_getindex(s.bits, 1:l), h) ⊻ hash(s.inverse) ⊻ hashis_seed
 end
 
 issubset(a::IntSet, b::IntSet) = isequal(a, intersect(a,b))

@@ -29,7 +29,7 @@ module DataStructures
     export ClassifiedCollections
     export classified_lists, classified_sets, classified_counters
 
-    export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set, root_union!
+    export IntDisjointSets, DisjointSets, num_groups, find_root!, in_same_set, root_union!
 
     export FenwickTree, length, inc!, dec!, incdec!, prefixsum
 
@@ -59,7 +59,6 @@ module DataStructures
 
     export findkey
 
-    include("deprecations.jl")
     include("delegate.jl")
 
     include("deque.jl")
@@ -107,4 +106,6 @@ module DataStructures
     include("priorityqueue.jl")
     include("sparse_int_set.jl")
     export SparseIntSet
+
+    include("deprecations.jl")
 end

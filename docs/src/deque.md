@@ -25,5 +25,5 @@ deque grows, new blocks may be created and linked to existing blocks.
 This way avoids the copying when growing a vector.
 
 Benchmark shows that the performance of `Deque` is comparable to
-`Vector` on `push!`, and is noticeably faster on `unshift!` (by about
+`Vector` on `push!`, and is noticeably faster on `pushfirst!` (by about
 30% to 40%).

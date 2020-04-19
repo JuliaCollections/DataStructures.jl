@@ -80,19 +80,19 @@ Base.eltype(::Type{<:AbstractHeap{T}}) where T = T
 function extract_all!(h::AbstractHeap{VT}) where VT
     n = length(h)
     r = Vector{VT}(undef, n)
-    for i = 1 : n
+    for i in 1 : n
         r[i] = pop!(h)
     end
-    r
+    return r
 end
 
 function extract_all_rev!(h::AbstractHeap{VT}) where VT
     n = length(h)
     r = Vector{VT}(undef, n)
-    for i = 1 : n
+    for i in 1 : n
         r[n + 1 - i] = pop!(h)
     end
-    r
+    return r
 end
 
 # Array functions using heaps
