@@ -1676,7 +1676,7 @@ end
     i2 = findkey(m,"bb")
     @test_throws BoundsError iterate(inclusive(m,i1,i2))
     @test_throws BoundsError iterate(exclusive(m,i1,i2))
-    @test_throws KeyError delete!(m,"a")
+    @test m === delete!(m,"a") # Okay to delete! nonexistent keys
     @test_throws KeyError pop!(m,"a")
     m3 = SortedDict((Dict{String, Int}()), Reverse)
     @test_throws ArgumentError isequal(m2, m3)
@@ -1697,7 +1697,7 @@ end
     @test_throws BoundsError last(m1)
 
     s = SortedSet([3,5])
-    @test_throws KeyError delete!(s,7)
+    @test s === delete!(s,7) # Okay to delete! nonexistent keys
     @test_throws KeyError pop!(s, 7)
     pop!(s)
     pop!(s)
