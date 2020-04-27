@@ -81,17 +81,12 @@ mutable struct Deque{T}
     Deque{T}() where {T} = Deque{T}(DEFAULT_DEQUEUE_BLOCKSIZE)
 end
 
-# deprecated constructor
-
 """
     deque(T)
 
 Create a deque of type `T`.
 """
 deque(::Type{T}) where {T} = Deque{T}()
-
-@deprecate deque(::Type{T}) Deque{T}()
-
 
 isempty(q::Deque) = q.len == 0
 length(q::Deque) = q.len
