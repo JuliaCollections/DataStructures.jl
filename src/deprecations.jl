@@ -5,4 +5,4 @@
 export find_root
 const find_root = find_root!
 
-@deprecate deque(::Type{T}) Deque{T}()
+@deprecate deque(::Type{T}) where {T} Deque{T}()
