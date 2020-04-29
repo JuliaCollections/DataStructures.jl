@@ -193,6 +193,14 @@ end
         @test isequal(extract_all!(hp), [1, 9, 11, 17, 19, 21, 22, 27])
     end
 
+    @testset "test delete! at end" begin
+        h = MutableBinaryMinHeap{Int}()
+        push!(h, 1)
+        handle = push!(h, 2)
+        delete!(h, handle)
+        @test isequal(heap_values(h), [1])
+    end
+
     @testset "test update! and top_with_handle" begin
         for (hf,m) = [(MutableBinaryMinHeap,-2.0), (MutableBinaryMaxHeap,2.0)]
             xs = rand(100)
