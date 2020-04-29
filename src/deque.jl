@@ -81,13 +81,6 @@ mutable struct Deque{T}
     Deque{T}() where {T} = Deque{T}(DEFAULT_DEQUEUE_BLOCKSIZE)
 end
 
-"""
-    deque(T)
-
-Create a deque of type `T`.
-"""
-deque(::Type{T}) where {T} = Deque{T}()
-
 isempty(q::Deque) = q.len == 0
 length(q::Deque) = q.len
 num_blocks(q::Deque) = q.nblocks
