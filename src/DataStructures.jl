@@ -21,7 +21,7 @@ module DataStructures
     export complement, complement!
 
     export Deque, Stack, Queue, CircularDeque
-    export deque, enqueue!, dequeue!, dequeue_pair!, update!, reverse_iter
+    export enqueue!, dequeue!, dequeue_pair!, update!, reverse_iter
     export capacity, num_blocks, top_with_handle, sizehint!
 
     export Accumulator, counter, reset!, inc!, dec!
