@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Heaps · DataStructures.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>DataStructures.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">DataStructures.jl</a></li><li><a class="toctext" href="../deque/">Deque</a></li><li><a class="toctext" href="../circ_buffer/">CircularBuffer</a></li><li><a class="toctext" href="../circ_deque/">CircularDeque</a></li><li><a class="toctext" href="../stack_and_queue/">Stack and Queue</a></li><li><a class="toctext" href="../priority-queue/">Priority Queue</a></li><li><a class="toctext" href="../fenwick/">Fenwick Tree</a></li><li><a class="toctext" href="../accumulators/">Accumulators and Counters</a></li><li><a class="toctext" href="../disjoint_sets/">Disjoint Sets</a></li><li class="current"><a class="toctext" href>Heaps</a><ul class="internal"><li><a class="toctext" href="#Min-max-heaps-1">Min-max heaps</a></li><li class="toplevel"><a class="toctext" href="#Functions-using-heaps-1">Functions using heaps</a></li></ul></li><li><a class="toctext" href="../ordered_containers/">OrderedDicts and OrderedSets</a></li><li><a class="toctext" href="../default_dict/">DefaultDict and DefaultOrderedDict</a></li><li><a class="toctext" href="../trie/">Trie</a></li><li><a class="toctext" href="../linked_list/">Linked List</a></li><li><a class="toctext" href="../mutable_linked_list/">Mutable Linked List</a></li><li><a class="toctext" href="../intset/">DataStructures.IntSet</a></li><li><a class="toctext" href="../sorted_containers/">Sorted Containers</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href>Heaps</a></li></ul><a class="edit-page" href="https://github.com/JuliaCollections/DataStructures.jl/blob/master/docs/src/heaps.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Heaps</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Heaps-1" href="#Heaps-1">Heaps</a></h1><p>Heaps are data structures that efficiently maintain the minimum (or maximum) for a set of data that may dynamically change.</p><p>All heaps in this package are derived from <code>AbstractHeap</code>, and provide the following interface:</p><pre><code class="language-julia"># Let h be a heap, i be a handle, and v be a value.
+
+length(h)         # returns the number of elements
+
+isempty(h)        # returns whether the heap is empty
+
+push!(h, v)       # add a value to the heap
+
+top(h)            # return the top value of a heap
+
+pop!(h)           # removes the top value, and returns it
+</code></pre><p>Mutable heaps (values can be changed after being pushed to a heap) are derived from <code>AbstractMutableHeap &lt;: AbstractHeap</code>, and additionally provides the following interface:</p><pre><code class="language-julia">i = push!(h, v)              # adds a value to the heap and and returns a handle to v
+
+update!(h, i, v)             # updates the value of an element (referred to by the handle i)
+
+delete!(h, i)               # deletes the node with handle i from the heap
+
+v, i = top_with_handle(h)    # returns the top value of a heap and its handle</code></pre><p>Currently, both min/max versions of binary heap (type <code>BinaryHeap</code>) and mutable binary heap (type <code>MutableBinaryHeap</code>) have been implemented.</p><p>Examples of constructing a heap:</p><pre><code class="language-julia">h = BinaryMinHeap{Int}()
+h = BinaryMaxHeap{Int}()          # create an empty min/max binary heap of integers
+
+h = BinaryMinHeap([1,4,3,2])
+h = BinaryMaxHeap([1,4,3,2])      # create a min/max heap from a vector
+
+h = MutableBinaryMinHeap{Int}()
+h = MutableBinaryMaxHeap{Int}()   # create an empty mutable min/max heap
+
+h = MutableBinaryMinHeap([1,4,3,2])
+h = MutableBinaryMaxHeap([1,4,3,2])    # create a mutable min/max heap from a vector</code></pre><h2><a class="nav-anchor" id="Min-max-heaps-1" href="#Min-max-heaps-1">Min-max heaps</a></h2><p>Min-max heaps maintain the minimum <em>and</em> the maximum of a set, allowing both to be retrieved in constant (<code>O(1)</code>) time. The min-max heaps in this package are subtypes of <code>AbstractMinMaxHeap &lt;: AbstractHeap</code> and have the same interface as other heaps with the following additions:</p><pre><code class="language-julia"># Let h be a min-max heap, k an integer
+minimum(h)     # return the smallest element
+maximum(h)     # return the largest element
+
+popmin!(h)     # remove and return the smallest element
+popmin!(h, k)  # remove and return the smallest k elements
+
+popmax!(h)     # remove and return the largest element
+popmax!(h, k)  # remove and return the largest k elements
+
+popall!(h)     # remove and return all the elements, sorted smallest to largest
+popall!(h, o)  # remove and return all the elements according to ordering o</code></pre><p>The usual <code>top(h)</code> and <code>pop!(h)</code> are defined to be <code>minimum(h)</code> and <code>popmin!(h)</code>, respectively.</p><p>This package includes an implementation of a binary min-max heap (<code>BinaryMinMaxHeap</code>).</p><blockquote><p>Atkinson, M.D., Sack, J., Santoro, N., &amp; Strothotte, T. (1986). Min-Max &gt; Heaps and Generalized Priority Queues. Commun. ACM, 29, 996-1000. doi: <a href="https://doi.org/10.1145/6617.6621">10.1145/6617.6621</a></p></blockquote><p>Examples:</p><pre><code class="language-julia">h = BinaryMinMaxHeap{Int}()          # create an empty min-max heap with integer values
+
+h = BinaryMinMaxHeap([1, 2, 3, 4]) # create a min-max heap from a vector</code></pre><h1><a class="nav-anchor" id="Functions-using-heaps-1" href="#Functions-using-heaps-1">Functions using heaps</a></h1><p>Heaps can be used to extract the largest or smallest elements of an array without sorting the entire array first:</p><pre><code class="language-julia">nlargest(3, [0,21,-12,68,-25,14]) # =&gt; [68,21,14]
+nsmallest(3, [0,21,-12,68,-25,14]) # =&gt; [-25,-12,0]</code></pre><p><code>nlargest(n, a)</code> is equivalent to <code>sort(a, lt = &gt;)[1:min(n, end)]</code>, and <code>nsmallest(n, a)</code> is equivalent to <code>sort(a, lt = &lt;)[1:min(n, end)]</code>.</p><footer><hr/><a class="previous" href="../disjoint_sets/"><span class="direction">Previous</span><span class="title">Disjoint Sets</span></a><a class="next" href="../ordered_containers/"><span class="direction">Next</span><span class="title">OrderedDicts and OrderedSets</span></a></footer></article></body></html>
