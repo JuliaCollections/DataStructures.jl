@@ -38,7 +38,7 @@ module DataStructures
     export MutableBinaryHeap, MutableBinaryMinHeap, MutableBinaryMaxHeap
     export heapify!, heapify, heappop!, heappush!, isheap
     export BinaryMinMaxHeap, popmin!, popmax!, popall!
-    export MutableBinomialHeap, MutableBinomialHeapNode, push!, show, top, top_with_handle, minimum, _union!, update!, delete!, HeapBoundsError, find_node
+    export MutableBinomialHeap, BinomialHeap, MutableBinomialHeapNode, top, minimum, _union!, HeapBoundsError, find_node
 
     export Trie, subtrie, keys_with_prefix, path
 

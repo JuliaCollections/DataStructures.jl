@@ -88,11 +88,11 @@ h = BinaryMinMaxHeap([1, 2, 3, 4]) # create a min-max heap from a vector
 ```
 
 ## Binomial heap
-Binomial heaps allow union of two heaps in O(logn) time.
-The Binomial heap in this package are subtypes of `AbstractHeap`
-and have the same interface as other heaps with the following additions:
+Binomial heaps allow union of two heaps in O(log(n)) time.
+The Binomial heap in this package is subtype of `AbstractHeap`
+and has the same interface as other heaps with the following additions:
 ```julia
-# Let h be a min-max heap, k an integer
+# Let h be a binomial heap, k an integer
 minimum(h)     # return the smallest element
 
 popmin!(h)     # remove and return the smallest element
@@ -110,7 +110,7 @@ Examples:
 ```julia
 h = MutableBinomialHeap{Int}()          # create an empty binomial heap with integer values
 
-h = MutableBinomialHeap([1, 2, 3, 4]) # create a binomial heap from a vector
+h = MutableBinomialHeap([1, 2, 3, 4])   # create a binomial heap from a vector
 ```
 
 # Functions using heaps
