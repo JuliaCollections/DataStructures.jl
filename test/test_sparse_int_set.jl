@@ -185,5 +185,6 @@ import DataStructures: SparseIntSet
 	    end
 	    @test s1 == 4*24
 	end
+        @test zip() isa Iterators.Zip  # issue 621
 
 end

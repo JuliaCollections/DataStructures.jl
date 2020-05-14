@@ -210,7 +210,8 @@ struct ZippedSparseIntSetIterator{VT,IT}
     end
 end
 
-Base.zip(s::SparseIntSet...;kwargs...) = ZippedSparseIntSetIterator(s...;kwargs...)
+Base.zip(s0::SparseIntSet, s::SparseIntSet...; kwargs...) =
+    ZippedSparseIntSetIterator(s0, s...; kwargs...)
 
 length(it::ZippedSparseIntSetIterator) = length(it.shortest_set)
 
