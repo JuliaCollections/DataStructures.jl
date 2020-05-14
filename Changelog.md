@@ -1,3 +1,7 @@
+Changelog is now in the [Github Release Notes](https://github.com/JuliaCollections/DataStructures.jl/releases).
+
+
+## Old Changelong (pre-2018)
 
 0.7.0 / 2017-09-02
 ==================
