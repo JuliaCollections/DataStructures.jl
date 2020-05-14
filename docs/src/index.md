@@ -21,6 +21,7 @@ This package implements a variety of data structures, including
 -   Sorted Dict, Sorted Multi-Dict and Sorted Set
 -   DataStructures.IntSet
 -   SparseIntSet
+-   DiBitVector
 
 ## Contents
 
@@ -44,6 +45,7 @@ Pages = [
     "mutable_linked_list.md",
     "intset.md",
     "sorted_containers.md",
-    "sparse_int_set.md"
+    "sparse_int_set.md",
+    "dibit_vector.md"
 ]
 ```
