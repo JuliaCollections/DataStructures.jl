@@ -5,7 +5,7 @@ module DataStructures
                  in, haskey, keys, merge, copy, cat, collect,
                  push!, pop!, pushfirst!, popfirst!, insert!, lastindex,
                  union!, delete!, similar, sizehint!, empty, append!,
-                 isequal, hash, map, filter, reverse,
+                 isequal, hash, map, filter, reverse, peek,
                  first, last, eltype, getkey, values, sum,
                  merge, merge!, lt, Ordering, ForwardOrdering, Forward,
                  ReverseOrdering, Reverse, Lt,
@@ -101,7 +101,7 @@ module DataStructures
     export status
     export deref_key, deref_value, deref, advance, regress
 
-    export PriorityQueue, peek
+    export PriorityQueue
 
     include("priorityqueue.jl")
     include("sparse_int_set.jl")
