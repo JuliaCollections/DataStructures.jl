@@ -330,6 +330,9 @@ end
     @test h.count == 0
     @test h.idxfloor == 0
     @test length(h.hashes) == length(h.keys) == length(h.vals) == length0
+    for i=-1000:1000
+      @test !haskey(h, i)
+    end
 end
 
 @testset "ArgumentError" begin

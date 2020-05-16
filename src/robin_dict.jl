@@ -285,6 +285,7 @@ function empty!(h::RobinDict{K,V}) where {K, V}
     resize!(h.keys, sz)
     resize!(h.vals, sz)
     resize!(h.hashes, sz)
+    fill!(h.hashes, 0)
     h.count = 0
     h.idxfloor = 0
     return h
