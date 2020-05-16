@@ -9,6 +9,11 @@ for performance and memory savings.
 const UINT_SZ = sizeof(UInt)   # number of bytes in a system int: 8 or 4
 const IDX = UINT_SZ ÷ 2 + 1    # 5 for 64, 3 for 32
 const OFFSET = UINT_SZ * 8 - 1 # 63 for 64, 31 for 32
+const U32 = UINT_SZ == 4
+
+const FV = U32 ? (UInt32(0), UInt32(0x55555555), UInt32(0xaaaaaaaa), UInt32(0xffffffff)) :
+                 (UInt64(0), 0x5555555555555555, 0xaaaaaaaaaaaaaaaa, 0xffffffffffffffff)
+                  
 
 mutable struct DiBitVector <: AbstractVector{UInt8}
     data::Vector{UInt}
@@ -18,8 +23,7 @@ mutable struct DiBitVector <: AbstractVector{UInt8}
         if !(Int(v) in 0:3)
             throw(ArgumentError("v must be in 0:3"))
         end
-        fv = (0x0000000000000000, 0x5555555555555555,
-        0xaaaaaaaaaaaaaaaa, 0xffffffffffffffff)[v + 1]
+        fv = FV[v + 1]
         vec = Vector{UInt}(undef, cld(n, 32))
         fill!(vec, fv)
         return new(vec, n % UInt)
