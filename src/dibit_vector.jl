@@ -1,9 +1,12 @@
 """
-    DiBitVector <: AbstractVector{UInt8}
+    DiBitVector(n::Integer, v::Integer)
 
-A bitvector whose elements are two bits wide, allowing
-storage of integer values between 0 and 3. Optimized
-for performance and memory savings.
+Create a `DiBitVector` with `n` elements preinitialized to a value `v`
+from `0` to `3`, inclusive.
+
+A `DiBitVector` is a vector whose elements are two bits wide, allowing
+storage of integer values between 0 and 3. This structure is optimized for
+performance and memory savings for large numbers of elements.
 """
 mutable struct DiBitVector <: AbstractVector{UInt8}
     data::Vector{UInt64}
@@ -23,6 +26,11 @@ end
 
 @inline checkbounds(D::DiBitVector, n::Integer) =  0 < n ≤ length(D.data) << 5 || throw(BoundsError(D, n))
 
+"""
+    DiBitVector(n::Integer)
+
+Create a [`DiBitVector`](@ref) with `n` elements set to `0`.
+"""
 DiBitVector(n::Integer) = DiBitVector(n, 0)
 DiBitVector() = DiBitVector(0, 0)
 
