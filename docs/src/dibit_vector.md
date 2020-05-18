@@ -4,7 +4,7 @@ DocTestSetup = :(using DataStructures)
 
 # DiBitVector
 
-`DiBitVector` provides a memory-efficient vector of elements that represent four different values from `0` to `3`. This structure is comparable to a `SparseArrays.BitVector` in its performance and memory characteristics.
+`DiBitVector` provides a memory-efficient vector of elements that represent four different values from `0` to `3`. This structure is comparable to a `BitVector` in its performance and memory characteristics.
 
 Examples:
 
