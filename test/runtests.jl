@@ -30,6 +30,7 @@ tests = ["int_set",
          "priority_queue",
          "fenwick",
          "robin_dict",
+         "binomial_heap"
         ]
 
 if length(ARGS) > 0
@@ -38,10 +39,10 @@ end
 
 @testset "DataStructures" begin
 
-for t in tests
-    fp = joinpath(dirname(@__FILE__), "test_$t.jl")
-    println("$fp ...")
-    include(fp)
-end
+    for t in tests
+        fp = joinpath(dirname(@__FILE__), "test_$t.jl")
+        println("$fp ...")
+        include(fp)
+    end
 
 end # @testset

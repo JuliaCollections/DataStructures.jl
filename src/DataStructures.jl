@@ -11,7 +11,7 @@ module DataStructures
                  ReverseOrdering, Reverse, Lt,
                  isless, union, intersect, symdiff, setdiff, issubset,
                  searchsortedfirst, searchsortedlast, in,
-                 eachindex, keytype, valtype, minimum, maximum, size
+                 eachindex, keytype, valtype, minimum, maximum, size, iterate
 
     using OrderedCollections
     import OrderedCollections: filter, filter!, isordered
@@ -38,6 +38,7 @@ module DataStructures
     export MutableBinaryHeap, MutableBinaryMinHeap, MutableBinaryMaxHeap
     export heapify!, heapify, heappop!, heappush!, isheap
     export BinaryMinMaxHeap, popmin!, popmax!, popall!
+    export MutableBinomialHeap, BinomialHeap, MutableBinomialHeapNode, top, minimum, _union!, HeapBoundsError, find_node
 
     export Trie, subtrie, keys_with_prefix, path
 
