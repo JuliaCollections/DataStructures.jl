@@ -3,6 +3,9 @@
     d1 = DiBitVector(10)
     d2 = DiBitVector(10, 0)
 
+    @test_throws ArgumentError DiBitVector(5, 4)
+    @test_throws ArgumentError DiBitVector(5, -1)
+
     @test length(d0) == 0
     @test isempty(d0)
     @test_throws ArgumentError pop!(d0)
