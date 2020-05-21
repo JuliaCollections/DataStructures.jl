@@ -6,6 +6,9 @@
     @test_throws ArgumentError DiBitVector(5, 4)
     @test_throws ArgumentError DiBitVector(5, -1)
 
+    @test_throws ArgumentError DiBitVector(-5)
+    @test_throws ArgumentError DiBitVector(-5, 1)
+
     @test length(d0) == 0
     @test isempty(d0)
     @test_throws ArgumentError pop!(d0)

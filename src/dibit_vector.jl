@@ -13,8 +13,11 @@ mutable struct DiBitVector <: AbstractVector{UInt8}
     len::UInt
 
     function DiBitVector(n::Integer, v::Integer)
+        if Int(n) < 0
+            throw(ArgumentError("n ($n) must be greater than or equal to zero"))
+        end
         if !(Int(v) in 0:3)
-            throw(ArgumentError("v must be in 0:3"))
+            throw(ArgumentError("v ($v) must be in 0:3"))
         end
         fv = (0x0000000000000000, 0x5555555555555555,
         0xaaaaaaaaaaaaaaaa, 0xffffffffffffffff)[v + 1]
