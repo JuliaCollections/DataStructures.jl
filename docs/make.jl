@@ -18,6 +18,7 @@ makedocs(
         "heaps.md",
         "ordered_containers.md",
         "default_dict.md",
+        "robin_dict.md",
         "trie.md",
         "linked_list.md",
         "mutable_linked_list.md",
