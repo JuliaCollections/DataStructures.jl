@@ -11,7 +11,9 @@ module DataStructures
                  ReverseOrdering, Reverse, Lt,
                  isless, union, intersect, symdiff, setdiff, issubset,
                  searchsortedfirst, searchsortedlast, in,
-                 eachindex, keytype, valtype, minimum, maximum, size
+                 eachindex, keytype, valtype, minimum, maximum, size,
+                 zero, checkbounds
+
 
     using OrderedCollections
     import OrderedCollections: filter, filter!, isordered
@@ -56,6 +58,8 @@ module DataStructures
 
     export MultiDict, enumerateall
     export RobinDict
+
+    export DiBitVector
 
     export findkey
 
@@ -107,5 +111,6 @@ module DataStructures
     include("sparse_int_set.jl")
     export SparseIntSet
 
+    include("dibit_vector.jl")
     include("deprecations.jl")
 end

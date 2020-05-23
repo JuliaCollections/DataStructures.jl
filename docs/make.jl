@@ -24,6 +24,7 @@ makedocs(
         "mutable_linked_list.md",
         "intset.md",
         "sorted_containers.md",
+        "dibit_vector.md",
     ],
     modules = [DataStructures],
     format = Documenter.HTML()

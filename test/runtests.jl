@@ -30,6 +30,7 @@ tests = ["int_set",
          "priority_queue",
          "fenwick",
          "robin_dict",
+         "dibit_vector",
         ]
 
 if length(ARGS) > 0
