@@ -359,6 +359,28 @@ end
     @test h.idxfloor == get_idxfloor(h) == 0
 end
 
+@testset "merge" begin
+    h1 = RobinDict("a" => 1, "b" => 2)
+    h2 = RobinDict("c" => 3, "d" => 4)
+    d = merge(h1, h2)
+    @test isa(d, RobinDict{String, Int})
+    @test length(d) == 4
+    @test d["a"] == 1
+    @test d["b"] == 2
+    @test d["c"] == 3
+    @test d["d"] == 4
+end
+
+@testset "merge with combine function" begin
+    h1 = RobinDict("a" => 1, "b" => 2)
+    h2 = RobinDict("b" => 3, "c" => 4)
+    d = merge(+, h1, h2)
+    @test isa(d, RobinDict{String, Int})
+    @test d["b"] == 5
+    @test d["a"] == 1
+    @test d["c"] == 4
+end
+
 @testset "invariants" begin
     h1 = RobinDict{Int, Int}()
     for i in 1:300
