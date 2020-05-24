@@ -291,7 +291,7 @@ function empty!(h::RobinDict{K,V}) where {K, V}
     return h
 end
 
-function rh_search(h::RobinDict{K, V}, key::K) where {K, V}
+function rh_search(h::RobinDict{K, V}, key) where {K, V}
     sz = length(h.keys)
     chash = hash_key(key)
     index = desired_index(chash, sz)
@@ -367,8 +367,7 @@ function _get!(default::Callable, h::RobinDict{K,V}, key::K) where V where K
     return v
 end
 
-function getindex(h::RobinDict{K, V}, key0) where {K, V}
-    key = convert(K, key0)
+function getindex(h::RobinDict{K, V}, key) where {K, V}
     index = rh_search(h, key)
     @inbounds return (index < 0) ? throw(KeyError(key)) : h.vals[index]
 end
@@ -392,8 +391,7 @@ julia> get(d, "c", 3)
 """
 get(collection, key, default)
 
-function get(h::RobinDict{K,V}, key0, default) where {K, V}
-    key = convert(K, key0)
+function get(h::RobinDict{K,V}, key, default) where {K, V}
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default : h.vals[index]::V
 end
@@ -415,8 +413,7 @@ end
 """
 get(::Function, collection, key)
 
-function get(default::Callable, h::RobinDict{K,V}, key0) where {K, V}
-    key = convert(K, key0)
+function get(default::Callable, h::RobinDict{K,V}, key) where {K, V}
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default() : h.vals[index]::V
 end
@@ -462,8 +459,7 @@ julia> getkey(D, 'd', 'a')
 'a': ASCII/Unicode U+0061 (category Ll: Letter, lowercase)
 ```
 """
-function getkey(h::RobinDict{K,V}, key0, default) where {K, V}
-    key = convert(K, key0)
+function getkey(h::RobinDict{K,V}, key, default) where {K, V}
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default : h.keys[index]::K
 end
