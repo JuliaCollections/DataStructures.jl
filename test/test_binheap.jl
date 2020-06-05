@@ -23,6 +23,14 @@
             @test true
         end
 
+        @testset "implicit conversion" begin
+            BinaryHeap{Float64, Base.ForwardOrdering}(vs)
+            BinaryMinHeap{Float64}(vs)
+            BinaryMaxHeap{Float64}(vs)
+
+            @test true
+        end
+
         @testset "confirm heap" begin
             @test isheap([1, 2, 3, 4, 7, 9, 10, 14, 8, 16])
             @test isheap([16, 14, 10, 8, 7, 3, 9, 1, 4, 2], Base.Reverse)
