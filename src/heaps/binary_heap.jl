@@ -38,7 +38,7 @@ mutable struct BinaryHeap{T, O <: Base.Ordering} <: AbstractHeap{T}
         new{T,O}(O(), Vector{T}())
     end
 
-    function BinaryHeap{T, O}(xs::AbstractVector{T}) where {T,O}
+    function BinaryHeap{T, O}(xs) where {T,O}
         ordering = O()
         valtree = heapify(xs, ordering)
         new{T,O}(ordering, valtree)
