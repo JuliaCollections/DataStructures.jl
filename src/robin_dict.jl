@@ -1,5 +1,5 @@
 import Base: setindex!, sizehint!, empty!, isempty, length, copy, empty,
-             getindex, getkey, haskey, iterate, @propagate_inbounds,
+             getindex, getkey, haskey, iterate, @propagate_inbounds, merge,
              pop!, delete!, get, get!, isbitstype, in, hashindex, isbitsunion,
              isiterable, dict_with_eltype, KeySet, Callable, _tablesz, filter!
 
@@ -610,3 +610,22 @@ end
 @propagate_inbounds iterate(t::RobinDict, i) = _iterate(t, get_next_filled(t, i))
 
 filter!(f, d::RobinDict) = Base.filter_in_one_pass!(f, d)
+
+function _merge_kvtypes(d, others...)
+    K, V = keytype(d), valtype(d)
+    for other in others
+        K = promote_type(K, keytype(other))
+        V = promote_type(V, valtype(other))
+    end
+    return (K, V)
+end
+
+function merge(d::RobinDict, others::AbstractDict...)
+    K, V = _merge_kvtypes(d, others...)
+    merge!(RobinDict{K,V}(), d, others...)
+end
+
+function merge(combine::Function, d::RobinDict, others::AbstractDict...)
+    K, V = _merge_kvtypes(d, others...)
+    merge!(combine, RobinDict{K,V}(), d, others...)
+end
