@@ -1,5 +1,5 @@
 import Base: setindex!, sizehint!, empty!, isempty, length, copy, empty,
-             getindex, getkey, haskey, iterate, @propagate_inbounds, iszero,
+             getindex, getkey, haskey, iterate, @propagate_inbounds,
              pop!, delete!, get, get!, isbitstype, in, hashindex, isbitsunion,
              isiterable, dict_with_eltype, KeySet, Callable, _tablesz, filter!
 
@@ -96,12 +96,12 @@ desired_index(hash, sz) = (hash & (sz - 1)) + 1
 
 function make_meta(hash::UInt32, dibs::Int)
     meta = hash
-    meta = (meta << 8) | UInt32(dibs)
+    meta = (meta << 8) | (dibs % UInt32)
     return meta
 end 
 
 hash_meta(meta::UInt32) = (meta>>8)
-dibs_meta(meta::UInt32) = Int(meta & 255)
+dibs_meta(meta::UInt32) = Int(meta & 0x0000_00FF)
 
 @propagate_inbounds calculate_distance(h::RobinDict, index) = dibs_meta(h.meta[index])
 
@@ -126,7 +126,7 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
         if probe_current > probe_distance
             h.vals[index_curr], cval = cval, h.vals[index_curr]
             h.keys[index_curr], ckey = ckey, h.keys[index_curr]
-            cmeta >>= 8
+            cmeta = hash_meta(cmeta)
             h.meta[index_curr], cmeta = make_meta(cmeta, probe_current), h.meta[index_curr]
             probe_current = probe_distance
         end
@@ -146,7 +146,7 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
     # println(ckey, " ", index_curr, " ", index_init, " ", probe_current)
     @inbounds h.vals[index_curr] = cval
     @inbounds h.keys[index_curr] = ckey
-    cmeta >>= 8
+    cmeta = hash_meta(cmeta)
     @inbounds h.meta[index_curr] = make_meta(cmeta, probe_current)
     
     @assert probe_current >= 0
