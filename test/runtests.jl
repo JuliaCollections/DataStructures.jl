@@ -28,7 +28,8 @@ tests = ["int_set",
          "sorting",
          "priority_queue", 
          "fenwick", 
-         "robin_dict"
+         "robin_dict", 
+         "swiss_dict"
         ]
 
 if length(ARGS) > 0
