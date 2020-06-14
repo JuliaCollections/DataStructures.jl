@@ -45,3 +45,4 @@ function filter_result(results, op, dt, apow=4)
            println(tr, " minimum time ", minimum(results[tr]))
        end
 end
+
