@@ -3,17 +3,27 @@ using DataStructures: _make_binary_minmax_heap, is_minmax_heap, children_and_gra
 using Base.Order: Forward, Reverse
 
 @testset "Binary MinMax Heaps" begin
-    
+
     @testset "is_minmax_heap tests" begin
         mmheap = [0, 10, 9, 2, 3, 4, 5]
         @test is_minmax_heap(mmheap)
         @test is_minmax_heap([])
         @test is_minmax_heap([rand()])
     end
-    
+
+    @testset "basic tests" begin
+        h = BinaryMinMaxHeap{Int}()
+
+        @test length(h) == 0
+        @test isempty(h)
+        @test eltype(h) == Int
+        @test eltype(typeof(h)) == Int
+        @test sizehint!(h, 100) === h
+    end
+
     @testset "make heap tests" begin
         vs = [10, 4, 6, 1, 16, 2, 20, 17, 13, 5]
-        
+
         @testset "make from array tests" begin
             h = BinaryMinMaxHeap(vs)
             @test length(h) == 10
@@ -22,7 +32,7 @@ using Base.Order: Forward, Reverse
             @test maximum(h) == 20
             @test is_minmax_heap(h.valtree)
         end
-        
+
         @testset "make from random arrays tests" begin
             for i = 1:20
                 A = rand(50)
@@ -30,13 +40,13 @@ using Base.Order: Forward, Reverse
                 @test is_minmax_heap(vtree)
             end
         end
-        
+
         @testset "push! tests" begin
             h = BinaryMinMaxHeap{Int}()
-            
+
             @test length(h) == 0
             @test isempty(h)
-            
+
             push!(h, 1)
             @test top(h) == 1
             push!(h, 2)
@@ -55,7 +65,7 @@ using Base.Order: Forward, Reverse
             end
         end
     end
-    
+
     @testset "pop! tests" begin
         @testset "popmin! tests" begin
             h = BinaryMinMaxHeap([1])
@@ -93,7 +103,7 @@ using Base.Order: Forward, Reverse
             @test maximum(h) == 2
         end
     end
-    
+
     @testset "empty!" begin
         h = BinaryMinMaxHeap([1, 4, 3, 10, 2])
         ret = empty!(h)
@@ -110,7 +120,7 @@ using Base.Order: Forward, Reverse
             @test popall!(h) == sorted_A
             @test isempty(h)
             @test length(h) == 0
-            
+
             h = BinaryMinMaxHeap(A)
             @test popmin!(h, 10) == sorted_A[1:10]
             @test !isempty(h)
@@ -123,24 +133,24 @@ using Base.Order: Forward, Reverse
             @test popall!(h, Reverse) == sorted_A
             @test length(h) == 0
             @test isempty(h)
-            
+
             h = BinaryMinMaxHeap(A)
             @test popmax!(h, 10) == sorted_A[1:10]
             @test length(h) == 40
             @test !isempty(h)
         end
     end
-    
+
     @testset "type conversion" begin
         h = BinaryMinMaxHeap{Float64}()
         push!(h, 3.)
         push!(h, 5)
         push!(h, Rational(4, 8))
         push!(h, Complex(10.1, 0.0))
-        
+
         @test h.valtree == [0.5, 10.1, 3.0, 5.0]
     end
-    
+
     @testset "children_and_grandchildren tests" begin
         @test children_and_grandchildren(1, 1) == Int[]
         @test children_and_grandchildren(2, 1) == [2]
@@ -148,17 +158,17 @@ using Base.Order: Forward, Reverse
         @test children_and_grandchildren(7, 1) == [2, 4, 5, 3, 6, 7]
         @test children_and_grandchildren(10, 2) == [4, 8, 9, 5, 10]
     end
-    
+
     @testset "throw errors tests" begin
         h = BinaryMinMaxHeap{Int}()
         @test_throws ArgumentError pop!(h)
         @test_throws ArgumentError popmin!(h)
-        
+
         @test_throws ArgumentError popmax!(h)
-        
+
         @test_throws ArgumentError top(h)
         @test_throws ArgumentError minimum(h)
         @test_throws ArgumentError maximum(h)
-        
+
     end
 end

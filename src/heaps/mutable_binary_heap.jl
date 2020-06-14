@@ -113,7 +113,8 @@ function _binary_heap_pop!(comp::Comp,
         empty!(nodes)
     else
         # move the last node to the position of the removed node
-        @inbounds nodes[nd_id] = new_rt = pop!(nodes)
+        @inbounds nodes[nd_id] = new_rt = nodes[end]
+        pop!(nodes)
         @inbounds nodemap[new_rt.handle] = nd_id
 
         if length(nodes) > 1
@@ -124,7 +125,7 @@ function _binary_heap_pop!(comp::Comp,
             end
         end
     end
-    v
+    return v
 end
 
 function _make_mutable_binary_heap(comp::Comp, ty::Type{T}, values) where {Comp,T}
@@ -165,25 +166,25 @@ mutable struct MutableBinaryHeap{VT, Comp} <: AbstractMutableHeap{VT,Int}
         new{VT, Comp}(Comp(), nodes, node_map)
     end
 
-    function MutableBinaryHeap{VT, Comp}(xs::AbstractVector{VT}) where {VT, Comp} 
+    function MutableBinaryHeap{VT, Comp}(xs::AbstractVector{VT}) where {VT, Comp}
         nodes, node_map = _make_mutable_binary_heap(Comp(), VT, xs)
         new{VT, Comp}(Comp(), nodes, node_map)
     end
 end
-                            
+
 const MutableBinaryMinHeap{T} = MutableBinaryHeap{T, LessThan}
 const MutableBinaryMaxHeap{T} = MutableBinaryHeap{T, GreaterThan}
-                            
+
 MutableBinaryMinHeap(xs::AbstractVector{T}) where T = MutableBinaryMinHeap{T}(xs)
 MutableBinaryMaxHeap(xs::AbstractVector{T}) where T = MutableBinaryMaxHeap{T}(xs)
 
 # deprecated constructors
-                            
+
 @deprecate mutable_binary_minheap(::Type{T}) where {T} MutableBinaryMinHeap{T}()
 @deprecate mutable_binary_minheap(xs::AbstractVector{T}) where {T} MutableBinaryMinHeap(xs)
 @deprecate mutable_binary_maxheap(::Type{T}) where {T} MutableBinaryMaxHeap{T}()
 @deprecate mutable_binary_maxheap(xs::AbstractVector{T}) where {T} MutableBinaryMaxHeap(xs)
-    
+
 
 function show(io::IO, h::MutableBinaryHeap)
     print(io, "MutableBinaryHeap(")
@@ -217,7 +218,13 @@ function push!(h::MutableBinaryHeap{T}, v) where T
     push!(nodes, MutableBinaryHeapNode(convert(T, v), i))
     push!(nodemap, nd_id)
     _heap_bubble_up!(h.comparer, nodes, nodemap, nd_id)
-    i
+    return i
+end
+
+function sizehint!(h::MutableBinaryHeap, s::Integer)
+    sizehint!(h.nodes, s)
+    sizehint!(h.node_map, s)
+    return h
 end
 
 @inline top(h::MutableBinaryHeap) = h.nodes[1].value
@@ -259,12 +266,12 @@ end
 """
     delete!{T}(h::MutableBinaryHeap{T}, i::Int)
 
-Deletes the element with handle `i` from heap `h` . 
-"""     
+Deletes the element with handle `i` from heap `h` .
+"""
 function delete!(h::MutableBinaryHeap{T}, i::Int) where T
      nd_id = h.node_map[i]
     _binary_heap_pop!(h.comparer, h.nodes, h.node_map, nd_id)
-    h
+    return h
 end
 
 setindex!(h::MutableBinaryHeap, v, i::Int) = update!(h, i, v)

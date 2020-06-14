@@ -1,15 +1,23 @@
 #A counter type
 
-struct Accumulator{T, V<:Number} <: AbstractDict{T,V}
-    map::Dict{T,V}
+"""
+    Accumulator{T, V<:Number}
+
+A accumulator is a data structure that maintains an accumulated total for each key.
+The particular case where those totals are integers is a counter.
+"""
+struct Accumulator{T, V <: Number} <: AbstractDict{T, V}
+    map::Dict{T, V}
 end
 
 ## constructors
 
-Accumulator{T, V}() where {T,V<:Number} = Accumulator{T,V}(Dict{T,V}())
+Accumulator{T, V}() where {T, V <: Number} = Accumulator{T, V}(Dict{T, V}())
+Accumulator(map::AbstractDict) = Accumulator(Dict(map))
+Accumulator(ps::Pair...) = Accumulator(Dict(ps))
 
-counter(T::Type) = Accumulator{T,Int}()
-counter(dct::Dict{T,V}) where {T,V<:Integer} = Accumulator{T,V}(copy(dct))
+counter(T::Type) = Accumulator{T, Int}()
+counter(dct::AbstractDict{T, V}) where {T, V<:Integer} = Accumulator{T, V}(Dict(dct))
 
 """
     counter(seq)
@@ -25,7 +33,7 @@ function counter(seq)
 end
 
 eltype_for_accumulator(seq::T) where T = eltype(T)
-function eltype_for_accumulator(seq::T) where {T<:Base.Generator}
+function eltype_for_accumulator(seq::Base.Generator)
     Base.@default_eltype(seq)
 end
 
@@ -60,12 +68,12 @@ iterate(ct::Accumulator, s...) = iterate(ct.map, s...)
 # manipulation
 
 """
-    inc!(ct, x, [v=1])
+    inc!(ct::Accumulator, x, [v=1])
 
 Increments the count for `x` by `v` (defaulting to one)
 """
-inc!(ct::Accumulator, x, a::Number) = (ct[x] += a)
-inc!(ct::Accumulator{T,V}, x) where {T,V} = inc!(ct, x, one(V))
+inc!(ct::Accumulator, x, v::Number) = (ct[x] += v)
+inc!(ct::Accumulator{T, V}, x) where {T, V} = inc!(ct, x, one(V))
 
 # inc! is preferred over push!, but we need to provide push! for the Bag interpreation
 # which is used by classified_collections.jl
@@ -78,17 +86,17 @@ push!(ct::Accumulator, x::Pair)  = inc!(ct, x)
 
 
 """
-    dec!(ct, x, [v=1])
+    dec!(ct::Accumulator, x, [v=1])
 
 Decrements the count for `x` by `v` (defaulting to one)
 """
-dec!(ct::Accumulator, x, a::Number) = (ct[x] -= a)
+dec!(ct::Accumulator, x, v::Number) = (ct[x] -= v)
 dec!(ct::Accumulator{T,V}, x) where {T,V} = dec!(ct, x, one(V))
 
 #TODO: once we are done deprecating `pop!` for `reset!` then add `pop!` as an alias for `dec!`
 
 """
-    merge!(ct1, others...)
+    merge!(ct1::Accumulator, others...)
 
 Merges the other counters into `ctl`,
 summing the counts for all elements.
@@ -97,7 +105,7 @@ function merge!(ct::Accumulator, other::Accumulator)
     for (x, v) in other
         inc!(ct, x, v)
     end
-    ct
+    return ct
 end
 
 
@@ -124,8 +132,7 @@ end
 """
     reset!(ct::Accumulator, x)
 
-Resets the count of `x` to zero.
-Returns its former count.
+Remove a key `x` from an accumulator, and return its current value
 """
 reset!(ct::Accumulator{<:Any,V}, x) where V = haskey(ct.map, x) ? pop!(ct.map, x) : zero(V)
 
@@ -177,7 +184,7 @@ nsmallest(acc::Accumulator, n) = partialsort!(collect(acc), 1:n, by=last, rev=fa
 ###########################################################
 ## Multiset operations
 
-struct MultiplicityException{K,V} <: Exception
+struct MultiplicityException{K, V} <: Exception
     k::K
     v::V
 end
@@ -218,7 +225,7 @@ end
 Base.intersect(a::Accumulator, b::Accumulator, c::Accumulator...) = insersect(intersect(a,b), c...)
 Base.intersect(a::Accumulator, b::Accumulator) = intersect!(copy(a), b)
 function Base.intersect!(a::Accumulator, b::Accumulator)
-    for k in union(keys(a), keys(b)) # union not interection as we want to check both multiplicties
+    for k in union(keys(a), keys(b)) # union not interection as we want to check both multiplicities
         va = a[k]
         vb = b[k]
         va >= 0 || throw(MultiplicityException(k, va))
@@ -228,4 +235,19 @@ function Base.intersect!(a::Accumulator, b::Accumulator)
         drop_nonpositive!(a, k) # Drop any that ended up zero
     end
     return a
+end
+function Base.show(io::IO, acc::Accumulator{T,V}) where {T,V}
+    l = length(acc)
+    if l>0
+        print(io, "Accumulator(")
+    else
+        print(io,"Accumulator{$T,$V}(")
+    end
+    for (count, (k, v)) in enumerate(acc)
+        print(io, k, " => ", v)
+        if count < l
+            print(io, ", ")
+        end
+    end
+    print(io, ")")
 end

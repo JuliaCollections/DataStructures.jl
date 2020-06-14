@@ -258,7 +258,7 @@ onlysemitokens(ba::SAIterableTypesBase) = SAOnlySemiTokensIteration(ba)
 
 
 
-    
+
 function nexthelper(c::SAContainer, state::SAIterationState)
     sn = state.next
     (sn < 3 || !(sn in c.bt.useddatacells)) && throw(BoundsError())
@@ -266,12 +266,12 @@ function nexthelper(c::SAContainer, state::SAIterationState)
 end
 
 
-    
+
 getitem(::SDMIterableTypesBase, dt, sn) = dt.k => dt.d
 getitem(::SSIterableTypesBase, dt, sn) = dt.k
 getitem(::SDMKeyIteration, dt, sn) = dt.k
 getitem(::SDMValIteration, dt, sn) = dt.d
-getitem(::SDMSemiTokenIteration, dt, sn) = (IntSemiToken(sn), dt.k, dt.d) 
+getitem(::SDMSemiTokenIteration, dt, sn) = (IntSemiToken(sn), dt.k, dt.d)
 getitem(::SSSemiTokenIteration, dt, sn) = (IntSemiToken(sn), dt.k)
 getitem(::SDMSemiTokenKeyIteration, dt, sn) = (IntSemiToken(sn), dt.k)
 getitem(::SDMSemiTokenValIteration, dt, sn) = (IntSemiToken(sn), dt.d)

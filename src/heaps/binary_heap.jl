@@ -82,7 +82,7 @@ function _binary_heap_pop!(comp::Comp, valtree::Array{T}) where {Comp,T}
             _heap_bubble_down!(comp, valtree, 1)
         end
     end
-    v
+    return v
 end
 
 
@@ -92,7 +92,7 @@ function _make_binary_heap(comp::Comp, ty::Type{T}, xs) where {Comp,T}
     for i = 2 : n
         _heap_bubble_up!(comp, valtree, i)
     end
-    valtree
+    return valtree
 end
 
 
@@ -135,7 +135,12 @@ function push!(h::BinaryHeap, v)
     valtree = h.valtree
     push!(valtree, v)
     _heap_bubble_up!(h.comparer, valtree, length(valtree))
-    h
+    return h
+end
+
+function sizehint!(h::BinaryHeap, s::Integer)
+    sizehint!(h.valtree, s)
+    return h
 end
 
 """

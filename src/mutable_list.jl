@@ -37,17 +37,13 @@ function MutableLinkedList{T}(elts...) where T
     return l
 end
 
-iterate(l::MutableLinkedList) = begin
-    l.len == 0 ? nothing : (l.node.next.data, l.node.next.next)
-end
-iterate(l::MutableLinkedList, n::ListNode) = begin
-    n === l.node ? nothing : (n.data, n.next)
-end
+iterate(l::MutableLinkedList) = l.len == 0 ? nothing : (l.node.next.data, l.node.next.next)
+iterate(l::MutableLinkedList, n::ListNode) = n === l.node ? nothing : (n.data, n.next)
 
 isempty(l::MutableLinkedList) = l.len == 0
 length(l::MutableLinkedList) = l.len
 collect(l::MutableLinkedList{T}) where T = T[x for x in l]
-eltype(l::MutableLinkedList{T}) where T = T
+Base.eltype(::Type{<:MutableLinkedList{T}}) where T = T
 lastindex(l::MutableLinkedList) = l.len
 
 function first(l::MutableLinkedList)
@@ -122,7 +118,7 @@ end
 function getindex(l::MutableLinkedList, idx::Int)
     @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
     node = l.node
-    for i = 1:idx
+    for i in 1:idx
         node = node.next
     end
     return node.data
@@ -132,7 +128,7 @@ function getindex(l::MutableLinkedList{T}, r::UnitRange) where T
     @boundscheck 0 < first(r) < last(r) <= l.len || throw(BoundsError(l, r))
     l2 = MutableLinkedList{T}()
     node = l.node
-    for i = 1:first(r)
+    for i in 1:first(r)
         node = node.next
     end
     len = length(r)
@@ -147,7 +143,7 @@ end
 function setindex!(l::MutableLinkedList{T}, data, idx::Int) where T
     @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
     node = l.node
-    for i = 1:idx
+    for i in 1:idx
         node = node.next
     end
     node.data = convert(T, data)
@@ -185,7 +181,7 @@ end
 function delete!(l::MutableLinkedList, r::UnitRange)
     @boundscheck 0 < first(r) < last(r) <= l.len || throw(BoundsError(l, r))
     node = l.node
-    for i = 1:first(r)
+    for i in 1:first(r)
         node = node.next
     end
     prev = node.prev

@@ -3,7 +3,7 @@
 @testset "Accumulators" begin
 
     ct = counter(String)
-    
+
     @testset "Core Functionality" begin
         @assert isa(ct, Accumulator{String,Int})
 
@@ -51,6 +51,17 @@
         @test sum(ct) == 6
     end
 
+    @testset "From Pairs" begin 
+        acc = Accumulator("a" => 2, "b" => 3, "c" => 1)
+        @test isa(acc,Accumulator{String,Int})
+        @test haskey(acc,"a")
+        @test haskey(acc,"b")
+        @test haskey(acc,"c")
+        @test acc["a"] == 2
+        @test acc["b"] == 3
+        @test acc["c"] == 1
+    end
+
     @testset "From Vector" begin
         ct2 = counter(["a", "a", "b", "b", "a", "c", "c"])
         @test isa(ct2, Accumulator{String,Int})
@@ -88,6 +99,16 @@
         @test reset!(ctm, "b") == 22
         @test !haskey(ctm, "b")
         @test ctm["b"] == 0
+    end
+
+    @testset "From AbstractDict" begin
+        kv = (:a => 1, :b => 2)
+        for f in (Accumulator, counter)
+            ct_odict = f(OrderedDict(kv))
+            ct_dict = f(Dict(kv))
+            @test ct_odict isa Accumulator{Symbol, Int}
+            @test ct_odict == ct_dict
+        end
     end
 
     @testset "From Pair" begin
@@ -174,12 +195,12 @@
 
         @test_throws BoundsError nsmallest(counter("a"),2)
     end
-    
+
     @testset "reset!" begin
         ct = counter("abbbcddddda") # ['d'=>5, 'b'=>3, 'a'=>2, 'c'=>1]
         @test reset!(ct, 'b') == 3
         @test ct == counter("acddddda")
-        
+
         @test reset!(ct, 'x') == 0
     end
 
@@ -187,60 +208,60 @@
         orig = counter("aabbbcccc")
         dup = copy(orig)
         @test orig == dup
-        
+
         # Modifying copy should not modify original
         inc!(orig, 'a')
         @test orig != dup
     end
-    
+
     @testset "Multiset" begin
         @testset "issubset" begin
             @test issubset(counter([1,2,3]), counter([1,2,3]))
             @test !issubset(counter([1,2,3,4]), counter([1,2,3]))
             @test issubset(counter([1,2]), counter([1,2,3]))
-            
+
             @test issubset(counter([1,2,3]), counter([1,2,3,3]))
             @test !issubset(counter([1,2,3,3]), counter([1,2,3]))
         end
-        
+
         @testset "setdiff" begin
             @test setdiff(counter([1,2,3]), counter([2, 4])) == counter([3, 1])
             @test setdiff(counter([1,2,3]), counter([2,2,4])) == counter([3, 1])
             @test setdiff(counter([1,2,2,2,3]), counter([2,2,4])) == counter([1,2,3])
-            
+
             nonmultiset = counter(Dict([('a',-10), ('b',20)]))
             @test_throws DataStructures.MultiplicityException setdiff(counter("aabbcc"), nonmultiset)
         end
-        
+
         @testset "union" begin
             @test ∪(counter([1,2,3]), counter([1,2,3])) == counter([1,2,3])
             @test ∪(counter([1,2,3]), counter([1,2,2,3])) == counter([1,2,2,3])
             @test ∪(counter([1,3]), counter([2,2])) == counter([1,2,2,3])
             @test ∪(counter([1,2,3]), counter(Int[])) == counter([1,2,3])
-            
+
             nonmultiset = counter(Dict([('a',-10), ('b',20)]))
             @test_throws DataStructures.MultiplicityException (counter("aabbcc") ∪ nonmultiset)
             @test_throws DataStructures.MultiplicityException (nonmultiset ∪ counter("aabbcc"))
         end
- 
+
         @testset "intersect" begin
             @test ∩(counter([1,2,3]), counter([1,2,3])) == counter([1,2,3])
             @test ∩(counter([1,2,3]), counter([1,2,2,3])) == counter([1,2,3])
             @test ∩(counter([1,3]), counter([2,2])) == counter(Int[])
             @test ∩(counter([1,2,3]), counter(Int[])) == counter(Int[])
-            
-            
+
+
             nonmultiset = counter(Dict([('a',-10), ('b',20)]))
             @test_throws DataStructures.MultiplicityException (counter("aabbcc") ∩ nonmultiset)
             @test_throws DataStructures.MultiplicityException (nonmultiset ∩ counter("aabbcc"))
         end
 
+        @testset "show" begin
+            @test sprint(show,Accumulator(1 => 3)) == "Accumulator(1 => 3)"
+            @test sprint(show,Accumulator(1 => 3, 3 => 4)) == "Accumulator(3 => 4, 1 => 3)"
+        end
 
-    
 
     end
 
 end # @testset Accumulators
-
-
-

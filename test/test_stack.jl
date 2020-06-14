@@ -15,12 +15,14 @@
         @test isa(s, Stack{Int})
         @test length(s) == 0
         @test isempty(s)
-        @test_throws ArgumentError top(s)
+        @test eltype(s) == Int
+        @test eltype(typeof(s)) == Int
+        @test_throws ArgumentError first(s)
         @test_throws ArgumentError pop!(s)
 
         for i = 1 : n
             push!(s, i)
-            @test top(s) == i
+            @test first(s) == i
             @test !isempty(s)
             @test length(s) == i
         end
@@ -29,12 +31,31 @@
             x = pop!(s)
             @test x == n - i + 1
             if i < n
-                @test top(s) == n - i
+                @test first(s) == n - i
             else
-                @test_throws ArgumentError top(s)
+                @test_throws ArgumentError first(s)
             end
             @test isempty(s) == (i == n)
             @test length(s) == n - i
+        end
+    end
+
+    @testset "==" begin
+        s = Stack{Int}()
+        t = Stack{Int}()
+
+        @test s == t
+        push!(s, 10)
+        @test s != t
+        push!(t, 10)
+        @test s == t
+        push!(t, 20)
+        @test s != t
+
+        @testset "different types" begin
+            r = Stack{Float32}()
+            push!(r, 10)
+            @test s == r
         end
     end
 

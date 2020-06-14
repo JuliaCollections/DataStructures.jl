@@ -12,8 +12,8 @@
 #   node of the heap and thus update its value.
 #
 #   Each heap type must implement all of the following
-#   functions. Here, let h be a heap, i be a handle, and
-#   v be a value.
+#   functions. Here, let h be a heap, i be a handle,
+#   v be a value and s be a size.
 #
 #   - length(h)           returns the number of elements
 #
@@ -22,7 +22,7 @@
 #
 #   - push!(h, v)         add a value to the heap
 #
-#   - sizehint!(h)         set size hint to a heap
+#   - sizehint!(h, s)     set size hint to a heap
 #
 #   - top(h)              return the top value of a heap
 #
@@ -75,22 +75,24 @@ include("heaps/minmax_heap.jl")
 
 # generic functions
 
+Base.eltype(::Type{<:AbstractHeap{T}}) where T = T
+
 function extract_all!(h::AbstractHeap{VT}) where VT
     n = length(h)
     r = Vector{VT}(undef, n)
-    for i = 1 : n
+    for i in 1 : n
         r[i] = pop!(h)
     end
-    r
+    return r
 end
 
 function extract_all_rev!(h::AbstractHeap{VT}) where VT
     n = length(h)
     r = Vector{VT}(undef, n)
-    for i = 1 : n
+    for i in 1 : n
         r[n + 1 - i] = pop!(h)
     end
-    r
+    return r
 end
 
 # Array functions using heaps

@@ -13,15 +13,17 @@
         n = 100
 
         @test length(s) == 0
+        @test eltype(s) == Int
+        @test eltype(typeof(s)) == Int
         @test isempty(s)
-        @test_throws ArgumentError front(s)
-        @test_throws ArgumentError back(s)
+        @test_throws ArgumentError first(s)
+        @test_throws ArgumentError last(s)
         @test_throws ArgumentError dequeue!(s)
 
         for i = 1 : n
             enqueue!(s, i)
-            @test front(s) == 1
-            @test back(s) == i
+            @test first(s) == 1
+            @test last(s) == i
             @test !isempty(s)
             @test length(s) == i
         end
@@ -30,15 +32,43 @@
             x = dequeue!(s)
             @test x == i
             if i < n
-                @test front(s) == i + 1
-                @test back(s) == n
+                @test first(s) == i + 1
+                @test last(s) == n
             else
-                @test_throws ArgumentError front(s)
-                @test_throws ArgumentError back(s)
+                @test_throws ArgumentError first(s)
+                @test_throws ArgumentError last(s)
             end
             @test isempty(s) == (i == n)
             @test length(s) == n - i
         end
+    end
+
+    @testset "==" begin
+        t = Queue{Int}()
+        s = Queue{Int}()
+
+        @test s == t
+        enqueue!(s, 10)
+        @test s != t
+        enqueue!(t, 10)
+        @test s == t
+        enqueue!(t, 20)
+        @test s != t
+
+        @testset "different types" begin
+            r = Queue{Float32}()
+            enqueue!(r, 10)
+            @test s == r
+        end
+    end
+
+    @testset "emptyness" begin
+        s = Queue{Int}()
+        enqueue!(s, 1)
+        enqueue!(s, 3)
+        @test !isempty(s)
+        empty!(s)
+        @test isempty(s)
     end
 
     @testset "iter should return a FIFO collection" begin

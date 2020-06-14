@@ -4,14 +4,12 @@
             q = Deque{Int}()
             @test length(q) == 0
             @test isempty(q)
+            @test eltype(q) == Int
+            @test eltype(typeof(q)) == Int
             @test q.blksize == DataStructures.DEFAULT_DEQUEUE_BLOCKSIZE
-            @test_throws ArgumentError front(q)
-            @test_throws ArgumentError back(q)
+            @test_throws ArgumentError first(q)
+            @test_throws ArgumentError last(q)
             @test length(sprint(dump,q)) >= 0
-        end
-
-        @testset "empty dequeue 2" begin
-            @test typeof(deque(Int)) === typeof(Deque{Int}())
         end
 
         @testset "empty dequeue 3" begin
@@ -28,8 +26,8 @@
             @test isempty(q)
             @test q.blksize == 3
             @test num_blocks(q) == 1
-            @test_throws ArgumentError front(q)
-            @test_throws ArgumentError back(q)
+            @test_throws ArgumentError first(q)
+            @test_throws ArgumentError last(q)
             @test isa(collect(q), Vector{Int})
             @test collect(q) == Int[]
         end
@@ -37,19 +35,19 @@
 
     @testset "Core Functionality" begin
         n = 10
-        
-        @testset "push back / pop back" begin
+
+        @testset "push last / pop last" begin
             q = Deque{Int}(3)
-            
-            @testset "push back" begin
+
+            @testset "push last" begin
                 for i = 1 : n
                     push!(q, i)
                     @test length(q) == i
                     @test isempty(q) == false
                     @test num_blocks(q) == div(i-1, 3) + 1
 
-                    @test front(q) == 1
-                    @test back(q) == i
+                    @test first(q) == 1
+                    @test last(q) == i
 
                     k = 1
                     for j in q
@@ -63,7 +61,7 @@
                 end
             end
 
-            @testset "pop back" begin
+            @testset "pop last" begin
                 for i = 1 : n
                     x = pop!(q)
                     @test length(q) == n - i
@@ -72,11 +70,11 @@
                     @test x == n - i + 1
 
                     if !isempty(q)
-                        @test front(q) == 1
-                        @test back(q) == n - i
+                        @test first(q) == 1
+                        @test last(q) == n - i
                     else
-                        @test_throws ArgumentError front(q)
-                        @test_throws ArgumentError back(q)
+                        @test_throws ArgumentError first(q)
+                        @test_throws ArgumentError last(q)
                     end
 
                     cq = collect(q)
@@ -85,18 +83,18 @@
             end
         end
 
-        @testset "push front / pop front" begin
+        @testset "push first / pop first" begin
             q = Deque{Int}(3)
 
-            @testset "push front" begin
+            @testset "push first" begin
                 for i = 1 : n
                     pushfirst!(q, i)
                     @test length(q) == i
                     @test isempty(q) == false
                     @test num_blocks(q) == div(i-1, 3) + 1
 
-                    @test front(q) == i
-                    @test back(q) == 1
+                    @test first(q) == i
+                    @test last(q) == 1
 
                     cq = collect(q)
                     @test isa(cq, Vector{Int})
@@ -104,7 +102,7 @@
                 end
             end
 
-            @testset "pop front" begin
+            @testset "pop first" begin
                 for i = 1 : n
                     x = popfirst!(q)
                     @test length(q) == n - i
@@ -113,11 +111,11 @@
                     @test x == n - i + 1
 
                     if !isempty(q)
-                        @test front(q) == n - i
-                        @test back(q) == 1
+                        @test first(q) == n - i
+                        @test last(q) == 1
                     else
-                        @test_throws ArgumentError front(q)
-                        @test_throws ArgumentError back(q)
+                        @test_throws ArgumentError first(q)
+                        @test_throws ArgumentError last(q)
                     end
 
                     cq = collect(q)
@@ -198,6 +196,10 @@
         @test length(sprint(dump,q)) >= 0
         @test typeof(empty!(q)) === typeof(Deque{Int}())
         @test isempty(q)
+    end
+
+    @testset "deprecated constructors" begin
+        @test_deprecated deque(Int)
     end
 
 end # @testset Deque

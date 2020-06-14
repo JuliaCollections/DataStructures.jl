@@ -1,3 +1,7 @@
+```@meta
+DocTestSetup = :(using DataStructures)
+```
+
 # RobinDict
 
 `RobinDict` provides a standard dictionary, conforming to the AbstractDict protocol, which uses the Robin Hood hashing algorithm with backward-shift deletion to provide improved average performance over Dict.
@@ -6,7 +10,7 @@ The interface of `RobinDict` replicates that of `Dict`.
 
 Examples:
 
-```julia
+```jldoctest
 julia> d = RobinDict{Int, Char}(1 => 'a', 2 => 'b')
 RobinDict{Int64,Char} with 2 entries:
   2 => 'b'
@@ -34,3 +38,6 @@ julia> pop!(d)
 3 => 'c'
 ```
 
+```@meta
+DocTestSetup = nothing
+```

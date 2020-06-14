@@ -15,7 +15,7 @@ Construct a SortedSet using keys given by iterable `iter` (e.g., an
 array) and ordering object `o`. The ordering object defaults to
 `Forward` if not specified.
 """
-mutable struct SortedSet{K, Ord <: Ordering}
+mutable struct SortedSet{K, Ord <: Ordering} <: AbstractSet{K}
     bt::BalancedTree23{K,Nothing,Ord}
 
     function SortedSet{K,Ord}(o::Ord=Forward, iter=[]) where {K,Ord<:Ordering}
@@ -25,7 +25,7 @@ mutable struct SortedSet{K, Ord <: Ordering}
             push!(sorted_set, item)
         end
 
-        sorted_set
+        return sorted_set
     end
 end
 
@@ -50,7 +50,7 @@ to slow performance.**
 SortedSet(o::O) where {O<:Ordering} = SortedSet{Any,O}(o)
 
 # To address ambiguity warnings on Julia v0.4
-SortedSet(o1::Ordering,o2::Ordering) =
+SortedSet(o1::Ordering, o2::Ordering) =
     throw(ArgumentError("SortedSet with two parameters must be called with an Ordering and an interable"))
 SortedSet(o::Ordering, iter) = sortedset_with_eltype(o, iter, eltype(iter))
 SortedSet(iter, o::Ordering=Forward) = sortedset_with_eltype(o, iter, eltype(iter))
@@ -113,7 +113,7 @@ second entry is the semitoken of the new entry. Time: O(*c* log *n*)
 """
 @inline function insert!(m::SortedSet, k_)
     b, i = insert!(m.bt, convert(keytype(m),k_), nothing, false)
-    b, IntSemiToken(i)
+    return b, IntSemiToken(i)
 end
 
 ## push! is similar to insert but returns the set
@@ -128,7 +128,7 @@ remarks about the customizing the sort order.) The return value is
 """
 @inline function push!(m::SortedSet, k_)
     b, i = insert!(m.bt, convert(keytype(m),k_), nothing, false)
-    m
+    return m
 end
 
 
@@ -180,8 +180,7 @@ end
 Returns the key type for SortedSet.
 This function may also be applied to the type itself. Time: O(1)
 """
-@inline eltype(m::SortedSet{K,Ord}) where {K,Ord <: Ordering} = K
-@inline eltype(::Type{SortedSet{K,Ord}}) where {K,Ord <: Ordering} = K
+@inline Base.eltype(::Type{SortedSet{K,Ord}}) where {K,Ord <: Ordering} = K
 
 """
     keytype(sc)
@@ -230,19 +229,21 @@ Returns `sc`. Time: O(*c* log *n*)
 """
 @inline function delete!(m::SortedSet, k_)
     i, exactfound = findkey(m.bt,convert(keytype(m),k_))
-    !exactfound && throw(KeyError(k_))
-    delete!(m.bt, i)
-    m
+    if exactfound
+        delete!(m.bt, i)
+    end
+    return m
 end
 
 
 """
-    pop!(sc, k)
+    pop!(sc, k[, default])
 
 Deletes the item with key `k` in SortedDict or SortedSet `sc` and
 returns the value that was associated with `k` in the case of
-SortedDict or `k` itself in the case of SortedSet. A `KeyError`
-results if `k` is not in `sc`. Time: O(*c* log *n*)
+SortedDict or `k` itself in the case of SortedSet. If `k` is not in `sc`
+return `default`, or throw a `KeyError` if `default` is not specified.
+Time: O(*c* log *n*)
 """
 @inline function pop!(m::SortedSet, k_)
     k = convert(keytype(m),k_)
@@ -250,7 +251,16 @@ results if `k` is not in `sc`. Time: O(*c* log *n*)
     !exactfound && throw(KeyError(k_))
     d = m.bt.data[i].d
     delete!(m.bt, i)
-    k
+    return k
+end
+
+@inline function pop!(m::SortedSet, k_, default)
+    k = convert(keytype(m),k_)
+    i, exactfound = findkey(m.bt, k)
+    !exactfound && return default
+    d = m.bt.data[i].d
+    delete!(m.bt, i)
+    return k
 end
 
 """
@@ -264,7 +274,7 @@ key. A `BoundsError` results if `ss` is empty. Time: O(*c* log *n*)
     i == 2 && throw(BoundsError())
     k = m.bt.data[i].k
     delete!(m.bt, i)
-    k
+    return k
 end
 
 
@@ -323,7 +333,7 @@ function union!(m1::SortedSet{K,Ord}, iterable_item) where {K, Ord <: Ordering}
     for k in iterable_item
         push!(m1,convert(K,k))
     end
-    m1
+    return m1
 end
 
 """
@@ -339,7 +349,7 @@ function union(m1::SortedSet, others...)
     for m2 in others
         union!(mr, m2)
     end
-    mr
+    return mr
 end
 
 function intersect2(m1::SortedSet{K, Ord}, m2::SortedSet{K, Ord}) where {K, Ord <: Ordering}
@@ -522,7 +532,7 @@ function packcopy(m::SortedSet{K,Ord}) where {K,Ord <: Ordering}
     for k in m
         push!(w, k)
     end
-    w
+    return w
 end
 
 """
@@ -538,7 +548,7 @@ function packdeepcopy(m::SortedSet{K,Ord}) where {K, Ord <: Ordering}
         newk = deepcopy(k)
         push!(w, newk)
     end
-    w
+    return w
 end
 
 

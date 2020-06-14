@@ -8,10 +8,11 @@
         t["emma"] = 30
         t["rob"] = 27
         t["roger"] = 52
+        t["kevin"] = Int8(11)
 
         @test haskey(t, "roger")
         @test get(t,"rob",nothing) == 27
-        @test sort(keys(t)) == ["amy", "ann", "emma", "rob", "roger"]
+        @test sort(keys(t)) == ["amy", "ann", "emma", "kevin", "rob", "roger"]
         @test t["rob"] == 27
         @test sort(keys_with_prefix(t,"ro")) == ["rob", "roger"]
     end

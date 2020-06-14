@@ -7,7 +7,7 @@ mutable struct Trie{T}
         self = new{T}()
         self.children = Dict{Char,Trie{T}}()
         self.is_key = false
-        self
+        return self
     end
 
     function Trie{T}(ks, vs) where T
@@ -33,7 +33,8 @@ Trie(kv::AbstractVector{Tuple{K,V}}) where {K<:AbstractString,V} = Trie{V}(kv)
 Trie(kv::AbstractDict{K,V}) where {K<:AbstractString,V} = Trie{V}(kv)
 Trie(ks::AbstractVector{K}) where {K<:AbstractString} = Trie{Nothing}(ks, similar(ks, Nothing))
 
-function setindex!(t::Trie{T}, val::T, key::AbstractString) where T
+function setindex!(t::Trie{T}, val, key::AbstractString) where T
+    value = convert(T, val) # we don't want to iterate before finding out it fails
     node = t
     for char in key
         if !haskey(node.children, char)
@@ -42,7 +43,7 @@ function setindex!(t::Trie{T}, val::T, key::AbstractString) where T
         node = node.children[char]
     end
     node.is_key = true
-    node.value = val
+    node.value = value
 end
 
 function getindex(t::Trie, key::AbstractString)
@@ -62,7 +63,7 @@ function subtrie(t::Trie, prefix::AbstractString)
             node = node.children[char]
         end
     end
-    node
+    return node
 end
 
 function haskey(t::Trie, key::AbstractString)
@@ -75,7 +76,7 @@ function get(t::Trie, key::AbstractString, notfound)
     if node != nothing && node.is_key
         return node.value
     end
-    notfound
+    return notfound
 end
 
 function keys(t::Trie, prefix::AbstractString="", found=AbstractString[])
@@ -85,7 +86,7 @@ function keys(t::Trie, prefix::AbstractString="", found=AbstractString[])
     for (char,child) in t.children
         keys(child, string(prefix,char), found)
     end
-    found
+    return found
 end
 
 function keys_with_prefix(t::Trie, prefix::AbstractString)

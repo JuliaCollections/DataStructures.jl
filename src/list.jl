@@ -1,5 +1,7 @@
 abstract type LinkedList{T} end
 
+Base.eltype(::Type{<:LinkedList{T}}) where T = T
+
 mutable struct Nil{T} <: LinkedList{T}
 end
 
@@ -62,7 +64,7 @@ function length(l::Cons)
     for i in l
         n += 1
     end
-    n
+    return n
 end
 
 map(f::Base.Callable, l::Nil) = l
@@ -91,7 +93,7 @@ function reverse(l::LinkedList{T}) where T
     for h in l
         l2 = cons(h, l2)
     end
-    l2
+    return l2
 end
 
 copy(l::Nil) = l

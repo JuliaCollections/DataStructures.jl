@@ -24,7 +24,7 @@ mutable struct SortedDict{K, D, Ord <: Ordering} <: AbstractDict{K,D}
                 s[p.first] = p.second
             end
         else
-            for (k,v) in kv
+            for (k, v) in kv
                 s[k] = v
             end
         end
@@ -84,7 +84,7 @@ SortedDict{K,D}(ps::Pair...) where {K,D} = SortedDict{K,D,ForwardOrdering}(Forwa
     SortedDict(o, k1=>v1, k2=>v2, ...)
 
 Construct a `SortedDict` from the given pairs with the specified
-ordering `o`. The key type and value type are inferred from the 
+ordering `o`. The key type and value type are inferred from the
 given pairs.
 """
 SortedDict(o::Ordering, ps::Pair...) = SortedDict(o, ps)
@@ -210,7 +210,7 @@ either side of an assignment statement. Time: O(1)
 """
 @inline function setindex!(m::SortedDict{K,D,Ord}, d_, k_) where {K, D, Ord <: Ordering}
     insert!(m.bt, convert(K,k_), convert(D,d_), false)
-    m
+    return m
 end
 
 ## push! is an alternative to insert!; it returns the container.
@@ -224,11 +224,8 @@ return value is `sc`. Time: O(*c* log *n*)
 """
 @inline function push!(m::SortedDict{K,D}, pr::Pair) where {K,D}
     insert!(m.bt, convert(K, pr[1]), convert(D, pr[2]), false)
-    m
+    return m
 end
-
-
-
 
 ## This function looks up a key in the tree;
 ## if not found, then it returns a marker for the
@@ -456,25 +453,35 @@ Returns `sc`. Time: O(*c* log *n*)
 """
 @inline function delete!(m::SortedDict, k_)
     i, exactfound = findkey(m.bt, convert(keytype(m), k_))
-    !exactfound && throw(KeyError(k_))
-    delete!(m.bt, i)
+    if exactfound
+        delete!(m.bt, i)
+    end
     m
 end
 
 """
-    pop!(sc, k)
+    pop!(sc, k[, default])
 
 Deletes the item with key `k` in SortedDict or SortedSet `sc` and
 returns the value that was associated with `k` in the case of
-SortedDict or `k` itself in the case of SortedSet. A `KeyError`
-results if `k` is not in `sc`. Time: O(*c* log *n*)
+SortedDict or `k` itself in the case of SortedSet. If `k` is not in `sc`
+return `default`, or throw a `KeyError` if `default` is not specified.
+Time: O(*c* log *n*)
 """
 @inline function pop!(m::SortedDict, k_)
     i, exactfound = findkey(m.bt, convert(keytype(m), k_))
     !exactfound && throw(KeyError(k_))
     d = m.bt.data[i].d
     delete!(m.bt, i)
-    d
+    return d
+end
+
+@inline function pop!(m::SortedDict, k_, default)
+    i, exactfound = findkey(m.bt, convert(keytype(m), k_))
+    !exactfound && return default
+    d = m.bt.data[i].d
+    delete!(m.bt, i)
+    return d
 end
 
 
@@ -539,7 +546,7 @@ deletions. Time: O(*cn* log *n*)
 function packcopy(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering}
     w = SortedDict(Dict{K,D}(), orderobject(m))
     mergetwo!(w,m)
-    w
+    return w
 end
 
 """
@@ -556,7 +563,7 @@ function packdeepcopy(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering}
         newv = deepcopy(v)
         w[newk] = newv
     end
-    w
+    return w
 end
 
 """
@@ -597,7 +604,7 @@ function merge(m::SortedDict{K,D,Ord},
                others::AbstractDict{K,D}...) where {K,D,Ord <: Ordering}
     result = packcopy(m)
     merge!(result, others...)
-    result
+    return result
 end
 
 

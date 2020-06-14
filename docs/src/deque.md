@@ -14,8 +14,8 @@ push!(a, 10)        # add an element to the back
 pop!(a)             # remove an element from the back
 pushfirst!(a, 20)   # add an element to the front
 popfirst!(a)        # remove an element from the front
-front(a)            # get the element at the front
-back(a)             # get the element at the back
+first(a)            # get the element at the front
+last(a)             # get the element at the back
 ```
 
 *Note:* Julia's `Vector` type also provides this interface, and thus can
@@ -25,5 +25,5 @@ deque grows, new blocks may be created and linked to existing blocks.
 This way avoids the copying when growing a vector.
 
 Benchmark shows that the performance of `Deque` is comparable to
-`Vector` on `push!`, and is noticeably faster on `unshift!` (by about
+`Vector` on `push!`, and is noticeably faster on `pushfirst!` (by about
 30% to 40%).

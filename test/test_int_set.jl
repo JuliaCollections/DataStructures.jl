@@ -11,7 +11,8 @@ import DataStructures: IntSet
     end
 
     @testset "eltype, empty" begin
-        @test eltype(IntSet()) ===  Int
+        @test eltype(IntSet()) == Int
+        @test eltype(typeof(IntSet())) == Int
         @test isequal(empty(IntSet([1,2,3])), IntSet())
     end
 
@@ -77,7 +78,7 @@ import DataStructures: IntSet
     @testset "complement! / pop!" begin
         c1 = complement!(IntSet())
         s1 = IntSet([1,2,3])
-        
+
         pop!(c1, 1)
         pop!(c1, 2)
         pop!(c1, 3)

@@ -18,7 +18,7 @@ mutable struct DequeBlock{T}
         blk = new{T}(data, capa, front, front-1)
         blk.prev = blk
         blk.next = blk
-        blk
+        return blk
     end
 end
 
@@ -58,6 +58,14 @@ end
 
 const DEFAULT_DEQUEUE_BLOCKSIZE = 1024
 
+"""
+    Deque{T}
+
+The Deque type implements a double-ended queue using a list of blocks.
+This data structure supports constant-time insertion/removal
+of elements at both ends of a sequence.
+
+"""
 mutable struct Deque{T}
     nblocks::Int
     blksize::Int
@@ -73,37 +81,31 @@ mutable struct Deque{T}
     Deque{T}() where {T} = Deque{T}(DEFAULT_DEQUEUE_BLOCKSIZE)
 end
 
-"""
-    deque(T)
-
-Create a deque of type `T`.
-"""
-deque(::Type{T}) where {T} = Deque{T}()
-
 isempty(q::Deque) = q.len == 0
 length(q::Deque) = q.len
 num_blocks(q::Deque) = q.nblocks
+Base.eltype(::Type{Deque{T}}) where T = T
 
 """
-    front(q::Deque)
+    first(q::Deque)
 
 Returns the first element of the deque `q`.
 """
-function front(q::Deque)
+function first(q::Deque)
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     blk = q.head
-    blk.data[blk.front]
+    return blk.data[blk.front]
 end
 
 """
-    back(q::Deque)
+    last(q::Deque)
 
 Returns the last element of the deque `q`.
 """
-function back(q::Deque)
+function last(q::Deque)
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     blk = q.rear
-    blk.data[blk.back]
+    return blk.data[blk.back]
 end
 
 
@@ -123,7 +125,7 @@ function iterate(qi::DequeIterator{T}, (cb, i) = (qi.q.head, qi.q.head.front)) w
         i = 1
     end
 
-    (x, (cb, i))
+    return (x, (cb, i))
 end
 
 # Backwards deque iteration
@@ -143,7 +145,7 @@ function iterate(qi::ReverseDequeIterator{T}, (cb, i) = (qi.q.rear, qi.q.rear.ba
         i = cb.back
     end
 
-    (x, (cb, i))
+    return (x, (cb, i))
 end
 
 reverse_iter(q::Deque{T}) where {T} = ReverseDequeIterator{T}(q)
@@ -186,6 +188,11 @@ end
 
 # Manipulation
 
+"""
+    empty!(q::Deque{T})
+
+Reset the deque.
+"""
 function empty!(q::Deque{T}) where T
     # release all blocks except the head
     if q.nblocks > 1
@@ -203,11 +210,16 @@ function empty!(q::Deque{T}) where T
     q.nblocks = 1
     q.len = 0
     q.rear = q.head
-    q
+    return q
 end
 
 
-function push!(q::Deque{T}, x) where T  # push back
+"""
+    push!(q::Deque{T}, x)
+
+Add an element to the back
+"""
+function push!(q::Deque{T}, x) where T
     rear = q.rear
 
     if isempty(rear)
@@ -226,10 +238,15 @@ function push!(q::Deque{T}, x) where T  # push back
         q.nblocks += 1
     end
     q.len += 1
-    q
+    return q
 end
 
-function pushfirst!(q::Deque{T}, x) where T   # push front
+"""
+    pushfirst!(q::Deque{T}, x)
+
+Add an element to the front
+"""
+function pushfirst!(q::Deque{T}, x) where T
     head = q.head
 
     if isempty(head)
@@ -250,10 +267,15 @@ function pushfirst!(q::Deque{T}, x) where T   # push front
         q.nblocks += 1
     end
     q.len += 1
-    q
+    return q
 end
 
-function pop!(q::Deque{T}) where T   # pop back
+"""
+    pop!(q::Deque{T})
+
+Remove the element at the back
+"""
+function pop!(q::Deque{T}) where T
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     rear = q.rear
     @assert rear.back >= rear.front
@@ -270,11 +292,15 @@ function pop!(q::Deque{T}) where T   # pop back
         end
     end
     q.len -= 1
-    x
+    return x
 end
 
+"""
+    popfirst!(q::Deque{T})
 
-function popfirst!(q::Deque{T}) where T  # pop front
+Remove the element at the front
+"""
+function popfirst!(q::Deque{T}) where T
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     head = q.head
     @assert head.back >= head.front
@@ -291,7 +317,7 @@ function popfirst!(q::Deque{T}) where T  # pop front
         end
     end
     q.len -= 1
-    x
+    return x
 end
 
 const _deque_hashseed = UInt === UInt64 ? 0x950aa17a3246be82 : 0x4f26f881
@@ -300,7 +326,7 @@ function hash(x::Deque, h::UInt)
     for (i, x) in enumerate(x)
         h += i * hash(x)
     end
-    h
+    return h
 end
 
 function ==(x::Deque, y::Deque)
@@ -308,5 +334,5 @@ function ==(x::Deque, y::Deque)
     for (i, j) in zip(x, y)
         i == j || return false
     end
-    true
+    return true
 end

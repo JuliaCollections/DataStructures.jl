@@ -54,6 +54,15 @@ end
 
     vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
 
+    @testset "basic tests" begin
+        h = MutableBinaryMinHeap{Int}()
+
+        @test length(h) == 0
+        @test isempty(h)
+        @test eltype(h) == Int
+        @test eltype(typeof(h)) == Int
+    end
+
     @testset "make mutable binary minheap" begin
         h = MutableBinaryMinHeap(vs)
 
@@ -62,6 +71,7 @@ end
         @test top(h) == 1
         @test isequal(list_values(h), vs)
         @test isequal(heap_values(h), [1, 2, 3, 4, 7, 9, 10, 14, 8, 16])
+        @test sizehint!(h, 100) === h
     end
 
     @testset "make mutable binary maxheap" begin
@@ -72,6 +82,7 @@ end
         @test top(h) == 16
         @test isequal(list_values(h), vs)
         @test isequal(heap_values(h), [16, 14, 10, 8, 7, 3, 9, 1, 4, 2])
+        @test sizehint!(h, 100) === h
     end
 
     @testset "hmin / push! / pop!" begin
@@ -102,7 +113,7 @@ end
 
         # test pop!
         @test isequal(extract_all!(hmin), [1, 2, 3, 4, 7, 8, 9, 10, 14, 16])
-        @test isempty(hmin)    
+        @test isempty(hmin)
     end
 
     @testset "hmax / push! / pop!" begin
@@ -157,7 +168,7 @@ end
         @test pop!(h) == 2
         @test isequal(heap_values(h), [7, 10])
         @test isequal(list_values(h), [10, 7])
-        
+
     end
 
     @testset "test delete!" begin
@@ -180,6 +191,14 @@ end
         hp = MutableBinaryMinHeap(vv)
         delete!(hp, 6)
         @test isequal(extract_all!(hp), [1, 9, 11, 17, 19, 21, 22, 27])
+    end
+
+    @testset "test delete! at end" begin
+        h = MutableBinaryMinHeap{Int}()
+        push!(h, 1)
+        handle = push!(h, 2)
+        delete!(h, handle)
+        @test isequal(heap_values(h), [1])
     end
 
     @testset "test update! and top_with_handle" begin
@@ -243,7 +262,7 @@ end
         update!(h, 2, 20)
         @test isequal(heap_values(h), [0.5, 10.1, 3.0, 20.0])
     end
-    
+
     # test deprecated constructors
     @testset "deprecated constructors" begin
         @test_deprecated mutable_binary_minheap(Int)
@@ -251,6 +270,6 @@ end
         @test_deprecated mutable_binary_maxheap(Int)
         @test_deprecated mutable_binary_maxheap([1., 2., 3.])
     end
-    
+
 
 end # @testset MutableBinheap

@@ -9,6 +9,7 @@
         @test lastindex(l1) == 0
         @test collect(l1) == Int[]
         @test eltype(l1) == Int
+        @test eltype(typeof(l1)) == Int
         @test_throws ArgumentError pop!(l1)
         @test_throws ArgumentError popfirst!(l1)
     end

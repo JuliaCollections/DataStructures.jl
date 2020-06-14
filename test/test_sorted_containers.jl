@@ -361,6 +361,26 @@ function testSortedDictMethods()
     end
     my_assert(isempty(m1))
     my_assert(length(m1) == 0)
+    N = 1000
+    for i = 2:N
+        m1[i] = convert(Float64,i) ^ 2
+    end
+    my_assert(!isempty(m1))
+    my_assert(length(m1) == N - 1)
+    for i = 2 : N
+        d = pop!(m1, i, -1.0)
+        my_assert(d == convert(Float64,i)^2)
+        d2 = pop!(m1, i, -1.0)
+        my_assert(d2 == -1.0)
+        d3 = pop!(m1, i, nothing)
+        my_assert(d3 == nothing)
+
+        if i % 200 == 0
+            checkcorrectness(m1.bt, false)
+        end
+    end
+    my_assert(isempty(m1))
+    my_assert(length(m1) == 0)
     for i = N : -1 : 2
         m1[i] = convert(Float64,i) ^ 2
         if i % 200 == 0
@@ -1637,14 +1657,14 @@ end
 @testset "SortedContainers" begin
     @test testSortedDictBasic()
     @test testSortedDictMethods()
-    @test testSortedDictLoops()    
+    @test testSortedDictLoops()
     @test testSortedDictOrderings()
     @test testSortedMultiDict()
     @test testSortedSet()
     @test testSortedDictConstructors()
     @test testSortedMultiDictConstructors()
 
-    
+
     # test all the errors of sorted containers
     m = SortedDict(Dict("a" => 6, "bb" => 9))
     @test_throws KeyError println(m["b"])
@@ -1656,7 +1676,7 @@ end
     i2 = findkey(m,"bb")
     @test_throws BoundsError iterate(inclusive(m,i1,i2))
     @test_throws BoundsError iterate(exclusive(m,i1,i2))
-    @test_throws KeyError delete!(m,"a")
+    @test m === delete!(m,"a") # Okay to delete! nonexistent keys
     @test_throws KeyError pop!(m,"a")
     m3 = SortedDict((Dict{String, Int}()), Reverse)
     @test_throws ArgumentError isequal(m2, m3)
@@ -1677,7 +1697,7 @@ end
     @test_throws BoundsError last(m1)
 
     s = SortedSet([3,5])
-    @test_throws KeyError delete!(s,7)
+    @test s === delete!(s,7) # Okay to delete! nonexistent keys
     @test_throws KeyError pop!(s, 7)
     pop!(s)
     pop!(s)
@@ -1689,7 +1709,12 @@ end
     @test_throws ArgumentError (("a",6) in m)
     @test_throws ArgumentError ((2,5) in m1)
 
+    s = SortedSet([10,30,50])
+    @test pop!(s,10) == 10
+    @test pop!(s,30,-1) == 30
+    @test pop!(s,30, nothing) == nothing
+    @test pop!(s,50, nothing) == 50
+    @test pop!(s,50, nothing) == nothing
+    @test isempty(s)
 
-    
-    
 end

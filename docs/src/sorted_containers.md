@@ -187,10 +187,6 @@ call, and _c_ denotes the time needed to compare two keys.
 getindex(m::SortedDict, k_)
 ```
 
-```@docs
-find(m::SortedDict, k_)
-```
-
     deref((sc, st))
 
 Argument `(sc,st)` is a token (i.e., `sc` is a container and `st` is
@@ -456,7 +452,7 @@ end
 
 Here, `st1` and `st2` are semitokens that refer to the container `sc`.
 Token `(sc,st1)` may not be the before-start token and
-token `(sc,st2)` may not be the past-end token. 
+token `(sc,st2)` may not be the past-end token.
 It is acceptable for `(sc,st1)` to be the past-end token or `(sc,st2)`
 to be the before-start token or both (in these cases, the body is not executed).
 If `compare(sc,st1,st2)==1` then the body is not executed. A second
@@ -648,10 +644,6 @@ ordtype(sc::SortedDict)
 ```
 
 ```@docs
-similar(sc::SortedDict)
-```
-
-```@docs
 orderobject(sc::SortedDict)
 ```
 
@@ -773,7 +765,7 @@ Lt((x,y) -> isless(lowercase(x),lowercase(y)))
 The ordering object is indicated in the above list of constructors in
 the `o` position (see above for constructor syntax).
 
-This approach may suffer from a performance hit because higher performance 
+This approach may suffer from a performance hit because higher performance
 may be possible if an equality method is also available as well as a
 less-than method.
 A more complicated but higher-performance method to implement
