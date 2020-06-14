@@ -42,7 +42,6 @@ function SwissDict{K,V}(ps::Pair...) where {K, V}
     end
     return h
 end
-
 SwissDict() = SwissDict{Any,Any}()
 SwissDict(kv::Tuple{}) = SwissDict()
 copy(d::SwissDict) = SwissDict(d)
