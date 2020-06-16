@@ -2,7 +2,8 @@ import Base: setindex!, sizehint!, empty!, isempty, length, copy, empty,
              getindex, getkey, haskey, iterate, @propagate_inbounds, ValueIterator,
              pop!, delete!, get, get!, isbitstype, in, hashindex, isbitsunion,
              isiterable, dict_with_eltype, KeySet, Callable, _tablesz, filter!
-             
+
+const SWISS_DICT_LOAD_FACTOR = 0.75      
 const _u8x16 = NTuple{16, VecElement{UInt8}}
 
 mutable struct SwissDict{K,V} <: AbstractDict{K,V}
@@ -41,13 +42,11 @@ function SwissDict{K,V}(ps::Pair...) where V where K
     end
     return h
 end
-# Note the constructors of WeakKeyDict mirror these here, keep in sync.
+
 SwissDict() = SwissDict{Any,Any}()
 SwissDict(kv::Tuple{}) = SwissDict()
 copy(d::SwissDict) = SwissDict(d)
 empty(d::SwissDict, ::Type{K}, ::Type{V}) where {K, V} = SwissDict{K, V}()
-
-const AnyDict = SwissDict{Any,Any}
 
 SwissDict(ps::Pair{K,V}...) where {K,V} = SwissDict{K,V}(ps)
 SwissDict(ps::Pair...)                  = SwissDict(ps)
@@ -63,38 +62,6 @@ function SwissDict(kv)
         end
     end
 end
-
-function grow_to!(dest::AbstractDict{K, V}, itr) where V where K
-    y = iterate(itr)
-    y === nothing && return dest
-    ((k,v), st) = y
-    dest2 = empty(dest, typeof(k), typeof(v))
-    dest2[k] = v
-    grow_to!(dest2, itr, st)
-end
-
-# this is a special case due to (1) allowing both Pairs and Tuples as elements,
-# and (2) Pair being invariant. a bit annoying.
-function grow_to!(dest::AbstractDict{K,V}, itr, st) where V where K
-    y = iterate(itr, st)
-    while y !== nothing
-        (k,v), st = y
-        if isa(k,K) && isa(v,V)
-            dest[k] = v
-        else
-            new = empty(dest, promote_typejoin(K,typeof(k)), promote_typejoin(V,typeof(v)))
-            merge!(new, dest)
-            new[k] = v
-            return grow_to!(new, itr, st)
-        end
-        y = iterate(itr, st)
-    end
-    return dest
-end
-
-empty(a::AbstractDict, ::Type{K}, ::Type{V}) where {K, V} = SwissDict{K, V}()
-
-#hashindex(key, sz) = (((hash(key)%Int) & (sz-1)) + 1)::Int
 
 ##Simd utilities
 @inline _expand16(u::UInt8) = ntuple(i->VecElement(u), Val(16))
@@ -268,7 +235,7 @@ function _delete!(h::SwissDict{K,V}, index) where {K,V}
     @inbounds _slotset!(h.slots, ifelse(isboundary, 0x01, 0x00), index)
     h.count -= 1
     h.age += 1
-    return h
+    maybe_rehash_shrink!(h)
 end
 
 
@@ -301,34 +268,33 @@ end
 #expected hysteresis is 25% to 42.5%.
 function maybe_rehash_grow!(h::SwissDict)
         sz = length(h.keys)
-        if h.count > sz * 0.75 || (h.nbfull-1) * 10 > sz * 6
-            rehash!(h, 2*sz)
+        if h.count > sz * SWISS_DICT_LOAD_FACTOR || (h.nbfull-1) * 10 > sz * 6
+            rehash!(h, sz<<2)
         end
-        nothing
     end
 
 function maybe_rehash_shrink!(h::SwissDict)
-#    sz = length(h.keys)
-#    if h.count*4 < sz && sz > 16
-#        rehash!(h, sz>>1)
-#    end
-    nothing
+   sz = length(h.keys)
+   if h.count*4 < sz && sz > 16
+       rehash!(h, sz>>1)
+   end
 end
 
-function _dictsizehint(sz)
-    sz<= 16 && return 16
-    nsz = _tablesz(sz)
-    sz > 0.85*nsz ? 2*nsz : nsz
-end
+# function _dictsizehint(sz)
+#     (sz <= 16) && return 16
+#     nsz = _tablesz(sz)
+#     return (sz > SWISS_DICT_LOAD_FACTOR*nsz) ? (nsz<<1) : nsz
+# end
 
-function sizehint!(d::SwissDict{T}, newsz) where T
-    nsz = _dictsizehint(newsz)
-    if newsz > nsz
-        rehash!(d, nsz)
+function sizehint!(d::SwissDict, newsz)
+    newsz = _tablesz(newsz*2)  # *2 for keys and values in same array
+    oldsz = length(d.keys)
+    # grow at least 25%
+    if newsz < (oldsz*5)>>2
+        return d
     end
-    d
+    rehash!(d, newsz)
 end
-
 
 function rehash!(h::SwissDict{K,V}, newsz = length(h.keys)) where V where K
     olds = h.slots
@@ -336,7 +302,7 @@ function rehash!(h::SwissDict{K,V}, newsz = length(h.keys)) where V where K
     oldv = h.vals
     sz = length(oldk)
     newsz = _tablesz(newsz)
-    newsz*0.95 > h.count || (newsz *= 2)
+    (newsz*SWISS_DICT_LOAD_FACTOR) > h.count || (newsz <<= 1)
     h.age += 1
     h.idxfloor = 1
     if h.count == 0
@@ -391,6 +357,8 @@ function rehash!(h::SwissDict{K,V}, newsz = length(h.keys)) where V where K
     return h
 end
 
+isempty(t::SwissDict) = (t.count == 0)
+length(t::SwissDict) = t.count
 
 function empty!(h::SwissDict{K,V}) where V where K
     fill!(h.slots, _expand16(0x00))
@@ -429,11 +397,7 @@ function _setindex!(h::SwissDict{K,V}, v0, key::K) where {K, V}
     return h
 end
 
-
-
 get!(h::SwissDict{K,V}, key0, default) where {K,V} = get!(()->default, h, key0)
-
-
 
 function get!(default::Callable, h::SwissDict{K,V}, key0) where V where K
     key = convert(K, key0)
@@ -463,21 +427,10 @@ function get!(default::Callable, h::SwissDict{K,V}, key::K) where V where K
     return v
 end
 
-# NOTE: this macro is trivial, and should
-#       therefore not be exported as-is: it's for internal use only.
-macro get!(h, key0, default)
-    return quote
-        get!(()->$(esc(default)), $(esc(h)), $(esc(key0)))
-    end
-end
-
-
 function getindex(h::SwissDict{K,V}, key) where V where K
     index = ht_keyindex(h, key)
     @inbounds return (index < 0) ? throw(KeyError(key)) : h.vals[index]::V
 end
-
-
 
 function get(h::SwissDict{K,V}, key, default) where V where K
     index = ht_keyindex(h, key)
@@ -510,8 +463,6 @@ function pop!(h::SwissDict, key)
     return index > 0 ? _pop!(h, index) : throw(KeyError(key))
 end
 
-
-
 function pop!(h::SwissDict, key, default)
     index = ht_keyindex(h, key)
     return index > 0 ? _pop!(h, index) : default
@@ -526,9 +477,8 @@ function pop!(h::SwissDict)
     @inbounds val = h.vals[idx]
     _delete!(h, idx)
     h.idxfloor = idx
-    key => val
+    return key => val
 end
-
 
 function delete!(h::SwissDict, key)
     index = ht_keyindex(h, key)
@@ -538,10 +488,6 @@ function delete!(h::SwissDict, key)
     maybe_rehash_shrink!(h)
     return h
 end
-
-
-isempty(t::SwissDict) = (t.count == 0)
-length(t::SwissDict) = t.count
 
 @propagate_inbounds function iterate(h::SwissDict, state = h.idxfloor)
     is = _iterslots(h, state)
