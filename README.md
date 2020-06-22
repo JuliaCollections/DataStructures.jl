@@ -3,6 +3,7 @@
 [![Test Coverage](https://coveralls.io/repos/github/JuliaCollections/DataStructures.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaCollections/DataStructures.jl?branch=master)
 [![Test Coverage](https://codecov.io/github/JuliaCollections/DataStructures.jl/coverage.svg?branch=master)](https://codecov.io/github/JuliaCollections/DataStructures.jl?branch=master)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://juliacollections.github.io/DataStructures.jl/latest)
+[![ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac)
 
 DataStructures.jl
 =================
