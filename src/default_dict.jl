@@ -61,11 +61,6 @@ DefaultDictBase{K,V}(default::F; kwargs...) where {K,V,F} = DefaultDictBase{K,V,
 empty(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default; passkey=d.passkey)
 @deprecate similar(d::DefaultDictBase) empty(d)
 
-function iterate(v::Base.ValueIterator{T}, i::Int) where {T <: DefaultDictBase}
-    i > length(v.dict.d.vals) && return nothing
-    return (v.dict.d.vals[i], Base.skip_deleted(v.dict.d, i+1))
-end
-
 getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 
 function getindex(d::DefaultDictBase{K,V,F}, key) where {K,V,F<:Base.Callable}
