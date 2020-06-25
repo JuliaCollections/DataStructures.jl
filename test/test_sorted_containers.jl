@@ -1717,4 +1717,10 @@ end
     @test pop!(s,50, nothing) == nothing
     @test isempty(s)
 
+    # Test AbstractSet/AbstractDict interface
+    for m in [SortedSet([1,2]), SortedDict(1=>2, 2=>3), SortedMultiDict(1=>2, 1=>3)]
+        # copy()
+        @test isequal(copy(m), m)
+        @test isequal(Base.copymutable(m), m)
+    end
 end
