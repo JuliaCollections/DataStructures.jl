@@ -1720,7 +1720,13 @@ end
     # Test AbstractSet/AbstractDict interface
     for m in [SortedSet([1,2]), SortedDict(1=>2, 2=>3), SortedMultiDict(1=>2, 1=>3)]
         # copy()
-        @test isequal(copy(m), m)
-        @test isequal(Base.copymutable(m), m)
+        let m1 = copy(m)
+            @test isequal(m1, m)
+            @test typeof(m1) === typeof(m)
+        end
+        let m1 = Base.copymutable(m)
+            @test isequal(m1, m)
+            @test typeof(m1) === typeof(m)
+        end
     end
 end
