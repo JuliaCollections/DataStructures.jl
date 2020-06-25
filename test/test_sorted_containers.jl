@@ -1717,4 +1717,16 @@ end
     @test pop!(s,50, nothing) == nothing
     @test isempty(s)
 
+    # Test AbstractSet/AbstractDict interface
+    for m in [SortedSet([1,2]), SortedDict(1=>2, 2=>3), SortedMultiDict(1=>2, 1=>3)]
+        # copy()
+        let m1 = copy(m)
+            @test isequal(m1, m)
+            @test typeof(m1) === typeof(m)
+        end
+        let m1 = Base.copymutable(m)
+            @test isequal(m1, m)
+            @test typeof(m1) === typeof(m)
+        end
+    end
 end

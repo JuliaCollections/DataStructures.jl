@@ -385,6 +385,11 @@ function mergetwo!(m::SortedMultiDict{K,D,Ord},
     end
 end
 
+# Standard copy functions use packcopy - that is, they retain elements but not
+# the identical structure.
+Base.copymutable(m::SortedMultiDict) = packcopy(m)
+Base.copy(m::SortedMultiDict) = packcopy(m)
+
 """
     packcopy(sc)
 

@@ -535,6 +535,11 @@ function mergetwo!(m::SortedDict{K,D,Ord},
     end
 end
 
+# Standard copy functions use packcopy - that is, they retain elements but not
+# the identical structure.
+Base.copymutable(m::SortedDict) = packcopy(m)
+Base.copy(m::SortedDict) = packcopy(m)
+
 """
     packcopy(sc)
 
