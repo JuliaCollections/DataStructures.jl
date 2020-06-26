@@ -23,6 +23,29 @@ end
 
 RBTree() = RBTree{Any}()
 
+function search_node(tree::RBTree{K}, d::K) where K
+	node = tree.root
+	(node == nothing) && return nothing
+	while (node != nothing)
+		if (d < node.data)
+			(node.leftChild == nothing) && break
+			node = node.leftChild
+		elseif (d > node.data)
+			(node.rightChild == nothing) && break
+			node = node.rightChild
+		else
+			break
+		end
+	end
+	return node
+end
+
+function search_key(tree::RBTree{K}, d::K) where K 
+	node = search_node(tree, d)
+	(node == nothing) && return false
+	return (node.data == d)
+end
+
 function insert(root::Union{Nothing, RBTreeNode}, node::RBTreeNode)
 	if root == nothing || root.data == nothing
 		return node
@@ -38,7 +61,7 @@ function insert(root::Union{Nothing, RBTreeNode}, node::RBTreeNode)
 	end
 end
 
-function left_rotate!(root::Union{Nothing, RBTreeNode}, node_x::RBTreeNode)
+function left_rotate!(tree::RBTree, node_x::RBTreeNode)
 	node_y = node_x.rightChild
 	node_x.rightChild = node_y.leftChild
 	if node_x.rightChild != nothing
@@ -46,7 +69,7 @@ function left_rotate!(root::Union{Nothing, RBTreeNode}, node_x::RBTreeNode)
 	end
 	node_y.parent = node_x.parent
 	if (node_x.parent == nothing)
-		root = node_y
+		tree.root = node_y
 	elseif (node_x == node_x.parent.leftChild)
 		node_x.parent.leftChild = node_y
 	else
@@ -56,7 +79,7 @@ function left_rotate!(root::Union{Nothing, RBTreeNode}, node_x::RBTreeNode)
 	node_x.parent = node_y
 end	
 
-function right_rotate!(root::Union{Nothing, RBTreeNode}, node_x::RBTreeNode)
+function right_rotate!(tree::RBTree, node_x::RBTreeNode)
 	node_y = node_x.leftChild
 	node_x.leftChild = node_y.rightChild
 	if node_x.leftChild != nothing
@@ -64,7 +87,7 @@ function right_rotate!(root::Union{Nothing, RBTreeNode}, node_x::RBTreeNode)
 	end
 	node_y.parent = node_x.parent
 	if (node_x.parent == nothing)
-		root = node_y
+		tree.root = node_y
 	elseif (node_x == node_x.parent.leftChild)
 		node_x.parent.leftChild = node_y
 	else
@@ -74,16 +97,19 @@ function right_rotate!(root::Union{Nothing, RBTreeNode}, node_x::RBTreeNode)
 	node_x.parent = node_y
 end	
 
-function balance!(root::Union{Nothing, RBTreeNode}, node::RBTreeNode)
+node_color(color::Bool) = (color) ? "RED" : "BLACK"
+desc_node(relation, node::RBTreeNode) = println("$relation is ", node.data, " color is ", node_color(node.color))
+
+function balance!(tree::RBTree, node::RBTreeNode)
 	parent = nothing
 	grand_parent = nothing
 	# for root node, we need to change the color to black
 	# other nodes, we need to maintain the property such that
 	# no two adjacent nodes are red in color
-	while (node != root && node.color && node.parent.color)
+	while (node != tree.root && node.color && node.parent.color)
 		parent = node.parent
 		grand_parent = parent.parent
-
+		
 		# parent is the leftChild of grand_parent
 		if (parent == grand_parent.leftChild)
 			uncle = grand_parent.rightChild
@@ -98,12 +124,12 @@ function balance!(root::Union{Nothing, RBTreeNode}, node::RBTreeNode)
 			else 
 				# node is rightChild of it's parent
 				if (node == parent.rightChild)
-					left_rotate!(root, parent)
+					left_rotate!(tree, parent)
 					node = parent
 					parent = node.parent
 				end
 				# node is leftChild of it's parent
-				right_rotate!(root, grand_parent)
+				right_rotate!(tree, grand_parent)
 				parent.color, grand_parent.color = grand_parent.color, parent.color
 				node = parent
 			end
@@ -121,24 +147,24 @@ function balance!(root::Union{Nothing, RBTreeNode}, node::RBTreeNode)
 			else 
 				# node is leftChild of it's parent
 				if (node == parent.leftChild)
-					right_rotate!(root, parent)
+					right_rotate!(tree, parent)
 					node = parent
 					parent = node.parent
 				end
 				# node is rightChild of it's parent
-				left_rotate!(root, grand_parent)
+				left_rotate!(tree, grand_parent)
 				parent.color, grand_parent.color = grand_parent.color, parent.color
 				node = parent
 			end
 		end
 	end
-	root.color = false
+	tree.root.color = false
 end
 
 function insert!(tree::RBTree{K}, d::K) where K
 	node = RBTreeNode(d)
 	tree.root = insert(tree.root, node)
-	balance!(tree.root, node)
+	balance!(tree, node)
 	return tree
 end
 
