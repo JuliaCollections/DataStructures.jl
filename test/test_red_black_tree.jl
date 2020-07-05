@@ -1,22 +1,22 @@
 include("../src/red_black_tree.jl")
 @testset "RBTree" begin
     t = RBTree()
-    for i = 1:100
+    for i = 1:10000
     	insert!(t, i)
     end
-    for i = 1:100
+    for i = 1:10000
     	@test search_key(t, i)
     end
 
-    for i = 101:200
+    for i = 10001:20000
         @test !search_key(t, i)
     end
 
-    for i = 1:2:100
+    for i = 1:2:10000
     	delete!(t, i)
     end
 
-    for i = 1:100
+    for i = 1:10000
     	if iseven(i)
     		@test search_key(t, i)
     	else
@@ -25,11 +25,11 @@ include("../src/red_black_tree.jl")
     	end
     end
 
-    for i = 1:2:100
+    for i = 1:2:1000
         insert!(t, i)
     end
 
-    for i = 1:100
+    for i = 1:1000
         @test search_key(t, i)
     end
 
