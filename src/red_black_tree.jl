@@ -181,7 +181,7 @@ function fix_insert!(tree::RBTree, node::RBTreeNode)
 end
 
 
-function insert!(tree::RBTree{K}, d::K) where K
+function Base.insert!(tree::RBTree{K}, d::K) where K
     # if the key exists in the tree, no need to insert 
     search_key(tree, d) && return tree
     # search_key(tree, d) && return tree
@@ -273,14 +273,14 @@ function rb_transplant(tree::RBTree, u::Union{RBTreeNode, Nothing}, v::Union{RBT
     v.parent = u.parent
 end
 
-function minimum_node(node::Union{RBTreeNode, Nothing})
-    while node.leftChild != nothing
+function minimum_node(tree::RBTree, node::RBTreeNode)
+    while node.leftChild != tree.Nil
         node = node.leftChild
     end
     return node
 end
 
-function delete!(tree::RBTree{K}, d::K) where K
+function Base.delete!(tree::RBTree{K}, d::K) where K
     z = tree.Nil
     node = tree.root
 
@@ -308,7 +308,7 @@ function delete!(tree::RBTree{K}, d::K) where K
         x = z.leftChild
         rb_transplant(tree, z, z.leftChild)
     else
-        y = minimum_node(z.rightChild)
+        y = minimum_node(tree, z.rightChild)
         y_original_color = y.color
         x = y.rightChild
 
