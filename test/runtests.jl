@@ -31,6 +31,7 @@ tests = ["int_set",
          "fenwick",
          "robin_dict",
          "dibit_vector",
+         "red_black_tree",
          "swiss_dict"
         ]
 

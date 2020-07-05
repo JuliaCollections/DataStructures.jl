@@ -113,4 +113,6 @@ module DataStructures
 
     include("dibit_vector.jl")
     include("deprecations.jl")
+
+    include("red_black_tree.jl")
 end
