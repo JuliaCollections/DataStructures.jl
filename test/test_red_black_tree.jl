@@ -33,4 +33,28 @@ include("../src/red_black_tree.jl")
         @test search_key(t, i)
     end
 
+    t2 = RBTree()
+    for i = 1:10000
+        insert!(t2, i)
+    end
+
+    nums = rand(1:10000, 100)
+    visited = Set{Int}()
+    for num in nums 
+        if num in visited
+            @test_throws KeyError delete!(t2, num)
+        else
+            delete!(t2, num)
+            push!(visited, num) 
+        end
+    end
+
+    for i = 1:10000
+        if i in visited
+            @test !search_key(t2, i)
+        else
+            @test search_key(t2, i)
+        end
+    end
+
 end
