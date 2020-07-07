@@ -31,6 +31,7 @@ tests = ["int_set",
          "fenwick",
          "robin_dict",
          "dibit_vector",
+         "avl_tree"
         ]
 
 if length(ARGS) > 0

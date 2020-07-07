@@ -1,11 +1,11 @@
 mutable struct AVLTreeNode{K}
     height::Int8
-    data::K
     leftChild::Union{AVLTreeNode{K}, Nothing}
     rightChild::Union{AVLTreeNode{K}, Nothing}
+    data::K
 
-    AVLTreeNode{K}() where K = new{K}(0, nothing, nothing, nothing)
-    AVLTreeNode{K}(d::K) where K = new{K}(1, d, nothing, nothing)
+    AVLTreeNode{K}() where K = new{K}(0, nothing, nothing)
+    AVLTreeNode{K}(d::K) where K = new{K}(1, nothing, nothing, d)
 end
 
 AVLTreeNode(d) = AVLTreeNode{Any}(d)
@@ -15,7 +15,7 @@ AVLTreeNode_or_null{T} = Union{AVLTreeNode{T}, Nothing}
 mutable struct AVLTree{T}
     root::AVLTreeNode_or_null{T}
 
-    AVLTree{T}() where T = new{T}(AVLTreeNode{T}())
+    AVLTree{T}() where T = new{T}(nothing)
 end
 
 AVLTree() = AVLTree{Any}()
@@ -65,6 +65,27 @@ function get_minimum_node(node::Union{AVLTreeNode, Nothing})
     return node
 end
 
+function search_node(tree::AVLTree{K}, d::K) where K
+    prev = nothing
+    node = tree.root
+    while node != nothing && node.data != nothing && node.data != d
+        prev = node
+        if d < node.data 
+            node = node.leftChild
+        else
+            node = node.rightChild
+        end
+    end
+    
+    return (node == nothing) ? prev : node
+end
+
+function search_key(tree::AVLTree{K}, d::K) where K 
+    (tree.root == nothing) && return false
+    node = search_node(tree, d)
+    return (node.data == d)
+end
+
 function Base.insert!(tree::AVLTree{K}, d::K) where K
 
     function insert_node(node::Union{AVLTreeNode, Nothing}, key)
@@ -99,6 +120,9 @@ function Base.insert!(tree::AVLTree{K}, d::K) where K
 
         return node
     end
+
+    search_key(tree, d) && return tree
+
     tree.root = insert_node(tree.root, d)
     return tree
 end
@@ -156,6 +180,8 @@ function Base.delete!(tree::AVLTree{K}, d::K) where K
         return node
     end
 
+    !search_key(tree, d) && throw(KeyError(d))
+    
     tree.root = delete_node(tree.root, d)
     return tree
 end
