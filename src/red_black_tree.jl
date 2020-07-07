@@ -4,14 +4,14 @@
 # color is true if it's a Red Node, else it's false
 mutable struct RBTreeNode{K}
     color::Bool 
+    data::K
     leftChild::Union{Nothing, RBTreeNode{K}}
     rightChild::Union{Nothing, RBTreeNode{K}}
     parent::Union{Nothing, RBTreeNode{K}}
-    data::K
 
-    RBTreeNode{K}() where K = new{K}(true, nothing, nothing, nothing)
-    RBTreeNode{Any}() = new{Any}(true, nothing, nothing, nothing, nothing)
-    RBTreeNode{K}(d::K) where K = new{K}(true, nothing, nothing, nothing, d)
+    RBTreeNode{K}() where K = new{K}(true, nothing, nothing, nothing, nothing)
+    
+    RBTreeNode{K}(d::K) where K = new{K}(true, d, nothing, nothing, nothing)
 end
 
 RBTreeNode() = RBTreeNode{Any}()
