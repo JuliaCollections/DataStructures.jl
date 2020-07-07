@@ -33,13 +33,14 @@ include("../src/red_black_tree.jl")
         @test search_key(t, i)
     end
 
+    # for handling cases related to delete!
     t2 = RBTree()
-    for i = 1:10000
+    for i = 1:100000
         insert!(t2, i)
     end
 
-    nums = rand(1:10000, 100)
-    visited = Set{Int}()
+    nums = rand(1:100000, 1000)
+    visited = Set()
     for num in nums 
         if num in visited
             @test_throws KeyError delete!(t2, num)
@@ -49,12 +50,22 @@ include("../src/red_black_tree.jl")
         end
     end
 
-    for i = 1:10000
+    for i = 1:100000
         if i in visited
             @test !search_key(t2, i)
         else
             @test search_key(t2, i)
         end
+    end
+
+    # for handling cases related to insert!
+    t3 = RBTree()
+    for num in nums
+        insert!(t3, num)
+    end
+
+    for i in visited
+        @test search_key(t3, i)
     end
 
 end
