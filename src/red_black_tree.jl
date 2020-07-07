@@ -4,14 +4,14 @@
 # color is true if it's a Red Node, else it's false
 mutable struct RBTreeNode{K}
     color::Bool 
-    data::K
     leftChild::Union{Nothing, RBTreeNode{K}}
     rightChild::Union{Nothing, RBTreeNode{K}}
     parent::Union{Nothing, RBTreeNode{K}}
+    data::K
 
-    RBTreeNode{K}() where K = new{K}(true, nothing, nothing, nothing, nothing)
-    
-    RBTreeNode{K}(d::K) where K = new{K}(true, d, nothing, nothing, nothing)
+    RBTreeNode{K}() where K = new{K}(true, nothing, nothing, nothing)
+    RBTreeNode{Any}() = new{Any}(true, nothing, nothing, nothing, nothing)
+    RBTreeNode{K}(d::K) where K = new{K}(true, nothing, nothing, nothing, d)
 end
 
 RBTreeNode() = RBTreeNode{Any}()
@@ -117,9 +117,6 @@ function right_rotate!(tree::RBTree, node_x::RBTreeNode)
     node_y.rightChild = node_x
     node_x.parent = node_y
 end    
-
-node_color(color::Bool) = (color) ? "RED" : "BLACK"
-desc_node(relation, node::RBTreeNode) = println("$relation is ", node.data, " color is ", node_color(node.color))
 
 function fix_insert!(tree::RBTree, node::RBTreeNode)
     parent = nothing
@@ -328,41 +325,3 @@ function Base.delete!(tree::RBTree{K}, d::K) where K
 
     !y_original_color && delete_fix(tree, x)
 end
-
-function print_tree_inorder(tree::RBTree)
-    function traverse_tree(node::RBTreeNode)
-        if (node != tree.Nil)
-            traverse_tree(node.leftChild)
-            print(node.data, " ")
-            traverse_tree(node.rightChild)
-        end
-    end
-    traverse_tree(tree.root)
-end
-
-function print_tree(tree::RBTree)
-    function print_tree_helper(node::RBTreeNode, indent, isright)
-        if node != tree.Nil
-            print(indent)
-            if isright
-                print("R--")
-                indent *= "   "
-            else
-                if (node == tree.root)
-                    print("-->")
-                    indent *= "   "
-                else
-                    print("L--")
-                    indent *= "|  "
-                end
-
-            end
-            println(node.data, " (", node_color(node.color)[1], ")")
-            print_tree_helper(node.leftChild, indent, false)
-            print_tree_helper(node.rightChild, indent, true)
-        end
-    end
-    print_tree_helper(tree.root, "", false)
-end
-
-Base.show(io::IO, t::RBTree) = print_tree(t)
