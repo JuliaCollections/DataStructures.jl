@@ -110,7 +110,9 @@ module DataStructures
     export SparseIntSet
 
     include("dibit_vector.jl")
+    include("avl_tree.jl")
     include("red_black_tree.jl")
+
     include("deprecations.jl")
 
 end

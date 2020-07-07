@@ -31,7 +31,8 @@ tests = ["deprecations",
          "fenwick",
          "robin_dict",
          "dibit_vector",
-         "red_black_tree"
+         "red_black_tree",
+         "avl_tree",
         ]
 
 if length(ARGS) > 0
