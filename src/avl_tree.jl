@@ -185,30 +185,3 @@ function Base.delete!(tree::AVLTree{K}, d::K) where K
     tree.root = delete_node(tree.root, d)
     return tree
 end
-
-function print_tree(tree::AVLTree)
-    function print_tree_helper(node::AVLTreeNode_or_null, indent, isright)
-        if node != nothing && node.data != nothing
-            print(indent)
-            if isright
-                print("R--")
-                indent *= "   "
-            else
-                if (node == tree.root)
-                    print("-->")
-                    indent *= "   "
-                else
-                    print("L--")
-                    indent *= "|  "
-                end
-
-            end
-            println(node.data, " (", get_balance(node), ")" , "H[", get_height(node), "]")
-            print_tree_helper(node.leftChild, indent, false)
-            print_tree_helper(node.rightChild, indent, true)
-        end
-    end
-    print_tree_helper(tree.root, "", false)
-end
-
-Base.show(io::IO, t::AVLTree) = print_tree(t)
