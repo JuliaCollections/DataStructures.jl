@@ -18,6 +18,8 @@ end
 
 CircularBuffer(capacity) = CircularBuffer{Any}(capacity)
 
+Base.IndexStyle(::Type{<:CircularBuffer}) = IndexLinear()
+
 """
     empty!(cb::CircularBuffer)
 
@@ -28,17 +30,11 @@ function Base.empty!(cb::CircularBuffer)
     return cb
 end
 
-Base.@propagate_inbounds function _buffer_index_checked(cb::CircularBuffer, i::Int)
-    @boundscheck if i < 1 || i > cb.length
-        throw(BoundsError(cb, i))
-    end
-    _buffer_index(cb, i)
-end
-
 @inline function _buffer_index(cb::CircularBuffer, i::Int)
-    n = cb.capacity
+    @boundscheck checkbounds(cb, i)
+    n = capacity(cb)
     idx = cb.first + i - 1
-    return ifelse(idx > n, idx - n, idx)
+    return idx > n ? idx - n : idx
 end
 
 """
@@ -49,8 +45,9 @@ Get the i-th element of CircularBuffer.
 * `cb[1]` to get the element at the front
 * `cb[end]` to get the element at the back
 """
-@inline Base.@propagate_inbounds function Base.getindex(cb::CircularBuffer, i::Int)
-    cb.buffer[_buffer_index_checked(cb, i)]
+Base.@propagate_inbounds function Base.getindex(cb::CircularBuffer, i::Int)
+    j = _buffer_index(cb, i)
+    @inbounds return cb.buffer[j]
 end
 
 """
@@ -58,8 +55,9 @@ end
 
 Store data to the `i`-th element of `CircularBuffer`.
 """
-@inline Base.@propagate_inbounds function Base.setindex!(cb::CircularBuffer, data, i::Int)
-    cb.buffer[_buffer_index_checked(cb, i)] = data
+Base.@propagate_inbounds function Base.setindex!(cb::CircularBuffer, data, i::Int)
+    j = _buffer_index(cb, i)
+    @inbounds cb.buffer[j] = data
     return cb
 end
 
@@ -68,11 +66,15 @@ end
 
 Remove the element at the back.
 """
-@inline function Base.pop!(cb::CircularBuffer)
-    (cb.length == 0) && throw(ArgumentError("array must be non-empty"))
-    i = _buffer_index(cb, cb.length)
+function Base.pop!(cb::CircularBuffer)
+    # To be consistent with `Base.pop!`, always check for emptiness and throw an
+    # `ArgumentError` if empty. We use `checkbounds` here (and in `popfirst!`) instead of
+    # `isempty` because benchmarking shows substantially (~30%) improved performance on some
+    # machines.
+    checkbounds(Bool, cb, 1) || throw(ArgumentError("circular buffer must be non-empty"))
+    @inbounds out = last(cb)
     cb.length -= 1
-    return cb.buffer[i]
+    return out
 end
 
 """
@@ -80,14 +82,14 @@ end
 
 Add an element to the back and overwrite front if full.
 """
-@inline function Base.push!(cb::CircularBuffer, data)
+function Base.push!(cb::CircularBuffer, data)
     # if full, increment and overwrite, otherwise push
-    if cb.length == cb.capacity
-        cb.first = (cb.first == cb.capacity ? 1 : cb.first + 1)
+    if isfull(cb)
+        cb.first = (cb.first == capacity(cb) ? 1 : cb.first + 1)
     else
         cb.length += 1
     end
-    cb.buffer[_buffer_index(cb, cb.length)] = data
+    @inbounds cb[length(cb)] = data
     return cb
 end
 
@@ -97,13 +99,11 @@ end
 Remove the element from the front of the `CircularBuffer`.
 """
 function popfirst!(cb::CircularBuffer)
-    if cb.length == 0
-        throw(ArgumentError("array must be non-empty"))
-    end
-    i = cb.first
-    cb.first = (cb.first + 1 > cb.capacity ? 1 : cb.first + 1)
+    checkbounds(Bool, cb, 1) || throw(ArgumentError("circular buffer must be non-empty"))
+    @inbounds out = first(cb)
+    cb.first = (cb.first == capacity(cb) ? 1 : cb.first + 1)
     cb.length -= 1
-    return cb.buffer[i]
+    return out
 end
 
 """
@@ -114,11 +114,11 @@ and overwrite back if full.
 """
 function pushfirst!(cb::CircularBuffer, data)
     # if full, decrement and overwrite, otherwise pushfirst
-    cb.first = (cb.first == 1 ? cb.capacity : cb.first - 1)
-    if length(cb) < cb.capacity
+    cb.first = (cb.first == 1 ? capacity(cb) : cb.first - 1)
+    if !isfull(cb)
         cb.length += 1
     end
-    cb.buffer[cb.first] = data
+    @inbounds cb.buffer[cb.first] = data
     return cb
 end
 
@@ -154,25 +154,21 @@ end
 
 Return the number of elements currently in the buffer.
 """
-Base.length(cb::CircularBuffer) = cb.length
-
-Base.eltype(::Type{CircularBuffer{T}}) where T = T
+Base.length
 
 """
     size(cb::CircularBuffer)
 
 Return a tuple with the size of the buffer.
 """
-Base.size(cb::CircularBuffer) = (length(cb),)
-
-Base.convert(::Type{Array}, cb::CircularBuffer{T}) where {T} = T[x for x in cb]
+Base.size(cb::CircularBuffer) = (cb.length,)
 
 """
     isempty(cb::CircularBuffer)
 
 Test whether the buffer is empty.
 """
-Base.isempty(cb::CircularBuffer) = cb.length == 0
+Base.isempty(cb::CircularBuffer) = length(cb) == 0
 
 """"
     capacity(cb::CircularBuffer)
@@ -186,23 +182,21 @@ capacity(cb::CircularBuffer) = cb.capacity
 
 Test whether the buffer is full.
 """
-isfull(cb::CircularBuffer) = length(cb) == cb.capacity
+isfull(cb::CircularBuffer) = length(cb) == capacity(cb)
 
 """
     first(cb::CircularBuffer)
 
 Get the first element of CircularBuffer.
 """
-Base.@propagate_inbounds function Base.first(cb::CircularBuffer)
-    @boundscheck (cb.length == 0) && throw(BoundsError(cb, 1))
-    return cb.buffer[cb.first]
+@inline function Base.first(cb::CircularBuffer)
+    @boundscheck checkbounds(cb, 1)
+    @inbounds return cb.buffer[cb.first]
 end
+
 """
     last(cb::CircularBuffer)
 
 Get the last element of CircularBuffer.
 """
-Base.@propagate_inbounds function Base.last(cb::CircularBuffer)
-    @boundscheck (cb.length == 0) && throw(BoundsError(cb, 1))
-    return cb.buffer[_buffer_index(cb, cb.length)]
-end
+Base.last
