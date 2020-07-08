@@ -19,7 +19,7 @@ end
 
 function perf_chained_getindex(cb)
     i = 1
-    for i = 1:capacity(cb)
+    for k = 1:capacity(cb)
         i = cb[i]
     end
     return i
