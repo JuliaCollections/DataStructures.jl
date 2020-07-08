@@ -19,7 +19,7 @@ end
 
 function perf_chained_getindex(cb)
     i = 1
-    for _ in eachindex(cb)
+    for i = 1:capacity(cb)
         i = cb[i]
     end
     return i
@@ -27,7 +27,7 @@ end
 
 function perf_first(cb)
     total = 0
-    for i in 1:capacity(cb)
+    for i = 1:capacity(cb)
         cb.first = i
         total += first(cb)
     end
@@ -36,7 +36,7 @@ end
 
 function perf_last(cb)
     total = 0
-    for i in 1:capacity(cb)
+    for i = 1:capacity(cb)
         cb.first = i
         total += last(cb)
     end
@@ -71,14 +71,14 @@ function perf_setindex!(cb, indices)
 end
 
 function perf_push!(cb)
-    for i in 1:capacity(cb)
+    for i = 1:capacity(cb)
         push!(cb, i)
     end
     return cb
 end
 
 function perf_pushfirst!(cb)
-    for i in 1:capacity(cb)
+    for i = 1:capacity(cb)
         pushfirst!(cb, i)
     end
     return cb
@@ -105,7 +105,7 @@ function perf_pop!(cb)
     cap = capacity(cb)
     cb.length = cap
     total = 0
-    for _ in 1:cap
+    for i = 1:cap
         total += pop!(cb)
     end
     return total
@@ -115,7 +115,7 @@ function perf_popfirst!(cb)
     cap = capacity(cb)
     cb.length = cap
     total = 0
-    for _ in 1:cap
+    for i = 1:cap
         total += popfirst!(cb)
     end
     return total
