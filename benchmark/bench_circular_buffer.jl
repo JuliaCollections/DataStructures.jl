@@ -139,7 +139,7 @@ if @isdefined(SUITE)
 else
     # This `else` branch allows this file to be called directly by PkgBenchmark via the
     # `script` keyword in `PkgBenchmark.benchmarkpkg`.
-	using BenchmarkTools
+    using BenchmarkTools
     const SUITE = BenchmarkGroup()
     SUITE["CircularBuffer"] = BenchCircularBuffer.SUITE
 end
