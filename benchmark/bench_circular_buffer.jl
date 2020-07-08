@@ -45,7 +45,7 @@ end
 
 g = addgroup!(SUITE, "access")
 
-# Creating a new copy for each sample seems to eliminates an unknown but substantial source
+# Creating a new copy for each sample seems to eliminate an unknown but substantial source
 # of timing variation on some machines. This is why each benchmark has `setup=(cb = deepcopy($cb))`.
 for cap in CAPS
     Random.seed!(0)
