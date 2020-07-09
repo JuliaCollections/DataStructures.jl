@@ -168,7 +168,7 @@ Base.size(cb::CircularBuffer) = (cb.length,)
 
 Test whether the buffer is empty.
 """
-Base.isempty(cb::CircularBuffer) = length(cb) == 0
+Base.isempty
 
 """"
     capacity(cb::CircularBuffer)
