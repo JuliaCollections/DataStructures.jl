@@ -60,7 +60,7 @@ end
 
 length(s::SparseIntSet) = length(s.packed)
 
-@inline function push!(s::SparseIntSet, i::Integer)
+function push!(s::SparseIntSet, i::Integer)
     i <= 0 && throw(DomainError("Only positive Ints allowed."))
 
     pageid, offset = pageid_offset(s, i)
@@ -91,14 +91,14 @@ length(s::SparseIntSet) = length(s.packed)
     return s
 end
 
-@inline function push!(s::SparseIntSet, is::Integer...)
+function push!(s::SparseIntSet, is::Integer...)
     for i in is
         push!(s, i)
     end
     return s
 end
 
-@inline Base.@propagate_inbounds function pop!(s::SparseIntSet)
+Base.@propagate_inbounds function pop!(s::SparseIntSet)
     if isempty(s)
         throw(ArgumentError("Cannot pop an empty set."))
     end
@@ -110,7 +110,7 @@ end
     return id
 end
 
-@inline Base.@propagate_inbounds function pop!(s::SparseIntSet, id::Integer)
+Base.@propagate_inbounds function pop!(s::SparseIntSet, id::Integer)
     id < 0 && throw(ArgumentError("Int to pop needs to be positive."))
 
     @boundscheck if !in(id, s)
@@ -132,19 +132,19 @@ end
     return id
 end
 
-@inline function cleanup!(s::SparseIntSet, pageid::Int)
+function cleanup!(s::SparseIntSet, pageid::Int)
     if s.counters[pageid] == 0
         s.reverse[pageid] = NULL_INT_PAGE
     end
 end
 
-@inline function pop!(s::SparseIntSet, id::Integer, default)
+function pop!(s::SparseIntSet, id::Integer, default)
     id < 0 && throw(ArgumentError("Int to pop needs to be positive."))
     return in(id, s) ? (@inbounds pop!(s, id)) : default
 end
 popfirst!(s::SparseIntSet) = pop!(s, first(s))
 
-@inline iterate(set::SparseIntSet, args...) = iterate(set.packed, args...)
+iterate(set::SparseIntSet, args...) = iterate(set.packed, args...)
 
 last(s::SparseIntSet) = isempty(s) ? throw(ArgumentError("Empty set has no last element.")) : last(s.packed)
 
@@ -217,9 +217,9 @@ end
 length(it::ZippedSparseIntSetIterator) = length(it.shortest_set)
 
 # we know it is not in_excluded, as there are no excluded
-@inline in_excluded(id, it::ZippedSparseIntSetIterator{VT,Tuple{}}) where {VT} = false
+in_excluded(id, it::ZippedSparseIntSetIterator{VT,Tuple{}}) where {VT} = false
 
-@inline function in_excluded(id, it)
+function in_excluded(id, it)
     for e in it.excluded_sets
         if id in e
             return true
@@ -228,7 +228,7 @@ length(it::ZippedSparseIntSetIterator) = length(it.shortest_set)
     return false
 end
 
-@inline function in_valid(id, it)
+function in_valid(id, it)
     for e in it.valid_sets
         if !in(id, e)
             return false
@@ -237,7 +237,7 @@ end
     return true
 end
 
-@inline function iterate(it::ZippedSparseIntSetIterator, state=1)
+function iterate(it::ZippedSparseIntSetIterator, state=1)
     iterator_length = length(it)
     if state > iterator_length
         return nothing
