@@ -15,9 +15,9 @@ isempty(h)        # returns whether the heap is empty
 
 push!(h, v)       # add a value to the heap
 
-top(h)            # return the top value of a heap
+first(h)            # return the first (top) value of a heap
 
-pop!(h)           # removes the top value, and returns it
+pop!(h)           # removes the first (top) value, and returns it
 
 ```
 
@@ -73,7 +73,7 @@ popmax!(h, k)  # remove and return the largest k elements
 popall!(h)     # remove and return all the elements, sorted smallest to largest
 popall!(h, o)  # remove and return all the elements according to ordering o
 ```
-The usual `top(h)` and `pop!(h)` are defined to be `minimum(h)` and `popmin!(h)`,
+The usual `first(h)` and `pop!(h)` are defined to be `minimum(h)` and `popmin!(h)`,
 respectively.
 
 This package includes an implementation of a binary min-max heap (`BinaryMinMaxHeap`).

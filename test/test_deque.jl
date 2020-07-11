@@ -197,9 +197,4 @@
         @test typeof(empty!(q)) === typeof(Deque{Int}())
         @test isempty(q)
     end
-
-    @testset "deprecated constructors" begin
-        @test_deprecated deque(Int)
-    end
-
 end # @testset Deque

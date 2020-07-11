@@ -623,6 +623,4 @@ empty). Time: O(1)
 empty(m::SortedDict{K,D,Ord}) where {K,D,Ord<:Ordering} =
     SortedDict{K,D,Ord}(orderobject(m))
 
-@deprecate similar(m::SortedDict) empty(m)
-
 isordered(::Type{T}) where {T<:SortedDict} = true
