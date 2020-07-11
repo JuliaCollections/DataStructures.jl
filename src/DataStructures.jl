@@ -27,12 +27,7 @@ module DataStructures
     export capacity, num_blocks, top_with_handle, sizehint!
 
     export Accumulator, counter, reset!, inc!, dec!
-
-    export ClassifiedCollections
-    export classified_lists, classified_sets, classified_counters
-
     export IntDisjointSets, DisjointSets, num_groups, find_root!, in_same_set, root_union!
-
     export FenwickTree, length, inc!, dec!, incdec!, prefixsum
 
     export AbstractHeap, compare, extract_all!
@@ -70,7 +65,6 @@ module DataStructures
     include("stack.jl")
     include("queue.jl")
     include("accumulator.jl")
-    include("classified_collections.jl")
     include("disjoint_set.jl")
     include("heaps.jl")
 
