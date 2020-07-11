@@ -244,11 +244,11 @@ function push!(h::BinaryMinMaxHeap, v)
 end
 
 """
-    top(h::BinaryMinMaxHeap)
+    first(h::BinaryMinMaxHeap)
 
-Get the top (minimum) of the heap.
+Get the first (minimum) of the heap.
 """
-@inline top(h::BinaryMinMaxHeap) = minimum(h)
+@inline first(h::BinaryMinMaxHeap) = minimum(h)
 
 @inline function minimum(h::BinaryMinMaxHeap)
     valtree = h.valtree

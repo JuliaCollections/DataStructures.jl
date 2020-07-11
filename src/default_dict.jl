@@ -59,7 +59,6 @@ DefaultDictBase{K,V}(default::F; kwargs...) where {K,V,F} = DefaultDictBase{K,V,
 @delegate_return_parent DefaultDictBase.d [ delete!, empty!, setindex!, sizehint! ]
 
 empty(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default; passkey=d.passkey)
-@deprecate similar(d::DefaultDictBase) empty(d)
 
 getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 
@@ -144,8 +143,6 @@ for _Dict in [:Dict, :OrderedDict]
 
         empty(d::$DefaultDict{K,V,F}) where {K,V,F} = $DefaultDict{K,V,F}(d.d.default)
         in(key, v::Base.KeySet{K,T}) where {K,T<:$DefaultDict{K}} = key in keys(v.dict.d.d)
-
-        @deprecate similar(d::$DefaultDict) empty(d)
     end
 end
 

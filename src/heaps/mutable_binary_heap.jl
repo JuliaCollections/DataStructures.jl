@@ -178,14 +178,6 @@ const MutableBinaryMaxHeap{T} = MutableBinaryHeap{T, GreaterThan}
 MutableBinaryMinHeap(xs::AbstractVector{T}) where T = MutableBinaryMinHeap{T}(xs)
 MutableBinaryMaxHeap(xs::AbstractVector{T}) where T = MutableBinaryMaxHeap{T}(xs)
 
-# deprecated constructors
-
-@deprecate mutable_binary_minheap(::Type{T}) where {T} MutableBinaryMinHeap{T}()
-@deprecate mutable_binary_minheap(xs::AbstractVector{T}) where {T} MutableBinaryMinHeap(xs)
-@deprecate mutable_binary_maxheap(::Type{T}) where {T} MutableBinaryMaxHeap{T}()
-@deprecate mutable_binary_maxheap(xs::AbstractVector{T}) where {T} MutableBinaryMaxHeap(xs)
-
-
 function show(io::IO, h::MutableBinaryHeap)
     print(io, "MutableBinaryHeap(")
     nodes = h.nodes
@@ -227,7 +219,7 @@ function sizehint!(h::MutableBinaryHeap, s::Integer)
     return h
 end
 
-@inline top(h::MutableBinaryHeap) = h.nodes[1].value
+@inline first(h::MutableBinaryHeap) = h.nodes[1].value
 
 """
     top_with_handle(h::MutableBinaryHeap)

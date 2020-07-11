@@ -24,9 +24,9 @@
 #
 #   - sizehint!(h, s)     set size hint to a heap
 #
-#   - top(h)              return the top value of a heap
+#   - first(h)              return the first (top) value of a heap
 #
-#   - pop!(h)             removes the top value, and
+#   - pop!(h)             removes the first (top) value, and
 #                         returns it
 #
 #  For mutable heaps, it should also support
@@ -113,7 +113,7 @@ function nextreme(comp::Comp, n::Int, arr::AbstractVector{T}) where {T, Comp}
 
     for i = n + 1 : length(arr)
         @inbounds xi = arr[i]
-        if compare(comp, top(buffer), xi)
+        if compare(comp, first(buffer), xi)
             # This could use a pushpop method
             pop!(buffer)
             push!(buffer, xi)
