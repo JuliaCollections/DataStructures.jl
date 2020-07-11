@@ -22,12 +22,12 @@ Trie(kvs::AbstractVector{(K, V)})   # construct a Trie from the given vector of 
 Trie(kvs::AbstractDict{K, V})       # construct a Trie from the given associative structure
 ```
 
-This package also provides an iterator `path(t::Trie, str)` for looping
+This package also provides an iterator `partial_path(t::Trie, str)` for looping
 over all the nodes encountered in searching for the given string `str`.
 This obviates much of the boilerplate code needed in writing many trie
 algorithms. For example, to test whether a trie contains any prefix of a
 given string, use:
 
 ```julia
-seen_prefix(t::Trie, str) = any(v -> v.is_key, path(t, str))
+seen_prefix(t::Trie, str) = any(v -> v.is_key, partial_path(t, str))
 ```

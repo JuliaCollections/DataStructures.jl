@@ -120,5 +120,5 @@ function iterate(it::TrieIterator, (t, i) = (it.t, 0))
     end
 end
 
-path(t::Trie, str::AbstractString) = TrieIterator(t, str)
+partial_path(t::Trie, str::AbstractString) = TrieIterator(t, str)
 Base.IteratorSize(::Type{TrieIterator}) = Base.SizeUnknown()
