@@ -199,4 +199,4 @@ end
 
 Get the last element of CircularBuffer.
 """
-Base.last
+Base.@propagate_inbounds Base.last(cb::CircularBuffer) = cb[end]
