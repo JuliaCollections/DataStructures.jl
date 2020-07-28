@@ -90,6 +90,28 @@ function search_key(tree::BTree{K}, k::K) where K
     return !isa(ki, Nothing)
 end
 
+function delete_internal_node(tree::BTree{K}, x::BTreeNode{K}, k::K, i::Integer) where K
+    t = tree.t
+    if x.leaf
+        @inbounds if x.keys[i] == k
+            deleteat!(x.keys, i)
+        end
+        return
+    end
+
+    if length(x.child[i].keys) >= t:
+        x.keys[i] = delete_predecessor(tree, x.child[i])
+        return
+    elseif length(x.child[i+1].keys) >= t:
+        x.keys[i] = delete_successor(tree, x.child[i+1])
+        return
+    else
+        delete_merge(tree, x, i, i+1)
+        delete_internal_node(tree, x.child[i], k, t)
+        return
+    end
+end
+
 function print_tree(tree::BTree)
 
     function traverse_tree(x::BTreeNode, lvl)
