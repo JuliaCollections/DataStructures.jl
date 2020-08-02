@@ -1,6 +1,6 @@
 include("../src/red_black_tree.jl")
 @testset "RBTree" begin
-    t = RBTree()
+    t = RBTree{Int}()
     for i = 1:10000
     	insert!(t, i)
     end

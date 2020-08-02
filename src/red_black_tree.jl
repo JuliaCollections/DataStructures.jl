@@ -4,7 +4,7 @@
 # color is true if it's a Red Node, else it's false
 mutable struct RBTreeNode{K}
     color::Bool 
-    data::K
+    data::Union{K, Nothing}
     leftChild::Union{Nothing, RBTreeNode{K}}
     rightChild::Union{Nothing, RBTreeNode{K}}
     parent::Union{Nothing, RBTreeNode{K}}
@@ -183,7 +183,7 @@ function Base.insert!(tree::RBTree{K}, d::K) where K
     search_key(tree, d) && return tree
     # search_key(tree, d) && return tree
     # insert, if not present in the tree
-    node = RBTreeNode(d)
+    node = RBTreeNode{K}(d)
     node.leftChild = node.rightChild = tree.Nil
     
     insert_node!(tree, node)
