@@ -2,11 +2,10 @@ mutable struct SplayTreeNode{K}
     leftChild::Union{SplayTreeNode{K}, Nothing}
     rightChild::Union{SplayTreeNode{K}, Nothing}
     parent::Union{SplayTreeNode{K}, Nothing}
-    dirty::Bool
     data::K
 
-    SplayTreeNode{K}() where K = new{K}(nothing, nothing, nothing, true)
-    SplayTreeNode{K}(d::K) where K = new{K}(nothing, nothing, nothing, false, d)
+    SplayTreeNode{K}() where K = new{K}(nothing, nothing, nothing)
+    SplayTreeNode{K}(d::K) where K = new{K}(nothing, nothing, nothing, d)
 end
 
 SplayTreeNode_or_null{K} = Union{SplayTreeNode{K}, Nothing}
@@ -14,7 +13,6 @@ SplayTreeNode_or_null{K} = Union{SplayTreeNode{K}, Nothing}
 SplayTreeNode(d) = SplayTreeNode{Any}(d)
 SplayTreeNode() = SplayTreeNode{Any}()
 
-isdirty(node::SplayTreeNode) = node.dirty
 
 mutable struct SplayTree{K}
     root::SplayTreeNode_or_null{K}
@@ -155,7 +153,7 @@ function search_key(tree::SplayTree{K}, d::K) where K
     end
 end
 
-function delete!(tree::SplayTree{K}, d::K) where K
+function Base.delete!(tree::SplayTree{K}, d::K) where K
     node = tree.root
     x = search_by_node(node, d)
     isa(x, Nothing) && return tree
@@ -180,7 +178,7 @@ function delete!(tree::SplayTree{K}, d::K) where K
     return tree
 end
 
-function insert!(tree::SplayTree{K}, d::K) where K
+function Base.insert!(tree::SplayTree{K}, d::K) where K
     is_present = search_by_node(tree.root, d)
     if !isa(is_present, Nothing) && (is_present.data == d)
         return tree
