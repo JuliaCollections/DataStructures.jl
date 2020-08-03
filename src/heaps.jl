@@ -118,23 +118,33 @@ function nextreme(order::Ordering, n::Int, arr::AbstractVector{T}) where {T}
 end
 
 """
-    nlargest(n, arr)
+    nlargest(n, arr; kw...)
 
 Return the `n` largest elements of the array `arr`.
 
-Equivalent to `sort(arr, lt = >)[1:min(n, end)]`
+Equivalent to `sort(arr; kw...)[1:min(n, end)]`
 """
-function nlargest(n::Int, arr::AbstractVector{T}) where T
-    return nextreme(LessThan(), n, arr)
+function nlargest(n::Int, arr::AbstractVector{T};
+    lt=isless, by=identity, order::Ordering=Forward) where T
+    nlargest(n, arr, ord(lt, by, nothing, order))
+end
+
+function nlargest(n::Int, arr::AbstractVector{T}, order::Ordering) where T
+    return nextreme(ReverseOrdering(order), n, arr)
 end
 
 """
-    nsmallest(n, arr)
+    nsmallest(n, arr; kw...)
 
 Return the `n` smallest elements of the array `arr`.
 
-Equivalent to `sort(arr, lt = <)[1:min(n, end)]`
+Equivalent to `sort(arr; rev=true, kw...)[1:min(n, end)]`
 """
-function nsmallest(n::Int, arr::AbstractVector{T}) where T
-    return nextreme(GreaterThan(), n, arr)
+function nsmallest(n::Int, arr::AbstractVector{T};
+    lt=isless, by=identity, order::Ordering=Forward) where T
+    nsmallest(n, arr, ord(lt, by, nothing, order))
+end
+
+function nsmallest(n::Int, arr::AbstractVector{T}, order::Ordering) where T
+    return nextreme(order, n, arr)
 end

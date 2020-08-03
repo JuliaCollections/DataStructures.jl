@@ -95,7 +95,10 @@ array without sorting the entire array first:
 ```julia
 nlargest(3, [0,21,-12,68,-25,14]) # => [68,21,14]
 nsmallest(3, [0,21,-12,68,-25,14]) # => [-25,-12,0]
+nlargest(3, [0,21,-12,68,-25,14], by=abs) # => [68,-25,21]
 ```
 
-`nlargest(n, a)` is equivalent to `sort(a, lt = >)[1:min(n, end)]`, and
-`nsmallest(n, a)` is equivalent to `sort(a, lt = <)[1:min(n, end)]`.
+Both functions support the same `lt`, `by`, and `order` keyword arguments as
+`sort` to define how elements are ordered.
+`nsmallest(n, a; kw...)` is equivalent to `sort(a; kw...)[1:min(n, end)]`, and
+`nlargest(n, a; kw...)` is equivalent to `sort(a; rev=true, kw...)[1:min(n, end)]`.
