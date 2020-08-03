@@ -174,6 +174,13 @@ end
 
 MutableBinaryHeap(order::Ordering, xs::AbstractVector{T}) where T = MutableBinaryHeap{T}(order, xs)
 
+function MutableBinaryHeap{T}(xs::AbstractVector{T};
+    lt=isless, by=identity, rev::Union{Bool, Nothing}=nothing, order::Ordering=Forward) where T
+    BinaryHeap{T}(ord(lt, by, rev, order), xs)
+end
+MutableBinaryHeap(xs::AbstractVector{T}; kw...) where T = MutableBinaryHeap{T}(xs; kw...)
+MutableBinaryHeap{T}(; kw...) where T = MutableBinaryHeap{T}(Vector{T}(); kw...)
+
 const MutableBinaryMinHeap{T} = MutableBinaryHeap{T, typeof(Forward)}
 const MutableBinaryMaxHeap{T} = MutableBinaryHeap{T, typeof(Reverse)}
 

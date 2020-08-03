@@ -116,6 +116,13 @@ end
 
 BinaryHeap(order::Ordering, xs::AbstractVector{T}) where T = BinaryHeap{T}(order, xs)
 
+function BinaryHeap{T}(xs::AbstractVector{T};
+    lt=isless, by=identity, rev::Union{Bool, Nothing}=nothing, order::Ordering=Forward) where T
+    BinaryHeap{T}(ord(lt, by, rev, order), xs)
+end
+BinaryHeap(xs::AbstractVector{T}; kw...) where T = BinaryHeap{T}(xs; kw...)
+BinaryHeap{T}(; kw...) where T = BinaryHeap{T}(Vector{T}(); kw...)
+
 const BinaryMinHeap{T} = BinaryHeap{T, typeof(Forward)}
 const BinaryMaxHeap{T} = BinaryHeap{T, typeof(Reverse)}
 
