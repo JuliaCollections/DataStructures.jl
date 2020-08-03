@@ -54,6 +54,8 @@ end
 @testset "MutableBinheap" begin
 
     vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
+    vs2 = collect(enumerate(vs))
+    order = Base.Order.By(last)
 
     @testset "basic tests" begin
         h = MutableBinaryMinHeap{Int}()
@@ -83,6 +85,17 @@ end
         @test top(h) == 16
         @test isequal(list_values(h), vs)
         @test isequal(heap_values(h), [16, 14, 10, 8, 7, 3, 9, 1, 4, 2])
+        @test sizehint!(h, 100) === h
+    end
+
+    @testset "make mutable binary custom ordering heap" begin
+        h = MutableBinaryHeap(order, vs2)
+
+        @test length(h) == 10
+        @test !isempty(h)
+        @test top(h) == (2, 1)
+        @test isequal(list_values(h), vs2)
+        @test isequal(heap_values(h), [(2, 1), (4, 2), (3, 3), (1, 4), (10, 7), (6, 9), (7, 10), (8, 14), (9, 8), (5, 16)])
         @test sizehint!(h, 100) === h
     end
 
@@ -146,7 +159,37 @@ end
         # test pop!
         @test isequal(extract_all!(hmax), [16, 14, 10, 9, 8, 7, 4, 3, 2, 1])
         @test isempty(hmax)
+    end
 
+    @testset "Custom ordering push! / pop!" begin
+        heap = MutableBinaryHeap{Tuple{Int,Int}}(order)
+        @test length(heap) == 0
+        @test isempty(heap)
+
+        # test push!
+        ss = Any[
+            [(1, 4)],
+            [(2, 1), (1, 4)],
+            [(2, 1), (1, 4), (3, 3)],
+            [(2, 1), (4, 2), (3, 3), (1, 4)],
+            [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16)],
+            [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9)],
+            [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9), (7, 10)],
+            [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9), (7, 10), (8, 14)],
+            [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9), (7, 10), (8, 14), (9, 8)],
+            [(2, 1), (4, 2), (3, 3), (1, 4), (10, 7), (6, 9), (7, 10), (8, 14), (9, 8), (5, 16)]]
+        for i = 1 : length(vs2)
+            ia = push!(heap, vs2[i])
+            @test ia == i
+            @test length(heap) == i
+            @test !isempty(heap)
+            @test isequal(list_values(heap), vs2[1:i])
+            @test isequal(heap_values(heap), ss[i])
+        end
+
+        # test pop!
+        @test isequal(extract_all!(heap), sort(vs2, order=order))
+        @test isempty(heap)
     end
 
     @testset "hybrid push! and pop!" begin
