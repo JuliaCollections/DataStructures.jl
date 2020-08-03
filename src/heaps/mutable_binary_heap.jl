@@ -11,8 +11,8 @@ end
 #
 #################################################
 
-function _heap_bubble_up!(comp::Comp,
-    nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int) where {Comp, T}
+function _heap_bubble_up!(order::Ordering,
+    nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int) where {T}
 
     @inbounds nd = nodes[nd_id]
     v::T = nd.value
@@ -24,7 +24,7 @@ function _heap_bubble_up!(comp::Comp,
         p = i >> 1
         @inbounds nd_p = nodes[p]
 
-        if compare(comp, v, nd_p.value)
+        if lt(order, v, nd_p.value)
             # move parent downward
             @inbounds nodes[i] = nd_p
             @inbounds nodemap[nd_p.handle] = i
@@ -40,8 +40,8 @@ function _heap_bubble_up!(comp::Comp,
     end
 end
 
-function _heap_bubble_down!(comp::Comp,
-    nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int) where {Comp, T}
+function _heap_bubble_down!(order::Ordering,
+    nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int) where {T}
 
     @inbounds nd = nodes[nd_id]
     v::T = nd.value
@@ -62,9 +62,9 @@ function _heap_bubble_down!(comp::Comp,
             @inbounds nd_l = nodes[il]
             @inbounds nd_r = nodes[ir]
 
-            if compare(comp, nd_r.value, nd_l.value)
+            if lt(order, nd_r.value, nd_l.value)
                 # consider right child
-                if compare(comp, nd_r.value, v)
+                if lt(order, nd_r.value, v)
                     @inbounds nodes[i] = nd_r
                     @inbounds nodemap[nd_r.handle] = i
                     i = ir
@@ -73,7 +73,7 @@ function _heap_bubble_down!(comp::Comp,
                 end
             else
                 # consider left child
-                if compare(comp, nd_l.value, v)
+                if lt(order, nd_l.value, v)
                     @inbounds nodes[i] = nd_l
                     @inbounds nodemap[nd_l.handle] = i
                     i = il
@@ -84,7 +84,7 @@ function _heap_bubble_down!(comp::Comp,
 
         else  # contains only left child
             nd_l = nodes[il]
-            if compare(comp, nd_l.value, v)
+            if lt(order, nd_l.value, v)
                 @inbounds nodes[i] = nd_l
                 @inbounds nodemap[nd_l.handle] = i
                 i = il
@@ -100,8 +100,8 @@ function _heap_bubble_down!(comp::Comp,
     end
 end
 
-function _binary_heap_pop!(comp::Comp,
-    nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int=1) where {Comp,T}
+function _binary_heap_pop!(order::Ordering,
+    nodes::Vector{MutableBinaryHeapNode{T}}, nodemap::Vector{Int}, nd_id::Int=1) where {T}
 
     # extract node
     rt = nodes[nd_id]
@@ -118,17 +118,17 @@ function _binary_heap_pop!(comp::Comp,
         @inbounds nodemap[new_rt.handle] = nd_id
 
         if length(nodes) > 1
-            if compare(comp, new_rt.value, v)
-                _heap_bubble_up!(comp, nodes, nodemap, nd_id)
+            if lt(order, new_rt.value, v)
+                _heap_bubble_up!(order, nodes, nodemap, nd_id)
             else
-                _heap_bubble_down!(comp, nodes, nodemap, nd_id)
+                _heap_bubble_down!(order, nodes, nodemap, nd_id)
             end
         end
     end
     return v
 end
 
-function _make_mutable_binary_heap(comp::Comp, ty::Type{T}, values) where {Comp,T}
+function _make_mutable_binary_heap(order::Ordering, ty::Type{T}, values) where {T}
     # make a static binary index tree from a list of values
 
     n = length(values)
@@ -143,7 +143,7 @@ function _make_mutable_binary_heap(comp::Comp, ty::Type{T}, values) where {Comp,
     end
 
     for i = 1 : n
-        _heap_bubble_up!(comp, nodes, nodemap, i)
+        _heap_bubble_up!(order, nodes, nodemap, i)
     end
     return nodes, nodemap
 end
@@ -155,26 +155,32 @@ end
 #
 #################################################
 
-mutable struct MutableBinaryHeap{VT, Comp} <: AbstractMutableHeap{VT,Int}
-    comparer::Comp
+mutable struct MutableBinaryHeap{VT, O<:Ordering} <: AbstractMutableHeap{VT,Int}
+    order::O
     nodes::Vector{MutableBinaryHeapNode{VT}}
     node_map::Vector{Int}
 
-    function MutableBinaryHeap{VT, Comp}() where {VT, Comp}
+    function MutableBinaryHeap{VT}(order::O) where {VT, O<:Ordering}
         nodes = Vector{MutableBinaryHeapNode{VT}}()
         node_map = Vector{Int}()
-        new{VT, Comp}(Comp(), nodes, node_map)
+        new{VT, O}(order, nodes, node_map)
     end
 
-    function MutableBinaryHeap{VT, Comp}(xs::AbstractVector{VT}) where {VT, Comp}
-        nodes, node_map = _make_mutable_binary_heap(Comp(), VT, xs)
-        new{VT, Comp}(Comp(), nodes, node_map)
+    function MutableBinaryHeap{VT}(order::O, xs::AbstractVector{VT}) where {VT, O<:Ordering}
+        nodes, node_map = _make_mutable_binary_heap(order, VT, xs)
+        new{VT, O}(order, nodes, node_map)
     end
 end
 
-const MutableBinaryMinHeap{T} = MutableBinaryHeap{T, LessThan}
-const MutableBinaryMaxHeap{T} = MutableBinaryHeap{T, GreaterThan}
+MutableBinaryHeap(order::Ordering, xs::AbstractVector{T}) where T = MutableBinaryHeap{T}(order, xs)
 
+const MutableBinaryMinHeap{T} = MutableBinaryHeap{T, typeof(Forward)}
+const MutableBinaryMaxHeap{T} = MutableBinaryHeap{T, typeof(Reverse)}
+
+MutableBinaryMinHeap{T}() where T = MutableBinaryHeap{T}(Forward)
+MutableBinaryMaxHeap{T}() where T = MutableBinaryHeap{T}(Reverse)
+MutableBinaryMinHeap{T}(xs::AbstractVector{T}) where T = MutableBinaryHeap{T}(Forward, xs)
+MutableBinaryMaxHeap{T}(xs::AbstractVector{T}) where T = MutableBinaryHeap{T}(Reverse, xs)
 MutableBinaryMinHeap(xs::AbstractVector{T}) where T = MutableBinaryMinHeap{T}(xs)
 MutableBinaryMaxHeap(xs::AbstractVector{T}) where T = MutableBinaryMaxHeap{T}(xs)
 
@@ -217,7 +223,7 @@ function push!(h::MutableBinaryHeap{T}, v) where T
     nd_id = length(nodes) + 1
     push!(nodes, MutableBinaryHeapNode(convert(T, v), i))
     push!(nodemap, nd_id)
-    _heap_bubble_up!(h.comparer, nodes, nodemap, nd_id)
+    _heap_bubble_up!(h.order, nodes, nodemap, nd_id)
     return i
 end
 
@@ -239,7 +245,7 @@ function top_with_handle(h::MutableBinaryHeap)
     return el.value, el.handle
 end
 
-pop!(h::MutableBinaryHeap{T}) where {T} = _binary_heap_pop!(h.comparer, h.nodes, h.node_map)
+pop!(h::MutableBinaryHeap{T}) where {T} = _binary_heap_pop!(h.order, h.nodes, h.node_map)
 
 """
     update!{T}(h::MutableBinaryHeap{T}, i::Int, v::T)
@@ -250,16 +256,16 @@ This is equivalent to `h[i]=v`.
 function update!(h::MutableBinaryHeap{T}, i::Int, v) where T
     nodes = h.nodes
     nodemap = h.node_map
-    comp = h.comparer
+    order = h.order
 
     nd_id = nodemap[i]
     v0 = nodes[nd_id].value
     x = convert(T, v)
     nodes[nd_id] = MutableBinaryHeapNode(x, i)
-    if compare(comp, x, v0)
-        _heap_bubble_up!(comp, nodes, nodemap, nd_id)
+    if lt(order, x, v0)
+        _heap_bubble_up!(order, nodes, nodemap, nd_id)
     else
-        _heap_bubble_down!(comp, nodes, nodemap, nd_id)
+        _heap_bubble_down!(order, nodes, nodemap, nd_id)
     end
 end
 
@@ -270,7 +276,7 @@ Deletes the element with handle `i` from heap `h` .
 """
 function delete!(h::MutableBinaryHeap{T}, i::Int) where T
      nd_id = h.node_map[i]
-    _binary_heap_pop!(h.comparer, h.nodes, h.node_map, nd_id)
+    _binary_heap_pop!(h.order, h.nodes, h.node_map, nd_id)
     return h
 end
 

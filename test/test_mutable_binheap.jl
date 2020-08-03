@@ -1,8 +1,10 @@
 # Test of binary heaps
 
+using Base.Order: lt
+
 # auxiliary functions
 
-function heap_values(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
+function heap_values(h::MutableBinaryHeap{VT}) where {VT}
     n = length(h)
     nodes = h.nodes
     @assert length(nodes) == n
@@ -13,7 +15,7 @@ function heap_values(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
     vs
 end
 
-function list_values(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
+function list_values(h::MutableBinaryHeap{VT}) where {VT}
     n = length(h)
     nodes = h.nodes
     nodemap = h.node_map
@@ -27,8 +29,7 @@ function list_values(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
     vs
 end
 
-function verify_heap(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
-    comp = h.comparer
+function verify_heap(h::MutableBinaryHeap{VT}) where {VT}
     nodes = h.nodes
     n = length(h)
     m = div(n,2)
@@ -36,13 +37,13 @@ function verify_heap(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
         v = nodes[i].value
         lc = i * 2
         if lc <= n
-            if compare(comp, nodes[lc].value, v)
+            if lt(h.order, nodes[lc].value, v)
                 return false
             end
         end
         rc = lc + 1
         if rc <= n
-            if compare(comp, nodes[rc].value, v)
+            if lt(h.order, nodes[rc].value, v)
                 return false
             end
         end

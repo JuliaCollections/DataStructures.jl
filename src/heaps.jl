@@ -46,6 +46,10 @@
 #
 ###########################################################
 
+
+import Base.Order: Ordering, lt, Forward, Reverse, ord
+
+
 # HT: handle type
 # VT: value type
 
@@ -54,17 +58,6 @@ abstract type AbstractHeap{VT} end
 abstract type AbstractMutableHeap{VT,HT} <: AbstractHeap{VT} end
 
 abstract type AbstractMinMaxHeap{VT} <: AbstractHeap{VT} end
-
-# comparer
-
-struct LessThan
-end
-
-struct GreaterThan
-end
-
-compare(c::LessThan, x, y) = x < y
-compare(c::GreaterThan, x, y) = x > y
 
 # heap implementations
 
@@ -97,14 +90,15 @@ end
 
 # Array functions using heaps
 
-function nextreme(comp::Comp, n::Int, arr::AbstractVector{T}) where {T, Comp}
+function nextreme(order::Ordering, n::Int, arr::AbstractVector{T}) where {T}
     if n <= 0
         return T[] # sort(arr)[1:n] returns [] for n <= 0
     elseif n >= length(arr)
-        return sort(arr, lt = (x, y) -> compare(comp, y, x))
+        return sort(arr, order=order)
     end
 
-    buffer = BinaryHeap{T,Comp}()
+    # We want the top of the heap to be the "largest" element according to the order
+    buffer = BinaryHeap{T}(ReverseOrdering(order))
 
     for i = 1 : n
         @inbounds xi = arr[i]
@@ -113,7 +107,7 @@ function nextreme(comp::Comp, n::Int, arr::AbstractVector{T}) where {T, Comp}
 
     for i = n + 1 : length(arr)
         @inbounds xi = arr[i]
-        if compare(comp, top(buffer), xi)
+        if lt(order, xi, top(buffer))
             # This could use a pushpop method
             pop!(buffer)
             push!(buffer, xi)
