@@ -68,7 +68,7 @@ end
 
         @test length(h) == 10
         @test !isempty(h)
-        @test top(h) == 1
+        @test first(h) == 1
         @test isequal(list_values(h), vs)
         @test isequal(heap_values(h), [1, 2, 3, 4, 7, 9, 10, 14, 8, 16])
         @test sizehint!(h, 100) === h
@@ -79,7 +79,7 @@ end
 
         @test length(h) == 10
         @test !isempty(h)
-        @test top(h) == 16
+        @test first(h) == 16
         @test isequal(list_values(h), vs)
         @test isequal(heap_values(h), [16, 14, 10, 8, 7, 3, 9, 1, 4, 2])
         @test sizehint!(h, 100) === h
@@ -262,14 +262,4 @@ end
         update!(h, 2, 20)
         @test isequal(heap_values(h), [0.5, 10.1, 3.0, 20.0])
     end
-
-    # test deprecated constructors
-    @testset "deprecated constructors" begin
-        @test_deprecated mutable_binary_minheap(Int)
-        @test_deprecated mutable_binary_minheap([1., 2., 3.])
-        @test_deprecated mutable_binary_maxheap(Int)
-        @test_deprecated mutable_binary_maxheap([1., 2., 3.])
-    end
-
-
 end # @testset MutableBinheap

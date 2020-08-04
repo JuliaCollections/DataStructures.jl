@@ -10,7 +10,7 @@
 
             @test length(h) == 10
             @test !isempty(h)
-            @test top(h) == 1
+            @test first(h) == 1
             @test isequal(h.valtree, [1, 2, 3, 4, 7, 9, 10, 14, 8, 16])
             @test sizehint!(h, 100) === h
         end
@@ -20,7 +20,7 @@
 
             @test length(h) == 10
             @test !isempty(h)
-            @test top(h) == 16
+            @test first(h) == 16
             @test isequal(h.valtree, [16, 14, 10, 8, 7, 3, 9, 1, 4, 2])
             @test sizehint!(h, 100) === h
         end
