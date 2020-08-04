@@ -41,7 +41,7 @@ module DataStructures
     export heapify!, heapify, heappop!, heappush!, isheap
     export BinaryMinMaxHeap, popmin!, popmax!, popall!
 
-    export Trie, subtrie, keys_with_prefix, path
+    export Trie, subtrie, keys_with_prefix, partial_path
 
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
            reverse
