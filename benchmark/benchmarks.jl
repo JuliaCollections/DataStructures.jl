@@ -10,5 +10,6 @@ using BenchmarkTools
 
 const SUITE = BenchmarkGroup()
 
+SUITE["CircularBuffer"] = include("bench_circular_buffer.jl")
 SUITE["heap"] = include("bench_heap.jl")
 SUITE["SparseIntSet"] = include("bench_sparse_int_set.jl")
