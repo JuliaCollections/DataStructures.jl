@@ -2,10 +2,10 @@ include("../src/red_black_tree.jl")
 @testset "RBTree" begin
     t = RBTree{Int}()
     for i = 1:10000
-    	insert!(t, i)
+        insert!(t, i)
     end
     for i = 1:10000
-    	@test search_key(t, i)
+        @test search_key(t, i)
     end
 
     for i = 10001:20000
@@ -13,16 +13,16 @@ include("../src/red_black_tree.jl")
     end
 
     for i = 1:2:10000
-    	delete!(t, i)
+        delete!(t, i)
     end
 
     for i = 1:10000
-    	if iseven(i)
-    		@test search_key(t, i)
-    	else
-    		@test !search_key(t, i)
-    		@test_throws KeyError delete!(t, i)
-    	end
+        if iseven(i)
+            @test search_key(t, i)
+        else
+            @test !search_key(t, i)
+            @test_throws KeyError delete!(t, i)
+        end
     end
 
     for i = 1:2:1000
@@ -31,6 +31,12 @@ include("../src/red_black_tree.jl")
 
     for i = 1:1000
         @test search_key(t, i)
+    end
+
+    # test hash
+    for i = 1:1000
+        node = search_node(t, i)
+        @test hash(node) == hash(i, hash(node.color))
     end
 
     # for handling cases related to delete!
