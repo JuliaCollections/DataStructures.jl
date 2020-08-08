@@ -101,18 +101,18 @@ end
 #   heap type and constructors
 #
 #################################################
-
 mutable struct BinaryHeap{T,Comp} <: AbstractHeap{T}
     comparer::Comp
     valtree::Vector{T}
 
     BinaryHeap{T,Comp}() where {T,Comp} = new{T,Comp}(Comp(), Vector{T}())
 
-    function BinaryHeap{T,Comp}(xs::AbstractVector{T}) where {T,Comp}
-        valtree = _make_binary_heap(Comp(), T, xs)
-        new{T,Comp}(Comp(), valtree)
+    function BinaryHeap{T,Comp}(comp::Comp, xs::AbstractVector{T}) where {T,Comp}
+        valtree = _make_binary_heap(comp, T, xs)
+        new{T,Comp}(comp, valtree)
     end
 end
+BinaryHeap{T,Comp}(xs::AbstractVector{T}) where {T,Comp} = BinaryHeap{T,Comp}(Comp(), xs::AbstractVector{T})
 
 const BinaryMinHeap{T} = BinaryHeap{T, LessThan}
 const BinaryMaxHeap{T} = BinaryHeap{T, GreaterThan}
