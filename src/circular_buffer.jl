@@ -69,10 +69,10 @@ end
 Remove the element at the back.
 """
 @inline function Base.pop!(cb::CircularBuffer)
-    (cb.length == 0) && throw(ArgumentError("array must be non-empty"))
+    @boundscheck (cb.length == 0) && throw(ArgumentError("array must be non-empty"))
     i = _buffer_index(cb, cb.length)
     cb.length -= 1
-    return cb.buffer[i]
+    return @inbounds cb.buffer[i]
 end
 
 """
@@ -87,7 +87,7 @@ Add an element to the back and overwrite front if full.
     else
         cb.length += 1
     end
-    cb.buffer[_buffer_index(cb, cb.length)] = data
+    @inbounds cb.buffer[_buffer_index(cb, cb.length)] = data
     return cb
 end
 
@@ -97,13 +97,11 @@ end
 Remove the element from the front of the `CircularBuffer`.
 """
 function popfirst!(cb::CircularBuffer)
-    if cb.length == 0
-        throw(ArgumentError("array must be non-empty"))
-    end
+    @boundscheck (cb.length == 0) && throw(ArgumentError("array must be non-empty"))
     i = cb.first
     cb.first = (cb.first + 1 > cb.capacity ? 1 : cb.first + 1)
     cb.length -= 1
-    return cb.buffer[i]
+    return @inbounds cb.buffer[i]
 end
 
 """
@@ -118,7 +116,7 @@ function pushfirst!(cb::CircularBuffer, data)
     if length(cb) < cb.capacity
         cb.length += 1
     end
-    cb.buffer[cb.first] = data
+    @inbounds cb.buffer[cb.first] = data
     return cb
 end
 
