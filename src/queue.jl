@@ -16,8 +16,29 @@ isempty(s::Queue) = isempty(s.store)
 length(s::Queue) = length(s.store)
 Base.eltype(::Type{Queue{T}}) where T = T
 
-first(s::Queue) = first(s.store)
-last(s::Queue) = last(s.store)
+"""
+    first(q::Queue)
+
+Returns the first element of the queue `q`.
+
+Throws an `ArgumentError` if the queue is empty. This check
+can be disabled with `@inbounds`.
+"""
+Base.@propagate_inbounds function first(s::Queue)
+    return first(s.store)
+end
+
+"""
+    last(q::Queue)
+
+Returns the last element of the queue `q`.
+
+Throws an `ArgumentError` if the queue is empty. This check
+can be disabled with `@inbounds`.
+"""
+Base.@propagate_inbounds function last(s::Queue)
+    return last(s.store)
+end
 
 """
     enqueue!(s::Queue, x)
@@ -33,8 +54,13 @@ end
     dequeue!(s::Queue)
 
 Removes an element from the front of the queue `s` and returns it.
+
+Throws an `ArgumentError` if the queue is empty. This check
+can be disabled with `@inbounds`.
 """
-dequeue!(s::Queue) = popfirst!(s.store)
+Base.@propagate_inbounds function dequeue!(s::Queue)
+    return popfirst!(s.store)
+end
 
 empty!(s::Queue) = (empty!(s.store); s)
 
