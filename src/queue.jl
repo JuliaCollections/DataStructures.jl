@@ -4,6 +4,8 @@
     Queue{T}([blksize::Integer=1024])
 
 Create a `Queue` object containing elements of type `T`.
+
+Needs to have mutable removed but need think about this a little more
 """
 mutable struct Queue{T}
     store::Deque{T}
@@ -25,8 +27,8 @@ last(s::Queue) = last(s.store)
 Inserts the value `x` to the end of the queue `s`.
 """
 function enqueue!(s::Queue, x)
-    push!(s.store, x)
-    return s
+    y = Queue(s.store)
+    return push!(y.store, x)
 end
 
 """
@@ -34,9 +36,19 @@ end
 
 Removes an element from the front of the queue `s` and returns it.
 """
-dequeue!(s::Queue) = popfirst!(s.store)
+function dequeue!(s::Queue)
+    y = Queue(s.store)
+    first = pop!(s.store)
+    s.store = y.store
+    return first
 
-empty!(s::Queue) = (empty!(s.store); s)
+"""
+Tried to make above and below functions immutable but not too sure!
+"""
+function empty!(s::Queue)
+    y = Queue(s.store)
+    return (empty!(y.store); y)
+
 
 # Iterators
 
