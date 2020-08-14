@@ -15,10 +15,10 @@ mutable struct SwissDict{K,V} <: AbstractDict{K,V}
     age::UInt
     idxfloor::Int  # an index <= the indices of all used slots
 
-    function SwissDict{K,V}() where V where K
+    function SwissDict{K,V}() where {K, V}
         new(fill(_expand16(0x00),1), Vector{K}(undef, 16), Vector{V}(undef, 16), 0, 0, 0, 1)
     end
-    function SwissDict{K,V}(d::SwissDict{K,V}) where V where K
+    function SwissDict{K,V}(d::SwissDict{K,V}) where {K, V}
         new(copy(d.slots), copy(d.keys), copy(d.vals), d.nbfull, d.count, d.age,
             d.idxfloor)
     end
@@ -26,7 +26,7 @@ mutable struct SwissDict{K,V} <: AbstractDict{K,V}
         new(slots, keys, vals, nbfull, count, age, idxfloor)
     end
 end
-function SwissDict{K,V}(kv) where V where K
+function SwissDict{K,V}(kv) where {K, V}
     h = SwissDict{K,V}()
     for (k,v) in kv
         h[k] = v
@@ -34,7 +34,7 @@ function SwissDict{K,V}(kv) where V where K
     return h
 end
 SwissDict{K,V}(p::Pair) where {K,V} = setindex!(SwissDict{K,V}(), p.second, p.first)
-function SwissDict{K,V}(ps::Pair...) where V where K
+function SwissDict{K,V}(ps::Pair...) where {K, V}
     h = SwissDict{K,V}()
     sizehint!(h, length(ps))
     for p in ps
@@ -63,7 +63,7 @@ function SwissDict(kv)
     end
 end
 
-##Simd utilities
+##SIMD utilities
 @inline _expand16(u::UInt8) = ntuple(i->VecElement(u), Val(16))
 _blsr(i::UInt32)= i & (i-Int32(1))
 
@@ -82,37 +82,11 @@ ret i32 %res
 """), UInt32, Tuple{_u8x16,_u8x16}, u, v)
 
 @inline function _prefetchr(p::Ptr)
-    p = reinterpret(UInt, p)
-    if UInt === UInt64
-        Core.Intrinsics.llvmcall(("declare void @llvm.prefetch(i8*, i32, i32, i32)", """
-    %ptr = inttoptr i64 %0 to i8*
-    call void @llvm.prefetch(i8* %ptr, i32 0, i32 3, i32 1)
-    ret void
-    """), Nothing, Tuple{UInt}, p)
-    else
-        Core.Intrinsics.llvmcall(("declare void @llvm.prefetch(i8*, i32, i32, i32)", """
-    %ptr = inttoptr i32 %0 to i8*
-    call void @llvm.prefetch(i8* %ptr, i32 0, i32 3, i32 1)
-    ret void
-    """), Nothing, Tuple{UInt}, p)
-    end
+    ccall("llvm.prefetch", llvmcall, Cvoid, (Ref{Int8}, Int32, Int32, Int32), Ptr{Int8}(p), 0, 3, 1)
 end
 
 @inline function _prefetchw(p::Ptr)
-    p = reinterpret(UInt, p)
-    if UInt === UInt64
-        Core.Intrinsics.llvmcall(("declare void @llvm.prefetch(i8*, i32, i32, i32)", """
-    %ptr = inttoptr i64 %0 to i8*
-    call void @llvm.prefetch(i8* %ptr, i32 1, i32 3, i32 1)
-    ret void
-    """), Nothing, Tuple{UInt}, p)
-    else
-        Core.Intrinsics.llvmcall(("declare void @llvm.prefetch(i8*, i32, i32, i32)", """
-    %ptr = inttoptr i32 %0 to i8*
-    call void @llvm.prefetch(i8* %ptr, i32 1, i32 3, i32 1)
-    ret void
-    """), Nothing, Tuple{UInt}, p)
-    end
+    ccall("llvm.prefetch", llvmcall, Cvoid, (Ref{Int8}, Int32, Int32, Int32), Ptr{Int8}(p), 1, 3, 1)
 end
 
 @inline function _hashtag(u::Unsigned)
@@ -129,14 +103,14 @@ end
 end
 
 @propagate_inbounds function _slotget(slots::Vector{_u8x16}, i::Int)
-    #@boundscheck 0 < i <= length(slots)*16 || throw(BoundsError(slots, 1 + (i-1)>>4)
+    @boundscheck 0 < i <= length(slots)*16 || throw(BoundsError(slots, 1 + (i-1)>>4)
     GC.@preserve slots begin
         return unsafe_load(convert(Ptr{UInt8}, pointer(slots)), i)
     end
 end
 
 @propagate_inbounds function _slotset!(slots::Vector{_u8x16},  v::UInt8, i::Int)
-   # @boundscheck 0 < i <= length(slots)*16 || throw(BoundsError(slots, 1 + (i-1)>>4))
+   @boundscheck 0 < i <= length(slots)*16 || throw(BoundsError(slots, 1 + (i-1)>>4))
     GC.@preserve slots begin
         return unsafe_store!(convert(Ptr{UInt8}, pointer(slots)), v, i)
     end
@@ -149,7 +123,7 @@ end
 
 @inline _find_free(v::_u8x16) = _vcmp_le(v, _expand16(UInt8(1)))
 
-##Basic operations
+# Basic operations
 
 # get the index where a key is stored, or -1 if not present
 ht_keyindex(h::SwissDict, key) = ht_keyindex(h::SwissDict, key, _hashtag(hash(key))...)
@@ -159,7 +133,7 @@ function ht_keyindex(h::SwissDict, key, i0, tag)
     sz = length(slots)
     i = i0 & (sz-1)
     #_prefetchr(pointer(h.keys, i*16+1))
-   # _prefetchr(pointer(h.vals, i*16+1))
+    # _prefetchr(pointer(h.vals, i*16+1))
     #Todo/discuss: _prefetchr(pointer(h.keys, i*16+9))?
     @inbounds while true
         msk = slots[i+1]
@@ -213,9 +187,9 @@ ht_keyindex2!(h::SwissDict, key) = ht_keyindex2!(h, key, _hashtag(hash(key))...)
     end
 end
 
-@propagate_inbounds function _setindex!(h::SwissDict, v, key, index, tag)
-    h.keys[index] = key
-    h.vals[index] = v
+function _setindex!(h::SwissDict, v, key, index, tag)
+    @inbounds h.keys[index] = key
+    @inbounds h.vals[index] = v
     h.count += 1
     h.age += 1
     so =  _slotget(h.slots, index)
@@ -296,7 +270,7 @@ function sizehint!(d::SwissDict, newsz)
     rehash!(d, newsz)
 end
 
-function rehash!(h::SwissDict{K,V}, newsz = length(h.keys)) where V where K
+function rehash!(h::SwissDict{K,V}, newsz = length(h.keys)) where {K, V}
     olds = h.slots
     oldk = h.keys
     oldv = h.vals
@@ -360,7 +334,7 @@ end
 isempty(t::SwissDict) = (t.count == 0)
 length(t::SwissDict) = t.count
 
-function empty!(h::SwissDict{K,V}) where V where K
+function empty!(h::SwissDict{K,V}) where {K, V}
     fill!(h.slots, _expand16(0x00))
     sz = length(h.keys)
     empty!(h.keys)
@@ -399,7 +373,7 @@ end
 
 get!(h::SwissDict{K,V}, key0, default) where {K,V} = get!(()->default, h, key0)
 
-function get!(default::Callable, h::SwissDict{K,V}, key0) where V where K
+function get!(default::Callable, h::SwissDict{K,V}, key0) where {K, V}
     key = convert(K, key0)
     if !isequal(key, key0)
         throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
@@ -407,7 +381,7 @@ function get!(default::Callable, h::SwissDict{K,V}, key0) where V where K
     return get!(default, h, key)
 end
 
-function get!(default::Callable, h::SwissDict{K,V}, key::K) where V where K
+function get!(default::Callable, h::SwissDict{K,V}, key::K) where {K, V}
     index, tag = ht_keyindex2!(h, key)
 
     index > 0 && return h.vals[index]
@@ -427,17 +401,17 @@ function get!(default::Callable, h::SwissDict{K,V}, key::K) where V where K
     return v
 end
 
-function getindex(h::SwissDict{K,V}, key) where V where K
+function getindex(h::SwissDict{K,V}, key) where {K, V}
     index = ht_keyindex(h, key)
     @inbounds return (index < 0) ? throw(KeyError(key)) : h.vals[index]::V
 end
 
-function get(h::SwissDict{K,V}, key, default) where V where K
+function get(h::SwissDict{K,V}, key, default) where {K, V}
     index = ht_keyindex(h, key)
     @inbounds return (index < 0) ? default : h.vals[index]::V
 end
 
-function get(default::Callable, h::SwissDict{K,V}, key) where V where K
+function get(default::Callable, h::SwissDict{K,V}, key) where {K, V}
     index = ht_keyindex(h, key)
     @inbounds return (index < 0) ? default() : h.vals[index]::V
 end
@@ -446,7 +420,7 @@ haskey(h::SwissDict, key) = (ht_keyindex(h, key) > 0)
 in(key, v::KeySet{<:Any, <:SwissDict}) = (ht_keyindex(v.dict, key) > 0)
 
 
-function getkey(h::SwissDict{K,V}, key, default) where V where K
+function getkey(h::SwissDict{K,V}, key, default) where {K, V}
     index = ht_keyindex(h, key)
     @inbounds return (index<0) ? default : h.keys[index]::K
 end
