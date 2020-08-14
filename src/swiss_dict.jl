@@ -131,8 +131,8 @@ function ht_keyindex(h::SwissDict, key, i0, tag)
     keys = h.keys
     sz = length(slots)
     i = i0 & (sz-1)
-    #_prefetchr(pointer(h.keys, i*16+1))
-    # _prefetchr(pointer(h.vals, i*16+1))
+    _prefetchr(pointer(h.keys, i*16+1))
+    _prefetchr(pointer(h.vals, i*16+1))
     #Todo/discuss: _prefetchr(pointer(h.keys, i*16+9))?
     @inbounds while true
         msk = slots[i+1]
