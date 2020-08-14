@@ -12,7 +12,8 @@ module DataStructures
                  isless, union, intersect, symdiff, setdiff, issubset,
                  searchsortedfirst, searchsortedlast, in,
                  eachindex, keytype, valtype, minimum, maximum, size,
-                 zero, checkbounds
+                 zero, checkbounds, filter!, isbitstype, isbitsunion, 
+                 isiterable, dict_with_eltype, KeySet, Callable, _tablesz
 
 
     using Compat # Provides Base.Order.ReverseOrdering(). May remove this line with julia 1.4
