@@ -257,6 +257,11 @@ end
     end == 16
 
     @test d == SwissDict(8=>19, 19=>2, 42=>4)
+
+    d1 = SwissDict{Int8, Char}()
+    d1[1%Int8] = 'a'
+    @test get!(d1, 1, 'b') == 'a'
+    @test get!(d1, 2, 'c') == 'c'
 end
 
 @testset "push!" begin
@@ -330,4 +335,16 @@ end
 @testset "empty tuple" begin
     h = SwissDict(())
     @test length(h) == 0
+end
+
+@testset "empty" begin
+    h = SwissDict()
+    for i=1:10000
+        h[i] = i+1
+    end
+    prev_sz = length(h.keys)
+    @test length(h) != 0
+    empty!(h)
+    @test length(h) == 0
+    @test length(h.keys) == length(h.vals) == prev_sz
 end

@@ -103,7 +103,7 @@ end
 end
 
 @propagate_inbounds function _slotget(slots::Vector{_u8x16}, i::Int)
-    @boundscheck 0 < i <= length(slots)*16 || throw(BoundsError(slots, 1 + (i-1)>>4)
+    @boundscheck 0 < i <= length(slots)*16 || throw(BoundsError(slots, 1 + (i-1)>>4))
     GC.@preserve slots begin
         return unsafe_load(convert(Ptr{UInt8}, pointer(slots)), i)
     end
@@ -375,9 +375,6 @@ get!(h::SwissDict{K,V}, key0, default) where {K,V} = get!(()->default, h, key0)
 
 function get!(default::Callable, h::SwissDict{K,V}, key0) where {K, V}
     key = convert(K, key0)
-    if !isequal(key, key0)
-        throw(ArgumentError("$(limitrepr(key0)) is not a valid key for type $K"))
-    end
     return get!(default, h, key)
 end
 
