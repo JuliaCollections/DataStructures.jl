@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>DefaultDict and DefaultOrderedDict · DataStructures.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>DataStructures.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">DataStructures.jl</a></li><li><a class="toctext" href="../deque/">Deque</a></li><li><a class="toctext" href="../circ_buffer/">CircularBuffer</a></li><li><a class="toctext" href="../circ_deque/">CircularDeque</a></li><li><a class="toctext" href="../stack_and_queue/">Stack and Queue</a></li><li><a class="toctext" href="../priority-queue/">Priority Queue</a></li><li><a class="toctext" href="../fenwick/">Fenwick Tree</a></li><li><a class="toctext" href="../accumulators/">Accumulators and Counters</a></li><li><a class="toctext" href="../disjoint_sets/">Disjoint Sets</a></li><li><a class="toctext" href="../heaps/">Heaps</a></li><li><a class="toctext" href="../ordered_containers/">OrderedDicts and OrderedSets</a></li><li class="current"><a class="toctext" href>DefaultDict and DefaultOrderedDict</a><ul class="internal"></ul></li><li><a class="toctext" href="../robin_dict/">RobinDict</a></li><li><a class="toctext" href="../trie/">Trie</a></li><li><a class="toctext" href="../linked_list/">Linked List</a></li><li><a class="toctext" href="../mutable_linked_list/">Mutable Linked List</a></li><li><a class="toctext" href="../intset/">DataStructures.IntSet</a></li><li><a class="toctext" href="../sorted_containers/">Sorted Containers</a></li><li><a class="toctext" href="../dibit_vector/">DiBitVector</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href>DefaultDict and DefaultOrderedDict</a></li></ul><a class="edit-page" href="https://github.com/JuliaCollections/DataStructures.jl/blob/master/docs/src/default_dict.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>DefaultDict and DefaultOrderedDict</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="DefaultDict-and-DefaultOrderedDict-1" href="#DefaultDict-and-DefaultOrderedDict-1">DefaultDict and DefaultOrderedDict</a></h1><p>A DefaultDict allows specification of a default value to return when a requested key is not in a dictionary.</p><p>While the implementation is slightly different, a <code>DefaultDict</code> can be thought to provide a normal <code>Dict</code> with a default value. A <code>DefaultOrderedDict</code> does the same for an <code>OrderedDict</code>.</p><p>Constructors:</p><pre><code class="language-julia">DefaultDict(default, kv)    # create a DefaultDict with a default value or function,
+                            # optionally wrapping an existing dictionary
+                            # or array of key-value pairs
+
+DefaultDict{KeyType, ValueType}(default)   # create a DefaultDict with Dict type (KeyType,ValueType)
+
+DefaultOrderedDict(default, kv)     # create a DefaultOrderedDict with a default value or function,
+                                    # optionally wrapping an existing dictionary
+                                    # or array of key-value pairs
+
+DefaultOrderedDict{KeyType, ValueType}(default) # create a DefaultOrderedDict with Dict type (KeyType,ValueType)</code></pre><p>All constructors also take a <code>passkey::Bool=false</code> keyword argument which determines whether to pass along the <code>key</code> argument when calling the default function. It has no effect when the key is just a value.</p><p>Examples using <code>DefaultDict</code>:</p><div></div><pre><code class="language-julia-repl">julia&gt; dd = DefaultDict(1)               # create an (Any=&gt;Any) DefaultDict with a default value of 1
+DefaultDict{Any,Any,Int64} with 0 entries</code></pre><pre><code class="language-julia-repl">julia&gt; dd = DefaultDict{AbstractString, Int}(0)  # create a (AbstractString=&gt;Int) DefaultDict with a default value of 0
+DefaultDict{AbstractString,Int64,Int64} with 0 entries</code></pre><pre><code class="language-julia-repl">julia&gt; d = Dict(&#39;a&#39;=&gt;1, &#39;b&#39;=&gt;2)
+Dict{Char,Int64} with 2 entries:
+  &#39;a&#39; =&gt; 1
+  &#39;b&#39; =&gt; 2
+
+julia&gt; dd = DefaultDict(0, d)            # provide a default value to an existing dictionary
+DefaultDict{Char,Int64,Int64} with 2 entries:
+  &#39;a&#39; =&gt; 1
+  &#39;b&#39; =&gt; 2
+
+julia&gt; d[&#39;c&#39;]  # should raise a KeyError because &#39;c&#39; key doesn&#39;t exist
+ERROR: KeyError: key &#39;c&#39; not found
+
+julia&gt; dd[&#39;c&#39;]
+0</code></pre><pre><code class="language-julia-repl">julia&gt; dd = DefaultOrderedDict(time)     # call time() to provide the default value for an OrderedDict
+DefaultOrderedDict{Any,Any,typeof(time)} with 0 entries
+
+julia&gt; dd = DefaultDict(Dict)            # Create a dictionary of dictionaries - Dict() is called to provide the default value
+DefaultDict{Any,Any,UnionAll} with 0 entries
+
+julia&gt; dd = DefaultDict(()-&gt;myfunc())    # call function myfunc to provide the default value
+DefaultDict{Any,Any,getfield(Main.ex-DataStructures, Symbol(&quot;##1#2&quot;))} with 0 entries</code></pre><p>These all create the same default dict</p><pre><code class="language-julia-repl">julia&gt; dd = DefaultDict{AbstractString, Vector{Int}}(() -&gt; Vector{Int}())
+DefaultDict{AbstractString,Array{Int64,1},getfield(Main.ex-DataStructures, Symbol(&quot;##3#4&quot;))} with 0 entries</code></pre><pre><code class="language-julia-repl">julia&gt; dd = DefaultDict{AbstractString, Vector{Int}}(() -&gt; Int[])
+DefaultDict{AbstractString,Array{Int64,1},getfield(Main.ex-DataStructures, Symbol(&quot;##5#6&quot;))} with 0 entries</code></pre><pre><code class="language-julia-repl">julia&gt; dd = DefaultDict{AbstractString, Vector{Int}}(Vector{Int})
+DefaultDict{AbstractString,Array{Int64,1},DataType} with 0 entries
+
+julia&gt; push!(dd[&quot;A&quot;], 1)
+1-element Array{Int64,1}:
+ 1
+
+julia&gt; push!(dd[&quot;B&quot;], 2)
+1-element Array{Int64,1}:
+ 2
+
+julia&gt; dd
+DefaultDict{AbstractString,Array{Int64,1},DataType} with 2 entries:
+  &quot;B&quot; =&gt; [2]
+  &quot;A&quot; =&gt; [1]</code></pre><p>Create a Dictionary of type <code>AbstractString=&gt;DefaultDict{AbstractString, Int}</code>, where the default of the inner set of <code>DefaultDict</code>s is zero</p><pre><code class="language-julia-repl">julia&gt; dd = DefaultDict{AbstractString, DefaultDict}(() -&gt; DefaultDict{AbstractString,Int}(0))
+DefaultDict{AbstractString,DefaultDict,getfield(Main.ex-DataStructures, Symbol(&quot;##7#8&quot;))} with 0 entries</code></pre><p>Use <code>DefaultDict</code> to cache an expensive function call, i.e., <a href="https://en.wikipedia.org/wiki/Memoization">memoize</a></p><pre><code class="language-julia-repl">julia&gt; dd = DefaultDict{AbstractString, Int}(passkey=true) do key
+           len = length(key)
+           sleep(len)
+           return len
+       end
+DefaultDict{AbstractString,Int64,getfield(Main.ex-DataStructures, Symbol(&quot;##9#10&quot;))} with 0 entries
+
+julia&gt; dd[&quot;hi&quot;]  # slow
+2
+
+julia&gt; dd[&quot;ho&quot;]  # slow
+2
+
+julia&gt; dd[&quot;hi&quot;]  # fast
+2</code></pre><p>Note that in the second-last example, we need to use a function to create each new <code>DefaultDict</code>. If we forget, we will end up using the same<code>DefaultDict</code> for all default values:</p><pre><code class="language-julia-repl">julia&gt; dd = DefaultDict{AbstractString, DefaultDict}(DefaultDict{AbstractString,Int}(0));
+
+julia&gt; dd[&quot;a&quot;]
+DefaultDict{AbstractString,Int64,Int64} with 0 entries
+
+julia&gt; dd[&quot;b&quot;][&quot;a&quot;] = 1
+1
+
+julia&gt; dd[&quot;a&quot;]
+DefaultDict{AbstractString,Int64,Int64} with 1 entry:
+  &quot;a&quot; =&gt; 1</code></pre><footer><hr/><a class="previous" href="../ordered_containers/"><span class="direction">Previous</span><span class="title">OrderedDicts and OrderedSets</span></a><a class="next" href="../robin_dict/"><span class="direction">Next</span><span class="title">RobinDict</span></a></footer></article></body></html>
