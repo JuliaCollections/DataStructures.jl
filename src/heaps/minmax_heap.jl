@@ -9,11 +9,13 @@ mutable struct BinaryMinMaxHeap{T} <: AbstractMinMaxHeap{T}
 
     BinaryMinMaxHeap{T}() where {T} = new{T}(Vector{T}())
 
-    function BinaryMinMaxHeap(xs::AbstractVector{T}) where {T}
+    function BinaryMinMaxHeap{T}(xs::AbstractVector{T}) where {T}
         valtree = _make_binary_minmax_heap(xs)
         new{T}(valtree)
     end
 end
+
+BinaryMinMaxHeap(xs::AbstractVector{T}) where T = BinaryMinMaxHeap{T}(xs)
 
 ################################################
 #

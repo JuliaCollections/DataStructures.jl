@@ -2,7 +2,7 @@
 
 # auxiliary functions
 
-function heap_values(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
+function heap_values(h::MutableBinaryHeap{VT,O}) where {VT,O}
     n = length(h)
     nodes = h.nodes
     @assert length(nodes) == n
@@ -13,7 +13,7 @@ function heap_values(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
     vs
 end
 
-function list_values(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
+function list_values(h::MutableBinaryHeap{VT,O}) where {VT,O}
     n = length(h)
     nodes = h.nodes
     nodemap = h.node_map
@@ -27,8 +27,8 @@ function list_values(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
     vs
 end
 
-function verify_heap(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
-    comp = h.comparer
+function verify_heap(h::MutableBinaryHeap{VT,O}) where {VT,O}
+    ord = h.ordering
     nodes = h.nodes
     n = length(h)
     m = div(n,2)
@@ -36,13 +36,13 @@ function verify_heap(h::MutableBinaryHeap{VT,Comp}) where {VT,Comp}
         v = nodes[i].value
         lc = i * 2
         if lc <= n
-            if compare(comp, nodes[lc].value, v)
+            if Base.lt(ord, nodes[lc].value, v)
                 return false
             end
         end
         rc = lc + 1
         if rc <= n
-            if compare(comp, nodes[rc].value, v)
+            if Base.lt(ord, nodes[rc].value, v)
                 return false
             end
         end
@@ -53,6 +53,24 @@ end
 @testset "MutableBinheap" begin
 
     vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
+
+    @testset "construct heap" begin
+        MutableBinaryHeap{Int, Base.ForwardOrdering}()
+        MutableBinaryHeap{Int, Base.ForwardOrdering}(vs)
+
+        MutableBinaryHeap{Int, Base.ReverseOrdering}()
+        MutableBinaryHeap{Int, Base.ReverseOrdering}(vs)
+
+        MutableBinaryMinHeap{Int}()
+        MutableBinaryMinHeap{Int}(vs)
+        MutableBinaryMinHeap(vs)
+
+        MutableBinaryMaxHeap{Int}()
+        MutableBinaryMaxHeap{Int}(vs)
+        MutableBinaryMaxHeap(vs)
+
+        @test true
+    end
 
     @testset "basic tests" begin
         h = MutableBinaryMinHeap{Int}()
