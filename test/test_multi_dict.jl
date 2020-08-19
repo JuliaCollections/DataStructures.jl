@@ -5,7 +5,8 @@
         KV = ('a',1)
         @test isa(MultiDict(), MultiDict{Any,Any})
         @test isa(MultiDict(()), MultiDict{Any,Any})
-        @test isa(MultiDict([KVS]), MultiDict{Char,Int})
+        @test isa(MultiDict(Dict([KVS])), MultiDict{Char,Int})
+
         @test isa(MultiDict([KV]), MultiDict{Char,Int})
         @test isa(MultiDict([KV, KVS]), MultiDict{Char,Any})
 
@@ -18,6 +19,11 @@
         @test isa(MultiDict(PV), MultiDict{Int,Float64})
         @test isa(MultiDict(PV, PV), MultiDict{Int,Float64})
         @test isa(MultiDict([PV, PV]), MultiDict{Int,Float64})
+
+        # Generators
+        xs = [1.0,2.0]
+        @test_broken isa(MultiDict(PV for _ in 1:3), MultiDict{Int,Float64})
+        @test isa(MultiDict(Int(x)=>x for x in xs), MultiDict{Int,Float64})
     end
 
     @testset "Core Functionality" begin

@@ -9,33 +9,41 @@ struct MultiDict{K,V}
     d::Dict{K,Vector{V}}
 
     MultiDict{K,V}() where {K,V} = new{K,V}(Dict{K,Vector{V}}())
-    MultiDict{K,V}(kvs) where {K,V} = new{K,V}(Dict{K,Vector{V}}(kvs))
-    MultiDict{K,V}(ps::Pair{K,Vector{V}}...) where {K,V} = new{K,V}(Dict{K,Vector{V}}(ps...))
+    MultiDict{K,V}(d::Dict) where {K,V} = new{K,V}(d)
 end
 
-MultiDict() = MultiDict{Any,Any}()
-MultiDict(kv::Tuple{}) = MultiDict()
-MultiDict(kvs) = multi_dict_with_eltype(kvs, eltype(kvs))
-
-multi_dict_with_eltype(kvs, ::Type{Tuple{K,Vector{V}}}) where {K,V} = MultiDict{K,V}(kvs)
-function multi_dict_with_eltype(kvs, ::Type{Tuple{K,V}}) where {K,V}
+function MultiDict{K,V}(kvs) where {K,V}
     md = MultiDict{K,V}()
     for (k,v) in kvs
         insert!(md, k, v)
     end
     return md
 end
-multi_dict_with_eltype(kvs, t) = MultiDict{Any,Any}(kvs)
 
+MultiDict() = MultiDict{Any,Any}()
+MultiDict(kv::Tuple{}) = MultiDict()
+MultiDict(d::Dict{K,<:AbstractVector{V}}) where {K,V} = MultiDict{K,V}(d)
+MultiDict(kvs) = multi_dict_with_eltype(kvs, eltype(kvs))
+
+TP = Base.TP  # Tuple and/or Pair
+
+#multi_dict_with_eltype(kvs, ::Type{Tuple{K,Vector{V}}}) where {K,V} = MultiDict{K,V}(kvs)
+multi_dict_with_eltype(kvs, ::TP{K,V}) where {K,V} = MultiDict{K,V}(kvs)
+multi_dict_with_eltype(kvs, t) = MultiDict{Any,Any}(kvs)
+multi_dict_with_eltype(::TP{K,V}) where {K,V} = MultiDict{K,V}()
+multi_dict_with_eltype(t) = MultiDict{Any,Any}()
+#multi_dict_with_eltype(kv::Base.Generator, ::TP{K,V}) where {K,V} = MultiDict{K, V}(kv)
+function multi_dict_with_eltype(kv::Base.Generator, t)
+    T = Base.@default_eltype(kv)
+    if T <: Union{Pair, Tuple{Any, Any}} && isconcretetype(T)
+        return multi_dict_with_eltype(kv, T)
+    end
+    return Base.grow_to!(multi_dict_with_eltype(T), kv)
+end
 
 MultiDict(kv::AbstractArray{Pair{K,V}}) where {K,V}  = MultiDict(kv...)
-function MultiDict(ps::Pair{K,V}...) where {K,V}
-    md = MultiDict{K,V}()
-    for (k,v) in ps
-        insert!(md, k, v)
-    end
-    return md
-end
+MultiDict(ps::Pair{K,V}...) where {K,V}  = MultiDict{K,V}(ps)
+
 
 ## Functions
 
