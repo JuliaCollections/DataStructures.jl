@@ -4,16 +4,12 @@ Base.eltype(::Type{<:LinkedList{T}}) where T = T
 
 mutable struct Nil{T} <: LinkedList{T}
 end
+Nil() = Nil{Any}()
 
 mutable struct Cons{T} <: LinkedList{T}
     head::T
     tail::LinkedList{T}
 end
-
-cons(h, t::LinkedList{T}) where {T} = Cons{T}(h, t)
-
-nil(T) = Nil{T}()
-nil() = nil(Any)
 
 head(x::Cons) = x.head
 tail(x::Cons) = x.tail
@@ -24,9 +20,9 @@ Base.:(==)(x::Cons, y::Cons) = (x.head == y.head) && (x.tail == y.tail)
 function Base.show(io::IO, l::LinkedList{T}) where T
     if isa(l,Nil)
         if T === Any
-            print(io, "nil()")
+            print(io, "Nil()")
         else
-            print(io, "nil(", T, ")")
+            print(io, "Nil{", T, "}()")
         end
     else
         print(io, "list(")
@@ -39,20 +35,20 @@ function Base.show(io::IO, l::LinkedList{T}) where T
     end
 end
 
-list() = nil()
+list() = Nil()
 
 function list(elts...)
-    l = nil()
-    for i=length(elts):-1:1
-        l = cons(elts[i],l)
+    l = Nil()
+    for i in length(elts):-1:1
+        l = Cons(elts[i],l)
     end
     return l
 end
 
 function list(elts::T...) where T
-    l = nil(T)
-    for i=length(elts):-1:1
-        l = cons(elts[i],l)
+    l = Nil{T}()
+    for i in length(elts):-1:1
+        l = Cons(elts[i],l)
     end
     return l
 end
@@ -71,27 +67,27 @@ Base.map(f::Base.Callable, l::Nil) = l
 
 function Base.map(f::Base.Callable, l::Cons{T}) where T
     first = f(l.head)
-    l2 = cons(first, nil(typeof(first) <: T ? T : typeof(first)))
+    l2 = Cons(first, Nil{typeof(first) <: T ? T : typeof(first)}())
     for h in l.tail
-        l2 = cons(f(h), l2)
+        l2 = Cons(f(h), l2)
     end
     reverse(l2)
 end
 
 function Base.filter(f::Function, l::LinkedList{T}) where T
-    l2 = nil(T)
+    l2 = Nil{T}()
     for h in l
         if f(h)
-            l2 = cons(h, l2)
+            l2 = Cons(h, l2)
         end
     end
     reverse(l2)
 end
 
 function Base.reverse(l::LinkedList{T}) where T
-    l2 = nil(T)
+    l2 = Nil{T}()
     for h in l
-        l2 = cons(h, l2)
+        l2 = Cons(h, l2)
     end
     return l2
 end
@@ -112,14 +108,14 @@ function Base.cat(lst::LinkedList, lsts::LinkedList...)
         T = typejoin(T, T2)
     end
 
-    l2 = nil(T)
+    l2 = Nil{T}()
     for h in lst
-        l2 = cons(h, l2)
+        l2 = Cons(h, l2)
     end
 
     for i = 1:n
         for h in lsts[i]
-            l2 = cons(h, l2)
+            l2 = Cons(h, l2)
         end
     end
 

@@ -4,8 +4,8 @@ A list of sequentially linked nodes. This allows efficient insertion of
 nodes to the front of the list:
 
 ```julia
-julia> l1 = nil()
-nil()
+julia> l1 = Nil()
+Nil()
 
 julia> l2 = cons(1, l1)
 list(1)
