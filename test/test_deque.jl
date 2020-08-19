@@ -12,10 +12,6 @@
             @test length(sprint(dump,q)) >= 0
         end
 
-        @testset "empty dequeue 2" begin
-            @test typeof(deque(Int)) === typeof(Deque{Int}())
-        end
-
         @testset "empty dequeue 3" begin
             q = DataStructures.DequeBlock{Int}(0,0)
             @test length(q) == 0
@@ -201,5 +197,4 @@
         @test typeof(empty!(q)) === typeof(Deque{Int}())
         @test isempty(q)
     end
-
 end # @testset Deque

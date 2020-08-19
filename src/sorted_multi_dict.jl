@@ -180,7 +180,7 @@ return value is `sc`. Time: O(*c* log *n*)
 """
 @inline function push!(m::SortedMultiDict{K,D}, pr::Pair) where {K,D}
     insert!(m.bt, convert(K,pr[1]), convert(D,pr[2]), true)
-    m
+    return m
 end
 
 
@@ -329,7 +329,7 @@ equivalent to `in(k,keys(sc))`. Time: O(*c* log *n*)
 """
 @inline function haskey(m::SortedMultiDict, k_)
     i, exactfound = findkey(m.bt,convert(keytype(m),k_))
-    exactfound
+    return exactfound
 end
 
 
@@ -385,6 +385,11 @@ function mergetwo!(m::SortedMultiDict{K,D,Ord},
     end
 end
 
+# Standard copy functions use packcopy - that is, they retain elements but not
+# the identical structure.
+Base.copymutable(m::SortedMultiDict) = packcopy(m)
+Base.copy(m::SortedMultiDict) = packcopy(m)
+
 """
     packcopy(sc)
 
@@ -396,7 +401,7 @@ deletions. Time: O(*cn* log *n*)
 function packcopy(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering}
     w = SortedMultiDict{K,D}(orderobject(m))
     mergetwo!(w,m)
-    w
+    return w
 end
 
 """
@@ -411,7 +416,7 @@ function packdeepcopy(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering}
     for (k,v) in m
         insert!(w.bt, deepcopy(k), deepcopy(v), true)
     end
-    w
+    return w
 end
 
 """
@@ -452,7 +457,7 @@ function merge(m::SortedMultiDict{K,D,Ord},
                others::SDorAbstractDict...) where {K,D,Ord <: Ordering}
     result = packcopy(m)
     merge!(result, others...)
-    result
+    return result
 end
 
 function Base.show(io::IO, m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering}

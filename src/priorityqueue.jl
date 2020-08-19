@@ -54,7 +54,7 @@ struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
             percolate_down!(pq, i)
         end
 
-        pq
+        return pq
     end
 end
 
@@ -171,10 +171,7 @@ function force_up!(pq::PriorityQueue, i::Integer)
     pq.xs[i] = x
 end
 
-function getindex(pq::PriorityQueue, key)
-    pq.xs[pq.index[key]].second
-end
-
+getindex(pq::PriorityQueue, key) = pq.xs[pq.index[key]].second
 
 function get(pq::PriorityQueue, key, default)
     i = get(pq.index, key, 0)
@@ -191,8 +188,6 @@ function get!(pq::PriorityQueue, key, default)
     end
 end
 
-
-
 # Change the priority of an existing element, or equeue it if it isn't present.
 function setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
     if haskey(pq, key)
@@ -207,7 +202,7 @@ function setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
     else
         enqueue!(pq, key, value)
     end
-    value
+    return value
 end
 
 """
@@ -281,14 +276,14 @@ function dequeue!(pq::PriorityQueue)
         percolate_down!(pq, 1)
     end
     delete!(pq.index, x.first)
-    x.first
+    return x.first
 end
 
 function dequeue!(pq::PriorityQueue, key)
     idx = pq.index[key]
     force_up!(pq, idx)
     dequeue!(pq)
-    key
+    return key
 end
 
 """
@@ -321,7 +316,7 @@ function dequeue_pair!(pq::PriorityQueue)
         percolate_down!(pq, 1)
     end
     delete!(pq.index, x.first)
-    x
+    return x
 end
 
 function dequeue_pair!(pq::PriorityQueue, key)
@@ -348,13 +343,13 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
 """
 function delete!(pq::PriorityQueue, key)
     dequeue_pair!(pq, key)
-    pq
+    return pq
 end
 
 function empty!(pq::PriorityQueue)
     empty!(pq.xs)
     empty!(pq.index)
-    pq
+    return pq
 end
 
 empty(pq::PriorityQueue) = PriorityQueue(empty(pq.xs), pq.o, empty(pq.index))

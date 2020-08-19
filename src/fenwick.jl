@@ -83,6 +83,7 @@ julia> prefixsum(f, 3)
 """
 function prefixsum(ft::FenwickTree{T}, ind::Integer) where T
     sum = zero(T)
+    ind < 1 && return sum
     i = ind
     n = ft.n
     @boundscheck 1 <= i <= n || throw(ArgumentError("$i should be in between 1 and $n"))

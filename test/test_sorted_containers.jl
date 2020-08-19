@@ -1676,7 +1676,7 @@ end
     i2 = findkey(m,"bb")
     @test_throws BoundsError iterate(inclusive(m,i1,i2))
     @test_throws BoundsError iterate(exclusive(m,i1,i2))
-    @test_throws KeyError delete!(m,"a")
+    @test m === delete!(m,"a") # Okay to delete! nonexistent keys
     @test_throws KeyError pop!(m,"a")
     m3 = SortedDict((Dict{String, Int}()), Reverse)
     @test_throws ArgumentError isequal(m2, m3)
@@ -1697,7 +1697,7 @@ end
     @test_throws BoundsError last(m1)
 
     s = SortedSet([3,5])
-    @test_throws KeyError delete!(s,7)
+    @test s === delete!(s,7) # Okay to delete! nonexistent keys
     @test_throws KeyError pop!(s, 7)
     pop!(s)
     pop!(s)
@@ -1717,4 +1717,16 @@ end
     @test pop!(s,50, nothing) == nothing
     @test isempty(s)
 
+    # Test AbstractSet/AbstractDict interface
+    for m in [SortedSet([1,2]), SortedDict(1=>2, 2=>3), SortedMultiDict(1=>2, 1=>3)]
+        # copy()
+        let m1 = copy(m)
+            @test isequal(m1, m)
+            @test typeof(m1) === typeof(m)
+        end
+        let m1 = Base.copymutable(m)
+            @test isequal(m1, m)
+            @test typeof(m1) === typeof(m)
+        end
+    end
 end
