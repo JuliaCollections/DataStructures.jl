@@ -172,6 +172,9 @@
         @test isa(d2, OrderedRobinDict{Int,Int})
         @test isa(d3, OrderedRobinDict{Int,Int})
         @test isa(d4, OrderedRobinDict{Int,Int})
+
+        h = OrderedRobinDict{Int, Char}(1=>'a')
+        @test h[1] == 'a'
     end
 
     @testset "from tuple/vector/pairs/tuple of pair 2" begin
@@ -334,6 +337,7 @@
 
     @testset "Issue #216" begin
         @test !isordered(Dict{Int, String})
+        @test isordered(OrderedRobinDict{Int, String})
     end
 
     @testset "Test merging" begin
@@ -404,6 +408,9 @@
         for i in 10:-1:1
             @test pop!(h) == (i => i+1)
         end
+
+        d = OrderedRobinDict(1=>'a', 2=>'b', 3=>'c')
+        @test pop!(d, 4, 'e') == 'e'
     end
 
     @testset "filter!" begin
