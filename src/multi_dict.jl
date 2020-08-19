@@ -12,8 +12,10 @@ struct MultiDict{K,V}
     MultiDict{K,V}(d::Dict) where {K,V} = new{K,V}(d)
 end
 
+MultiDict{K,V}(pairs::Pair...) where {K,V} = MultiDict{K,V}(pairs)
 function MultiDict{K,V}(kvs) where {K,V}
     md = MultiDict{K,V}()
+    sizehint!(md.d, length(kvs))  # This might be an overestimate, but :shrug:
     for (k,v) in kvs
         insert!(md, k, v)
     end
@@ -43,6 +45,10 @@ end
 
 MultiDict(kv::AbstractArray{Pair{K,V}}) where {K,V}  = MultiDict(kv...)
 MultiDict(ps::Pair{K,V}...) where {K,V}  = MultiDict{K,V}(ps)
+
+# Copy constructors
+MultiDict{K,V}(md::MultiDict) where {K,V} = MultiDict(md.d)
+MultiDict(md::MultiDict) = MultiDict(md.d)
 
 
 ## Functions

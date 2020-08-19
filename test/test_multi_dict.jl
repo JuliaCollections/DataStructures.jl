@@ -1,6 +1,35 @@
 @testset "MultiDict" begin
 
-    @testset "Constructors" begin
+    @testset "Typed Constructors" begin
+        @test isa(MultiDict{Int,Any}(), MultiDict{Int,Any})
+
+        KVS = ('a',[1])
+        KV = ('a',1)
+        @test isa(MultiDict{Char,Int}(Dict([KVS])), MultiDict{Char,Int})
+        @test isa(MultiDict{Any,Any}(Dict{Char,Vector{Int}}([KVS])), MultiDict{Any,Any})
+
+        @test isa(MultiDict{Char,Int}([KV]), MultiDict{Char,Int})
+        @test isa(MultiDict{Char,Any}([KV, KVS]), MultiDict{Char,Any})
+        @test isa(MultiDict{Any,Any}([KV]), MultiDict{Any,Any})
+        @test isa(MultiDict{Any,Any}([KV, KVS]), MultiDict{Any,Any})
+
+        PV = 1 => 1.0
+        @test eltype(MultiDict{Char,Int}()) === Pair{Char,Vector{Int}}
+        @test isa(MultiDict{Int,Float64}(PV), MultiDict{Int,Float64})
+        @test isa(MultiDict{Int,Float64}(PV, PV), MultiDict{Int,Float64})
+        @test isa(MultiDict{Int,Float64}([PV, PV]), MultiDict{Int,Float64})
+
+        PVS = 1 => [1.0]
+        @test_throws MethodError MultiDict{Int,Float64}(PVS)
+        @test isa(MultiDict{Int,Vector{Float64}}(PVS), MultiDict{Int,Vector{Float64}})
+
+        # Generators
+        xs = [1.0,2.0]
+        @test isa(MultiDict{Int,Float64}(PV for _ in 1:3), MultiDict{Int,Float64})
+        @test isa(MultiDict{Int,Float64}(Int(x)=>x for x in xs), MultiDict{Int,Float64})
+    end
+
+    @testset "Non-typed Constructors" begin
         KVS = ('a',[1])
         KV = ('a',1)
         @test isa(MultiDict(), MultiDict{Any,Any})
@@ -10,15 +39,16 @@
         @test isa(MultiDict([KV]), MultiDict{Char,Int})
         @test isa(MultiDict([KV, KVS]), MultiDict{Char,Any})
 
-        PVS = 1 => [1.0]
         PV = 1 => 1.0
         @test eltype(MultiDict{Char,Int}()) === Pair{Char,Vector{Int}}
-        @test isa(MultiDict(PVS), MultiDict{Int,Array{Float64,1}})
-        @test isa(MultiDict(PVS, PVS), MultiDict{Int,Array{Float64,1}})
-        @test isa(MultiDict([PVS, PVS]), MultiDict{Int,Array{Float64,1}})
         @test isa(MultiDict(PV), MultiDict{Int,Float64})
         @test isa(MultiDict(PV, PV), MultiDict{Int,Float64})
         @test isa(MultiDict([PV, PV]), MultiDict{Int,Float64})
+
+        PVS = 1 => [1.0]  # Nothing special, this is just another value
+        @test isa(MultiDict(PVS), MultiDict{Int,Array{Float64,1}})
+        @test isa(MultiDict(PVS, PVS), MultiDict{Int,Array{Float64,1}})
+        @test isa(MultiDict([PVS, PVS]), MultiDict{Int,Array{Float64,1}})
 
         # Generators
         xs = [1.0,2.0]
@@ -34,11 +64,11 @@
         @test length(d) == 0
         @test isempty(d)
 
-        @test insert!(d, 'a', 1) == MultiDict{Char,Int}([('a', [1])])
+        @test insert!(d, 'a', 1) == MultiDict{Char,Int}(Dict([('a', [1])]))
         @test getindex(d, 'a') == [1]
         @test_throws MethodError insert!(d, 'a', [2,3]) == MultiDict{Char,Int}([('a', [1,2,3])])
-        @test insert!(d, 'a', 2) == MultiDict{Char,Int}([('a', [1,2])])
-        @test insert!(d, 'a', 3) == MultiDict{Char,Int}([('a', [1,2, 3])])
+        @test insert!(d, 'a', 2) == MultiDict{Char,Int}(Dict([('a', [1,2])]))
+        @test insert!(d, 'a', 3) == MultiDict{Char,Int}(Dict([('a', [1,2, 3])]))
         @test getindex(d, 'a') == [1,2,3]
 
         @test_throws KeyError d['c'] == 1
@@ -78,7 +108,7 @@
         end
 
         @testset "pop!" begin
-            d = MultiDict{Char,Int}([('a', [1,2,3]), ('c', [1])])
+            d = MultiDict{Char,Int}(Dict([('a', [1,2,3]), ('c', [1])]))
             @test_throws KeyError pop!(d, 'b')
             @test pop!(d, 'a') == 3
             @test pop!(d, 'a') == 2
@@ -89,24 +119,24 @@
     end
 
     @testset "delete!" begin
-        d = MultiDict{Char,Int}([('a', [1,2,3]), ('c', [1])])
+        d = MultiDict{Char,Int}(Dict('a' => [1,2,3], 'c' => [1]))
         @test delete!(d, 'b') == d
-        @test delete!(d, 'a') == MultiDict{Char,Int}([('c', [1])])
+        @test delete!(d, 'a') == MultiDict{Char,Int}('c' => 1)
     end
 
     @testset "setindex!" begin
         d = MultiDict{Char,Int}()
-        @test insert!(d, 'a', 1) == MultiDict{Char,Int}([('a', [1])])
-        @test insert!(d, 'a', 1) == MultiDict{Char,Int}([('a', [1, 1])])
+        @test insert!(d, 'a', 1) == MultiDict{Char,Int}(Dict([('a', [1])]))
+        @test insert!(d, 'a', 1) == MultiDict{Char,Int}(Dict([('a', [1, 1])]))
     end
 
     @testset "push!" begin
         d = MultiDict{Char,Int}()
-        @test push!(d, ('a',1)) == MultiDict{Char,Int}([('a', [1])])
-        @test push!(d, ('a',1)) == MultiDict{Char,Int}([('a', [1,1])])
+        @test push!(d, ('a',1)) == MultiDict{Char,Int}(Dict([('a', [1])]))
+        @test push!(d, ('a',1)) == MultiDict{Char,Int}(Dict([('a', [1,1])]))
         empty!(d)
-        @test push!(d,'a'=>1) == MultiDict{Char,Int}([('a', [1])])
-        @test push!(d, 'a'=>1) == MultiDict{Char,Int}([('a', [1,1])])
+        @test push!(d, 'a'=>1) == MultiDict{Char,Int}('a'=>1)
+        @test push!(d, 'a'=>1) == MultiDict{Char,Int}('a'=>1, 'a'=>1)
 
         @testset "get!" begin
             @test get!(d, 'a', []) == [1,1]
