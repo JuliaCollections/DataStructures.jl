@@ -29,12 +29,11 @@ MultiDict(kvs) = multi_dict_with_eltype(kvs, eltype(kvs))
 
 TP = Base.TP  # Tuple and/or Pair
 
-#multi_dict_with_eltype(kvs, ::Type{Tuple{K,Vector{V}}}) where {K,V} = MultiDict{K,V}(kvs)
 multi_dict_with_eltype(kvs, ::TP{K,V}) where {K,V} = MultiDict{K,V}(kvs)
 multi_dict_with_eltype(kvs, t) = MultiDict{Any,Any}(kvs)
 multi_dict_with_eltype(::TP{K,V}) where {K,V} = MultiDict{K,V}()
 multi_dict_with_eltype(t) = MultiDict{Any,Any}()
-#multi_dict_with_eltype(kv::Base.Generator, ::TP{K,V}) where {K,V} = MultiDict{K, V}(kv)
+multi_dict_with_eltype(kv::Base.Generator, ::TP{K,V}) where {K,V} = MultiDict{K, V}(kv)
 function multi_dict_with_eltype(kv::Base.Generator, t)
     T = Base.@default_eltype(kv)
     if T <: Union{Pair, Tuple{Any, Any}} && isconcretetype(T)
