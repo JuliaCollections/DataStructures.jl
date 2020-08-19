@@ -123,9 +123,7 @@ end
 
 function setindex!(h::OrderedRobinDict{K, V}, v0, key0) where {K,V}
     key = convert(K,key0)
-    if !isequal(key,key0)
-        throw(ArgumentError("$key0 is not a valid key for type $K"))
-    end
+
     v = convert(V,  v0)
 
     index = get(h.dict, key, -2)
@@ -217,9 +215,6 @@ get!(collection, key, default)
 
 function get!(h::OrderedRobinDict{K,V}, key0, default) where {K,V}
     key = convert(K,key0)
-    if !isequal(key,key0)
-        throw(ArgumentError("$key0 is not a valid key for type $K"))
-    end
 
     index = get(h.dict, key, -2)
 
