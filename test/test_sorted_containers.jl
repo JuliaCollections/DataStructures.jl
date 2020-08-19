@@ -1537,6 +1537,15 @@ function testSortedSet()
     my_assert(typeof(m3empty) == SortedSet{String, ForwardOrdering})
     my_assert(eltype(m3empty) == String &&
        length(m3empty) == 0)
+    let m3empty_char = empty(m3, Char)
+        @test typeof(m3empty_char) == SortedSet{Char, ForwardOrdering}
+        Base.emptymutable(m3) == m3empty
+        Base.emptymutable(m3, Char) == m3empty_char
+    end
+    m3_reverse = SortedSet(DataStructures.FasterReverse(), ["orange", "yellow", "red"])
+    let m3empty_reverse_char = empty(m3_reverse, Char)
+        @test typeof(m3empty_reverse_char) == SortedSet{Char, DataStructures.FasterReverse}
+    end
     my_assert(isequal(m1,m2))
     my_assert(!isequal(m1,m3))
     my_assert(!isequal(m1, SortedSet(["blue"])))
