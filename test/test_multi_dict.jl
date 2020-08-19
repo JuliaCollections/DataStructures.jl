@@ -22,7 +22,7 @@
 
         # Generators
         xs = [1.0,2.0]
-        @test_broken isa(MultiDict(PV for _ in 1:3), MultiDict{Int,Float64})
+        @test isa(MultiDict(PV for _ in 1:3), MultiDict{Int,Float64})
         @test isa(MultiDict(Int(x)=>x for x in xs), MultiDict{Int,Float64})
     end
 

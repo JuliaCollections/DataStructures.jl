@@ -56,6 +56,7 @@ MultiDict(ps::Pair{K,V}...) where {K,V}  = MultiDict{K,V}(ps)
 sizehint!(d::MultiDict, sz::Integer) = (sizehint!(d.d, sz); d)
 copy(d::MultiDict) = MultiDict(d)
 empty(d::MultiDict{K,V}) where {K,V} = MultiDict{K,V}()
+empty(a::MultiDict, ::Type{K}, ::Type{V}) where {K, V} = MultiDict{K, V}()
 ==(d1::MultiDict, d2::MultiDict) = d1.d == d2.d
 delete!(d::MultiDict, key) = (delete!(d.d, key); d)
 empty!(d::MultiDict) = (empty!(d.d); d)
@@ -134,4 +135,33 @@ function iterate(e::EnumerateAll, s)
     end
     v, vst = vstate
     return ((k, v), (dstate, k, vs, vstate))
+end
+
+# grow_to! copied from Base -- needed for abstract generator constructor
+function Base.grow_to!(dest::MultiDict{K, V}, itr) where V where K
+    y = iterate(itr)
+    y === nothing && return dest
+    ((k,v), st) = y
+    dest2 = empty(dest, typeof(k), typeof(v))
+    insert!(dest2, k, v)
+    Base.grow_to!(dest2, itr, st)
+end
+
+# this is a special case due to (1) allowing both Pairs and Tuples as elements,
+# and (2) Pair being invariant. a bit annoying.
+function Base.grow_to!(dest::MultiDict{K,V}, itr, st) where V where K
+    y = iterate(itr, st)
+    while y !== nothing
+        (k,v), st = y
+        if isa(k,K) && isa(v,V)
+            insert!(dest, k, v)
+        else
+            new = empty(dest, promote_typejoin(K,typeof(k)), promote_typejoin(V,typeof(v)))
+            merge!(new, dest)
+            new[k] = v
+            return grow_to!(new, itr, st)
+        end
+        y = iterate(itr, st)
+    end
+    return dest
 end
