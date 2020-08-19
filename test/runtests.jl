@@ -30,6 +30,7 @@ tests = ["deprecations",
          "priority_queue",
          "fenwick",
          "robin_dict",
+         "ordered_robin_dict",
          "dibit_vector",
         ]
 

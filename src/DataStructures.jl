@@ -12,7 +12,8 @@ module DataStructures
                  isless, union, intersect, symdiff, setdiff, issubset,
                  searchsortedfirst, searchsortedlast, in,
                  eachindex, keytype, valtype, minimum, maximum, size,
-                 zero, checkbounds
+                 zero, checkbounds, filter!, isbitstype, isbitsunion, 
+                 isiterable, dict_with_eltype, KeySet, Callable, _tablesz
 
 
     using OrderedCollections
@@ -53,6 +54,7 @@ module DataStructures
 
     export MultiDict, enumerateall
     export RobinDict
+    export OrderedRobinDict, isordered
 
     export DiBitVector
 
@@ -90,6 +92,7 @@ module DataStructures
     include("tokens2.jl")
     include("container_loops.jl")
     include("robin_dict.jl")
+    include("ordered_robin_dict.jl")
     export
         CircularBuffer,
         capacity,
