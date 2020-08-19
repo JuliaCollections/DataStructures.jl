@@ -146,7 +146,7 @@ end
 function Base.grow_to!(dest::MultiDict{K, V}, itr) where V where K
     y = iterate(itr)
     y === nothing && return dest
-    ((k,v), st) = y
+    ((k, v), st) = y
     dest2 = empty(dest, typeof(k), typeof(v))
     insert!(dest2, k, v)
     Base.grow_to!(dest2, itr, st)
@@ -157,8 +157,8 @@ end
 function Base.grow_to!(dest::MultiDict{K,V}, itr, st) where V where K
     y = iterate(itr, st)
     while y !== nothing
-        (k,v), st = y
-        if isa(k,K) && isa(v,V)
+        (k, v), st = y
+        if isa(k, K) && isa(v, V)
             insert!(dest, k, v)
         else
             new = empty(dest, promote_typejoin(K,typeof(k)), promote_typejoin(V,typeof(v)))
