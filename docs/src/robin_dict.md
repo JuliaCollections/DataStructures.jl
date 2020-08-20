@@ -6,7 +6,8 @@ DocTestSetup = :(using DataStructures)
 
 `RobinDict` provides a standard dictionary, conforming to the AbstractDict protocol, which uses the Robin Hood hashing algorithm with backward-shift deletion to provide improved average performance over Dict.
 
-The interface of `RobinDict` replicates that of `Dict`. This has an ordered version called `OrderedRobinDict`, which replicates the interface of `OrderedDict`.
+The interface of `RobinDict` replicates that of `Dict`.
+This has an ordered version called `OrderedRobinDict`, which replicates the interface of `OrderedDict`.
 
 Examples:
 
