@@ -1,7 +1,7 @@
 # it has unique keys
 # leftChild has keys which are less than the node
 # rightChild has keys which are greater than the node
-# color is true if its a Red Node, else its false
+# color is true if it's a Red Node, else it's false
 mutable struct RBTreeNode{K}
     color::Bool 
     data::Union{K, Nothing}
