@@ -1,7 +1,7 @@
 # it has unique keys
 # leftChild has keys which are less than the node
 # rightChild has keys which are greater than the node
-# color is true if it's a Red Node, else it's false
+# color is true if its a Red Node, else its false
 mutable struct RBTreeNode{K}
     color::Bool 
     data::Union{K, Nothing}
@@ -17,14 +17,6 @@ end
 RBTreeNode() = RBTreeNode{Any}()
 RBTreeNode(d) = RBTreeNode{Any}(d)
 
-function Base.isequal(x::RBTreeNode{K}, y::RBTreeNode{K})where K
-   return (x.color == y.color && x.data == y.data)
-end
-
-Base.:(==)(x::RBTreeNode{K}, y::RBTreeNode{K}) where K = isequal(x, y)
-
-Base.hash(x::RBTreeNode) = hash(x.data, hash(x.color))
-
 function create_null_node(K::Type)
     node = RBTreeNode{K}()
     node.color = false
@@ -34,13 +26,20 @@ end
 mutable struct RBTree{K}
     root::RBTreeNode{K}
     nil::RBTreeNode{K}
+    count::Int
 
     function RBTree{K}() where K 
-        new{K}(create_null_node(K), create_null_node(K))
+        rb = new()
+        rb.nil = create_null_node(K)
+        rb.root = Ref(rb.nil)[]
+        rb.count = 0
+        return rb
     end
 end
 
 RBTree() = RBTree{Any}()
+
+Base.length(tree::RBTree) = tree.count
 
 """
     search_node(tree, key)
@@ -62,13 +61,13 @@ function search_node(tree::RBTree{K}, d::K) where K
 end
 
 """
-    search_key(tree, key)
+    haskey(tree, key)
 
 Returns true if `key` is present in the `tree`, else returns false.    
 """
-search_key(tree, key)
+haskey(tree, key)
 
-function search_key(tree::RBTree{K}, d::K) where K 
+function Base.haskey(tree::RBTree{K}, d::K) where K 
     node = search_node(tree, d)
     return (node.data == d)
 end
@@ -171,11 +170,11 @@ function fix_insert!(tree::RBTree, node::RBTreeNode)
                 uncle.color = false
                 node = grand_parent
             else  # uncle is black in color
-                if (node == parent.rightChild) # node is rightChild of it's parent
+                if (node == parent.rightChild) # node is rightChild of its parent
                     node = parent
                     left_rotate!(tree, node)
                 end
-                # node is leftChild of it's parent
+                # node is leftChild of its parent
                 node.parent.color = false
                 node.parent.parent.color = true
                 right_rotate!(tree, node.parent.parent)
@@ -189,11 +188,11 @@ function fix_insert!(tree::RBTree, node::RBTreeNode)
                 uncle.color = false
                 node = grand_parent
             else  # uncle is black in color
-                if (node == parent.leftChild) # node is leftChild of it's parent
+                if (node == parent.leftChild) # node is leftChild of its parent
                     node = parent
                     right_rotate!(tree, node)
                 end
-                # node is rightChild of it's parent
+                # node is rightChild of its parent
                 node.parent.color = false
                 node.parent.parent.color = true
                 left_rotate!(tree, node.parent.parent)
@@ -212,8 +211,8 @@ insert!(tree, key)
 
 function Base.insert!(tree::RBTree{K}, d::K) where K
     # if the key exists in the tree, no need to insert 
-    search_key(tree, d) && return tree
-    # search_key(tree, d) && return tree
+    haskey(tree, d) && return tree
+
     # insert, if not present in the tree
     node = RBTreeNode{K}(d)
     node.leftChild = node.rightChild = tree.nil
@@ -227,7 +226,18 @@ function Base.insert!(tree::RBTree{K}, d::K) where K
     else
         fix_insert!(tree, node)
     end
+    tree.count += 1
     return tree
+end
+
+"""
+    insert!(tree, key)
+
+Inserts `key` in the `tree` if it is not present.
+"""
+function Base.push!(tree::RBTree{K}, key0) where K
+    key = convert(K, key0)
+    insert!(tree, key)
 end
 
 """
@@ -317,6 +327,7 @@ end
 Returns the RBTreeNode with minimum value in subtree of `node`. 
 """
 function minimum_node(tree::RBTree, node::RBTreeNode)
+    (node == tree.nil) && return node
     while node.leftChild != tree.nil
         node = node.leftChild
     end
@@ -326,7 +337,7 @@ end
 """
     delete!(tree::RBTree, key)
 
-Deletes `key` from `tree`, if present, else throws a KeyError.
+Deletes `key` from `tree`, if present, else returns the unmodified tree.
 """
 delete!(tree, key)
 
@@ -346,7 +357,7 @@ function Base.delete!(tree::RBTree{K}, d::K) where K
         end
     end
 
-    (z == tree.nil) && throw(KeyError(d))
+    (z == tree.nil) && return tree
     
     y = z
     y_original_color = y.color
@@ -377,4 +388,30 @@ function Base.delete!(tree::RBTree{K}, d::K) where K
     end
 
     !y_original_color && delete_fix(tree, x)
+    tree.count -= 1
+    return tree
+end
+
+Base.in(key, tree::RBTree) = haskey(tree, key)
+
+"""
+    getindex(tree, ind)
+
+Gets the key present at index `ind` of the tree. Indexing is done in increasing order of key.
+"""
+getindex(tree, ind)
+
+function Base.getindex(tree::RBTree{K}, ind) where K 
+    @boundscheck (1 <= ind <= tree.count) || throw(ArgumentError("$ind should be in between 1 and $(tree.count)"))
+    function traverse_tree_inorder(node::RBTreeNode{K}) where K
+        if (node != tree.nil)
+            left = traverse_tree_inorder(node.leftChild)
+            right = traverse_tree_inorder(node.rightChild)
+            append!(push!(left, node.data), right)
+        else
+            return K[]
+        end
+    end
+    arr = traverse_tree_inorder(tree.root) 
+    return @inbounds arr[ind]
 end
