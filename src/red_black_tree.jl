@@ -31,7 +31,7 @@ mutable struct RBTree{K}
     function RBTree{K}() where K 
         rb = new()
         rb.nil = create_null_node(K)
-        rb.root = Ref(rb.nil)[]
+        rb.root = rb.nil
         rb.count = 0
         return rb
     end
@@ -50,7 +50,7 @@ search_node(tree, key)
 
 function search_node(tree::RBTree{K}, d::K) where K
     node = tree.root
-    while node != tree.nil && d != node.data
+    while node !== tree.nil && d != node.data
         if d < node.data
             node = node.leftChild
         else
@@ -81,7 +81,7 @@ function insert_node!(tree::RBTree, node::RBTreeNode)
     node_y = nothing
     node_x = tree.root
 
-    while node_x != tree.nil
+    while node_x !== tree.nil
         node_y = node_x
         if node.data < node_x.data
             node_x = node_x.leftChild
@@ -108,7 +108,7 @@ Performs a left-rotation on `node_x` and updates `tree.root`, if required.
 function left_rotate!(tree::RBTree, node_x::RBTreeNode)
     node_y = node_x.rightChild
     node_x.rightChild = node_y.leftChild
-    if node_y.leftChild != tree.nil
+    if node_y.leftChild !== tree.nil
         node_y.leftChild.parent = node_x
     end
     node_y.parent = node_x.parent
@@ -131,7 +131,7 @@ Performs a right-rotation on `node_x` and updates `tree.root`, if required.
 function right_rotate!(tree::RBTree, node_x::RBTreeNode)
     node_y = node_x.leftChild
     node_x.leftChild = node_y.rightChild
-    if node_y.rightChild != tree.nil
+    if node_y.rightChild !== tree.nil
         node_y.rightChild.parent = node_x
     end
     node_y.parent = node_x.parent
@@ -327,8 +327,8 @@ end
 Returns the RBTreeNode with minimum value in subtree of `node`. 
 """
 function minimum_node(tree::RBTree, node::RBTreeNode)
-    (node == tree.nil) && return node
-    while node.leftChild != tree.nil
+    (node === tree.nil) && return node
+    while node.leftChild !== tree.nil
         node = node.leftChild
     end
     return node
@@ -345,7 +345,7 @@ function Base.delete!(tree::RBTree{K}, d::K) where K
     z = tree.nil
     node = tree.root
 
-    while node != tree.nil
+    while node !== tree.nil
         if node.data == d
             z = node
         end
@@ -357,15 +357,15 @@ function Base.delete!(tree::RBTree{K}, d::K) where K
         end
     end
 
-    (z == tree.nil) && return tree
+    (z === tree.nil) && return tree
     
     y = z
     y_original_color = y.color
     x = RBTreeNode{K}()
-    if z.leftChild == tree.nil
+    if z.leftChild === tree.nil
         x = z.rightChild
         rb_transplant(tree, z, z.rightChild)
-    elseif z.rightChild == tree.nil
+    elseif z.rightChild === tree.nil
         x = z.leftChild
         rb_transplant(tree, z, z.leftChild)
     else
@@ -404,7 +404,7 @@ getindex(tree, ind)
 function Base.getindex(tree::RBTree{K}, ind) where K 
     @boundscheck (1 <= ind <= tree.count) || throw(ArgumentError("$ind should be in between 1 and $(tree.count)"))
     function traverse_tree_inorder(node::RBTreeNode{K}) where K
-        if (node != tree.nil)
+        if (node !== tree.nil)
             left = traverse_tree_inorder(node.leftChild)
             right = traverse_tree_inorder(node.rightChild)
             append!(push!(left, node.data), right)
