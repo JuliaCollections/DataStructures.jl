@@ -1,4 +1,3 @@
-include("../src/red_black_tree.jl")
 @testset "RBTree" begin
     @testset "inserting values" begin
         t = RBTree{Int}()
@@ -41,7 +40,6 @@ include("../src/red_black_tree.jl")
         end
 
         @test length(t) == 100
-
     end
 
     @testset "handling different cases of delete!" begin

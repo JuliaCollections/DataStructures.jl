@@ -25,6 +25,7 @@ makedocs(
         "intset.md",
         "sorted_containers.md",
         "dibit_vector.md",
+        "red_black_tree.md",
     ],
     modules = [DataStructures],
     format = Documenter.HTML()

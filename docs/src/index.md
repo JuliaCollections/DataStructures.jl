@@ -22,6 +22,7 @@ This package implements a variety of data structures, including
 -   DataStructures.IntSet
 -   SparseIntSet
 -   DiBitVector
+-   Red Black Tree
 
 ## Contents
 
@@ -46,6 +47,7 @@ Pages = [
     "intset.md",
     "sorted_containers.md",
     "sparse_int_set.md",
-    "dibit_vector.md"
+    "dibit_vector.md",
+    "red_black_tree.md"
 ]
 ```

@@ -59,6 +59,8 @@ module DataStructures
 
     export DiBitVector
 
+    export RBTree, search_node, minimum_node
+
     export findkey
 
     include("delegate.jl")
