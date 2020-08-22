@@ -238,7 +238,6 @@ get!(f::Function, collection, key)
 function get!(default::Base.Callable, h::OrderedRobinDict{K,V}, key0) where {K,V}
     index = get(h.dict, key, -2)
     index > 0 && return @inbounds h.vals[index]
-
     v = convert(V, default())
     setindex!(h, v, key)
     return v
