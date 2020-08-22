@@ -122,7 +122,7 @@ function _setindex!(h::OrderedRobinDict, v, key)
 end
 
 function setindex!(h::OrderedRobinDict{K, V}, v0, key0) where {K,V}
-    key = convert(K,key0)
+    key = convert(K, key0)
     v = convert(V, v0)
     index = get(h.dict, key, -2)
 
@@ -150,22 +150,18 @@ end
 function rehash!(h::OrderedRobinDict{K, V}) where {K, V}
     keys = h.keys
     vals = h.vals
-    newk = Vector{K}()
-    newv = Vector{V}()
-    hk, hv = newk, newv
+    hk = Vector{K}()
+    hv = Vector{V}()
     
     for (idx, (k, v)) in enumerate(zip(keys, vals))
         if get(h.dict, k, -1) == idx
-            ccall(:jl_array_grow_end, Cvoid, (Any, UInt), hk, 1)
-            nk = length(hk)
-            @inbounds hk[nk] = k
-            ccall(:jl_array_grow_end, Cvoid, (Any, UInt), hv, 1)
-            @inbounds hv[nk] = v
+            push!(hk, k)
+            push!(hv, v)
         end
     end
     
-    h.keys = newk
-    h.vals = newv
+    h.keys = hk
+    h.vals = hv
     
     for (idx, k) in enumerate(h.keys)
         h.dict[k] = idx
