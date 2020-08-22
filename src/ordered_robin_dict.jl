@@ -123,9 +123,7 @@ end
 
 function setindex!(h::OrderedRobinDict{K, V}, v0, key0) where {K,V}
     key = convert(K,key0)
-
     v = convert(V,  v0)
-
     index = get(h.dict, key, -2)
 
     if index < 0
@@ -215,11 +213,8 @@ get!(collection, key, default)
 
 function get!(h::OrderedRobinDict{K,V}, key0, default) where {K,V}
     key = convert(K,key0)
-
     index = get(h.dict, key, -2)
-
     index > 0 && return h.vals[index]
-
     v = convert(V,  default)
     setindex!(h, v, key)
     return v
@@ -244,7 +239,6 @@ get!(f::Function, collection, key)
 function get!(default::Base.Callable, h::OrderedRobinDict{K,V}, key0) where {K,V}
     key = convert(K,key0)
     index = get(h.dict, key, -2)
-
     index > 0 && return @inbounds h.vals[index]
 
     v = convert(V,  default())
