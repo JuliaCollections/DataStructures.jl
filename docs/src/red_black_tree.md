@@ -18,7 +18,7 @@ julia> for k in 1:2:20
 julia> haskey(tree, 3)
 true
 
-julia> getindex(tree, 4)
+julia> tree[4]
 7
 
 julia> for k in 1:2:10
