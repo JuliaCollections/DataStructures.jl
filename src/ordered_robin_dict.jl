@@ -212,10 +212,10 @@ OrderedRobinDict{String,Int64} with 4 entries:
 get!(collection, key, default)
 
 function get!(h::OrderedRobinDict{K,V}, key0, default) where {K,V}
-    index = get(h.dict, key, -2)
+    index = get(h.dict, key0, -2)
     index > 0 && return h.vals[index]
     v = convert(V, default)
-    setindex!(h, v, key)
+    setindex!(h, v, key0)
     return v
 end
 
@@ -236,10 +236,10 @@ end
 get!(f::Function, collection, key)
 
 function get!(default::Base.Callable, h::OrderedRobinDict{K,V}, key0) where {K,V}
-    index = get(h.dict, key, -2)
+    index = get(h.dict, key0, -2)
     index > 0 && return @inbounds h.vals[index]
     v = convert(V, default())
-    setindex!(h, v, key)
+    setindex!(h, v, key0)
     return v
 end
 
