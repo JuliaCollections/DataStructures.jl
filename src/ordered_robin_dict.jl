@@ -83,8 +83,8 @@ end
 
 empty(d::OrderedRobinDict{K,V}) where {K,V} = OrderedRobinDict{K,V}()
 
-length(d::OrderedRobinDict) = d.count
-isempty(d::OrderedRobinDict) = (length(d) == 0)
+length(d::Union{RobinDict, OrderedRobinDict}) = d.count
+isempty(d::Union{RobinDict, OrderedRobinDict}) = (length(d) == 0)
 
 """
     empty!(collection) -> collection
@@ -123,7 +123,7 @@ end
 
 function setindex!(h::OrderedRobinDict{K, V}, v0, key0) where {K,V}
     key = convert(K,key0)
-    v = convert(V,  v0)
+    v = convert(V, v0)
     index = get(h.dict, key, -2)
 
     if index < 0
@@ -212,10 +212,9 @@ OrderedRobinDict{String,Int64} with 4 entries:
 get!(collection, key, default)
 
 function get!(h::OrderedRobinDict{K,V}, key0, default) where {K,V}
-    key = convert(K,key0)
     index = get(h.dict, key, -2)
     index > 0 && return h.vals[index]
-    v = convert(V,  default)
+    v = convert(V, default)
     setindex!(h, v, key)
     return v
 end
@@ -237,11 +236,10 @@ end
 get!(f::Function, collection, key)
 
 function get!(default::Base.Callable, h::OrderedRobinDict{K,V}, key0) where {K,V}
-    key = convert(K,key0)
     index = get(h.dict, key, -2)
     index > 0 && return @inbounds h.vals[index]
 
-    v = convert(V,  default())
+    v = convert(V, default())
     setindex!(h, v, key)
     return v
 end
@@ -455,7 +453,7 @@ Base.@propagate_inbounds function iterate(h::OrderedRobinDict, i)
     return (Pair(h.keys[index], h.vals[index]), index+1)
 end
 
-filter!(f, d::OrderedRobinDict) = Base.filter_in_one_pass!(f, d)
+filter!(f, d::Union{RobinDict, OrderedRobinDict}) = Base.filter_in_one_pass!(f, d)
 
 function merge(d::OrderedRobinDict, others::AbstractDict...)
     K,V = _merge_kvtypes(d, others...)

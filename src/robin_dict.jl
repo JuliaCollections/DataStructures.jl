@@ -251,9 +251,6 @@ function _setindex!(h::RobinDict{K,V}, key::K, v0) where {K, V}
     return h
 end
 
-isempty(d::RobinDict) = (d.count == 0)
-length(d::RobinDict) = d.count
-
 """
     empty!(collection) -> collection
 
@@ -590,8 +587,6 @@ Base.@propagate_inbounds function iterate(t::RobinDict)
     _iterate(t, t.idxfloor)
 end
 Base.@propagate_inbounds iterate(t::RobinDict, i) = _iterate(t, get_next_filled(t, i))
-
-filter!(f, d::RobinDict) = Base.filter_in_one_pass!(f, d)
 
 function _merge_kvtypes(d, others...)
     K, V = keytype(d), valtype(d)
