@@ -55,6 +55,7 @@ module DataStructures
 
     export MultiDict, enumerateall
     export RobinDict
+    export OrderedRobinDict, isordered
 
     export DiBitVector
 
@@ -95,6 +96,7 @@ module DataStructures
     include("tokens2.jl")
     include("container_loops.jl")
     include("robin_dict.jl")
+    include("ordered_robin_dict.jl")
     export
         CircularBuffer,
         capacity,
@@ -115,5 +117,4 @@ module DataStructures
     include("red_black_tree.jl")
 
     include("deprecations.jl")
-
 end
