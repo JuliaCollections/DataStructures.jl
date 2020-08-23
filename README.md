@@ -30,6 +30,7 @@ This package implements a variety of data structures, including
 -   DataStructures.IntSet
 -   SparseIntSet
 -   DiBitVector (in which each element can store two bits)
+-   Red Black Tree
 
 Resources
 ---------
