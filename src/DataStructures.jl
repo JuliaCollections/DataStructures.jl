@@ -61,6 +61,8 @@ module DataStructures
 
     export DiBitVector
 
+    export AVLTree
+
     export findkey
 
     include("delegate.jl")
