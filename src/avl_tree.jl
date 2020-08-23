@@ -111,7 +111,7 @@ Returns true if `key` is present in the `tree`, else returns false.
 """
 haskey(tree, key)
 
-function haskey(tree::AVLTree{K}, d::K) where K 
+function Base.haskey(tree::AVLTree{K}, d::K) where K 
     (tree.root == nothing) && return false
     node = search_node(tree, d)
     return (node.data == d)
