@@ -7,7 +7,8 @@ import DataStructures: IntSet
 
 @test [] == detect_ambiguities(Base, Core, DataStructures)
 
-tests = ["int_set",
+tests = ["deprecations",
+         "int_set",
          "sparse_int_set",
          "deque",
          "circ_deque",
@@ -15,7 +16,6 @@ tests = ["int_set",
          "stack",
          "queue",
          "accumulator",
-         "classified_collections",
          "disjoint_set",
          "binheap",
          "mutable_binheap",
@@ -30,8 +30,10 @@ tests = ["int_set",
          "priority_queue",
          "fenwick",
          "robin_dict",
+         "ordered_robin_dict",
          "dibit_vector",
-         "avl_tree"
+         "avl_tree",
+         "red_black_tree"
         ]
 
 if length(ARGS) > 0

@@ -1,8 +1,3 @@
-import Base: setindex!, sizehint!, empty!, isempty, length, copy, empty,
-             getindex, getkey, haskey, iterate, @propagate_inbounds, merge,
-             pop!, delete!, get, get!, isbitstype, in, hashindex, isbitsunion,
-             isiterable, dict_with_eltype, KeySet, Callable, _tablesz, filter!
-
 # the load factor after which the dictionary `rehash` happens
 const ROBIN_DICT_LOAD_FACTOR = 0.70
 
@@ -237,8 +232,8 @@ function sizehint!(d::RobinDict, newsz)
     rehash!(d, newsz)
 end
 
-@propagate_inbounds isslotfilled(h::RobinDict, index) = (h.hashes[index] != 0)
-@propagate_inbounds isslotempty(h::RobinDict, index) = (h.hashes[index] == 0)
+Base.@propagate_inbounds isslotfilled(h::RobinDict, index) = (h.hashes[index] != 0)
+Base.@propagate_inbounds isslotempty(h::RobinDict, index) = (h.hashes[index] == 0)
 
 
 function setindex!(h::RobinDict{K,V}, v0, key0) where {K, V}
@@ -255,9 +250,6 @@ function _setindex!(h::RobinDict{K,V}, key::K, v0) where {K, V}
     @assert index > 0
     return h
 end
-
-isempty(d::RobinDict) = (d.count == 0)
-length(d::RobinDict) = d.count
 
 """
     empty!(collection) -> collection
@@ -291,7 +283,7 @@ function empty!(h::RobinDict{K,V}) where {K, V}
     return h
 end
 
-function rh_search(h::RobinDict{K, V}, key::K) where {K, V}
+function rh_search(h::RobinDict{K, V}, key) where {K, V}
     sz = length(h.keys)
     chash = hash_key(key)
     index = desired_index(chash, sz)
@@ -367,8 +359,7 @@ function _get!(default::Callable, h::RobinDict{K,V}, key::K) where V where K
     return v
 end
 
-function getindex(h::RobinDict{K, V}, key0) where {K, V}
-    key = convert(K, key0)
+function getindex(h::RobinDict{K, V}, key) where {K, V}
     index = rh_search(h, key)
     @inbounds return (index < 0) ? throw(KeyError(key)) : h.vals[index]
 end
@@ -392,8 +383,7 @@ julia> get(d, "c", 3)
 """
 get(collection, key, default)
 
-function get(h::RobinDict{K,V}, key0, default) where {K, V}
-    key = convert(K, key0)
+function get(h::RobinDict{K,V}, key, default) where {K, V}
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default : h.vals[index]::V
 end
@@ -415,8 +405,7 @@ end
 """
 get(::Function, collection, key)
 
-function get(default::Callable, h::RobinDict{K,V}, key0) where {K, V}
-    key = convert(K, key0)
+function get(default::Callable, h::RobinDict{K,V}, key) where {K, V}
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default() : h.vals[index]::V
 end
@@ -462,8 +451,7 @@ julia> getkey(D, 'd', 'a')
 'a': ASCII/Unicode U+0061 (category Ll: Letter, lowercase)
 ```
 """
-function getkey(h::RobinDict{K,V}, key0, default) where {K, V}
-    key = convert(K, key0)
+function getkey(h::RobinDict{K,V}, key, default) where {K, V}
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default : h.keys[index]::K
 end
@@ -583,15 +571,6 @@ function delete!(h::RobinDict{K, V}, key0) where {K, V}
     return h
 end
 
-function get_idxfloor(h::RobinDict)
-    @inbounds for i = 1:length(h.keys)
-        if isslotfilled(h, i)
-            return i
-        end
-    end
-    return 0
-end
-
 function get_next_filled(h::RobinDict, i)
     L = length(h.keys)
     (1 <= i <= L) || return 0
@@ -603,13 +582,11 @@ function get_next_filled(h::RobinDict, i)
     return 0
 end
 
-@propagate_inbounds _iterate(t::RobinDict{K,V}, i) where {K,V} = i == 0 ? nothing : (Pair{K,V}(t.keys[i],t.vals[i]), i == typemax(Int) ? 0 : get_next_filled(t, i+1))
-@propagate_inbounds function iterate(t::RobinDict)
+Base.@propagate_inbounds _iterate(t::RobinDict{K,V}, i) where {K,V} = i == 0 ? nothing : (Pair{K,V}(t.keys[i],t.vals[i]), i == typemax(Int) ? 0 : get_next_filled(t, i+1))
+Base.@propagate_inbounds function iterate(t::RobinDict)
     _iterate(t, t.idxfloor)
 end
-@propagate_inbounds iterate(t::RobinDict, i) = _iterate(t, get_next_filled(t, i))
-
-filter!(f, d::RobinDict) = Base.filter_in_one_pass!(f, d)
+Base.@propagate_inbounds iterate(t::RobinDict, i) = _iterate(t, get_next_filled(t, i))
 
 function _merge_kvtypes(d, others...)
     K, V = keytype(d), valtype(d)

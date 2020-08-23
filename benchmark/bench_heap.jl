@@ -26,13 +26,12 @@ heaptypes = [BinaryHeap, MutableBinaryHeap]
 aexps = [1,3]
 datatypes = [Int, Float64]
 baseorderings = Dict(
-    "Min" => DataStructures.LessThan,
-    #"Max" => DataStructures.GreaterThan,
+    "Min" => Base.ForwardOrdering,
+    #"Max" => Base.ReverseOrdering,
     )
 fastfloatorderings = Dict(
-    # These will be enabled upon reordering change
-    #"FastMin" => DataStructures.FasterForward(),
-    #"FastMax" => DataStructures.FasterReverse(),
+    "Min" => DataStructures.FasterForward,
+    "Max" => DataStructures.FasterReverse,
     )
 
 for heap in heaptypes
@@ -41,7 +40,8 @@ for heap in heaptypes
             Random.seed!(0)
             a = rand(dt, 10^aexp)
 
-            orderings = baseorderings
+            # Dict types to force use of abstract type if containing single value
+            orderings = Dict{String, DataType}(baseorderings)
             if dt == Float64
                 # swap to faster ordering operation
                 for (k,v) in orderings
@@ -66,38 +66,22 @@ for heap in heaptypes
     end
 end
 
-# Quick check to ensure no Float regressions with Min/Max convenience functions
-# These don't fit in well with the above loop, since ordering is hardcoded.
-heapalias = Dict(
-    "BinaryMinHeap" => BinaryMinHeap,
-    "BinaryMaxHeap" => BinaryMaxHeap,
-    "BinaryMinMaxHeap" => BinaryMinMaxHeap, # <- no alias issue
-)
-for (heapname, heap) in heapalias
-    for aexp in aexps
-        for dt in [Float64]
-            Random.seed!(0)
-            a = rand(dt, 10^aexp)
-            prepath = [heapname]
-            postpath = [string(dt), "10^"*string(aexp)]
-            suite[vcat(prepath, ["make"], postpath)] =
-                @benchmarkable $(heap)($a)
-            suite[vcat(prepath, ["push"], postpath)] =
-                @benchmarkable push_heap(h, $a) setup=(h=$(heap){$dt}())
-            suite[vcat(prepath, ["pop"], postpath)] =
-                @benchmarkable pop_heap(h) setup=(h=$(heap)($a))
-        end
-    end
-end
+fast_extreme_orderings = Dict(
+    nsmallest => DataStructures.FasterForward(),
+    nlargest => DataStructures.FasterReverse(),
+    )
 
 for func in [nlargest, nsmallest]
+    fastord = fast_extreme_orderings[func]
     for aexp in [4]
         Random.seed!(0);
         a = rand(10^aexp);
         for nexp in [2]
             n = 10^nexp
-            suite[[string(func), "a=rand(10^"*string(aexp)*")", "n=10^"*string(nexp)]] =
+            suite[["Slow " * string(func), "a=rand(10^"*string(aexp)*")", "n=10^"*string(nexp)]] =
                 @benchmarkable $(func)($n, $a)
+            suite[[string(func), "a=rand(10^"*string(aexp)*")", "n=10^"*string(nexp)]] =
+                @benchmarkable DataStructures.nextreme($fastord, $n, $a)
         end
     end
 end

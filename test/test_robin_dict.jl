@@ -1,5 +1,3 @@
-include("../src/robin_dict.jl")
-
 @testset "Constructors" begin
     h1 = RobinDict()
     @test length(h1) == 0
@@ -107,6 +105,9 @@ end
         end
         @test get_KeyError
     end
+
+    h = RobinDict{Char, Int}()
+    @test_throws KeyError h[0.01] 
 end
 
 @testset "Filter function" begin
@@ -214,7 +215,7 @@ end
     @test eq(RobinDict(), sizehint!(RobinDict(),96))
 
     # Dictionaries of different types
-    @test_throws MethodError eq(RobinDict(1 => 2), RobinDict("dog" => "bone"))
+    @test !eq(RobinDict(1 => 2), RobinDict("dog" => "bone"))
     @test eq(RobinDict{Int,Int}(), RobinDict{AbstractString,AbstractString}())
 end
 
@@ -310,14 +311,14 @@ end
     @test haskey(h, 1) == true
     @test haskey(h, 2) == true
     @test haskey(h, 3) == false
-    @test_throws MethodError haskey(h, "1")
+    @test haskey(h, "1") == false
 end
 
 @testset "getkey" begin
     h = RobinDict(1=>2, 3 => 6, 5=>10)
     @test getkey(h, 1, 7) == 1
     @test getkey(h, 4, 6) == 6
-    @test_throws MethodError getkey(h, "1", 8)
+    @test getkey(h, "1", 8) == 8
 end
 
 @testset "empty" begin
@@ -346,19 +347,6 @@ end
     @test length(h) == 0
 end
 
-@testset "get_idxfloor" begin
-    h = RobinDict()
-    @test get_idxfloor(h) == 0
-
-    h["a"] = 1
-    h[2] = "b"
-    @test h.idxfloor == get_idxfloor(h)
-    pop!(h)
-    @test h.idxfloor == get_idxfloor(h)
-    pop!(h)
-    @test h.idxfloor == get_idxfloor(h) == 0
-end
-
 @testset "merge" begin
     h1 = RobinDict("a" => 1, "b" => 2)
     h2 = RobinDict("c" => 3, "d" => 4)
@@ -382,6 +370,28 @@ end
 end
 
 @testset "invariants" begin
+    # Functions which are not exported, but are required for checking invariants
+    hash_key(key) = (hash(key)%UInt32) | 0x80000000
+    desired_index(hash, sz) = (hash & (sz - 1)) + 1
+    isslotfilled(h::RobinDict, index) = (h.hashes[index] != 0)
+    isslotempty(h::RobinDict, index) = (h.hashes[index] == 0)
+    
+    function calculate_distance(h::RobinDict{K, V}, index) where {K, V}
+        @assert isslotfilled(h, index)
+        sz = length(h.keys)
+        @inbounds index_init = desired_index(h.hashes[index], sz)
+        return (index - index_init + sz) & (sz - 1)
+    end
+
+    function get_idxfloor(h::RobinDict)
+        @inbounds for i = 1:length(h.keys)
+            if isslotfilled(h, i)
+                return i
+            end
+        end
+        return 0
+    end
+
     h1 = RobinDict{Int, Int}()
     for i in 1:300
         h1[i] = i
@@ -449,4 +459,17 @@ end
         h[i] = i+1
     end
     check_invariants(h)
+
+    @testset "get_idxfloor" begin
+        h = RobinDict()
+        @test get_idxfloor(h) == 0
+
+        h["a"] = 1
+        h[2] = "b"
+        @test h.idxfloor == get_idxfloor(h)
+        pop!(h)
+        @test h.idxfloor == get_idxfloor(h)
+        pop!(h)
+        @test h.idxfloor == get_idxfloor(h) == 0
+    end
 end

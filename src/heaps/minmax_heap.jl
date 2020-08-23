@@ -9,11 +9,13 @@ mutable struct BinaryMinMaxHeap{T} <: AbstractMinMaxHeap{T}
 
     BinaryMinMaxHeap{T}() where {T} = new{T}(Vector{T}())
 
-    function BinaryMinMaxHeap(xs::AbstractVector{T}) where {T}
+    function BinaryMinMaxHeap{T}(xs::AbstractVector{T}) where {T}
         valtree = _make_binary_minmax_heap(xs)
         new{T}(valtree)
     end
 end
+
+BinaryMinMaxHeap(xs::AbstractVector{T}) where T = BinaryMinMaxHeap{T}(xs)
 
 ################################################
 #
@@ -244,11 +246,11 @@ function push!(h::BinaryMinMaxHeap, v)
 end
 
 """
-    top(h::BinaryMinMaxHeap)
+    first(h::BinaryMinMaxHeap)
 
-Get the top (minimum) of the heap.
+Get the first (minimum) of the heap.
 """
-@inline top(h::BinaryMinMaxHeap) = minimum(h)
+@inline first(h::BinaryMinMaxHeap) = minimum(h)
 
 @inline function minimum(h::BinaryMinMaxHeap)
     valtree = h.valtree

@@ -52,8 +52,6 @@ empty(d::MultiDict{K,V}) where {K,V} = MultiDict{K,V}()
 delete!(d::MultiDict, key) = (delete!(d.d, key); d)
 empty!(d::MultiDict) = (empty!(d.d); d)
 
-@deprecate similar(d::MultiDict) empty(d)
-
 function insert!(d::MultiDict{K,V}, k, v) where {K,V}
     if !haskey(d.d, k)
         d.d[k] = V[]

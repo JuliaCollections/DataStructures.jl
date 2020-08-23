@@ -519,6 +519,11 @@ function issubset(iterable, m2::SortedSet)
     return true
 end
 
+# Standard copy functions use packcopy - that is, they retain elements but not
+# the identical structure.
+Base.copymutable(m::SortedSet) = packcopy(m)
+Base.copy(m::SortedSet) = packcopy(m)
+
 """
     packcopy(sc)
 

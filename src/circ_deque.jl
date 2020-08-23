@@ -39,7 +39,7 @@ Get the item at the front of the queue.
 """
 @inline function first(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
-    return D.buffer[D.first]
+    return @inbounds D.buffer[D.first]
 end
 
 """
@@ -49,7 +49,7 @@ Get the item from the back of the queue.
 """
 @inline function last(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
-    return D.buffer[D.last]
+    return @inbounds D.buffer[D.last]
 end
 
 @inline function Base.push!(D::CircularDeque, v)
@@ -61,7 +61,7 @@ end
     return D
 end
 
-@inline function Base.pop!(D::CircularDeque)
+@inline Base.@propagate_inbounds function Base.pop!(D::CircularDeque)
     v = last(D)
     D.n -= 1
     tmp = D.last - 1
@@ -88,7 +88,7 @@ end
 
 Remove the element at the front.
 """
-@inline function popfirst!(D::CircularDeque)
+@inline Base.@propagate_inbounds function popfirst!(D::CircularDeque)
     v = first(D)
     D.n -= 1
     tmp = D.first + 1
