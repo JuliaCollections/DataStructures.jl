@@ -14,20 +14,18 @@ AVLTreeNode_or_null{T} = Union{AVLTreeNode{T}, Nothing}
 
 mutable struct AVLTree{T}
     root::AVLTreeNode_or_null{T}
+    count::Int
 
-    AVLTree{T}() where T = new{T}(nothing)
+    AVLTree{T}() where T = new{T}(nothing, 0)
 end
 
 AVLTree() = AVLTree{Any}()
 
-function get_height(node::Union{AVLTreeNode, Nothing})
-    if node == nothing
-        return 0
-    else
-        return node.height
-    end
-end
+Base.length(tree::AVLTree) = tree.count
 
+get_height(node::Union{AVLTreeNode, Nothing}) = (node == nothing) ? 0 : node.height
+
+# balance is the difference of height between leftChild and rightChild of a node.
 function get_balance(node::Union{AVLTreeNode, Nothing})
     if node == nothing
         return 0
@@ -36,8 +34,13 @@ function get_balance(node::Union{AVLTreeNode, Nothing})
     end
 end
 
-fix_height(node::Union{AVLTreeNode, Nothing}) = 1 + max(get_height(node.leftChild), get_height(node.rightChild))
+fix_height(node::AVLTreeNode) = 1 + max(get_height(node.leftChild), get_height(node.rightChild))
 
+"""
+    left_rotate!(node_x::RBTreeNode)
+
+Performs a left-rotation on `node_x`, updates height of the nodes, and returns the rotated node. 
+"""
 function left_rotate(z::AVLTreeNode)
     y = z.rightChild
     α = y.leftChild
@@ -48,6 +51,11 @@ function left_rotate(z::AVLTreeNode)
     return y
 end
 
+"""
+    right_rotate!(node_x::RBTreeNode)
+
+Performs a right-rotation on `node_x`, updates height of the nodes, and returns the rotated node. 
+"""
 function right_rotate(z::AVLTreeNode)
     y = z.leftChild
     α = y.rightChild
@@ -58,17 +66,30 @@ function right_rotate(z::AVLTreeNode)
     return y
 end
 
-function get_minimum_node(node::Union{AVLTreeNode, Nothing})
+"""
+   minimum_node(tree::RBTree, node::RBTreeNode) 
+
+Returns the RBTreeNode with minimum value in subtree of `node`. 
+"""
+function minimum_node(node::Union{AVLTreeNode, Nothing})
     while node != nothing && node.leftChild != nothing
         node = node.leftChild
     end
     return node
 end
 
+"""
+    search_node(tree, key)
+
+Returns the last visited node, while traversing through in binary-search-tree fashion looking for `key`.
+"""
+search_node(tree, key)
+
 function search_node(tree::AVLTree{K}, d::K) where K
     prev = nothing
     node = tree.root
     while node != nothing && node.data != nothing && node.data != d
+
         prev = node
         if d < node.data 
             node = node.leftChild
@@ -80,16 +101,30 @@ function search_node(tree::AVLTree{K}, d::K) where K
     return (node == nothing) ? prev : node
 end
 
-function search_key(tree::AVLTree{K}, d::K) where K 
+"""
+    haskey(tree, key)
+
+Returns true if `key` is present in the `tree`, else returns false.    
+"""
+haskey(tree, key)
+
+function haskey(tree::AVLTree{K}, d::K) where K 
     (tree.root == nothing) && return false
     node = search_node(tree, d)
     return (node.data == d)
 end
 
+"""
+    insert!(tree, key)
+
+Inserts `key` in the `tree` if it is not present.
+"""
+insert!(tree, key)
+
 function Base.insert!(tree::AVLTree{K}, d::K) where K
 
     function insert_node(node::Union{AVLTreeNode, Nothing}, key)
-        if node == nothing || node.data == nothing
+        if node == nothing
             return AVLTreeNode{K}(key)
         elseif key < node.data
             node.leftChild = insert_node(node.leftChild, key)
@@ -103,7 +138,7 @@ function Base.insert!(tree::AVLTree{K}, d::K) where K
         if balance > 1
             if key < node.leftChild.data
                 return right_rotate(node)
-            else
+
                 node.leftChild = left_rotate(node.leftChild)
                 return right_rotate(node)
             end
@@ -113,7 +148,7 @@ function Base.insert!(tree::AVLTree{K}, d::K) where K
             if key > node.rightChild.data
                 return left_rotate(node)
             else
-                node.rightChild = right_rotate(node)
+                node.rightChild = right_rotate(node.rightChild)
                 return left_rotate(node)
             end
         end
@@ -121,10 +156,21 @@ function Base.insert!(tree::AVLTree{K}, d::K) where K
         return node
     end
 
-    search_key(tree, d) && return tree
+    haskey(tree, d) && return tree
 
     tree.root = insert_node(tree.root, d)
+    tree.count += 1
     return tree
+end
+
+"""
+    push!(tree, key)
+
+Inserts `key` in the `tree` if it is not present.
+"""
+function Base.push!(tree::AVLTree{K}, key0) where K
+    key = convert(K, key0)
+    insert!(tree, key)
 end
 
 function Base.delete!(tree::AVLTree{K}, d::K) where K
@@ -146,7 +192,7 @@ function Base.delete!(tree::AVLTree{K}, d::K) where K
                 node = nothing
                 return temp
             else 
-                temp = get_minimum_node(node.rightChild)
+                temp = minimum_node(node.rightChild)
                 node.data = temp.data
                 node.rightChild = delete_node(node.rightChild, temp.data)
             end 
@@ -180,8 +226,11 @@ function Base.delete!(tree::AVLTree{K}, d::K) where K
         return node
     end
 
-    !search_key(tree, d) && throw(KeyError(d))
+    # if the key is not in the tree, do nothing and return the tree
+    !haskey(tree, d) && return tree
     
+    # if the key is present, delete it from the tree
     tree.root = delete_node(tree.root, d)
+    tree.count -= 1
     return tree
 end

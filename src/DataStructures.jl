@@ -59,6 +59,7 @@ module DataStructures
     export DiBitVector
 
     export RBTree, search_node, minimum_node
+    export AVLTree
 
     export findkey
 
