@@ -3,7 +3,7 @@
 import Base: haskey, get, get!, getkey, delete!, pop!, empty!,
              insert!, getindex, length, isempty, iterate,
              keys, values, copy, similar,  push!,
-             count, size, eltype, empty
+             count, size, eltype, empty, grow_to!, promote_typejoin
 
 struct MultiDict{K,V}
     d::Dict{K,Vector{V}}
@@ -25,16 +25,17 @@ end
 MultiDict() = MultiDict{Any,Any}()
 MultiDict(kv::Tuple{}) = MultiDict()
 MultiDict(d::Dict{K,<:AbstractVector{V}}) where {K,V} = MultiDict{K,V}(d)
+MultiDict(ps::Pair...) = MultiDict(ps)
 MultiDict(kvs) = multi_dict_with_eltype(kvs, eltype(kvs))
 
 TP = Base.TP  # Tuple and/or Pair
 
 multi_dict_with_eltype(kvs, ::TP{K,V}) where {K,V} = MultiDict{K,V}(kvs)
-multi_dict_with_eltype(kvs, t) = MultiDict{Any,Any}(kvs)
+multi_dict_with_eltype(kvs, ::Type) = Base.grow_to!(multi_dict_with_eltype(Base.@default_eltype(typeof(kvs))), kvs)
 multi_dict_with_eltype(::TP{K,V}) where {K,V} = MultiDict{K,V}()
-multi_dict_with_eltype(t) = MultiDict{Any,Any}()
+multi_dict_with_eltype(::Type) = MultiDict{Any,Any}()
 multi_dict_with_eltype(kv::Base.Generator, ::TP{K,V}) where {K,V} = MultiDict{K, V}(kv)
-function multi_dict_with_eltype(kv::Base.Generator, t)
+function multi_dict_with_eltype(kv::Base.Generator, ::Type)
     T = Base.@default_eltype(kv)
     if T <: Union{Pair, Tuple{Any, Any}} && isconcretetype(T)
         return multi_dict_with_eltype(kv, T)
@@ -163,10 +164,21 @@ function Base.grow_to!(dest::MultiDict{K,V}, itr, st) where V where K
         else
             new_md = empty(dest, promote_typejoin(K,typeof(k)), promote_typejoin(V,typeof(v)))
             merge!(new_md, dest)
-            new_md[k] = v
+            insert!(new_md, k, v)
             return grow_to!(new_md, itr, st)
         end
         y = iterate(itr, st)
     end
     return dest
+end
+
+function Base.merge!(md::MultiDict, others::MultiDict...)
+    for other in others
+        for (k,vs) in other
+            for v in vs
+                insert!(md, k, v)
+            end
+        end
+    end
+    return md
 end

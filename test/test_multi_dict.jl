@@ -1,3 +1,6 @@
+using Test
+using DataStructures
+
 @testset "MultiDict" begin
 
     @testset "Typed Constructors" begin
@@ -49,6 +52,11 @@
         @test isa(MultiDict(PVS), MultiDict{Int,Array{Float64,1}})
         @test isa(MultiDict(PVS, PVS), MultiDict{Int,Array{Float64,1}})
         @test isa(MultiDict([PVS, PVS]), MultiDict{Int,Array{Float64,1}})
+
+        # Un-promotable types
+        @test isa(MultiDict(1=>2, 1=>"hello"), MultiDict{Int,Any})
+        @test isa(MultiDict(1=>2, "hi"=>"hello"), MultiDict{Any,Any})
+        @test MultiDict(1=>2, "hi"=>"hello") == MultiDict([1=>2, "hi"=>"hello"]) == MultiDict([(1,2), ("hi"=>"hello")])
 
         # Generators
         xs = [1.0,2.0]
