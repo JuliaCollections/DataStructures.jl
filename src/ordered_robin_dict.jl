@@ -205,8 +205,6 @@ OrderedRobinDict{String,Int64} with 4 entries:
   "d" => 4
 ```
 """
-get!(collection, key, default)
-
 function get!(h::OrderedRobinDict{K,V}, key0, default) where {K,V}
     index = get(h.dict, key0, -2)
     index > 0 && return h.vals[index]
@@ -229,8 +227,6 @@ get!(dict, key) do
 end
 ```
 """
-get!(f::Function, collection, key)
-
 function get!(default::Base.Callable, h::OrderedRobinDict{K,V}, key0) where {K,V}
     index = get(h.dict, key0, -2)
     index > 0 && return @inbounds h.vals[index]
@@ -262,8 +258,6 @@ julia> get(d, "c", 3)
 3
 ```
 """
-get(collection, key, default)
-
 function get(h::OrderedRobinDict{K,V}, key, default) where {K,V}
     index = get(h.dict, key, -1)
     return (index < 0) ? default : @inbounds h.vals[index]::V
@@ -283,8 +277,6 @@ get(dict, key) do
 end
 ```
 """
-get(::Function, collection, key)
-
 function get(default::Base.Callable, h::OrderedRobinDict{K,V}, key) where {K,V}
     index = get(h.dict, key, -1)
     return (index < 0) ? default() : @inbounds h.vals[index]::V
@@ -383,8 +375,6 @@ julia> pop!(d, "e", 4)
 4
 ```
 """
-pop!(collection, key, default)
-
 function pop!(h::OrderedRobinDict, key, default)
     index = get(h.dict, key, -1)
     (index > 0) ? _pop(h, index) : default
