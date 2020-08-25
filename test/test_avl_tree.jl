@@ -131,4 +131,15 @@
             node = node.leftChild
         end
     end
+
+    @testset "rank" begin 
+        t9 = AVLTree{Int}()
+        for i in 1:20
+            push!(t9, i)
+        end
+        for i in 1:20
+            @test rank(t9, i) == i
+        end
+        @test_throws KeyError rank(t9, 21)
+    end
 end

@@ -228,6 +228,27 @@ function Base.delete!(tree::AVLTree{K}, d::K) where K
     return tree
 end
 
+"""
+    rank(tree::AVLTree, key)
+
+Returns the rank of `key` present in the `tree`, if it present. A KeyError is thrown if `key` is not present.
+"""
+function rank(tree::AVLTree{K}, key::K) where K
+    !haskey(tree, key) && throw(KeyError(key))
+    node = tree.root
+    rank = 0
+    while node.data != key
+        if (node.data < key)
+            rank += (1 + get_subsize(node.leftChild))
+            node = node.rightChild
+        else
+            node = node.leftChild
+        end
+    end 
+    rank += (1 + get_subsize(node.leftChild))
+    return rank
+end
+
 function Base.getindex(tree::AVLTree{K}, ind::Integer) where K 
     @boundscheck (1 <= ind <= tree.count) || throw(BoundsError("$ind should be in between 1 and $(tree.count)"))
     function traverse_tree(node::AVLTreeNode_or_null, idx)

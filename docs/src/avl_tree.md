@@ -27,6 +27,9 @@ julia> for k in 1:2:10
 
 julia> haskey(tree, 5)
 false
+
+julia> rank(tree, 17)
+4
 ```
 
 ```@meta
