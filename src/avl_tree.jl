@@ -6,9 +6,10 @@ mutable struct AVLTreeNode{K}
     height::Int8
     leftChild::Union{AVLTreeNode{K}, Nothing}
     rightChild::Union{AVLTreeNode{K}, Nothing}
+    subsize::Int32
     data::K
 
-    AVLTreeNode{K}(d::K) where K = new{K}(1, nothing, nothing, d)
+    AVLTreeNode{K}(d::K) where K = new{K}(1, nothing, nothing, 1, d)
 end
 
 AVLTreeNode(d) = AVLTreeNode{Any}(d)
@@ -41,6 +42,19 @@ end
 # one added the maximum of the height of the left subtree and right subtree
 compute_height(node::AVLTreeNode) = 1 + max(get_height(node.leftChild), get_height(node.rightChild))
 
+get_subsize(node::AVLTreeNode_or_null) = (node == nothing) ? 0 : node.subsize
+
+# compute the subtree size
+function compute_subtree_size(node::AVLTreeNode_or_null)
+    if node == nothing
+        return 0
+    else
+        L = get_subsize(node.leftChild)
+        R = get_subsize(node.rightChild)
+        return (L + R + 1)
+    end
+end
+
 """
     left_rotate(node_x::AVLTreeNode)
 
@@ -53,6 +67,8 @@ function left_rotate(z::AVLTreeNode)
     z.rightChild = α
     z.height = compute_height(z)
     y.height = compute_height(y)
+    z.subsize = compute_subtree_size(z)
+    y.subsize = compute_subtree_size(y)
     return y
 end
 
@@ -68,6 +84,8 @@ function right_rotate(z::AVLTreeNode)
     z.leftChild = α
     z.height = compute_height(z)
     y.height = compute_height(y)
+    z.subsize = compute_subtree_size(z)
+    y.subsize = compute_subtree_size(y)
     return y
 end
 
@@ -118,6 +136,7 @@ function Base.insert!(tree::AVLTree{K}, d::K) where K
             node.rightChild = insert_node(node.rightChild, key)
         end
         
+        node.subsize = compute_subtree_size(node)
         node.height = compute_height(node)
         balance = get_balance(node)
         
@@ -176,7 +195,8 @@ function Base.delete!(tree::AVLTree{K}, d::K) where K
                 node.rightChild = delete_node!(node.rightChild, result.data)
             end 
         end
-
+        
+        node.subsize = compute_subtree_size(node)
         node.height = compute_height(node)
         balance = get_balance(node)
 
@@ -197,7 +217,7 @@ function Base.delete!(tree::AVLTree{K}, d::K) where K
                 return left_rotate(node)
             end
         end 
-
+        
         return node
     end
 
@@ -210,17 +230,20 @@ function Base.delete!(tree::AVLTree{K}, d::K) where K
     return tree
 end
 
-function Base.getindex(tree::AVLTree{K}, ind) where K 
+function Base.getindex(tree::AVLTree{K}, ind::Integer) where K 
     @boundscheck (1 <= ind <= tree.count) || throw(BoundsError("$ind should be in between 1 and $(tree.count)"))
-    function traverse_tree_inorder(node::Union{AVLTreeNode, Nothing})
+    function traverse_tree(node::AVLTreeNode_or_null, idx)
         if (node != nothing)
-            left = traverse_tree_inorder(node.leftChild)
-            right = traverse_tree_inorder(node.rightChild)
-            append!(push!(left, node.data), right)
-        else
-            return K[]
+            L = get_subsize(node.leftChild)
+            if idx <= L
+                return traverse_tree(node.leftChild, idx)
+            elseif idx == L + 1
+                return node.data
+            else
+                return traverse_tree(node.rightChild, idx - L - 1)
+            end
         end
     end
-    arr = traverse_tree_inorder(tree.root) 
-    return @inbounds arr[ind]
+    value = traverse_tree(tree.root, ind) 
+    return value
 end
