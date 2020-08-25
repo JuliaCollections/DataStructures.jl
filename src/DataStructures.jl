@@ -107,6 +107,7 @@ module DataStructures
     include("dibit_vector.jl")
     include("avl_tree.jl")
     include("red_black_tree.jl")
-
+    include("splay_tree.jl")
     include("deprecations.jl")
+
 end
