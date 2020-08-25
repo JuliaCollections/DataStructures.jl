@@ -16,11 +16,13 @@ SplayTreeNode() = SplayTreeNode{Any}()
 
 mutable struct SplayTree{K}
     root::SplayTreeNode_or_null{K}
+    count::Int
 
-    SplayTree{K}() where K = new{K}(nothing)
+    SplayTree{K}() where K = new{K}(nothing, 0)
 end 
 
-SplayTree(d) = SplayTree{Any}(d)
+Base.length(tree::SplayTree) = tree.count
+
 SplayTree() = SplayTree{Any}()
 
 function left_rotate!(tree::SplayTree, node_x::SplayTreeNode)
@@ -98,8 +100,9 @@ function splay!(tree::SplayTree, node_x::SplayTreeNode)
     end
 end
 
-function maximum(node::SplayTreeNode)
-    while !isa(node.rightChild, Nothing)
+function maximum_node(node::SplayTreeNode_or_null)
+    (node == nothing) && return node
+    while node.rightChild != nothing
         node = node.rightChild
     end
     return node
@@ -111,7 +114,7 @@ function _join(tree::SplayTree ,s::SplayTreeNode_or_null, t::SplayTreeNode_or_nu
     elseif isa(t, Nothing)
         return s
     else
-        x = maximum(s)
+        x = maximum_node(s)
         splay!(tree, x)
         x.rightChild = t
         t.parent = x
@@ -119,33 +122,26 @@ function _join(tree::SplayTree ,s::SplayTreeNode_or_null, t::SplayTreeNode_or_nu
     end
 end
 
-function search_by_node(node::SplayTreeNode_or_null{K}, d::K) where K
-    while !isa(node, Nothing)
-        if node.data == d
-            break
-        elseif node.data < d
-            if !isa(node.rightChild, Nothing)
-                node = node.rightChild
-            else
-                break
-            end
+function search_node(tree::SplayTree{K}, d::K) where K
+    node = tree.root
+    prev = nothing
+    while node != nothing && node.data != d
+        prev = node
+        if node.data < d
+            node = node.rightChild
         else
-            if isa(node.leftChild, Nothing)
-                node = node.leftChild
-            else
-                break
-            end
+            node = node.leftChild
         end
     end
-    return node
+    return (node == nothing) ? prev : node
 end
 
-function search_key(tree::SplayTree{K}, d::K) where K
+function haskey(tree::SplayTree{K}, d::K) where K
     node = tree.root
     if isa(node, Nothing)
         return false
     else
-        node = search_by_node(node, d)
+        node = search_node(tree, d)
         isa(node, Nothing) && return false
         is_found = (node.data == d)
         is_found && splay!(tree, node)
@@ -153,10 +149,13 @@ function search_key(tree::SplayTree{K}, d::K) where K
     end
 end
 
+
+Base.in(key, tree::SplayTree) = haskey(tree, key)
+
 function Base.delete!(tree::SplayTree{K}, d::K) where K
     node = tree.root
-    x = search_by_node(node, d)
-    isa(x, Nothing) && return tree
+    x = search_node(tree, d)
+    (x ==  nothing) && return tree
     t = nothing
     s = nothing 
     
@@ -175,11 +174,12 @@ function Base.delete!(tree::SplayTree{K}, d::K) where K
     end
 
     tree.root = _join(tree, s.leftChild, t)
+    tree.count -= 1
     return tree
 end
 
 function Base.insert!(tree::SplayTree{K}, d::K) where K
-    is_present = search_by_node(tree.root, d)
+    is_present = search_node(tree, d)
     if !isa(is_present, Nothing) && (is_present.data == d)
         return tree
     end
@@ -206,5 +206,26 @@ function Base.insert!(tree::SplayTree{K}, d::K) where K
         y.rightChild = node
     end
     splay!(tree, node)
+    tree.count += 1
     return tree
+end
+
+function Base.push!(tree::SplayTree{K}, key0) where K
+    key = convert(K, key0)
+    insert!(tree, key)
+end
+
+function Base.getindex(tree::SplayTree{K}, ind) where K 
+    @boundscheck (1 <= ind <= tree.count) || throw(BoundsError("$ind should be in between 1 and $(tree.count)"))
+    function traverse_tree_inorder(node::SplayTreeNode_or_null)
+        if (node != nothing)
+            left = traverse_tree_inorder(node.leftChild)
+            right = traverse_tree_inorder(node.rightChild)
+            append!(push!(left, node.data), right)
+        else
+            return K[]
+        end
+    end
+    arr = traverse_tree_inorder(tree.root) 
+    return @inbounds arr[ind]
 end

@@ -60,6 +60,7 @@ module DataStructures
     export DiBitVector
 
     export RBTree, search_node, minimum_node
+    export SplayTree, maximum_node
 
     export findkey
 
@@ -113,6 +114,7 @@ module DataStructures
 
     include("dibit_vector.jl")
     include("red_black_tree.jl")
+    include("splay_tree.jl")
     include("deprecations.jl")
 
 end
