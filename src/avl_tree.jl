@@ -229,11 +229,11 @@ function Base.delete!(tree::AVLTree{K}, d::K) where K
 end
 
 """
-    rank(tree::AVLTree, key)
+    sorted_rank(tree::AVLTree, key)
 
 Returns the rank of `key` present in the `tree`, if it present. A KeyError is thrown if `key` is not present.
 """
-function rank(tree::AVLTree{K}, key::K) where K
+function sorted_rank(tree::AVLTree{K}, key::K) where K
     !haskey(tree, key) && throw(KeyError(key))
     node = tree.root
     rank = 0

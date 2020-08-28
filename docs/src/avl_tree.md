@@ -18,7 +18,7 @@ julia> for k in 1:2:20
 julia> haskey(tree, 3)
 true
 
-julia> tree[4] # this operation is O(log n)
+julia> tree[4] # time complexity of this operation is O(log n)
 7
 
 julia> for k in 1:2:10
@@ -28,7 +28,7 @@ julia> for k in 1:2:10
 julia> haskey(tree, 5)
 false
 
-julia> rank(tree, 17)
+julia> sorted_rank(tree, 17) # used for finding rank of the key
 4
 ```
 

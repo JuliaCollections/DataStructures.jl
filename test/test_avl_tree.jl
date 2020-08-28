@@ -138,8 +138,8 @@
             push!(t9, i)
         end
         for i in 1:20
-            @test rank(t9, i) == i
+            @test sorted_rank(t9, i) == i
         end
-        @test_throws KeyError rank(t9, 21)
+        @test_throws KeyError sorted_rank(t9, 21)
     end
 end
