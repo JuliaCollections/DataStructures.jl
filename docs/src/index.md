@@ -23,6 +23,7 @@ This package implements a variety of data structures, including
 -   SparseIntSet
 -   DiBitVector
 -   Red Black Tree
+-   Splay Tree
 
 ## Contents
 
