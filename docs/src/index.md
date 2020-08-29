@@ -25,6 +25,7 @@ This package implements a variety of data structures, including
 -   DiBitVector
 -   Red Black Tree
 -   AVL Tree
+-   Splay Tree
 
 ## Contents
 

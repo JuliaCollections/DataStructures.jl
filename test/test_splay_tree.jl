@@ -105,8 +105,8 @@
         for i in 1:10
             @test t6[i] == i
         end
-        @test_throws BoundsError getindex(t6, 0)
-        @test_throws BoundsError getindex(t6, 11)
+        @test_throws KeyError getindex(t6, 0)
+        @test_throws KeyError getindex(t6, 11)
     end
 
     @testset "key conversion in push!" begin

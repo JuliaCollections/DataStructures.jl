@@ -216,7 +216,7 @@ function Base.push!(tree::SplayTree{K}, key0) where K
 end
 
 function Base.getindex(tree::SplayTree{K}, ind) where K 
-    @boundscheck (1 <= ind <= tree.count) || throw(BoundsError("$ind should be in between 1 and $(tree.count)"))
+    @boundscheck (1 <= ind <= tree.count) || throw(KeyError("$ind should be in between 1 and $(tree.count)"))
     function traverse_tree_inorder(node::SplayTreeNode_or_null)
         if (node != nothing)
             left = traverse_tree_inorder(node.leftChild)
