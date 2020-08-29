@@ -185,5 +185,8 @@ import DataStructures: SparseIntSet
 	    end
 	    @test s1 == 4*24
 	end
+        if VERSION >= v"1.1"
+            @test zip() isa Iterators.Zip  # issue 621
+        end
 
 end

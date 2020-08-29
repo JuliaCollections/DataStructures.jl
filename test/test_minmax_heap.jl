@@ -4,6 +4,16 @@ using Base.Order: Forward, Reverse
 
 @testset "Binary MinMax Heaps" begin
 
+    @testset "construct heap" begin
+        vs = [10, 4, 6, 1, 16, 2, 20, 17, 13, 5]
+
+        BinaryMinMaxHeap{Int}()
+        BinaryMinMaxHeap{Int}(vs)
+        BinaryMinMaxHeap(vs)
+
+        @test true
+    end
+
     @testset "is_minmax_heap tests" begin
         mmheap = [0, 10, 9, 2, 3, 4, 5]
         @test is_minmax_heap(mmheap)
@@ -28,7 +38,7 @@ using Base.Order: Forward, Reverse
             h = BinaryMinMaxHeap(vs)
             @test length(h) == 10
             @test !isempty(h)
-            @test top(h) == minimum(h) == 1
+            @test first(h) == minimum(h) == 1
             @test maximum(h) == 20
             @test is_minmax_heap(h.valtree)
         end
@@ -48,7 +58,7 @@ using Base.Order: Forward, Reverse
             @test isempty(h)
 
             push!(h, 1)
-            @test top(h) == 1
+            @test first(h) == 1
             push!(h, 2)
             @test is_minmax_heap(h.valtree)
             push!(h, 10)
@@ -163,10 +173,8 @@ using Base.Order: Forward, Reverse
         h = BinaryMinMaxHeap{Int}()
         @test_throws ArgumentError pop!(h)
         @test_throws ArgumentError popmin!(h)
-
         @test_throws ArgumentError popmax!(h)
 
-        @test_throws ArgumentError top(h)
         @test_throws ArgumentError minimum(h)
         @test_throws ArgumentError maximum(h)
 

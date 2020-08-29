@@ -6,17 +6,17 @@
 A accumulator is a data structure that maintains an accumulated total for each key.
 The particular case where those totals are integers is a counter.
 """
-struct Accumulator{T, V<:Number} <: AbstractDict{T,V}
-    map::Dict{T,V}
+struct Accumulator{T, V <: Number} <: AbstractDict{T, V}
+    map::Dict{T, V}
 end
 
 ## constructors
 
-Accumulator{T, V}() where {T,V<:Number} = Accumulator{T,V}(Dict{T,V}())
+Accumulator{T, V}() where {T, V <: Number} = Accumulator{T, V}(Dict{T, V}())
 Accumulator(map::AbstractDict) = Accumulator(Dict(map))
 Accumulator(ps::Pair...) = Accumulator(Dict(ps))
 
-counter(T::Type) = Accumulator{T,Int}()
+counter(T::Type) = Accumulator{T, Int}()
 counter(dct::AbstractDict{T, V}) where {T, V<:Integer} = Accumulator{T, V}(Dict(dct))
 
 """
@@ -33,7 +33,7 @@ function counter(seq)
 end
 
 eltype_for_accumulator(seq::T) where T = eltype(T)
-function eltype_for_accumulator(seq::T) where {T<:Base.Generator}
+function eltype_for_accumulator(seq::Base.Generator)
     Base.@default_eltype(seq)
 end
 
@@ -73,7 +73,7 @@ iterate(ct::Accumulator, s...) = iterate(ct.map, s...)
 Increments the count for `x` by `v` (defaulting to one)
 """
 inc!(ct::Accumulator, x, v::Number) = (ct[x] += v)
-inc!(ct::Accumulator{T,V}, x) where {T,V} = inc!(ct, x, one(V))
+inc!(ct::Accumulator{T, V}, x) where {T, V} = inc!(ct, x, one(V))
 
 # inc! is preferred over push!, but we need to provide push! for the Bag interpreation
 # which is used by classified_collections.jl
@@ -105,7 +105,7 @@ function merge!(ct::Accumulator, other::Accumulator)
     for (x, v) in other
         inc!(ct, x, v)
     end
-    ct
+    return ct
 end
 
 
@@ -184,7 +184,7 @@ nsmallest(acc::Accumulator, n) = partialsort!(collect(acc), 1:n, by=last, rev=fa
 ###########################################################
 ## Multiset operations
 
-struct MultiplicityException{K,V} <: Exception
+struct MultiplicityException{K, V} <: Exception
     k::K
     v::V
 end
@@ -225,7 +225,7 @@ end
 Base.intersect(a::Accumulator, b::Accumulator, c::Accumulator...) = insersect(intersect(a,b), c...)
 Base.intersect(a::Accumulator, b::Accumulator) = intersect!(copy(a), b)
 function Base.intersect!(a::Accumulator, b::Accumulator)
-    for k in union(keys(a), keys(b)) # union not interection as we want to check both multiplicties
+    for k in union(keys(a), keys(b)) # union not interection as we want to check both multiplicities
         va = a[k]
         vb = b[k]
         va >= 0 || throw(MultiplicityException(k, va))

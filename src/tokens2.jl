@@ -120,7 +120,7 @@ end
     m.bt.data[i.address] = KDRec{keytype(m),valtype(m)}(m.bt.data[i.address].parent,
                                                          m.bt.data[i.address].k,
                                                          convert(valtype(m),d_))
-    m
+    return m
 end
 
 @inline function setindex!(m::SortedMultiDict,
@@ -130,7 +130,7 @@ end
     m.bt.data[i.address] = KDRec{keytype(m),valtype(m)}(m.bt.data[i.address].parent,
                                                          m.bt.data[i.address].k,
                                                          convert(valtype(m),d_))
-    m
+    return m
 end
 
 

@@ -1,14 +1,14 @@
 # FIFO queue
 
-mutable struct Queue{T}
-    store::Deque{T}
-end
-
 """
     Queue{T}([blksize::Integer=1024])
 
 Create a `Queue` object containing elements of type `T`.
 """
+mutable struct Queue{T}
+    store::Deque{T}
+end
+
 Queue{T}() where {T} = Queue(Deque{T}())
 Queue{T}(blksize::Integer) where {T} = Queue(Deque{T}(blksize))
 
@@ -26,7 +26,7 @@ Inserts the value `x` to the end of the queue `s`.
 """
 function enqueue!(s::Queue, x)
     push!(s.store, x)
-    s
+    return s
 end
 
 """

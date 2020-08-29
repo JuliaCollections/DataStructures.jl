@@ -5,14 +5,18 @@ module DataStructures
                  in, haskey, keys, merge, copy, cat, collect,
                  push!, pop!, pushfirst!, popfirst!, insert!, lastindex,
                  union!, delete!, similar, sizehint!, empty, append!,
-                 isequal, hash, map, filter, reverse,
+                 isequal, hash, map, filter, reverse, peek,
                  first, last, eltype, getkey, values, sum,
                  merge, merge!, lt, Ordering, ForwardOrdering, Forward,
                  ReverseOrdering, Reverse, Lt,
                  isless, union, intersect, symdiff, setdiff, issubset,
                  searchsortedfirst, searchsortedlast, in, resize!,
-                 eachindex, keytype, valtype, minimum, maximum, size
+                 eachindex, keytype, valtype, minimum, maximum, size,
+                 zero, checkbounds, filter!, isbitstype, isbitsunion, 
+                 isiterable, dict_with_eltype, KeySet, Callable, _tablesz
 
+
+    using Compat # Provides Base.Order.ReverseOrdering(). May remove this line with julia 1.4
     using OrderedCollections
     import OrderedCollections: filter, filter!, isordered
     export OrderedDict, OrderedSet, LittleDict
@@ -21,25 +25,21 @@ module DataStructures
     export complement, complement!
 
     export Deque, Stack, Queue, CircularDeque
-    export deque, enqueue!, dequeue!, dequeue_pair!, update!, reverse_iter
+    export enqueue!, dequeue!, dequeue_pair!, update!, reverse_iter
     export capacity, num_blocks, top_with_handle, sizehint!
 
     export Accumulator, counter, reset!, inc!, dec!
 
-    export ClassifiedCollections
-    export classified_lists, classified_sets, classified_counters
+    export IntDisjointSets, DisjointSets, num_groups, find_root!, in_same_set, root_union!
+    export FenwickTree, SuffixFenwickTree, inc!, dec!, incdec!, prefixsum, suffixsum
 
-    export IntDisjointSets, DisjointSets, num_groups, find_root, in_same_set, root_union!
-
-    export FenwickTree, SuffixFenwickTree, length, inc!, dec!, incdec!, prefixsum, suffixsum
-
-    export AbstractHeap, compare, extract_all!
+    export AbstractHeap, compare, extract_all!, extract_all_rev!
     export BinaryHeap, BinaryMinHeap, BinaryMaxHeap, nlargest, nsmallest
     export MutableBinaryHeap, MutableBinaryMinHeap, MutableBinaryMaxHeap
     export heapify!, heapify, heappop!, heappush!, isheap
     export BinaryMinMaxHeap, popmin!, popmax!, popall!
 
-    export Trie, subtrie, keys_with_prefix, path
+    export Trie, subtrie, keys_with_prefix, partial_path
 
     export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
            reverse
@@ -56,10 +56,15 @@ module DataStructures
 
     export MultiDict, enumerateall
     export RobinDict
+    export OrderedRobinDict, isordered
+
+    export DiBitVector
+
+    export RBTree, search_node, minimum_node
+    export AVLTree, sorted_rank
 
     export findkey
 
-    include("deprecations.jl")
     include("delegate.jl")
 
     include("deque.jl")
@@ -67,7 +72,6 @@ module DataStructures
     include("stack.jl")
     include("queue.jl")
     include("accumulator.jl")
-    include("classified_collections.jl")
     include("disjoint_set.jl")
     include("heaps.jl")
 
@@ -93,6 +97,7 @@ module DataStructures
     include("tokens2.jl")
     include("container_loops.jl")
     include("robin_dict.jl")
+    include("ordered_robin_dict.jl")
     export
         CircularBuffer,
         capacity,
@@ -107,4 +112,10 @@ module DataStructures
     include("priorityqueue.jl")
     include("sparse_int_set.jl")
     export SparseIntSet
+
+    include("dibit_vector.jl")
+    include("avl_tree.jl")
+    include("red_black_tree.jl")
+
+    include("deprecations.jl")
 end

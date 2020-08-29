@@ -1,3 +1,3 @@
-@deprecate front(x) first(x)
-@deprecate back(x) last(x)
-@deprecate top(x) first(x)
+# 0.18 deprecations. Remove before releasing 0.19
+@deprecate path(t::Trie, str::AbstractString) partial_path(t::Trie, str::AbstractString)
+@deprecate find_root find_root!

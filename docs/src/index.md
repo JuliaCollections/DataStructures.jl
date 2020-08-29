@@ -14,13 +14,16 @@ This package implements a variety of data structures, including
 -   Binary Heap
 -   Mutable Binary Heap
 -   Ordered Dicts and Sets
--   RobinDict (implemented with [Robin Hood Hashing](https://cs.uwaterloo.ca/research/tr/1986/CS-86-14.pdf))
+-   RobinDict and OrderedRobinDict (implemented with [Robin Hood Hashing](https://cs.uwaterloo.ca/research/tr/1986/CS-86-14.pdf))
 -   Dictionaries with Defaults
 -   Trie
 -   Linked List and Mutable Linked List
 -   Sorted Dict, Sorted Multi-Dict and Sorted Set
 -   DataStructures.IntSet
 -   SparseIntSet
+-   DiBitVector
+-   Red Black Tree
+-   AVL Tree
 
 ## Contents
 
@@ -44,6 +47,9 @@ Pages = [
     "mutable_linked_list.md",
     "intset.md",
     "sorted_containers.md",
-    "sparse_int_set.md"
+    "sparse_int_set.md",
+    "dibit_vector.md",
+    "red_black_tree.md",
+    "avl_tree.md"
 ]
 ```
