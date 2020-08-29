@@ -1,6 +1,6 @@
 # This contains code that was formerly a part of Julia. License is MIT: http://julialang.org/license
 
-import Base.Order: Forward, Ordering, lt
+using Base.Order: Forward, Ordering, lt
 
 
 # Heap operations on flat arrays

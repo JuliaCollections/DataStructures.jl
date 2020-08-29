@@ -37,28 +37,28 @@ function MutableLinkedList{T}(elts...) where T
     return l
 end
 
-iterate(l::MutableLinkedList) = l.len == 0 ? nothing : (l.node.next.data, l.node.next.next)
-iterate(l::MutableLinkedList, n::ListNode) = n === l.node ? nothing : (n.data, n.next)
+Base.iterate(l::MutableLinkedList) = l.len == 0 ? nothing : (l.node.next.data, l.node.next.next)
+Base.iterate(l::MutableLinkedList, n::ListNode) = n === l.node ? nothing : (n.data, n.next)
 
-isempty(l::MutableLinkedList) = l.len == 0
-length(l::MutableLinkedList) = l.len
-collect(l::MutableLinkedList{T}) where T = T[x for x in l]
+Base.isempty(l::MutableLinkedList) = l.len == 0
+Base.length(l::MutableLinkedList) = l.len
+Base.collect(l::MutableLinkedList{T}) where T = T[x for x in l]
 Base.eltype(::Type{<:MutableLinkedList{T}}) where T = T
-lastindex(l::MutableLinkedList) = l.len
+Base.lastindex(l::MutableLinkedList) = l.len
 
-function first(l::MutableLinkedList)
+function Base.first(l::MutableLinkedList)
     isempty(l) && throw(ArgumentError("List is empty"))
     return l.node.next.data
 end
 
-function last(l::MutableLinkedList)
+function Base.last(l::MutableLinkedList)
     isempty(l) && throw(ArgumentError("List is empty"))
     return l.node.prev.data
 end
 
-==(l1::MutableLinkedList{T}, l2::MutableLinkedList{S}) where {T,S} = false
+Base.:(==)(l1::MutableLinkedList{T}, l2::MutableLinkedList{S}) where {T,S} = false
 
-function ==(l1::MutableLinkedList{T}, l2::MutableLinkedList{T}) where T
+function Base.:(==)(l1::MutableLinkedList{T}, l2::MutableLinkedList{T}) where T
     length(l1) == length(l2) || return false
     for (i, j) in zip(l1, l2)
         i == j || return false
@@ -66,7 +66,7 @@ function ==(l1::MutableLinkedList{T}, l2::MutableLinkedList{T}) where T
     return true
 end
 
-function map(f::Base.Callable, l::MutableLinkedList{T}) where T
+function Base.map(f::Base.Callable, l::MutableLinkedList{T}) where T
     if isempty(l) && f isa Function
         S = Core.Compiler.return_type(f, (T,))
         return MutableLinkedList{S}()
@@ -89,7 +89,7 @@ function map(f::Base.Callable, l::MutableLinkedList{T}) where T
     end
 end
 
-function filter(f::Function, l::MutableLinkedList{T}) where T
+function Base.filter(f::Function, l::MutableLinkedList{T}) where T
     l2 = MutableLinkedList{T}()
     for h in l
         if f(h)
@@ -99,7 +99,7 @@ function filter(f::Function, l::MutableLinkedList{T}) where T
     return l2
 end
 
-function reverse(l::MutableLinkedList{T}) where T
+function Base.reverse(l::MutableLinkedList{T}) where T
     l2 = MutableLinkedList{T}()
     for h in l
         pushfirst!(l2, h)
@@ -107,7 +107,7 @@ function reverse(l::MutableLinkedList{T}) where T
     return l2
 end
 
-function copy(l::MutableLinkedList{T}) where T
+function Base.copy(l::MutableLinkedList{T}) where T
     l2 = MutableLinkedList{T}()
     for h in l
         push!(l2, h)
@@ -115,7 +115,7 @@ function copy(l::MutableLinkedList{T}) where T
     return l2
 end
 
-function getindex(l::MutableLinkedList, idx::Int)
+function Base.getindex(l::MutableLinkedList, idx::Int)
     @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
     node = l.node
     for i in 1:idx
@@ -124,7 +124,7 @@ function getindex(l::MutableLinkedList, idx::Int)
     return node.data
 end
 
-function getindex(l::MutableLinkedList{T}, r::UnitRange) where T
+function Base.getindex(l::MutableLinkedList{T}, r::UnitRange) where T
     @boundscheck 0 < first(r) < last(r) <= l.len || throw(BoundsError(l, r))
     l2 = MutableLinkedList{T}()
     node = l.node
@@ -140,7 +140,7 @@ function getindex(l::MutableLinkedList{T}, r::UnitRange) where T
     return l2
 end
 
-function setindex!(l::MutableLinkedList{T}, data, idx::Int) where T
+function Base.setindex!(l::MutableLinkedList{T}, data, idx::Int) where T
     @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
     node = l.node
     for i in 1:idx
@@ -150,21 +150,21 @@ function setindex!(l::MutableLinkedList{T}, data, idx::Int) where T
     return l
 end
 
-function append!(l1::MutableLinkedList{T}, l2::MutableLinkedList{T}) where T
+function Base.append!(l1::MutableLinkedList{T}, l2::MutableLinkedList{T}) where T
     l1.node.prev.next = l2.node.next
     l2.node.next.prev = l1.node.prev
     l1.len += length(l2)
     return l1
 end
 
-function append!(l::MutableLinkedList, elts...)
+function Base.append!(l::MutableLinkedList, elts...)
     for elt in elts
         push!(l, elt)
     end
     return l
 end
 
-function delete!(l::MutableLinkedList, idx::Int)
+function Base.delete!(l::MutableLinkedList, idx::Int)
     @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
     node = l.node
     for i = 1:idx
@@ -178,7 +178,7 @@ function delete!(l::MutableLinkedList, idx::Int)
     return l
 end
 
-function delete!(l::MutableLinkedList, r::UnitRange)
+function Base.delete!(l::MutableLinkedList, r::UnitRange)
     @boundscheck 0 < first(r) < last(r) <= l.len || throw(BoundsError(l, r))
     node = l.node
     for i in 1:first(r)
@@ -196,7 +196,7 @@ function delete!(l::MutableLinkedList, r::UnitRange)
     return l
 end
 
-function push!(l::MutableLinkedList{T}, data) where T
+function Base.push!(l::MutableLinkedList{T}, data) where T
     oldlast = l.node.prev
     node = ListNode{T}(data)
     node.next = l.node
@@ -207,7 +207,7 @@ function push!(l::MutableLinkedList{T}, data) where T
     return l
 end
 
-function pushfirst!(l::MutableLinkedList{T}, data) where T
+function Base.pushfirst!(l::MutableLinkedList{T}, data) where T
     oldfirst = l.node.next
     node = ListNode{T}(data)
     node.prev = l.node
@@ -218,7 +218,7 @@ function pushfirst!(l::MutableLinkedList{T}, data) where T
     return l
 end
 
-function pop!(l::MutableLinkedList)
+function Base.pop!(l::MutableLinkedList)
     isempty(l) && throw(ArgumentError("List must be non-empty"))
     last = l.node.prev.prev
     data = l.node.prev.data
@@ -228,7 +228,7 @@ function pop!(l::MutableLinkedList)
     return data
 end
 
-function popfirst!(l::MutableLinkedList)
+function Base.popfirst!(l::MutableLinkedList)
     isempty(l) && throw(ArgumentError("List must be non-empty"))
     first = l.node.next.next
     data = l.node.next.data
@@ -238,12 +238,12 @@ function popfirst!(l::MutableLinkedList)
     return data
 end
 
-function show(io::IO, node::ListNode)
+function Base.show(io::IO, node::ListNode)
     x = node.data
     print(io, "$(typeof(node))($x)")
 end
 
-function show(io::IO, l::MutableLinkedList)
+function Base.show(io::IO, l::MutableLinkedList)
     print(io, typeof(l), '(')
     join(io, l, ", ")
     print(io, ')')

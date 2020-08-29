@@ -50,19 +50,19 @@ DefaultDictBase{K,V}(default::F; kwargs...) where {K,V,F} = DefaultDictBase{K,V,
 # Functions
 
 # most functions are simply delegated to the wrapped dictionary
-@delegate DefaultDictBase.d [ get, haskey, getkey, pop!,
-                              iterate, isempty, length ]
+@delegate DefaultDictBase.d [ Base.get, Base.haskey, Base.getkey, Base.pop!,
+                              Base.iterate, Base.isempty, Base.length ]
 
 # Some functions are delegated, but then need to return the main dictionary
 # NOTE: push! is not included below, because the fallback version just
 #       calls setindex!
-@delegate_return_parent DefaultDictBase.d [ delete!, empty!, setindex!, sizehint! ]
+@delegate_return_parent DefaultDictBase.d [ Base.delete!, Base.empty!, Base.setindex!, Base.sizehint! ]
 
-empty(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default; passkey=d.passkey)
+Base.empty(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default; passkey=d.passkey)
 
-getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
+Base.getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 
-function getindex(d::DefaultDictBase{K,V,F}, key) where {K,V,F<:Base.Callable}
+function Base.getindex(d::DefaultDictBase{K,V,F}, key) where {K,V,F<:Base.Callable}
     if d.passkey
         return get!(d.d, key) do
             d.default(key)
@@ -73,7 +73,6 @@ function getindex(d::DefaultDictBase{K,V,F}, key) where {K,V,F<:Base.Callable}
         end
     end
 end
-
 
 
 ################
@@ -119,34 +118,34 @@ for _Dict in [:Dict, :OrderedDict]
         ## Functions
 
         # Most functions are simply delegated to the wrapped DefaultDictBase object
-        @delegate $DefaultDict.d [ getindex, get, get!, haskey,
-                                   getkey, pop!, iterate,
-                                   isempty, length ]
+        @delegate $DefaultDict.d [ Base.getindex, Base.get, Base.get!, Base.haskey,
+                                   Base.getkey, Base.pop!, Base.iterate,
+                                   Base.isempty, Base.length ]
 
         # Some functions are delegated, but then need to return the main dictionary
         # NOTE: push! is not included below, because the fallback version just
         #       calls setindex!
-        @delegate_return_parent $DefaultDict.d [ delete!, empty!, setindex!, sizehint! ]
+        @delegate_return_parent $DefaultDict.d [ Base.delete!, Base.empty!, Base.setindex!, Base.sizehint! ]
 
         # NOTE: The second and third definition of push! below are only
         # necessary for disambiguating with the fourth, fifth, and sixth
         # definitions of push! below.
         # If these are removed, the second and third definitions can be
         # removed as well.
-        push!(d::$DefaultDict, p::Pair) = (setindex!(d.d, p.second, p.first); d)
-        push!(d::$DefaultDict, p::Pair, q::Pair) = push!(push!(d, p), q)
-        push!(d::$DefaultDict, p::Pair, q::Pair, r::Pair...) = push!(push!(push!(d, p), q), r...)
+        Base.push!(d::$DefaultDict, p::Pair) = (setindex!(d.d, p.second, p.first); d)
+        Base.push!(d::$DefaultDict, p::Pair, q::Pair) = push!(push!(d, p), q)
+        Base.push!(d::$DefaultDict, p::Pair, q::Pair, r::Pair...) = push!(push!(push!(d, p), q), r...)
 
-        push!(d::$DefaultDict, p) = (setindex!(d.d, p[2], p[1]); d)
-        push!(d::$DefaultDict, p, q) = push!(push!(d, p), q)
-        push!(d::$DefaultDict, p, q, r...) = push!(push!(push!(d, p), q), r...)
+        Base.push!(d::$DefaultDict, p) = (setindex!(d.d, p[2], p[1]); d)
+        Base.push!(d::$DefaultDict, p, q) = push!(push!(d, p), q)
+        Base.push!(d::$DefaultDict, p, q, r...) = push!(push!(push!(d, p), q), r...)
 
-        empty(d::$DefaultDict{K,V,F}) where {K,V,F} = $DefaultDict{K,V,F}(d.d.default)
-        in(key, v::Base.KeySet{K,T}) where {K,T<:$DefaultDict{K}} = key in keys(v.dict.d.d)
+        Base.empty(d::$DefaultDict{K,V,F}) where {K,V,F} = $DefaultDict{K,V,F}(d.d.default)
+        Base.in(key, v::Base.KeySet{K,T}) where {K,T<:$DefaultDict{K}} = key in keys(v.dict.d.d)
     end
 end
 
-isordered(::Type{T}) where {T<:DefaultOrderedDict} = true
+OrderedCollections.isordered(::Type{T}) where {T<:DefaultOrderedDict} = true
 
 ## This should be uncommented to provide a DefaultSortedDict
 
