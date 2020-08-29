@@ -33,7 +33,8 @@ tests = ["deprecations",
          "ordered_robin_dict",
          "dibit_vector",
          "red_black_tree",
-         "swiss_dict"
+         "swiss_dict",
+         "avl_tree"
         ]
 
 if length(ARGS) > 0

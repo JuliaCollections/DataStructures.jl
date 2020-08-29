@@ -60,6 +60,7 @@ module DataStructures
     export DiBitVector
 
     export RBTree, search_node, minimum_node
+    export AVLTree, sorted_rank
 
     export findkey
 
@@ -112,7 +113,8 @@ module DataStructures
     export SparseIntSet
 
     include("dibit_vector.jl")
+    include("avl_tree.jl")
     include("red_black_tree.jl")
-    include("deprecations.jl")
 
+    include("deprecations.jl")
 end
