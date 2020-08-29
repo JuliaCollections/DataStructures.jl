@@ -1,8 +1,3 @@
-import Base: setindex!, sizehint!, empty!, isempty, length, copy, empty,
-             getindex, getkey, haskey, iterate, @propagate_inbounds, ValueIterator,
-             pop!, delete!, get, get!, isbitstype, in, hashindex, isbitsunion,
-             isiterable, dict_with_eltype, KeySet, Callable, _tablesz, filter!
-
 const SWISS_DICT_LOAD_FACTOR = 0.75      
 const _u8x16 = NTuple{16, VecElement{UInt8}}
 
@@ -101,14 +96,14 @@ end
     return (hi, tag)
 end
 
-@propagate_inbounds function _slotget(slots::Vector{_u8x16}, i::Int)
+Base.@propagate_inbounds function _slotget(slots::Vector{_u8x16}, i::Int)
     @boundscheck 0 < i <= length(slots)*16 || throw(BoundsError(slots, 1 + (i-1)>>4))
     GC.@preserve slots begin
         return unsafe_load(convert(Ptr{UInt8}, pointer(slots)), i)
     end
 end
 
-@propagate_inbounds function _slotset!(slots::Vector{_u8x16},  v::UInt8, i::Int)
+Base.@propagate_inbounds function _slotset!(slots::Vector{_u8x16},  v::UInt8, i::Int)
    @boundscheck 0 < i <= length(slots)*16 || throw(BoundsError(slots, 1 + (i-1)>>4))
     GC.@preserve slots begin
         return unsafe_store!(convert(Ptr{UInt8}, pointer(slots)), v, i)
@@ -201,7 +196,7 @@ function _setindex!(h::SwissDict, v, key, index, tag)
 end
 
 function _delete!(h::SwissDict{K,V}, index) where {K,V}
-    #Caller is responsible for maybe shrinking the SwissDict after the deletion.
+    # Caller is responsible for maybe shrinking the SwissDict after the deletion.
     isbitstype(K) || isbitsunion(K) || ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.keys, index-1)
     isbitstype(V) || isbitsunion(V) || ccall(:jl_arrayunset, Cvoid, (Any, UInt), h.vals, index-1)
     isboundary = iszero(index & 0x0f) #boundaries: 16, 32, ...
@@ -212,7 +207,7 @@ function _delete!(h::SwissDict{K,V}, index) where {K,V}
 end
 
 
-#fast iteration over active slots.
+# fast iteration over active slots.
 function _iterslots(h::SwissDict, start::Int)
     i0 = ((start-1) & (length(h.keys)-1))>>4 + 1
     off = (start-1) & 0x0f
@@ -232,13 +227,13 @@ function _iterslots(h::SwissDict, state)
     return ((i-1)*16 + trailing_zeros(sl) + 1, (i, _blsr(sl)))
 end
 
-#Dictionary resize logic:
-#Guarantee 40% of buckets and 15% of entries free, and at least 25% of entries filled
-#growth when > 85% entries full or > 60% buckets full, shrink when <25% entries full.
-#>60% bucket full should be super rare outside of very bad hash collisions or
-#super long-lived Dictionaries (expected 0.85^16 = 7% buckets full at 85% entries full).
-#worst-case hysteresis: shrink at 25% vs grow at 30% if all hashes collide.
-#expected hysteresis is 25% to 42.5%.
+# Dictionary resize logic:
+# Guarantee 40% of buckets and 15% of entries free, and at least 25% of entries filled
+# growth when > 85% entries full or > 60% buckets full, shrink when <25% entries full.
+# >60% bucket full should be super rare outside of very bad hash collisions or
+# super long-lived Dictionaries (expected 0.85^16 = 7% buckets full at 85% entries full).
+# worst-case hysteresis: shrink at 25% vs grow at 30% if all hashes collide.
+# expected hysteresis is 25% to 42.5%.
 function maybe_rehash_grow!(h::SwissDict)
         sz = length(h.keys)
         if h.count > sz * SWISS_DICT_LOAD_FACTOR || (h.nbfull-1) * 10 > sz * 6
@@ -459,7 +454,7 @@ function delete!(h::SwissDict, key)
     return h
 end
 
-@propagate_inbounds function iterate(h::SwissDict, state = h.idxfloor)
+Base.@propagate_inbounds function iterate(h::SwissDict, state = h.idxfloor)
     is = _iterslots(h, state)
     is === nothing && return nothing
     i, s = is
@@ -467,7 +462,7 @@ end
     return (p, s)
 end
 
-@propagate_inbounds function iterate(v::Union{KeySet{<:Any, <:SwissDict}, ValueIterator{<:SwissDict}}, state=v.dict.idxfloor)
+Base.@propagate_inbounds function iterate(v::Union{KeySet{<:Any, <:SwissDict}, Base.ValueIterator{<:SwissDict}}, state=v.dict.idxfloor)
     is = _iterslots(v.dict, state)
     is === nothing && return nothing
     i, s = is

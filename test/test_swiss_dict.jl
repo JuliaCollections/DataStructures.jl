@@ -1,5 +1,3 @@
-include("../src/swiss_dict.jl")
-
 @testset "Constructors" begin
     h1 = SwissDict()
     @test length(h1) == 0
