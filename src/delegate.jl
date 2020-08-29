@@ -9,7 +9,7 @@ function unquote(e::QuoteNode)
     return e.value
 end
 
-macro delegate(source, targets)
+macro delegate(source::Expr, targets::Expr)
     typename = esc(source.args[1])
     fieldname = unquote(source.args[2])
     funcnames = targets.args
@@ -25,7 +25,7 @@ macro delegate(source, targets)
     return Expr(:block, fdefs...)
 end
 
-macro delegate_return_parent(source, targets)
+macro delegate_return_parent(source::Expr, targets::Expr)
     typename = esc(source.args[1])
     fieldname = unquote(source.args[2])
     funcnames = targets.args

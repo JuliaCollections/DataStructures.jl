@@ -61,6 +61,7 @@ module DataStructures
 
     export RBTree, search_node, minimum_node
     export SplayTree, maximum_node
+    export AVLTree, sorted_rank
 
     export findkey
 
@@ -113,8 +114,9 @@ module DataStructures
     export SparseIntSet
 
     include("dibit_vector.jl")
+    include("avl_tree.jl")
     include("red_black_tree.jl")
     include("splay_tree.jl")
-    include("deprecations.jl")
 
+    include("deprecations.jl")
 end
