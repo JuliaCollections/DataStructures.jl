@@ -84,7 +84,7 @@ in_same_set(s::IntDisjointSets{T}, x::T, y::T) where {T<:Integer} = find_root!(s
 Merge the subset containing x and that containing y into one
 and return the root of the new set.
 """
-function Base.union!(s::IntDisjointSets, x::Integer, y::Integer)
+function Base.union!(s::IntDisjointSets{T}, x::T, y::T) where {T<:Integer}
     parents = s.parents
     xroot = find_root_impl!(parents, x)
     yroot = find_root_impl!(parents, y)
