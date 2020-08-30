@@ -38,32 +38,32 @@ function eltype_for_accumulator(seq::Base.Generator)
 end
 
 
-copy(ct::Accumulator) = Accumulator(copy(ct.map))
+Base.copy(ct::Accumulator) = Accumulator(copy(ct.map))
 
-length(a::Accumulator) = length(a.map)
+Base.length(a::Accumulator) = length(a.map)
 
 ## retrieval
 
-get(ct::Accumulator, x, default) = get(ct.map, x, default)
+Base.get(ct::Accumulator, x, default) = get(ct.map, x, default)
 # need to allow user specified default in order to
 # correctly implement "informal" AbstractDict interface
 
-getindex(ct::Accumulator{T,V}, x) where {T,V} = get(ct.map, x, zero(V))
+Base.getindex(ct::Accumulator{T,V}, x) where {T,V} = get(ct.map, x, zero(V))
 
-setindex!(ct::Accumulator, x, v) = setindex!(ct.map, x, v)
+Base.setindex!(ct::Accumulator, x, v) = setindex!(ct.map, x, v)
 
 
-haskey(ct::Accumulator, x) = haskey(ct.map, x)
+Base.haskey(ct::Accumulator, x) = haskey(ct.map, x)
 
-keys(ct::Accumulator) = keys(ct.map)
+Base.keys(ct::Accumulator) = keys(ct.map)
 
-values(ct::Accumulator) = values(ct.map)
+Base.values(ct::Accumulator) = values(ct.map)
 
-sum(ct::Accumulator) = sum(values(ct.map))
+Base.sum(ct::Accumulator) = sum(values(ct.map))
 
 ## iteration
 
-iterate(ct::Accumulator, s...) = iterate(ct.map, s...)
+Base.iterate(ct::Accumulator, s...) = iterate(ct.map, s...)
 
 # manipulation
 
@@ -77,12 +77,11 @@ inc!(ct::Accumulator{T, V}, x) where {T, V} = inc!(ct, x, one(V))
 
 # inc! is preferred over push!, but we need to provide push! for the Bag interpreation
 # which is used by classified_collections.jl
-push!(ct::Accumulator, x) = inc!(ct, x)
-push!(ct::Accumulator, x, a::Number) = inc!(ct, x, a)
+Base.push!(ct::Accumulator, x) = inc!(ct, x)
+Base.push!(ct::Accumulator, x, a::Number) = inc!(ct, x, a)
 
 # To remove ambiguities related to Accumulator now being a subtype of AbstractDict
-push!(ct::Accumulator, x::Pair)  = inc!(ct, x)
-
+Base.push!(ct::Accumulator, x::Pair)  = inc!(ct, x)
 
 
 """
@@ -101,7 +100,7 @@ dec!(ct::Accumulator{T,V}, x) where {T,V} = dec!(ct, x, one(V))
 Merges the other counters into `ctl`,
 summing the counts for all elements.
 """
-function merge!(ct::Accumulator, other::Accumulator)
+function Base.merge!(ct::Accumulator, other::Accumulator)
     for (x, v) in other
         inc!(ct, x, v)
     end
@@ -109,7 +108,7 @@ function merge!(ct::Accumulator, other::Accumulator)
 end
 
 
-function merge!(ct1::Accumulator, others::Accumulator...)
+function Base.merge!(ct1::Accumulator, others::Accumulator...)
     for ct in others
         merge!(ct1,ct)
     end
@@ -124,7 +123,7 @@ Creates a new counter with total counts equal to the sum of the counts in the co
 
 See also merge!
 """
-function merge(ct1::Accumulator, others::Accumulator...)
+function Base.merge(ct1::Accumulator, others::Accumulator...)
     ct = copy(ct1)
     merge!(ct,others...)
 end
