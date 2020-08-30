@@ -41,6 +41,7 @@ Base.eltype(::Type{Stack{T}}) where T = T
 Get the top item from the stack. Sometimes called peek.
 """
 Base.first(s::Stack) = last(s.store)
+Base.last(s::Stack) = first(s.store)
 
 function Base.push!(s::Stack, x)
     push!(s.store, x)
@@ -51,13 +52,8 @@ Base.pop!(s::Stack) = pop!(s.store)
 
 Base.empty!(s::Stack) = (empty!(s.store); s)
 
-Base.iterate(st::Stack, s...) = iterate(reverse_iter(st.store), s...)
+Base.iterate(st::Stack, s...) = iterate(Iterators.reverse(st.store), s...)
 
-"""
-    reverse_iterate(s::Stack)
-
-Get a FILO iterator of a stack
-"""
-reverse_iter(s::Stack{T}) where {T} = DequeIterator{T}(s.store)
+Iterators.reverse(s::Stack{T}) where {T} = DequeIterator{T}(s.store)
 
 Base.:(==)(x::Stack, y::Stack) = x.store == y.store

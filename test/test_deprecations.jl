@@ -20,3 +20,24 @@ end
     hh = BinaryMinHeap{Float64}([1,2,3])
     @test top(hh) == 1
 end
+
+function test_reverse_iter(it::T) where T
+    arr = [i for i in it]
+    index = length(arr)
+    for i in reverse_iter(it)
+        @test arr[index] == i
+        index -= 1
+    end
+
+    @test reverse(arr) == [i for i in reverse_iter(it)]
+end
+@testset "reverse_iter" begin
+    @testset "Queue" begin
+        q = Queue{Int}(); enqueue!(q, 1); enqueue!(q, 2)
+        test_reverse_iter(q)
+    end
+    @testset "Stack" begin
+        s = Stack{Int}(); push!(s, 1); push!(s, 2)
+        test_reverse_iter(s)
+    end
+end
