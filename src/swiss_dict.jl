@@ -64,8 +64,8 @@ function SwissDict{K,V}(ps::Pair...) where {K, V}
 end
 SwissDict() = SwissDict{Any,Any}()
 SwissDict(kv::Tuple{}) = SwissDict()
-copy(d::SwissDict) = SwissDict(d)
-empty(d::SwissDict, ::Type{K}, ::Type{V}) where {K, V} = SwissDict{K, V}()
+Base.copy(d::SwissDict) = SwissDict(d)
+Base.empty(d::SwissDict, ::Type{K}, ::Type{V}) where {K, V} = SwissDict{K, V}()
 
 SwissDict(ps::Pair{K,V}...) where {K,V} = SwissDict{K,V}(ps)
 SwissDict(ps::Pair...)                  = SwissDict(ps)
@@ -73,11 +73,11 @@ SwissDict(ps::Pair...)                  = SwissDict(ps)
 function SwissDict(kv)
     try
         dict_with_eltype((K, V) -> SwissDict{K, V}, kv, eltype(kv))
-    catch
+    catch e
         if !isiterable(typeof(kv)) || !all(x->isa(x,Union{Tuple,Pair}),kv)
             throw(ArgumentError("SwissDict(kv): kv needs to be an iterator of tuples or pairs"))
         else
-            rethrow()
+            rethrow(e)
         end
     end
 end
@@ -274,7 +274,7 @@ function maybe_rehash_shrink!(h::SwissDict)
    end
 end
 
-function sizehint!(d::SwissDict, newsz)
+function Base.sizehint!(d::SwissDict, newsz)
     newsz = _tablesz(newsz*2)  # *2 for keys and values in same array
     oldsz = length(d.keys)
     # grow at least 25%
@@ -366,7 +366,7 @@ julia> A
 SwissDict{String,Int64} with 0 entries
 ```
 """
-function empty!(h::SwissDict{K,V}) where {K, V}
+function Base.empty!(h::SwissDict{K,V}) where {K, V}
     fill!(h.slots, _expand16(0x00))
     sz = length(h.keys)
     empty!(h.keys)
@@ -380,7 +380,7 @@ function empty!(h::SwissDict{K,V}) where {K, V}
     return h
 end
 
-function setindex!(h::SwissDict{K,V}, v0, key0) where {K, V}
+function Base.setindex!(h::SwissDict{K,V}, v0, key0) where {K, V}
     key = convert(K, key0)
     _setindex!(h, v0, key)
 end
@@ -424,7 +424,7 @@ SwissDict{String,Int64} with 4 entries:
   "d" => 4
 ```
 """
-get!(h::SwissDict{K,V}, key0, default) where {K,V} = get!(()->default, h, key0)
+Base.get!(h::SwissDict{K,V}, key0, default) where {K,V} = get!(()->default, h, key0)
 
 """
     get!(f::Function, collection, key)
@@ -440,7 +440,7 @@ get!(dict, key) do
 end
 ```
 """
-function get!(default::Callable, h::SwissDict{K,V}, key0) where {K, V}
+function Base.get!(default::Callable, h::SwissDict{K,V}, key0) where {K, V}
     key = convert(K, key0)
     return _get!(default, h, key)
 end
@@ -465,7 +465,7 @@ function _get!(default::Callable, h::SwissDict{K,V}, key::K) where {K, V}
     return v
 end
 
-function getindex(h::SwissDict{K,V}, key) where {K, V}
+function Base.getindex(h::SwissDict{K,V}, key) where {K, V}
     index = ht_keyindex(h, key)
     @inbounds return (index < 0) ? throw(KeyError(key)) : h.vals[index]::V
 end
@@ -487,7 +487,7 @@ julia> get(d, "c", 3)
 3
 ```
 """
-function get(h::SwissDict{K,V}, key, default) where {K, V}
+function Base.get(h::SwissDict{K,V}, key, default) where {K, V}
     index = ht_keyindex(h, key)
     @inbounds return (index < 0) ? default : h.vals[index]::V
 end
@@ -507,7 +507,7 @@ get(dict, key) do
 end
 ```
 """
-function get(default::Callable, h::SwissDict{K,V}, key) where {K, V}
+function Base.get(default::Callable, h::SwissDict{K,V}, key) where {K, V}
     index = ht_keyindex(h, key)
     @inbounds return (index < 0) ? default() : h.vals[index]::V
 end
@@ -531,8 +531,8 @@ julia> haskey(D, 'c')
 false
 ```
 """
-haskey(h::SwissDict, key) = (ht_keyindex(h, key) > 0)
-in(key, v::KeySet{<:Any, <:SwissDict}) = (ht_keyindex(v.dict, key) > 0)
+Base.haskey(h::SwissDict, key) = (ht_keyindex(h, key) > 0)
+Base.in(key, v::KeySet{<:Any, <:SwissDict}) = (ht_keyindex(v.dict, key) > 0)
 
 """
     getkey(collection, key, default)
@@ -553,9 +553,16 @@ julia> getkey(D, 'd', 'a')
 'a': ASCII/Unicode U+0061 (category Ll: Letter, lowercase)
 ```
 """
-function getkey(h::SwissDict{K,V}, key, default) where {K, V}
+function Base.getkey(h::SwissDict{K,V}, key, default) where {K, V}
     index = ht_keyindex(h, key)
     @inbounds return (index<0) ? default : h.keys[index]::K
+end
+
+function _pop!(h::SwissDict, index)
+    @inbounds val = h.vals[index]
+    _delete!(h, index)
+    maybe_rehash_shrink!(h)
+    return val
 end
 
 """
@@ -580,26 +587,17 @@ julia> pop!(d, "e", 4)
 4
 ```
 """
-pop!(collection, key, default)
-
-function _pop!(h::SwissDict, index)
-    @inbounds val = h.vals[index]
-    _delete!(h, index)
-    maybe_rehash_shrink!(h)
-    return val
-end
-
-function pop!(h::SwissDict, key)
+function Base.pop!(h::SwissDict, key)
     index = ht_keyindex(h, key)
     return index > 0 ? _pop!(h, index) : throw(KeyError(key))
 end
 
-function pop!(h::SwissDict, key, default)
+function Base.pop!(h::SwissDict, key, default)
     index = ht_keyindex(h, key)
     return index > 0 ? _pop!(h, index) : default
 end
 
-function pop!(h::SwissDict)
+function Base.pop!(h::SwissDict)
     isempty(h) && throw(ArgumentError("SwissDict must be non-empty"))
     is = _iterslots(h, h.idxfloor)
     @assert is !== nothing
@@ -628,7 +626,7 @@ SwissDict{String,Int64} with 1 entry:
   "a" => 1
 ```
 """
-function delete!(h::SwissDict, key)
+function Base.delete!(h::SwissDict, key)
     index = ht_keyindex(h, key)
     if index > 0
         _delete!(h, index)
@@ -637,7 +635,7 @@ function delete!(h::SwissDict, key)
     return h
 end
 
-Base.@propagate_inbounds function iterate(h::SwissDict, state = h.idxfloor)
+Base.@propagate_inbounds function Base.iterate(h::SwissDict, state = h.idxfloor)
     is = _iterslots(h, state)
     is === nothing && return nothing
     i, s = is
@@ -645,7 +643,7 @@ Base.@propagate_inbounds function iterate(h::SwissDict, state = h.idxfloor)
     return (p, s)
 end
 
-Base.@propagate_inbounds function iterate(v::Union{KeySet{<:Any, <:SwissDict}, Base.ValueIterator{<:SwissDict}}, state=v.dict.idxfloor)
+Base.@propagate_inbounds function Base.iterate(v::Union{KeySet{<:Any, <:SwissDict}, Base.ValueIterator{<:SwissDict}}, state=v.dict.idxfloor)
     is = _iterslots(v.dict, state)
     is === nothing && return nothing
     i, s = is
