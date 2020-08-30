@@ -345,8 +345,8 @@ function rehash!(h::SwissDict{K,V}, newsz = length(h.keys)) where {K, V}
     return h
 end
 
-isempty(t::SwissDict) = (t.count == 0)
-length(t::SwissDict) = t.count
+Base.isempty(t::SwissDict) = (t.count == 0)
+Base.length(t::SwissDict) = t.count
 
 """
     empty!(collection) -> collection
