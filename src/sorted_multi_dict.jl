@@ -164,7 +164,7 @@ present) and the second entry is the semitoken of the new entry. In
 the case of SortedMultiDict, a semitoken is returned (but no
 boolean). Time: O(*c* log *n*)
 """
-@inline function insert!(m::SortedMultiDict{K,D,Ord}, k_, d_) where {K, D, Ord <: Ordering}
+@inline function Base.insert!(m::SortedMultiDict{K,D,Ord}, k_, d_) where {K, D, Ord <: Ordering}
     b, i = insert!(m.bt, convert(K,k_), convert(D,d_), true)
     IntSemiToken(i)
 end
@@ -178,11 +178,10 @@ key-value pair. This inserts the key-value pair into the container.
 If the key is already present, this overwrites the old value. The
 return value is `sc`. Time: O(*c* log *n*)
 """
-@inline function push!(m::SortedMultiDict{K,D}, pr::Pair) where {K,D}
+@inline function Base.push!(m::SortedMultiDict{K,D}, pr::Pair) where {K,D}
     insert!(m.bt, convert(K,pr[1]), convert(D,pr[2]), true)
     return m
 end
-
 
 
 ## First and last return the first and last (key,data) pairs
@@ -199,7 +198,7 @@ order in the container. Thus, `first(sc)` is equivalent to
 `deref((sc,startof(sc)))`. It is an error to call this function on
 an empty container. Time: O(log *n*)
 """
-@inline function first(m::SortedMultiDict)
+@inline function Base.first(m::SortedMultiDict)
     i = beginloc(m.bt)
     i == 2 && throw(BoundsError())
     return Pair(m.bt.data[i].k, m.bt.data[i].d)
@@ -215,7 +214,7 @@ order in the container. Thus, `last(sc)` is equivalent to
 `deref((sc,lastindex(sc)))`. It is an error to call this function on an
 empty container. Time: O(log *n*)
 """
-@inline function last(m::SortedMultiDict)
+@inline function Base.last(m::SortedMultiDict)
     i = endloc(m.bt)
     i == 1 && throw(BoundsError())
     return Pair(m.bt.data[i].k, m.bt.data[i].d)
@@ -233,7 +232,6 @@ function searchequalrange(m::SortedMultiDict, k_)
         return IntSemiToken(2), IntSemiToken(1)
     end
 end
-
 
 
 ## '(k,d) in m' checks whether a key-data pair is in
@@ -263,8 +261,8 @@ Returns the (key,value) type (a 2-entry pair, i.e., `Pair{K,V}`) for
 SortedDict and SortedMultiDict. Returns the key type for SortedSet.
 This function may also be applied to the type itself. Time: O(1)
 """
-@inline eltype(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering} =  Pair{K,D}
-@inline eltype(::Type{SortedMultiDict{K,D,Ord}}) where {K,D,Ord <: Ordering} =  Pair{K,D}
+@inline Base.eltype(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering} =  Pair{K,D}
+@inline Base.eltype(::Type{SortedMultiDict{K,D,Ord}}) where {K,D,Ord <: Ordering} =  Pair{K,D}
 
 """
     in(p, sc)
@@ -279,9 +277,9 @@ that have the key of the given pair. (So therefore this call is
 inefficient if the same key addresses a large number of values, and
 an alternative should be considered.)
 """
-@inline in(pr::Pair, m::SortedMultiDict) =
+@inline Base.in(pr::Pair, m::SortedMultiDict) =
     in_(pr[1], pr[2], m)
-@inline in(::Tuple{Any,Any}, ::SortedMultiDict) =
+@inline Base.in(::Tuple{Any,Any}, ::SortedMultiDict) =
     throw(ArgumentError("'(k,v) in sortedmultidict' not supported in Julia 0.4 or 0.5.  See documentation"))
 
 """
@@ -290,8 +288,8 @@ an alternative should be considered.)
 Returns the key type for SortedDict, SortedMultiDict and SortedSet.
 This function may also be applied to the type itself. Time: O(1)
 """
-@inline keytype(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering} = K
-@inline keytype(::Type{SortedMultiDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = K
+@inline Base.keytype(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering} = K
+@inline Base.keytype(::Type{SortedMultiDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = K
 
 """
     valtype(sc)
@@ -299,8 +297,8 @@ This function may also be applied to the type itself. Time: O(1)
 Returns the value type for SortedDict and SortedMultiDict. This
 function may also be applied to the type itself. Time: O(1)
 """
-@inline valtype(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering} = D
-@inline valtype(::Type{SortedMultiDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = D
+@inline Base.valtype(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord <: Ordering} = D
+@inline Base.valtype(::Type{SortedMultiDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = D
 
 """
     ordtype(sc)
@@ -327,11 +325,10 @@ or SortedSet `sc`. For SortedSet, `haskey(sc,k)` is a synonym for
 `in(k,sc)`. For SortedDict and SortedMultiDict, `haskey(sc,k)` is
 equivalent to `in(k,keys(sc))`. Time: O(*c* log *n*)
 """
-@inline function haskey(m::SortedMultiDict, k_)
+@inline function Base.haskey(m::SortedMultiDict, k_)
     i, exactfound = findkey(m.bt,convert(keytype(m),k_))
     return exactfound
 end
-
 
 
 ## Check if two SortedMultiDicts are equal in the sense of containing
@@ -352,7 +349,7 @@ hash-equivalence in the case of SortedDict, then `isequal` of the
 entire containers implies hash-equivalence of the containers. Time:
 O(*cn* + *n* log *n*)
 """
-function isequal(m1::SortedMultiDict, m2::SortedMultiDict)
+function Base.isequal(m1::SortedMultiDict, m2::SortedMultiDict)
     ord = orderobject(m1)
     if !isequal(ord, orderobject(m2)) || !isequal(eltype(m1), eltype(m2))
         throw(ArgumentError("Cannot use isequal for two SortedMultiDicts unless their element types and ordering objects are equal"))
@@ -432,7 +429,7 @@ not available for SortedSet, but the `union!` function (see below)
 provides equivalent functionality. Time: O(*cN* log *N*), where *N*
 is the total size of all the arguments.
 """
-function merge!(m::SortedMultiDict{K,D,Ord},
+function Base.merge!(m::SortedMultiDict{K,D,Ord},
                 others::SDorAbstractDict...) where {K,D,Ord <: Ordering}
     for o in others
         mergetwo!(m,o)
@@ -453,7 +450,7 @@ function is not available for SortedSet, but the `union` function
 (see below) provides equivalent functionality. Time: O(*cN* log
 *N*), where *N* is the total size of all the arguments.
 """
-function merge(m::SortedMultiDict{K,D,Ord},
+function Base.merge(m::SortedMultiDict{K,D,Ord},
                others::SDorAbstractDict...) where {K,D,Ord <: Ordering}
     result = packcopy(m)
     merge!(result, others...)
@@ -480,7 +477,7 @@ Returns a new `SortedDict`, `SortedMultiDict`, or `SortedSet` of the same
 type and with the same ordering as `sc` but with no entries (i.e.,
 empty). Time: O(1)
 """
-empty(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord<:Ordering} =
+Base.empty(m::SortedMultiDict{K,D,Ord}) where {K,D,Ord<:Ordering} =
    SortedMultiDict{K,D}(orderobject(m))
 
-isordered(::Type{T}) where {T<:SortedMultiDict} = true
+OrderedCollections.isordered(::Type{T}) where {T<:SortedMultiDict} = true

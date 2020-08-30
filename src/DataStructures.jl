@@ -1,24 +1,14 @@
 module DataStructures
 
-    import Base: <, <=, ==, length, isempty, iterate,
-                 show, dump, empty!, getindex, setindex!, get, get!,
-                 in, haskey, keys, merge, copy, cat, collect,
-                 push!, pop!, pushfirst!, popfirst!, insert!, lastindex,
-                 union!, delete!, similar, sizehint!, empty, append!,
-                 isequal, hash, map, filter, reverse, peek,
-                 first, last, eltype, getkey, values, sum,
-                 merge, merge!, lt, Ordering, ForwardOrdering, Forward,
-                 ReverseOrdering, Reverse, Lt,
-                 isless, union, intersect, symdiff, setdiff, issubset,
-                 searchsortedfirst, searchsortedlast, in,
-                 eachindex, keytype, valtype, minimum, maximum, size,
-                 zero, checkbounds, filter!, isbitstype, isbitsunion, 
-                 isiterable, dict_with_eltype, KeySet, Callable, _tablesz
+    using Base: HasEltype, HasLength, IteratorEltype, IteratorSize, SizeUnknown,
+                lt, Ordering, ForwardOrdering, Forward, ReverseOrdering, Reverse, Lt,
+                isbitsunion, isiterable, dict_with_eltype, KeySet, Callable, _tablesz,
+                findnextnot, unsafe_getindex, unsafe_setindex!, peek
 
 
     using Compat # Provides Base.Order.ReverseOrdering(). May remove this line with julia 1.4
     using OrderedCollections
-    import OrderedCollections: filter, filter!, isordered
+    using OrderedCollections: isordered
     export OrderedDict, OrderedSet, LittleDict
     export DefaultDict, DefaultOrderedDict
 
@@ -56,6 +46,7 @@ module DataStructures
     export MultiDict, enumerateall
     export RobinDict
     export OrderedRobinDict, isordered
+    export SwissDict
 
     export DiBitVector
 
@@ -98,6 +89,7 @@ module DataStructures
     include("container_loops.jl")
     include("robin_dict.jl")
     include("ordered_robin_dict.jl")
+    include("swiss_dict.jl")
     export
         CircularBuffer,
         capacity,

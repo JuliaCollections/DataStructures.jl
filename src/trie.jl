@@ -33,7 +33,7 @@ Trie(kv::AbstractVector{Tuple{K,V}}) where {K<:AbstractString,V} = Trie{V}(kv)
 Trie(kv::AbstractDict{K,V}) where {K<:AbstractString,V} = Trie{V}(kv)
 Trie(ks::AbstractVector{K}) where {K<:AbstractString} = Trie{Nothing}(ks, similar(ks, Nothing))
 
-function setindex!(t::Trie{T}, val, key::AbstractString) where T
+function Base.setindex!(t::Trie{T}, val, key::AbstractString) where T
     value = convert(T, val) # we don't want to iterate before finding out it fails
     node = t
     for char in key
@@ -46,7 +46,7 @@ function setindex!(t::Trie{T}, val, key::AbstractString) where T
     node.value = value
 end
 
-function getindex(t::Trie, key::AbstractString)
+function Base.getindex(t::Trie, key::AbstractString)
     node = subtrie(t, key)
     if node != nothing && node.is_key
         return node.value
@@ -66,12 +66,12 @@ function subtrie(t::Trie, prefix::AbstractString)
     return node
 end
 
-function haskey(t::Trie, key::AbstractString)
+function Base.haskey(t::Trie, key::AbstractString)
     node = subtrie(t, key)
     node != nothing && node.is_key
 end
 
-function get(t::Trie, key::AbstractString, notfound)
+function Base.get(t::Trie, key::AbstractString, notfound)
     node = subtrie(t, key)
     if node != nothing && node.is_key
         return node.value
@@ -79,7 +79,7 @@ function get(t::Trie, key::AbstractString, notfound)
     return notfound
 end
 
-function keys(t::Trie, prefix::AbstractString="", found=AbstractString[])
+function Base.keys(t::Trie, prefix::AbstractString="", found=AbstractString[])
     if t.is_key
         push!(found, prefix)
     end
@@ -109,7 +109,7 @@ end
 # We use a "dummy value" of it.t to keep the type of the state stable.
 # The second element is 0
 # since the root of the trie corresponds to a length 0 prefix of str.
-function iterate(it::TrieIterator, (t, i) = (it.t, 0))
+function Base.iterate(it::TrieIterator, (t, i) = (it.t, 0))
     if i == 0
         return it.t, (it.t, 1)
     elseif i == length(it.str) + 1 || !(it.str[i] in keys(t.children))

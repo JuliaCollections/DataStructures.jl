@@ -37,7 +37,7 @@ Base.isempty(D::CircularDeque) = D.n == 0
 
 Get the item at the front of the queue.
 """
-@inline function first(D::CircularDeque)
+@inline function Base.first(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
     return @inbounds D.buffer[D.first]
 end
@@ -47,7 +47,7 @@ end
 
 Get the item from the back of the queue.
 """
-@inline function last(D::CircularDeque)
+@inline function Base.last(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
     return @inbounds D.buffer[D.last]
 end
@@ -74,7 +74,7 @@ end
 
 Add an element to the front.
 """
-@inline function pushfirst!(D::CircularDeque, v)
+@inline function Base.pushfirst!(D::CircularDeque, v)
     @boundscheck D.n < D.capacity || throw(BoundsError())
     D.n += 1
     tmp = D.first - 1
@@ -88,7 +88,7 @@ end
 
 Remove the element at the front.
 """
-@inline Base.@propagate_inbounds function popfirst!(D::CircularDeque)
+@inline Base.@propagate_inbounds function Base.popfirst!(D::CircularDeque)
     v = first(D)
     D.n -= 1
     tmp = D.first + 1
@@ -112,7 +112,7 @@ end
 end
 
 # Iteration via getindex
-@inline function iterate(d::CircularDeque, i = 1)
+@inline function Base.iterate(d::CircularDeque, i = 1)
     i == d.n + 1 ? nothing : (_unsafe_getindex(d, i), i+1)
 end
 
