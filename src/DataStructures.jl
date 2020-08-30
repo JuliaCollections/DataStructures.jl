@@ -3,7 +3,7 @@ module DataStructures
     using Base: HasEltype, HasLength, IteratorEltype, IteratorSize, SizeUnknown,
                 lt, Ordering, ForwardOrdering, Forward, ReverseOrdering, Reverse, Lt,
                 isbitsunion, isiterable, dict_with_eltype, KeySet, Callable, _tablesz,
-                findnextnot, unsafe_getindex, unsafe_setindex!
+                findnextnot, unsafe_getindex, unsafe_setindex!, peek
 
 
     using Compat # Provides Base.Order.ReverseOrdering(). May remove this line with julia 1.4
@@ -96,7 +96,7 @@ module DataStructures
     export status
     export deref_key, deref_value, deref, advance, regress
 
-    export PriorityQueue
+    export PriorityQueue, peek
 
     include("priorityqueue.jl")
     include("sparse_int_set.jl")
