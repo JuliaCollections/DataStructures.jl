@@ -33,6 +33,7 @@ tests = ["deprecations",
          "ordered_robin_dict",
          "dibit_vector",
          "red_black_tree",
+         "swiss_dict",
          "avl_tree"
         ]
 

@@ -5,7 +5,7 @@ using Random
 
 suite = BenchmarkGroup()
 
-dicttypes = [Dict, RobinDict]
+dicttypes = [Dict, RobinDict, SwissDict]
 KVtypes = [Int, Float64]
 aexps = [4]
 for dt in dicttypes
