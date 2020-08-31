@@ -178,7 +178,8 @@ function Base.delete!(tree::SplayTree{K}, d::K) where K
     return tree
 end
 
-function Base.insert!(tree::SplayTree{K}, d::K) where K
+function Base.push!(tree::SplayTree{K}, d0) where K
+    d = convert(K, d0)
     is_present = search_node(tree, d)
     if (is_present !== nothing) && (is_present.data == d)
         return tree
@@ -208,11 +209,6 @@ function Base.insert!(tree::SplayTree{K}, d::K) where K
     splay!(tree, node)
     tree.count += 1
     return tree
-end
-
-function Base.push!(tree::SplayTree{K}, key0) where K
-    key = convert(K, key0)
-    insert!(tree, key)
 end
 
 function Base.getindex(tree::SplayTree{K}, ind) where K 
