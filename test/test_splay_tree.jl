@@ -1,8 +1,8 @@
 @testset "SplayTree" begin
-    @testset "inserting values" begin
+    @testset "pushing values" begin
         t = SplayTree{Int}()
         for i in 1:100
-            insert!(t, i)
+            push!(t, i)
         end
 
         @test length(t) == 100
@@ -19,7 +19,7 @@
     @testset "deleting values" begin
         t = SplayTree{Int}()
         for i in 1:100
-            insert!(t, i)
+            push!(t, i)
         end
         for i in 1:2:100
             delete!(t, i)
@@ -36,7 +36,7 @@
         end
 
         for i in 1:2:100
-            insert!(t, i)
+            push!(t, i)
         end
 
         @test length(t) == 100
@@ -45,7 +45,7 @@
     @testset "handling different cases of delete!" begin
         t2 = SplayTree()
         for i in 1:100000
-            insert!(t2, i)
+            push!(t2, i)
         end
 
         @test length(t2) == 100000
@@ -65,12 +65,12 @@
         @test (length(t2) + length(visited)) == 100000
     end
 
-    @testset "handling different cases of insert!" begin
+    @testset "handling different cases of push!" begin
         nums = rand(1:100000, 1000)
         t3 = SplayTree()
         uniq_nums = Set(nums)
         for num in nums
-            insert!(t3, num)
+            push!(t3, num)
         end
         @test length(t3) == length(uniq_nums)
     end
