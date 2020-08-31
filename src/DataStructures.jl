@@ -52,6 +52,7 @@ module DataStructures
 
     export RBTree, search_node, minimum_node
     export AVLTree, sorted_rank
+    export SplayTree, maximum_node
 
     export findkey
 

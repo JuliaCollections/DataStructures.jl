@@ -178,7 +178,7 @@ function Base.delete!(tree::SplayTree{K}, d::K) where K
     return tree
 end
 
-function insert!(tree::SplayTree{K}, d::K) where K
+function Base.insert!(tree::SplayTree{K}, d::K) where K
     is_present = search_node(tree, d)
     if (is_present !== nothing) && (is_present.data == d)
         return tree
