@@ -8,14 +8,11 @@ mutable struct SplayTreeNode{K}
     SplayTreeNode{K}(d::K) where K = new{K}(nothing, nothing, nothing, d)
 end
 
-SplayTreeNode_or_null{K} = Union{SplayTreeNode{K}, Nothing}
-
 SplayTreeNode(d) = SplayTreeNode{Any}(d)
 SplayTreeNode() = SplayTreeNode{Any}()
 
-
 mutable struct SplayTree{K}
-    root::SplayTreeNode_or_null{K}
+    root::Union{SplayTreeNode{K}, Nothing}
     count::Int
 
     SplayTree{K}() where K = new{K}(nothing, 0)
@@ -64,13 +61,12 @@ function right_rotate!(tree::SplayTree, node_x::SplayTreeNode)
     node_x.parent = node_y
 end 
 
-
+# The splaying operation moves node_x to the root of the tree using the series of rotations.
 function splay!(tree::SplayTree, node_x::SplayTreeNode)
-    while !isa(node_x.parent, Nothing)
+    while node_x.parent !== nothing
         parent = node_x.parent
         grand_parent = node_x.parent.parent
-        # grand-parent is Null
-        if isa(grand_parent, Nothing)
+        if grand_parent === nothing
             # single rotation
             if node_x == parent.leftChild
                 # zig rotation
@@ -100,7 +96,7 @@ function splay!(tree::SplayTree, node_x::SplayTreeNode)
     end
 end
 
-function maximum_node(node::SplayTreeNode_or_null)
+function maximum_node(node::Union{SplayTreeNode, Nothing})
     (node == nothing) && return node
     while node.rightChild != nothing
         node = node.rightChild
@@ -108,10 +104,15 @@ function maximum_node(node::SplayTreeNode_or_null)
     return node
 end
 
-function _join(tree::SplayTree ,s::SplayTreeNode_or_null, t::SplayTreeNode_or_null)
-    if isa(s, Nothing)
+# Join operations joins two trees S and T 
+# All the items in S are smaller than the items in T.
+# This is a two-step process.
+# In the first step, splay the largest node in S. This moves the largest node to the root node.
+# In the second step, set the right child of the new root of S to T.
+function _join(tree::SplayTree, s::Union{SplayTreeNode, Nothing}, t::Union{SplayTreeNode, Nothing})
+    if s === nothing
         return t
-    elseif isa(t, Nothing)
+    elseif t === nothing
         return s
     else
         x = maximum_node(s)
@@ -136,32 +137,31 @@ function search_node(tree::SplayTree{K}, d::K) where K
     return (node == nothing) ? prev : node
 end
 
-function haskey(tree::SplayTree{K}, d::K) where K
+function Base.haskey(tree::SplayTree{K}, d::K) where K
     node = tree.root
-    if isa(node, Nothing)
+    if node === nothing
         return false
     else
         node = search_node(tree, d)
-        isa(node, Nothing) && return false
+        (node === nothing) && return false
         is_found = (node.data == d)
         is_found && splay!(tree, node)
         return is_found
     end
 end
 
-
 Base.in(key, tree::SplayTree) = haskey(tree, key)
 
 function Base.delete!(tree::SplayTree{K}, d::K) where K
     node = tree.root
     x = search_node(tree, d)
-    (x ==  nothing) && return tree
+    (x == nothing) && return tree
     t = nothing
     s = nothing 
     
     splay!(tree, x)
     
-    if !isa(x.rightChild, Nothing)
+    if x.rightChild !== nothing
         t = x.rightChild
         t.parent = nothing
     end
@@ -169,7 +169,7 @@ function Base.delete!(tree::SplayTree{K}, d::K) where K
     s = x
     s.rightChild = nothing
 
-    if !isa(s.leftChild, Nothing)
+    if s.leftChild !== nothing
         s.leftChild.parent = nothing
     end
 
@@ -178,9 +178,9 @@ function Base.delete!(tree::SplayTree{K}, d::K) where K
     return tree
 end
 
-function Base.insert!(tree::SplayTree{K}, d::K) where K
+function insert!(tree::SplayTree{K}, d::K) where K
     is_present = search_node(tree, d)
-    if !isa(is_present, Nothing) && (is_present.data == d)
+    if (is_present !== nothing) && (is_present.data == d)
         return tree
     end
     # only unique keys are inserted
@@ -188,7 +188,7 @@ function Base.insert!(tree::SplayTree{K}, d::K) where K
     y = nothing
     x = tree.root
 
-    while !isa(x, Nothing)
+    while x !== nothing
         y = x
         if node.data > x.data
             x = x.rightChild
@@ -198,7 +198,7 @@ function Base.insert!(tree::SplayTree{K}, d::K) where K
     end
     node.parent = y
 
-    if isa(y, Nothing)
+    if y === nothing
         tree.root = node
     elseif node.data < y.data
         y.leftChild = node
@@ -217,7 +217,7 @@ end
 
 function Base.getindex(tree::SplayTree{K}, ind) where K 
     @boundscheck (1 <= ind <= tree.count) || throw(KeyError("$ind should be in between 1 and $(tree.count)"))
-    function traverse_tree_inorder(node::SplayTreeNode_or_null)
+    function traverse_tree_inorder(node::Union{SplayTreeNode, Nothing})
         if (node != nothing)
             left = traverse_tree_inorder(node.leftChild)
             right = traverse_tree_inorder(node.rightChild)
