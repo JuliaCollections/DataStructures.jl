@@ -109,7 +109,7 @@ end
 # This is a two-step process.
 # In the first step, splay the largest node in S. This moves the largest node to the root node.
 # In the second step, set the right child of the new root of S to T.
-function _join(tree::SplayTree, s::Union{SplayTreeNode, Nothing}, t::Union{SplayTreeNode, Nothing})
+function _join!(tree::SplayTree, s::Union{SplayTreeNode, Nothing}, t::Union{SplayTreeNode, Nothing})
     if s === nothing
         return t
     elseif t === nothing
@@ -173,7 +173,7 @@ function Base.delete!(tree::SplayTree{K}, d::K) where K
         s.leftChild.parent = nothing
     end
 
-    tree.root = _join(tree, s.leftChild, t)
+    tree.root = _join!(tree, s.leftChild, t)
     tree.count -= 1
     return tree
 end
