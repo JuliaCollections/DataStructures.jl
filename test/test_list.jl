@@ -8,30 +8,30 @@
     end
 
     @testset "l0" begin
-        l0 = nil(Char)
+        l0 = Nil{Char}()
         @test length(l0) == 0
-        @test l0 == nil(Char)
-        @test l0 == nil()
-        @test sprint(show,l0) == "nil(Char)"
+        @test l0 == Nil{Char}()
+        @test l0 == Nil()
+        @test sprint(show,l0) == "Nil{Char}()"
     end
 
     @testset "l1" begin
-        l1 = nil()
+        l1 = Nil()
         @test length(l1) == 0
-        @test l1 == nil()
-        @test l1 == nil(Int)
-        @test sprint(show,l1) == "nil()"
+        @test l1 == Nil()
+        @test l1 == Nil{Int}()
+        @test sprint(show,l1) == "Nil()"
         @test typeof(list()) === typeof(l1)
         @test copy(l1) == l1
         @test map((x) -> x*2,l1) == l1
     end
 
     @testset "l2" begin
-        l1 = nil()
-        l2 = cons(1, l1)
+        l1 = Nil()
+        l2 = Cons(1, l1)
         @test length(l2) == 1
         @test head(l2) == 1
-        @test l2 == cons(1, l1)
+        @test l2 == Cons(1, l1)
         @test l2 == list(1)
         @test sprint(show,l2) == "list(1)"
         @test cat(l2) == l2
@@ -50,8 +50,8 @@
     end
 
     @testset "l4" begin
-        l1 = nil()
-        l2 = cons(1, l1)
+        l1 = Nil()
+        l2 = Cons(1, l1)
         l3 = list(2, 3)
         l4 = cat(l1, l2, l3)
         @test length(l4) == 3

@@ -15,3 +15,13 @@
     @test collect(path(t, "ro")) == [t0, t1, t2]
     @test collect(path(t, "roa")) == [t0, t1, t2]
 end
+
+
+@testset "List nil and cons" begin
+    @test nil() == Nil()
+    @test nil(Char) == Nil{Char}()
+
+    l1 = Nil()
+    l2 = cons(1, l1)  # deprecated to Cons(1, l1)
+    @test length(l2) == 1
+end
