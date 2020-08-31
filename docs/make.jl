@@ -28,6 +28,7 @@ makedocs(
         "dibit_vector.md",
         "red_black_tree.md",
         "avl_tree.md",
+        "splay_tree.md",
     ],
     modules = [DataStructures],
     format = Documenter.HTML()

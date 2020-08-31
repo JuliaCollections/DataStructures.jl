@@ -33,6 +33,7 @@ This package implements a variety of data structures, including
 -   DiBitVector (in which each element can store two bits)
 -   Red Black Tree
 -   AVL Tree
+-   Splay Tree
 
 Resources
 ---------

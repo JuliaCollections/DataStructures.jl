@@ -25,6 +25,7 @@ This package implements a variety of data structures, including
 -   DiBitVector
 -   Red Black Tree
 -   AVL Tree
+-   Splay Tree
 
 ## Contents
 
@@ -51,6 +52,7 @@ Pages = [
     "sparse_int_set.md",
     "dibit_vector.md",
     "red_black_tree.md",
-    "avl_tree.md"
+    "avl_tree.md",
+    "splay_tree.md",
 ]
 ```
