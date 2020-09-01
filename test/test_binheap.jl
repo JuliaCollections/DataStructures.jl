@@ -208,9 +208,17 @@
             102,-56,-17,-41,25,-30,-84,26,-84,48,49,-5,-38,28,
             114,-54,96,-55,67,74,127,-61,124,11,-7,93,-51,110,
             -106,-84,-90,-18,-12,-116,21,115,50]
+        square = x -> x^2
+
         for n = -1:length(ss) + 1
-            @test sort(ss, lt = >)[1:min(n, end)] == nlargest(n, ss)
-            @test sort(ss, lt = <)[1:min(n, end)] == nsmallest(n, ss)
+            r = 1:min(n, length(ss))
+
+            @test nlargest(n, ss) == sort(ss, rev=true)[r]
+            @test nsmallest(n, ss) == sort(ss)[r]
+
+            @test nlargest(n, ss, by=square) == sort(ss, by=square, rev=true)[r]
+            @test nsmallest(n, ss, by=square) == sort(ss, by=square)[r]
+
             @test nlargest(n, ss) == DataStructures.nextreme(DataStructures.FasterReverse(), n, ss)
             @test nsmallest(n, ss) == DataStructures.nextreme(DataStructures.FasterForward(), n, ss)
         end
