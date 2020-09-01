@@ -4,6 +4,8 @@
 
     @testset "make heap" begin
         vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
+        vs2 = collect(enumerate(vs))
+        ordering = Base.Order.By(last)
 
         @testset "construct heap" begin
             BinaryHeap{Int, Base.ForwardOrdering}()
@@ -20,6 +22,10 @@
             BinaryMaxHeap{Int}(vs)
             BinaryMaxHeap(vs)
 
+            BinaryHeap{eltype(vs2)}(ordering)
+            BinaryHeap{eltype(vs2)}(ordering, vs2)
+            BinaryHeap(ordering, vs2)
+
             @test true
         end
 
@@ -27,6 +33,7 @@
             BinaryHeap{Float64, Base.ForwardOrdering}(vs)
             BinaryMinHeap{Float64}(vs)
             BinaryMaxHeap{Float64}(vs)
+            BinaryHeap{Tuple{Int, Float64}}(ordering, vs2)
 
             @test true
         end
@@ -58,6 +65,16 @@
             @test !isempty(h)
             @test first(h) == 16
             @test isheap([16, 14, 10, 8, 7, 3, 9, 1, 4, 2], Base.Reverse)
+            @test sizehint!(h, 100) === h
+        end
+
+        @testset "make custom ordering heap" begin
+            h = BinaryHeap(ordering, vs2)
+
+            @test length(h) == 10
+            @test !isempty(h)
+            @test first(h) == (2, 1)
+            @test isheap([(2, 1), (4, 2), (3, 3), (1, 4), (10, 7), (6, 9), (7, 10), (8, 14), (9, 8), (5, 16)], ordering)
             @test sizehint!(h, 100) === h
         end
 
@@ -95,7 +112,6 @@
                     @test isequal(extract_all!(hmin), [1, 2, 3, 4, 7, 8, 9, 10, 14, 16])
                     @test isempty(hmin)
                 end
-
             end
 
             @testset "push! hmax" begin
@@ -125,6 +141,36 @@
                 @testset "pop! hmax" begin
                     @test isequal(extract_all!(hmax), [16, 14, 10, 9, 8, 7, 4, 3, 2, 1])
                     @test isempty(hmax)
+                end
+            end
+
+            @testset "push! custom ordering" begin
+                heap = BinaryHeap{Tuple{Int,Int}}(ordering)
+                @test length(heap) == 0
+                @test isempty(heap)
+
+                ss = Any[
+                    [(1, 4)],
+                    [(2, 1), (1, 4)],
+                    [(2, 1), (1, 4), (3, 3)],
+                    [(2, 1), (4, 2), (3, 3), (1, 4)],
+                    [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16)],
+                    [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9)],
+                    [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9), (7, 10)],
+                    [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9), (7, 10), (8, 14)],
+                    [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9), (7, 10), (8, 14), (9, 8)],
+                    [(2, 1), (4, 2), (3, 3), (1, 4), (10, 7), (6, 9), (7, 10), (8, 14), (9, 8), (5, 16)]]
+
+                for i = 1 : length(vs2)
+                    push!(heap, vs2[i])
+                    @test length(heap) == i
+                    @test !isempty(heap)
+                    @test isequal(heap.valtree, ss[i])
+                end
+
+                @testset "pop! custom ordering" begin
+                    @test isequal(extract_all!(heap), sort(vs2, order=ordering))
+                    @test isempty(heap)
                 end
             end
         end
