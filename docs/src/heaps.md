@@ -33,13 +33,13 @@ provides the following interface:
 ```julia
 # Let `h` be a heap, `i` be a handle, and `v` be a value.
 
-i = push!(h, v)              # adds a value to the heap and and returns a handle to v
+i = push!(h, v)            # adds a value to the heap and and returns a handle to v
 
-update!(h, i, v)             # updates the value of an element (referred to by the handle i)
+update!(h, i, v)           # updates the value of an element (referred to by the handle i)
 
-delete!(h, i)               # deletes the node with handle i from the heap
+delete!(h, i)              # deletes the node with handle i from the heap
 
-v, i = top_with_handle(h)    # returns the top value of a heap and its handle
+v, i = top_with_handle(h)  # returns the top value of a heap and its handle
 ```
 
 Currently, both min/max versions of binary heap (type `BinaryHeap`) and
@@ -49,16 +49,16 @@ Examples of constructing a heap:
 
 ```julia
 h = BinaryMinHeap{Int}()
-h = BinaryMaxHeap{Int}()          # create an empty min/max binary heap of integers
+h = BinaryMaxHeap{Int}()             # create an empty min/max binary heap of integers
 
 h = BinaryMinHeap([1,4,3,2])
-h = BinaryMaxHeap([1,4,3,2])      # create a min/max heap from a vector
+h = BinaryMaxHeap([1,4,3,2])         # create a min/max heap from a vector
 
 h = MutableBinaryMinHeap{Int}()
-h = MutableBinaryMaxHeap{Int}()   # create an empty mutable min/max heap
+h = MutableBinaryMaxHeap{Int}()      # create an empty mutable min/max heap
 
 h = MutableBinaryMinHeap([1,4,3,2])
-h = MutableBinaryMaxHeap([1,4,3,2])    # create a mutable min/max heap from a vector
+h = MutableBinaryMaxHeap([1,4,3,2])  # create a mutable min/max heap from a vector
 ```
 
 ## Using alternate orderings
@@ -119,7 +119,7 @@ This package includes an implementation of a binary min-max heap (`BinaryMinMaxH
 
 Examples:
 ```julia
-h = BinaryMinMaxHeap{Int}()          # create an empty min-max heap with integer values
+h = BinaryMinMaxHeap{Int}()        # create an empty min-max heap with integer values
 
 h = BinaryMinMaxHeap([1, 2, 3, 4]) # create a min-max heap from a vector
 ```
