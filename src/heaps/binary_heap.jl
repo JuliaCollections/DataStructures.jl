@@ -34,21 +34,29 @@ mutable struct BinaryHeap{T, O <: Base.Ordering} <: AbstractHeap{T}
     ordering::O
     valtree::Vector{T}
 
-    function BinaryHeap{T, O}() where {T,O}
-        new{T,O}(O(), Vector{T}())
+    function BinaryHeap{T}(ordering::Base.Ordering) where T
+        new{T, typeof(ordering)}(ordering, Vector{T}())
     end
 
-    function BinaryHeap{T, O}(xs) where {T,O}
-        ordering = O()
+    function BinaryHeap{T}(ordering::Base.Ordering, xs::AbstractVector) where T
         valtree = heapify(xs, ordering)
-        new{T,O}(ordering, valtree)
+        new{T, typeof(ordering)}(ordering, valtree)
     end
 end
 
+BinaryHeap(ordering::Base.Ordering, xs::AbstractVector{T}) where T = BinaryHeap{T}(ordering, xs)
+
+# Constructors using singleton order types as type parameters rather than arguments
+BinaryHeap{T, O}() where {T, O<:Base.Ordering} = BinaryHeap{T}(O())
+BinaryHeap{T, O}(xs::AbstractVector) where {T, O<:Base.Ordering} = BinaryHeap{T}(O(), xs)
+
+# Forward/reverse ordering type aliases
 const BinaryMinHeap{T} = BinaryHeap{T, Base.ForwardOrdering}
 const BinaryMaxHeap{T} = BinaryHeap{T, Base.ReverseOrdering}
+
 BinaryMinHeap(xs::AbstractVector{T}) where T = BinaryMinHeap{T}(xs)
 BinaryMaxHeap(xs::AbstractVector{T}) where T = BinaryMaxHeap{T}(xs)
+
 
 #################################################
 #
