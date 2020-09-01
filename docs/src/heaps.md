@@ -61,19 +61,32 @@ h = MutableBinaryMinHeap([1,4,3,2])
 h = MutableBinaryMaxHeap([1,4,3,2])    # create a mutable min/max heap from a vector
 ```
 
-Heaps may be constructed with a custom ordering. One use case for custom orderings
-is to achieve faster performance with `Float` elements with the risk of random ordering
-if any elements are `NaN`. The provided `DataStructures.FasterForward` and
-`DataStructures.FasterReverse` orderings are optimized for this purpose.
-Custom orderings may also be used for defining the order of structs as heap elements.
+## Using alternate orderings
+
+Heaps can also use alternate orderings apart from the default one defined by
+`Base.isless`. This is accomplished by passing an instance of `Base.Ordering`
+as the first argument to the constructor. The top of the heap will then be the
+element that comes first according to this ordering.
+
+The following example uses 2-tuples to track the index of each element in the
+original array, but sorts only by the data value:
+
 ```julia
-h = BinaryHeap{Float64, DataStructures.FasterForward}() # faster min heap
-h = BinaryHeap{Float64, DataStructures.FasterReverse}() # faster max heap
+data = collect(enumerate(["foo", "bar", "baz"]))
 
-h = MutableBinaryHeap{Float64, DataStructures.FasterForward}() # faster mutable min heap
-h = MutableBinaryHeap{Float64, DataStructures.FasterReverse}() # faster mutable max heap
+h1 = BinaryHeap(data) # Standard lexicographic ordering for tuples
+first(h1)             # => (1, "foo")
 
-h = BinaryHeap{MyStruct, MyStructOrdering}() # heap containing custom struct
+h2 = BinaryHeap(Base.By(last), data) # Order by 2nd element only
+first(h2)                            # => (2, "bar")
+```
+
+If the ordering type is a singleton it can be passed as a type parameter to the
+constructor instead:
+
+```julia
+BinaryHeap{T, O}()        # => BinaryHeap{T}(O())
+MutableBinaryHeap{T, O}() # => MutableBinaryHeap{T}(O())
 ```
 
 ## Min-max heaps
@@ -81,6 +94,7 @@ Min-max heaps maintain the minimum _and_ the maximum of a set,
 allowing both to be retrieved in constant (`O(1)`) time.
 The min-max heaps in this package are subtypes of `AbstractMinMaxHeap <: AbstractHeap`
 and have the same interface as other heaps with the following additions:
+
 ```julia
 # Let h be a min-max heap, k an integer
 minimum(h)     # return the smallest element
@@ -95,6 +109,7 @@ popmax!(h, k)  # remove and return the largest k elements
 popall!(h)     # remove and return all the elements, sorted smallest to largest
 popall!(h, o)  # remove and return all the elements according to ordering o
 ```
+
 The usual `first(h)` and `pop!(h)` are defined to be `minimum(h)` and `popmin!(h)`,
 respectively.
 
@@ -115,13 +130,42 @@ Heaps can be used to extract the largest or smallest elements of an
 array without sorting the entire array first:
 
 ```julia
-nlargest(3, [0,21,-12,68,-25,14]) # => [68,21,14]
-nsmallest(3, [0,21,-12,68,-25,14]) # => [-25,-12,0]
+data = [0,21,-12,68,-25,14]
+nlargest(3, data)  # => [68,21,14]
+nsmallest(3, data) # => [-25,-12,0]
 ```
 
-Note that if the array contains floats and is free of NaN values,
-then the following alternatives may be used to achieve a 2x performance boost.
+Both methods also support the `by` and `lt` keywords to customize the sort order,
+as in `Base.sort`:
+
+```julia
+nlargest(3, data, by=x -> x^2)  # => [68,-25,21]
+nsmallest(3, data, by=x -> x^2) # => [0,-12,14]
 ```
-DataStructures.nextreme(DataStructures.FasterReverse(), n, a) # faster nlargest(n, a)
-DataStructures.nextreme(DataStructures.FasterForward(), n, a) # faster nsmallest(n, a)
+
+The lower-level `DataStructures.nextreme` function takes a `Base.Ordering`
+instance as the first argument and returns the first `n` elements according to
+this ordering:
+
+```julia
+DataStructures.nextreme(Base.Forward, n, a) # Equivalent to nsmallest(n, a)
+```
+
+
+# Improving performance with Float data
+
+One use case for custom orderings is to achieve faster performance with `Float`
+elements with the risk of random ordering if any elements are `NaN`.
+The provided `DataStructures.FasterForward` and `DataStructures.FasterReverse`
+orderings are optimized for this purpose and may achive a 2x performance boost:
+
+```julia
+h = BinaryHeap{Float64, DataStructures.FasterForward}() # faster min heap
+h = BinaryHeap{Float64, DataStructures.FasterReverse}() # faster max heap
+
+h = MutableBinaryHeap{Float64, DataStructures.FasterForward}() # faster mutable min heap
+h = MutableBinaryHeap{Float64, DataStructures.FasterReverse}() # faster mutable max heap
+
+DataStructures.nextreme(DataStructures.FasterReverse(), n, a)  # faster nlargest(n, a)
+DataStructures.nextreme(DataStructures.FasterForward(), n, a)  # faster nsmallest(n, a)
 ```
