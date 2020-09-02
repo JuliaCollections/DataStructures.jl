@@ -15,3 +15,8 @@
     @test collect(path(t, "ro")) == [t0, t1, t2]
     @test collect(path(t, "roa")) == [t0, t1, t2]
 end
+
+@testset "top" begin
+    hh = BinaryMinHeap{Float64}([1,2,3])
+    @test top(hh) == 1
+end
