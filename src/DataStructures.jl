@@ -25,7 +25,7 @@ module DataStructures
     export AbstractHeap, compare, extract_all!, extract_all_rev!
     export BinaryHeap, BinaryMinHeap, BinaryMaxHeap, nlargest, nsmallest
     export MutableBinaryHeap, MutableBinaryMinHeap, MutableBinaryMaxHeap
-    export heapify!, heapify, heappop!, heappush!, isheap, top
+    export heapify!, heapify, heappop!, heappush!, isheap
     export BinaryMinMaxHeap, popmin!, popmax!, popall!
 
     export Trie, subtrie, keys_with_prefix, partial_path
@@ -112,5 +112,5 @@ module DataStructures
     include("splay_tree.jl")
 
     include("deprecations.jl")
-    @deprecate top(h::BinaryHeap) = first(h)
+@deprecate top(x) = first(h)
 end
