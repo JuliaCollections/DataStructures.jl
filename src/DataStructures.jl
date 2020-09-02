@@ -112,5 +112,5 @@ module DataStructures
     include("splay_tree.jl")
 
     include("deprecations.jl")
-    const top = first
+    @deprecate top(h::BinaryHeap) = first(h)
 end
