@@ -112,5 +112,4 @@ module DataStructures
     include("splay_tree.jl")
 
     include("deprecations.jl")
-@deprecate top(x) = first(h)
 end
