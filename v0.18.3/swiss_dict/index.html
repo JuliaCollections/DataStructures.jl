@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>SwissDict · DataStructures.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>DataStructures.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">DataStructures.jl</a></li><li><a class="toctext" href="../deque/">Deque</a></li><li><a class="toctext" href="../circ_buffer/">CircularBuffer</a></li><li><a class="toctext" href="../circ_deque/">CircularDeque</a></li><li><a class="toctext" href="../stack_and_queue/">Stack and Queue</a></li><li><a class="toctext" href="../priority-queue/">Priority Queue</a></li><li><a class="toctext" href="../fenwick/">Fenwick Tree</a></li><li><a class="toctext" href="../accumulators/">Accumulators and Counters</a></li><li><a class="toctext" href="../disjoint_sets/">Disjoint Sets</a></li><li><a class="toctext" href="../heaps/">Heaps</a></li><li><a class="toctext" href="../ordered_containers/">OrderedDicts and OrderedSets</a></li><li><a class="toctext" href="../default_dict/">DefaultDict and DefaultOrderedDict</a></li><li><a class="toctext" href="../robin_dict/">RobinDict</a></li><li class="current"><a class="toctext" href>SwissDict</a><ul class="internal"></ul></li><li><a class="toctext" href="../trie/">Trie</a></li><li><a class="toctext" href="../linked_list/">Linked List</a></li><li><a class="toctext" href="../mutable_linked_list/">Mutable Linked List</a></li><li><a class="toctext" href="../intset/">DataStructures.IntSet</a></li><li><a class="toctext" href="../sorted_containers/">Sorted Containers</a></li><li><a class="toctext" href="../dibit_vector/">DiBitVector</a></li><li><a class="toctext" href="../red_black_tree/">Red Black Tree</a></li><li><a class="toctext" href="../avl_tree/">AVL Tree</a></li><li><a class="toctext" href="../splay_tree/">Splay Tree</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href>SwissDict</a></li></ul><a class="edit-page" href="https://github.com/JuliaCollections/DataStructures.jl/blob/master/docs/src/swiss_dict.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>SwissDict</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="SwissDict-1" href="#SwissDict-1">SwissDict</a></h1><p><code>SwissDict</code> provides a standard dictionary, conforming to the AbstractDict protocol, which is inspired from SwissTable developed by Google. This provides improved performance over Dict at extremely high Load Factor.</p><p>The interface of <code>SwissDict</code> replicates that of <code>Dict</code>.</p><p>Examples:</p><pre><code class="language-julia-repl">julia&gt; d = RobinDict{Int, Char}(1 =&gt; &#39;a&#39;, 2 =&gt; &#39;b&#39;)
+SwissDict{Int64,Char} with 2 entries:
+  1 =&gt; &#39;a&#39;
+  2 =&gt; &#39;b&#39;
+
+julia&gt; d[3] = &#39;c&#39;;
+
+julia&gt; collect(d)
+3-element Array{Pair{Int64,Char},1}:
+ 1 =&gt; &#39;a&#39;
+ 2 =&gt; &#39;b&#39;
+ 3 =&gt; &#39;c&#39;
+
+julia&gt; delete!(d, 2);
+
+julia&gt; d[1]
+&#39;a&#39;: ASCII/Unicode U+0061 (category Ll: Letter, lowercase)
+
+julia&gt; d
+SwissDict{Int64,Char} with 2 entries:
+  1 =&gt; &#39;a&#39;
+  3 =&gt; &#39;c&#39;
+
+julia&gt; pop!(d)
+1 =&gt; &#39;a&#39;</code></pre><footer><hr/><a class="previous" href="../robin_dict/"><span class="direction">Previous</span><span class="title">RobinDict</span></a><a class="next" href="../trie/"><span class="direction">Next</span><span class="title">Trie</span></a></footer></article></body></html>
