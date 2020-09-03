@@ -112,7 +112,7 @@ end
 # Iteration
 
 struct DequeIterator{T}
-    q::Deque
+    q::Deque{T}
 end
 
 function Base.iterate(qi::DequeIterator{T}, (cb, i) = (qi.q.head, qi.q.head.front)) where T
