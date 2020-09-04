@@ -115,6 +115,8 @@ struct DequeIterator{T}
     q::Deque
 end
 
+Base.last(qi::DequeIterator) = last(qi.q)
+
 function Base.iterate(qi::DequeIterator{T}, (cb, i) = (qi.q.head, qi.q.head.front)) where T
     i > cb.back && return nothing
     x = cb.data[i]
@@ -130,11 +132,7 @@ end
 
 # Backwards deque iteration
 
-struct ReverseDequeIterator{T}
-    q::Deque
-end
-
-function Base.iterate(qi::ReverseDequeIterator{T}, (cb, i) = (qi.q.rear, qi.q.rear.back)) where T
+function Base.iterate(qi::Iterators.Reverse{<:Deque}, (cb, i) = (qi.itr.rear, qi.itr.rear.back))
     i < cb.front && return nothing
     x = cb.data[i]
 
@@ -148,12 +146,9 @@ function Base.iterate(qi::ReverseDequeIterator{T}, (cb, i) = (qi.q.rear, qi.q.re
     return (x, (cb, i))
 end
 
-reverse_iter(q::Deque{T}) where {T} = ReverseDequeIterator{T}(q)
-
 Base.iterate(q::Deque{T}, s...) where {T} = iterate(DequeIterator{T}(q), s...)
 
 Base.length(qi::DequeIterator{T}) where {T} = qi.q.len
-Base.length(qi::ReverseDequeIterator{T}) where {T} = qi.q.len
 
 Base.collect(q::Deque{T}) where {T} = T[x for x in q]
 

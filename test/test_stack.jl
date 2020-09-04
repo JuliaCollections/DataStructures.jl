@@ -87,14 +87,17 @@
 
         @testset "reverse iterator" begin
             index = 1
-            for i in reverse_iter(stk)
+            for i in Iterators.reverse(stk)
                 @test(arr[index] == i)
                 index += 1
             end
         end
 
-        @test arr == [i for i in reverse_iter(stk)]
+        @test arr == [i for i in Iterators.reverse(stk)]
         @test reverse(arr) == [i for i in stk]
+        @test first(Iterators.reverse(stk)) === last(stk)
+        @test last(Iterators.reverse(stk)) === first(stk)
+        @test length(Iterators.reverse(stk)) === length(stk)
     end
 
 end # @testset Stack
