@@ -12,22 +12,22 @@ SparseIntSet() = SparseIntSet(Int[], Vector{Int}[], Int[])
 
 SparseIntSet(indices) = union!(SparseIntSet(), indices)
 
-eltype(::Type{SparseIntSet}) = Int
+Base.eltype(::Type{SparseIntSet}) = Int
 
-empty(::SparseIntSet) = SparseIntSet()
+Base.empty(::SparseIntSet) = SparseIntSet()
 
-function empty!(s::SparseIntSet)
+function Base.empty!(s::SparseIntSet)
     empty!(s.packed)
     empty!(s.reverse)
     empty!(s.counters)
     return s
 end
 
-isempty(s::SparseIntSet) = isempty(s.packed)
+Base.isempty(s::SparseIntSet) = isempty(s.packed)
 
-copy(s::SparseIntSet) = copy!(SparseIntSet(), s)
+Base.copy(s::SparseIntSet) = copy!(SparseIntSet(), s)
 
-function copy!(to::SparseIntSet, from::SparseIntSet)
+function Base.copy!(to::SparseIntSet, from::SparseIntSet)
     to.packed = copy(from.packed)
     #we want to keep the null pages === NULL_INT_PAGE
     resize!(to.reverse, length(from.reverse))
@@ -48,7 +48,7 @@ function pageid_offset(s::SparseIntSet, i)
     return pageid, (i - 1) & (INT_PER_PAGE - 1) + 1
 end
 
-function in(i, s::SparseIntSet)
+function Base.in(i, s::SparseIntSet)
     pageid, offset = pageid_offset(s, i)
     if pageid > length(s.reverse)
         return false
@@ -58,9 +58,9 @@ function in(i, s::SparseIntSet)
     end
 end
 
-length(s::SparseIntSet) = length(s.packed)
+Base.length(s::SparseIntSet) = length(s.packed)
 
-@inline function push!(s::SparseIntSet, i::Integer)
+@inline function Base.push!(s::SparseIntSet, i::Integer)
     i <= 0 && throw(DomainError("Only positive Ints allowed."))
 
     pageid, offset = pageid_offset(s, i)
@@ -91,14 +91,14 @@ length(s::SparseIntSet) = length(s.packed)
     return s
 end
 
-@inline function push!(s::SparseIntSet, is::Integer...)
+@inline function Base.push!(s::SparseIntSet, is::Integer...)
     for i in is
         push!(s, i)
     end
     return s
 end
 
-@inline Base.@propagate_inbounds function pop!(s::SparseIntSet)
+@inline Base.@propagate_inbounds function Base.pop!(s::SparseIntSet)
     if isempty(s)
         throw(ArgumentError("Cannot pop an empty set."))
     end
@@ -110,7 +110,7 @@ end
     return id
 end
 
-@inline Base.@propagate_inbounds function pop!(s::SparseIntSet, id::Integer)
+@inline Base.@propagate_inbounds function Base.pop!(s::SparseIntSet, id::Integer)
     id < 0 && throw(ArgumentError("Int to pop needs to be positive."))
 
     @boundscheck if !in(id, s)
@@ -138,27 +138,27 @@ end
     end
 end
 
-@inline function pop!(s::SparseIntSet, id::Integer, default)
+@inline function Base.pop!(s::SparseIntSet, id::Integer, default)
     id < 0 && throw(ArgumentError("Int to pop needs to be positive."))
     return in(id, s) ? (@inbounds pop!(s, id)) : default
 end
-popfirst!(s::SparseIntSet) = pop!(s, first(s))
+Base.popfirst!(s::SparseIntSet) = pop!(s, first(s))
 
-@inline iterate(set::SparseIntSet, args...) = iterate(set.packed, args...)
+@inline Base.iterate(set::SparseIntSet, args...) = iterate(set.packed, args...)
 
-last(s::SparseIntSet) = isempty(s) ? throw(ArgumentError("Empty set has no last element.")) : last(s.packed)
+Base.last(s::SparseIntSet) = isempty(s) ? throw(ArgumentError("Empty set has no last element.")) : last(s.packed)
 
-union(s::SparseIntSet, ns) = union!(copy(s), ns)
-function union!(s::SparseIntSet, ns)
+Base.union(s::SparseIntSet, ns) = union!(copy(s), ns)
+function Base.union!(s::SparseIntSet, ns)
     for n in ns
         push!(s, n)
     end
     return s
 end
 
-intersect(s1::SparseIntSet) = copy(s1)
-intersect(s1::SparseIntSet, ss...) = intersect(s1, intersect(ss...))
-function intersect(s1::SparseIntSet, ns)
+Base.intersect(s1::SparseIntSet) = copy(s1)
+Base.intersect(s1::SparseIntSet, ss...) = intersect(s1, intersect(ss...))
+function Base.intersect(s1::SparseIntSet, ns)
     s = SparseIntSet()
     for n in ns
         n in s1 && push!(s, n)
@@ -166,28 +166,28 @@ function intersect(s1::SparseIntSet, ns)
     return s
 end
 
-intersect!(s1::SparseIntSet, ss...) = intersect!(s1, intersect(ss...))
+Base.intersect!(s1::SparseIntSet, ss...) = intersect!(s1, intersect(ss...))
 
 #Is there a more performant way to do this?
-intersect!(s1::SparseIntSet, ns) = copy!(s1, intersect(s1, ns))
+Base.intersect!(s1::SparseIntSet, ns) = copy!(s1, intersect(s1, ns))
 
-setdiff(s::SparseIntSet, ns) = setdiff!(copy(s), ns)
-function setdiff!(s::SparseIntSet, ns)
+Base.setdiff(s::SparseIntSet, ns) = setdiff!(copy(s), ns)
+function Base.setdiff!(s::SparseIntSet, ns)
     for n in ns
         pop!(s, n, nothing)
     end
     return s
 end
 
-function ==(s1::SparseIntSet, s2::SparseIntSet)
+function Base.:(==)(s1::SparseIntSet, s2::SparseIntSet)
     length(s1) != length(s2) && return false
     return all(in(s1), s2)
 end
 
-issubset(a::SparseIntSet, b::SparseIntSet) = isequal(a, intersect(a, b))
+Base.issubset(a::SparseIntSet, b::SparseIntSet) = isequal(a, intersect(a, b))
 
-<(a::SparseIntSet, b::SparseIntSet) = ( a<=b ) && !isequal(a, b)
-<=(a::SparseIntSet, b::SparseIntSet) = issubset(a, b)
+Base.:(<)(a::SparseIntSet, b::SparseIntSet) = ( a<=b ) && !isequal(a, b)
+Base.:(<=)(a::SparseIntSet, b::SparseIntSet) = issubset(a, b)
 
 function findfirst_packed_id(i, s::SparseIntSet)
     pageid, offset = pageid_offset(s, i)
@@ -198,7 +198,7 @@ function findfirst_packed_id(i, s::SparseIntSet)
     return id
 end
 
-collect(s::SparseIntSet) = copy(s.packed)
+Base.collect(s::SparseIntSet) = copy(s.packed)
 
 struct ZippedSparseIntSetIterator{VT,IT}
     valid_sets::VT
@@ -214,7 +214,7 @@ function Base.zip(s0::SparseIntSet, s::SparseIntSet...; kwargs...)
     return ZippedSparseIntSetIterator(s0, s...; kwargs...)
 end
 
-length(it::ZippedSparseIntSetIterator) = length(it.shortest_set)
+Base.length(it::ZippedSparseIntSetIterator) = length(it.shortest_set)
 
 # we know it is not in_excluded, as there are no excluded
 @inline in_excluded(id, it::ZippedSparseIntSetIterator{VT,Tuple{}}) where {VT} = false
@@ -237,7 +237,7 @@ end
     return true
 end
 
-@inline function iterate(it::ZippedSparseIntSetIterator, state=1)
+@inline function Base.iterate(it::ZippedSparseIntSetIterator, state=1)
     iterator_length = length(it)
     if state > iterator_length
         return nothing

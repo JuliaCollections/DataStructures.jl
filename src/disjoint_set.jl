@@ -34,7 +34,7 @@ end
 
 IntDisjointSets(n::T) where {T<:Integer} = IntDisjointSets{T}(collect(Base.OneTo(n)), zeros(T, n), n)
 IntDisjointSets{T}(n::Integer) where {T<:Integer} = IntDisjointSets{T}(collect(Base.OneTo(T(n))), zeros(T, T(n)), T(n))
-length(s::IntDisjointSets) = length(s.parents)
+Base.length(s::IntDisjointSets) = length(s.parents)
 
 """
     num_groups(s::IntDisjointSets)
@@ -84,7 +84,7 @@ in_same_set(s::IntDisjointSets{T}, x::T, y::T) where {T<:Integer} = find_root!(s
 Merge the subset containing x and that containing y into one
 and return the root of the new set.
 """
-function union!(s::IntDisjointSets{T}, x::T, y::T) where {T<:Integer}
+function Base.union!(s::IntDisjointSets{T}, x::T, y::T) where {T<:Integer}
     parents = s.parents
     xroot = find_root_impl!(parents, x)
     yroot = find_root_impl!(parents, y)
@@ -121,9 +121,9 @@ Make a new subset with an automatically chosen new element x.
 Returns the new element. Throw an `ArgumentError` if the
 capacity of the set would be exceeded.
 """
-function push!(s::IntDisjointSets{T}) where {T<:Integer}
+function Base.push!(s::IntDisjointSets{T}) where {T<:Integer}
     l = length(s)
-    l < typemax(T) || throw(ArgumentError(_intdisjointsets_bounds_err_msg(T))) 
+    l < typemax(T) || throw(ArgumentError(_intdisjointsets_bounds_err_msg(T)))
     x = l + one(T)
     push!(s.parents, x)
     push!(s.ranks, zero(T))
@@ -171,10 +171,10 @@ function _DisjointSets(xs, ::Base.EltypeUnknown)
     return DisjointSets{T}(xs)
 end
 
-iterate(s::DisjointSets) = iterate(s.revmap)
-iterate(s::DisjointSets, i) = iterate(s.revmap, i)
+Base.iterate(s::DisjointSets) = iterate(s.revmap)
+Base.iterate(s::DisjointSets, i) = iterate(s.revmap, i)
 
-length(s::DisjointSets) = length(s.internal)
+Base.length(s::DisjointSets) = length(s.internal)
 
 """
     num_groups(s::DisjointSets)
@@ -183,8 +183,8 @@ Get a number of groups.
 """
 num_groups(s::DisjointSets) = num_groups(s.internal)
 Base.eltype(::Type{DisjointSets{T}}) where T = T
-empty(s::DisjointSets{T}, ::Type{U}=T) where {T,U} = DisjointSets{U}()
-function sizehint!(s::DisjointSets, n::Integer)
+Base.empty(s::DisjointSets{T}, ::Type{U}=T) where {T,U} = DisjointSets{U}()
+function Base.sizehint!(s::DisjointSets, n::Integer)
     sizehint!(s.intmap, n)
     sizehint!(s.revmap, n)
     return s
@@ -210,7 +210,7 @@ in_same_set(s::DisjointSets{T}, x::T, y::T) where {T} = in_same_set(s.internal, 
 Merge the subset containing x and that containing y into one
 and return the root of the new set.
 """
-union!(s::DisjointSets{T}, x::T, y::T) where {T} = s.revmap[union!(s.internal, s.intmap[x], s.intmap[y])]
+Base.union!(s::DisjointSets{T}, x::T, y::T) where {T} = s.revmap[union!(s.internal, s.intmap[x], s.intmap[y])]
 
 """
     root_union!(s::DisjointSets{T}, x::T, y::T)
@@ -227,7 +227,7 @@ root_union!(s::DisjointSets{T}, x::T, y::T) where {T} = s.revmap[root_union!(s.i
 Make a new subset with an automatically chosen new element x.
 Returns the new element.
 """
-function push!(s::DisjointSets{T}, x::T) where T
+function Base.push!(s::DisjointSets{T}, x::T) where T
     id = push!(s.internal)
     s.intmap[x] = id
     push!(s.revmap,x) # Note, this assumes invariant: length(s.revmap) == id

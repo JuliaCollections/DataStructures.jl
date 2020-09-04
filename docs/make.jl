@@ -19,6 +19,7 @@ makedocs(
         "ordered_containers.md",
         "default_dict.md",
         "robin_dict.md",
+        "swiss_dict.md",
         "trie.md",
         "linked_list.md",
         "mutable_linked_list.md",
@@ -27,6 +28,7 @@ makedocs(
         "dibit_vector.md",
         "red_black_tree.md",
         "avl_tree.md",
+        "splay_tree.md",
     ],
     modules = [DataStructures],
     format = Documenter.HTML()

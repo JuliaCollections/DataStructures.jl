@@ -29,7 +29,7 @@ About [`SuffixFenwickTree`](https://stackoverflow.com/questions/21995930/dynamic
 """
 const SuffixFenwickTree{T} = GenericFenwickTree{:suffix, T}
 
-length(gft::GenericFenwickTree) = length(gft.bi_tree)
+Base.length(gft::GenericFenwickTree) = length(gft.bi_tree)
 Base.eltype(::Type{GenericFenwickTree{F, T}}) where {F, T} = T
 
 """
@@ -133,10 +133,10 @@ function suffixsum(sft::SuffixFenwickTree{T}, ind::Integer) where T
     return sum
 end
 
-getindex(ft::FenwickTree{T}, ind::Integer) where T = prefixsum(ft, ind)
-getindex(sft::SuffixFenwickTree{T}, ind::Integer) where T = suffixsum(sft, ind)
+Base.getindex(ft::FenwickTree{T}, ind::Integer) where T = prefixsum(ft, ind)
+Base.getindex(sft::SuffixFenwickTree{T}, ind::Integer) where T = suffixsum(sft, ind)
 
-function resize!(sft::SuffixFenwickTree{T}, size::Int) where T
+function Base.resize!(sft::SuffixFenwickTree{T}, size::Int) where T
     @boundscheck size > 0 || throw(ArgumentError("size should be greater than 0"))
     n0 = length(sft)
     resize!(sft.bi_tree, size)
