@@ -4,6 +4,7 @@ import Base: haskey, get, get!, getkey, delete!, pop!, empty!,
              insert!, getindex, length, isempty, iterate,
              keys, values, copy, similar,  push!,
              count, size, eltype, empty
+import Base.Iterators: flatten, repeated
 
 struct MultiDict{K,V}
     d::Dict{K,Vector{V}}
@@ -42,8 +43,8 @@ end
 ## Most functions are simply delegated to the wrapped Dict
 
 @delegate MultiDict.d [ haskey, get, get!, getkey,
-                        getindex, length, isempty, eltype,
-                        iterate, keys, values]
+                        getindex, isempty,
+                        keys]
 
 sizehint!(d::MultiDict, sz::Integer) = (sizehint!(d.d, sz); d)
 copy(d::MultiDict) = MultiDict(d)
@@ -64,6 +65,46 @@ function in(pr::(Tuple{Any,Any}), d::MultiDict{K,V}) where {K,V}
     k = convert(K, pr[1])
     v = get(d,k,Base.secret_table_token)
     (v !== Base.secret_table_token) && (pr[2] in v)
+end
+
+# TODO: For efficiency, we probably want a MultiKeySet to correspond to Dict's KeySet
+
+# TODO: I'm not actually sure if we need this eachindex?
+function Base.eachindex(md::MultiDict)
+    flatten((repeated(k, length(vs)) for (k,vs) in md.d))
+end
+Base.length(md::MultiDict) = sum(length(vs) for (_,vs) in md.d)
+# TODO: what should values() do?
+Base.values(md::MultiDict) = values(md.d)
+#function Base.values(md::MultiDict)
+#    flatten(vs for (_,vs) in md.d)
+#end
+
+Base.eltype(md::MultiDict{K,V}) where {K,V} = Pair{K,V}
+function Base.iterate(md::MultiDict)
+    i = iterate(md.d)
+    if i === nothing
+        return nothing
+    end
+    ((k,vs), state) = i
+    (v, vstate) = iterate(vs)  # Should be non-empty
+    return (k=>v, (state, ((k,vs), vstate)))
+end
+function Base.iterate(md::MultiDict, md_state)
+    state, ((k,vs), vstate) = md_state
+    i = iterate(vs, vstate)
+    if i === nothing
+        # Finished iterating vs, move on to the next key
+        i = iterate(md.d, state)
+        if i === nothing
+            return nothing
+        end
+        ((k,vs), state) = i
+        (v, vstate) = iterate(vs)  # Should be non-empty
+    else
+        (v, vstate) = i
+    end
+    return (k=>v, (state, ((k,vs), vstate)))
 end
 
 function pop!(d::MultiDict, key, default)
