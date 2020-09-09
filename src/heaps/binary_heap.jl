@@ -61,21 +61,21 @@ BinaryMaxHeap(xs::AbstractVector{T}) where T = BinaryMaxHeap{T}(xs)
 
 Returns the number of elements in heap `h`.
 """
-length(h::BinaryHeap) = length(h.valtree)
+Base.length(h::BinaryHeap) = length(h.valtree)
 
 """
     isempty(h::BinaryHeap)
 
 Returns whether the heap `h` is empty.
 """
-isempty(h::BinaryHeap) = isempty(h.valtree)
+Base.isempty(h::BinaryHeap) = isempty(h.valtree)
 
 """
     push!(h::BinaryHeap, value)
 
 Adds the `value` element to the heap `h`.
 """
-function push!(h::BinaryHeap, v)
+function Base.push!(h::BinaryHeap, v)
     heappush!(h.valtree, v, h.ordering)
     return h
 end
@@ -85,21 +85,21 @@ end
 
 Returns the element at the top of the heap `h`.
 """
-@inline first(h::BinaryHeap) = h.valtree[1]
+@inline Base.first(h::BinaryHeap) = h.valtree[1]
 
 """
     pop!(h::BinaryHeap)
 
 Removes and returns the element at the top of the heap `h`.
 """
-pop!(h::BinaryHeap) = heappop!(h.valtree, h.ordering)
+Base.pop!(h::BinaryHeap) = heappop!(h.valtree, h.ordering)
 
 """
     sizehint!(h::BinaryHeap, n::Integer)
 
 Suggest that heap `h` reserve capacity for at least `n` elements. This can improve performance.
 """
-function sizehint!(h::BinaryHeap, n::Integer)
+function Base.sizehint!(h::BinaryHeap, n::Integer)
     sizehint!(h.valtree, n)
     return h
 end

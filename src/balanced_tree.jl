@@ -145,8 +145,6 @@ mutable struct BalancedTree23{K, D, Ord <: Ordering}
 end
 
 
-
-
 ## Function cmp2 checks a tree node with two children
 ## against a given key, and returns 1 if the given key is
 ## less than the node's splitkey or 2 else.  Special case
@@ -160,14 +158,12 @@ end
 end
 
 
-
 @inline function cmp2_leaf(o::Ordering,
                            treenode::TreeNode,
                            k)
     (treenode.child2 == 2) ||
     lt(o, k, treenode.splitkey1) ? 1 : 2
 end
-
 
 
 ## Function cmp3 checks a tree node with three children
@@ -193,7 +189,6 @@ end
 end
 
 
-
 ## Function cmp2le checks a tree node with two children
 ## against a given key, and returns 1 if the given key is
 ## less than or equal to the node's splitkey or 2 else.  Special case
@@ -212,8 +207,6 @@ end
                              k)
     treenode.child2 == 2 || !lt(o,treenode.splitkey1,k) ? 1 : 2
 end
-
-
 
 
 ## Function cmp3le checks a tree node with three children
@@ -239,11 +232,10 @@ end
 end
 
 
-
 ## The empty! function deletes all data in the balanced tree.
 ## Therefore, it invalidates all indices.
 
-function empty!(t::BalancedTree23)
+function Base.empty!(t::BalancedTree23)
     resize!(t.data,2)
     initializeData!(t.data)
     resize!(t.tree,1)
@@ -293,7 +285,6 @@ function findkey(t::BalancedTree23, k)
 end
 
 
-
 ## The findkeyless function finds the index of a (key,data) pair in the tree that
 ## with the greatest key that is less than the given key.  If there is no
 ## key less than the given key, then it returns 1 (the before-start node).
@@ -318,7 +309,6 @@ function findkeyless(t::BalancedTree23, k)
 end
 
 
-
 ## The following are helper routines for the insert! and delete! functions.
 ## They replace the 'parent' field of either an internal tree node or
 ## a data node at the bottom tree level.
@@ -337,8 +327,6 @@ function replaceparent!(tree::Array{TreeNode{K},1}, whichind::Int, newparent::In
 end
 
 
-
-
 ## Helper function for either grabbing a brand new location in a
 ## array (if there are no free locations) or else grabbing a free
 ## location and marking it as used.  The return value is the
@@ -355,7 +343,6 @@ function push_or_reuse!(a::Vector, freelocs::Array{Int,1}, item)
 end
 
 
-
 ## Function insert! inserts a new data item into the tree.
 ## The arguments are the (K,D) pair to insert.
 ## The return values are a bool and an index.  The
@@ -367,7 +354,7 @@ end
 ## done whether the iterm
 ## is already in the tree, so insertion of a new item always succeeds.
 
-function insert!(t::BalancedTree23{K,D,Ord}, k, d, allowdups::Bool) where {K,D,Ord <: Ordering}
+function Base.insert!(t::BalancedTree23{K,D,Ord}, k, d, allowdups::Bool) where {K,D,Ord <: Ordering}
 
     ## First we find the greatest data node that is <= k.
     leafind, exactfound = findkey(t, k)
@@ -544,8 +531,6 @@ function insert!(t::BalancedTree23{K,D,Ord}, k, d, allowdups::Bool) where {K,D,O
 end
 
 
-
-
 ## nextloc0: returns the next item in the tree according to the
 ## sort order, given an index i (subscript of t.data) of a current
 ## item.
@@ -676,7 +661,7 @@ endloc(t::BalancedTree23) = prevloc0(t,2)
 
 ## delete! routine deletes an entry from the balanced tree.
 
-function delete!(t::BalancedTree23{K,D,Ord}, it::Int) where {K,D,Ord<:Ordering}
+function Base.delete!(t::BalancedTree23{K,D,Ord}, it::Int) where {K,D,Ord<:Ordering}
 
     ## Put the cell indexed by 'it' into the deletion list.
     ##

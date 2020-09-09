@@ -25,12 +25,12 @@ struct SDMExcludeLast{ContainerType <: SDMContainer} <:
     pastlast::Int
 end
 
-keytype(::SDMExcludeLast{T}) where {T <: SAContainer} = keytype(T)
-keytype(::Type{SDMExcludeLast{T}}) where {T <: SAContainer} = keytype(T)
-valtype(::SDMExcludeLast{T}) where {T <: SAContainer} = valtype(T)
-valtype(::Type{SDMExcludeLast{T}}) where {T <: SAContainer} = valtype(T)
-eltype(::SDMExcludeLast{T}) where {T <: SAContainer} = eltype(T)
-eltype(::Type{SDMExcludeLast{T}}) where {T <: SAContainer} = eltype(T)
+Base.keytype(::SDMExcludeLast{T}) where {T <: SAContainer} = keytype(T)
+Base.keytype(::Type{SDMExcludeLast{T}}) where {T <: SAContainer} = keytype(T)
+Base.valtype(::SDMExcludeLast{T}) where {T <: SAContainer} = valtype(T)
+Base.valtype(::Type{SDMExcludeLast{T}}) where {T <: SAContainer} = valtype(T)
+Base.eltype(::SDMExcludeLast{T}) where {T <: SAContainer} = eltype(T)
+Base.eltype(::Type{SDMExcludeLast{T}}) where {T <: SAContainer} = eltype(T)
 
 
 struct SSExcludeLast{ContainerType <: SortedSet} <:
@@ -40,8 +40,8 @@ struct SSExcludeLast{ContainerType <: SortedSet} <:
     pastlast::Int
 end
 
-eltype(::SSExcludeLast{T}) where {T <: SortedSet} = eltype(T)
-eltype(::Type{SSExcludeLast{T}}) where {T <: SortedSet} = eltype(T)
+Base.eltype(::SSExcludeLast{T}) where {T <: SortedSet} = eltype(T)
+Base.eltype(::Type{SSExcludeLast{T}}) where {T <: SortedSet} = eltype(T)
 
 
 extractcontainer(s::AbstractExcludeLast) = s.m
@@ -60,13 +60,12 @@ struct SDMIncludeLast{ContainerType <: SDMContainer} <:
     last::Int
 end
 
-keytype(::SDMIncludeLast{T}) where {T <: SAContainer} = keytype(T)
-keytype(::Type{SDMIncludeLast{T}}) where {T <: SAContainer} = keytype(T)
-valtype(::SDMIncludeLast{T}) where {T <: SAContainer} = valtype(T)
-valtype(::Type{SDMIncludeLast{T}}) where {T <: SAContainer} = valtype(T)
-eltype(::SDMIncludeLast{T}) where {T <: SAContainer} = eltype(T)
-eltype(::Type{SDMIncludeLast{T}}) where {T <: SAContainer} = eltype(T)
-
+Base.keytype(::SDMIncludeLast{T}) where {T <: SAContainer} = keytype(T)
+Base.keytype(::Type{SDMIncludeLast{T}}) where {T <: SAContainer} = keytype(T)
+Base.valtype(::SDMIncludeLast{T}) where {T <: SAContainer} = valtype(T)
+Base.valtype(::Type{SDMIncludeLast{T}}) where {T <: SAContainer} = valtype(T)
+Base.eltype(::SDMIncludeLast{T}) where {T <: SAContainer} = eltype(T)
+Base.eltype(::Type{SDMIncludeLast{T}}) where {T <: SAContainer} = eltype(T)
 
 
 struct SSIncludeLast{ContainerType <: SortedSet} <:
@@ -76,21 +75,17 @@ struct SSIncludeLast{ContainerType <: SortedSet} <:
     last::Int
 end
 
-eltype(::SSIncludeLast{T}) where {T <: SortedSet} = eltype(T)
-eltype(::Type{SSIncludeLast{T}}) where {T <: SortedSet} = eltype(T)
-
-
+Base.eltype(::SSIncludeLast{T}) where {T <: SortedSet} = eltype(T)
+Base.eltype(::Type{SSIncludeLast{T}}) where {T <: SortedSet} = eltype(T)
 
 
 extractcontainer(s::AbstractIncludeLast) = s.m
 getrangeobj(s::AbstractIncludeLast) = s
 
 
-IteratorSize(::Type{T} where {T <: SAContainer}) = HasLength()
-IteratorSize(::Type{T} where {T <: AbstractExcludeLast}) = SizeUnknown()
-IteratorSize(::Type{T} where {T <: AbstractIncludeLast}) = SizeUnknown()
-
-
+Base.IteratorSize(::Type{T} where {T <: SAContainer}) = HasLength()
+Base.IteratorSize(::Type{T} where {T <: AbstractExcludeLast}) = SizeUnknown()
+Base.IteratorSize(::Type{T} where {T <: AbstractIncludeLast}) = SizeUnknown()
 
 
 ## The basic iterations are either over the whole sorted container, an
@@ -119,72 +114,71 @@ struct SDMKeyIteration{T <: SDMIterableTypesBase}
     base::T
 end
 
-eltype(::Type{SDMKeyIteration{T}}) where {T} = keytype(T)
-eltype(s::SDMKeyIteration) = keytype(extractcontainer(s.base))
-length(s::SDMKeyIteration{T} where T <: SDMContainer) = length(extractcontainer(s.base))
+Base.eltype(::Type{SDMKeyIteration{T}}) where {T} = keytype(T)
+Base.eltype(s::SDMKeyIteration) = keytype(extractcontainer(s.base))
+Base.length(s::SDMKeyIteration{T} where T <: SDMContainer) = length(extractcontainer(s.base))
 
 
 struct SDMValIteration{T <: SDMIterableTypesBase}
     base::T
 end
 
-eltype(::Type{SDMValIteration{T}}) where {T} = valtype(T)
-eltype(s::SDMValIteration) = valtype(extractcontainer(s.base))
-length(s::SDMValIteration{T} where T <: SDMContainer) = length(extractcontainer(s.base))
-
+Base.eltype(::Type{SDMValIteration{T}}) where {T} = valtype(T)
+Base.eltype(s::SDMValIteration) = valtype(extractcontainer(s.base))
+Base.length(s::SDMValIteration{T} where T <: SDMContainer) = length(extractcontainer(s.base))
 
 
 struct SDMSemiTokenIteration{T <: SDMIterableTypesBase}
     base::T
 end
 
-eltype(::Type{SDMSemiTokenIteration{T}}) where {T} =
+Base.eltype(::Type{SDMSemiTokenIteration{T}}) where {T} =
     Tuple{IntSemiToken, keytype(T), valtype(T)}
-eltype(s::SDMSemiTokenIteration) = Tuple{IntSemiToken,
+Base.eltype(s::SDMSemiTokenIteration) = Tuple{IntSemiToken,
                                          keytype(extractcontainer(s.base)),
                                          valtype(extractcontainer(s.base))}
-length(s::SDMSemiTokenIteration{T} where T <: SDMContainer) = length(s.base)
+Base.length(s::SDMSemiTokenIteration{T} where T <: SDMContainer) = length(s.base)
 
 
 struct SSSemiTokenIteration{T <: SSIterableTypesBase}
     base::T
 end
 
-eltype(::Type{SSSemiTokenIteration{T}}) where {T} =
+Base.eltype(::Type{SSSemiTokenIteration{T}}) where {T} =
     Tuple{IntSemiToken, eltype(T)}
-eltype(s::SSSemiTokenIteration) = Tuple{IntSemiToken,
+Base.eltype(s::SSSemiTokenIteration) = Tuple{IntSemiToken,
                                         eltype(extractcontainer(s.base))}
-length(s::SSSemiTokenIteration{T} where T <: SortedSet) = length(s.base)
+Base.length(s::SSSemiTokenIteration{T} where T <: SortedSet) = length(s.base)
 
 
 struct SDMSemiTokenKeyIteration{T <: SDMIterableTypesBase}
     base::T
 end
 
-eltype(::Type{SDMSemiTokenKeyIteration{T}}) where {T} =
+Base.eltype(::Type{SDMSemiTokenKeyIteration{T}}) where {T} =
     Tuple{IntSemiToken,
           keytype(T)}
-eltype(s::SDMSemiTokenKeyIteration) = Tuple{IntSemiToken,
+Base.eltype(s::SDMSemiTokenKeyIteration) = Tuple{IntSemiToken,
                                             keytype(extractcontainer(s.base))}
-length(s::SDMSemiTokenKeyIteration{T} where T <: SDMContainer) = length(s.base)
+Base.length(s::SDMSemiTokenKeyIteration{T} where T <: SDMContainer) = length(s.base)
 
 struct SAOnlySemiTokensIteration{T <: SAIterableTypesBase}
     base::T
 end
 
-eltype(::Type{SAOnlySemiTokensIteration{T}} where {T}) = IntSemiToken
-eltype(::SAOnlySemiTokensIteration) = IntSemiToken
-length(s::SAOnlySemiTokensIteration{T} where T <: SAContainer) = length(s.base)
+Base.eltype(::Type{SAOnlySemiTokensIteration{T}} where {T}) = IntSemiToken
+Base.eltype(::SAOnlySemiTokensIteration) = IntSemiToken
+Base.length(s::SAOnlySemiTokensIteration{T} where T <: SAContainer) = length(s.base)
 
 struct SDMSemiTokenValIteration{T <: SDMIterableTypesBase}
     base::T
 end
 
-eltype(::Type{SDMSemiTokenValIteration{T}}) where {T} =
+Base.eltype(::Type{SDMSemiTokenValIteration{T}}) where {T} =
     Tuple{IntSemiToken, valtype(T)}
-eltype(s::SDMSemiTokenValIteration) = Tuple{IntSemiToken,
+Base.eltype(s::SDMSemiTokenValIteration) = Tuple{IntSemiToken,
                                             valtype(extractcontainer(s.base))}
-length(s::SDMSemiTokenValIteration{T} where T <: SDMContainer) = length(s.base)
+Base.length(s::SDMSemiTokenValIteration{T} where T <: SDMContainer) = length(s.base)
 
 const SACompoundIterable = Union{SDMKeyIteration,
                                  SDMValIteration,
@@ -200,14 +194,14 @@ getrangeobj(s::SACompoundIterable) = getrangeobj(s.base)
 const SAIterable = Union{SAIterableTypesBase, SACompoundIterable}
 
 
-IteratorEltype(::Type{T} where {T <: SAIterable}) = HasEltype()
-IteratorSize(::Type{SDMKeyIteration{T}}) where {T} = IteratorSize(T)
-IteratorSize(::Type{SDMValIteration{T}}) where {T} = IteratorSize(T)
-IteratorSize(::Type{SDMSemiTokenIteration{T}}) where {T} = IteratorSize(T)
-IteratorSize(::Type{SSSemiTokenIteration{T}}) where {T} = IteratorSize(T)
-IteratorSize(::Type{SDMSemiTokenKeyIteration{T}}) where {T} = IteratorSize(T)
-IteratorSize(::Type{SDMSemiTokenValIteration{T}}) where {T} = IteratorSize(T)
-IteratorSize(::Type{SAOnlySemiTokensIteration{T}}) where {T} = IteratorSize(T)
+Base.IteratorEltype(::Type{T} where {T <: SAIterable}) = HasEltype()
+Base.IteratorSize(::Type{SDMKeyIteration{T}}) where {T} = IteratorSize(T)
+Base.IteratorSize(::Type{SDMValIteration{T}}) where {T} = IteratorSize(T)
+Base.IteratorSize(::Type{SDMSemiTokenIteration{T}}) where {T} = IteratorSize(T)
+Base.IteratorSize(::Type{SSSemiTokenIteration{T}}) where {T} = IteratorSize(T)
+Base.IteratorSize(::Type{SDMSemiTokenKeyIteration{T}}) where {T} = IteratorSize(T)
+Base.IteratorSize(::Type{SDMSemiTokenValIteration{T}}) where {T} = IteratorSize(T)
+Base.IteratorSize(::Type{SAOnlySemiTokensIteration{T}}) where {T} = IteratorSize(T)
 
 
 ## All the loops maintain a state which is an object of the
@@ -236,20 +230,20 @@ inclusive(m::SAContainer, i1::IntSemiToken, i2::IntSemiToken) =
 
 # Next definition needed to break ambiguity with keys(AbstractDict) from Dict.jl
 
-keys(ba::SortedDict) = SDMKeyIteration(ba)
-keys(ba::SDMIterableTypesBase) = SDMKeyIteration(ba)
+Base.keys(ba::SortedDict) = SDMKeyIteration(ba)
+Base.keys(ba::SDMIterableTypesBase) = SDMKeyIteration(ba)
 
 
-in(k, keyit::SDMKeyIteration{SortedDict{K,D,Ord}} where {K,D,Ord}) =
+Base.in(k, keyit::SDMKeyIteration{SortedDict{K,D,Ord}} where {K,D,Ord}) =
     haskey(extractcontainer(keyit.base), k)
 
-in(k, keyit::SDMKeyIteration{SortedMultiDict{K,D,Ord}} where {K,D,Ord}) =
+Base.in(k, keyit::SDMKeyIteration{SortedMultiDict{K,D,Ord}} where {K,D,Ord}) =
     haskey(extractcontainer(keyit.base), k)
 
 
 # Next definition needed to break ambiguity with values(AbstractDict) from Dict.jl
-values(ba::SortedDict) = SDMValIteration(ba)
-values(ba::SDMIterableTypesBase) = SDMValIteration(ba)
+Base.values(ba::SortedDict) = SDMValIteration(ba)
+Base.values(ba::SDMIterableTypesBase) = SDMValIteration(ba)
 semitokens(ba::SDMIterableTypesBase) = SDMSemiTokenIteration(ba)
 semitokens(ba::SSIterableTypesBase) = SSSemiTokenIteration(ba)
 semitokens(ki::SDMKeyIteration) = SDMSemiTokenKeyIteration(ki.base)
@@ -257,14 +251,11 @@ semitokens(vi::SDMValIteration) = SDMSemiTokenValIteration(vi.base)
 onlysemitokens(ba::SAIterableTypesBase) = SAOnlySemiTokensIteration(ba)
 
 
-
-
 function nexthelper(c::SAContainer, state::SAIterationState)
     sn = state.next
     (sn < 3 || !(sn in c.bt.useddatacells)) && throw(BoundsError())
     SAIterationState(nextloc0(c.bt, sn), state.final)
 end
-
 
 
 getitem(::SDMIterableTypesBase, dt, sn) = dt.k => dt.d
@@ -302,7 +293,7 @@ end
 
 get_init_state(m::SAContainer) = SAIterationState(beginloc(m.bt), 2)
 
-function iterate(s::SAIterable, state = get_init_state(getrangeobj(s)))
+function Base.iterate(s::SAIterable, state = get_init_state(getrangeobj(s)))
     if state.next == state.final
         return nothing
     else
@@ -314,19 +305,19 @@ function iterate(s::SAIterable, state = get_init_state(getrangeobj(s)))
 end
 
 
-eachindex(sd::SortedDict) = keys(sd)
-eachindex(sdm::SortedMultiDict) = onlysemitokens(sdm)
-eachindex(ss::SortedSet) = onlysemitokens(ss)
-eachindex(sd::SDMExcludeLast{SortedDict{K,D,Ord}} where {K,D,Ord <: Ordering}) = keys(sd)
-eachindex(smd::SDMExcludeLast{SortedMultiDict{K,D,Ord}} where {K,D,Ord <: Ordering}) =
+Base.eachindex(sd::SortedDict) = keys(sd)
+Base.eachindex(sdm::SortedMultiDict) = onlysemitokens(sdm)
+Base.eachindex(ss::SortedSet) = onlysemitokens(ss)
+Base.eachindex(sd::SDMExcludeLast{SortedDict{K,D,Ord}} where {K,D,Ord <: Ordering}) = keys(sd)
+Base.eachindex(smd::SDMExcludeLast{SortedMultiDict{K,D,Ord}} where {K,D,Ord <: Ordering}) =
      onlysemitokens(smd)
-eachindex(ss::SSExcludeLast) = onlysemitokens(ss)
-eachindex(sd::SDMIncludeLast{SortedDict{K,D,Ord}} where {K,D,Ord <: Ordering}) = keys(sd)
-eachindex(smd::SDMIncludeLast{SortedMultiDict{K,D,Ord}} where {K,D,Ord <: Ordering}) =
+Base.eachindex(ss::SSExcludeLast) = onlysemitokens(ss)
+Base.eachindex(sd::SDMIncludeLast{SortedDict{K,D,Ord}} where {K,D,Ord <: Ordering}) = keys(sd)
+Base.eachindex(smd::SDMIncludeLast{SortedMultiDict{K,D,Ord}} where {K,D,Ord <: Ordering}) =
      onlysemitokens(smd)
-eachindex(ss::SSIncludeLast) = onlysemitokens(ss)
+Base.eachindex(ss::SSIncludeLast) = onlysemitokens(ss)
 
 
-empty!(m::SAContainer) = (empty!(m.bt); m)
-length(m::SAContainer) = length(m.bt.data) - length(m.bt.freedatainds) - 2
-isempty(m::SAContainer) = length(m) == 0
+Base.empty!(m::SAContainer) = (empty!(m.bt); m)
+Base.length(m::SAContainer) = length(m.bt.data) - length(m.bt.freedatainds) - 2
+Base.isempty(m::SAContainer) = length(m) == 0

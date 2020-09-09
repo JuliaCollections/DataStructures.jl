@@ -171,16 +171,16 @@ end
 #
 ################################################
 
-length(h::BinaryMinMaxHeap) = length(h.valtree)
+Base.length(h::BinaryMinMaxHeap) = length(h.valtree)
 
-isempty(h::BinaryMinMaxHeap) = isempty(h.valtree)
+Base.isempty(h::BinaryMinMaxHeap) = isempty(h.valtree)
 
 """
     pop!(h::BinaryMinMaxHeap) = popmin!(h)
 """
-@inline pop!(h::BinaryMinMaxHeap) = popmin!(h)
+@inline Base.pop!(h::BinaryMinMaxHeap) = popmin!(h)
 
-function sizehint!(h::BinaryMinMaxHeap, s::Integer)
+function Base.sizehint!(h::BinaryMinMaxHeap, s::Integer)
     sizehint!(h.valtree, s)
     return h
 end
@@ -239,7 +239,7 @@ Remove up to the `k` largest values from the heap.
 end
 
 
-function push!(h::BinaryMinMaxHeap, v)
+function Base.push!(h::BinaryMinMaxHeap, v)
     valtree = h.valtree
     push!(valtree, v)
     _minmax_heap_bubble_up!(valtree, length(valtree))
@@ -250,21 +250,21 @@ end
 
 Get the first (minimum) of the heap.
 """
-@inline first(h::BinaryMinMaxHeap) = minimum(h)
+@inline Base.first(h::BinaryMinMaxHeap) = minimum(h)
 
-@inline function minimum(h::BinaryMinMaxHeap)
+@inline function Base.minimum(h::BinaryMinMaxHeap)
     valtree = h.valtree
     !isempty(h) || throw(ArgumentError("heap must be non-empty"))
     return @inbounds h.valtree[1]
 end
 
-@inline function maximum(h::BinaryMinMaxHeap)
+@inline function Base.maximum(h::BinaryMinMaxHeap)
     valtree = h.valtree
     !isempty(h) || throw(ArgumentError("heap must be non-empty"))
     return @inbounds maximum(valtree[1:min(end, 3)])
 end
 
-empty!(h::BinaryMinMaxHeap) = (empty!(h.valtree); h)
+Base.empty!(h::BinaryMinMaxHeap) = (empty!(h.valtree); h)
 
 
 """

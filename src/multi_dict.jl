@@ -1,10 +1,5 @@
 #  multi-value dictionary (multidict)
 
-import Base: haskey, get, get!, getkey, delete!, pop!, empty!,
-             insert!, getindex, length, isempty, iterate,
-             keys, values, copy, similar,  push!,
-             count, size, eltype, empty
-
 struct MultiDict{K,V}
     d::Dict{K,Vector{V}}
 
@@ -41,18 +36,18 @@ end
 
 ## Most functions are simply delegated to the wrapped Dict
 
-@delegate MultiDict.d [ haskey, get, get!, getkey,
-                        getindex, length, isempty, eltype,
-                        iterate, keys, values]
+@delegate MultiDict.d [ Base.haskey, Base.get, Base.get!, Base.getkey,
+                        Base.getindex, Base.length, Base.isempty, Base.eltype,
+                        Base.iterate, Base.keys, Base.values]
 
-sizehint!(d::MultiDict, sz::Integer) = (sizehint!(d.d, sz); d)
-copy(d::MultiDict) = MultiDict(d)
-empty(d::MultiDict{K,V}) where {K,V} = MultiDict{K,V}()
-==(d1::MultiDict, d2::MultiDict) = d1.d == d2.d
-delete!(d::MultiDict, key) = (delete!(d.d, key); d)
-empty!(d::MultiDict) = (empty!(d.d); d)
+Base.sizehint!(d::MultiDict, sz::Integer) = (sizehint!(d.d, sz); d)
+Base.copy(d::MultiDict) = MultiDict(d)
+Base.empty(d::MultiDict{K,V}) where {K,V} = MultiDict{K,V}()
+Base.:(==)(d1::MultiDict, d2::MultiDict) = d1.d == d2.d
+Base.delete!(d::MultiDict, key) = (delete!(d.d, key); d)
+Base.empty!(d::MultiDict) = (empty!(d.d); d)
 
-function insert!(d::MultiDict{K,V}, k, v) where {K,V}
+function Base.insert!(d::MultiDict{K,V}, k, v) where {K,V}
     if !haskey(d.d, k)
         d.d[k] = V[]
     end
@@ -60,13 +55,13 @@ function insert!(d::MultiDict{K,V}, k, v) where {K,V}
     return d
 end
 
-function in(pr::(Tuple{Any,Any}), d::MultiDict{K,V}) where {K,V}
+function Base.in(pr::(Tuple{Any,Any}), d::MultiDict{K,V}) where {K,V}
     k = convert(K, pr[1])
     v = get(d,k,Base.secret_table_token)
     (v !== Base.secret_table_token) && (pr[2] in v)
 end
 
-function pop!(d::MultiDict, key, default)
+function Base.pop!(d::MultiDict, key, default)
     vs = get(d, key, Base.secret_table_token)
     if vs === Base.secret_table_token
         if default !== Base.secret_table_token
@@ -79,17 +74,17 @@ function pop!(d::MultiDict, key, default)
     (length(vs) == 0) && delete!(d, key)
     return v
 end
-pop!(d::MultiDict, key) = pop!(d, key, Base.secret_table_token)
+Base.pop!(d::MultiDict, key) = pop!(d, key, Base.secret_table_token)
 
-push!(d::MultiDict, kv::Pair) = insert!(d, kv[1], kv[2])
-#push!(d::MultiDict, kv::Pair, kv2::Pair) = (push!(d.d, kv, kv2); d)
-#push!(d::MultiDict, kv::Pair, kv2::Pair, kv3::Pair...) = (push!(d.d, kv, kv2, kv3...); d)
+Base.push!(d::MultiDict, kv::Pair) = insert!(d, kv[1], kv[2])
+#Base.push!(d::MultiDict, kv::Pair, kv2::Pair) = (push!(d.d, kv, kv2); d)
+#Base.push!(d::MultiDict, kv::Pair, kv2::Pair, kv3::Pair...) = (push!(d.d, kv, kv2, kv3...); d)
 
-push!(d::MultiDict, kv) = insert!(d, kv[1], kv[2])
-#push!(d::MultiDict, kv, kv2...) = (push!(d.d, kv, kv2...); d)
+Base.push!(d::MultiDict, kv) = insert!(d, kv[1], kv[2])
+#Base.push!(d::MultiDict, kv, kv2...) = (push!(d.d, kv, kv2...); d)
 
-count(d::MultiDict) = length(keys(d)) == 0 ? 0 : mapreduce(k -> length(d[k]), +, keys(d))
-size(d::MultiDict) = (length(keys(d)), count(d::MultiDict))
+Base.count(d::MultiDict) = length(keys(d)) == 0 ? 0 : mapreduce(k -> length(d[k]), +, keys(d))
+Base.size(d::MultiDict) = (length(keys(d)), count(d::MultiDict))
 
 # enumerate
 
@@ -98,9 +93,9 @@ struct EnumerateAll
 end
 enumerateall(d::MultiDict) = EnumerateAll(d)
 
-length(e::EnumerateAll) = count(e.d)
+Base.length(e::EnumerateAll) = count(e.d)
 
-function iterate(e::EnumerateAll)
+function Base.iterate(e::EnumerateAll)
     V = eltype(eltype(values(e.d)))
     vs = V[]
     dstate = iterate(e.d.d)
@@ -116,7 +111,7 @@ function iterate(e::EnumerateAll)
     return ((k, v), (dstate, k, vs, vstate))
 end
 
-function iterate(e::EnumerateAll, s)
+function Base.iterate(e::EnumerateAll, s)
     dstate, k, vs, vstate = s
     dstate === nothing || vstate === nothing && return nothing
     while vstate === nothing

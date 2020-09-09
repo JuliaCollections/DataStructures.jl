@@ -111,7 +111,7 @@ pair whose first entry is boolean and indicates whether the
 insertion was new (i.e., the key was not previously present) and the
 second entry is the semitoken of the new entry. Time: O(*c* log *n*)
 """
-@inline function insert!(m::SortedSet, k_)
+@inline function Base.insert!(m::SortedSet, k_)
     b, i = insert!(m.bt, convert(keytype(m),k_), nothing, false)
     return b, IntSemiToken(i)
 end
@@ -126,7 +126,7 @@ the old value. (This is not necessarily a no-op; see below for
 remarks about the customizing the sort order.) The return value is
 `sc`. Time: O(*c* log *n*)
 """
-@inline function push!(m::SortedSet, k_)
+@inline function Base.push!(m::SortedSet, k_)
     b, i = insert!(m.bt, convert(keytype(m),k_), nothing, false)
     return m
 end
@@ -146,7 +146,7 @@ order in the container. Thus, `first(sc)` is equivalent to
 `deref((sc,startof(sc)))`. It is an error to call this function on
 an empty container. Time: O(log *n*)
 """
-@inline function first(m::SortedSet)
+@inline function Base.first(m::SortedSet)
     i = beginloc(m.bt)
     i == 2 && throw(BoundsError())
     return m.bt.data[i].k
@@ -162,14 +162,14 @@ order in the container. Thus, `last(sc)` is equivalent to
 `deref((sc,lastindex(sc)))`. It is an error to call this function on an
 empty container. Time: O(log *n*)
 """
-@inline function last(m::SortedSet)
+@inline function Base.last(m::SortedSet)
     i = endloc(m.bt)
     i == 1 && throw(BoundsError())
     return m.bt.data[i].k
 end
 
 
-@inline function in(k_, m::SortedSet)
+@inline function Base.in(k_, m::SortedSet)
     i, exactfound = findkey(m.bt, convert(keytype(m),k_))
     return exactfound
 end
@@ -188,8 +188,8 @@ This function may also be applied to the type itself. Time: O(1)
 Returns the key type for SortedDict, SortedMultiDict and SortedSet.
 This function may also be applied to the type itself. Time: O(1)
 """
-@inline keytype(m::SortedSet{K,Ord}) where {K,Ord <: Ordering} = K
-@inline keytype(::Type{SortedSet{K,Ord}}) where {K,Ord <: Ordering} = K
+@inline Base.keytype(m::SortedSet{K,Ord}) where {K,Ord <: Ordering} = K
+@inline Base.keytype(::Type{SortedSet{K,Ord}}) where {K,Ord <: Ordering} = K
 
 """
     ordtype(sc)
@@ -216,7 +216,7 @@ or SortedSet `sc`. For SortedSet, `haskey(sc,k)` is a synonym for
 `in(k,sc)`. For SortedDict and SortedMultiDict, `haskey(sc,k)` is
 equivalent to `in(k,keys(sc))`. Time: O(*c* log *n*)
 """
-haskey(m::SortedSet, k_) = in(k_, m)
+Base.haskey(m::SortedSet, k_) = in(k_, m)
 
 """
     delete!(sc, k)
@@ -227,7 +227,7 @@ operation deletes the item whose key is `k`. It is a `KeyError` if
 is complete, any token addressing the deleted item is invalid.
 Returns `sc`. Time: O(*c* log *n*)
 """
-@inline function delete!(m::SortedSet, k_)
+@inline function Base.delete!(m::SortedSet, k_)
     i, exactfound = findkey(m.bt,convert(keytype(m),k_))
     if exactfound
         delete!(m.bt, i)
@@ -245,7 +245,7 @@ SortedDict or `k` itself in the case of SortedSet. If `k` is not in `sc`
 return `default`, or throw a `KeyError` if `default` is not specified.
 Time: O(*c* log *n*)
 """
-@inline function pop!(m::SortedSet, k_)
+@inline function Base.pop!(m::SortedSet, k_)
     k = convert(keytype(m),k_)
     i, exactfound = findkey(m.bt, k)
     !exactfound && throw(KeyError(k_))
@@ -254,7 +254,7 @@ Time: O(*c* log *n*)
     return k
 end
 
-@inline function pop!(m::SortedSet, k_, default)
+@inline function Base.pop!(m::SortedSet, k_, default)
     k = convert(keytype(m),k_)
     i, exactfound = findkey(m.bt, k)
     !exactfound && return default
@@ -269,14 +269,13 @@ end
 Deletes the item with first key in SortedSet `ss` and returns the
 key. A `BoundsError` results if `ss` is empty. Time: O(*c* log *n*)
 """
-@inline function pop!(m::SortedSet)
+@inline function Base.pop!(m::SortedSet)
     i = beginloc(m.bt)
     i == 2 && throw(BoundsError())
     k = m.bt.data[i].k
     delete!(m.bt, i)
     return k
 end
-
 
 
 ## Check if two SortedSets are equal in the sense of containing
@@ -297,7 +296,7 @@ hash-equivalence in the case of SortedDict, then `isequal` of the
 entire containers implies hash-equivalence of the containers. Time:
 O(*cn* + *n* log *n*)
 """
-function isequal(m1::SortedSet, m2::SortedSet)
+function Base.isequal(m1::SortedSet, m2::SortedSet)
     ord = orderobject(m1)
     if !isequal(ord, orderobject(m2)) || !isequal(eltype(m1), eltype(m2))
         throw(ArgumentError("Cannot use isequal for two SortedSets unless their element types and ordering objects are equal"))
@@ -329,7 +328,7 @@ iterable) into the SortedSet `ss`. The items must be convertible to
 the key-type of `ss`. Time: O(*ci* log *n*) where *i* is the number
 of items in the iterable argument.
 """
-function union!(m1::SortedSet{K,Ord}, iterable_item) where {K, Ord <: Ordering}
+function Base.union!(m1::SortedSet{K,Ord}, iterable_item) where {K, Ord <: Ordering}
     for k in iterable_item
         push!(m1,convert(K,k))
     end
@@ -344,7 +343,7 @@ inserts each item from `ss` and each item from each iterable
 argument into the returned SortedSet. Time: O(*cn* log *n*) where
 *n* is the total number of items in all the arguments.
 """
-function union(m1::SortedSet, others...)
+function Base.union(m1::SortedSet, others...)
     mr = packcopy(m1)
     for m2 in others
         union!(mr, m2)
@@ -383,7 +382,7 @@ return variable is a new SortedSet that is the intersection of all
 the sets that are input. Time: O(*cn* log *n*), where *n* is the
 total number of items in all the arguments.
 """
-function intersect(m1::SortedSet{K,Ord}, others::SortedSet{K,Ord}...) where {K, Ord <: Ordering}
+function Base.intersect(m1::SortedSet{K,Ord}, others::SortedSet{K,Ord}...) where {K, Ord <: Ordering}
     ord = orderobject(m1)
     for s2 in others
         if !isequal(ord, orderobject(s2))
@@ -410,7 +409,7 @@ containing entries that are in one of `ss1`, `ss2` but not both.
 Time: O(*cn* log *n*), where *n* is the total size of the two
 containers.
 """
-function symdiff(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord}) where {K, Ord <: Ordering}
+function Base.symdiff(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord}) where {K, Ord <: Ordering}
     ord = orderobject(m1)
     if !isequal(ord, orderobject(m2))
         throw(ArgumentError("Cannot apply symdiff to two SortedSets unless their ordering objects are equal"))
@@ -454,7 +453,7 @@ This operation computes the difference, i.e., a sorted set
 containing entries that in are in `ss1` but not `ss2`. Time: O(*cn*
 log *n*), where *n* is the total size of the two containers.
 """
-function setdiff(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord}) where {K, Ord <: Ordering}
+function Base.setdiff(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord}) where {K, Ord <: Ordering}
     ord = orderobject(m1)
     if !isequal(ord, orderobject(m2))
         throw(ArgumentError("Cannot apply setdiff to two SortedSets unless their ordering objects are equal"))
@@ -493,7 +492,7 @@ be convertible to the key type of m1. Time: O(*cm* log *n*), where
 *n* is the size of `ss` and *m* is the number of items in
 `iterable`.
 """
-function setdiff!(m1::SortedSet, iterable)
+function Base.setdiff!(m1::SortedSet, iterable)
     for p in iterable
         i = findkey(m1, p)
         if i != pastendsemitoken(m1)
@@ -510,7 +509,7 @@ element of the SortedSet `ss`. The entries must be convertible to
 the key-type of `ss`. Time: O(*cm* log *n*), where *n* is the sizes
 of `ss` and *m* is the number of items in `iterable`.
 """
-function issubset(iterable, m2::SortedSet)
+function Base.issubset(iterable, m2::SortedSet)
     for k in iterable
         if !in(k, m2)
             return false
@@ -557,7 +556,6 @@ function packdeepcopy(m::SortedSet{K,Ord}) where {K, Ord <: Ordering}
 end
 
 
-
 function Base.show(io::IO, m::SortedSet{K,Ord}) where {K,Ord <: Ordering}
     print(io, "SortedSet(")
     keys = K[]
@@ -577,7 +575,7 @@ Returns a new `SortedDict`, `SortedMultiDict`, or `SortedSet` of the same
 type and with the same ordering as `sc` but with no entries (i.e.,
 empty). Time: O(1)
 """
-empty(m::SortedSet{K,Ord}, ::Type{U}=K) where {K,Ord<:Ordering,U} = Base.emptymutable(m, U)
+Base.empty(m::SortedSet{K,Ord}, ::Type{U}=K) where {K,Ord<:Ordering,U} = Base.emptymutable(m, U)
 function Base.emptymutable(m::SortedSet{K,Ord}, ::Type{U}=K) where {K,Ord<:Ordering,U}
     return SortedSet{U,Ord}(orderobject(m))
 end

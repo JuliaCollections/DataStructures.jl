@@ -62,8 +62,8 @@ end
 
 RobinDict() = RobinDict{Any,Any}()
 RobinDict(kv::Tuple{}) = RobinDict()
-copy(d::RobinDict) = RobinDict(d)
-empty(d::RobinDict, ::Type{K}, ::Type{V}) where {K, V} = RobinDict{K, V}()
+Base.copy(d::RobinDict) = RobinDict(d)
+Base.empty(d::RobinDict, ::Type{K}, ::Type{V}) where {K, V} = RobinDict{K, V}()
 
 RobinDict(ps::Pair{K,V}...) where {K,V} = RobinDict{K,V}(ps)
 RobinDict(ps::Pair...)                  = RobinDict(ps)
@@ -222,7 +222,7 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
     return h
 end
 
-function sizehint!(d::RobinDict, newsz)
+function Base.sizehint!(d::RobinDict, newsz)
     newsz = _tablesz(newsz*2)  # *2 for keys and values in same array
     oldsz = length(d.keys)
     # grow at least 25%
@@ -236,7 +236,7 @@ Base.@propagate_inbounds isslotfilled(h::RobinDict, index) = (h.hashes[index] !=
 Base.@propagate_inbounds isslotempty(h::RobinDict, index) = (h.hashes[index] == 0)
 
 
-function setindex!(h::RobinDict{K,V}, v0, key0) where {K, V}
+function Base.setindex!(h::RobinDict{K,V}, v0, key0) where {K, V}
     key = convert(K, key0)
     isequal(key, key0) || throw(ArgumentError("$key0 is not a valid key for type $K"))
     _setindex!(h, key, v0)
@@ -250,9 +250,6 @@ function _setindex!(h::RobinDict{K,V}, key::K, v0) where {K, V}
     @assert index > 0
     return h
 end
-
-isempty(d::RobinDict) = (d.count == 0)
-length(d::RobinDict) = d.count
 
 """
     empty!(collection) -> collection
@@ -272,7 +269,7 @@ julia> A
 RobinDict{String,Int64} with 0 entries
 ```
 """
-function empty!(h::RobinDict{K,V}) where {K, V}
+function Base.empty!(h::RobinDict{K,V}) where {K, V}
     sz = length(h.keys)
     empty!(h.hashes)
     empty!(h.keys)
@@ -327,9 +324,9 @@ RobinDict{String,Int64} with 4 entries:
   "d" => 4
 ```
 """
-get!(collection, key, default)
+Base.get!(collection, key, default)
 
-get!(h::RobinDict{K,V}, key0, default) where {K,V} = get!(()->default, h, key0)
+Base.get!(h::RobinDict{K,V}, key0, default) where {K,V} = get!(()->default, h, key0)
 
 """
     get!(f::Function, collection, key)
@@ -345,9 +342,9 @@ get!(dict, key) do
 end
 ```
 """
-get!(f::Function, collection, key)
+Base.get!(f::Function, collection, key)
 
-function get!(default::Callable, h::RobinDict{K,V}, key0::K) where {K, V}
+function Base.get!(default::Callable, h::RobinDict{K,V}, key0::K) where {K, V}
     key = convert(K, key0)
     return _get!(default, h, key)
 end
@@ -362,7 +359,7 @@ function _get!(default::Callable, h::RobinDict{K,V}, key::K) where V where K
     return v
 end
 
-function getindex(h::RobinDict{K, V}, key) where {K, V}
+function Base.getindex(h::RobinDict{K, V}, key) where {K, V}
     index = rh_search(h, key)
     @inbounds return (index < 0) ? throw(KeyError(key)) : h.vals[index]
 end
@@ -384,9 +381,7 @@ julia> get(d, "c", 3)
 3
 ```
 """
-get(collection, key, default)
-
-function get(h::RobinDict{K,V}, key, default) where {K, V}
+function Base.get(h::RobinDict{K,V}, key, default) where {K, V}
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default : h.vals[index]::V
 end
@@ -406,9 +401,7 @@ get(dict, key) do
 end
 ```
 """
-get(::Function, collection, key)
-
-function get(default::Callable, h::RobinDict{K,V}, key) where {K, V}
+function Base.get(default::Callable, h::RobinDict{K,V}, key) where {K, V}
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default() : h.vals[index]::V
 end
@@ -432,8 +425,8 @@ julia> haskey(D, 'c')
 false
 ```
 """
-haskey(h::RobinDict, key) = (rh_search(h, key) > 0)
-in(key, v::KeySet{<:Any, <:RobinDict}) = (rh_search(v.dict, key) >= 0)
+Base.haskey(h::RobinDict, key) = (rh_search(h, key) > 0)
+Base.in(key, v::KeySet{<:Any, <:RobinDict}) = (rh_search(v.dict, key) >= 0)
 
 """
     getkey(collection, key, default)
@@ -454,7 +447,7 @@ julia> getkey(D, 'd', 'a')
 'a': ASCII/Unicode U+0061 (category Ll: Letter, lowercase)
 ```
 """
-function getkey(h::RobinDict{K,V}, key, default) where {K, V}
+function Base.getkey(h::RobinDict{K,V}, key, default) where {K, V}
     index = rh_search(h, key)
     @inbounds return (index < 0) ? default : h.keys[index]::K
 end
@@ -503,7 +496,7 @@ function _pop!(h::RobinDict, index)
     return val
 end
 
-function pop!(h::RobinDict{K, V}, key0) where {K, V}
+function Base.pop!(h::RobinDict{K, V}, key0) where {K, V}
     key = convert(K, key0)
     index = rh_search(h, key)
     return index > 0 ? _pop!(h, index) : throw(KeyError(key))
@@ -531,15 +524,13 @@ julia> pop!(d, "e", 4)
 4
 ```
 """
-pop!(collection, key, default)
-
-function pop!(h::RobinDict{K, V}, key0, default) where {K, V}
+function Base.pop!(h::RobinDict{K, V}, key0, default) where {K, V}
     key = convert(K, key0)
     index = rh_search(h, key)
     return index > 0 ? _pop!(h, index) : default
 end
 
-function pop!(h::RobinDict)
+function Base.pop!(h::RobinDict)
     isempty(h) && throw(ArgumentError("dict must be non-empty"))
     idx = h.idxfloor
     @inbounds key = h.keys[idx]
@@ -565,7 +556,7 @@ RobinDict{String,Int64} with 1 entry:
   "a" => 1
 ```
 """
-function delete!(h::RobinDict{K, V}, key0) where {K, V}
+function Base.delete!(h::RobinDict{K, V}, key0) where {K, V}
     key = convert(K, key0)
     index = rh_search(h, key)
     if index > 0
@@ -586,12 +577,10 @@ function get_next_filled(h::RobinDict, i)
 end
 
 Base.@propagate_inbounds _iterate(t::RobinDict{K,V}, i) where {K,V} = i == 0 ? nothing : (Pair{K,V}(t.keys[i],t.vals[i]), i == typemax(Int) ? 0 : get_next_filled(t, i+1))
-Base.@propagate_inbounds function iterate(t::RobinDict)
+Base.@propagate_inbounds function Base.iterate(t::RobinDict)
     _iterate(t, t.idxfloor)
 end
-Base.@propagate_inbounds iterate(t::RobinDict, i) = _iterate(t, get_next_filled(t, i))
-
-filter!(f, d::RobinDict) = Base.filter_in_one_pass!(f, d)
+Base.@propagate_inbounds Base.iterate(t::RobinDict, i) = _iterate(t, get_next_filled(t, i))
 
 function _merge_kvtypes(d, others...)
     K, V = keytype(d), valtype(d)
@@ -602,12 +591,12 @@ function _merge_kvtypes(d, others...)
     return (K, V)
 end
 
-function merge(d::RobinDict, others::AbstractDict...)
+function Base.merge(d::RobinDict, others::AbstractDict...)
     K, V = _merge_kvtypes(d, others...)
     merge!(RobinDict{K,V}(), d, others...)
 end
 
-function merge(combine::Function, d::RobinDict, others::AbstractDict...)
+function Base.merge(combine::Function, d::RobinDict, others::AbstractDict...)
     K, V = _merge_kvtypes(d, others...)
     merge!(combine, RobinDict{K,V}(), d, others...)
 end
