@@ -575,7 +575,9 @@ Returns a new `SortedDict`, `SortedMultiDict`, or `SortedSet` of the same
 type and with the same ordering as `sc` but with no entries (i.e.,
 empty). Time: O(1)
 """
-Base.empty(m::SortedSet{K,Ord}, ::Type{U}=K) where {K,Ord<:Ordering,U} = Base.emptymutable(m, U)
+function Base.empty(m::SortedSet{K,Ord}, ::Type{U}=K) where {K,Ord<:Ordering,U}
+    return Base.emptymutable(m, U)
+end
 function Base.emptymutable(m::SortedSet{K,Ord}, ::Type{U}=K) where {K,Ord<:Ordering,U}
     return SortedSet{U,Ord}(orderobject(m))
 end
