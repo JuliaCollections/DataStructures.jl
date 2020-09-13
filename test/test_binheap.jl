@@ -4,6 +4,8 @@
 
     @testset "make heap" begin
         vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
+        vs2 = collect(enumerate(vs))
+        ordering = Base.Order.By(last)
 
         @testset "construct heap" begin
             BinaryHeap{Int, Base.ForwardOrdering}()
@@ -20,6 +22,10 @@
             BinaryMaxHeap{Int}(vs)
             BinaryMaxHeap(vs)
 
+            BinaryHeap{eltype(vs2)}(ordering)
+            BinaryHeap{eltype(vs2)}(ordering, vs2)
+            BinaryHeap(ordering, vs2)
+
             @test true
         end
 
@@ -27,6 +33,7 @@
             BinaryHeap{Float64, Base.ForwardOrdering}(vs)
             BinaryMinHeap{Float64}(vs)
             BinaryMaxHeap{Float64}(vs)
+            BinaryHeap{Tuple{Int, Float64}}(ordering, vs2)
 
             @test true
         end
@@ -58,6 +65,16 @@
             @test !isempty(h)
             @test first(h) == 16
             @test isheap([16, 14, 10, 8, 7, 3, 9, 1, 4, 2], Base.Reverse)
+            @test sizehint!(h, 100) === h
+        end
+
+        @testset "make custom ordering heap" begin
+            h = BinaryHeap(ordering, vs2)
+
+            @test length(h) == 10
+            @test !isempty(h)
+            @test first(h) == (2, 1)
+            @test isheap([(2, 1), (4, 2), (3, 3), (1, 4), (10, 7), (6, 9), (7, 10), (8, 14), (9, 8), (5, 16)], ordering)
             @test sizehint!(h, 100) === h
         end
 
@@ -95,7 +112,6 @@
                     @test isequal(extract_all!(hmin), [1, 2, 3, 4, 7, 8, 9, 10, 14, 16])
                     @test isempty(hmin)
                 end
-
             end
 
             @testset "push! hmax" begin
@@ -125,6 +141,36 @@
                 @testset "pop! hmax" begin
                     @test isequal(extract_all!(hmax), [16, 14, 10, 9, 8, 7, 4, 3, 2, 1])
                     @test isempty(hmax)
+                end
+            end
+
+            @testset "push! custom ordering" begin
+                heap = BinaryHeap{Tuple{Int,Int}}(ordering)
+                @test length(heap) == 0
+                @test isempty(heap)
+
+                ss = Any[
+                    [(1, 4)],
+                    [(2, 1), (1, 4)],
+                    [(2, 1), (1, 4), (3, 3)],
+                    [(2, 1), (4, 2), (3, 3), (1, 4)],
+                    [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16)],
+                    [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9)],
+                    [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9), (7, 10)],
+                    [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9), (7, 10), (8, 14)],
+                    [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9), (7, 10), (8, 14), (9, 8)],
+                    [(2, 1), (4, 2), (3, 3), (1, 4), (10, 7), (6, 9), (7, 10), (8, 14), (9, 8), (5, 16)]]
+
+                for i = 1 : length(vs2)
+                    push!(heap, vs2[i])
+                    @test length(heap) == i
+                    @test !isempty(heap)
+                    @test isequal(heap.valtree, ss[i])
+                end
+
+                @testset "pop! custom ordering" begin
+                    @test isequal(extract_all!(heap), sort(vs2, order=ordering))
+                    @test isempty(heap)
                 end
             end
         end
@@ -162,9 +208,17 @@
             102,-56,-17,-41,25,-30,-84,26,-84,48,49,-5,-38,28,
             114,-54,96,-55,67,74,127,-61,124,11,-7,93,-51,110,
             -106,-84,-90,-18,-12,-116,21,115,50]
+        square = x -> x^2
+
         for n = -1:length(ss) + 1
-            @test sort(ss, lt = >)[1:min(n, end)] == nlargest(n, ss)
-            @test sort(ss, lt = <)[1:min(n, end)] == nsmallest(n, ss)
+            r = 1:min(n, length(ss))
+
+            @test nlargest(n, ss) == sort(ss, rev=true)[r]
+            @test nsmallest(n, ss) == sort(ss)[r]
+
+            @test nlargest(n, ss, by=square) == sort(ss, by=square, rev=true)[r]
+            @test nsmallest(n, ss, by=square) == sort(ss, by=square)[r]
+
             @test nlargest(n, ss) == DataStructures.nextreme(DataStructures.FasterReverse(), n, ss)
             @test nsmallest(n, ss) == DataStructures.nextreme(DataStructures.FasterForward(), n, ss)
         end

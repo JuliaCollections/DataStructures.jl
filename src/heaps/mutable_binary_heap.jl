@@ -160,25 +160,31 @@ mutable struct MutableBinaryHeap{T, O <: Base.Ordering} <: AbstractMutableHeap{T
     nodes::Vector{MutableBinaryHeapNode{T}}
     node_map::Vector{Int}
 
-    function MutableBinaryHeap{T, O}() where {T, O}
-        ordering = O()
+    function MutableBinaryHeap{T}(ordering::Base.Ordering) where T
         nodes = Vector{MutableBinaryHeapNode{T}}()
         node_map = Vector{Int}()
-        new{T, O}(ordering, nodes, node_map)
+        new{T, typeof(ordering)}(ordering, nodes, node_map)
     end
 
-    function MutableBinaryHeap{T, O}(xs::AbstractVector{T}) where {T, O}
-        ordering = O()
+    function MutableBinaryHeap{T}(ordering::Base.Ordering, xs::AbstractVector) where T
         nodes, node_map = _make_mutable_binary_heap(ordering, T, xs)
-        new{T, O}(ordering, nodes, node_map)
+        new{T, typeof(ordering)}(ordering, nodes, node_map)
     end
 end
 
+MutableBinaryHeap(ordering::Base.Ordering, xs::AbstractVector{T}) where T = MutableBinaryHeap{T}(ordering, xs)
+
+# Constructors using singleton order types as type parameters rather than arguments
+MutableBinaryHeap{T, O}() where {T, O<:Base.Ordering} = MutableBinaryHeap{T}(O())
+MutableBinaryHeap{T, O}(xs::AbstractVector) where {T, O<:Base.Ordering} = MutableBinaryHeap{T}(O(), xs)
+
+# Forward/reverse ordering type aliases
 const MutableBinaryMinHeap{T} = MutableBinaryHeap{T, Base.ForwardOrdering}
 const MutableBinaryMaxHeap{T} = MutableBinaryHeap{T, Base.ReverseOrdering}
 
 MutableBinaryMinHeap(xs::AbstractVector{T}) where T = MutableBinaryMinHeap{T}(xs)
 MutableBinaryMaxHeap(xs::AbstractVector{T}) where T = MutableBinaryMaxHeap{T}(xs)
+
 
 function Base.show(io::IO, h::MutableBinaryHeap)
     print(io, "MutableBinaryHeap(")
