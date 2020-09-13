@@ -33,7 +33,7 @@ function test_reverse_iter(it::T) where T
 end
 @testset "reverse_iter" begin
     @testset "Queue" begin
-        q = Queue{Int}(); enqueue!(q, 1); enqueue!(q, 2)
+        q = Queue{Int}(); push!(q, 1); push!(q, 2)
         test_reverse_iter(q)
     end
     @testset "Stack" begin
