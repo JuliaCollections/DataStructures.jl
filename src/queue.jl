@@ -42,6 +42,6 @@ Base.empty!(s::Queue) = (empty!(s.store); s)
 
 Base.iterate(q::Queue, s...) = iterate(q.store, s...)
 
-reverse_iter(q::Queue) = reverse_iter(q.store)
+Iterators.reverse(q::Queue) = Iterators.reverse(q.store)
 
 Base.:(==)(x::Queue, y::Queue) = x.store == y.store

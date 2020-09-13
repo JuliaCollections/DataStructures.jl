@@ -1,6 +1,6 @@
 module DataStructures
 
-    using Base: HasEltype, HasLength, IteratorEltype, IteratorSize, SizeUnknown,
+    using Base: Iterators, HasEltype, HasLength, IteratorEltype, IteratorSize, SizeUnknown,
                 lt, Ordering, ForwardOrdering, Forward, ReverseOrdering, Reverse, Lt,
                 isbitsunion, isiterable, dict_with_eltype, KeySet, Callable, _tablesz,
                 findnextnot, unsafe_getindex, unsafe_setindex!, peek
@@ -15,7 +15,7 @@ module DataStructures
     export complement, complement!
 
     export Deque, Stack, Queue, CircularDeque
-    export enqueue!, dequeue!, dequeue_pair!, update!, reverse_iter
+    export enqueue!, dequeue!, dequeue_pair!, update!
     export capacity, num_blocks, top_with_handle, sizehint!
 
     export Accumulator, counter, reset!, inc!, dec!
