@@ -11,13 +11,13 @@ Stack{Int64}(Deque [Int64[]])
 julia> push!(s, 1) # push back a item
 Stack{Int64}(Deque [[1]])
 
-julia> x = top(s) # get a first item
+julia> x = first(s) # get a first item
 1
 
 julia> length(s)
 1
 
-julia> x = pop!(s) # get and remove a first item
+julia> x = popfirst!(s) # get and remove a first item
 1
 
 julia> length(s)
@@ -49,6 +49,7 @@ function Base.push!(s::Stack, x)
 end
 
 Base.pop!(s::Stack) = pop!(s.store)
+Base.popfirst!(s::Stack) = pop!(s.store)
 
 Base.empty!(s::Stack) = (empty!(s.store); s)
 
