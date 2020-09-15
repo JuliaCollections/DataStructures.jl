@@ -5,7 +5,6 @@ module DataStructures
                 isbitsunion, isiterable, dict_with_eltype, KeySet, Callable, _tablesz,
                 findnextnot, unsafe_getindex, unsafe_setindex!, peek
 
-
     using Compat # Provides Base.Order.ReverseOrdering(). May remove this line with julia 1.4
     using OrderedCollections
     using OrderedCollections: isordered
@@ -19,8 +18,9 @@ module DataStructures
     export capacity, num_blocks, top_with_handle, sizehint!
 
     export Accumulator, counter, reset!, inc!, dec!
+
     export IntDisjointSets, DisjointSets, num_groups, find_root!, in_same_set, root_union!
-    export FenwickTree, length, inc!, dec!, incdec!, prefixsum
+    export FenwickTree, SuffixFenwickTree, inc!, dec!, incdec!, prefixsum, suffixsum
 
     export AbstractHeap, compare, extract_all!, extract_all_rev!
     export BinaryHeap, BinaryMinHeap, BinaryMaxHeap, nlargest, nsmallest

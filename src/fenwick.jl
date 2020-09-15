@@ -1,33 +1,36 @@
-struct FenwickTree{T}
-    bi_tree::Vector{T} #bi_tree is shorthand for Binary Indexed Tree, an alternative name for Fenwick Tree
-    n::Int
+mutable struct GenericFenwickTree{F, T}
+    bi_tree::Vector{T}
+    
+    GenericFenwickTree{F, T}(n::Integer) where {F, T} = new{F, T}(zeros(T, n))
+    
+    function GenericFenwickTree{F}(a::AbstractVector{U}) where {F, U}
+        n = length(a)
+        gft = GenericFenwickTree{F, U}(n)
+        @inbounds for i in 1:n
+            inc!(gft, i, a[i])
+        end
+        return gft
+    end
 end
 
 """
     FenwickTree{T}(n::Integer)
 
-Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) of length `n`.
+About [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree).
 
 """
-FenwickTree{T}(n::Integer) where T = FenwickTree{T}(zeros(T, n), n)
+const FenwickTree{T} = GenericFenwickTree{:prefix, T}
 
 """
-    FenwickTree(counts::AbstractArray)
-
-Constructs a [`FenwickTree`](https://en.wikipedia.org/wiki/Fenwick_tree) from an array of `counts`
-
+    SuffixFenwickTree{T}
+    
+About [`SuffixFenwickTree`](https://stackoverflow.com/questions/21995930/dynamic-i-e-variable-size-fenwick-tree).
+ 
 """
-function FenwickTree(a::AbstractVector{U}) where U
-    n = length(a)
-    tree = FenwickTree{U}(n)
-    @inbounds for i = 1:n
-        inc!(tree, i, a[i])
-    end
-    tree
-end
+const SuffixFenwickTree{T} = GenericFenwickTree{:suffix, T}
 
-Base.length(ft::FenwickTree) = ft.n
-Base.eltype(::Type{FenwickTree{T}}) where T = T
+Base.length(gft::GenericFenwickTree) = length(gft.bi_tree)
+Base.eltype(::Type{GenericFenwickTree{F, T}}) where {F, T} = T
 
 """
     inc!(ft::FenwickTree{T}, ind::Integer, val)
@@ -35,35 +38,47 @@ Base.eltype(::Type{FenwickTree{T}}) where T = T
 Increases the value of the [`FenwickTree`] by `val` from the index `ind` upto the length of the Fenwick Tree.
 
 """
-function inc!(ft::FenwickTree{T}, ind::Integer, val = 1) where T
-    val0 = convert(T, val)
-    i = ind
-    n = ft.n
-    @boundscheck 1 <= i <= n || throw(ArgumentError("$i should be in between 1 and $n"))
-    @inbounds while i <= n
-        ft.bi_tree[i] += val0
-        i += i&(-i)
+function inc!(ft::FenwickTree{T}, ind::Integer, val = one(T)) where T
+    n = length(ft)
+    @boundscheck 1 <= ind <= n || throw(ArgumentError("$ind should be between 1 and $n"))
+    @inbounds while ind <= n
+        ft.bi_tree[ind] += val
+        ind += ind&(-ind)
     end
 end
 
 """
-    dec!(ft::FenwickTree, ind::Integer, val)
+    inc!(sft::SuffixFenwickTree{T}, ind, val)
 
-Decreases the value of the [`FenwickTree`] by `val` from the index `ind` upto the length of the Fenwick Tree.
+Increases the value of the [`SuffixFenwickTree`] by `val` from the index `ind` upto the beginning of the SuffixFenwick Tree.
+
+""" 
+function inc!(sft::SuffixFenwickTree{T}, ind::Integer, val = one(T)) where T
+    n = length(sft)
+    @boundscheck 1 <= ind <= n || throw(ArgumentError("$ind should be between 1 and $n"))
+    @inbounds while ind > 0
+        sft.bi_tree[ind] += val
+        ind -= ind&(-ind)
+    end
+end
 
 """
-dec!(ft::FenwickTree, ind::Integer, val = 1 ) = inc!(ft, ind, -val)
+    dec!(gft::GenericFenwickTree{F, T}, ind::Integer, val = one(T))
+
+Decreases the value of the [`GenericFenwickTree`] by `val` from the index `ind`, as per dispatch.
 
 """
-    incdec!(ft::FenwickTree{T}, left::Integer, right::Integer, val)
-
-Increases the value of the [`FenwickTree`] by `val` from the indices from `left` and decreases it from the `right`.
+dec!(gft::GenericFenwickTree{F, T}, ind::Integer, val = one(T)) where {F, T} = inc!(gft, ind, -val)
 
 """
-function incdec!(ft::FenwickTree{T}, left::Integer, right::Integer, val = one(T)) where T
-    val0 = convert(T, val)
-    inc!(ft, left, val0)
-    dec!(ft, right, val0)
+    incdec!(gft::GenericFenwickTree{F, T}, start::Integer, stop::Integer, val = one(T))
+
+Increases the value of the [`GenericFenwickTree`] by `val` from `start`, and decreases the value from `stop`, as per dispatch.
+
+"""
+function incdec!(gft::GenericFenwickTree{F, T}, start::Integer, stop::Integer, val = one(T)) where {F, T}
+    inc!(gft, start, val)
+    dec!(gft, stop, val)
 end
 
 """
@@ -82,16 +97,52 @@ julia> prefixsum(f, 3)
 ```
 """
 function prefixsum(ft::FenwickTree{T}, ind::Integer) where T
+    n = length(ft)
+    @boundscheck 1 <= ind <= n || throw(ArgumentError("$ind should be between 1 and $n"))
     sum = zero(T)
-    ind < 1 && return sum
-    i = ind
-    n = ft.n
-    @boundscheck 1 <= i <= n || throw(ArgumentError("$i should be in between 1 and $n"))
-    @inbounds while i > 0
-        sum += ft.bi_tree[i]
-        i -= i&(-i)
+    @inbounds while ind > 0
+        sum += ft.bi_tree[ind]
+        ind -= ind&(-ind)
     end
-    sum
+    return sum
+end
+
+"""
+    suffixsum(sft::SuffixFenwickTree{T}, ind)
+    
+Return the cumulative sum from `ind` upto length of the [`SuffixFenwickTree`](@ref)
+
+# Examples
+```
+julia> f = SuffixFenwickTree{Int}(6)
+julia> inc!(f, 2, 5)
+julia> suffixsum(f, 1)
+ 5
+julia> suffixsum(f, 3)
+ 0
+```
+"""
+function suffixsum(sft::SuffixFenwickTree{T}, ind::Integer) where T
+    n = length(sft)
+    @boundscheck 1 <= ind <= n || throw(ArgumentError("$ind should be between 1 and $n"))
+    sum = zero(T)
+    @inbounds while ind <= n
+        sum += sft.bi_tree[ind]
+        ind += ind&(-ind)
+    end
+    return sum
 end
 
 Base.getindex(ft::FenwickTree{T}, ind::Integer) where T = prefixsum(ft, ind)
+Base.getindex(sft::SuffixFenwickTree{T}, ind::Integer) where T = suffixsum(sft, ind)
+
+function Base.resize!(sft::SuffixFenwickTree{T}, size::Int) where T
+    @boundscheck size > 0 || throw(ArgumentError("size should be greater than 0"))
+    n0 = length(sft)
+    resize!(sft.bi_tree, size)
+    z = zero(T)
+    @inbounds for i in n0+1 : size
+        sft.bi_tree[i] = z
+    end
+    return sft
+end
