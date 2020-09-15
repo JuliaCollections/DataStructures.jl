@@ -113,7 +113,7 @@ function _binary_heap_pop!(ord::Ordering,
     if nd_id == lastindex(nodes)
         pop!(nodes)
     else
-        # otherwise we need to swap the node-to-remove with the last node
+        # move the last node to the position of the node-to-remove
         @inbounds nodes[nd_id] = new_rt = nodes[end]
         pop!(nodes)
         @inbounds nodemap[new_rt.handle] = nd_id
