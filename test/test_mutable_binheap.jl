@@ -266,6 +266,15 @@ end
         @test isequal(heap_values(h), [1])
     end
 
+    @testset "test delete! at end of 3-element heap" begin
+        h = MutableBinaryMinHeap{Int}()
+        push!(h, 1)
+        push!(h, 2)
+        handle = push!(h, 3)
+        delete!(h, handle)
+        @test isequal(heap_values(h), [1, 2])
+    end
+
     @testset "test update! and top_with_handle" begin
         for (hf,m) = [(MutableBinaryMinHeap,-2.0), (MutableBinaryMaxHeap,2.0)]
             xs = rand(100)

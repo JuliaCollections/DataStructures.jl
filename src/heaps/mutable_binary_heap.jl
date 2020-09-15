@@ -108,11 +108,12 @@ function _binary_heap_pop!(ord::Ordering,
     v = rt.value
     @inbounds nodemap[rt.handle] = 0
 
-    if length(nodes) == 1
-        # clear
-        empty!(nodes)
+    # if node-to-remove is at end, we can just pop it
+    # the same applies to 1-element heaps that are empty after removing the last element
+    if nd_id == lastindex(nodes)
+        pop!(nodes)
     else
-        # move the last node to the position of the removed node
+        # move the last node to the position of the node-to-remove
         @inbounds nodes[nd_id] = new_rt = nodes[end]
         pop!(nodes)
         @inbounds nodemap[new_rt.handle] = nd_id
