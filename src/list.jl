@@ -2,27 +2,29 @@ abstract type LinkedList{T} end
 
 Base.eltype(::Type{<:LinkedList{T}}) where T = T
 
-mutable struct Nil{T} <: LinkedList{T}
-end
-
 mutable struct Cons{T} <: LinkedList{T}
     head::T
-    tail::LinkedList{T}
+    tail::Cons{T}
+    Cons{T}(h, t) where T = new{T}(h, t)
+    Cons{T}() where T = new{T}()
 end
 
 cons(h, t::LinkedList{T}) where {T} = Cons{T}(h, t)
 
-nil(T) = Nil{T}()
+nil(T) = Cons{T}()
 nil() = nil(Any)
+isnil(x::Cons) = !isdefined(x, :tail)
 
 head(x::Cons) = x.head
 tail(x::Cons) = x.tail
 
-Base.:(==)(x::Nil, y::Nil) = true
-Base.:(==)(x::Cons, y::Cons) = (x.head == y.head) && (x.tail == y.tail)
+Base.:(==)(x::Cons, y::Cons) = begin
+    isnil(x) && isnil(y) && return true
+    return !isnil(x) && !isnil(y) && (x.head == y.head) && (x.tail == y.tail)
+end
 
 function Base.show(io::IO, l::LinkedList{T}) where T
-    if isa(l,Nil)
+    if isnil(l)
         if T === Any
             print(io, "nil()")
         else
@@ -57,8 +59,6 @@ function list(elts::T...) where T
     return l
 end
 
-Base.length(l::Nil) = 0
-
 function Base.length(l::Cons)
     n = 0
     for i in l
@@ -67,9 +67,8 @@ function Base.length(l::Cons)
     return n
 end
 
-Base.map(f::Base.Callable, l::Nil) = l
-
 function Base.map(f::Base.Callable, l::Cons{T}) where T
+    isnil(l) && return l
     first = f(l.head)
     l2 = cons(first, nil(typeof(first) <: T ? T : typeof(first)))
     for h in l.tail
@@ -96,9 +95,8 @@ function Base.reverse(l::LinkedList{T}) where T
     return l2
 end
 
-Base.copy(l::Nil) = l
-
 function Base.copy(l::Cons)
+    isnil(l) && return l
     l2 = reverse(reverse(l))
 end
 
@@ -126,7 +124,7 @@ function Base.cat(lst::LinkedList, lsts::LinkedList...)
     reverse(l2)
 end
 
-Base.iterate(l::LinkedList, ::Nil) = nothing
 function Base.iterate(l::LinkedList, state::Cons = l)
+    isnil(state) && return nothing
     state.head, state.tail
 end

@@ -30,8 +30,7 @@ module DataStructures
 
     export Trie, subtrie, keys_with_prefix, partial_path
 
-    export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
-           reverse
+    export LinkedList, Cons, nil, cons, head, tail, list, filter, cat, reverse
     export MutableLinkedList
     export SortedDict, SortedMultiDict, SortedSet
     export SDToken, SDSemiToken, SMDToken, SMDSemiToken
