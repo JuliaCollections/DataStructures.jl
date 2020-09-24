@@ -180,7 +180,7 @@ const MutableBinaryMaxHeap{T} = MutableBinaryHeap{T, Base.ReverseOrdering}
 MutableBinaryMinHeap(xs::AbstractVector{T}) where T = MutableBinaryMinHeap{T}(xs)
 MutableBinaryMaxHeap(xs::AbstractVector{T}) where T = MutableBinaryMaxHeap{T}(xs)
 
-function show(io::IO, h::MutableBinaryHeap)
+function Base.show(io::IO, h::MutableBinaryHeap)
     print(io, "MutableBinaryHeap(")
     nodes = h.nodes
     n = length(nodes)
@@ -200,11 +200,11 @@ end
 #
 #################################################
 
-length(h::MutableBinaryHeap) = length(h.nodes)
+Base.length(h::MutableBinaryHeap) = length(h.nodes)
 
-isempty(h::MutableBinaryHeap) = isempty(h.nodes)
+Base.isempty(h::MutableBinaryHeap) = isempty(h.nodes)
 
-function push!(h::MutableBinaryHeap{T}, v) where T
+function Base.push!(h::MutableBinaryHeap{T}, v) where T
     nodes = h.nodes
     nodemap = h.node_map
     i = length(nodemap) + 1
@@ -215,13 +215,13 @@ function push!(h::MutableBinaryHeap{T}, v) where T
     return i
 end
 
-function sizehint!(h::MutableBinaryHeap, s::Integer)
+function Base.sizehint!(h::MutableBinaryHeap, s::Integer)
     sizehint!(h.nodes, s)
     sizehint!(h.node_map, s)
     return h
 end
 
-@inline first(h::MutableBinaryHeap) = h.nodes[1].value
+@inline Base.first(h::MutableBinaryHeap) = h.nodes[1].value
 
 """
     top_with_handle(h::MutableBinaryHeap)
@@ -233,7 +233,7 @@ function top_with_handle(h::MutableBinaryHeap)
     return el.value, el.handle
 end
 
-pop!(h::MutableBinaryHeap{T}) where {T} = _binary_heap_pop!(h.ordering, h.nodes, h.node_map)
+Base.pop!(h::MutableBinaryHeap{T}) where {T} = _binary_heap_pop!(h.ordering, h.nodes, h.node_map)
 
 """
     update!{T}(h::MutableBinaryHeap{T}, i::Int, v::T)
@@ -262,11 +262,11 @@ end
 
 Deletes the element with handle `i` from heap `h` .
 """
-function delete!(h::MutableBinaryHeap{T}, i::Int) where T
+function Base.delete!(h::MutableBinaryHeap{T}, i::Int) where T
      nd_id = h.node_map[i]
     _binary_heap_pop!(h.ordering, h.nodes, h.node_map, nd_id)
     return h
 end
 
-setindex!(h::MutableBinaryHeap, v, i::Int) = update!(h, i, v)
-getindex(h::MutableBinaryHeap, i::Int) = h.nodes[h.node_map[i]].value
+Base.setindex!(h::MutableBinaryHeap, v, i::Int) = update!(h, i, v)
+Base.getindex(h::MutableBinaryHeap, i::Int) = h.nodes[h.node_map[i]].value

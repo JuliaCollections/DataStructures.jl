@@ -112,9 +112,9 @@ _priority_queue_with_eltype(o::Ord, kv, ::Type            ) where {    Ord} = Pr
 ##       If deemed possible, please create a test and uncomment this definition.
 # _priority_queue_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,V} where K}) = PriorityQueue{Any,  D,Ord}(o, ps)
 
-length(pq::PriorityQueue) = length(pq.xs)
-isempty(pq::PriorityQueue) = isempty(pq.xs)
-haskey(pq::PriorityQueue, key) = haskey(pq.index, key)
+Base.length(pq::PriorityQueue) = length(pq.xs)
+Base.isempty(pq::PriorityQueue) = isempty(pq.xs)
+Base.haskey(pq::PriorityQueue, key) = haskey(pq.index, key)
 
 """
     peek(pq)
@@ -122,7 +122,7 @@ haskey(pq::PriorityQueue, key) = haskey(pq.index, key)
 Return the lowest priority key from a priority queue without removing that
 key from the queue.
 """
-peek(pq::PriorityQueue) = pq.xs[1]
+Base.peek(pq::PriorityQueue) = pq.xs[1]
 
 function percolate_down!(pq::PriorityQueue, i::Integer)
     x = pq.xs[i]
@@ -171,14 +171,14 @@ function force_up!(pq::PriorityQueue, i::Integer)
     pq.xs[i] = x
 end
 
-getindex(pq::PriorityQueue, key) = pq.xs[pq.index[key]].second
+Base.getindex(pq::PriorityQueue, key) = pq.xs[pq.index[key]].second
 
-function get(pq::PriorityQueue, key, default)
+function Base.get(pq::PriorityQueue, key, default)
     i = get(pq.index, key, 0)
     i == 0 ? default : pq.xs[i].second
 end
 
-function get!(pq::PriorityQueue, key, default)
+function Base.get!(pq::PriorityQueue, key, default)
     i = get(pq.index, key, 0)
     if i == 0
         enqueue!(pq, key, default)
@@ -189,7 +189,7 @@ function get!(pq::PriorityQueue, key, default)
 end
 
 # Change the priority of an existing element, or equeue it if it isn't present.
-function setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
+function Base.setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
     if haskey(pq, key)
         i = pq.index[key]
         oldvalue = pq.xs[i].second
@@ -238,7 +238,7 @@ function enqueue!(pq::PriorityQueue{K,V}, pair::Pair{K,V}) where {K,V}
 end
 
 """
-enqueue!(pq, k, v)
+    enqueue!(pq, k, v)
 
 Insert the a key `k` into a priority queue `pq` with priority `v`.
 
@@ -327,6 +327,7 @@ end
 
 """
     delete!(pq, key)
+
 Delete the mapping for the given key in a priority queue, and return the priority queue.
 # Examples
 ```jldoctest
@@ -341,22 +342,22 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
   "a" => 2
 ```
 """
-function delete!(pq::PriorityQueue, key)
+function Base.delete!(pq::PriorityQueue, key)
     dequeue_pair!(pq, key)
     return pq
 end
 
-function empty!(pq::PriorityQueue)
+function Base.empty!(pq::PriorityQueue)
     empty!(pq.xs)
     empty!(pq.index)
     return pq
 end
 
-empty(pq::PriorityQueue) = PriorityQueue(empty(pq.xs), pq.o, empty(pq.index))
+Base.empty(pq::PriorityQueue) = PriorityQueue(empty(pq.xs), pq.o, empty(pq.index))
 
-merge!(d::SortedDict, other::PriorityQueue) = invoke(merge!, Tuple{AbstractDict, PriorityQueue}, d, other)
+Base.merge!(d::SortedDict, other::PriorityQueue) = invoke(merge!, Tuple{AbstractDict, PriorityQueue}, d, other)
 
-function merge!(d::AbstractDict, other::PriorityQueue)
+function Base.merge!(d::AbstractDict, other::PriorityQueue)
     next = iterate(other, false)
     while next !== nothing
         (k, v), state = next
@@ -366,7 +367,7 @@ function merge!(d::AbstractDict, other::PriorityQueue)
     return d
 end
 
-function merge!(combine::Function, d::AbstractDict, other::PriorityQueue)
+function Base.merge!(combine::Function, d::AbstractDict, other::PriorityQueue)
     next = iterate(other, false)
     while next !== nothing
         (k, v), state = next
@@ -392,9 +393,9 @@ function _iterate(pq::PriorityQueue, state)
 end
 _iterate(pq::PriorityQueue, ::Nothing) = nothing
 
-iterate(pq::PriorityQueue, ::Nothing) = nothing
+Base.iterate(pq::PriorityQueue, ::Nothing) = nothing
 
-function iterate(pq::PriorityQueue, ordered::Bool=true)
+function Base.iterate(pq::PriorityQueue, ordered::Bool=true)
     if ordered
         isempty(pq) && return nothing
         state = _PQIteratorState(PriorityQueue(copy(pq.xs), pq.o, copy(pq.index)))
@@ -404,9 +405,9 @@ function iterate(pq::PriorityQueue, ordered::Bool=true)
     end
 end
 
-function iterate(pq::PriorityQueue, state::_PQIteratorState)
+function Base.iterate(pq::PriorityQueue, state::_PQIteratorState)
     isempty(state.pq) && return nothing
     return dequeue_pair!(state.pq), state
 end
 
-iterate(pq::PriorityQueue, i) = _iterate(pq, iterate(pq.index, i))
+Base.iterate(pq::PriorityQueue, i) = _iterate(pq, iterate(pq.index, i))

@@ -1,5 +1,3 @@
-import Base: isless, isequal
-
 const SDMContainer = Union{SortedDict, SortedMultiDict}
 const SAContainer = Union{SDMContainer, SortedSet}
 
@@ -18,7 +16,7 @@ const SetToken = Tuple{SortedSet, IntSemiToken}
 ## to the last item in the sorted order,
 ## or the before-start marker if the tree is empty.
 
-@inline lastindex(m::SAContainer) = IntSemiToken(endloc(m.bt))
+@inline Base.lastindex(m::SAContainer) = IntSemiToken(endloc(m.bt))
 
 ## Function pastendsemitoken returns the token past the end of the data.
 
@@ -30,7 +28,7 @@ const SetToken = Tuple{SortedSet, IntSemiToken}
 
 ## delete! deletes an item given a token.
 
-@inline function delete!(ii::Token)
+@inline function Base.delete!(ii::Token)
     has_data(ii)
     delete!(ii[1].bt, ii[2].address)
 end
@@ -96,24 +94,23 @@ end
 end
 
 
-
 ## Functions setindex! and getindex for semitokens.
 ## Note that we can't use SDMContainer here; we have
 ## to spell it out otherwise there is an ambiguity.
 
-@inline function getindex(m::SortedDict,
+@inline function Base.getindex(m::SortedDict,
                           i::IntSemiToken)
     has_data((m,i))
     return m.bt.data[i.address].d
 end
 
-@inline function getindex(m::SortedMultiDict,
+@inline function Base.getindex(m::SortedMultiDict,
                           i::IntSemiToken)
     has_data((m,i))
     return m.bt.data[i.address].d
 end
 
-@inline function setindex!(m::SortedDict,
+@inline function Base.setindex!(m::SortedDict,
                            d_,
                            i::IntSemiToken)
     has_data((m,i))
@@ -123,7 +120,7 @@ end
     return m
 end
 
-@inline function setindex!(m::SortedMultiDict,
+@inline function Base.setindex!(m::SortedMultiDict,
                            d_,
                            i::IntSemiToken)
     has_data((m,i))
@@ -139,7 +136,7 @@ end
 ## key in the sorted order.  It returns the past-end marker
 ## if there is none.
 
-@inline function searchsortedfirst(m::SAContainer, k_)
+@inline function Base.searchsortedfirst(m::SAContainer, k_)
     i = findkeyless(m.bt, convert(keytype(m), k_))
     IntSemiToken(nextloc0(m.bt, i))
 end
@@ -160,7 +157,7 @@ end
 ## key in the sorted order.  It returns the before-start marker
 ## if there is none.
 
-@inline function searchsortedlast(m::SAContainer, k_)
+@inline function Base.searchsortedlast(m::SAContainer, k_)
     i, exactfound = findkey(m.bt, convert(keytype(m),k_))
     IntSemiToken(i)
 end

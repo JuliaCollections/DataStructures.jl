@@ -18,10 +18,10 @@ nil() = nil(Any)
 head(x::Cons) = x.head
 tail(x::Cons) = x.tail
 
-==(x::Nil, y::Nil) = true
-==(x::Cons, y::Cons) = (x.head == y.head) && (x.tail == y.tail)
+Base.:(==)(x::Nil, y::Nil) = true
+Base.:(==)(x::Cons, y::Cons) = (x.head == y.head) && (x.tail == y.tail)
 
-function show(io::IO, l::LinkedList{T}) where T
+function Base.show(io::IO, l::LinkedList{T}) where T
     if isa(l,Nil)
         if T === Any
             print(io, "nil()")
@@ -57,9 +57,9 @@ function list(elts::T...) where T
     return l
 end
 
-length(l::Nil) = 0
+Base.length(l::Nil) = 0
 
-function length(l::Cons)
+function Base.length(l::Cons)
     n = 0
     for i in l
         n += 1
@@ -67,9 +67,9 @@ function length(l::Cons)
     return n
 end
 
-map(f::Base.Callable, l::Nil) = l
+Base.map(f::Base.Callable, l::Nil) = l
 
-function map(f::Base.Callable, l::Cons{T}) where T
+function Base.map(f::Base.Callable, l::Cons{T}) where T
     first = f(l.head)
     l2 = cons(first, nil(typeof(first) <: T ? T : typeof(first)))
     for h in l.tail
@@ -78,7 +78,7 @@ function map(f::Base.Callable, l::Cons{T}) where T
     reverse(l2)
 end
 
-function filter(f::Function, l::LinkedList{T}) where T
+function Base.filter(f::Function, l::LinkedList{T}) where T
     l2 = nil(T)
     for h in l
         if f(h)
@@ -88,7 +88,7 @@ function filter(f::Function, l::LinkedList{T}) where T
     reverse(l2)
 end
 
-function reverse(l::LinkedList{T}) where T
+function Base.reverse(l::LinkedList{T}) where T
     l2 = nil(T)
     for h in l
         l2 = cons(h, l2)
@@ -96,15 +96,15 @@ function reverse(l::LinkedList{T}) where T
     return l2
 end
 
-copy(l::Nil) = l
+Base.copy(l::Nil) = l
 
-function copy(l::Cons)
+function Base.copy(l::Cons)
     l2 = reverse(reverse(l))
 end
 
-cat(lst::LinkedList) = lst
+Base.cat(lst::LinkedList) = lst
 
-function cat(lst::LinkedList, lsts::LinkedList...)
+function Base.cat(lst::LinkedList, lsts::LinkedList...)
     T = typeof(lst).parameters[1]
     n = length(lsts)
     for i = 1:n
@@ -126,7 +126,7 @@ function cat(lst::LinkedList, lsts::LinkedList...)
     reverse(l2)
 end
 
-iterate(l::LinkedList, ::Nil) = nothing
-function iterate(l::LinkedList, state::Cons = l)
+Base.iterate(l::LinkedList, ::Nil) = nothing
+function Base.iterate(l::LinkedList, state::Cons = l)
     state.head, state.tail
 end

@@ -27,7 +27,7 @@ mutable struct DiBitVector <: AbstractVector{UInt8}
     end
 end
 
-@inline checkbounds(D::DiBitVector, n::Integer) =  0 < n ≤ length(D.data) << 5 || throw(BoundsError(D, n))
+@inline Base.checkbounds(D::DiBitVector, n::Integer) =  0 < n ≤ length(D.data) << 5 || throw(BoundsError(D, n))
 
 """
     DiBitVector(n::Integer)
@@ -48,13 +48,13 @@ DiBitVector() = DiBitVector(0, 0)
     return UInt8((@inbounds x.data[index(i)] >>> offset(i)) & 3)
 end
 
-@inline function unsafe_setindex!(x::DiBitVector, v::UInt64, i::Int)
+@inline function Base.unsafe_setindex!(x::DiBitVector, v::UInt64, i::Int)
     bits = @inbounds x.data[index(i)]
     bits &= ~(UInt64(3) << offset(i))
     bits |= convert(UInt64, v) << offset(i)
     @inbounds x.data[index(i)] = bits
 end
-    
+
 @inline function Base.setindex!(x::DiBitVector, v::Integer, i::Int)
     v & 3 == v || throw(DomainError("Can only contain 0:3 (tried $v)"))
     @boundscheck checkbounds(x, i)
@@ -77,5 +77,4 @@ end
     return v
 end
 
-@inline zero(x::DiBitVector) = DiBitVector(x.len, 0)
-    
+@inline Base.zero(x::DiBitVector) = DiBitVector(x.len, 0)

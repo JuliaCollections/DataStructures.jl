@@ -96,7 +96,7 @@ end
 
 Remove the element from the front of the `CircularBuffer`.
 """
-function popfirst!(cb::CircularBuffer)
+function Base.popfirst!(cb::CircularBuffer)
     @boundscheck (cb.length == 0) && throw(ArgumentError("array must be non-empty"))
     i = cb.first
     cb.first = (cb.first + 1 > cb.capacity ? 1 : cb.first + 1)
@@ -110,7 +110,7 @@ end
 Insert one or more items at the beginning of CircularBuffer
 and overwrite back if full.
 """
-function pushfirst!(cb::CircularBuffer, data)
+function Base.pushfirst!(cb::CircularBuffer, data)
     # if full, decrement and overwrite, otherwise pushfirst
     cb.first = (cb.first == 1 ? cb.capacity : cb.first - 1)
     if length(cb) < cb.capacity
