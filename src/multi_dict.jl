@@ -4,7 +4,7 @@ import Base: haskey, get, get!, getkey, delete!, pop!, empty!,
              insert!, getindex, length, isempty, iterate,
              keys, values, copy, similar,  push!,
              count, size, eltype, empty
-import Base.Iterators: flatten, repeated
+using Base.Iterators: flatten, repeated
 
 struct MultiDict{K,V}
     d::Dict{K,Vector{V}}
