@@ -39,8 +39,7 @@ end
 ## Most functions are simply delegated to the wrapped Dict
 
 @delegate MultiDict.d [ Base.haskey, Base.get, Base.get!, Base.getkey,
-                        Base.getindex, Base.isempty,
-                        Base.keys]
+                        Base.getindex, Base.isempty, ]
 
 Base.sizehint!(d::MultiDict, sz::Integer) = (sizehint!(d.d, sz); d)
 Base.copy(d::MultiDict) = MultiDict(d)
@@ -64,9 +63,8 @@ function Base.in(pr::(Tuple{Any,Any}), d::MultiDict{K,V}) where {K,V}
 end
 
 # TODO: For efficiency, we probably want a MultiKeySet to correspond to Dict's KeySet
-
-# TODO: I'm not actually sure if we need this eachindex?
-function Base.eachindex(md::MultiDict)
+#       Instead, we currently return this Generator / Iterator.
+function Base.keys(md::MultiDict)
     flatten((repeated(k, length(vs)) for (k,vs) in md.d))
 end
 Base.length(md::MultiDict) = sum(length(vs) for (_,vs) in md.d)
