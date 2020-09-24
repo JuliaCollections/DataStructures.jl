@@ -64,15 +64,17 @@ end
 
 # TODO: For efficiency, we probably want a MultiKeySet to correspond to Dict's KeySet
 #       Instead, we currently return this Generator / Iterator.
+# EDIT: What value would MultiKeySet provide over the iterator we get via `flatten()`?
 function Base.keys(md::MultiDict)
     flatten((repeated(k, length(vs)) for (k,vs) in md.d))
 end
 Base.length(md::MultiDict) = sum(length(vs) for (_,vs) in md.d)
-# TODO: what should values() do?
-Base.values(md::MultiDict) = values(md.d)
-#function Base.values(md::MultiDict)
-#    flatten(vs for (_,vs) in md.d)
-#end
+# TODO: Should this return (something like?) a ValueIterator? ValueIterator itself
+# currently requires its dict to be <: AbstractDict, but we could create something similar.
+# What does it provide that this `flatten()` iterator / generator doesn't?
+function Base.values(md::MultiDict)
+    flatten(vs for (_,vs) in md.d)
+end
 
 Base.eltype(md::MultiDict{K,V}) where {K,V} = Pair{K,V}
 function Base.iterate(md::MultiDict)
