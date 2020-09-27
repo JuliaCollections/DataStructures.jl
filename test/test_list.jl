@@ -116,4 +116,9 @@
         @test collect(map(x->x, l11)) == collect(l11)
     end
 
+    @testset "test promotion" begin
+        l12 = list(Int(1), Float64(1))
+        @test isa(l12, Cons{Float64})
+    end
+
 end # @testset LinkedList

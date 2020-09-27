@@ -42,7 +42,7 @@ end
 list() = nil()
 
 function list(elts...)
-    l = nil()
+    l = nil(Base.promote_typeof(elts...))
     for i=length(elts):-1:1
         l = cons(elts[i],l)
     end
