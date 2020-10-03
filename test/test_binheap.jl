@@ -29,6 +29,12 @@
             @test true
         end
 
+        @testset "Type Aliases" begin
+            # https://github.com/JuliaCollections/DataStructures.jl/issues/686
+            @test BinaryMaxHeap{Int}() isa BinaryMaxHeap{Int}
+            @test BinaryMinHeap{Int}() isa BinaryMinHeap{Int}
+        end
+
         @testset "implicit conversion" begin
             BinaryHeap{Float64, Base.ForwardOrdering}(vs)
             BinaryMinHeap{Float64}(vs)
