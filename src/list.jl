@@ -75,15 +75,22 @@ function Base.length(l::Cons)
     return n
 end
 
-Base.map(f::Base.Callable, l::Nil) = l
+function Base.map(f::Base.Callable, l::Nil{T}) where T
+    if f isa Function
+        nil(Core.Compiler.return_type(f, (T,)))
+    else
+        nil(f)
+    end
+end
 
 function Base.map(f::Base.Callable, l::Cons{T}) where T
     first = f(l.head)
-    l2 = cons(first, nil(typeof(first) <: T ? T : typeof(first)))
-    for h in l.tail
-        l2 = cons(f(h), l2)
+    n = nil(typeof(first) <: T ? T : typeof(first))
+    root = l2 = cons(first, n)
+    for h in tail(l)
+        l2 = l2.tail = cons(f(h), n)
     end
-    reverse(l2)
+    root
 end
 
 function Base.filter(f::Function, l::LinkedList{T}) where T
