@@ -106,8 +106,13 @@ end
 
 Base.copy(l::Nil) = l
 
-function Base.copy(l::Cons)
-    l2 = reverse(reverse(l))
+function Base.copy(l::Cons{T}) where T
+    n = nil(T)
+    root = l2 = cons(head(l), n)
+    for h in l.tail
+        l2 = l2.tail = cons(h, n)
+    end
+    root
 end
 
 Base.cat(lst::LinkedList) = lst
