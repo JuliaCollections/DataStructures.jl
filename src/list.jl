@@ -19,7 +19,15 @@ head(x::Cons) = x.head
 tail(x::Cons) = x.tail
 
 Base.:(==)(x::Nil, y::Nil) = true
-Base.:(==)(x::Cons, y::Cons) = (x.head == y.head) && (x.tail == y.tail)
+function Base.:(==)(x::Cons, y::Cons) 
+    while true
+        x.head == y.head || return false
+        x = tail(x)
+        y = tail(y)
+        (x isa Nil || y isa Nil) && break
+    end
+    x == y
+end
 
 function Base.show(io::IO, l::LinkedList{T}) where T
     if isa(l,Nil)
