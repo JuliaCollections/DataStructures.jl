@@ -93,14 +93,17 @@ function Base.map(f::Base.Callable, l::Cons{T}) where T
     root
 end
 
+Base.filter(f::Function, l::Nil) = l
+
 function Base.filter(f::Function, l::LinkedList{T}) where T
-    l2 = nil(T)
+    n = nil(T)
+    guard = l2 = cons(head(l), n)
     for h in l
         if f(h)
-            l2 = cons(h, l2)
+            l2 = l2.tail = cons(h, n)
         end
     end
-    reverse(l2)
+    guard.tail
 end
 
 function Base.reverse(l::LinkedList{T}) where T
