@@ -82,6 +82,8 @@
         @test l6.head == 2
         @test l6.tail.head == 4
         @test collect(l6) == [2, 4]
+        l6 = nil()
+        @test filter((x) -> true, l6) isa Nil
     end
 
     @testset "l7" begin
