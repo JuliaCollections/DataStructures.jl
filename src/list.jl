@@ -95,7 +95,7 @@ end
 
 Base.filter(f::Function, l::Nil) = l
 
-function Base.filter(f::Function, l::LinkedList{T}) where T
+function Base.filter(f::Function, l::Cons{T}) where T
     n = nil(T)
     guard = l2 = cons(head(l), n)
     for h in l
