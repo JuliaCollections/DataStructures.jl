@@ -116,4 +116,12 @@
         @test collect(map(x->x, l11)) == collect(l11)
     end
 
+    @testset "test nil type change while mapping nil" begin
+        l12 = map(x->"", nil())
+        @test typeof(l12).parameters[1] == typeof("")
+        l12 = map(x->1, nil())
+        @test typeof(l12).parameters[1] == typeof(1)
+        l12 = map(Float64, nil())
+        @test typeof(l12).parameters[1] == Float64
+    end
 end # @testset LinkedList
