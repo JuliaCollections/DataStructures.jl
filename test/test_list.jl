@@ -124,4 +124,20 @@
         l12 = map(Float64, nil())
         @test typeof(l12).parameters[1] == Float64
     end
+
+    @testset "list isempty" begin
+        l13 = nil()
+        @test isempty(l13)
+        l13 = nil(Int)
+        @test isempty(l13)
+        l13 = list(1, 2)
+        @test isempty(l13) == false
+    end
+
+    @testset "list first" begin
+        l14 = nil()
+        @test_throws ArgumentError first(l14)
+        l14 = list(1234, 2, 3)
+        @test first(l14) == 1234
+    end
 end # @testset LinkedList
