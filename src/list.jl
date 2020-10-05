@@ -153,3 +153,7 @@ Base.iterate(l::LinkedList, ::Nil) = nothing
 function Base.iterate(l::LinkedList, state::Cons = l)
     state.head, state.tail
 end
+Base.isempty(l::Nil) = true
+Base.isempty(l::Cons) = false
+
+Base.first(l::Cons) = head(l)
