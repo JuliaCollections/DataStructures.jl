@@ -62,3 +62,15 @@ t2 = @elapsed traverse(q)
 println("traverse 10^7 integers:")
 @printf("    Vector:   elapsed = %8.4fs\n", t1)
 @printf("    Deque:    elapsed = %8.4fs\n", t2)
+
+# sum
+
+sum(v)
+t1 = @elapsed sum(v)
+
+sum(q)
+t2 = @elapsed sum(q)
+
+println("sum 10^7 integers:")
+@printf("    Vector:   elapsed = %8.4fs\n", t1)
+@printf("    Deque:    elapsed = %8.4fs\n", t2)
