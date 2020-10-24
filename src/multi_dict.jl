@@ -1,9 +1,14 @@
 #  multi-value dictionary (multidict)
 
-struct MultiDict{K,V}
-    d::Dict{K,Vector{V}}
+# MultiDict values are stored as an unordered collection of (value, count) pairs, which
+# gives both unordered semantics (allowing `log(n)` lookup and delete) and support for
+# duplicate entries (e.g. `A=>1, A=>2, A=>2, B=>3`).
+const MultiValues{T} = Accumulator{T,Int}
 
-    MultiDict{K,V}() where {K,V} = new{K,V}(Dict{K,Vector{V}}())
+struct MultiDict{K,V}
+    d::Dict{K,MultiValues{V}}
+
+    MultiDict{K,V}() where {K,V} = new{K,V}(Dict{K,MultiValues{V}}())
     MultiDict{K,V}(d::Dict) where {K,V} = new{K,V}(d)
 end
 
@@ -59,14 +64,27 @@ Base.copy(d::MultiDict) = MultiDict(d)
 Base.empty(d::MultiDict{K,V}) where {K,V} = MultiDict{K,V}()
 Base.empty(a::MultiDict, ::Type{K}, ::Type{V}) where {K, V} = MultiDict{K, V}()
 Base.:(==)(d1::MultiDict, d2::MultiDict) = d1.d == d2.d
-Base.delete!(d::MultiDict, key) = (delete!(d.d, key); d)
 Base.empty!(d::MultiDict) = (empty!(d.d); d)
 
 function Base.insert!(d::MultiDict{K,V}, k, v) where {K,V}
-    if !haskey(d.d, k)
-        d.d[k] = V[]
+    vs = get!(d.d, k, MultiValues{V}())
+    inc!(vs, v)
+    return d
+end
+
+# Delete all pairs starting with a given key.
+Base.delete!(d::MultiDict, key) = (delete!(d.d, key); d)
+# Delete a single pair key=>val from the dict.
+function Base.delete!(d::MultiDict, key, val)
+    vs = get(d, key, Base.secret_table_token)
+    if vs !== Base.secret_table_token
+        if vs[val] > 1
+            dec!(vs, val)
+        elseif vs[val] == 1
+            delete!(vs.map, val)
+        end
     end
-    push!(d.d[k], v)
+    isempty(vs) && delete!(d, key)
     return d
 end
 
