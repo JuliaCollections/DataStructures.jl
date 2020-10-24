@@ -43,7 +43,7 @@ module DataStructures
     export exclusive, inclusive, semitokens
     export orderobject, ordtype, Lt, compare, onlysemitokens
 
-    export MultiDict, enumerateall
+    export MultiDict, MultiSet, enumerateall
     export RobinDict
     export OrderedRobinDict, isordered
     export SwissDict
@@ -82,6 +82,7 @@ module DataStructures
 
     import .Tokens: IntSemiToken
 
+    include("multi_set.jl")
     include("multi_dict.jl")
     include("sorted_dict.jl")
     include("sorted_multi_dict.jl")
