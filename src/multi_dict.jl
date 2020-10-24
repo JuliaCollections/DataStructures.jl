@@ -90,9 +90,9 @@ function Base.in(pr::(Tuple{Any,Any}), d::MultiDict{K,V}) where {K,V}
     (vs !== Base.secret_table_token) && (pr[2] in vs)
 end
 
-Base.length(md::MultiDict) = sum(length(vs) for (_,vs) in md.d)
+Base.length(md::MultiDict) = length(keys(md.d)) == 0 ? 0 : sum(length(vs) for (_,vs) in md.d)
 
-Base.eltype(md::MultiDict{K,V}) where {K,V} = Pair{K,V}
+Base.eltype(::MultiDict{K,V}) where {K,V} = Pair{K,V}
 function Base.iterate(md::MultiDict)
     i = iterate(md.d)
     if i === nothing
@@ -100,10 +100,10 @@ function Base.iterate(md::MultiDict)
     end
     ((k,vs), state) = i
     (v, vstate) = iterate(vs)  # Should be non-empty
-    return (k=>v, (state, ((k,vs), vstate)))
+    return (k=>v, (k, state, vs, vstate))
 end
 function Base.iterate(md::MultiDict, md_state)
-    state, ((k,vs), vstate) = md_state
+    (k, state, vs, vstate) = md_state
     i = iterate(vs, vstate)
     if i === nothing
         # Finished iterating vs, move on to the next key
@@ -116,7 +116,7 @@ function Base.iterate(md::MultiDict, md_state)
     else
         (v, vstate) = i
     end
-    return (k=>v, (state, ((k,vs), vstate)))
+    return (k=>v, (k, state, vs, vstate))
 end
 
 function Base.pop!(d::MultiDict, key, default)
@@ -133,15 +133,15 @@ function Base.pop!(d::MultiDict, key, default)
     return v
 end
 Base.pop!(d::MultiDict, key) = pop!(d, key, Base.secret_table_token)
+function Base.pop!(md::MultiDict)
+    isempty(md) && throw(ArgumentError("multidict must be non-empty"))
+    (k,v) = first(md)
+    delete!(md, k, v)
+    return k=>v
+end
 
-Base.push!(d::MultiDict, kv::Pair) = insert!(d, kv[1], kv[2])
-#Base.push!(d::MultiDict, kv::Pair, kv2::Pair) = (push!(d.d, kv, kv2); d)
-#Base.push!(d::MultiDict, kv::Pair, kv2::Pair, kv3::Pair...) = (push!(d.d, kv, kv2, kv3...); d)
+Base.push!(d::MultiDict, kv::Pair) = (insert!(d, kv[1], kv[2]); d)
 
-Base.push!(d::MultiDict, kv) = insert!(d, kv[1], kv[2])
-#Base.push!(d::MultiDict, kv, kv2...) = (push!(d.d, kv, kv2...); d)
-
-Base.count(d::MultiDict) = length(keys(d)) == 0 ? 0 : mapreduce(k -> length(d[k]), +, keys(d))
 Base.size(d::MultiDict) = (length(keys(d)), count(d::MultiDict))
 
 # enumerate
