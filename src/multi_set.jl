@@ -84,7 +84,7 @@ function Base.pop!(ms::MultiSet, t)
     delete!(ms, t)
     return t
 end
-pop!(s::MultiSet, x, default) = (x in s ? pop!(s, x) : default)
+Base.pop!(s::MultiSet, x, default) = (x in s ? pop!(s, x) : default)
 function Base.pop!(ms::MultiSet)
     isempty(ms) && throw(ArgumentError("multiset must be non-empty"))
     # TODO: Should Accumulator have a `pop!()`?
