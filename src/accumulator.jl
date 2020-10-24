@@ -67,6 +67,10 @@ Base.iterate(ct::Accumulator, s...) = iterate(ct.map, s...)
 
 # manipulation
 
+Base.empty!(ct::Accumulator) = (empty!(ct.map); ct)
+
+Base.sizehint!(a::Accumulator, newsz) = (sizehint!(a.map, newsz); a)
+
 """
     inc!(ct::Accumulator, x, [v=1])
 
