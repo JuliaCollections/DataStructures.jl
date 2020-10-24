@@ -144,43 +144,6 @@ Base.push!(d::MultiDict, kv::Pair) = (insert!(d, kv[1], kv[2]); d)
 
 Base.size(d::MultiDict) = (length(keys(d)), count(d::MultiDict))
 
-# enumerate
-
-struct EnumerateAll
-    d::MultiDict
-end
-enumerateall(d::MultiDict) = EnumerateAll(d)
-
-Base.length(e::EnumerateAll) = count(e.d)
-
-function Base.iterate(e::EnumerateAll)
-    V = eltype(eltype(values(e.d)))
-    vs = V[]
-    dstate = iterate(e.d.d)
-    vstate = iterate(vs)
-    dstate === nothing || vstate === nothing && return nothing
-    k = nothing
-    while vstate === nothing
-        ((k, vs), dst) = dstate
-        dstate = iterate(e.d.d, dst)
-        vstate = iterate(vs)
-    end
-    v, vst = vstate
-    return ((k, v), (dstate, k, vs, vstate))
-end
-
-function Base.iterate(e::EnumerateAll, s)
-    dstate, k, vs, vstate = s
-    dstate === nothing || vstate === nothing && return nothing
-    while vstate === nothing
-        ((k, vs), dst) = dstate
-        dstate = iterate(e.d.d, dst)
-        vstate = iterate(vs)
-    end
-    v, vst = vstate
-    return ((k, v), (dstate, k, vs, vstate))
-end
-
 # grow_to! copied from Base -- needed for abstract generator constructor
 function Base.grow_to!(dest::MultiDict{K, V}, itr) where V where K
     y = iterate(itr)
