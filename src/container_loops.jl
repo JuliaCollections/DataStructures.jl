@@ -318,6 +318,6 @@ Base.eachindex(smd::SDMIncludeLast{SortedMultiDict{K,D,Ord}} where {K,D,Ord <: O
 Base.eachindex(ss::SSIncludeLast) = onlysemitokens(ss)
 
 
-Base.empty!(m::SAContainer) =  empty!(m.bt)
+Base.empty!(m::SAContainer) = (empty!(m.bt); m)
 Base.length(m::SAContainer) = length(m.bt.data) - length(m.bt.freedatainds) - 2
 Base.isempty(m::SAContainer) = length(m) == 0
