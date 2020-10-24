@@ -2,15 +2,12 @@
 
 using Base.Iterators: flatten, repeated
 
-# MultiDict values are stored as an unordered collection of (value, count) pairs, which
-# gives both unordered semantics (allowing `log(n)` lookup and delete) and support for
-# duplicate entries (e.g. `A=>1, A=>2, A=>2, B=>3`).
-const MultiValues{T} = Accumulator{T,Int}
-
 struct MultiDict{K,V} <: AbstractDict{K,V}
-    d::Dict{K,MultiValues{V}}
+    d::Dict{K,MultiSet{V}}
 
-    MultiDict{K,V}() where {K,V} = new{K,V}(Dict{K,MultiValues{V}}())
+    MultiDict{K,V}() where {K,V} = new{K,V}(Dict{K,MultiSet{V}}())
+    # TODO: this should probably not be exposed, since it should probably be covered
+    # by MultiSet{K,V}(iter).
     MultiDict{K,V}(d::Dict) where {K,V} = new{K,V}(d)
 end
 
@@ -68,8 +65,8 @@ Base.:(==)(d1::MultiDict, d2::MultiDict) = d1.d == d2.d
 Base.empty!(d::MultiDict) = (empty!(d.d); d)
 
 function Base.insert!(d::MultiDict{K,V}, k, v) where {K,V}
-    vs = get!(d.d, k, MultiValues{V}())
-    inc!(vs, v)
+    vs = get!(d.d, k, MultiSet{V}())
+    insert!(vs, v)
     return d
 end
 
@@ -77,13 +74,9 @@ end
 Base.delete!(d::MultiDict, key) = (delete!(d.d, key); d)
 # Delete a single pair key=>val from the dict.
 function Base.delete!(d::MultiDict, key, val)
-    vs = get(d, key, Base.secret_table_token)
+    vs = get(d.d, key, Base.secret_table_token)
     if vs !== Base.secret_table_token
-        if vs[val] > 1
-            dec!(vs, val)
-        elseif vs[val] == 1
-            delete!(vs.map, val)
-        end
+        delete!(vs, val)
     end
     isempty(vs) && delete!(d, key)
     return d
