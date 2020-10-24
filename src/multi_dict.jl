@@ -5,7 +5,7 @@
 # duplicate entries (e.g. `A=>1, A=>2, A=>2, B=>3`).
 const MultiValues{T} = Accumulator{T,Int}
 
-struct MultiDict{K,V}
+struct MultiDict{K,V} <: AbstractDict{K,V}
     d::Dict{K,MultiValues{V}}
 
     MultiDict{K,V}() where {K,V} = new{K,V}(Dict{K,MultiValues{V}}())
