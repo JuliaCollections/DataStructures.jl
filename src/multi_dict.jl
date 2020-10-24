@@ -84,7 +84,7 @@ function Base.delete!(d::MultiDict, key, val)
     return d
 end
 
-function Base.in(pr::(Tuple{Any,Any}), d::MultiDict{K,V}) where {K,V}
+function Base.in(pr::Pair, d::MultiDict{K,V}) where {K,V}
     k = convert(K, pr[1])
     vs = get(d.d, k, Base.secret_table_token)
     (vs !== Base.secret_table_token) && (pr[2] in vs)
