@@ -2,14 +2,16 @@
 
 using Base.Iterators: flatten, repeated
 
+# Internal helper inner constructor for MultiSet
+function _multidict_from_dict end
+
 struct MultiDict{K,V} <: AbstractDict{K,V}
     d::Dict{K,MultiSet{V}}
 
-    MultiDict{K,V}() where {K,V} = new{K,V}(Dict{K,MultiSet{V}}())
-    # TODO: this should probably not be exposed, since it should probably be covered
-    # by MultiSet{K,V}(iter).
-    MultiDict{K,V}(d::Dict) where {K,V} = new{K,V}(d)
+    @__MODULE__()._multidict_from_dict(d::Dict{K,MultiSet{V}}) where {K,V} = new{K,V}(d)
 end
+MultiDict{K,V}() where {K,V} = _multidict_from_dict(Dict{K,MultiSet{V}}())
+MultiDict{K,V}(d::MultiDict{K,V}) where {K,V} = _multidict_from_dict(copy(d.d))
 
 MultiDict{K,V}(pairs::Pair...) where {K,V} = MultiDict{K,V}(pairs)
 function MultiDict{K,V}(kvs) where {K,V}
@@ -54,7 +56,7 @@ MultiDict(md::MultiDict) = MultiDict(md.d)
 
 ## Most functions are simply delegated to the wrapped Dict
 
-@delegate MultiDict.d [ Base.haskey, Base.get, Base.get!, Base.getkey,
+@delegate MultiDict.d [ Base.haskey, Base.get, Base.getkey,
                         Base.getindex, Base.isempty, ]
 
 Base.sizehint!(d::MultiDict, sz::Integer) = (sizehint!(d.d, sz); d)
@@ -84,8 +86,8 @@ end
 
 function Base.in(pr::(Tuple{Any,Any}), d::MultiDict{K,V}) where {K,V}
     k = convert(K, pr[1])
-    v = get(d,k,Base.secret_table_token)
-    (v !== Base.secret_table_token) && (pr[2] in v)
+    vs = get(d.d, k, Base.secret_table_token)
+    (vs !== Base.secret_table_token) && (pr[2] in vs)
 end
 
 # TODO: For efficiency, we probably want a MultiKeySet to correspond to Dict's KeySet
