@@ -112,7 +112,7 @@ end
 # Iteration
 
 struct DequeIterator{T}
-    q::Deque
+    q::Deque{T}
 end
 
 Base.last(qi::DequeIterator) = last(qi.q)

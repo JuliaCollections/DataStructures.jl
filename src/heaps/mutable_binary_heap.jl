@@ -108,11 +108,12 @@ function _binary_heap_pop!(ord::Ordering,
     v = rt.value
     @inbounds nodemap[rt.handle] = 0
 
-    if length(nodes) == 1
-        # clear
-        empty!(nodes)
+    # if node-to-remove is at end, we can just pop it
+    # the same applies to 1-element heaps that are empty after removing the last element
+    if nd_id == lastindex(nodes)
+        pop!(nodes)
     else
-        # move the last node to the position of the removed node
+        # move the last node to the position of the node-to-remove
         @inbounds nodes[nd_id] = new_rt = nodes[end]
         pop!(nodes)
         @inbounds nodemap[new_rt.handle] = nd_id
@@ -160,25 +161,31 @@ mutable struct MutableBinaryHeap{T, O <: Base.Ordering} <: AbstractMutableHeap{T
     nodes::Vector{MutableBinaryHeapNode{T}}
     node_map::Vector{Int}
 
-    function MutableBinaryHeap{T, O}() where {T, O}
-        ordering = O()
+    function MutableBinaryHeap{T}(ordering::Base.Ordering) where T
         nodes = Vector{MutableBinaryHeapNode{T}}()
         node_map = Vector{Int}()
-        new{T, O}(ordering, nodes, node_map)
+        new{T, typeof(ordering)}(ordering, nodes, node_map)
     end
 
-    function MutableBinaryHeap{T, O}(xs::AbstractVector{T}) where {T, O}
-        ordering = O()
+    function MutableBinaryHeap{T}(ordering::Base.Ordering, xs::AbstractVector) where T
         nodes, node_map = _make_mutable_binary_heap(ordering, T, xs)
-        new{T, O}(ordering, nodes, node_map)
+        new{T, typeof(ordering)}(ordering, nodes, node_map)
     end
 end
 
+MutableBinaryHeap(ordering::Base.Ordering, xs::AbstractVector{T}) where T = MutableBinaryHeap{T}(ordering, xs)
+
+# Constructors using singleton order types as type parameters rather than arguments
+MutableBinaryHeap{T, O}() where {T, O<:Base.Ordering} = MutableBinaryHeap{T}(O())
+MutableBinaryHeap{T, O}(xs::AbstractVector) where {T, O<:Base.Ordering} = MutableBinaryHeap{T}(O(), xs)
+
+# Forward/reverse ordering type aliases
 const MutableBinaryMinHeap{T} = MutableBinaryHeap{T, Base.ForwardOrdering}
 const MutableBinaryMaxHeap{T} = MutableBinaryHeap{T, Base.ReverseOrdering}
 
 MutableBinaryMinHeap(xs::AbstractVector{T}) where T = MutableBinaryMinHeap{T}(xs)
 MutableBinaryMaxHeap(xs::AbstractVector{T}) where T = MutableBinaryMaxHeap{T}(xs)
+
 
 function Base.show(io::IO, h::MutableBinaryHeap)
     print(io, "MutableBinaryHeap(")

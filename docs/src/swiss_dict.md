@@ -11,7 +11,7 @@ The interface of `SwissDict` replicates that of `Dict`.
 Examples:
 
 ```jldoctest
-julia> d = RobinDict{Int, Char}(1 => 'a', 2 => 'b')
+julia> d = SwissDict(1 => 'a', 2 => 'b')
 SwissDict{Int64,Char} with 2 entries:
   1 => 'a'
   2 => 'b'
