@@ -26,7 +26,7 @@ function FenwickTree(a::AbstractVector{U}) where U
     tree
 end
 
-length(ft::FenwickTree) = ft.n
+Base.length(ft::FenwickTree) = ft.n
 Base.eltype(::Type{FenwickTree{T}}) where T = T
 
 """
@@ -94,4 +94,4 @@ function prefixsum(ft::FenwickTree{T}, ind::Integer) where T
     sum
 end
 
-getindex(ft::FenwickTree{T}, ind::Integer) where T = prefixsum(ft, ind)
+Base.getindex(ft::FenwickTree{T}, ind::Integer) where T = prefixsum(ft, ind)

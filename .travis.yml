@@ -20,6 +20,8 @@ after_success:
 # Documenter auto-deploy
 # https://juliadocs.github.io/Documenter.jl/stable/man/hosting/#.travis.yml-Configuration-1
 jobs:
+  allow_failures:
+    - julia: nightly
   include:
     - name: "Benchmark"
       julia: 1.2

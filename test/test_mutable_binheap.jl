@@ -53,6 +53,8 @@ end
 @testset "MutableBinheap" begin
 
     vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
+    vs2 = collect(enumerate(vs))
+    ordering = Base.Order.By(last)
 
     @testset "construct heap" begin
         MutableBinaryHeap{Int, Base.ForwardOrdering}()
@@ -68,6 +70,10 @@ end
         MutableBinaryMaxHeap{Int}()
         MutableBinaryMaxHeap{Int}(vs)
         MutableBinaryMaxHeap(vs)
+
+        MutableBinaryHeap{eltype(vs2)}(ordering)
+        MutableBinaryHeap{eltype(vs2)}(ordering, vs2)
+        MutableBinaryHeap(ordering, vs2)
 
         @test true
     end
@@ -100,6 +106,17 @@ end
         @test first(h) == 16
         @test isequal(list_values(h), vs)
         @test isequal(heap_values(h), [16, 14, 10, 8, 7, 3, 9, 1, 4, 2])
+        @test sizehint!(h, 100) === h
+    end
+
+    @testset "make mutable binary custom ordering heap" begin
+        h = MutableBinaryHeap(ordering, vs2)
+
+        @test length(h) == 10
+        @test !isempty(h)
+        @test first(h) == (2, 1)
+        @test isequal(list_values(h), vs2)
+        @test isequal(heap_values(h), [(2, 1), (4, 2), (3, 3), (1, 4), (10, 7), (6, 9), (7, 10), (8, 14), (9, 8), (5, 16)])
         @test sizehint!(h, 100) === h
     end
 
@@ -163,7 +180,37 @@ end
         # test pop!
         @test isequal(extract_all!(hmax), [16, 14, 10, 9, 8, 7, 4, 3, 2, 1])
         @test isempty(hmax)
+    end
 
+    @testset "Custom ordering push! / pop!" begin
+        heap = MutableBinaryHeap{Tuple{Int,Int}}(ordering)
+        @test length(heap) == 0
+        @test isempty(heap)
+
+        # test push!
+        ss = Any[
+            [(1, 4)],
+            [(2, 1), (1, 4)],
+            [(2, 1), (1, 4), (3, 3)],
+            [(2, 1), (4, 2), (3, 3), (1, 4)],
+            [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16)],
+            [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9)],
+            [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9), (7, 10)],
+            [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9), (7, 10), (8, 14)],
+            [(2, 1), (4, 2), (3, 3), (1, 4), (5, 16), (6, 9), (7, 10), (8, 14), (9, 8)],
+            [(2, 1), (4, 2), (3, 3), (1, 4), (10, 7), (6, 9), (7, 10), (8, 14), (9, 8), (5, 16)]]
+        for i = 1 : length(vs2)
+            ia = push!(heap, vs2[i])
+            @test ia == i
+            @test length(heap) == i
+            @test !isempty(heap)
+            @test isequal(list_values(heap), vs2[1:i])
+            @test isequal(heap_values(heap), ss[i])
+        end
+
+        # test pop!
+        @test isequal(extract_all!(heap), sort(vs2, order=ordering))
+        @test isempty(heap)
     end
 
     @testset "hybrid push! and pop!" begin
@@ -217,6 +264,15 @@ end
         handle = push!(h, 2)
         delete!(h, handle)
         @test isequal(heap_values(h), [1])
+    end
+
+    @testset "test delete! at end of 3-element heap" begin
+        h = MutableBinaryMinHeap{Int}()
+        push!(h, 1)
+        push!(h, 2)
+        handle = push!(h, 3)
+        delete!(h, handle)
+        @test isequal(heap_values(h), [1, 2])
     end
 
     @testset "test update! and top_with_handle" begin

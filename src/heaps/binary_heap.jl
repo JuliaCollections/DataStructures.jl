@@ -34,21 +34,35 @@ mutable struct BinaryHeap{T, O <: Base.Ordering} <: AbstractHeap{T}
     ordering::O
     valtree::Vector{T}
 
-    function BinaryHeap{T, O}() where {T,O}
-        new{T,O}(O(), Vector{T}())
+    function BinaryHeap{T}(ordering::Base.Ordering) where T
+        new{T, typeof(ordering)}(ordering, Vector{T}())
     end
 
-    function BinaryHeap{T, O}(xs) where {T,O}
-        ordering = O()
+    function BinaryHeap{T}(ordering::Base.Ordering, xs::AbstractVector) where T
         valtree = heapify(xs, ordering)
-        new{T,O}(ordering, valtree)
+        new{T, typeof(ordering)}(ordering, valtree)
     end
 end
 
+BinaryHeap(ordering::Base.Ordering, xs::AbstractVector{T}) where T = BinaryHeap{T}(ordering, xs)
+
+# Constructors using singleton order types as type parameters rather than arguments
+BinaryHeap{T, O}() where {T, O<:Base.Ordering} = BinaryHeap{T}(O())
+BinaryHeap{T, O}(xs::AbstractVector) where {T, O<:Base.Ordering} = BinaryHeap{T}(O(), xs)
+
+const DefaultReverseOrdering = Base.ReverseOrdering{Base.ForwardOrdering}
+
+# These constructors needed for BinaryMaxHeap, until we have https://github.com/JuliaLang/julia/pull/37822
+BinaryHeap{T, DefaultReverseOrdering}() where {T} = BinaryHeap{T}(Base.Reverse)
+BinaryHeap{T, DefaultReverseOrdering}(xs::AbstractVector) where {T} = BinaryHeap{T}(Base.Reverse, xs)
+
+# Forward/reverse ordering type aliases
 const BinaryMinHeap{T} = BinaryHeap{T, Base.ForwardOrdering}
-const BinaryMaxHeap{T} = BinaryHeap{T, Base.ReverseOrdering}
+const BinaryMaxHeap{T} = BinaryHeap{T, DefaultReverseOrdering}
+
 BinaryMinHeap(xs::AbstractVector{T}) where T = BinaryMinHeap{T}(xs)
 BinaryMaxHeap(xs::AbstractVector{T}) where T = BinaryMaxHeap{T}(xs)
+
 
 #################################################
 #
@@ -61,21 +75,21 @@ BinaryMaxHeap(xs::AbstractVector{T}) where T = BinaryMaxHeap{T}(xs)
 
 Returns the number of elements in heap `h`.
 """
-length(h::BinaryHeap) = length(h.valtree)
+Base.length(h::BinaryHeap) = length(h.valtree)
 
 """
     isempty(h::BinaryHeap)
 
 Returns whether the heap `h` is empty.
 """
-isempty(h::BinaryHeap) = isempty(h.valtree)
+Base.isempty(h::BinaryHeap) = isempty(h.valtree)
 
 """
     push!(h::BinaryHeap, value)
 
 Adds the `value` element to the heap `h`.
 """
-function push!(h::BinaryHeap, v)
+function Base.push!(h::BinaryHeap, v)
     heappush!(h.valtree, v, h.ordering)
     return h
 end
@@ -85,21 +99,21 @@ end
 
 Returns the element at the top of the heap `h`.
 """
-@inline first(h::BinaryHeap) = h.valtree[1]
+@inline Base.first(h::BinaryHeap) = h.valtree[1]
 
 """
     pop!(h::BinaryHeap)
 
 Removes and returns the element at the top of the heap `h`.
 """
-pop!(h::BinaryHeap) = heappop!(h.valtree, h.ordering)
+Base.pop!(h::BinaryHeap) = heappop!(h.valtree, h.ordering)
 
 """
     sizehint!(h::BinaryHeap, n::Integer)
 
 Suggest that heap `h` reserve capacity for at least `n` elements. This can improve performance.
 """
-function sizehint!(h::BinaryHeap, n::Integer)
+function Base.sizehint!(h::BinaryHeap, n::Integer)
     sizehint!(h.valtree, n)
     return h
 end

@@ -93,14 +93,17 @@
 
         @testset "reverse iterator" begin
             index = length(arr)
-            for i in reverse_iter(q)
+            for i in Iterators.reverse(q)
                 @test(arr[index] == i)
                 index -= 1
             end
         end
 
         @test arr == [i for i in q]
-        @test reverse(arr) == [i for i in reverse_iter(q)]
+        @test reverse(arr) == [i for i in Iterators.reverse(q)]
+        @test first(Iterators.reverse(q)) === last(q)
+        @test last(Iterators.reverse(q)) === first(q)
+        @test length(Iterators.reverse(q)) === length(q)
     end
 
 end # @testset Queue

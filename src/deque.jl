@@ -29,8 +29,8 @@ rear_deque_block(ty::Type{T}, n::Int) where {T} = DequeBlock{T}(n, 1)
 head_deque_block(ty::Type{T}, n::Int) where {T} = DequeBlock{T}(n, n+1)
 
 capacity(blk::DequeBlock) = blk.capa
-length(blk::DequeBlock) = blk.back - blk.front + 1
-isempty(blk::DequeBlock) = blk.back < blk.front
+Base.length(blk::DequeBlock) = blk.back - blk.front + 1
+Base.isempty(blk::DequeBlock) = blk.back < blk.front
 ishead(blk::DequeBlock) = blk.prev === blk
 isrear(blk::DequeBlock) =  blk.next === blk
 
@@ -44,7 +44,7 @@ function reset!(blk::DequeBlock{T}, front::Int) where T
     blk.next = blk
 end
 
-function show(io::IO, blk::DequeBlock)  # avoids recursion into prev and next
+function Base.show(io::IO, blk::DequeBlock)  # avoids recursion into prev and next
     x = blk.data[blk.front:blk.back]
     print(io, "$(typeof(blk))(capa = $(blk.capa), front = $(blk.front), back = $(blk.back)): $x")
 end
@@ -81,8 +81,8 @@ mutable struct Deque{T}
     Deque{T}() where {T} = Deque{T}(DEFAULT_DEQUEUE_BLOCKSIZE)
 end
 
-isempty(q::Deque) = q.len == 0
-length(q::Deque) = q.len
+Base.isempty(q::Deque) = q.len == 0
+Base.length(q::Deque) = q.len
 num_blocks(q::Deque) = q.nblocks
 Base.eltype(::Type{Deque{T}}) where T = T
 
@@ -91,7 +91,7 @@ Base.eltype(::Type{Deque{T}}) where T = T
 
 Returns the first element of the deque `q`.
 """
-function first(q::Deque)
+function Base.first(q::Deque)
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     blk = q.head
     return blk.data[blk.front]
@@ -102,7 +102,7 @@ end
 
 Returns the last element of the deque `q`.
 """
-function last(q::Deque)
+function Base.last(q::Deque)
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     blk = q.rear
     return blk.data[blk.back]
@@ -112,10 +112,12 @@ end
 # Iteration
 
 struct DequeIterator{T}
-    q::Deque
+    q::Deque{T}
 end
 
-function iterate(qi::DequeIterator{T}, (cb, i) = (qi.q.head, qi.q.head.front)) where T
+Base.last(qi::DequeIterator) = last(qi.q)
+
+function Base.iterate(qi::DequeIterator{T}, (cb, i) = (qi.q.head, qi.q.head.front)) where T
     i > cb.back && return nothing
     x = cb.data[i]
 
@@ -130,11 +132,7 @@ end
 
 # Backwards deque iteration
 
-struct ReverseDequeIterator{T}
-    q::Deque
-end
-
-function iterate(qi::ReverseDequeIterator{T}, (cb, i) = (qi.q.rear, qi.q.rear.back)) where T
+function Base.iterate(qi::Iterators.Reverse{<:Deque}, (cb, i) = (qi.itr.rear, qi.itr.rear.back))
     i < cb.front && return nothing
     x = cb.data[i]
 
@@ -148,22 +146,19 @@ function iterate(qi::ReverseDequeIterator{T}, (cb, i) = (qi.q.rear, qi.q.rear.ba
     return (x, (cb, i))
 end
 
-reverse_iter(q::Deque{T}) where {T} = ReverseDequeIterator{T}(q)
-
-iterate(q::Deque{T}, s...) where {T} = iterate(DequeIterator{T}(q), s...)
+Base.iterate(q::Deque{T}, s...) where {T} = iterate(DequeIterator{T}(q), s...)
 
 Base.length(qi::DequeIterator{T}) where {T} = qi.q.len
-Base.length(qi::ReverseDequeIterator{T}) where {T} = qi.q.len
 
 Base.collect(q::Deque{T}) where {T} = T[x for x in q]
 
 # Showing
 
-function show(io::IO, q::Deque)
+function Base.show(io::IO, q::Deque)
     print(io, "Deque [$(collect(q))]")
 end
 
-function dump(io::IO, q::Deque)
+function Base.dump(io::IO, q::Deque)
     println(io, "Deque (length = $(q.len), nblocks = $(q.nblocks))")
     cb::DequeBlock = q.head
     i = 1
@@ -193,7 +188,7 @@ end
 
 Reset the deque.
 """
-function empty!(q::Deque{T}) where T
+function Base.empty!(q::Deque{T}) where T
     # release all blocks except the head
     if q.nblocks > 1
         cb::DequeBlock{T} = q.rear
@@ -219,7 +214,7 @@ end
 
 Add an element to the back
 """
-function push!(q::Deque{T}, x) where T
+function Base.push!(q::Deque{T}, x) where T
     rear = q.rear
 
     if isempty(rear)
@@ -246,7 +241,7 @@ end
 
 Add an element to the front
 """
-function pushfirst!(q::Deque{T}, x) where T
+function Base.pushfirst!(q::Deque{T}, x) where T
     head = q.head
 
     if isempty(head)
@@ -275,7 +270,7 @@ end
 
 Remove the element at the back
 """
-function pop!(q::Deque{T}) where T
+function Base.pop!(q::Deque{T}) where T
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     rear = q.rear
     @assert rear.back >= rear.front
@@ -300,7 +295,7 @@ end
 
 Remove the element at the front
 """
-function popfirst!(q::Deque{T}) where T
+function Base.popfirst!(q::Deque{T}) where T
     isempty(q) && throw(ArgumentError("Deque must be non-empty"))
     head = q.head
     @assert head.back >= head.front
@@ -321,7 +316,7 @@ function popfirst!(q::Deque{T}) where T
 end
 
 const _deque_hashseed = UInt === UInt64 ? 0x950aa17a3246be82 : 0x4f26f881
-function hash(x::Deque, h::UInt)
+function Base.hash(x::Deque, h::UInt)
     h += _deque_hashseed
     for (i, x) in enumerate(x)
         h += i * hash(x)
@@ -329,7 +324,7 @@ function hash(x::Deque, h::UInt)
     return h
 end
 
-function ==(x::Deque, y::Deque)
+function Base.:(==)(x::Deque, y::Deque)
     length(x) != length(y) && return false
     for (i, j) in zip(x, y)
         i == j || return false
