@@ -3,3 +3,5 @@
 @deprecate find_root find_root!
 @deprecate top first
 @deprecate reverse_iter Iterators.reverse
+@deprecate DisjointSets DisjointSet
+@deprecate IntDisjointSets IntDisjointSet

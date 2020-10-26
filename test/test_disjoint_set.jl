@@ -1,10 +1,10 @@
 @testset "DisjointSet" begin
 
-    @testset "IntDisjointSets" begin
+    @testset "IntDisjointSet" begin
         for T in [Int, UInt8, Int8, UInt16, Int16, UInt32, Int32, UInt64]
             @testset "eltype = $(T)" begin
-                s = IntDisjointSets(T(10))
-                s2 = IntDisjointSets{T}(10)
+                s = IntDisjointSet(T(10))
+                s2 = IntDisjointSet{T}(10)
 
                 @testset "basic tests" begin
                     @test length(s) == 10
@@ -36,7 +36,7 @@
                 end
 
                 @testset "more tests" begin
-                    # We cannot support arbitrary indexing and still use @inbounds with IntDisjointSets
+                    # We cannot support arbitrary indexing and still use @inbounds with IntDisjointSet
                     # (and it's not useful anyway)
                     @test_throws MethodError push!(s, T(22))
 
@@ -59,27 +59,28 @@
         end
     end
 
-    @testset "IntDisjointSets overflow" begin
+    @testset "IntDisjointSet overflow" begin
         for T in [UInt8, Int8]
-            s = IntDisjointSets(T(typemax(T)-1))
+            s = IntDisjointSet(T(typemax(T)-1))
             push!(s)
             @test_throws ArgumentError push!(s)
         end
     end
 
-    @testset "DisjointSets" begin
-        # DisjointSets supports arbitrary indices
-        s = DisjointSets{Int}(1:10)
+    @testset "DisjointSet" begin
+        # DisjointSet supports arbitrary indices
+        s = DisjointSet{Int}(1:10)
 
         @testset "constructor" begin
-            @test DisjointSets() isa DisjointSets{Any}
-            @test DisjointSets{Int}(1:10) isa DisjointSets{Int}
-            @test DisjointSets{Float64}(1.0:10.0...) isa DisjointSets{Float64}
-            @test DisjointSets(collect(1:10)) isa DisjointSets{Int}
-            @test DisjointSets(collect(1.0:10.0)...) isa DisjointSets{Float64}
-            @test DisjointSets(x*im for x = 1:10) isa DisjointSets{Complex{Int}}
+            @test DisjointSet() isa DisjointSet{Any}
+            @test DisjointSet{Int}(1:10) isa DisjointSet{Int}
+            @test DisjointSet(collect(1:10)) isa DisjointSet{Int}
+            @test DisjointSet(x*im for x = 1:10) isa DisjointSet{Complex{Int}}
             g = (x % 2 == 0 ? x+1//x : x*im for x = 1:10)
-            @test DisjointSets(g) isa DisjointSets{Number}
+            @test DisjointSet(g) isa DisjointSet{Number}
+            @test DisjointSet(Any[1,2,3]) isa DisjointSet
+            @test DisjointSet{Any}(Any[1,2,3]) isa DisjointSet{Any}
+            @test DisjointSet{Int}(Any[1,2,3]) isa DisjointSet{Int}
         end
 
         @testset "basic tests" begin
@@ -88,10 +89,10 @@
             @test eltype(s) == Int
             @test eltype(typeof(s)) == Int
             @test length(empty(s)) == num_groups(empty(s)) == 0
-            @test empty(s) isa DisjointSets{eltype(s)}
+            @test empty(s) isa DisjointSet{eltype(s)}
             @test collect(s) == collect(1:10)
             g = (x % 2 == 0 ? x+1//x : x*im for x = 1:10)
-            s1 = DisjointSets(g)
+            s1 = DisjointSet(g)
             @test length(s1) == 10
             @test sizehint!(s1, 100) === s1
 
@@ -139,7 +140,7 @@
 
         @testset "Some tests using non-integer disjoint sets" begin
             elems = ["a", "b", "c", "d"]
-            a = DisjointSets{AbstractString}(elems)
+            a = DisjointSet{AbstractString}(elems)
             @test collect(a) == ["a", "b", "c", "d"]
             union!(a, "a", "b")
             @test in_same_set(a,"a","b")
