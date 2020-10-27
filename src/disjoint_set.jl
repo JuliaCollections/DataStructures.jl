@@ -27,9 +27,6 @@ mutable struct IntDisjointSet{T<:Integer}
     parents::Vector{T}
     ranks::Vector{T}
     ngroups::T
-
-    # creates a disjoint set comprised of n singletons
-    # IntDisjointSet(n::T) where {T<:Integer} = new(collect(Base.OneTo(n)), zeros(T, n), n)
 end
 
 IntDisjointSet(n::T) where {T<:Integer} = IntDisjointSet{T}(collect(Base.OneTo(n)), zeros(T, n), n)
