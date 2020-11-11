@@ -223,6 +223,7 @@ Make a new subset with an automatically chosen new element x.
 Returns the new element.
 """
 function Base.push!(s::DisjointSet{T}, x::T) where T
+    haskey(s.intmap, x) && return x
     id = push!(s.internal)
     s.intmap[x] = id
     push!(s.revmap, x) # Note, this assumes invariant: length(s.revmap) == id
