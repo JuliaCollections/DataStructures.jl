@@ -162,4 +162,9 @@
         end
     end
 
+    @testset "Test deprecations from #700" begin
+        @test DisjointSets(1:10) isa DisjointSet
+        @test IntDisjointSets(10) isa IntDisjointSet
+        @test DisjointSets(1:10...) == DisjointSet(1:10)
+    end
 end # @testset DisjointSet
