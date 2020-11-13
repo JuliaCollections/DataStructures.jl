@@ -166,5 +166,6 @@
         @test DisjointSets(1:10) isa DisjointSet
         @test IntDisjointSets(10) isa IntDisjointSet
         @test DisjointSets(1:10...) == DisjointSet(1:10)
+        @test typeof(DisjointSet(1:10)) <: DisjointSets
     end
 end # @testset DisjointSet
