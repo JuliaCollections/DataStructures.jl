@@ -19,7 +19,7 @@ module DataStructures
     export capacity, num_blocks, top_with_handle, sizehint!
 
     export Accumulator, counter, reset!, inc!, dec!
-    export IntDisjointSets, DisjointSets, num_groups, find_root!, in_same_set, root_union!
+    export IntDisjointSet, DisjointSet, num_groups, find_root!, in_same_set, root_union!
     export FenwickTree, length, inc!, dec!, incdec!, prefixsum
 
     export AbstractHeap, compare, extract_all!, extract_all_rev!
