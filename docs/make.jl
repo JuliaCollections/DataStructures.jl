@@ -14,7 +14,7 @@ makedocs(
         "priority-queue.md",
         "fenwick.md",
         "accumulators.md",
-        "disjoint_sets.md",
+        "disjoint_set.md",
         "heaps.md",
         "ordered_containers.md",
         "default_dict.md",
