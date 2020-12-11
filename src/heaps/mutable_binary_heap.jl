@@ -136,7 +136,7 @@ function _make_mutable_binary_heap(ord::Ordering, ty::Type{T}, values) where T
     n = length(values)
     nodes = Vector{MutableBinaryHeapNode{T}}(undef, n)
     nodemap = Vector{Int}(undef, n)
-    values = heapify(values, ord)
+    values = heapify!(values, ord)
 
     i::Int = 0
     for v in values
