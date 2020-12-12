@@ -237,17 +237,17 @@ end
     end
 
     @testset "test delete!" begin
-        vs=[1,2,4,6,3]
+        vs = [1, 2, 4, 6, 3]
         h = MutableBinaryMinHeap(vs)
 
-        @test isequal(heap_values(delete!(h,1)), [2, 3, 4, 6])
-        @test isequal(heap_values(delete!(h,5)), [2, 6, 4])
-        @test_throws BoundsError delete!(h,10)
-        @test_throws BoundsError delete!(h,0)
-        @test_throws BoundsError delete!(h,-5)
+        @test isequal(heap_values(delete!(h, 1)), [2, 3, 4, 6])
+        @test isequal(heap_values(delete!(h, 5)), [2, 6, 4])
+        @test_throws BoundsError delete!(h, 10)
+        @test_throws BoundsError delete!(h, 0)
+        @test_throws BoundsError delete!(h, -5)
         @test pop!(h) == 2
         @test pop!(h) == 4
-        push!(h,2)
+        push!(h, 2)
         @test pop!(h) == 2
         @test pop!(h) == 6
         @test isempty(h)
