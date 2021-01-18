@@ -78,6 +78,12 @@ end
         @test true
     end
 
+    @testset "Type Aliases" begin
+        # https://github.com/JuliaCollections/DataStructures.jl/issues/686
+        @test MutableBinaryMaxHeap{Int}() isa MutableBinaryMaxHeap{Int}
+        @test MutableBinaryMinHeap{Int}() isa MutableBinaryMinHeap{Int}
+    end
+
     @testset "basic tests" begin
         h = MutableBinaryMinHeap{Int}()
 

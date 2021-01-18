@@ -50,8 +50,6 @@ BinaryHeap(ordering::Base.Ordering, xs::AbstractVector{T}) where T = BinaryHeap{
 BinaryHeap{T, O}() where {T, O<:Base.Ordering} = BinaryHeap{T}(O())
 BinaryHeap{T, O}(xs::AbstractVector) where {T, O<:Base.Ordering} = BinaryHeap{T}(O(), xs)
 
-const DefaultReverseOrdering = Base.ReverseOrdering{Base.ForwardOrdering}
-
 # These constructors needed for BinaryMaxHeap, until we have https://github.com/JuliaLang/julia/pull/37822
 BinaryHeap{T, DefaultReverseOrdering}() where {T} = BinaryHeap{T}(Base.Reverse)
 BinaryHeap{T, DefaultReverseOrdering}(xs::AbstractVector) where {T} = BinaryHeap{T}(Base.Reverse, xs)

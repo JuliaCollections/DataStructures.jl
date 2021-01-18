@@ -2,6 +2,7 @@
 
 using Base.Order: Forward, Ordering, lt
 
+const DefaultReverseOrdering = Base.ReverseOrdering{Base.ForwardOrdering}
 
 # Heap operations on flat arrays
 # ------------------------------

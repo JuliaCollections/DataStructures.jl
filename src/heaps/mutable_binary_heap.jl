@@ -179,9 +179,13 @@ MutableBinaryHeap(ordering::Base.Ordering, xs::AbstractVector{T}) where T = Muta
 MutableBinaryHeap{T, O}() where {T, O<:Base.Ordering} = MutableBinaryHeap{T}(O())
 MutableBinaryHeap{T, O}(xs::AbstractVector) where {T, O<:Base.Ordering} = MutableBinaryHeap{T}(O(), xs)
 
+# These constructors needed for BinaryMaxHeap, until we have https://github.com/JuliaLang/julia/pull/37822
+MutableBinaryHeap{T, DefaultReverseOrdering}() where {T} = MutableBinaryHeap{T}(Base.Reverse)
+MutableBinaryHeap{T, DefaultReverseOrdering}(xs::AbstractVector) where {T} = MutableBinaryHeap{T}(Base.Reverse, xs)
+
 # Forward/reverse ordering type aliases
 const MutableBinaryMinHeap{T} = MutableBinaryHeap{T, Base.ForwardOrdering}
-const MutableBinaryMaxHeap{T} = MutableBinaryHeap{T, Base.ReverseOrdering}
+const MutableBinaryMaxHeap{T} = MutableBinaryHeap{T, DefaultReverseOrdering}
 
 MutableBinaryMinHeap(xs::AbstractVector{T}) where T = MutableBinaryMinHeap{T}(xs)
 MutableBinaryMaxHeap(xs::AbstractVector{T}) where T = MutableBinaryMaxHeap{T}(xs)
