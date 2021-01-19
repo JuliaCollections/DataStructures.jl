@@ -3,7 +3,7 @@ on:
   pull_request:
   push:
     branches:
-      - master
+      - release-0.18
     tags: '*'
 jobs:
   test:
