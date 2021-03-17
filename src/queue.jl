@@ -36,7 +36,7 @@ Base.first(s::Queue) = first(s.store)
 Base.last(s::Queue) = last(s.store)
 
 """
-    psuh!(s::Queue, x)
+    push!(s::Queue, x)
 
 Inserts the value `x` to the end of the queue `s`.
 """
