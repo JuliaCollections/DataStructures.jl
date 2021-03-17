@@ -4,6 +4,22 @@
     Queue{T}([blksize::Integer=1024])
 
 Create a `Queue` object containing elements of type `T`.
+
+# Examples
+```jldoctest
+julia> q = Queue{Int}()
+Queue{Int64}(Deque [Int64[]])
+julia> push!(q, 1)
+Queue{Int64}(Deque [[1]])
+julia> x = first(q)
+1
+julia> length(q)
+1
+julia> x = popfirst!(q)
+1
+julia> length(q)
+0
+```
 """
 mutable struct Queue{T}
     store::Deque{T}
