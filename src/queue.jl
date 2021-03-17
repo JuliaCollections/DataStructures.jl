@@ -50,7 +50,7 @@ end
 
 Removes an element from the front of the queue `s` and returns it.
 """
-popfirst!(s::Queue) = popfirst!(s.store)
+Base.popfirst!(s::Queue) = popfirst!(s.store)
 
 Base.empty!(s::Queue) = (empty!(s.store); s)
 
