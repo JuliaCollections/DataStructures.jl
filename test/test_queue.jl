@@ -21,7 +21,7 @@
         @test_throws ArgumentError popfirst!(s)
 
         for i = 1 : n
-            psuh!(s, i)
+            push!(s, i)
             @test first(s) == 1
             @test last(s) == i
             @test !isempty(s)
