@@ -20,21 +20,21 @@ Base.first(s::Queue) = first(s.store)
 Base.last(s::Queue) = last(s.store)
 
 """
-    enqueue!(s::Queue, x)
+    psuh!(s::Queue, x)
 
 Inserts the value `x` to the end of the queue `s`.
 """
-function enqueue!(s::Queue, x)
+function Base.push!(s::Queue, x)
     push!(s.store, x)
     return s
 end
 
 """
-    dequeue!(s::Queue)
+    popfirst!(s::Queue)
 
 Removes an element from the front of the queue `s` and returns it.
 """
-dequeue!(s::Queue) = popfirst!(s.store)
+popfirst!(s::Queue) = popfirst!(s.store)
 
 Base.empty!(s::Queue) = (empty!(s.store); s)
 
