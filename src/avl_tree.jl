@@ -179,7 +179,7 @@ function Base.delete!(tree::AVLTree{K}, d::K) where K
     function delete_node!(node::Union{AVLTreeNode, Nothing}, key)
         if tree.lt(key, node.data)
             node.leftChild = delete_node!(node.leftChild, key)
-        elseif tree.lt(node.data,key)
+        elseif tree.lt(node.data, key)
             node.rightChild = delete_node!(node.rightChild, key)
         else
             if node.leftChild == nothing
