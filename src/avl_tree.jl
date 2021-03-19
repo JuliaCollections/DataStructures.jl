@@ -108,7 +108,7 @@ function search_node(tree::AVLTree{K}, d::K) where K
     while node != nothing && node.data != nothing && node.data != d
 
         prev = node
-        if tree.lt(d,node.data)
+        if tree.lt(d, node.data)
             node = node.leftChild
         else
             node = node.rightChild
