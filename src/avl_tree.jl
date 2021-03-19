@@ -21,7 +21,7 @@ mutable struct AVLTree{T}
     count::Int
     lt
 
-    AVLTree{T}(;lt=isless) where T = new{T}(nothing, 0, lt)
+    AVLTree{T}(; lt = isless) where T = new{T}(nothing, 0, lt)
 end
 
 AVLTree() = AVLTree{Any}()
