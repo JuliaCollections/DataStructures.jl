@@ -131,7 +131,7 @@ function Base.insert!(tree::AVLTree{K}, d::K) where K
     function insert_node(node::Union{AVLTreeNode, Nothing}, key)
         if node == nothing
             return AVLTreeNode{K}(key)
-        elseif tree.lt(key,node.data)
+        elseif tree.lt(key, node.data)
             node.leftChild = insert_node(node.leftChild, key)
         else
             node.rightChild = insert_node(node.rightChild, key)
