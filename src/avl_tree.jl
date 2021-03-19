@@ -151,7 +151,7 @@ function Base.insert!(tree::AVLTree{K}, d::K) where K
         end
 
         if balance < -1
-            if tree.lt(node.rightChild.data,key)
+            if tree.lt(node.rightChild.data, key)
                 return left_rotate(node)
             else
                 node.rightChild = right_rotate(node.rightChild)
