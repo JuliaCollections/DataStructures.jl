@@ -19,7 +19,7 @@ AVLTreeNode_or_null{T} = Union{AVLTreeNode{T}, Nothing}
 mutable struct AVLTree{T}
     root::AVLTreeNode_or_null{T}
     count::Int
-    lt
+    lt::Function
 
     AVLTree{T}(; lt = isless) where T = new{T}(nothing, 0, lt)
 end
