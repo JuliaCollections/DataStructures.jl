@@ -85,6 +85,19 @@ end
 for _Dict in [:Dict, :OrderedDict]
     DefaultDict = Symbol("Default"*string(_Dict))
     @eval begin
+        """
+            $($DefaultDict)(default, pairs...; passkey=false)
+            $($DefaultDict)(default, d::AbstractDict; passkey=false)
+            $($DefaultDict){K, V}(default, pairs...; passkey=false)
+            $($DefaultDict){K, V}(default, dict::AbstractDict; passkey=false)
+        
+        Construct an $($(_Dict == :Dict ? "un" : ""))ordered dictionary from the given key-value `pairs` or `dict`
+        with a `default` value to be returned for keys that are not stored in the dictionary. The key and value
+        types may be optionally specified with the `K` and `V` parameters.
+        
+        If the `default` value is `Callable`, then it will be _called_ upon retrieval,
+        with either 0 arguments (if `passkey==false`) or with the key that was requested (but missing).
+        """
         struct $DefaultDict{K,V,F} <: AbstractDict{K,V}
             d::DefaultDictBase{K,V,F,$_Dict{K,V}}
 
@@ -113,7 +126,8 @@ for _Dict in [:Dict, :OrderedDict]
 
         # Constructor syntax: DefaultDictBase{Int,Float64}(default)
         $DefaultDict{K,V}(; kwargs...) where {K,V} = throw(ArgumentError("$DefaultDict: no default specified"))
-        $DefaultDict{K,V}(default::F; kwargs...) where {K,V,F} = $DefaultDict{K,V,F}(default; kwargs...)
+        $DefaultDict{K,V}(default::F, pairs...; kwargs...) where {K,V,F} = $DefaultDict{K,V,F}(default, pairs...; kwargs...)
+        $DefaultDict{K,V}(default::F, d::AbstractDict; kwargs...) where {K,V,F} = $DefaultDict{K,V,F}(default, $_Dict(d); kwargs...)
 
         ## Functions
 
