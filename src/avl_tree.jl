@@ -16,15 +16,19 @@ AVLTreeNode(d) = AVLTreeNode{Any}(d)
 
 AVLTreeNode_or_null{T} = Union{AVLTreeNode{T}, Nothing}
 
-mutable struct AVLTree{T}
+mutable struct AVLTree{T, Ord<:Ordering}
     root::AVLTreeNode_or_null{T}
     count::Int
-    lt::Function
+    ord::Ord
 
-    AVLTree{T}(; lt = isless) where T = new{T}(nothing, 0, lt)
+    AVLTree{T, Ord}(o::Ord=Forward) where {T, Ord<:Ordering} = new{T, Ord}(nothing, 0, o)
 end
 
-AVLTree() = AVLTree{Any}()
+AVLTree() = AVLTree{Any, ForwardOrdering}(Forward)
+
+AVLTree{T}() where T = AVLTree{T, ForwardOrdering}(Forward)
+
+AVLTree{T}(o::Ord) where {T, Ord<:Ordering} = AVLTree{T, Ord}(o)
 
 Base.length(tree::AVLTree) = tree.count
 
@@ -105,10 +109,10 @@ end
 function search_node(tree::AVLTree{K}, d::K) where K
     prev = nothing
     node = tree.root
-    while node != nothing && node.data != nothing && node.data != d
+    while node != nothing && node.data != nothing && !eq(tree.ord, node.data, d)
 
         prev = node
-        if tree.lt(d, node.data)
+        if lt(tree.ord, d, node.data)
             node = node.leftChild
         else
             node = node.rightChild
@@ -121,7 +125,7 @@ end
 function Base.haskey(tree::AVLTree{K}, d::K) where K
     (tree.root == nothing) && return false
     node = search_node(tree, d)
-    return (node.data == d)
+    return eq(tree.ord, node.data, d)
 end
 
 Base.in(key, tree::AVLTree) = haskey(tree, key)
@@ -131,7 +135,7 @@ function Base.insert!(tree::AVLTree{K}, d::K) where K
     function insert_node(node::Union{AVLTreeNode, Nothing}, key)
         if node == nothing
             return AVLTreeNode{K}(key)
-        elseif tree.lt(key, node.data)
+        elseif lt(tree.ord, key, node.data)
             node.leftChild = insert_node(node.leftChild, key)
         else
             node.rightChild = insert_node(node.rightChild, key)
@@ -142,7 +146,7 @@ function Base.insert!(tree::AVLTree{K}, d::K) where K
         balance = get_balance(node)
 
         if balance > 1
-            if tree.lt(key, node.leftChild.data)
+            if lt(tree.ord, key, node.leftChild.data)
                 return right_rotate(node)
             else
                 node.leftChild = left_rotate(node.leftChild)
@@ -151,7 +155,7 @@ function Base.insert!(tree::AVLTree{K}, d::K) where K
         end
 
         if balance < -1
-            if tree.lt(node.rightChild.data, key)
+            if lt(tree.ord, node.rightChild.data, key)
                 return left_rotate(node)
             else
                 node.rightChild = right_rotate(node.rightChild)
@@ -177,9 +181,9 @@ end
 function Base.delete!(tree::AVLTree{K}, d::K) where K
 
     function delete_node!(node::Union{AVLTreeNode, Nothing}, key)
-        if tree.lt(key, node.data)
+        if lt(tree.ord, key, node.data)
             node.leftChild = delete_node!(node.leftChild, key)
-        elseif tree.lt(node.data, key)
+        elseif lt(tree.ord, node.data, key)
             node.rightChild = delete_node!(node.rightChild, key)
         else
             if node.leftChild == nothing
@@ -238,8 +242,8 @@ function sorted_rank(tree::AVLTree{K}, key::K) where K
     !haskey(tree, key) && throw(KeyError(key))
     node = tree.root
     rank = 0
-    while node.data != key
-        if tree.lt(node.data, key)
+    while !eq(tree.ord, node.data, key)
+        if lt(tree.ord, node.data, key)
             rank += (1 + get_subsize(node.leftChild))
             node = node.rightChild
         else
