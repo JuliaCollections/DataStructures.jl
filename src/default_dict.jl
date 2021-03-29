@@ -95,8 +95,8 @@ for _Dict in [:Dict, :OrderedDict]
         with a `default` value to be returned for keys that are not stored in the dictionary. The key and value
         types may be optionally specified with the `K` and `V` parameters.
         
-        If the `default` value is `Callable`, then it will be _called_ upon retrieval,
-        with either 0 arguments (if `passkey==false`) or with the key that was requested (but missing).
+        If the `default` value is a `Function` or `Type`, then it will be _called_ upon the retrieval of a missing key,
+        with either 0 arguments (if `passkey==false`) or with the key that was requested.
         """
         struct $DefaultDict{K,V,F} <: AbstractDict{K,V}
             d::DefaultDictBase{K,V,F,$_Dict{K,V}}
@@ -126,8 +126,8 @@ for _Dict in [:Dict, :OrderedDict]
 
         # Constructor syntax: DefaultDictBase{Int,Float64}(default)
         $DefaultDict{K,V}(; kwargs...) where {K,V} = throw(ArgumentError("$DefaultDict: no default specified"))
-        $DefaultDict{K,V}(default::F, pairs...; kwargs...) where {K,V,F} = $DefaultDict{K,V,F}(default, pairs...; kwargs...)
-        $DefaultDict{K,V}(default::F, d::AbstractDict; kwargs...) where {K,V,F} = $DefaultDict{K,V,F}(default, $_Dict(d); kwargs...)
+        $DefaultDict{K,V}(default::F, pairs...; kwargs...) where {K,V,F} = $DefaultDict{K,V,F}(default, $_Dict{K,V}(pairs...); kwargs...)
+        $DefaultDict{K,V}(default::F, d::AbstractDict; kwargs...) where {K,V,F} = $DefaultDict{K,V,F}(default, $_Dict{K,V}(d); kwargs...)
 
         ## Functions
 
