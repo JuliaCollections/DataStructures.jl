@@ -104,3 +104,17 @@ dd["a"]
 dd["b"]["a"] = 1
 dd["a"]
 ```
+
+To create a `DefaultDict` which recursively calls itself you can write:
+```@repl
+rdict(args...) = DefaultDict(rdict, Dict{Any,Any}(args...))
+dd = rdict()
+dd["a"]["b"]["c"]
+```
+
+It's also possible to create a recursive `DefaultDict` where the key is restricted:
+```@repl
+rdict(args...) = DefaultDict{String,Any,typeof(rdict)}(rdict, Dict{String,Any}(args...))
+dd = rdict()
+dd["a"]["b"]["c"]
+```
