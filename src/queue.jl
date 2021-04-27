@@ -45,3 +45,9 @@ Base.iterate(q::Queue, s...) = iterate(q.store, s...)
 Iterators.reverse(q::Queue) = Iterators.reverse(q.store)
 
 Base.:(==)(x::Queue, y::Queue) = x.store == y.store
+
+# Showing
+
+function Base.show(io::IO, s::Queue)
+   print(io,"Queue [$(collect(s.store))]")
+end
