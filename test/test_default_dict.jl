@@ -1,4 +1,4 @@
-import DataStructures: DefaultDictBase
+import DataStructures: DefaultDictBase, OrderedDict
 
 @testset "DefaultDict" begin
 
@@ -26,6 +26,14 @@ import DataStructures: DefaultDictBase
             @test_throws ArgumentError DefaultDict{AbstractString, Int}()
 
             @test isa(DefaultDict(0.0, 1 => 1.0), DefaultDict{Int, Float64, Float64})
+            @test isa(DefaultDict(0.0, Dict(1 => 1.0)), DefaultDict{Int, Float64, Float64})
+
+            @test isa(DefaultDict{Float64, Int}(0.0), DefaultDict{Float64, Int, Float64})
+            @test isa(DefaultDict{Float64, Int}(0.0, Dict()), DefaultDict{Float64, Int, Float64})
+            @test isa(DefaultDict{Float64, Int}(0.0, OrderedDict()), DefaultDict{Float64, Int, Float64})
+            @test isa(DefaultDict{Float64, Int}(0.0, 1 => 1.0), DefaultDict{Float64, Int, Float64})
+            @test isa(DefaultDict{Float64, Int}(0.0, Dict(1 => 1.0)), DefaultDict{Float64, Int, Float64})
+            @test isa(DefaultDict{Float64, Int}(0.0, OrderedDict(1 => 1.0)), DefaultDict{Float64, Int, Float64})
         end
 
         @testset "Core Functionality" begin
@@ -132,7 +140,18 @@ import DataStructures: DefaultDictBase
     @testset "DefaultOrderedDict" begin
         @testset "construction" begin
             @test_throws ArgumentError DefaultOrderedDict()
+            @test_throws ArgumentError DefaultOrderedDict(AbstractString, Int)
             @test_throws ArgumentError DefaultOrderedDict{AbstractString, Int}()
+
+            @test isa(DefaultOrderedDict(0.0, 1 => 1.0), DefaultOrderedDict{Int, Float64, Float64})
+            @test isa(DefaultOrderedDict(0.0, Dict(1 => 1.0)), DefaultOrderedDict{Int, Float64, Float64})
+
+            @test isa(DefaultOrderedDict{Float64, Int}(0.0), DefaultOrderedDict{Float64, Int, Float64})
+            @test isa(DefaultOrderedDict{Float64, Int}(0.0, Dict()), DefaultOrderedDict{Float64, Int, Float64})
+            @test isa(DefaultOrderedDict{Float64, Int}(0.0, OrderedDict()), DefaultOrderedDict{Float64, Int, Float64})
+            @test isa(DefaultOrderedDict{Float64, Int}(0.0, 1 => 1.0), DefaultOrderedDict{Float64, Int, Float64})
+            @test isa(DefaultOrderedDict{Float64, Int}(0.0, Dict(1 => 1.0)), DefaultOrderedDict{Float64, Int, Float64})
+            @test isa(DefaultOrderedDict{Float64, Int}(0.0, OrderedDict(1 => 1.0)), DefaultOrderedDict{Float64, Int, Float64})
         end
 
         @testset "Core Functionality" begin
