@@ -50,10 +50,24 @@
         end
     end
 
-    @testset "other constructor" begin
-        cb = CircularBuffer(10)
-        @test length(cb) == 0
-        @test typeof(cb) <: CircularBuffer{Any}
+    @testset "other constructors" begin
+        @testset "capacity only" begin
+            cb = CircularBuffer(10)
+            @test length(cb) == 0
+            @test typeof(cb) <: CircularBuffer{Any}
+        end
+        @testset "from vec inferred type" begin
+            cb = CircularBuffer(1:5,10)
+            @test length(cb) == 5
+            @test typeof(cb) == CircularBuffer{Int}
+        end
+        @testset "from vec given type" begin
+            cb = CircularBuffer{Float64}(1:5,10)
+            @test length(cb) == 5
+            @test typeof(cb) == CircularBuffer{Float64}
+            @test collect(cb) == [1.0,2.0,3.0,4.0,5.0]
+        end
+
     end
 
     @testset "pushfirst" begin
