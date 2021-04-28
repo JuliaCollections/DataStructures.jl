@@ -13,10 +13,19 @@ mutable struct CircularBuffer{T} <: AbstractVector{T}
     length::Int
     buffer::Vector{T}
 
-    CircularBuffer{T}(capacity::Int) where {T} = new{T}(capacity, 1, 0, Vector{T}(undef, capacity))
+    function CircularBuffer{T}(vec,capacity::Int) where {T}
+        capacity >= length(vec) || throw(BoundsError()) # prevent overflow
+        new{T}(capacity,1,length(vec),copyto!(Vector{T}(undef,capacity),convert(Vector{T},vec)))
+    end
+
 end
 
-CircularBuffer(capacity) = CircularBuffer{Any}(capacity)
+CircularBuffer(capacity::Int) = CircularBuffer{Any}(capacity)
+
+CircularBuffer{T}(capacity::Int) where {T} = CircularBuffer{T}([],capacity)
+
+CircularBuffer(vec,capacity::Int) =  CircularBuffer{eltype(vec)}(vec,capacity)
+
 
 """
     empty!(cb::CircularBuffer)
