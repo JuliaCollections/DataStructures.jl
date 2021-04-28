@@ -1,11 +1,11 @@
 """
-    CircularBuffer{T}(n)
+    CircularBuffer{T}(v,n)
 
 The CircularBuffer type implements a circular buffer of fixed capacity
 where new items are pushed to the back of the list, overwriting values
 in a circular fashion.
 
-Allocate a buffer of elements of type `T` with maximum capacity `n`.
+Allocate a buffer of elements of type `T`  containing items `v` with maximum capacity `n`.
 """
 mutable struct CircularBuffer{T} <: AbstractVector{T}
     capacity::Int
