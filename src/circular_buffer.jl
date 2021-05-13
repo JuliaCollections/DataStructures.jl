@@ -22,7 +22,7 @@ end
 
 CircularBuffer(capacity::Int) = CircularBuffer{Any}(capacity)
 
-CircularBuffer{T}(capacity::Int) where {T} = CircularBuffer{T}([],capacity)
+CircularBuffer{T}(capacity::Int) where {T} = CircularBuffer{T}(T[],capacity)
 
 CircularBuffer(vec,capacity::Int) =  CircularBuffer{eltype(vec)}(vec,capacity)
 
