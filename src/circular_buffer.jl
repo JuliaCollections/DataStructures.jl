@@ -13,9 +13,9 @@ mutable struct CircularBuffer{T} <: AbstractVector{T}
     length::Int
     buffer::Vector{T}
 
-    function CircularBuffer{T}(vec,capacity::Int) where {T}
-        capacity >= length(vec) || throw(BoundsError()) # prevent overflow
-        new{T}(capacity,1,length(vec),copyto!(Vector{T}(undef,capacity),convert(Vector{T},vec)))
+    function CircularBuffer{T}(iter, capacity::Int) where {T}
+        vec = copyto!(Vector{T}(undef,capacity), vec)
+        new{T}(capacity, 1, length(vec),vec)
     end
 
 end
