@@ -67,6 +67,13 @@
             @test typeof(cb) == CircularBuffer{Float64}
             @test collect(cb) == [1.0,2.0,3.0,4.0,5.0]
         end
+        @testset "inferred capacity" begin
+            cb = CircularBuffer{Float64}(1:5)
+            @test length(cb) == 5
+            @test typeof(cb) == CircularBuffer{Float64}
+            @test collect(cb) == [1.0,2.0,3.0,4.0,5.0]
+            @test capacity(cb) == 5
+        end
 
     end
 
