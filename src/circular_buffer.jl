@@ -14,7 +14,7 @@ mutable struct CircularBuffer{T} <: AbstractVector{T}
     buffer::Vector{T}
 
     function CircularBuffer{T}(iter, capacity::Int) where {T}
-        vec = copyto!(Vector{T}(undef,capacity), vec)
+        vec = copyto!(Vector{T}(undef,capacity), iter)
         new{T}(capacity, 1, length(vec),vec)
     end
 
@@ -24,7 +24,8 @@ CircularBuffer(capacity::Int) = CircularBuffer{Any}(capacity)
 
 CircularBuffer{T}(capacity::Int) where {T} = CircularBuffer{T}(T[],capacity)
 
-CircularBuffer(vec,capacity::Int) =  CircularBuffer{eltype(vec)}(vec,capacity)
+CircularBuffer(iter,capacity::Int) =  CircularBuffer{eltype(iter)}(iter,capacity)
+
 
 
 """
