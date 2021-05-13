@@ -26,7 +26,12 @@ CircularBuffer{T}(capacity::Int) where {T} = CircularBuffer{T}(T[],capacity)
 
 CircularBuffer(iter,capacity::Int) =  CircularBuffer{eltype(iter)}(iter,capacity)
 
+function CircularBuffer{T}(iter)
+  vec = collect(T,iter)  
+  CircularBuffer{T}(vec,length(vec))
+end
 
+CircularBuffer(iter) = CircularBuffer{eltype(iter)}(iter)
 
 """
     empty!(cb::CircularBuffer)
