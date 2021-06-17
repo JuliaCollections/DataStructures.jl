@@ -7,3 +7,6 @@
 Base.@deprecate_binding DisjointSets DisjointSet
 Base.@deprecate_binding IntDisjointSets IntDisjointSet
 @deprecate DisjointSets(xs...) DisjointSet(xs)
+# Enqueue and dequeue deprecations
+@deprecate enqueue! Base.push!
+@deprecate dequeue! Base.popfirst!
