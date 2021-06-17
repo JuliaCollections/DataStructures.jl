@@ -18,10 +18,10 @@
         @test isempty(s)
         @test_throws ArgumentError first(s)
         @test_throws ArgumentError last(s)
-        @test_throws ArgumentError dequeue!(s)
+        @test_throws ArgumentError popfirst!(s)
 
         for i = 1 : n
-            enqueue!(s, i)
+            push!(s, i)
             @test first(s) == 1
             @test last(s) == i
             @test !isempty(s)
@@ -29,7 +29,7 @@
         end
 
         for i = 1 : n
-            x = dequeue!(s)
+            x = popfirst!(s)
             @test x == i
             if i < n
                 @test first(s) == i + 1
@@ -48,24 +48,24 @@
         s = Queue{Int}()
 
         @test s == t
-        enqueue!(s, 10)
+        push!(s, 10)
         @test s != t
-        enqueue!(t, 10)
+        push!(t, 10)
         @test s == t
-        enqueue!(t, 20)
+        push!(t, 20)
         @test s != t
 
         @testset "different types" begin
             r = Queue{Float32}()
-            enqueue!(r, 10)
+            push!(r, 10)
             @test s == r
         end
     end
 
     @testset "emptyness" begin
         s = Queue{Int}()
-        enqueue!(s, 1)
-        enqueue!(s, 3)
+        push!(s, 1)
+        push!(s, 3)
         @test !isempty(s)
         empty!(s)
         @test isempty(s)
@@ -79,7 +79,7 @@
         arr = Int64[]
 
         for i = 1:n
-            enqueue!(q,i)
+            push!(q,i)
             push!(arr,i)
         end
 
