@@ -51,6 +51,10 @@
     end
 
     @testset "other constructors" begin
+        @testset "internal constructor" begin
+            @test_throws ArgumentError CircularBuffer{Int64}(6,0,Vector{Int64}(undef,5))
+            @test_throws ArgumentError CircularBuffer{Int64}(1,6,Vector{Int64}(undef,5))
+        end
         @testset "capacity only" begin
             cb = CircularBuffer(10)
             @test length(cb) == 0
