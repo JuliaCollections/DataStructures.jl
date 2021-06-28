@@ -14,11 +14,16 @@ mutable struct CircularBuffer{T} <: AbstractVector{T}
     length::Int
     buffer::Vector{T}
 
+    function CircularBuffer{T}(f,len,buf) where {T}
+        f <= length(buf) || throw(ArgumentError("Value of 'first' must be inbounds of buffer"))
+        len <= length(buf) || throw(ArgumentError("Value of 'length' must be <= length of buffer"))
+        return new{T}(length(buf), f, len, buf)
+    end
 end
 
 function CircularBuffer{T}(iter, capacity::Int) where {T}
     vec = copyto!(Vector{T}(undef,capacity), iter)
-    CircularBuffer{T}(capacity, 1, length(vec),vec)
+    CircularBuffer{T}(1, length(iter),vec)
 end
 
 CircularBuffer(capacity::Int) = CircularBuffer{Any}(capacity)
@@ -29,7 +34,7 @@ CircularBuffer(iter,capacity::Int) =  CircularBuffer{eltype(iter)}(iter,capacity
 
 function CircularBuffer{T}(iter) where {T}
   vec = reshape(collect(T,iter),:) 
-  CircularBuffer{T}(length(vec), 1, length(vec), vec)
+  CircularBuffer{T}(1, length(vec), vec)
 end
 
 CircularBuffer(iter) = CircularBuffer{eltype(iter)}(iter)
