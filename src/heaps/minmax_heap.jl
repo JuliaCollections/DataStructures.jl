@@ -26,12 +26,12 @@ BinaryMinMaxHeap(xs::AbstractVector{T}) where T = BinaryMinMaxHeap{T}(xs)
 function _make_binary_minmax_heap(xs)
     valtree = copy(xs)
     for i in length(xs):-1:1
-        _minmax_heap_trickle_down!(valtree, i)
+        @inbounds _minmax_heap_trickle_down!(valtree, i)
     end
     return valtree
 end
 
-function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer)
+Base.@propagate_inbounds function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer)
     if on_minlevel(i)
         if i > 1 && A[i] > A[hparent(i)]
             # swap to parent and bubble up max
@@ -59,7 +59,7 @@ function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer)
     end
 end
 
-function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer, o::Ordering, x=A[i])
+Base.@propagate_inbounds function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer, o::Ordering, x=A[i])
     if hasgrandparent(i)
         gparent = hparent(hparent(i))
         if lt(o, x, A[gparent])
@@ -70,7 +70,7 @@ function _minmax_heap_bubble_up!(A::AbstractVector, i::Integer, o::Ordering, x=A
     end
 end
 
-function _minmax_heap_trickle_down!(A::AbstractVector, i::Integer)
+Base.@propagate_inbounds function _minmax_heap_trickle_down!(A::AbstractVector, i::Integer)
     if on_minlevel(i)
         _minmax_heap_trickle_down!(A, i, Forward)
     else
@@ -78,7 +78,7 @@ function _minmax_heap_trickle_down!(A::AbstractVector, i::Integer)
     end
 end
 
-function _minmax_heap_trickle_down!(A::AbstractVector, i::Integer, o::Ordering, x=A[i])
+Base.@propagate_inbounds function _minmax_heap_trickle_down!(A::AbstractVector, i::Integer, o::Ordering, x=A[i])
 
     if haschildren(i, A)
         # get the index of the extremum (min or max) descendant
@@ -128,15 +128,9 @@ Return the indices of all children and grandchildren of
 position `i`.
 """
 function children_and_grandchildren(maxlen::T, i::T) where {T <: Integer}
-    _children_and_grandchildren = T[]
-    for child in children(i)
-        for desc in (child, lchild(child), rchild(child))
-            if desc ≤ maxlen
-                push!(_children_and_grandchildren, desc)
-            end
-        end
-    end
-    return _children_and_grandchildren
+    left, right = children(i)
+    _children_and_grandchildren = (left, children(left)..., right, children(right)...)
+    return Iterators.filter(<=(maxlen), _children_and_grandchildren)
 end
 
 """
@@ -193,11 +187,11 @@ Remove the minimum value from the heap.
 function popmin!(h::BinaryMinMaxHeap)
     valtree = h.valtree
     !isempty(valtree) || throw(ArgumentError("heap must be non-empty"))
-    x = valtree[1]
+    @inbounds x = valtree[1]
     y = pop!(valtree)
     if !isempty(valtree)
-        valtree[1] = y
-        _minmax_heap_trickle_down!(valtree, 1)
+        @inbounds valtree[1] = y
+        @inbounds _minmax_heap_trickle_down!(valtree, 1)
     end
     return x
 end
@@ -224,7 +218,7 @@ function popmax!(h::BinaryMinMaxHeap)
     y = pop!(valtree)
     if !isempty(valtree) && i <= length(valtree)
         @inbounds valtree[i] = y
-        _minmax_heap_trickle_down!(valtree, i)
+        @inbounds _minmax_heap_trickle_down!(valtree, i)
     end
     return x
 end
@@ -242,7 +236,7 @@ end
 function Base.push!(h::BinaryMinMaxHeap, v)
     valtree = h.valtree
     push!(valtree, v)
-    _minmax_heap_bubble_up!(valtree, length(valtree))
+    @inbounds _minmax_heap_bubble_up!(valtree, length(valtree))
 end
 
 """
@@ -261,7 +255,7 @@ end
 @inline function Base.maximum(h::BinaryMinMaxHeap)
     valtree = h.valtree
     !isempty(h) || throw(ArgumentError("heap must be non-empty"))
-    return @inbounds maximum(valtree[1:min(end, 3)])
+    return @inbounds maximum(@views(valtree[1:min(end, 3)]))
 end
 
 Base.empty!(h::BinaryMinMaxHeap) = (empty!(h.valtree); h)
