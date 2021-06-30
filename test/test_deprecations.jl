@@ -33,11 +33,46 @@ function test_reverse_iter(it::T) where T
 end
 @testset "reverse_iter" begin
     @testset "Queue" begin
-        q = Queue{Int}(); enqueue!(q, 1); enqueue!(q, 2)
+        q = Queue{Int}(); push!(q, 1); push!(q, 2)
         test_reverse_iter(q)
     end
     @testset "Stack" begin
         s = Stack{Int}(); push!(s, 1); push!(s, 2)
         test_reverse_iter(s)
+    end
+end
+
+@testset "enqueue! dequeue!" begin
+    s = Queue{Int}(5)
+    n = 100
+
+    @test length(s) == 0
+    @test eltype(s) == Int
+    @test eltype(typeof(s)) == Int
+    @test isempty(s)
+    @test_throws ArgumentError first(s)
+    @test_throws ArgumentError last(s)
+    @test_throws ArgumentError dequeue!(s)
+
+    for i = 1 : n
+        enqueue!(s, i)
+        @test first(s) == 1
+        @test last(s) == i
+        @test !isempty(s)
+        @test length(s) == i
+    end
+
+    for i = 1 : n
+        x = dequeue!(s)
+        @test x == i
+        if i < n
+            @test first(s) == i + 1
+            @test last(s) == n
+        else
+            @test_throws ArgumentError first(s)
+            @test_throws ArgumentError last(s)
+        end
+        @test isempty(s) == (i == n)
+        @test length(s) == n - i
     end
 end

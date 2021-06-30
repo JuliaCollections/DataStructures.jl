@@ -23,10 +23,10 @@ Usage of Queue:
 
 ```julia
 q = Queue{Int}()
-enqueue!(q, x)
+push!(q, x)
 x = first(q)
 x = last(q)
-x = dequeue!(q)
+x = popfirst!(q)
 ```
 
 Both `Stack` and `Queue` implement the Iterator interface; iterating
