@@ -9,4 +9,4 @@ Base.@deprecate_binding IntDisjointSets IntDisjointSet
 @deprecate DisjointSets(xs...) DisjointSet(xs)
 # Enqueue and dequeue deprecations
 @deprecate enqueue!(q::Queue, x) Base.push!(q, x)
-@deprecate dequeue!(q::Queue, x) Base.popfirst!(q, x)
+@deprecate dequeue!(q::Queue) Base.popfirst!(q)
