@@ -1,11 +1,12 @@
 """
-    CircularBuffer{T}(n)
+    CircularBuffer{T}(v,n::Int)
 
 The CircularBuffer type implements a circular buffer of fixed capacity
 where new items are pushed to the back of the list, overwriting values
 in a circular fashion.
 
-Allocate a buffer of elements of type `T` with maximum capacity `n`.
+Allocate a buffer of elements of type `T`  containing items `v` with maximum capacity `n`.
+If no capacity is provided the capacity is the number of elements in `v`
 """
 mutable struct CircularBuffer{T} <: AbstractVector{T}
     capacity::Int
@@ -13,10 +14,30 @@ mutable struct CircularBuffer{T} <: AbstractVector{T}
     length::Int
     buffer::Vector{T}
 
-    CircularBuffer{T}(capacity::Int) where {T} = new{T}(capacity, 1, 0, Vector{T}(undef, capacity))
+    function CircularBuffer{T}(f,len,buf) where {T}
+        f <= length(buf) || throw(ArgumentError("Value of 'first' must be inbounds of buffer"))
+        len <= length(buf) || throw(ArgumentError("Value of 'length' must be <= length of buffer"))
+        return new{T}(length(buf), f, len, buf)
+    end
 end
 
-CircularBuffer(capacity) = CircularBuffer{Any}(capacity)
+function CircularBuffer{T}(iter, capacity::Int) where {T}
+    vec = copyto!(Vector{T}(undef,capacity), iter)
+    CircularBuffer{T}(1, length(iter),vec)
+end
+
+CircularBuffer(capacity::Int) = CircularBuffer{Any}(capacity)
+
+CircularBuffer{T}(capacity::Int) where {T} = CircularBuffer{T}(T[],capacity)
+
+CircularBuffer(iter,capacity::Int) =  CircularBuffer{eltype(iter)}(iter,capacity)
+
+function CircularBuffer{T}(iter) where {T}
+  vec = reshape(collect(T,iter),:) 
+  CircularBuffer{T}(1, length(vec), vec)
+end
+
+CircularBuffer(iter) = CircularBuffer{eltype(iter)}(iter)
 
 """
     empty!(cb::CircularBuffer)
