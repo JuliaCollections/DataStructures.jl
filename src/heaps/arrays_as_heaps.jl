@@ -45,7 +45,7 @@ function percolate_up!(xs::AbstractArray, i::Integer, x=xs[i], o::Ordering=Forwa
     xs[i] = x
 end
 
-percolate_up!(xs::AbstractArray, i::Integer, o::Ordering) = percolate_up!(xs, i, xs[i], o)
+@inline percolate_up!(xs::AbstractArray, i::Integer, o::Ordering) = percolate_up!(xs, i, xs[i], o)
 
 """
     heappop!(v, [ord])
@@ -68,7 +68,7 @@ end
 Given a binary heap-ordered array, push a new element `x`, preserving the heap property.
 For efficiency, this function does not check that the array is indeed heap-ordered.
 """
-function heappush!(xs::AbstractArray, x, o::Ordering=Forward)
+@inline function heappush!(xs::AbstractArray, x, o::Ordering=Forward)
     push!(xs, x)
     percolate_up!(xs, length(xs), o)
     return xs
