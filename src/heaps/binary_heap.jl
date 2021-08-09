@@ -87,7 +87,7 @@ Base.isempty(h::BinaryHeap) = isempty(h.valtree)
 
 Adds the `value` element to the heap `h`.
 """
-function Base.push!(h::BinaryHeap, v)
+@inline function Base.push!(h::BinaryHeap, v)
     heappush!(h.valtree, v, h.ordering)
     return h
 end
