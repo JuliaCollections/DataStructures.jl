@@ -45,7 +45,28 @@ PriorityQueue{Any,Any,Base.Order.ForwardOrdering} with 3 entries:
   "b" => 5
   "c" => 15
 ```
+It is also possible to iterate over the priorities and elements of the queue in sorted order. 
+```jldoctest
+julia> pq = PriorityQueue("a"=>2, "b"=>1, "c"=>3)
+PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
+  "b" => 1
+  "a" => 2
+  "c" => 3
 
+julia> for priority in values(pq)
+           println(priority)
+       end
+1
+2
+3
+
+julia> for element in keys(pq)
+           println(element)
+       end
+b
+a
+c
+```
 ```@meta
 DocTestSetup = nothing
 ```
