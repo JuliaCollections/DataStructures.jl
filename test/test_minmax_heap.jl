@@ -162,11 +162,11 @@ using Base.Order: Forward, Reverse
     end
 
     @testset "children_and_grandchildren tests" begin
-        @test children_and_grandchildren(1, 1) == Int[]
-        @test children_and_grandchildren(2, 1) == [2]
-        @test children_and_grandchildren(3, 1) == [2, 3]
-        @test children_and_grandchildren(7, 1) == [2, 4, 5, 3, 6, 7]
-        @test children_and_grandchildren(10, 2) == [4, 8, 9, 5, 10]
+        @test collect(children_and_grandchildren(1, 1)) == Int[]
+        @test collect(children_and_grandchildren(2, 1)) == [2]
+        @test collect(children_and_grandchildren(3, 1)) == [2, 3]
+        @test collect(children_and_grandchildren(7, 1)) == [2, 4, 5, 3, 6, 7]
+        @test collect(children_and_grandchildren(10, 2)) == [4, 8, 9, 5, 10]
     end
 
     @testset "throw errors tests" begin
