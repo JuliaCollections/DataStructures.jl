@@ -119,7 +119,7 @@ Base.haskey(pq::PriorityQueue, key) = haskey(pq.index, key)
 """
     peek(pq)
 
-Return the lowest priority key from a priority queue without removing that
+Return the lowest priority key and value from a priority queue without removing that
 key from the queue.
 """
 Base.peek(pq::PriorityQueue) = pq.xs[1]
