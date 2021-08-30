@@ -25,7 +25,7 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
 """
 struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
     # Binary heap of (element, priority) pairs.
-    xs::Array{Pair{K,V}, 1}
+    xs::Vector{Pair{K,V}}
     o::O
 
     # Map elements to their index in xs
@@ -35,7 +35,7 @@ struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
         new{K,V,O}(Vector{Pair{K,V}}(), o, Dict{K, Int}())
     end
 
-    PriorityQueue{K, V, O}(xs::Array{Pair{K,V}, 1}, o::O, index::Dict{K, Int}) where {K,V,O<:Ordering} = new(xs, o, index)
+    PriorityQueue{K, V, O}(xs::Vector{Pair{K,V}}, o::O, index::Dict{K, Int}) where {K,V,O<:Ordering} = new(xs, o, index)
 
     function PriorityQueue{K,V,O}(o::O, itr) where {K,V,O<:Ordering}
         xs = Vector{Pair{K,V}}(undef, length(itr))
@@ -59,7 +59,7 @@ struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
 end
 
 # A copy constructor
-PriorityQueue(xs::Array{Pair{K,V}, 1}, o::O, index::Dict{K, Int}) where {K,V,O<:Ordering} =
+PriorityQueue(xs::Vector{Pair{K,V}}, o::O, index::Dict{K, Int}) where {K,V,O<:Ordering} =
     PriorityQueue{K,V,O}(xs, o, index)
 
 # Any-Any constructors
@@ -129,9 +129,10 @@ function percolate_down!(pq::PriorityQueue, i::Integer)
     @inbounds while (l = heapleft(i)) <= length(pq)
         r = heapright(i)
         j = r > length(pq) || lt(pq.o, pq.xs[l].second, pq.xs[r].second) ? l : r
-        if lt(pq.o, pq.xs[j].second, x.second)
-            pq.index[pq.xs[j].first] = i
-            pq.xs[i] = pq.xs[j]
+        xj = pq.xs[j]
+        if lt(pq.o, xj.second, x.second)
+            pq.index[xj.first] = i
+            pq.xs[i] = xj
             i = j
         else
             break
@@ -146,9 +147,10 @@ function percolate_up!(pq::PriorityQueue, i::Integer)
     x = pq.xs[i]
     @inbounds while i > 1
         j = heapparent(i)
-        if lt(pq.o, x.second, pq.xs[j].second)
-            pq.index[pq.xs[j].first] = i
-            pq.xs[i] = pq.xs[j]
+        xj = pq.xs[j]
+        if lt(pq.o, x.second, xj.second)
+            pq.index[xj.first] = i
+            pq.xs[i] = xj
             i = j
         else
             break
@@ -190,9 +192,9 @@ end
 
 # Change the priority of an existing element, or equeue it if it isn't present.
 function Base.setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
-    if haskey(pq, key)
-        i = pq.index[key]
-        oldvalue = pq.xs[i].second
+    i = get(pq.index, key, 0)
+    if i != 0
+        @inbounds oldvalue = pq.xs[i].second
         pq.xs[i] = Pair{K,V}(key, value)
         if lt(pq.o, oldvalue, value)
             percolate_down!(pq, i)
@@ -267,24 +269,9 @@ PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
   "b" => 3
 ```
 """
-function dequeue!(pq::PriorityQueue)
-    x = pq.xs[1]
-    y = pop!(pq.xs)
-    if !isempty(pq)
-        pq.xs[1] = y
-        pq.index[y.first] = 1
-        percolate_down!(pq, 1)
-    end
-    delete!(pq.index, x.first)
-    return x.first
-end
+dequeue!(pq::PriorityQueue) = dequeue_pair!(pq).first
 
-function dequeue!(pq::PriorityQueue, key)
-    idx = pq.index[key]
-    force_up!(pq, idx)
-    dequeue!(pq)
-    return key
-end
+dequeue!(pq::PriorityQueue, key) = dequeue_pair!(pq, key).first
 
 """
     dequeue_pair!(pq)
@@ -311,7 +298,7 @@ function dequeue_pair!(pq::PriorityQueue)
     x = pq.xs[1]
     y = pop!(pq.xs)
     if !isempty(pq)
-        pq.xs[1] = y
+        @inbounds pq.xs[1] = y
         pq.index[y.first] = 1
         percolate_down!(pq, 1)
     end

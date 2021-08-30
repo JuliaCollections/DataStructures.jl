@@ -196,6 +196,9 @@ import Base.Order.Reverse
             while !isempty(pq)
                 @test 10 != dequeue!(pq)
             end
+
+            pq = PriorityQueue(1.0 => 1)
+            @test dequeue!(pq, 1.0f0) isa Float64
         end
 
         @testset "dequeuing pair" begin
