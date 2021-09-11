@@ -123,3 +123,15 @@ end
 partial_path(t::Trie, str::AbstractString) = TrieIterator(t, str)
 Base.IteratorSize(::Type{TrieIterator}) = Base.SizeUnknown()
 
+function find_prefixes(t::Trie, str::AbstractString)
+    prefixes = AbstractString[]
+    it = partial_path(t, str)
+    idx = firstindex(str)
+    for t in it
+        if t.is_key
+            push!(prefixes, str[firstindex(str):idx])
+        end
+        idx = nextind(str, idx)
+    end
+    return prefixes
+end
