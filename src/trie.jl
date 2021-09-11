@@ -112,7 +112,7 @@ end
 function Base.iterate(it::TrieIterator, (t, i) = (it.t, 0))
     if i == 0
         return it.t, (it.t, firstindex(it.str))
-    elseif i == lastindex(it.str) || !(it.str[i] in keys(t.children))
+    elseif i > lastindex(it.str) || !(it.str[i] in keys(t.children))
         return nothing
     else
         t = t.children[it.str[i]]
@@ -126,7 +126,7 @@ Base.IteratorSize(::Type{TrieIterator}) = Base.SizeUnknown()
 function find_prefixes(t::Trie, str::AbstractString)
     prefixes = AbstractString[]
     it = partial_path(t, str)
-    idx = firstindex(str)
+    idx = 0
     for t in it
         if t.is_key
             push!(prefixes, str[firstindex(str):idx])
