@@ -111,14 +111,15 @@ end
 # since the root of the trie corresponds to a length 0 prefix of str.
 function Base.iterate(it::TrieIterator, (t, i) = (it.t, 0))
     if i == 0
-        return it.t, (it.t, 1)
-    elseif i == length(it.str) + 1 || !(it.str[i] in keys(t.children))
+        return it.t, (it.t, firstindex(it.str))
+    elseif i == lastindex(it.str) || !(it.str[i] in keys(t.children))
         return nothing
     else
         t = t.children[it.str[i]]
-        return (t, (t, i + 1))
+        return (t, (t, nextind(it.str, i)))
     end
 end
 
 partial_path(t::Trie, str::AbstractString) = TrieIterator(t, str)
 Base.IteratorSize(::Type{TrieIterator}) = Base.SizeUnknown()
+
