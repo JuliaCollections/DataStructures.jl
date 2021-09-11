@@ -31,3 +31,10 @@ given string, use:
 ```julia
 seen_prefix(t::Trie, str) = any(v -> v.is_key, partial_path(t, str))
 ```
+
+`find_prefixes` can be used to find all keys which are prefixes of the given string.
+
+```julia
+t = Trie(["A", "ABC", "ABCD", "BCE"])
+find_prefixes(t, "ABCDE") # "A", "ABC"
+```
