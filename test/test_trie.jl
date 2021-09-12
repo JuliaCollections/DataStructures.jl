@@ -40,4 +40,30 @@
         @test collect(partial_path(t, "ro")) == [t0, t1, t2]
         @test collect(partial_path(t, "roa")) == [t0, t1, t2]
     end
+
+    @testset "partial_path iterator non-ascii" begin
+        t = Trie(["東京都"])
+        t0 = t
+        t1 = t0.children['東']
+        t2 = t1.children['京']
+        t3 = t2.children['都']
+        @test collect(partial_path(t, "西")) == [t0]
+        @test collect(partial_path(t, "東京都")) == [t0, t1, t2, t3]
+        @test collect(partial_path(t, "東京都渋谷区")) == [t0, t1, t2, t3]
+        @test collect(partial_path(t, "東京")) == [t0, t1, t2]
+        @test collect(partial_path(t, "東京スカイツリー")) == [t0, t1, t2]
+    end
+    
+    @testset "find_prefixes" begin
+        t = Trie(["A", "ABC", "ABD", "BCD"])
+        prefixes = find_prefixes(t, "ABCDE")
+        @test prefixes == ["A", "ABC"]
+    end
+
+    @testset "find_prefixes non-ascii" begin
+        t = Trie(["東京都", "東京都渋谷区", "東京都新宿区"])
+        prefixes = find_prefixes(t, "東京都渋谷区東")
+        @test prefixes == ["東京都", "東京都渋谷区"]
+    end
+
 end # @testset Trie
