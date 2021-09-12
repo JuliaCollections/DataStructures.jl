@@ -123,6 +123,22 @@ end
 partial_path(t::Trie, str::AbstractString) = TrieIterator(t, str)
 Base.IteratorSize(::Type{TrieIterator}) = Base.SizeUnknown()
 
+"""
+    find_prefixes(t::Trie, str::AbstractString)
+
+Find all keys from the `Trie` that are prefix of the given string
+
+# Examples
+```julia-repl
+julia> t = Trie(["A", "ABC", "ABCD", "BCE"])
+
+julia> find_prefixes(t, "ABCDE")
+3-element Vector{AbstractString}:
+ "A"
+ "ABC"
+ "ABCD"
+```
+"""
 function find_prefixes(t::Trie, str::AbstractString)
     prefixes = AbstractString[]
     it = partial_path(t, str)
