@@ -36,5 +36,5 @@ seen_prefix(t::Trie, str) = any(v -> v.is_key, partial_path(t, str))
 
 ```julia
 t = Trie(["A", "ABC", "ABCD", "BCE"])
-find_prefixes(t, "ABCDE") # "A", "ABC"
+find_prefixes(t, "ABCDE") # "A", "ABC", "ABCD"
 ```
