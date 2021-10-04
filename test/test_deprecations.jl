@@ -1,7 +1,7 @@
 # These are the tests for deprecated features, they should be deleted along with them
 
 @testset "Trie: path iterator" begin
-    t = Trie{Int}()
+    t = Trie{Char,Int}()
     t["rob"] = 27
     t["roger"] = 52
     t["kevin"] = Int8(11)
