@@ -18,7 +18,7 @@ array) and ordering object `o`. The ordering object defaults to
 mutable struct SortedSet{K, Ord <: Ordering} <: AbstractSet{K}
     bt::BalancedTree23{K,Nothing,Ord}
 
-    function SortedSet{K,Ord}(o::Ord=Forward, iter=[]) where {K,Ord<:Ordering}
+    function SortedSet{K,Ord}(o::Ord=Forward, iter=K[]) where {K,Ord<:Ordering}
         sorted_set = new{K,Ord}(BalancedTree23{K,Nothing,Ord}(o))
 
         for item in iter
