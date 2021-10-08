@@ -1,6 +1,6 @@
 @testset "Trie" begin
     @testset "Core Functionality" begin
-        t = Trie{Int}()
+        t = Trie{Char,Int}()
         t["amy"] = 56
         t["ann"] = 15
         t["emma"] = 30
@@ -19,14 +19,14 @@
         ks = ["amy", "ann", "emma", "rob", "roger"]
         vs = [56, 15, 30, 27, 52]
         kvs = collect(zip(ks, vs))
-        @test isa(Trie(ks, vs), Trie{Int})
-        @test isa(Trie(kvs), Trie{Int})
-        @test isa(Trie(Dict(kvs)), Trie{Int})
-        @test isa(Trie(ks), Trie{Nothing})
+        @test isa(Trie(ks, vs), Trie{Char,Int})
+        @test isa(Trie(kvs), Trie{Char,Int})
+        @test isa(Trie(Dict(kvs)), Trie{Char,Int})
+        @test isa(Trie(ks), Trie{Char,Nothing})
     end
 
     @testset "partial_path iterator" begin
-        t = Trie{Int}()
+        t = Trie{Char,Int}()
         t["rob"] = 27
         t["roger"] = 52
         t["kevin"] = Int8(11)
@@ -53,7 +53,7 @@
         @test collect(partial_path(t, "東京")) == [t0, t1, t2]
         @test collect(partial_path(t, "東京スカイツリー")) == [t0, t1, t2]
     end
-    
+
     @testset "find_prefixes" begin
         t = Trie(["A", "ABC", "ABD", "BCD"])
         prefixes = find_prefixes(t, "ABCDE")
@@ -66,4 +66,16 @@
         @test prefixes == ["東京都", "東京都渋谷区"]
     end
 
+    @testset "non-string indexing" begin
+        t = Trie{Int,Int}()
+        t[[1,2,3,4]] = 1
+        t[[1,2]] = 2
+        @test haskey(t, [1,2])
+        @test get(t, [1,2], nothing) == 2
+        st = subtrie(t, [1,2,3])
+        @test keys(st) == [[4]]
+        @test st[[4]] == 1
+        @test find_prefixes(t, [1,2,3,5]) == [[1,2]]
+        @test find_prefixes(t, 1:3) == [1:2]
+    end
 end # @testset Trie
