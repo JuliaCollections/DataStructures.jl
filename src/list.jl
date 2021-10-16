@@ -2,10 +2,9 @@ abstract type LinkedList{T} end
 
 Base.eltype(::Type{<:LinkedList{T}}) where T = T
 
-mutable struct Nil{T} <: LinkedList{T}
-end
+struct Nil{T} <: LinkedList{T} end
 
-mutable struct Cons{T} <: LinkedList{T}
+struct Cons{T} <: LinkedList{T}
     head::T
     tail::LinkedList{T}
 end
