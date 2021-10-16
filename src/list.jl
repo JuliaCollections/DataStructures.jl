@@ -79,7 +79,9 @@ function Base.map(f::Base.Callable, l::Cons{T}) where T
         push!(stack, head(l))
         l::Cons{T} = tail(l)::Cons{T}
     end
-    l2 = list(f(head(l)))  # Note this might have a different eltype than T
+    # Note the new list might have a different eltype than T
+    first = f(head(l))
+    l2 = cons(first, nil(typeof(first) <: T ? T : typeof(first)))
     for i in reverse(1:length(stack))
         l2 = cons(f(stack[i]), l2)
     end
