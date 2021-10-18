@@ -106,11 +106,7 @@ Removes and returns the element at the top of the heap `h`.
 """
 Base.pop!(h::BinaryHeap) = heappop!(h.valtree, h.ordering)
 
-"""
-    sizehint!(h::BinaryHeap, n::Integer)
-
-Suggest that heap `h` reserve capacity for at least `n` elements. This can improve performance.
-"""
+# Suggest that heap `h` reserve capacity for at least `n` elements. This can improve performance.
 function Base.sizehint!(h::BinaryHeap, n::Integer)
     sizehint!(h.valtree, n)
     return h
