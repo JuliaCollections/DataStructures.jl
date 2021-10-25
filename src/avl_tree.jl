@@ -16,6 +16,24 @@ AVLTreeNode(d) = AVLTreeNode{Any}(d)
 
 AVLTreeNode_or_null{T} = Union{AVLTreeNode{T}, Nothing}
 
+_getproperty(x::Nothing, f) = @assert false
+_getproperty(x::AVLTreeNode{T}, f) where {T} = getfield(x, f)
+Base.getproperty(x::AVLTreeNode_or_null{T}, f::Symbol) where {T} =
+    _getproperty(x, f)
+
+_setproperty!(x::Nothing, f, v) = @assert false
+_setproperty!(x::AVLTreeNode{T}, f, v) where {T} =
+    # setfield!(x, f, convert(fieldtype(typeof(x), f), v))
+    setfield!(x, f, v)
+_setproperty!(x::AVLTreeNode{T}, f, ::Nothing) where {T} =
+    setfield!(x, f, nothing)
+_setproperty!(x::AVLTreeNode{T}, f, v::AVLTreeNode{T}) where {T} =
+    setfield!(x, f, v)
+Base.setproperty!(x::AVLTreeNode_or_null{T}, f::Symbol, v) where {T} =
+    _setproperty!(x, f, v)
+Base.setproperty!(x::AVLTreeNode_or_null{T}, f::Symbol, v::AVLTreeNode_or_null{T}) where {T} =
+    _setproperty!(x, f, v)
+
 mutable struct AVLTree{T}
     root::AVLTreeNode_or_null{T}
     count::Int
@@ -27,7 +45,7 @@ AVLTree() = AVLTree{Any}()
 
 Base.length(tree::AVLTree) = tree.count
 
-get_height(node::Union{AVLTreeNode, Nothing}) = (node == nothing) ? 0 : node.height
+get_height(node::Union{AVLTreeNode, Nothing}) = (node == nothing) ? Int32(0) : node.height
 
 # balance is the difference of height between leftChild and rightChild of a node.
 function get_balance(node::Union{AVLTreeNode, Nothing})
@@ -40,25 +58,25 @@ end
 
 # computes the height of the subtree, which basically is
 # one added the maximum of the height of the left subtree and right subtree
-compute_height(node::AVLTreeNode) = 1 + max(get_height(node.leftChild), get_height(node.rightChild))
+compute_height(node::AVLTreeNode) = Int8(1 + max(get_height(node.leftChild), get_height(node.rightChild)))
 
-get_subsize(node::AVLTreeNode_or_null) = (node == nothing) ? 0 : node.subsize
+get_subsize(node::AVLTreeNode_or_null) = (node == nothing) ? Int32(0) : node.subsize
 
 # compute the subtree size
 function compute_subtree_size(node::AVLTreeNode_or_null)
     if node == nothing
-        return 0
+        return Int32(0)
     else
         L = get_subsize(node.leftChild)
         R = get_subsize(node.rightChild)
-        return (L + R + 1)
+        return (L + R + Int32(1))
     end
 end
 
 """
     left_rotate(node_x::AVLTreeNode)
 
-Performs a left-rotation on `node_x`, updates height of the nodes, and returns the rotated node. 
+Performs a left-rotation on `node_x`, updates height of the nodes, and returns the rotated node.
 """
 function left_rotate(z::AVLTreeNode)
     y = z.rightChild
@@ -75,7 +93,7 @@ end
 """
     right_rotate(node_x::AVLTreeNode)
 
-Performs a right-rotation on `node_x`, updates height of the nodes, and returns the rotated node. 
+Performs a right-rotation on `node_x`, updates height of the nodes, and returns the rotated node.
 """
 function right_rotate(z::AVLTreeNode)
     y = z.leftChild
@@ -90,9 +108,9 @@ function right_rotate(z::AVLTreeNode)
 end
 
 """
-   minimum_node(tree::AVLTree, node::AVLTreeNode) 
+   minimum_node(tree::AVLTree, node::AVLTreeNode)
 
-Returns the AVLTreeNode with minimum value in subtree of `node`. 
+Returns the AVLTreeNode with minimum value in subtree of `node`.
 """
 function minimum_node(node::Union{AVLTreeNode, Nothing})
     while node != nothing && node.leftChild != nothing
@@ -107,17 +125,17 @@ function search_node(tree::AVLTree{K}, d::K) where K
     while node != nothing && node.data != nothing && node.data != d
 
         prev = node
-        if d < node.data 
+        if d < node.data
             node = node.leftChild
         else
             node = node.rightChild
         end
     end
-    
+
     return (node == nothing) ? prev : node
 end
 
-function Base.haskey(tree::AVLTree{K}, d::K) where K 
+function Base.haskey(tree::AVLTree{K}, d::K) where K
     (tree.root == nothing) && return false
     node = search_node(tree, d)
     return (node.data == d)
@@ -125,42 +143,42 @@ end
 
 Base.in(key, tree::AVLTree) = haskey(tree, key)
 
-function Base.insert!(tree::AVLTree{K}, d::K) where K
-
-    function insert_node(node::Union{AVLTreeNode, Nothing}, key)
-        if node == nothing
-            return AVLTreeNode{K}(key)
-        elseif key < node.data
-            node.leftChild = insert_node(node.leftChild, key)
-        else
-            node.rightChild = insert_node(node.rightChild, key)
-        end
-        
-        node.subsize = compute_subtree_size(node)
-        node.height = compute_height(node)
-        balance = get_balance(node)
-        
-        if balance > 1
-            if key < node.leftChild.data
-                return right_rotate(node)
-            else
-                node.leftChild = left_rotate(node.leftChild)
-                return right_rotate(node)
-            end
-        end
-
-        if balance < -1
-            if key > node.rightChild.data
-                return left_rotate(node)
-            else
-                node.rightChild = right_rotate(node.rightChild)
-                return left_rotate(node)
-            end
-        end
-
-        return node
+function insert_node(node::Nothing, key::K) where K
+    return AVLTreeNode{K}(key)
+end
+function insert_node(node::AVLTreeNode{K}, key::K) where K
+    if key < node.data
+        node.leftChild = insert_node(node.leftChild, key)
+    else
+        node.rightChild = insert_node(node.rightChild, key)
     end
 
+    node.subsize = compute_subtree_size(node)
+    node.height = compute_height(node)
+    balance = get_balance(node)
+
+    if balance > 1
+        if key < node.leftChild.data
+            return right_rotate(node)
+        else
+            node.leftChild = left_rotate(node.leftChild)
+            return right_rotate(node)
+        end
+    end
+
+    if balance < -1
+        if key > node.rightChild.data
+            return left_rotate(node)
+        else
+            node.rightChild = right_rotate(node.rightChild)
+            return left_rotate(node)
+        end
+    end
+
+    return node
+end
+
+function Base.insert!(tree::AVLTree{K}, d::K) where K
     haskey(tree, d) && return tree
 
     tree.root = insert_node(tree.root, d)
@@ -173,55 +191,54 @@ function Base.push!(tree::AVLTree{K}, key0) where K
     insert!(tree, key)
 end
 
-function Base.delete!(tree::AVLTree{K}, d::K) where K
-
-    function delete_node!(node::Union{AVLTreeNode, Nothing}, key)
-        if key < node.data
-            node.leftChild = delete_node!(node.leftChild, key)
-        elseif key > node.data
-            node.rightChild = delete_node!(node.rightChild, key)
+function delete_node!(node::AVLTreeNode{K}, key) where K
+    if key < node.data
+        node.leftChild = delete_node!(node.leftChild, key)
+    elseif key > node.data
+        node.rightChild = delete_node!(node.rightChild, key)
+    else
+        if node.leftChild == nothing
+            result = node.rightChild
+            return result
+        elseif node.rightChild == nothing
+            result = node.leftChild
+            return result
         else
-            if node.leftChild == nothing
-                result = node.rightChild
-                return result
-            elseif node.rightChild == nothing
-                result = node.leftChild
-                return result
-            else 
-                result = minimum_node(node.rightChild)
-                node.data = result.data
-                node.rightChild = delete_node!(node.rightChild, result.data)
-            end 
+            result = minimum_node(node.rightChild)
+            node.data = result.data
+            node.rightChild = delete_node!(node.rightChild, result.data)
         end
-        
-        node.subsize = compute_subtree_size(node)
-        node.height = compute_height(node)
-        balance = get_balance(node)
-
-        if balance > 1
-            if get_balance(node.leftChild) >= 0
-                return right_rotate(node)
-            else
-                node.leftChild = left_rotate(node.leftChild)
-                return right_rotate(node)
-            end
-        end
-
-        if balance < -1
-            if get_balance(node.rightChild) <= 0
-                return left_rotate(node)
-            else
-                node.rightChild = right_rotate(node.rightChild)
-                return left_rotate(node)
-            end
-        end 
-        
-        return node
     end
 
+    node.subsize = compute_subtree_size(node)
+    node.height = compute_height(node)
+    balance = get_balance(node)
+
+    if balance > 1
+        if get_balance(node.leftChild) >= 0
+            return right_rotate(node)
+        else
+            node.leftChild = left_rotate(node.leftChild)
+            return right_rotate(node)
+        end
+    end
+
+    if balance < -1
+        if get_balance(node.rightChild) <= 0
+            return left_rotate(node)
+        else
+            node.rightChild = right_rotate(node.rightChild)
+            return left_rotate(node)
+        end
+    end
+
+    return node
+end
+
+function Base.delete!(tree::AVLTree{K}, d::K) where K
     # if the key is not in the tree, do nothing and return the tree
     !haskey(tree, d) && return tree
-    
+
     # if the key is present, delete it from the tree
     tree.root = delete_node!(tree.root, d)
     tree.count -= 1
@@ -244,12 +261,12 @@ function sorted_rank(tree::AVLTree{K}, key::K) where K
         else
             node = node.leftChild
         end
-    end 
+    end
     rank += (1 + get_subsize(node.leftChild))
     return rank
 end
 
-function Base.getindex(tree::AVLTree{K}, ind::Integer) where K 
+function Base.getindex(tree::AVLTree{K}, ind::Integer) where K
     @boundscheck (1 <= ind <= tree.count) || throw(BoundsError("$ind should be in between 1 and $(tree.count)"))
     function traverse_tree(node::AVLTreeNode_or_null, idx)
         if (node != nothing)
@@ -263,6 +280,6 @@ function Base.getindex(tree::AVLTree{K}, ind::Integer) where K
             end
         end
     end
-    value = traverse_tree(tree.root, ind) 
+    value = traverse_tree(tree.root, ind)
     return value
 end
