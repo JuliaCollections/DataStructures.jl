@@ -32,7 +32,7 @@ AVLTree() = AVLTree{Any}()
 
 Base.length(tree::AVLTree) = tree.count
 
-get_height(node::Union{AVLTreeNode, Nothing}) = (node == nothing) ? Int32(0) : node.height
+get_height(node::Union{AVLTreeNode, Nothing}) = (node == nothing) ? Int8(0) : node.height
 
 # balance is the difference of height between leftChild and rightChild of a node.
 function get_balance(node::Union{AVLTreeNode, Nothing})
