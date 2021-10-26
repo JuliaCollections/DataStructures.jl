@@ -57,9 +57,6 @@ module DataStructures
 
     export findkey
 
-    # _getproperty(x::Nothing, f::Symbol) = @assert false
-    _setproperty!(x::Nothing, f::Symbol, v) = @assert false
-
     include("delegate.jl")
 
     include("deque.jl")

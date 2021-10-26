@@ -17,18 +17,9 @@ end
 RBTreeNode() = RBTreeNode{Any}()
 RBTreeNode(d) = RBTreeNode{Any}(d)
 
-# _getproperty(x::RBTreeNode{K}, f) where {K} = getfield(x, f)
-# Base.getproperty(x::Union{Nothing, RBTreeNode{K}}, f::Symbol) where {K} =
-#     _getproperty(x, f)
-
 _setproperty!(x::RBTreeNode{K}, f, v) where {K} =
-    # setfield!(x, f, convert(fieldtype(typeof(x), f), v))
     setfield!(x, f, v)
-_setproperty!(x::RBTreeNode{K}, f, ::Nothing) where {K} =
-    setfield!(x, f, nothing)
-_setproperty!(x::RBTreeNode{K}, f, v::RBTreeNode{K}) where {K} =
-    setfield!(x, f, v)
-Base.setproperty!(x::Union{Nothing, RBTreeNode{K}}, f::Symbol, v) where {K} =
+Base.setproperty!(x::RBTreeNode{K}, f::Symbol, v) where {K} =
     _setproperty!(x, f, v)
 
 function create_null_node(K::Type)
