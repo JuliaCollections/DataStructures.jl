@@ -191,7 +191,7 @@ function Base.push!(tree::AVLTree{K}, key0) where K
     insert!(tree, key)
 end
 
-function delete_node!(node::AVLTreeNode{K}, key) where K
+function delete_node!(node::AVLTreeNode{K}, key::K) where K
     if key < node.data
         node.leftChild = delete_node!(node.leftChild, key)
     elseif key > node.data

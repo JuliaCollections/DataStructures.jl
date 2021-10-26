@@ -34,7 +34,7 @@ tests = ["deprecations",
          "dibit_vector",
          "swiss_dict",
          "avl_tree",
-         "red_black_tree", 
+         "red_black_tree",
          "splay_tree"
         ]
 

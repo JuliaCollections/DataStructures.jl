@@ -26,7 +26,7 @@
         end
 
         @test length(t) == 50
-        
+
         for i in 1:100
             if iseven(i)
                 @test haskey(t, i)
@@ -43,19 +43,19 @@
     end
 
     @testset "handling different cases of delete!" begin
-        t2 = AVLTree()
+        t2 = AVLTree{Int}()
         for i in 1:100000
             insert!(t2, i)
         end
 
         @test length(t2) == 100000
-        
+
         nums = rand(1:100000, 8599)
         visited = Set()
-        for num in nums 
+        for num in nums
             if !(num in visited)
                 delete!(t2, num)
-                push!(visited, num) 
+                push!(visited, num)
             end
         end
 
@@ -67,7 +67,7 @@
 
     @testset "handling different cases of insert!" begin
         nums = rand(1:100000, 1000)
-        t3 = AVLTree()
+        t3 = AVLTree{Int}()
         uniq_nums = Set(nums)
         for num in uniq_nums
             insert!(t3, num)
@@ -84,20 +84,20 @@
         @test !in('c', t4)
     end
 
-    @testset "search_node" begin 
-        t5 = AVLTree()
+    @testset "search_node" begin
+        t5 = AVLTree{Int}()
         for i in 1:32
             push!(t5, i)
         end
         n1 = search_node(t5, 21)
         @test n1.data == 21
         n2 = search_node(t5, 35)
-        @test n2.data == 32 
+        @test n2.data == 32
         n3 = search_node(t5, 0)
         @test n3.data == 1
-    end 
+    end
 
-    @testset "getindex" begin 
+    @testset "getindex" begin
         t6 = AVLTree{Int}()
         for i in 1:10
             push!(t6, i)
@@ -117,7 +117,7 @@
     end
 
     @testset "minimum_node" begin
-        t8 = AVLTree()
+        t8 = AVLTree{Int}()
         @test minimum_node(t8.root) == nothing
         for i in 1:32
             push!(t8, i)
@@ -132,7 +132,7 @@
         end
     end
 
-    @testset "rank" begin 
+    @testset "rank" begin
         t9 = AVLTree{Int}()
         for i in 1:20
             push!(t9, i)
