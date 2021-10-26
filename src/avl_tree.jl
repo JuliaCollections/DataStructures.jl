@@ -16,12 +16,10 @@ AVLTreeNode(d) = AVLTreeNode{Any}(d)
 
 AVLTreeNode_or_null{T} = Union{AVLTreeNode{T}, Nothing}
 
-_getproperty(x::Nothing, f) = @assert false
-_getproperty(x::AVLTreeNode{T}, f) where {T} = getfield(x, f)
-Base.getproperty(x::AVLTreeNode_or_null{T}, f::Symbol) where {T} =
-    _getproperty(x, f)
+# _getproperty(x::AVLTreeNode{T}, f::Symbol) where {T} = getfield(x, f)
+# Base.getproperty(x::AVLTreeNode_or_null{T}, f::Symbol) where {T} =
+#     _getproperty(x, f)
 
-_setproperty!(x::Nothing, f, v) = @assert false
 _setproperty!(x::AVLTreeNode{T}, f, v) where {T} =
     # setfield!(x, f, convert(fieldtype(typeof(x), f), v))
     setfield!(x, f, v)
@@ -30,8 +28,6 @@ _setproperty!(x::AVLTreeNode{T}, f, ::Nothing) where {T} =
 _setproperty!(x::AVLTreeNode{T}, f, v::AVLTreeNode{T}) where {T} =
     setfield!(x, f, v)
 Base.setproperty!(x::AVLTreeNode_or_null{T}, f::Symbol, v) where {T} =
-    _setproperty!(x, f, v)
-Base.setproperty!(x::AVLTreeNode_or_null{T}, f::Symbol, v::AVLTreeNode_or_null{T}) where {T} =
     _setproperty!(x, f, v)
 
 mutable struct AVLTree{T}
