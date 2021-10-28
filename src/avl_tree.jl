@@ -14,10 +14,8 @@ end
 
 AVLTreeNode(d) = AVLTreeNode{Any}(d)
 
-_setproperty!(x::AVLTreeNode{T}, f, v) where {T} =
-    setfield!(x, f, v)
 Base.setproperty!(x::AVLTreeNode{T}, f::Symbol, v) where {T} =
-    _setproperty!(x, f, v)
+    setfield!(x, f, v)
 
 AVLTreeNode_or_null{T} = Union{AVLTreeNode{T}, Nothing}
 
@@ -45,7 +43,7 @@ end
 
 # computes the height of the subtree, which basically is
 # one added the maximum of the height of the left subtree and right subtree
-compute_height(node::AVLTreeNode) = Int8(1 + max(get_height(node.leftChild), get_height(node.rightChild)))
+compute_height(node::AVLTreeNode) = Int8(1) + max(get_height(node.leftChild), get_height(node.rightChild))
 
 get_subsize(node::AVLTreeNode_or_null) = (node == nothing) ? Int32(0) : node.subsize
 

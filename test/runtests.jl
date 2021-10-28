@@ -5,9 +5,8 @@ using Serialization
 
 import DataStructures: IntSet
 
-# These fail due to setproperty! specializations for AVL and RB tree.
-# @test [] == detect_ambiguities(Core, DataStructures)
-# @test [] == detect_ambiguities(Base, DataStructures)
+@test [] == detect_ambiguities(Core, DataStructures)
+@test [] == detect_ambiguities(Base, DataStructures)
 
 tests = ["deprecations",
          "int_set",

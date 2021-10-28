@@ -11,12 +11,15 @@ end
 SplayTreeNode(d) = SplayTreeNode{Any}(d)
 SplayTreeNode() = SplayTreeNode{Any}()
 
+Base.setproperty!(x::SplayTreeNode{K}, f::Symbol, v) where {K} =
+    setfield!(x, f, v)
+
 mutable struct SplayTree{K}
     root::Union{SplayTreeNode{K}, Nothing}
     count::Int
 
     SplayTree{K}() where K = new{K}(nothing, 0)
-end 
+end
 
 Base.length(tree::SplayTree) = tree.count
 
@@ -41,7 +44,7 @@ function left_rotate!(tree::SplayTree, node_x::SplayTreeNode)
         node_y.leftChild = node_x
     end
     node_x.parent = node_y
-end    
+end
 
 function right_rotate!(tree::SplayTree, node_x::SplayTreeNode)
     node_y = node_x.leftChild
@@ -59,7 +62,7 @@ function right_rotate!(tree::SplayTree, node_x::SplayTreeNode)
     end
     node_y.rightChild = node_x
     node_x.parent = node_y
-end 
+end
 
 # The splaying operation moves node_x to the root of the tree using the series of rotations.
 function splay!(tree::SplayTree, node_x::SplayTreeNode)
@@ -71,7 +74,7 @@ function splay!(tree::SplayTree, node_x::SplayTreeNode)
             if node_x == parent.leftChild
                 # zig rotation
                 right_rotate!(tree, node_x.parent)
-            else 
+            else
                 # zag rotation
                 left_rotate!(tree, node_x.parent)
             end
@@ -104,7 +107,7 @@ function maximum_node(node::Union{SplayTreeNode, Nothing})
     return node
 end
 
-# Join operations joins two trees S and T 
+# Join operations joins two trees S and T
 # All the items in S are smaller than the items in T.
 # This is a two-step process.
 # In the first step, splay the largest node in S. This moves the largest node to the root node.
@@ -157,10 +160,10 @@ function Base.delete!(tree::SplayTree{K}, d::K) where K
     x = search_node(tree, d)
     (x == nothing) && return tree
     t = nothing
-    s = nothing 
-    
+    s = nothing
+
     splay!(tree, x)
-    
+
     if x.rightChild !== nothing
         t = x.rightChild
         t.parent = nothing
@@ -211,7 +214,7 @@ function Base.push!(tree::SplayTree{K}, d0) where K
     return tree
 end
 
-function Base.getindex(tree::SplayTree{K}, ind) where K 
+function Base.getindex(tree::SplayTree{K}, ind) where K
     @boundscheck (1 <= ind <= tree.count) || throw(KeyError("$ind should be in between 1 and $(tree.count)"))
     function traverse_tree_inorder(node::Union{SplayTreeNode, Nothing})
         if (node != nothing)
@@ -222,6 +225,6 @@ function Base.getindex(tree::SplayTree{K}, ind) where K
             return K[]
         end
     end
-    arr = traverse_tree_inorder(tree.root) 
+    arr = traverse_tree_inorder(tree.root)
     return @inbounds arr[ind]
 end

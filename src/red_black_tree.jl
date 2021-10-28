@@ -17,10 +17,8 @@ end
 RBTreeNode() = RBTreeNode{Any}()
 RBTreeNode(d) = RBTreeNode{Any}(d)
 
-_setproperty!(x::RBTreeNode{K}, f, v) where {K} =
-    setfield!(x, f, v)
 Base.setproperty!(x::RBTreeNode{K}, f::Symbol, v) where {K} =
-    _setproperty!(x, f, v)
+    setfield!(x, f, v)
 
 function create_null_node(K::Type)
     node = RBTreeNode{K}()
