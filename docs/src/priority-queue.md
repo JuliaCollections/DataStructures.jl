@@ -33,14 +33,14 @@ julia> # Julia code
 
 julia> # Insert keys with associated priorities
        pq["a"] = 10; pq["b"] = 5; pq["c"] = 15; pq
-PriorityQueue{Any,Any,Base.Order.ForwardOrdering} with 3 entries:
+PriorityQueue{Any, Any, Base.Order.ForwardOrdering} with 3 entries:
   "b" => 5
   "a" => 10
   "c" => 15
 
 julia> # Change the priority of an existing key
        pq["a"] = 0; pq
-PriorityQueue{Any,Any,Base.Order.ForwardOrdering} with 3 entries:
+PriorityQueue{Any, Any, Base.Order.ForwardOrdering} with 3 entries:
   "a" => 0
   "b" => 5
   "c" => 15
@@ -48,7 +48,7 @@ PriorityQueue{Any,Any,Base.Order.ForwardOrdering} with 3 entries:
 It is also possible to iterate over the priorities and elements of the queue in sorted order. 
 ```jldoctest
 julia> pq = PriorityQueue("a"=>2, "b"=>1, "c"=>3)
-PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
+PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
   "b" => 1
   "a" => 2
   "c" => 3
