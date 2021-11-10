@@ -15,7 +15,6 @@ module DataStructures
     export complement, complement!
 
     export Deque, Stack, Queue, CircularDeque
-    export update!
     export capacity, num_blocks, top_with_handle, sizehint!
 
     export Accumulator, counter, reset!, inc!, dec!
@@ -27,6 +26,7 @@ module DataStructures
     export MutableBinaryHeap, MutableBinaryMinHeap, MutableBinaryMaxHeap
     export heapify!, heapify, heappop!, heappush!, isheap
     export BinaryMinMaxHeap, popmin!, popmax!, popall!
+    export update!
 
     export Trie, subtrie, keys_with_prefix, partial_path, find_prefixes
 
