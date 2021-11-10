@@ -12,8 +12,8 @@ If an order is not given, the priority queue is min-ordered using
 the default comparison for `V`.
 
 A `PriorityQueue` acts like a `Dict`, mapping values to their
-priorities, with the addition of a `dequeue!` function to remove the
-lowest priority element.
+priorities. New elements are added using `push!` and retrieved
+using `popfirst!` or `popat!` based on their priority.
 
 ```jldoctest
 julia> PriorityQueue(Base.Order.Forward, "a" => 2, "b" => 3, "c" => 1)
@@ -242,7 +242,7 @@ end
 Base.push!(pq::PriorityQueue{K,V}, kv::Pair) where {K,V} = push!(pq, Pair{K,V}(kv.first, kv.second))
 
 """
-    dequeue!(pq)
+    popfirst!(pq)
 
 Remove and return the lowest priority key from a priority queue.
 
@@ -253,7 +253,7 @@ PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
   "a" => 2
   "b" => 3
 
-julia> dequeue!(a)
+julia> popfirst!(a)
 "c"
 
 julia> a
@@ -262,9 +262,9 @@ PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 2 entries:
   "b" => 3
 ```
 """
-dequeue!(pq::PriorityQueue) = dequeue_pair!(pq).first
+Base.popfirst!(pq::PriorityQueue) = dequeue_pair!(pq).first
 
-dequeue!(pq::PriorityQueue, key) = dequeue_pair!(pq, key).first
+Base.popat!(pq::PriorityQueue, key) = dequeue_pair!(pq, key).first
 
 """
     dequeue_pair!(pq)

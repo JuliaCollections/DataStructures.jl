@@ -7,9 +7,9 @@ import Base.Order.Reverse
 
     # Test dequeing in sorted order.
     function test_issorted!(pq::PriorityQueue, priorities, rev=false)
-        last = dequeue!(pq)
+        last = popfirst!(pq)
         while !isempty(pq)
-            value = dequeue!(pq)
+            value = popfirst!(pq)
             if !rev
                 @test priorities[last] <= priorities[value]
             else
@@ -23,7 +23,7 @@ import Base.Order.Reverse
         i = 0
         while !isempty(pq)
             krqst =  keys[i+=1]
-            krcvd = dequeue!(pq, krqst)
+            krcvd = popat!(pq, krqst)
             @test krcvd == krqst
         end
     end
@@ -110,13 +110,13 @@ import Base.Order.Reverse
     @testset "PriorityQueueMethods" begin
         pq1 = PriorityQueue('a'=>1, 'b'=>2)
 
-        @testset "peek/get/dequeue!/get!" begin
+        @testset "peek/get/popfirst!/get!" begin
             @test peek(pq1) == ('a'=>1)
             @test get(pq1, 'a', 0) == 1
             @test get(pq1, 'c', 0) == 0
             @test get!(pq1, 'b', 20) == 2
-            @test dequeue!(pq1) == 'a'
-            @test dequeue!(pq1) == 'b'
+            @test popfirst!(pq1) == 'a'
+            @test popfirst!(pq1) == 'b'
             @test get!(pq1, 'c', 0) == 0
             @test peek(pq1) == ('c'=>0)
             @test get!(pq1, 'c', 3) == 0
@@ -190,15 +190,15 @@ import Base.Order.Reverse
 
         @testset "dequeuing" begin
             pq = PriorityQueue(priorities)
-            @test_throws KeyError dequeue!(pq, 0)
+            @test_throws KeyError popat!(pq, 0)
 
-            @test 10 == dequeue!(pq, 10)
+            @test 10 == popat!(pq, 10)
             while !isempty(pq)
-                @test 10 != dequeue!(pq)
+                @test 10 != popfirst!(pq)
             end
 
             pq = PriorityQueue(1.0 => 1)
-            @test dequeue!(pq, 1.0f0) isa Float64
+            @test popat!(pq, 1.0f0) isa Float64
         end
 
         @testset "dequeuing pair" begin
