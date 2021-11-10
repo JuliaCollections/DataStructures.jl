@@ -274,7 +274,13 @@ function Base.popfirst!(pq::PriorityQueue)
     return x
 end
 
-function Base.popat!(pq::PriorityQueue, key)
+if isdefined(Base, :popat!)
+    Base.popat!(pq::PriorityQueue, key) = _popat!(pq, key)
+else
+    popat!(pq::PriorityQueue, key) = _popat!(pq, key)
+end
+
+function _popat!(pq::PriorityQueue, key)
     idx = pq.index[key]
     force_up!(pq, idx)
     popfirst!(pq)
