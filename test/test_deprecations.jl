@@ -42,7 +42,7 @@ end
     end
 end
 
-@testset "enqueue! dequeue!" begin
+@testset "Queue enqueue! dequeue!" begin
     s = Queue{Int}(5)
     n = 100
 
@@ -71,6 +71,35 @@ end
         else
             @test_throws ArgumentError first(s)
             @test_throws ArgumentError last(s)
+        end
+        @test isempty(s) == (i == n)
+        @test length(s) == n - i
+    end
+end
+
+@testset "PriorityQueue enqueue! dequeue!" begin
+    s = PriorityQueue{Int,Int}()
+    n = 100
+
+    @test length(s) == 0
+    @test isempty(s)
+    @test_throws ArgumentError first(s)
+    @test_throws BoundsError dequeue!(s)
+
+    for i = 1 : n
+        enqueue!(s, i=>i)
+        @test first(s) == (1=>1)
+        @test !isempty(s)
+        @test length(s) == i
+    end
+
+    for i = 1 : n
+        x = dequeue!(s)
+        @test x == i
+        if i < n
+            @test first(s) == (i+1 => i+1)
+        else
+            @test_throws ArgumentError first(s)
         end
         @test isempty(s) == (i == n)
         @test length(s) == n - i
