@@ -7,9 +7,9 @@ import Base.Order.Reverse
 
     # Test dequeing in sorted order.
     function test_issorted!(pq::PriorityQueue, priorities, rev=false)
-        last = popfirst!(pq)
+        last, _ = popfirst!(pq)
         while !isempty(pq)
-            value = popfirst!(pq)
+            value, _ = popfirst!(pq)
             if !rev
                 @test priorities[last] <= priorities[value]
             else
@@ -23,7 +23,7 @@ import Base.Order.Reverse
         i = 0
         while !isempty(pq)
             krqst =  keys[i+=1]
-            krcvd = popat!(pq, krqst)
+            krcvd, _ = popat!(pq, krqst)
             @test krcvd == krqst
         end
     end
@@ -115,8 +115,8 @@ import Base.Order.Reverse
             @test get(pq1, 'a', 0) == 1
             @test get(pq1, 'c', 0) == 0
             @test get!(pq1, 'b', 20) == 2
-            @test popfirst!(pq1) == 'a'
-            @test popfirst!(pq1) == 'b'
+            @test popfirst!(pq1).first == 'a'
+            @test popfirst!(pq1).first == 'b'
             @test get!(pq1, 'c', 0) == 0
             @test peek(pq1) == ('c'=>0)
             @test get!(pq1, 'c', 3) == 0
@@ -192,21 +192,22 @@ import Base.Order.Reverse
             pq = PriorityQueue(priorities)
             @test_throws KeyError popat!(pq, 0)
 
-            @test 10 == popat!(pq, 10)
+            v, _ = popat!(pq, 10)
+            @test v == 10
             while !isempty(pq)
-                @test 10 != popfirst!(pq)
+                v, _ = popfirst!(pq)
+                @test v != 10
             end
 
             pq = PriorityQueue(1.0 => 1)
-            @test popat!(pq, 1.0f0) isa Float64
-        end
+            @test popat!(pq, 1.0f0) isa eltype(pq)
+            @test eltype(pq) == Pair{Float64, Int64}
 
-        @testset "dequeuing pair" begin
             priorities2 = Dict(zip('a':'e', 5:-1:1))
             pq = PriorityQueue(priorities2)
-            @test_throws KeyError dequeue_pair!(pq, 'g')
-            @test dequeue_pair!(pq) == ('e'=> 1)
-            @test dequeue_pair!(pq, 'b') == ('b'=>4)
+            @test_throws KeyError popat!(pq, 'g')
+            @test popfirst!(pq) == ('e'=> 1)
+            @test popat!(pq, 'b') == ('b'=>4)
             @test length(pq) == 3
         end
 

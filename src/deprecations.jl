@@ -12,5 +12,7 @@ Base.@deprecate_binding IntDisjointSets IntDisjointSet
 @deprecate enqueue!(q::PriorityQueue, x) Base.push!(q, x)
 @deprecate enqueue!(q::PriorityQueue, k, v) Base.push!(q, k=>v)
 @deprecate dequeue!(q::Queue) Base.popfirst!(q)
-@deprecate dequeue!(q::PriorityQueue) Base.popfirst!(q)
-@deprecate dequeue!(q::PriorityQueue, x) Base.popat!(q, x)
+@deprecate dequeue!(q::PriorityQueue) Base.popfirst!(q).first # maybe better: `val, _ = popfirst!(pq)`
+@deprecate dequeue!(q::PriorityQueue, x) Base.popat!(q, x).first
+@deprecate dequeue_pair!(q::PriorityQueue) Base.popfirst!(q)
+@deprecate dequeue_pair!(q::PriorityQueue, key) Base.popat!(q, key)
