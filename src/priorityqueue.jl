@@ -7,7 +7,7 @@
     PriorityQueue{K, V}([ord])
 
 Construct a new [`PriorityQueue`](@ref), with keys of type
-`K` and values/priorites of type `V`.
+`K` and values/priorities of type `V`.
 If an order is not given, the priority queue is min-ordered using
 the default comparison for `V`.
 
@@ -183,14 +183,14 @@ end
 function Base.get!(pq::PriorityQueue, key, default)
     i = get(pq.index, key, 0)
     if i == 0
-        enqueue!(pq, key, default)
+        push!(pq, key=>default)
         return default
     else
         return pq.xs[i].second
     end
 end
 
-# Change the priority of an existing element, or equeue it if it isn't present.
+# Change the priority of an existing element, or enqueue it if it isn't present.
 function Base.setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
     i = get(pq.index, key, 0)
     if i != 0
@@ -202,24 +202,24 @@ function Base.setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
             percolate_up!(pq, i)
         end
     else
-        enqueue!(pq, key, value)
+        push!(pq, key=>value)
     end
     return value
 end
 
 """
-    enqueue!(pq, k=>v)
+    push!(pq, k=>v)
 
 Insert the a key `k` into a priority queue `pq` with priority `v`.
 
 ```jldoctest
-julia> a = PriorityQueue(PriorityQueue("a"=>1, "b"=>2, "c"=>3))
+julia> a = PriorityQueue("a"=>1, "b"=>2, "c"=>3)
 PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
   "a" => 1
   "b" => 2
   "c" => 3
 
-julia> enqueue!(a, "d"=>4)
+julia> push!(a, "d"=>4)
 PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 4 entries:
   "a" => 1
   "b" => 2
@@ -227,7 +227,7 @@ PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 4 entries:
   "d" => 4
 ```
 """
-function enqueue!(pq::PriorityQueue{K,V}, pair::Pair{K,V}) where {K,V}
+function Base.push!(pq::PriorityQueue{K,V}, pair::Pair{K,V}) where {K,V}
     key = pair.first
     if haskey(pq, key)
         throw(ArgumentError("PriorityQueue keys must be unique"))
@@ -239,14 +239,7 @@ function enqueue!(pq::PriorityQueue{K,V}, pair::Pair{K,V}) where {K,V}
     return pq
 end
 
-"""
-    enqueue!(pq, k, v)
-
-Insert the a key `k` into a priority queue `pq` with priority `v`.
-
-"""
-enqueue!(pq::PriorityQueue, key, value) = enqueue!(pq, key=>value)
-enqueue!(pq::PriorityQueue{K,V}, kv) where {K,V} = enqueue!(pq, Pair{K,V}(kv.first, kv.second))
+Base.push!(pq::PriorityQueue{K,V}, kv::Pair) where {K,V} = push!(pq, Pair{K,V}(kv.first, kv.second))
 
 """
     dequeue!(pq)

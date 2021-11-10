@@ -136,30 +136,30 @@ import Base.Order.Reverse
         @testset "enqueue error throw" begin
             ks, vs = 1:n, rand(1:pmax, n)
             pq = PriorityQueue(zip(ks, vs))
-            @test_throws ArgumentError enqueue!(pq, 1, 10)
+            @test_throws ArgumentError push!(pq, 1=>10)
         end
 
         @testset "Iteration" begin
             pq = PriorityQueue(priorities)
             pq2 = PriorityQueue()
             for kv in pq
-                enqueue!(pq2, kv)
+                push!(pq2, kv)
             end
             @test pq == pq2
         end
 
-        @testset "enqueing pairs via enqueue!" begin
+        @testset "enqueing pairs via push!" begin
             pq = PriorityQueue()
             for kv in priorities
-                enqueue!(pq, kv)
+                push!(pq, kv)
             end
             test_issorted!(pq, priorities)
         end
 
-        @testset "enqueing values via enqueue!" begin
+        @testset "enqueing values via push!" begin
             pq = PriorityQueue()
             for (k, v) in priorities
-                enqueue!(pq, k, v)
+                push!(pq, k=>v)
             end
             test_issorted!(pq, priorities)
         end
@@ -222,7 +222,7 @@ import Base.Order.Reverse
             @test !isempty(pq)
             empty!(pq)
             @test isempty(pq)
-            enqueue!(pq, "a"=>2)
+            push!(pq, "a"=>2)
             @test length(pq) == 1
         end
     end
