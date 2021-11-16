@@ -63,37 +63,37 @@ end
 """
     find_root!(s::IntDisjointSet{T}, x::T)
 
-Find the root element of the subset that contains an member x.
-Path compression is implemented here.
+Find the root element of the subset that contains an member `x`.
+Path compression happens here.
 """
 find_root!(s::IntDisjointSet{T}, x::T) where {T<:Integer} = find_root_impl!(s.parents, x)
 
 """
     in_same_set(s::IntDisjointSet{T}, x::T, y::T)
 
-Returns `true` if `x` and `y` belong to the same subset in `s` and `false` otherwise.
+Returns `true` if `x` and `y` belong to the same subset in `s`, and `false` otherwise.
 """
 in_same_set(s::IntDisjointSet{T}, x::T, y::T) where {T<:Integer} = find_root!(s, x) == find_root!(s, y)
 
 """
     union!(s::IntDisjointSet{T}, x::T, y::T)
 
-Merge the subset containing x and that containing y into one
+Merge the subset containing `x` and that containing `y` into one
 and return the root of the new set.
 """
 function Base.union!(s::IntDisjointSet{T}, x::T, y::T) where {T<:Integer}
     parents = s.parents
     xroot = find_root_impl!(parents, x)
     yroot = find_root_impl!(parents, y)
-    xroot != yroot ? root_union!(s, xroot, yroot) : xroot
+    return xroot != yroot ? root_union!(s, xroot, yroot) : xroot
 end
 
 """
     root_union!(s::IntDisjointSet{T}, x::T, y::T)
 
 Form a new set that is the union of the two sets whose root elements are
-x and y and return the root of the new set.
-Assume x ≠ y (unsafe).
+`x` and `y` and return the root of the new set.
+Assume `x ≠ y` (unsafe).
 """
 function root_union!(s::IntDisjointSet{T}, x::T, y::T) where {T<:Integer}
     parents = s.parents
@@ -114,7 +114,7 @@ end
 """
     push!(s::IntDisjointSet{T})
 
-Make a new subset with an automatically chosen new element x.
+Make a new subset with an automatically chosen new element `x`.
 Returns the new element. Throw an `ArgumentError` if the
 capacity of the set would be exceeded.
 """
@@ -131,9 +131,9 @@ end
 """
     DisjointSet{T}(xs)
 
-A forest of disjoint sets of arbitrary value type T.
+A forest of disjoint sets of arbitrary value type `T`.
 
-It is a wrapper of IntDisjointSet{Int}, which uses a
+It is a wrapper of `IntDisjointSet{Int}`, which uses a
 dictionary to map the input value to an internal index.
 """
 mutable struct DisjointSet{T} <: AbstractSet{T}
@@ -145,7 +145,7 @@ mutable struct DisjointSet{T} <: AbstractSet{T}
     function DisjointSet{T}(xs) where T    # xs must be iterable
         imap = Dict{T,Int}()
         rmap = Vector{T}()
-        n = length(xs)
+        n = length(xs)::Int
         sizehint!(imap, n)
         sizehint!(rmap, n)
         id = 0
@@ -153,7 +153,7 @@ mutable struct DisjointSet{T} <: AbstractSet{T}
             imap[x] = (id += 1)
             push!(rmap,x)
         end
-        new{T}(imap, rmap, IntDisjointSet(n))
+        return new{T}(imap, rmap, IntDisjointSet(n))
     end
 end
 
@@ -188,21 +188,21 @@ end
 """
     find_root!{T}(s::DisjointSet{T}, x::T)
 
-Finds the root element of the subset in `s` which has the element `x` as a member.
+Find the root element of the subset in `s` which has the element `x` as a member.
 """
 find_root!(s::DisjointSet{T}, x::T) where {T} = s.revmap[find_root!(s.internal, s.intmap[x])]
 
 """
     in_same_set(s::DisjointSet{T}, x::T, y::T)
 
-Returns `true` if `x` and `y` belong to the same subset in `s` and `false` otherwise.
+Return `true` if `x` and `y` belong to the same subset in `s`, and `false` otherwise.
 """
 in_same_set(s::DisjointSet{T}, x::T, y::T) where {T} = in_same_set(s.internal, s.intmap[x], s.intmap[y])
 
 """
     union!(s::DisjointSet{T}, x::T, y::T)
 
-Merge the subset containing x and that containing y into one
+Merge the subset containing `x` and that containing `y` into one
 and return the root of the new set.
 """
 Base.union!(s::DisjointSet{T}, x::T, y::T) where {T} = s.revmap[union!(s.internal, s.intmap[x], s.intmap[y])]
@@ -211,16 +211,15 @@ Base.union!(s::DisjointSet{T}, x::T, y::T) where {T} = s.revmap[union!(s.interna
     root_union!(s::DisjointSet{T}, x::T, y::T)
 
 Form a new set that is the union of the two sets whose root elements are
-x and y and return the root of the new set.
-Assume x ≠ y (unsafe).
+`x` and `y` and return the root of the new set.
+Assume `x ≠ y` (unsafe).
 """
 root_union!(s::DisjointSet{T}, x::T, y::T) where {T} = s.revmap[root_union!(s.internal, s.intmap[x], s.intmap[y])]
 
 """
     push!(s::DisjointSet{T}, x::T)
 
-Make a new subset with an automatically chosen new element x.
-Returns the new element.
+Make a new subset containing `x` if any existing subset of `s` does not contain `x`.
 """
 function Base.push!(s::DisjointSet{T}, x::T) where T
     haskey(s.intmap, x) && return x
