@@ -117,12 +117,12 @@ Base.isempty(pq::PriorityQueue) = isempty(pq.xs)
 Base.haskey(pq::PriorityQueue, key) = haskey(pq.index, key)
 
 """
-    peek(pq)
+    first(pq)
 
 Return the lowest priority key and value from a priority queue without removing that
-key from the queue.
+pair from the queue.
 """
-Base.peek(pq::PriorityQueue) = pq.xs[1]
+Base.first(pq::PriorityQueue) = first(pq.xs)
 
 function percolate_down!(pq::PriorityQueue, i::Integer)
     x = pq.xs[i]

@@ -83,7 +83,7 @@ end
 
     @test length(s) == 0
     @test isempty(s)
-    @test_throws ArgumentError first(s)
+    @test_throws BoundsError first(s)
     @test_throws BoundsError dequeue!(s)
 
     for i = 1 : n
@@ -99,9 +99,20 @@ end
         if i < n
             @test first(s) == (i+1 => i+1)
         else
-            @test_throws ArgumentError first(s)
+            @test_throws BoundsError first(s)
         end
         @test isempty(s) == (i == n)
         @test length(s) == n - i
     end
+end
+
+@testset "peek" begin
+    pq = PriorityQueue{Int,Int}()
+    push!(pq, 1 => 1)
+    push!(pq, 2 => 2)
+    @test peek(pq) == (1=>1)
+    pq = PriorityQueue{Int,Int}()
+    push!(pq, 2 => 2)
+    push!(pq, 1 => 1)
+    @test peek(pq) == (1=>1)
 end

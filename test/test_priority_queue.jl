@@ -77,17 +77,17 @@ import Base.Order.Reverse
         @testset "construction from pairs" begin
             @testset "pq9" begin
                 pq9 = PriorityQueue('a'=>1, 'b'=>2)
-                @test peek(pq9) == ('a'=>1)
+                @test first(pq9) == ('a'=>1)
             end
 
             @testset "pq10" begin
                 pq10 = PriorityQueue(Reverse, 'a'=>1, 'b'=>2)
-                @test peek(pq10) == ('b'=>2)
+                @test first(pq10) == ('b'=>2)
             end
 
             @testset "pq11" begin
                 pq11 = PriorityQueue(Pair{Char}['a'=>1,'b'=>2])
-                @test peek(pq11) == ('a'=>1)
+                @test first(pq11) == ('a'=>1)
             end
         end
 
@@ -110,15 +110,15 @@ import Base.Order.Reverse
     @testset "PriorityQueueMethods" begin
         pq1 = PriorityQueue('a'=>1, 'b'=>2)
 
-        @testset "peek/get/popfirst!/get!" begin
-            @test peek(pq1) == ('a'=>1)
+        @testset "first/get/popfirst!/get!" begin
+            @test first(pq1) == ('a'=>1)
             @test get(pq1, 'a', 0) == 1
             @test get(pq1, 'c', 0) == 0
             @test get!(pq1, 'b', 20) == 2
             @test popfirst!(pq1).first == 'a'
             @test popfirst!(pq1).first == 'b'
             @test get!(pq1, 'c', 0) == 0
-            @test peek(pq1) == ('c'=>0)
+            @test first(pq1) == ('c'=>0)
             @test get!(pq1, 'c', 3) == 0
         end
 
@@ -127,10 +127,10 @@ import Base.Order.Reverse
         ks, vs = 1:n, rand(1:pmax, n)
         priorities = Dict(zip(ks, vs))
 
-        @testset "peek" begin
+        @testset "first" begin
             pq1 = PriorityQueue(priorities)
             lowpri = findmin(vs)
-            @test peek(pq1)[2] == pq1[ks[lowpri[2]]]
+            @test first(pq1)[2] == pq1[ks[lowpri[2]]]
         end
 
         @testset "enqueue error throw" begin

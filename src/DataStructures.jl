@@ -102,7 +102,7 @@ module DataStructures
     export status
     export deref_key, deref_value, deref, advance, regress
 
-    export PriorityQueue, peek
+    export PriorityQueue
 
     include("priorityqueue.jl")
     include("sparse_int_set.jl")
