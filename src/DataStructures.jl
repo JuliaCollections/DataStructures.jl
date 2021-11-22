@@ -5,8 +5,9 @@ module DataStructures
                 isbitsunion, isiterable, dict_with_eltype, KeySet, Callable, _tablesz,
                 findnextnot, unsafe_getindex, unsafe_setindex!, peek
 
-    export popat!  # Export for old version of julia where Base doesn't export this
-
+    # Exports for old version of julia where Base doesn't export this
+    export peek
+    export popat!
 
     using Compat # Provides Base.Order.ReverseOrdering(). May remove this line with julia 1.4
     using OrderedCollections
