@@ -7,13 +7,13 @@
     PriorityQueue{K, V}([ord])
 
 Construct a new [`PriorityQueue`](@ref), with keys of type
-`K` and values/priorites of type `V`.
+`K` and values/priorities of type `V`.
 If an order is not given, the priority queue is min-ordered using
 the default comparison for `V`.
 
 A `PriorityQueue` acts like a `Dict`, mapping values to their
-priorities, with the addition of a `dequeue!` function to remove the
-lowest priority element.
+priorities. New elements are added using `push!` and retrieved
+using `popfirst!` or `popat!` based on their priority.
 
 ```jldoctest
 julia> PriorityQueue(Base.Order.Forward, "a" => 2, "b" => 3, "c" => 1)
@@ -117,12 +117,12 @@ Base.isempty(pq::PriorityQueue) = isempty(pq.xs)
 Base.haskey(pq::PriorityQueue, key) = haskey(pq.index, key)
 
 """
-    peek(pq)
+    first(pq)
 
 Return the lowest priority key and value from a priority queue without removing that
-key from the queue.
+pair from the queue.
 """
-Base.peek(pq::PriorityQueue) = pq.xs[1]
+Base.first(pq::PriorityQueue) = first(pq.xs)
 
 function percolate_down!(pq::PriorityQueue, i::Integer)
     x = pq.xs[i]
@@ -183,14 +183,14 @@ end
 function Base.get!(pq::PriorityQueue, key, default)
     i = get(pq.index, key, 0)
     if i == 0
-        enqueue!(pq, key, default)
+        push!(pq, key=>default)
         return default
     else
         return pq.xs[i].second
     end
 end
 
-# Change the priority of an existing element, or equeue it if it isn't present.
+# Change the priority of an existing element, or enqueue it if it isn't present.
 function Base.setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
     i = get(pq.index, key, 0)
     if i != 0
@@ -202,24 +202,24 @@ function Base.setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
             percolate_up!(pq, i)
         end
     else
-        enqueue!(pq, key, value)
+        push!(pq, key=>value)
     end
     return value
 end
 
 """
-    enqueue!(pq, k=>v)
+    push!(pq, k=>v)
 
 Insert the a key `k` into a priority queue `pq` with priority `v`.
 
 ```jldoctest
-julia> a = PriorityQueue(PriorityQueue("a"=>1, "b"=>2, "c"=>3))
+julia> a = PriorityQueue("a"=>1, "b"=>2, "c"=>3)
 PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
   "a" => 1
   "b" => 2
   "c" => 3
 
-julia> enqueue!(a, "d"=>4)
+julia> push!(a, "d"=>4)
 PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 4 entries:
   "a" => 1
   "b" => 2
@@ -227,7 +227,7 @@ PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 4 entries:
   "d" => 4
 ```
 """
-function enqueue!(pq::PriorityQueue{K,V}, pair::Pair{K,V}) where {K,V}
+function Base.push!(pq::PriorityQueue{K,V}, pair::Pair{K,V}) where {K,V}
     key = pair.first
     if haskey(pq, key)
         throw(ArgumentError("PriorityQueue keys must be unique"))
@@ -239,44 +239,12 @@ function enqueue!(pq::PriorityQueue{K,V}, pair::Pair{K,V}) where {K,V}
     return pq
 end
 
-"""
-    enqueue!(pq, k, v)
-
-Insert the a key `k` into a priority queue `pq` with priority `v`.
+Base.push!(pq::PriorityQueue{K,V}, kv::Pair) where {K,V} = push!(pq, Pair{K,V}(kv.first, kv.second))
 
 """
-enqueue!(pq::PriorityQueue, key, value) = enqueue!(pq, key=>value)
-enqueue!(pq::PriorityQueue{K,V}, kv) where {K,V} = enqueue!(pq, Pair{K,V}(kv.first, kv.second))
+    popfirst!(pq)
 
-"""
-    dequeue!(pq)
-
-Remove and return the lowest priority key from a priority queue.
-
-```jldoctest
-julia> a = PriorityQueue(Base.Order.Forward, ["a" => 2, "b" => 3, "c" => 1])
-PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
-  "c" => 1
-  "a" => 2
-  "b" => 3
-
-julia> dequeue!(a)
-"c"
-
-julia> a
-PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 2 entries:
-  "a" => 2
-  "b" => 3
-```
-"""
-dequeue!(pq::PriorityQueue) = dequeue_pair!(pq).first
-
-dequeue!(pq::PriorityQueue, key) = dequeue_pair!(pq, key).first
-
-"""
-    dequeue_pair!(pq)
-
-Remove and return a the lowest priority key and value from a priority queue as a pair.
+Remove and return the lowest priority key and value from a priority queue as a pair.
 
 ```jldoctest
 julia> a = PriorityQueue(Base.Order.Forward, "a" => 2, "b" => 3, "c" => 1)
@@ -285,7 +253,7 @@ PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
   "a" => 2
   "b" => 3
 
-julia> dequeue_pair!(a)
+julia> popfirst!(a)
 "c" => 1
 
 julia> a
@@ -294,7 +262,7 @@ PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 2 entries:
   "b" => 3
 ```
 """
-function dequeue_pair!(pq::PriorityQueue)
+function Base.popfirst!(pq::PriorityQueue)
     x = pq.xs[1]
     y = pop!(pq.xs)
     if !isempty(pq)
@@ -306,10 +274,14 @@ function dequeue_pair!(pq::PriorityQueue)
     return x
 end
 
-function dequeue_pair!(pq::PriorityQueue, key)
+if isdefined(Base, :popat!)  # We will overload if it is defined, else we define on our own
+    import Base: popat!
+end
+
+function popat!(pq::PriorityQueue, key)
     idx = pq.index[key]
     force_up!(pq, idx)
-    dequeue_pair!(pq)
+    popfirst!(pq)
 end
 
 """
@@ -330,7 +302,7 @@ PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 2 entries:
 ```
 """
 function Base.delete!(pq::PriorityQueue, key)
-    dequeue_pair!(pq, key)
+    popat!(pq, key)
     return pq
 end
 
@@ -386,7 +358,7 @@ function Base.iterate(pq::PriorityQueue, ordered::Bool=true)
     if ordered
         isempty(pq) && return nothing
         state = _PQIteratorState(PriorityQueue(copy(pq.xs), pq.o, copy(pq.index)))
-        return dequeue_pair!(state.pq), state
+        return popfirst!(state.pq), state
     else
         _iterate(pq, iterate(pq.index))
     end
@@ -394,7 +366,7 @@ end
 
 function Base.iterate(pq::PriorityQueue, state::_PQIteratorState)
     isempty(state.pq) && return nothing
-    return dequeue_pair!(state.pq), state
+    return popfirst!(state.pq), state
 end
 
 Base.iterate(pq::PriorityQueue, i) = _iterate(pq, iterate(pq.index, i))

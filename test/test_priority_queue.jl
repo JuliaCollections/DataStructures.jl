@@ -7,9 +7,9 @@ import Base.Order.Reverse
 
     # Test dequeing in sorted order.
     function test_issorted!(pq::PriorityQueue, priorities, rev=false)
-        last = dequeue!(pq)
+        last, _ = popfirst!(pq)
         while !isempty(pq)
-            value = dequeue!(pq)
+            value, _ = popfirst!(pq)
             if !rev
                 @test priorities[last] <= priorities[value]
             else
@@ -23,7 +23,7 @@ import Base.Order.Reverse
         i = 0
         while !isempty(pq)
             krqst =  keys[i+=1]
-            krcvd = dequeue!(pq, krqst)
+            krcvd, _ = popat!(pq, krqst)
             @test krcvd == krqst
         end
     end
@@ -77,17 +77,17 @@ import Base.Order.Reverse
         @testset "construction from pairs" begin
             @testset "pq9" begin
                 pq9 = PriorityQueue('a'=>1, 'b'=>2)
-                @test peek(pq9) == ('a'=>1)
+                @test first(pq9) == ('a'=>1)
             end
 
             @testset "pq10" begin
                 pq10 = PriorityQueue(Reverse, 'a'=>1, 'b'=>2)
-                @test peek(pq10) == ('b'=>2)
+                @test first(pq10) == ('b'=>2)
             end
 
             @testset "pq11" begin
                 pq11 = PriorityQueue(Pair{Char}['a'=>1,'b'=>2])
-                @test peek(pq11) == ('a'=>1)
+                @test first(pq11) == ('a'=>1)
             end
         end
 
@@ -110,15 +110,15 @@ import Base.Order.Reverse
     @testset "PriorityQueueMethods" begin
         pq1 = PriorityQueue('a'=>1, 'b'=>2)
 
-        @testset "peek/get/dequeue!/get!" begin
-            @test peek(pq1) == ('a'=>1)
+        @testset "first/get/popfirst!/get!" begin
+            @test first(pq1) == ('a'=>1)
             @test get(pq1, 'a', 0) == 1
             @test get(pq1, 'c', 0) == 0
             @test get!(pq1, 'b', 20) == 2
-            @test dequeue!(pq1) == 'a'
-            @test dequeue!(pq1) == 'b'
+            @test popfirst!(pq1).first == 'a'
+            @test popfirst!(pq1).first == 'b'
             @test get!(pq1, 'c', 0) == 0
-            @test peek(pq1) == ('c'=>0)
+            @test first(pq1) == ('c'=>0)
             @test get!(pq1, 'c', 3) == 0
         end
 
@@ -127,39 +127,39 @@ import Base.Order.Reverse
         ks, vs = 1:n, rand(1:pmax, n)
         priorities = Dict(zip(ks, vs))
 
-        @testset "peek" begin
+        @testset "first" begin
             pq1 = PriorityQueue(priorities)
             lowpri = findmin(vs)
-            @test peek(pq1)[2] == pq1[ks[lowpri[2]]]
+            @test first(pq1)[2] == pq1[ks[lowpri[2]]]
         end
 
         @testset "enqueue error throw" begin
             ks, vs = 1:n, rand(1:pmax, n)
             pq = PriorityQueue(zip(ks, vs))
-            @test_throws ArgumentError enqueue!(pq, 1, 10)
+            @test_throws ArgumentError push!(pq, 1=>10)
         end
 
         @testset "Iteration" begin
             pq = PriorityQueue(priorities)
             pq2 = PriorityQueue()
             for kv in pq
-                enqueue!(pq2, kv)
+                push!(pq2, kv)
             end
             @test pq == pq2
         end
 
-        @testset "enqueing pairs via enqueue!" begin
+        @testset "enqueing pairs via push!" begin
             pq = PriorityQueue()
             for kv in priorities
-                enqueue!(pq, kv)
+                push!(pq, kv)
             end
             test_issorted!(pq, priorities)
         end
 
-        @testset "enqueing values via enqueue!" begin
+        @testset "enqueing values via push!" begin
             pq = PriorityQueue()
             for (k, v) in priorities
-                enqueue!(pq, k, v)
+                push!(pq, k=>v)
             end
             test_issorted!(pq, priorities)
         end
@@ -190,23 +190,24 @@ import Base.Order.Reverse
 
         @testset "dequeuing" begin
             pq = PriorityQueue(priorities)
-            @test_throws KeyError dequeue!(pq, 0)
+            @test_throws KeyError popat!(pq, 0)
 
-            @test 10 == dequeue!(pq, 10)
+            v, _ = popat!(pq, 10)
+            @test v == 10
             while !isempty(pq)
-                @test 10 != dequeue!(pq)
+                v, _ = popfirst!(pq)
+                @test v != 10
             end
 
             pq = PriorityQueue(1.0 => 1)
-            @test dequeue!(pq, 1.0f0) isa Float64
-        end
+            @test popat!(pq, 1.0f0) isa eltype(pq)
+            @test eltype(pq) == Pair{Float64, Int64}
 
-        @testset "dequeuing pair" begin
             priorities2 = Dict(zip('a':'e', 5:-1:1))
             pq = PriorityQueue(priorities2)
-            @test_throws KeyError dequeue_pair!(pq, 'g')
-            @test dequeue_pair!(pq) == ('e'=> 1)
-            @test dequeue_pair!(pq, 'b') == ('b'=>4)
+            @test_throws KeyError popat!(pq, 'g')
+            @test popfirst!(pq) == ('e'=> 1)
+            @test popat!(pq, 'b') == ('b'=>4)
             @test length(pq) == 3
         end
 
@@ -222,7 +223,7 @@ import Base.Order.Reverse
             @test !isempty(pq)
             empty!(pq)
             @test isempty(pq)
-            enqueue!(pq, "a"=>2)
+            push!(pq, "a"=>2)
             @test length(pq) == 1
         end
     end

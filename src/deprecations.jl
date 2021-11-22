@@ -9,4 +9,16 @@ Base.@deprecate_binding IntDisjointSets IntDisjointSet
 @deprecate DisjointSets(xs...) DisjointSet(xs)
 # Enqueue and dequeue deprecations
 @deprecate enqueue!(q::Queue, x) Base.push!(q, x)
+@deprecate enqueue!(q::PriorityQueue, x) Base.push!(q, x)
+@deprecate enqueue!(q::PriorityQueue, k, v) Base.push!(q, k=>v)
 @deprecate dequeue!(q::Queue) Base.popfirst!(q)
+@deprecate dequeue!(q::PriorityQueue) Base.popfirst!(q).first # maybe better: `val, _ = popfirst!(pq)`
+@deprecate dequeue!(q::PriorityQueue, x) popat!(q, x).first
+@deprecate dequeue_pair!(q::PriorityQueue) Base.popfirst!(q)
+@deprecate dequeue_pair!(q::PriorityQueue, key) popat!(q, key)
+
+function Base.peek(q::PriorityQueue)
+    Expr(:meta, :noinline)
+    Base.depwarn("`peek(q::PriorityQueue)` is deprecated, use `first(q)` instead.", :peek)
+    first(q)
+end

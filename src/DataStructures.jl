@@ -5,6 +5,9 @@ module DataStructures
                 isbitsunion, isiterable, dict_with_eltype, KeySet, Callable, _tablesz,
                 findnextnot, unsafe_getindex, unsafe_setindex!, peek
 
+    # Exports for old version of julia where Base doesn't export this
+    export peek
+    export popat!
 
     using Compat # Provides Base.Order.ReverseOrdering(). May remove this line with julia 1.4
     using OrderedCollections
@@ -15,7 +18,6 @@ module DataStructures
     export complement, complement!
 
     export Deque, Stack, Queue, CircularDeque
-    export enqueue!, dequeue!, dequeue_pair!, update!
     export capacity, num_blocks, top_with_handle, sizehint!
 
     export Accumulator, counter, reset!, inc!, dec!
@@ -27,6 +29,7 @@ module DataStructures
     export MutableBinaryHeap, MutableBinaryMinHeap, MutableBinaryMaxHeap
     export heapify!, heapify, heappop!, heappush!, isheap
     export BinaryMinMaxHeap, popmin!, popmax!, popall!
+    export update!
 
     export Trie, subtrie, keys_with_prefix, partial_path, find_prefixes
 
@@ -100,7 +103,7 @@ module DataStructures
     export status
     export deref_key, deref_value, deref, advance, regress
 
-    export PriorityQueue, peek
+    export PriorityQueue
 
     include("priorityqueue.jl")
     include("sparse_int_set.jl")
