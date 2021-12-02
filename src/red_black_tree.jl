@@ -17,6 +17,9 @@ end
 RBTreeNode() = RBTreeNode{Any}()
 RBTreeNode(d) = RBTreeNode{Any}(d)
 
+Base.setproperty!(x::RBTreeNode{K}, f::Symbol, v) where {K} =
+    setfield!(x, f, v)
+
 function create_null_node(K::Type)
     node = RBTreeNode{K}()
     node.color = false

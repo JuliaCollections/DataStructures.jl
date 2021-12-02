@@ -5,7 +5,8 @@ using Serialization
 
 import DataStructures: IntSet
 
-@test [] == detect_ambiguities(Base, Core, DataStructures)
+@test [] == detect_ambiguities(Core, DataStructures)
+@test [] == detect_ambiguities(Base, DataStructures)
 
 tests = ["deprecations",
          "int_set",
@@ -34,7 +35,7 @@ tests = ["deprecations",
          "dibit_vector",
          "swiss_dict",
          "avl_tree",
-         "red_black_tree", 
+         "red_black_tree",
          "splay_tree"
         ]
 
