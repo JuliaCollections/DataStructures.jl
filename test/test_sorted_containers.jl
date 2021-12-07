@@ -1403,6 +1403,32 @@ function testSortedMultiDict()
     end
     # issue #216
     my_assert(DataStructures.isordered(SortedMultiDict{Int, String}))
+    # issue #773
+    s = SortedMultiDict{Int, Int}()           
+    insert!(s, 4, 41)
+    insert!(s, 3, 31)
+    insert!(s, 2, 21)
+    insert!(s, 2, 22)
+    insert!(s, 2, 23)
+    insert!(s, 2, 24)
+    insert!(s, 2, 25)
+    insert!(s, 2, 26)
+    insert!(s, 1, 11)
+    insert!(s, 1, 12)
+    st1 = insert!(s, 1, 13)
+    st2 = insert!(s, 1, 14)
+    st3 = insert!(s, 1, 15)
+    st4 = insert!(s, 1, 16)
+    st5 = insert!(s, 1, 17)
+    st6 = insert!(s, 1, 18)
+    delete!((s, st6))
+    delete!((s, st5))
+    delete!((s, st4))
+    delete!((s, st3))
+    delete!((s, st2))
+    delete!((s, st1))
+    insert!(s, 1, 19)
+    checkcorrectness(s.bt, true)
     true
 end
 

@@ -354,6 +354,7 @@ end
 ## done whether the iterm
 ## is already in the tree, so insertion of a new item always succeeds.
 
+
 function Base.insert!(t::BalancedTree23{K,D,Ord}, k, d, allowdups::Bool) where {K,D,Ord <: Ordering}
 
     ## First we find the greatest data node that is <= k.
@@ -395,134 +396,122 @@ function Base.insert!(t::BalancedTree23{K,D,Ord}, k, d, allowdups::Bool) where {
     ## go back and fix the parent.
 
     newind = push_or_reuse!(t.data, t.freedatainds, KDRec{K,D}(0,k,d))
+    push!(t.useddatacells, newind)
     p1 = parent
-    oldchild = leafind
     newchild = newind
     minkeynewchild = k
     splitroot = false
     curdepth = depth
+    existingchild = leafind
 
+    
     ## This loop ascends the tree (i.e., follows the path from a leaf to the root)
     ## starting from the parent p1 of
-    ## where the new key k would go.  For each 3-node we encounter
+    ## where the new key k will go.
+    ## Variables updated by the loop:
+    ##   p1: parent of where the new node goes
+    ##   newchild: index of the child to be inserted
+    ##   minkeynewchild: the minimum key in the subtree rooted at newchild
+    ##   existingchild: a child of p1; the newchild must
+    ##      be inserted in the slot to the right of existingchild
+    ##   curdepth: depth of newchild
+    ## For each 3-node we encounter
     ## during the ascent, we add a new child, which requires splitting
     ## the 3-node into two 2-nodes.  Then we keep going until we hit the root.
     ## If we encounter a 2-node, then the ascent can stop; we can
-    ## change the 2-node to a 3-node with the new child. Invariants
-    ## during this loop are:
-    ##     p1: the parent node (a tree node index) where the insertion must occur
-    ##     oldchild,newchild: the two children of the parent node; oldchild
-    ##          was already in the tree; newchild was just added to it.
-    ##     minkeynewchild:  This is the key that is the minimum value in
-    ##         the subtree rooted at newchild.
+    ## change the 2-node to a 3-node with the new child.
 
-    while t.tree[p1].child3 > 0
-        isleaf = (curdepth == depth)
-        oldtreenode = t.tree[p1]
-
-        ## Node p1 index a 3-node. There are three cases for how to
-        ## insert new child.  All three cases involve splitting the
-        ## existing node (oldtreenode, numbered p1) into
-        ## two new nodes.  One keeps the index p1; the other has
-        ## has a new index called newparentnum.
+    while true
 
 
-        cmp = isleaf ? cmp3_leaf(ord, oldtreenode, minkeynewchild) :
-                      cmp3_nonleaf(ord, oldtreenode, minkeynewchild)
+        # Let newchild1,...newchild4 be the new children of
+        # the parent node
+        # Initially, take the three children of the existing parent
+        # node and set newchild4 to 0.
 
-        if cmp == 1
-            lefttreenodenew = TreeNode{K}(oldtreenode.child1, newchild, 0,
-                                          oldtreenode.parent,
-                                          minkeynewchild, minkeynewchild)
-            righttreenodenew = TreeNode{K}(oldtreenode.child2, oldtreenode.child3, 0,
-                                           oldtreenode.parent, oldtreenode.splitkey2,
-                                           oldtreenode.splitkey2)
-            minkeynewchild = oldtreenode.splitkey1
-            whichp = 1
-        elseif cmp == 2
-            lefttreenodenew = TreeNode{K}(oldtreenode.child1, oldtreenode.child2, 0,
-                                          oldtreenode.parent,
-                                          oldtreenode.splitkey1, oldtreenode.splitkey1)
-            righttreenodenew = TreeNode{K}(newchild, oldtreenode.child3, 0,
-                                           oldtreenode.parent,
-                                           oldtreenode.splitkey2, oldtreenode.splitkey2)
-            whichp = 2
+        newchild1 = t.tree[p1].child1
+        newchild2 = t.tree[p1].child2
+        minkeychild2 = t.tree[p1].splitkey1
+        newchild3 = t.tree[p1].child3
+        minkeychild3 = t.tree[p1].splitkey2
+        p1parent = t.tree[p1].parent
+        newchild4 = 0
+
+        # Now figure out which of the 4 children is the new node
+        # and insert it into newchild1 ... newchild4
+
+        if newchild1 == existingchild
+            newchild4 = newchild3
+            minkeychild4 = minkeychild3
+            newchild3 = newchild2
+            minkeychild3 = minkeychild2
+            newchild2 = newchild
+            minkeychild2 = minkeynewchild
+        elseif newchild2 == existingchild
+            newchild4 = newchild3
+            minkeychild4 = minkeychild3
+            newchild3 = newchild
+            minkeychild3 = minkeynewchild
+        elseif newchild3 == existingchild
+            newchild4 = newchild
+            minkeychild4 = minkeynewchild
         else
-            lefttreenodenew = TreeNode{K}(oldtreenode.child1, oldtreenode.child2, 0,
-                                          oldtreenode.parent,
-                                          oldtreenode.splitkey1, oldtreenode.splitkey1)
-            righttreenodenew = TreeNode{K}(oldtreenode.child3, newchild, 0,
-                                           oldtreenode.parent,
-                                           minkeynewchild, minkeynewchild)
-            minkeynewchild = oldtreenode.splitkey2
-            whichp = 2
+            throw(AssertionError("Tree structure is corrupted 1"))
         end
-        # Replace p1 with a new 2-node and insert another 2-node at
-        # index newparentnum.
-        t.tree[p1] = lefttreenodenew
-        newparentnum = push_or_reuse!(t.tree, t.freetreeinds, righttreenodenew)
-        if isleaf
-            par = (whichp == 1) ? p1 : newparentnum
-            # fix the parent of the new datanode.
-            replaceparent!(t.data, newind, par)
-            push!(t.useddatacells, newind)
-            replaceparent!(t.data, righttreenodenew.child1, newparentnum)
-            replaceparent!(t.data, righttreenodenew.child2, newparentnum)
+
+        # Two cases: either we need to split the tree node
+        # if newchild4>0 else we convert a 2-node to a 3-node
+        # if newchild4==0
+
+        if newchild4 == 0
+            # Change the parent from a 2-node to a 3-node
+            t.tree[p1] = TreeNode{K}(newchild1, newchild2, newchild3,
+                                     p1parent, minkeychild2, minkeychild3)
+            if curdepth == depth
+                replaceparent!(t.data, newchild, p1)
+            else
+                replaceparent!(t.tree, newchild, p1)
+            end
+            break
+        end
+        # Split the parent
+        t.tree[p1] = TreeNode{K}(newchild1, newchild2, 0,
+                                 p1parent, minkeychild2, minkeychild2)
+        newtreenode = TreeNode{K}(newchild3, newchild4, 0,
+                                  p1parent, minkeychild4, minkeychild2)
+        newparentnum = push_or_reuse!(t.tree, t.freetreeinds, newtreenode)
+        if curdepth == depth
+            replaceparent!(t.data, newchild2, p1)
+            replaceparent!(t.data, newchild3, newparentnum)
+            replaceparent!(t.data, newchild4, newparentnum)
         else
-            # If this is not a leaf, we still have to fix the
-            # parent fields of the two nodes that are now children
-            ## of the newparent.
-            replaceparent!(t.tree, righttreenodenew.child1, newparentnum)
-            replaceparent!(t.tree, righttreenodenew.child2, newparentnum)
+            replaceparent!(t.tree, newchild2, p1)
+            replaceparent!(t.tree, newchild3, newparentnum)
+            replaceparent!(t.tree, newchild4, newparentnum)
         end
-        oldchild = p1
+        # Update the loop variables for the next level of the
+        # ascension
+        existingchild = p1
         newchild = newparentnum
-        ## If p1 is the root (i.e., we have encountered only 3-nodes during
-        ## our ascent of the tree), then the root must be split.
-        if p1 == t.rootloc
-            @invariant curdepth == 1
+        p1 = p1parent
+        minkeynewchild = minkeychild3
+        curdepth -= 1
+        if curdepth == 0
             splitroot = true
             break
         end
-        p1 = t.tree[oldchild].parent
-        curdepth -= 1
     end
 
-    ## big loop terminated either because a 2-node was reached
-    ## (splitroot == false) or we went up the whole tree seeing
-    ## only 3-nodes (splitroot == true).
-    if !splitroot
+    # If the root has been split, then we need to add a level
+    # to the tree that is the parent of the old root and the new node.
 
-        ## If our ascent reached a 2-node, then we convert it to
-        ## a 3-node by giving it a child3 field that is >0.
-        ## Encountering a 2-node halts the ascent up the tree.
-
-        isleaf = curdepth == depth
-        oldtreenode = t.tree[p1]
-        cmpres = isleaf ? cmp2_leaf(ord, oldtreenode, minkeynewchild) :
-                         cmp2_nonleaf(ord, oldtreenode, minkeynewchild)
-
-
-        t.tree[p1] = cmpres == 1 ?
-                         TreeNode{K}(oldtreenode.child1, newchild, oldtreenode.child2,
-                                     oldtreenode.parent,
-                                     minkeynewchild, oldtreenode.splitkey1) :
-                         TreeNode{K}(oldtreenode.child1, oldtreenode.child2, newchild,
-                                     oldtreenode.parent,
-                                     oldtreenode.splitkey1, minkeynewchild)
-        if isleaf
-            replaceparent!(t.data, newind, p1)
-            push!(t.useddatacells, newind)
-        end
-    else
-        ## Splitroot is set if the ascent of the tree encountered only 3-nodes.
-        ## In this case, the root itself was replaced by two nodes, so we need
-        ## a new root above those two.
-
-        newroot = TreeNode{K}(oldchild, newchild, 0, 0,
-                              minkeynewchild, minkeynewchild)
+    if splitroot
+        @invariant existingchild == t.rootloc
+        newroot = TreeNode{K}(existingchild, newchild, 0,
+                              0, minkeynewchild, minkeynewchild)
+        
         newrootloc = push_or_reuse!(t.tree, t.freetreeinds, newroot)
-        replaceparent!(t.tree, oldchild, newrootloc)
+        replaceparent!(t.tree, existingchild, newrootloc)
         replaceparent!(t.tree, newchild, newrootloc)
         t.rootloc = newrootloc
         t.depth += 1
@@ -615,7 +604,7 @@ end
 ##, 1 if i2 precedes i1.
 
 function compareInd(t::BalancedTree23, i1::Int, i2::Int)
-    @assert(i1 in t.useddatacells && i2 in t.useddatacells)
+    @invariant(i1 in t.useddatacells && i2 in t.useddatacells)
     if i1 == i2
         return 0
     end
@@ -624,6 +613,7 @@ function compareInd(t::BalancedTree23, i1::Int, i2::Int)
     p1 = t.data[i1].parent
     p2 = t.data[i2].parent
     @invariant_support_statement curdepth = t.depth
+    curdepth = t.depth
     while true
         @invariant curdepth > 0
         if p1 == p2
@@ -647,6 +637,7 @@ function compareInd(t::BalancedTree23, i1::Int, i2::Int)
         p1 = t.tree[i1a].parent
         p2 = t.tree[i2a].parent
         @invariant_support_statement curdepth -= 1
+        curdepth -= 1
     end
 end
 
