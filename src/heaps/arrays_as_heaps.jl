@@ -19,12 +19,9 @@ function percolate_down!(xs::AbstractArray, i::Integer, x=xs[i], o::Ordering=For
     @inbounds while (l = heapleft(i)) <= len
         r = heapright(i)
         j = r > len || lt(o, xs[l], xs[r]) ? l : r
-        if lt(o, xs[j], x)
-            xs[i] = xs[j]
-            i = j
-        else
-            break
-        end
+        lt(o, xs[j], x) || break
+        xs[i] = xs[j]
+        i = j
     end
     xs[i] = x
 end
@@ -35,12 +32,9 @@ percolate_down!(xs::AbstractArray, i::Integer, o::Ordering, len::Integer=length(
 # Binary min-heap percolate up.
 function percolate_up!(xs::AbstractArray, i::Integer, x=xs[i], o::Ordering=Forward)
     @inbounds while (j = heapparent(i)) >= 1
-        if lt(o, x, xs[j])
-            xs[i] = xs[j]
-            i = j
-        else
-            break
-        end
+        lt(o, x, xs[j]) || break
+        xs[i] = xs[j]
+        i = j
     end
     xs[i] = x
 end
