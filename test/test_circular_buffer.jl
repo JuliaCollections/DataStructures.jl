@@ -164,4 +164,12 @@
             @test Array(cb) == [21, 42, 42]
         end
     end
+
+    @testset "Issue 754" begin
+        cb = CircularBuffer{Int}(5)
+        @test size(cb) == (0,)
+        @test_throws MethodError push!(cb, 1.5)
+        @test size(cb) == (0,)
+    end
+
 end
