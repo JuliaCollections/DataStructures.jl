@@ -225,3 +225,25 @@ Base.@propagate_inbounds function Base.last(cb::CircularBuffer)
     @boundscheck (cb.length == 0) && throw(BoundsError(cb, 1))
     return cb.buffer[_buffer_index(cb, cb.length)]
 end
+
+"""
+    resize!(cb::CircularBuffer, n)
+
+Resize CircularBuffer to the maximum capacity of n elements.
+If n is smaller than the current buffer length, the first n elements will be retained.
+"""
+function Base.resize!(cb::CircularBuffer, n::Integer)
+    if n != capacity(cb)
+        buf_new = Vector{eltype(cb)}(undef, n)
+        len_new = min(length(cb), n)
+        for i in 1:len_new
+            @inbounds buf_new[i] = cb[i]
+        end
+
+        cb.capacity = n
+        cb.first = 1
+        cb.length = len_new
+        cb.buffer = buf_new
+    end
+    return cb
+end
