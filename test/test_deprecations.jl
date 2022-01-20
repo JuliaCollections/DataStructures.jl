@@ -1,3 +1,5 @@
+using DataStructures: IntSemiToken
+
 # These are the tests for deprecated features, they should be deleted along with them
 
 @testset "Trie: path iterator" begin
@@ -115,4 +117,13 @@ end
     push!(pq, 2 => 2)
     push!(pq, 1 => 1)
     @test peek(pq) == (1=>1)
+end
+
+@testset "insert!" begin
+    s = SortedDict{Int,String}();
+    @test isa(insert!(s, 5, "hello"), Tuple{Bool, IntSemiToken})
+    s2 = SortedMultiDict{Int,String}();
+    @test isa(insert!(s2, 5, "hello"), IntSemiToken)
+    s3 = SortedSet{Int}()
+    @test isa(insert!(s3, 5), Tuple{Bool, IntSemiToken})
 end

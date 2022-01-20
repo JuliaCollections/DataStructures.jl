@@ -1,129 +1,150 @@
 ## A SortedSet is a wrapper around balancedTree with
 ## methods similiar to those of the julia Set.
 
-
-"""
-    SortedSet(iter, o=Forward)
-and
-    `SortedSet{K}(iter, o=Forward)`
-and
-    `SortedSet(o, iter)`
-and
-    `SortedSet{K}(o, iter)`
-
-Construct a SortedSet using keys given by iterable `iter` (e.g., an
-array) and ordering object `o`. The ordering object defaults to
-`Forward` if not specified.
-"""
-mutable struct SortedSet{K, Ord <: Ordering} <: AbstractSet{K}
+mutable struct SortedSet{K, Ord <: Ordering}  <: AbstractSet{K}
     bt::BalancedTree23{K,Nothing,Ord}
-
-    function SortedSet{K,Ord}(o::Ord=Forward, iter=Tuple{}()) where {K,Ord<:Ordering}
-        sorted_set = new{K,Ord}(BalancedTree23{K,Nothing,Ord}(o))
-
-        for item in iter
-            push!(sorted_set, item)
-        end
-
-        return sorted_set
-    end
 end
 
+
 """
-    SortedSet()
+    SortedSet{K,Ord}(o::Ord=Forward) where {K, Ord<:Ordering}
+    SortedSet{K,Ord}(o::Ord, iter) where {K, Ord<:Ordering}
 
-Construct a `SortedSet{Any}` with `Forward` ordering.
+Construct a SortedSet of eltype `K`using from elements
+produced by  iterable `iter` (e.g., an
+array) and ordering object `o`.  Running time: O(*cn* log *n*)
+where *n* is the length of iterable.
+"""
+SortedSet{K,Ord}(o::Ord=Forward) where{K,Ord<:Ordering} =
+    SortedSet{K,Ord}(BalancedTree23{K,Nothing,Ord}(o))
 
-**Note that a key type of `Any` or any other abstract type will lead
+function SortedSet{K,Ord}(o::Ord, iter) where {K,Ord<:Ordering}
+    sorted_set = SortedSet{K,Ord}(BalancedTree23{K,Nothing,Ord}(o))
+    for item in iter
+        push!(sorted_set, item)
+    end
+    return sorted_set
+end
+
+
+"""
+    SortedSet(o::Ord=Forward) where {Ord <: Ordering}
+    SortedSet{K}(o::Ord=Forward) where {K, Ord<:Ordering}
+
+
+Construct an empty `SortedSet` with `Forward` ordering.  The first form
+assumes element type of `Any`.  Time: O(1).
+
+**Note that an element type of `Any` or any other abstract type will lead
 to slow performance.**
 """
-SortedSet() = SortedSet{Any,ForwardOrdering}(Forward)
+SortedSet(o::Ord=Forward) where {Ord<:Ordering} = SortedSet{Any,Ord}(o)
+SortedSet{K}(o::Ord=Forward) where {K,Ord <: Ordering} =
+    SortedSet{K,Ord}(o)
+
 
 """
-    SortedSet(o)
+    SortedSet(o::Ordering, iter)
+    SortedSet(iter, o::Ordering=Forward)
+    SortedSet{K}(o::Ordering, iter)
+    SortedSet{K}(iter, o::Ordering=Forward)
 
-Construct a `SortedSet{Any}` with `o` ordering.
-
-**Note that a key type of `Any` or any other abstract type will lead
-to slow performance.**
+Construct a sorted set from an iterable `iter` using order o.   In
+the first two forms, the element type is inferred from the
+iterable, which requires copying the data twice.  Therefore,
+the second two forms (specifying `K` explicitly) are more efficient.
+Time: O(*cn* log *n*)
 """
-SortedSet(o::O) where {O<:Ordering} = SortedSet{Any,O}(o)
+function SortedSet(o::Ordering, iter)
+    c = collect(iter)
+    SortedSet{eltype(c),typeof(o)}(o, c)
+end
+SortedSet(iter, o::Ordering=Forward) = SortedSet(o, iter)
+SortedSet{K}(o::Ordering, iter) where {K} = SortedSet{K,typeof(o)}(o, iter)
+SortedSet{K}(iter, o::Ordering=Forward) where {K} = SortedSet{K}(o, iter)
 
-# To address ambiguity warnings on Julia v0.4
-SortedSet(o1::Ordering, o2::Ordering) =
-    throw(ArgumentError("SortedSet with two parameters must be called with an Ordering and an interable"))
-SortedSet(o::Ordering, iter) = sortedset_with_eltype(o, iter, eltype(iter))
-SortedSet(iter, o::Ordering=Forward) = sortedset_with_eltype(o, iter, eltype(iter))
 
-"""
-    SortedSet{K}()
-
-Construct a `SortedSet` of keys of type `K` with `Forward` ordering.
-"""
-SortedSet{K}() where {K} = SortedSet{K,ForwardOrdering}(Forward)
 
 """
-    SortedSet{K}(o)
+    SortedSet{K}(::Val{true}, iterable) where {K}
+    SortedSet{K}(::Val{true}, iterable, ord::Ord) where {K, Ord <: Ordering}
 
-Construct a `SortedSet` of keys of type `K` with ordering given according
-`o` parameter.
+Construct a `SortedSet` from an iterable whose entries
+have type `K` and that is already in sorted ordered. No duplicates
+allowed.  The first form assumes Forward ordering.
+Time: O(*cn*).
 """
-SortedSet{K}(o::O) where {K,O<:Ordering} = SortedSet{K,O}(o)
+SortedSet{K}(::Val{true}, iterable) where {K} =
+    SortedSet{K}(Val(true), iterable, Forward)
+function SortedSet{K}(::Val{true},
+                      iterable,
+                      ord::Ord) where {K, Ord <: Ordering}
+    SortedSet{K, Ord}(BalancedTree23{K,Nothing,Ord}(Val(true),
+                                                    ((k,nothing) for k in iterable),
+                                                    ord,
+                                                    false))
+end
 
-# To address ambiguity warnings on Julia v0.4
-SortedSet{K}(o1::Ordering,o2::Ordering) where {K} =
-    throw(ArgumentError("SortedSet with two parameters must be called with an Ordering and an interable"))
-SortedSet{K}(o::Ordering, iter) where {K} = sortedset_with_eltype(o, iter, K)
-SortedSet{K}(iter, o::Ordering=Forward) where {K} = sortedset_with_eltype(o, iter, K)
+# The following is needed to resolve ambiguities
 
-sortedset_with_eltype(o::Ord, iter, ::Type{K}) where {K,Ord} = SortedSet{K,Ord}(o, iter)
+SortedSet{K}(::Val{true}, ::Ordering) where {K} =
+    throw(ArgumentError("Not a valid SortedSet constructor"))
+SortedSet(::Ordering, ::Ordering) =
+    throw(ArgumentError("Not a valid SortedSet constructor"))
+SortedSet{K}(::Ordering,::Ordering) where {K} =
+    throw(ArgumentError("Not a valid SortedSet constructor"))
+
 
 const SetSemiToken = IntSemiToken
 
-# The following definition was moved to tokens2.jl
-# const SetToken = Tuple{SortedSet, IntSemiToken}
 
-## This function looks up a key in the tree;
-## if not found, then it returns a marker for the
-## end of the tree.
+"""
+    findkey(m::SortedSet, k)
 
+Return the semitoken of the element `k` in sorted set `m`.
+If the element is not present in `m`, then the past-end semitoken
+is returned.  Time: O(*c* log *n*)
+"""
 @inline function findkey(m::SortedSet, k_)
     ll, exactfound = findkey(m.bt, convert(keytype(m),k_))
     IntSemiToken(exactfound ? ll : 2)
 end
 
 
-## This function inserts an item into the tree.
-## It returns a bool and a token.
-## The bool is true if the inserted item is new.
-## It is false if there was already an item
-## with that key.
-## The token points to the newly inserted item.
 
 """
-    insert!(sc, k)
+    ss_push!(ss::SortedSet, k)
 
-Argument `sc` is a SortedSet and `k` is a key. This inserts the key
-into the container. If the key is already present, this overwrites
-the old value. (This is not necessarily a no-op; see below for
-remarks about the customizing the sort order.) The return value is a
+Insert the element `k`
+into the SortedSet `sc`.
+If `k` is already present, this overwrites
+the old value. (This is not necessarily a no-op; see remarks about the 
+customizing the sort order.) Unlike `push!`,
+the return value is a
 pair whose first entry is boolean and indicates whether the
 insertion was new (i.e., the key was not previously present) and the
-second entry is the semitoken of the new entry. Time: O(*c* log *n*)
+second entry is the semitoken of the new entry.   This function
+replaces the deprecated `insert!`.
+Time: O(*c* log *n*)
 """
-@inline function Base.insert!(m::SortedSet, k_)
+@inline function ss_push!(m::SortedSet, k_)
     b, i = insert!(m.bt, convert(keytype(m),k_), nothing, false)
     return b, IntSemiToken(i)
 end
 
-## push! is similar to insert but returns the set
-"""
-    push!(sc, k)
+@deprecate insert!(m::SortedSet, k) ss_push!(m::SortedSet, k)
 
-Argument `sc` is a SortedSet and `k` is a key. This inserts the key
-into the container. If the key is already present, this overwrites
-the old value. (This is not necessarily a no-op; see below for
-remarks about the customizing the sort order.) The return value is
+
+
+"""
+    Base.push!(ss::SortedSet, k)
+
+Insert the element `k` into the sorted set `ss`.
+If the `k` is already present, this overwrites
+the old value. (This is not necessarily a no-op; see remarks about the 
+customizing the sort order.) 
+See also [`ss_push!(ss::SortedSet, k)`]@ref.
+The return value is
 `sc`. Time: O(*c* log *n*)
 """
 @inline function Base.push!(m::SortedSet, k_)
@@ -132,100 +153,34 @@ remarks about the customizing the sort order.) The return value is
 end
 
 
-## First and last return the first and last (key,data) pairs
-## in the SortedDict.  It is an error to invoke them on an
-## empty SortedDict.
 
 """
-    first(sc)
+    Base.in(k,m::SortedSet)
 
-Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
-function returns the first item (a `k=>v` pair for SortedDict and
-SortedMultiDict or a key for SortedSet) according to the sorted
-order in the container. Thus, `first(sc)` is equivalent to
-`deref((sc,startof(sc)))`. It is an error to call this function on
-an empty container. Time: O(log *n*)
+Return `true` iff
+element `k` is in sorted set `m` is a sorted set.
+Unlike the `in` function for
+`Set`, this routine will thrown an error if `k` is not 
+convertible to `eltype(m)`.  Time: O(*c* log *n*)
 """
-@inline function Base.first(m::SortedSet)
-    i = beginloc(m.bt)
-    i == 2 && throw(BoundsError())
-    return m.bt.data[i].k
-end
-
-"""
-    last(sc)
-
-Argument `sc` is a SortedDict, SortedMultiDict or SortedSet. This
-function returns the last item (a `k=>v` pair for SortedDict and
-SortedMultiDict or a key for SortedSet) according to the sorted
-order in the container. Thus, `last(sc)` is equivalent to
-`deref((sc,lastindex(sc)))`. It is an error to call this function on an
-empty container. Time: O(log *n*)
-"""
-@inline function Base.last(m::SortedSet)
-    i = endloc(m.bt)
-    i == 1 && throw(BoundsError())
-    return m.bt.data[i].k
-end
-
-
 @inline function Base.in(k_, m::SortedSet)
     i, exactfound = findkey(m.bt, convert(keytype(m),k_))
     return exactfound
 end
 
-"""
-    eltype(sc)
-
-Returns the key type for SortedSet.
-This function may also be applied to the type itself. Time: O(1)
-"""
 @inline Base.eltype(::Type{SortedSet{K,Ord}}) where {K,Ord <: Ordering} = K
-
-"""
-    keytype(sc)
-
-Returns the key type for SortedDict, SortedMultiDict and SortedSet.
-This function may also be applied to the type itself. Time: O(1)
-"""
 @inline Base.keytype(m::SortedSet{K,Ord}) where {K,Ord <: Ordering} = K
 @inline Base.keytype(::Type{SortedSet{K,Ord}}) where {K,Ord <: Ordering} = K
 
-"""
-    ordtype(sc)
 
-Returns the order type for SortedDict, SortedMultiDict and
-SortedSet. This function may also be applied to the type itself.
-Time: O(1)
-"""
-@inline ordtype(m::SortedSet{K,Ord}) where {K,Ord <: Ordering} = Ord
-@inline ordtype(::Type{SortedSet{K,Ord}}) where {K,Ord <: Ordering} = Ord
 
 """
-    orderobject(sc)
+    Base.delete!(ss::SortedSet, k)
 
-Returns the order object used to construct the container. Time: O(1)
-"""
-@inline orderobject(m::SortedSet) = m.bt.ord
-
-"""
-    haskey(sc,k)
-
-Returns true if key `k` is present for SortedDict, SortedMultiDict
-or SortedSet `sc`. For SortedSet, `haskey(sc,k)` is a synonym for
-`in(k,sc)`. For SortedDict and SortedMultiDict, `haskey(sc,k)` is
-equivalent to `in(k,keys(sc))`. Time: O(*c* log *n*)
-"""
-Base.haskey(m::SortedSet, k_) = in(k_, m)
-
-"""
-    delete!(sc, k)
-
-Argument `sc` is a SortedDict or SortedSet and `k` is a key. This
-operation deletes the item whose key is `k`. It is a `KeyError` if
-`k` is not a key of an item in the container. After this operation
-is complete, any token addressing the deleted item is invalid.
-Returns `sc`. Time: O(*c* log *n*)
+Delete element `k` from `sc`.  After this operation
+is complete, a token addressing the deleted item is invalid.
+Returns `sc`.  if `k` is not present, this operation is a no-op.
+Time: O(*c* log *n*)
 """
 @inline function Base.delete!(m::SortedSet, k_)
     i, exactfound = findkey(m.bt,convert(keytype(m),k_))
@@ -237,11 +192,13 @@ end
 
 
 """
-    pop!(sc, k[, default])
+    Base.pop!(ss::SortedSet, k)
+    Base.pop!(ss::SortedSet, k, default)
 
-Deletes the item with key `k` in SortedDict or SortedSet `sc` and
-returns the value that was associated with `k` in the case of
-SortedDict or `k` itself in the case of SortedSet. If `k` is not in `sc`
+Delete the item with key `k` in `ss` and
+return the item that compares equal to `k` according to the
+sort order (which is not necessarily `k`, since equality in the
+sort-order does not necessarily imply hash-equality). If `k` is not found,
 return `default`, or throw a `KeyError` if `default` is not specified.
 Time: O(*c* log *n*)
 """
@@ -249,27 +206,27 @@ Time: O(*c* log *n*)
     k = convert(keytype(m),k_)
     i, exactfound = findkey(m.bt, k)
     !exactfound && throw(KeyError(k_))
-    d = m.bt.data[i].d
+    k2 = m.bt.data[i].k
     delete!(m.bt, i)
-    return k
+    return k2
 end
 
 @inline function Base.pop!(m::SortedSet, k_, default)
     k = convert(keytype(m),k_)
     i, exactfound = findkey(m.bt, k)
     !exactfound && return default
-    d = m.bt.data[i].d
     delete!(m.bt, i)
     return k
 end
 
 """
-    pop!(ss)
+    Base.popfirst!(ss::SortedSet)
 
-Deletes the item with first key in SortedSet `ss` and returns the
-key. A `BoundsError` results if `ss` is empty. Time: O(*c* log *n*)
+Delete the item with first key in SortedSet `ss` and returns the
+key.  This function was named `pop!` in a previous version of the package.
+ A `BoundsError` results if `ss` is empty. Time: O(log *n*)
 """
-@inline function Base.pop!(m::SortedSet)
+@inline function Base.popfirst!(m::SortedSet)
     i = beginloc(m.bt)
     i == 2 && throw(BoundsError())
     k = m.bt.data[i].k
@@ -277,71 +234,132 @@ key. A `BoundsError` results if `ss` is empty. Time: O(*c* log *n*)
     return k
 end
 
+Base.pop!(m::SortedSet) = error("pop!(::SortedSet) is disabled in this version; refer to popfirst! and `poplast! in the docs")
+
+
+
+"""
+    poplast!(ss::SortedSet)
+
+Delete the item with last key in SortedSet `ss` and returns the
+key. A `BoundsError` results if `ss` is empty.   This function will
+be renamed `Base.pop!` in a future version of the package.
+Time: O(log *n*)
+"""
+@inline function poplast!(m::SortedSet)
+    i = endloc(m.bt)
+    i == 2 && throw(BoundsError())
+    k = m.bt.data[i].k
+    delete!(m.bt, i)
+    return k
+end
+
+
 
 ## Check if two SortedSets are equal in the sense of containing
 ## the same K entries.  This sense of equality does not mean
 ## that semitokens valid for one are also valid for the other.
 """
-    isequal(sc1,sc2)
+    Base.isequal(ss1::SortedSet{K,Ord}, ss2::SortedSet{K,Ord}) where {K,Ord <: Ordering}
+    Base.issetequal(ss1::SortedSet{K,Ord}, ss2::SortedSet{K,Ord}) where {K,Ord <: Ordering}
 
-Checks if two containers are equal in the sense that they contain
-the same items; the keys are compared using the `eq` method, while
-the values are compared with the `isequal` function. In the case of
-SortedMultiDict, equality requires that the values associated with a
-particular key have same order (that is, the same insertion order).
-Note that `isequal` in this sense does not imply any correspondence
-between semitokens for items in `sc1` with those for `sc2`. If the
-equality-testing method associated with the keys and values implies
-hash-equivalence in the case of SortedDict, then `isequal` of the
-entire containers implies hash-equivalence of the containers. Time:
-O(*cn* + *n* log *n*)
+Check if two sorted sets are equal in the sense that they contain
+the same items.
+Note that `isequal` in this sense does not imply correspondence
+between semitokens for items in `sc1` with those for `sc2`.  Time:
+O(*cn*) where n is the size of the smaller container. 
+If the two sorted sets have `K`, different `Ord`, or 
+different order objects, then a
+fallback routine `isequal(::AbstractSet, ::AbstractSet)` is invoked.
 """
-function Base.isequal(m1::SortedSet, m2::SortedSet)
+function Base.isequal(m1::SortedSet{K, Ord}, m2::SortedSet{K, Ord}) where {K, Ord <: Ordering}
     ord = orderobject(m1)
-    if !isequal(ord, orderobject(m2)) || !isequal(eltype(m1), eltype(m2))
-        throw(ArgumentError("Cannot use isequal for two SortedSets unless their element types and ordering objects are equal"))
+    if ord != orderobject(m2)
+        return invoke(issetequal, Tuple{AbstractSet, AbstractSet}, m1, m2)
     end
     p1 = startof(m1)
     p2 = startof(m2)
     while true
-        if p1 == pastendsemitoken(m1)
-            return p2 == pastendsemitoken(m2)
-        end
-        if p2 == pastendsemitoken(m2)
-            return false
-        end
-        k1 = deref((m1,p1))
-        k2 = deref((m2,p2))
-        if !eq(ord,k1,k2)
-            return false
-        end
-        p1 = advance((m1,p1))
-        p2 = advance((m2,p2))
+        p1 == pastendsemitoken(m1) && return p2 == pastendsemitoken(m2)
+        p2 == pastendsemitoken(m2) && return false
+        k1 = deref_nocheck((m1,p1))
+        k2 = deref_nocheck((m2,p2))
+        !eq(ord,k1,k2) && return false
+        p1 = advance_nocheck((m1,p1))
+        p2 = advance_nocheck((m2,p2))
     end
 end
 
-"""
-    union!(ss, iterable)
 
-This function inserts each item from the second argument (which must
-iterable) into the SortedSet `ss`. The items must be convertible to
-the key-type of `ss`. Time: O(*ci* log *n*) where *i* is the number
-of items in the iterable argument.
+Base.issetequal(m1::SortedSet, m2::SortedSet) = isequal(m1::SortedSet, m2::SortedSet)
+
+
 """
-function Base.union!(m1::SortedSet{K,Ord}, iterable_item) where {K, Ord <: Ordering}
-    for k in iterable_item
-        push!(m1,convert(K,k))
+    Base.union!(ss::SortedSet, iterable...)
+
+Insert each item among the second and following
+arguments  (which must be
+iterable) into the SortedSet `ss`. The items must be convertible to
+the key-type of `ss`. Time: O(*cN* log *N*) where *N* is the total number
+of items in the iterable arguments.  
+"""
+function Base.union!(m1::SortedSet, iterable...)
+    for iter in iterable
+        for k in iter
+            push!(m1,convert(eltype(m1),k))
+        end
     end
     return m1
 end
 
-"""
-    union(ss, iterable...)
+struct UnionManySortedSets{K, Ord <: Ordering}
+    vec::Vector{SortedSet{K, Ord}}
+end
 
-This function creates a new SortedSet (the return argument) and
-inserts each item from `ss` and each item from each iterable
-argument into the returned SortedSet. Time: O(*cn* log *n*) where
-*n* is the total number of items in all the arguments.
+function Base.iterate(ss::UnionManySortedSets{K, Ord},
+                      state = [startof(ss.vec[k]) for k=1:length(ss.vec)]) where
+{K, Ord <: Ordering}
+    ord = orderobject(ss.vec[1])
+    N = length(ss.vec)
+    firsti = 0
+    for i = 1 : N
+        if state[i] != pastendsemitoken(ss.vec[i])
+            firsti = i
+            break
+        end
+    end
+    firsti == 0 && return nothing
+    foundi = firsti
+    firstk = deref_nocheck((ss.vec[firsti], state[firsti]))
+    for i = firsti + 1 : N
+        if state[i] != pastendsemitoken(ss.vec[i])
+            k2 = deref_nocheck((ss.vec[i], state[i]))
+            if !lt(ord, firstk, k2)
+                foundi = i
+                firstk = k2
+            end
+        end
+    end
+    for i = firsti : N
+        if state[i] != pastendsemitoken(ss.vec[i]) &&
+            eq(ord, deref_nocheck((ss.vec[i], state[i])), firstk)
+            state[i] = advance_nocheck((ss.vec[i], state[i]))
+        end
+    end
+    (firstk, state)
+end
+
+
+
+"""
+    Base.union(ss::SortedSet, iterable...)
+
+Compute and return
+the union of a sorted set and one or more iterables.  They must have the same
+keytype.  If they are all sorted sets with the same order object, then the
+required time is O(*cn*), where *n* is the total size.  If not,
+then the fallback routine requires time O(*cn* log *n*).
+
 """
 function Base.union(m1::SortedSet, others...)
     mr = packcopy(m1)
@@ -351,227 +369,363 @@ function Base.union(m1::SortedSet, others...)
     return mr
 end
 
+function Base.union(s1::SortedSet{K,Ord}, others::SortedSet{K,Ord}...) where
+{K, Ord <: Ordering}
+    ss = UnionManySortedSets{K, Ord}(SortedSet{K,Ord}[s1])
+    for s in others
+        if orderobject(s) != orderobject(s1)
+            return invoke(union,
+                          Tuple{SortedSet, Vararg{Any}},
+                          s1, others...)
+        end
+        push!(ss.vec, s)
+    end
+    SortedSet{K}(Val(true), ss, orderobject(s1))
+end
+
+
+
+
+
+struct IntersectTwoSortedSets{K, Ord <: Ordering}
+    m1::SortedSet{K,Ord}
+    m2::SortedSet{K,Ord}
+end
+
+struct TwoSortedSets_State
+    p1::IntSemiToken
+    p2::IntSemiToken
+end
+
+function Base.iterate(twoss::IntersectTwoSortedSets,
+                      state = TwoSortedSets_State(startof(twoss.m1),
+                                                  startof(twoss.m2)))
+    m1 = twoss.m1
+    m2 = twoss.m2
+    ord = orderobject(m1)
+    p1 = state.p1
+    p2 = state.p2
+    while p1 != pastendsemitoken(m1) && p2 != pastendsemitoken(m2)
+        k1 = deref_nocheck((m1, p1))
+        k2 = deref_nocheck((m2, p2))
+        if lt(ord, k1, k2)
+            p1 = advance_nocheck((m1, p1))
+            continue
+        end
+        if lt(ord, k2, k1)
+            p2 = advance_nocheck((m2, p2))
+            continue
+        end
+        return (k1, TwoSortedSets_State(advance_nocheck((m1, p1)),
+                                        advance_nocheck((m2, p2))))
+    end
+    return nothing
+end
+
+
 function intersect2(m1::SortedSet{K, Ord}, m2::SortedSet{K, Ord}) where {K, Ord <: Ordering}
-    ord = orderobject(m1)
-    mi = SortedSet(K[], ord)
-    p1 = startof(m1)
-    p2 = startof(m2)
-    while true
-        if p1 == pastendsemitoken(m1) || p2 == pastendsemitoken(m2)
-            return mi
-        end
-        k1 = deref((m1,p1))
-        k2 = deref((m2,p2))
-        if lt(ord,k1,k2)
-            p1 = advance((m1,p1))
-        elseif lt(ord,k2,k1)
-            p2 = advance((m2,p2))
-        else
-            push!(mi,k1)
-            p1 = advance((m1,p1))
-            p2 = advance((m2,p2))
-        end
+    if orderobject(m1) != orderobject(m2)
+        return invoke(intersect2, Tuple{SortedSet{K, Ord}, Any}, m1, m2)
     end
+    SortedSet{K}(Val(true),
+                 IntersectTwoSortedSets(m1, m2),
+                 orderobject(m1))
 end
 
-"""
-    intersect(ss, others...)
 
-Each argument is a SortedSet with the same key and order type. The
-return variable is a new SortedSet that is the intersection of all
-the sets that are input. Time: O(*cn* log *n*), where *n* is the
-total number of items in all the arguments.
-"""
-function Base.intersect(m1::SortedSet{K,Ord}, others::SortedSet{K,Ord}...) where {K, Ord <: Ordering}
-    ord = orderobject(m1)
-    for s2 in others
-        if !isequal(ord, orderobject(s2))
-            throw(ArgumentError("Cannot intersect two SortedSets unless their ordering objects are equal"))
-        end
+function intersect2(m1::SortedSet{K,Ord}, iterable) where {K, Ord <: Ordering}
+    mi = SortedSet{K, Ord}(orderobject(m1))
+    for k_ in iterable
+        k = convert(K,k_)
+        k in m1 && push!(mi, k)
     end
+    mi
+end
+        
+
+
+
+"""
+    Base.intersect(ss::SortedSet, others...)
+
+Intersect SortedSets with other SortedSets or other iterables and return
+the intersection as a new SortedSet.
+Time: O(*cn*), where *n* is the
+total number of items in all the arguments if all the arguments are
+SortedSets of the same type and same order object.  Otherwise, the
+time is O(*cn* log *n*)
+
+"""
+function Base.intersect(m1::SortedSet{K,Ord}, others...) where {K, Ord <: Ordering}
     if length(others) == 0
-        return m1
-    else
-        mi = intersect2(m1, others[1])
-        for s2 = others[2:end]
-            mi = intersect2(mi, s2)
-        end
-        return mi
+        return packcopy(m1)
     end
+    mi = intersect2(m1, others[1])
+    for s2 = others[2:end]
+        mi = intersect2(mi, s2)
+    end
+    mi
 end
 
-"""
-    symdiff(ss1, ss2)
 
-The two argument are sorted sets with the same key and order type.
-This operation computes the symmetric difference, i.e., a sorted set
-containing entries that are in one of `ss1`, `ss2` but not both.
-Time: O(*cn* log *n*), where *n* is the total size of the two
-containers.
-"""
-function Base.symdiff(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord}) where {K, Ord <: Ordering}
+struct SymdiffTwoSortedSets{K,Ord <: Ordering}
+    m1::SortedSet{K,Ord}
+    m2::SortedSet{K,Ord}
+end
+
+function Base.iterate(twoss::SymdiffTwoSortedSets,
+                      state = TwoSortedSets_State(startof(twoss.m1),
+                                                  startof(twoss.m2)))
+    m1 = twoss.m1
+    m2 = twoss.m2
     ord = orderobject(m1)
-    if !isequal(ord, orderobject(m2))
-        throw(ArgumentError("Cannot apply symdiff to two SortedSets unless their ordering objects are equal"))
-    end
-    mi = SortedSet(K[], ord)
-    p1 = startof(m1)
-    p2 = startof(m2)
+    p1 = state.p1
+    p2 = state.p2
     while true
         m1end = p1 == pastendsemitoken(m1)
         m2end = p2 == pastendsemitoken(m2)
         if m1end && m2end
-            return mi
-        elseif m1end
-            push!(mi, deref((m2,p2)))
-            p2 = advance((m2,p2))
-        elseif m2end
-            push!(mi, deref((m1,p1)))
-            p1 = advance((m1,p1))
-        else
-            k1 = deref((m1,p1))
-            k2 = deref((m2,p2))
-            if lt(ord,k1,k2)
-                push!(mi, k1)
-                p1 = advance((m1,p1))
-            elseif lt(ord,k2,k1)
-                push!(mi, k2)
-                p2 = advance((m2,p2))
-            else
-                p1 = advance((m1,p1))
-                p2 = advance((m2,p2))
-            end
+            return nothing
         end
+        if m1end
+            return (deref_nocheck((m2, p2)),
+                    TwoSortedSets_State(p1, advance_nocheck((m2,p2))))
+        end
+        if m2end
+            return (deref_nocheck((m1, p1)),
+                    TwoSortedSets_State(advance_nocheck((m1,p1)), p2))
+        end
+        k1 = deref_nocheck((m1, p1))
+        k2 = deref_nocheck((m2, p2))
+        if lt(ord, k1, k2)
+            return (k1, TwoSortedSets_State(advance_nocheck((m1,p1)), p2))
+        end
+        if lt(ord, k2, k1)
+            return (k2, TwoSortedSets_State(p1, advance_nocheck((m2,p2))))
+        end
+        p1 = advance_nocheck((m1,p1))
+        p2 = advance_nocheck((m2,p2))
     end
 end
 
 """
-    setdiff(ss1, ss2)
+    Base.symdiff(ss1::SortedSet, iterable)
 
-The two arguments are sorted sets with the same key and order type.
-This operation computes the difference, i.e., a sorted set
-containing entries that in are in `ss1` but not `ss2`. Time: O(*cn*
-log *n*), where *n* is the total size of the two containers.
+Compute and
+return the symmetric difference of `ss1` and `iterable`, i.e., a sorted set
+containing entries that are in one of `ss1` or `iterable` but not both.
+Time: O(*cn*), where *n* is the total size of the two
+containers if both are sorted sets with the same key and order objects.
+Otherwise, the time is O(*cn* log *n*)
+"""
+function Base.symdiff(m1::SortedSet{K,Ord}, iterable) where {K, Ord <: Ordering}
+    ms = SortedSet{K,Ord}(orderobject(m1))
+    m1seen = SortedSet{K,Ord}(orderobject(m1))
+    for k_ in iterable
+        k = convert(K,k_)
+        if k in m1
+            push!(m1seen, k)
+        else
+            push!(ms, k)
+        end
+    end
+    for k in m1
+        if !(k in m1seen)
+            push!(ms, k)
+        end
+    end
+    ms
+end
+
+function Base.symdiff(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord}) where {K, Ord <: Ordering}
+    ord = orderobject(m1)
+    if ord != orderobject(m2)
+        return invoke(symdiff, Tuple{SortedSet{K,Ord}, Any}, m1, m2)
+    end
+    SortedSet{K}(Val(true), SymdiffTwoSortedSets(m1, m2), ord)
+end
+
+
+struct SetdiffTwoSortedSets{K, Ord <: Ordering}
+    m1::SortedSet{K,Ord}
+    m2::SortedSet{K,Ord}
+end
+
+function Base.iterate(twoss::SetdiffTwoSortedSets,
+                      state = TwoSortedSets_State(startof(twoss.m1),
+                                                  startof(twoss.m2)))
+    m1 = twoss.m1
+    m2 = twoss.m2
+    ord = orderobject(m1)
+    p1 = state.p1
+    p2 = state.p2
+    while true
+        m1end = p1 == pastendsemitoken(m1)
+        m2end = p2 == pastendsemitoken(m2)
+        if m1end
+            return nothing
+        end
+        if m2end
+            return (deref_nocheck((m1, p1)), TwoSortedSets_State(advance_nocheck((m1,p1)), p2))
+        end
+        k1 = deref_nocheck((m1, p1))
+        k2 = deref_nocheck((m2, p2))
+        if lt(ord, k1, k2)
+            return (k1, TwoSortedSets_State(advance_nocheck((m1,p1)), p2))
+        end
+        if !lt(ord, k2, k1)
+            p1 = advance_nocheck((m1,p1))
+        end
+        p2 = advance_nocheck((m2, p2))
+    end
+end
+
+        
+"""
+    Base.setdiff(ss1::SortedSet{K,Ord}, ss2::SortedSet{K,Ord}) where {K, Ord<:Ordering}
+    Base.setdiff(ss1::SortedSet, others...)
+
+Return the set difference, i.e., a sorted set containing entries in `ss1` but not
+in `ss2` or successive arguments.   Time for the first form: O(*cn*)
+where *n* is the total size of both sets provided that they are both
+sorted sets of the same type and order object.  
+The second form computes the set difference
+between `ss1` and all the others, which are all iterables.  The second
+form requires O(*cn* log *n*) time.
 """
 function Base.setdiff(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord}) where {K, Ord <: Ordering}
     ord = orderobject(m1)
-    if !isequal(ord, orderobject(m2))
-        throw(ArgumentError("Cannot apply setdiff to two SortedSets unless their ordering objects are equal"))
+    if ord != orderobject(m2)
+        return invoke(setdiff, Tuple{SortedSet{K,Ord}, Vararg{Any}}, m1, m2)
     end
-    mi = SortedSet(K[], ord)
-    p1 = startof(m1)
-    p2 = startof(m2)
-    while true
-        if p1 == pastendsemitoken(m1)
-            return mi
-        elseif p2 == pastendsemitoken(m2)
-            push!(mi, deref((m1,p1)))
-            p1 = advance((m1,p1))
-        else
-            k1 = deref((m1,p1))
-            k2 = deref((m2,p2))
-            if lt(ord,k1,k2)
-                push!(mi, deref((m1,p1)))
-                p1 = advance((m1,p1))
-            elseif lt(ord,k2,k1)
-                p2 = advance((m2,p2))
-            else
-                p1 = advance((m1,p1))
-                p2 = advance((m2,p2))
-            end
+    SortedSet{K}(Val(true), SetdiffTwoSortedSets(m1,m2), ord)
+end
+
+
+function Base.setdiff(m1::SortedSet{K,Ord}, others...) where {K, Ord <: Ordering}
+    ms = packcopy(m1)
+    setdiff!(ms, others...)
+    ms
+end
+
+
+"""
+    Base.setdiff!(ss::SortedSet, iterable..)
+
+Delete items in `ss` that appear in any of the
+iterables. The arguments after the first  must be iterables each
+of whose entries must  convertible to the key type of m1. 
+Time: O(*cm* log *n*), where *n* is the size of `ss` and *m* is the 
+total number of items in iterable.
+"""
+function Base.setdiff!(m1::SortedSet, others...)
+    for iterable in others
+        for p in iterable
+            i = findkey(m1, convert(eltype(m1), p))
+            i != pastendsemitoken(m1) &&  delete!((m1,i))
         end
     end
 end
 
-"""
-    setdiff!(ss, iterable)
 
-This function deletes items in `ss` that appear in the second
-argument. The second argument must be iterable and its entries must
-be convertible to the key type of m1. Time: O(*cm* log *n*), where
-*n* is the size of `ss` and *m* is the number of items in
-`iterable`.
-"""
-function Base.setdiff!(m1::SortedSet, iterable)
-    for p in iterable
-        i = findkey(m1, p)
-        if i != pastendsemitoken(m1)
-            delete!((m1,i))
-        end
-    end
-end
+# TODO: implement a jump-forward method so that issubset runs in time
+# O(*m* log (*n*/*m*)) when both sets are sorted sets.
 
 """
-    issubset(iterable, ss)
+    Base.issubset(iterable, ss::SortedSet)
 
-This function checks whether each item of the first argument is an
-element of the SortedSet `ss`. The entries must be convertible to
-the key-type of `ss`. Time: O(*cm* log *n*), where *n* is the sizes
-of `ss` and *m* is the number of items in `iterable`.
+Check whether each item of the first argument is an
+element of  `ss`. The entries must be convertible to
+the key-type of `ss`. Time: O(*cm* log *n*), where *n* is the size
+of `ss` and *m* is the number of items in `iterable`.  If both are
+sorted sets of the same keytype and order object and if *m* > *n* / log *n*,
+then an algorithm whose running time is O(*c*(*m*+*n*)) is used.
 """
 function Base.issubset(iterable, m2::SortedSet)
     for k in iterable
-        if !in(k, m2)
+        if !(k in m2)
             return false
         end
     end
     return true
 end
 
+function Base.issubset(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord}) where {K, Ord <: Ordering}
+    ord = orderobject(m1)
+    if ord != orderobject(m2) ||
+        length(m1) < length(m2) / log2(length(m2) + 2)
+        return invoke(issubset, Tuple{Any, SortedSet}, m1, m2)
+    end
+    p1 = startof(m1)
+    p2 = startof(m2)
+    while p1 != pastendsemitoken(m1)
+        p2 == pastendsemitoken(m2) && return false
+        k1 = deref_nocheck((m1, p1))
+        k2 = deref_nocheck((m2, p2))
+        if eq(ord, k1, k2)
+            p1 = advance_nocheck((m1,p1))
+            p2 = advance_nocheck((m2,p2))
+        elseif lt(ord, k1,k2)
+            return false
+        else
+            p2 = advance_nocheck((m2,p2))
+        end
+    end
+    return true
+end
+            
 # Standard copy functions use packcopy - that is, they retain elements but not
 # the identical structure.
 Base.copymutable(m::SortedSet) = packcopy(m)
 Base.copy(m::SortedSet) = packcopy(m)
 
 """
-    packcopy(sc)
+    copy(sc::SortedSet)
+    copy(sc::SortedDict)
+    copy(sc::SortedMultiDict)
+    packcopy(sc::SortedSet)
+    packcopy(sc::SortedDict)
+    packcopy(sc::SortedMultiDict)
 
-This returns a copy of `sc` in which the data is packed. When
+Return a copy of `sc`, where `sc` is a sorted
+container, in which the data is packed. When
 deletions take place, the previously allocated memory is not
 returned. This function can be used to reclaim memory after many
-deletions. Time: O(*cn* log *n*)
+deletions. Time: O(*cn*)
+
+Note that the semitokens valid for the original container are no
+longer valid for the copy because the indexing structure is rebuilt
+by these copies.  If an exact copy is needed in which semitokens
+remain valid, use `Base.deepcopy`.
 """
 function packcopy(m::SortedSet{K,Ord}) where {K,Ord <: Ordering}
-    w = SortedSet(K[], orderobject(m))
-    for k in m
-        push!(w, k)
-    end
-    return w
+    SortedSet{K}(Val(true), m, orderobject(m))
 end
 
-"""
-    packdeepcopy(sc)
 
-This returns a packed copy of `sc` in which the keys and values are
+"""
+    packdeepcopy(sc::SortedSet)
+    packdeepcopy(sc::SortedDict)
+    packdeepcopy(sc::SorteMultiDict)
+
+Return a packed copy of `sc`, where `sc` is a sorted
+container in which the keys and values are
 deep-copied. This function can be used to reclaim memory after many
-deletions. Time: O(*cn* log *n*)
+deletions. Time: O(*cn*)
 """
-function packdeepcopy(m::SortedSet{K,Ord}) where {K, Ord <: Ordering}
-    w = SortedSet(K[], orderobject(m))
-    for k in m
-        newk = deepcopy(k)
-        push!(w, newk)
-    end
-    return w
-end
+packdeepcopy(m::SortedSet{K,Ord}) where {K, Ord <: Ordering} =
+    SortedSet{K}(Val(true), deepcopy(m), orderobject(m))
 
 
 function Base.show(io::IO, m::SortedSet{K,Ord}) where {K,Ord <: Ordering}
-    print(io, "SortedSet(")
-    keys = K[]
-    for k in m
-        push!(keys, k)
-    end
-    print(io, keys)
-    println(io, ",")
-    print(io, orderobject(m))
-    print(io, ")")
+    print(io, "SortedSet{", K, ",", Ord, "}(")
+    print(io, collect(m), ",", orderobject(m), ")")
 end
 
 """
-    empty(sc)
+    Base.empty(sc)
 
-Returns a new `SortedDict`, `SortedMultiDict`, or `SortedSet` of the same
+Return a new `SortedDict`, `SortedMultiDict`, or `SortedSet` of the same
 type and with the same ordering as `sc` but with no entries (i.e.,
 empty). Time: O(1)
 """
