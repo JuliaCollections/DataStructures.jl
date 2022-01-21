@@ -1262,17 +1262,10 @@ function testSortedMultiDict()
 
     test_pair_array = Pair{Char}['a'=>1, 'b'=>2, 'c'=>3]
     factors5 = SortedMultiDict(test_pair_array)
-
-
-    
     my_assert(typeof(factors5) == SortedMultiDict{Char,Int,ForwardOrdering})
+    # test for `show` method for sortedmultidict
     str1 = repr(MIME{Symbol("text/plain")}(), factors5)
-    str2 = remove_spaces(str1)
-    println("str1 = ", str1)
-    println("str2 = ", str2)
-    my_assert(str2 ==
-              "SortedMultiDict{Char,Int64,ForwardOrdering}" *
-              "(ForwardOrdering(),['a'=>1,'b'=>2,'c'=>3])")
+    my_assert(Meta.parse(str1).head == :call)
     #@test factors2 == factors3   # Broken!  TODO: fix me...
     my_assert(isequal(factors2, factors3))
     my_assert(!isequal(SortedMultiDict{Int,Int,ForBack}(ForBack(true), [1=>2, 1=>3, 0=>1]),
