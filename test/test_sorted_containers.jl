@@ -1266,10 +1266,11 @@ function testSortedMultiDict()
 
     
     my_assert(typeof(factors5) == SortedMultiDict{Char,Int,ForwardOrdering})
-   # my_assert(remove_spaces(repr(MIME{Symbol("text/plain")}(), factors5)) ==
-   #           "SortedMultiDict{Char,Int64,Base.Order.ForwardOrdering}" *
-   #           "(Base.Order.ForwardOrdering(),['a'=>1,'b'=>2,'c'=>3])")
-    my_assert(remove_spaces(repr(MIME{Symbol("text/plain")}(), factors5)) ==
+    str1 = repr(MIME{Symbol("text/plain")}(), factors5)
+    str2 = remove_spaces(str1)
+    println("str1 = ", str1)
+    println("str2 = ", str2)
+    my_assert(str2 ==
               "SortedMultiDict{Char,Int64,ForwardOrdering}" *
               "(ForwardOrdering(),['a'=>1,'b'=>2,'c'=>3])")
     #@test factors2 == factors3   # Broken!  TODO: fix me...
