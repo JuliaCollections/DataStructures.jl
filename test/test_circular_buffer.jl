@@ -165,6 +165,15 @@
         end
     end
 
+    @testset "Issue 754" begin
+        cb = CircularBuffer{Int}(5)
+        @test size(cb) == (0,)
+        @test_throws InexactError push!(cb, 1.5)
+        @test size(cb) == (0,)
+        push!(cb, 1.0)
+        @test size(cb) == (1,)
+    end
+
     @testset "resize!" begin
         @testset "resize an empty buffer" begin
             cb = CircularBuffer{Int}(3)
