@@ -197,5 +197,4 @@
             @test cb == 6:20
         end
     end
-
 end
