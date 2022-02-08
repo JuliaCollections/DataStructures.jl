@@ -101,14 +101,18 @@ end
 
 Add an element to the back and overwrite front if full.
 """
-@inline function Base.push!(cb::CircularBuffer{T}, data::S) where {T, S <: T}
+@inline function Base.push!(cb::CircularBuffer{T}, data) where T
+
+    # As per the behaviour of Base.push!
+    data_converted = convert(T, data)
+
     # if full, increment and overwrite, otherwise push
     if cb.length == cb.capacity
         cb.first = (cb.first == cb.capacity ? 1 : cb.first + 1)
     else
         cb.length += 1
     end
-    @inbounds cb.buffer[_buffer_index(cb, cb.length)] = data
+    @inbounds cb.buffer[_buffer_index(cb, cb.length)] = data_converted
     return cb
 end
 
