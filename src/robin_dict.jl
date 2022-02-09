@@ -197,8 +197,8 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
     sz = length(oldk)
     newsz = _tablesz(newsz)
     if h.count == 0
-        resize!(h.keys, sz)
-        resize!(h.vals, sz)
+        resize!(h.keys, newsz)
+        resize!(h.vals, newsz)
         resize!(h.hashes, newsz)
         fill!(h.hashes, 0)
         h.count = 0
