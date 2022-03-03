@@ -74,7 +74,7 @@ original array, but sorts only by the data value:
 ```julia
 data = collect(enumerate(["foo", "bar", "baz"]))
 
-h1 = BinaryHeap(data) # Standard lexicographic ordering for tuples
+h1 = BinaryHeap(Base.Forward, data) # Standard lexicographic ordering for tuples
 first(h1)             # => (1, "foo")
 
 h2 = BinaryHeap(Base.By(last), data) # Order by 2nd element only
