@@ -10,6 +10,8 @@
         a[2:21]  .= 5
         @test sum(a[23:99]) == get_range(X1, 23,99)
         @test sum(a[55:87]) == get_range(X1, 55,87)
+        @test sum(a[2:3]) == get_range(X1, 2, 3)
+        @test sum(a[5:77]) == get_range(X1, 5,77)
     end
 
 
