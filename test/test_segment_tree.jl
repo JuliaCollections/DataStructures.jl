@@ -9,7 +9,7 @@
         a[23:45] .= 9
         a[2:21]  .= 5
         @test sum(a[23:99]) == get_range(X1, 23,99)
-
+        @test sum(a[55:87]) == get_range(X1, 55,87)
     end
 
 
