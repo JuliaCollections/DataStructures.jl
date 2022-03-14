@@ -55,3 +55,8 @@ struct functional_segment_tree{node_type<:Abstractsegmenttreenode}<:Abstractsegm
 end
 
 mutable struct Segment_tree_node{Dtype, Op, iterated_op}<:Abstractsegmenttreenode{Dtype,Op,iterated_op}
+    child_nodes::Union{NTuple{2,Segment_tree_node{Dtype, Op, iterated_op}},Nothing}
+    #Either both children are valid or none is valid. 
+    value::Dtype
+    density::Dtype
+end
