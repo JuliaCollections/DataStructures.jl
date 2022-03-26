@@ -89,6 +89,11 @@
             @test reverse(sort(vs)) == extract_all_rev!(BinaryMinHeap(vs))
         end
 
+        @testset "drain" begin
+            @test sort(vs) == sort(drain(BinaryMinHeap(vs)))
+            @test sort(vs) == sort(drain!(BinaryMinHeap(vs)))
+        end
+
         @testset "push!" begin
             @testset "push! hmin" begin
                 hmin = BinaryMinHeap{Int}()

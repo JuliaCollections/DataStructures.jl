@@ -114,6 +114,13 @@ using Base.Order: Forward, Reverse
         end
     end
 
+    @testset "drain" begin
+        vs = [10, 4, 6, 1, 16, 2, 20, 17, 13, 5]
+
+        @test sort(vs) == sort(drain(BinaryMinMaxHeap{Int}(vs)))
+        @test sort(vs) == sort(drain!(BinaryMinMaxHeap{Int}(vs)))
+    end
+
     @testset "empty!" begin
         h = BinaryMinMaxHeap([1, 4, 3, 10, 2])
         ret = empty!(h)
