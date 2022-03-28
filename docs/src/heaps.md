@@ -23,6 +23,8 @@ extract_all!(h)      # removes all elements and returns sorted array
 
 extract_all_rev!(h)  # removes all elements and returns reverse sorted array
 
+values(h)            # returns the elements of the heap in an arbitrary order
+
 sizehint!(h, n)      # reserve capacity for at least `n` elements
 ```
 
@@ -40,6 +42,8 @@ update!(h, i, v)           # updates the value of an element (referred to by the
 delete!(h, i)              # deletes the node with handle i from the heap
 
 v, i = top_with_handle(h)  # returns the top value of a heap and its handle
+
+ks = keys(h)               # returns the handles associated with the heap in an arbitrary order
 ```
 
 Currently, both min/max versions of binary heap (type `BinaryHeap`) and

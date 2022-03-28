@@ -232,25 +232,14 @@ Remove up to the `k` largest values from the heap.
     return [popmax!(h) for _ in 1:min(length(h), k)]
 end
 
+
 """
-    drain(h::BinaryMinMaxHeap)
+    values(h::BinaryMinMaxHeap)
 
 Returns the elements of the heap in an arbitrary order.
 """
-drain(h::BinaryMinMaxHeap) = h.valtree
+Base.values(h::BinaryMinMaxHeap) = h.valtree
 
-"""
-    drain!(h::BinaryMinMaxHeap)
-
-Removes and returns the elements of the heap in an arbitrary order.
-"""
-drain!(h::BinaryMinMaxHeap) = [pop!(h.valtree) for _ in 1:length(h)]
-
-function Base.push!(h::BinaryMinMaxHeap, v)
-    valtree = h.valtree
-    push!(valtree, v)
-    @inbounds _minmax_heap_bubble_up!(valtree, length(valtree))
-end
 
 """
     first(h::BinaryMinMaxHeap)

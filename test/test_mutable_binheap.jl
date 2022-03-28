@@ -113,6 +113,8 @@ end
         @test isequal(list_values(h), vs)
         @test isequal(heap_values(h), [16, 14, 10, 8, 7, 3, 9, 1, 4, 2])
         @test sizehint!(h, 100) === h
+        @test sort(vs) == sort(collect(values(h)))
+        @test 1:length(h) == sort(keys(h))
     end
 
     @testset "make mutable binary custom ordering heap" begin
