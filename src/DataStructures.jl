@@ -25,7 +25,7 @@ module DataStructures
     export FenwickTree, length, inc!, dec!, incdec!, prefixsum
 
     export AbstractHeap, compare, extract_all!, extract_all_rev!
-    export BinaryHeap, BinaryMinHeap, BinaryMaxHeap, nlargest, nsmallest, drain, drain!
+    export BinaryHeap, BinaryMinHeap, BinaryMaxHeap, nlargest, nsmallest
     export MutableBinaryHeap, MutableBinaryMinHeap, MutableBinaryMaxHeap
     export heapify!, heapify, heappop!, heappush!, isheap
     export BinaryMinMaxHeap, popmin!, popmax!, popall!
