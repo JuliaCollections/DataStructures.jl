@@ -232,6 +232,11 @@ Remove up to the `k` largest values from the heap.
     return [popmax!(h) for _ in 1:min(length(h), k)]
 end
 
+function Base.push!(h::BinaryMinMaxHeap, v)
+    valtree = h.valtree
+    push!(valtree, v)
+    @inbounds _minmax_heap_bubble_up!(valtree, length(valtree))
+end
 
 """
     values(h::BinaryMinMaxHeap)
