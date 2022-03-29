@@ -47,12 +47,22 @@ end
 mutable struct Segment_tree{node_type<:Abstractsegmenttreenode}<:Abstractsegmenttree{node_type}
     size::UInt64
     head::node_type
+    
 end
+function Segment_tree(size::Number,Dtype::Type,op::Function, iterated_op::Function)
+    newsize = convert(UInt64,size)
+    node_type = Segment_tree_node{Dtype,op,iterated_op}
+    return Segment_tree{node_type}(newsize, node_type)
+end
+Segment_tree(size::Number,::Type{T}, ::typeof(+)) where {T<:Real} = Segment_tree(size,T,+,*)
+
 
 struct functional_segment_tree{node_type<:Abstractsegmenttreenode}<:Abstractsegmenttree{node_type}
     size::UInt64
     head::node_type
 end
+is_functional(functional_segment_tree) = true
+
 
 mutable struct Segment_tree_node{Dtype, Op, iterated_op}<:Abstractsegmenttreenode{Dtype,Op,iterated_op}
     child_nodes::Union{NTuple{2,Segment_tree_node{Dtype, Op, iterated_op}},Nothing}
@@ -60,3 +70,4 @@ mutable struct Segment_tree_node{Dtype, Op, iterated_op}<:Abstractsegmenttreenod
     value::Dtype
     density::Dtype
 end
+
