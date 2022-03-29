@@ -54,8 +54,14 @@ function Segment_tree(size::Number,Dtype::Type,op::Function, iterated_op::Functi
     node_type = Segment_tree_node{Dtype,op,iterated_op}
     return Segment_tree{node_type}(newsize, node_type)
 end
-Segment_tree(size::Number,::Type{T}, ::typeof(+)) where {T<:Real} = Segment_tree(size,T,+,*)
 
+Addition_supported = Union{Real, Complex}
+
+Segment_tree(size::Number, T::Type, op::Function) = Segment_tree(size, T, op, (x,y)->repeat_op(x,y,op))
+Segment_tree(size::Number,::Type{T}, ::typeof(+)) where {T<:Addition_supported} = Segment_tree(size,T,+,*)
+Segment_tree(size::Number,::Type{Array{T,N}}, ::typeof(+)) where {T<:Addition_supported,N} = Segment_tree(size,Array{T,N},+,*)
+Segment_tree(size::Number,::Type{T}, ::typeof(*)) where {T<:Addition_supported} = Segment_tree(size,T,*,^)
+Segment_tree(size::Number,::Type{Array{T,N}}, ::typeof(*)) where {T<:Addition_supported,N} = Segment_tree(size,Array{T,N},*,^)
 
 struct functional_segment_tree{node_type<:Abstractsegmenttreenode}<:Abstractsegmenttree{node_type}
     size::UInt64
