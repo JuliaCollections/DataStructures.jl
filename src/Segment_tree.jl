@@ -52,7 +52,7 @@ end
 function Segment_tree(size::Number,Dtype::Type,op::Function, iterated_op::Function)
     newsize = convert(UInt64,size)
     node_type = Segment_tree_node{Dtype,op,iterated_op}
-    return Segment_tree{node_type}(newsize, node_type)
+    return Segment_tree{node_type}(newsize, node_type())
 end
 
 Addition_supported = Union{Real, Complex}
@@ -70,10 +70,30 @@ end
 is_functional(functional_segment_tree) = true
 
 
-mutable struct Segment_tree_node{Dtype, Op, iterated_op}<:Abstractsegmenttreenode{Dtype,Op,iterated_op}
+mutable struct Segment_tree_node{Dtype, Op, iterated_op, identity}<:Abstractsegmenttreenode{Dtype,Op,iterated_op}
     child_nodes::Union{NTuple{2,Segment_tree_node{Dtype, Op, iterated_op}},Nothing}
     #Either both children are valid or none is valid. 
     value::Dtype
     density::Dtype
+    function Segment_tree_node()
+        return new(nothing)
+    end
 end
 
+mutable struct Segment_tree_node_without_identity{Dtype,Op,iterated_op}<:Abstractsegmenttreenode{Dtype,Op,iterated_op}
+    child_nodes::Union{NTuple{2,Segment_tree_node{Dtype, Op, iterated_op}},Nothing}
+    #Either both children are valid or none is valid. 
+    #This variant will throw an error instead of returning an identity.
+    #This is not very recommended, as complexity is required to bypass this.
+    value::Union{Dtype,Nothing}
+    density::Union{Dtype,Nothing}
+    function Segment_tree_node_without_identity()
+        return new(nothing)
+    end
+end
+
+
+
+function Segment_tree_node()
+    
+end
