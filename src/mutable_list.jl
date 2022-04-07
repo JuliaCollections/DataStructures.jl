@@ -151,6 +151,9 @@ function Base.setindex!(l::MutableLinkedList{T}, data, idx::Int) where T
 end
 
 function Base.append!(l1::MutableLinkedList{T}, l2::MutableLinkedList{T}) where T
+    if isempty(l2)
+        return l1
+    end
     l1.node.prev.next = l2.node.next # l1's last's next is now l2's first
     l1.node.prev = l2.node.prev.next # l1's last node is now l2's last node
     l2.node.prev.next = l1.node # l2's last's next is now l1.node
