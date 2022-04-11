@@ -166,8 +166,13 @@ function get_range(X::Standard_Segment_tree_node, Query_low, Query_high, Current
     end
 end
 
-function get_left_range(X::Standard_Segment_tree_node, Query_low, Current_low)
+function get_entire_range(X::Standard_Segment_tree_node, range)
+    #Working in progress.
+    
+end
 
+function get_left_range(X::Standard_Segment_tree_node, Query_low, Current_low)
+    
 end
 
 function get_right_range(X::Standard_Segment_tree_node, Query_high, Current_high)
