@@ -123,6 +123,7 @@ function Segment_tree_node(Dtype::Type, Op::Function, iterated_op::Function)
 end
 
 Standard_Segment_tree_node = Union{Segment_tree_node,Segment_tree_node_without_identity} #Standard meaning not every Segment_tree_node has this.
+#TODO: consider refactoring this into its abstract type instead of as union.
 
 get_left_child(X::Standard_Segment_tree_node) = X.child_nodes[1]
 get_right_child(X::Standard_Segment_tree_node) = X.child_nodes[2]
