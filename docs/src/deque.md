@@ -4,7 +4,8 @@ A Deque (short for Double-ended Queue) is an abstract data type that generalizes
 a Queue for which elements can be added to or removed from both the front (head)
 and the back (tail) in $O(1)$ time complexity.
 
-The type `Deque` implements the Double-ended Queue using a list of fixed-size blocks.
+The type `Deque` implements the Double-ended Queue as a list of fixed-size blocks
+using an [unrolled linked list](https://en.wikipedia.org/wiki/Unrolled_linked_list).
 
 !!! note
     Julia's `Vector` type also provides this interface, and thus can
