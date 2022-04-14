@@ -1,7 +1,6 @@
 ```@meta
 DocTestSetup = :(using DataStructures)
 ```
-
 # Priority Queue
 
 The `PriorityQueue` type provides a basic priority queue implementation
@@ -9,62 +8,88 @@ allowing for arbitrary key and priority types. Multiple identical keys
 are not permitted, but the priority of existing keys can be changed
 efficiently.
 
-Usage:
+## Constructors
 
-```julia
-PriorityQueue{K, V}()     # construct a new priority queue with keys of type K and priorities of type V (forward ordering by default)
-PriorityQueue{K, V}(ord)  # construct a new priority queue with the given types and ordering ord (Base.Order.Forward or Base.Order.Reverse)
-push!(pq, k=>v)           # insert the key k into pq with priority v
-popfirst!(pq)             # remove and return the lowest priority key and value
-first(pq)                 # return the lowest priority key and value without removing it
-delete!(pq, k)            # delete the mapping for the given key in a priority queue, and return the priority queue.
+```@autodocs
+Modules = [DataStructures]
+Pages = ["src/priorityqueue.jl"]
+Order = [:type]
 ```
 
-`PriorityQueue` also behaves similarly to a `Dict` in that keys can be
-inserted and priorities accessed or changed using indexing notation.
+## Usage
 
-Examples:
+The `PriorityQueue` type implements the following methods:
 
-```jldoctest
-julia> pq = PriorityQueue();
+- [`delete!(pd::PriorityQueue, key)`](@ref)
+- [`empty!(pd::PriorityQueue)`](@ref)
+- [`first(pd::PriorityQueue)`](@ref)
+- [`haskey(pd::PriorityQueue, key)`](@ref)
+- [`isempty(pd::PriorityQueue)`](@ref)
+- [`length(pd::PriorityQueue)`](@ref)
+- [`popfirst!(pd::PriorityQueue)`](@ref)
+- [`push!(pd::PriorityQueue)`](@ref)
 
-julia> # Insert keys with associated priorities
-       pq["a"] = 10; pq["b"] = 5; pq["c"] = 15; pq
-PriorityQueue{Any, Any, Base.Order.ForwardOrdering} with 3 entries:
-  "b" => 5
-  "a" => 10
-  "c" => 15
+!!! note
+    `PriorityQueue` also behaves similarly to a `Dict` in that keys can be
+    inserted and priorities accessed or changed using indexing notation.
 
-julia> # Change the priority of an existing key
-       pq["a"] = 0; pq
-PriorityQueue{Any, Any, Base.Order.ForwardOrdering} with 3 entries:
-  "a" => 0
-  "b" => 5
-  "c" => 15
-```
+    Examples:
 
-It is also possible to iterate over the priorities and elements of the queue in sorted order.
+    ```jldoctest
+    julia> pq = PriorityQueue();
 
-```jldoctest
-julia> pq = PriorityQueue("a"=>2, "b"=>1, "c"=>3)
-PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
-  "b" => 1
-  "a" => 2
-  "c" => 3
+    julia> # Insert keys with associated priorities
+           pq["a"] = 10; pq["b"] = 5; pq["c"] = 15; pq
+    PriorityQueue{Any, Any, Base.Order.ForwardOrdering} with 3 entries:
+      "b" => 5
+      "a" => 10
+      "c" => 15
 
-julia> for priority in values(pq)
-           println(priority)
-       end
-1
-2
-3
+    julia> # Change the priority of an existing key
+           pq["a"] = 0; pq
+    PriorityQueue{Any, Any, Base.Order.ForwardOrdering} with 3 entries:
+      "a" => 0
+      "b" => 5
+      "c" => 15
+    ```
 
-julia> for element in keys(pq)
-           println(element)
-       end
-b
-a
-c
+    It is also possible to iterate over the priorities and elements of the queue in sorted order.
+
+    ```jldoctest
+    julia> pq = PriorityQueue("a" => 2, "b" => 1, "c" => 3)
+    PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
+      "b" => 1
+      "a" => 2
+      "c" => 3
+
+    julia> for priority in values(pq)
+               println(priority)
+           end
+    1
+    2
+    3
+
+    julia> for element in keys(pq)
+               println(element)
+           end
+    b
+    a
+    c
+
+    julia> for (element, priority) in pq
+               println("$element $priority")
+           end
+    b 1
+    a 2
+    c 3
+    ```
+
+------
+
+```@autodocs
+Modules = [DataStructures]
+Pages = ["src/priorityqueue.jl"]
+Order = [:function]
 ```
 
 ```@meta

@@ -6,15 +6,24 @@
 """
     PriorityQueue{K, V}([ord])
 
-Construct a new [`PriorityQueue`](@ref), with keys of type
-`K` and values/priorities of type `V`.
-If an order is not given, the priority queue is min-ordered using
+Construct a new `PriorityQueue`, with keys of type `K` and values/priorities
+of type `V`. If an order is not given, the priority queue is min-ordered using
 the default comparison for `V`.
 
 A `PriorityQueue` acts like a `Dict`, mapping values to their
 priorities. New elements are added using `push!` and retrieved
 using `popfirst!` or `popat!` based on their priority.
 
+Parameters
+---------
+
+`K::Type` Data type for the keys
+
+`V::Type` Data type for the values/priorities
+
+`ord::Base.Ordering` Priority queue ordering
+
+# Examples
 ```jldoctest
 julia> PriorityQueue(Base.Order.Forward, "a" => 2, "b" => 3, "c" => 1)
 PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
@@ -112,15 +121,49 @@ _priority_queue_with_eltype(o::Ord, kv, ::Type            ) where {    Ord} = Pr
 ##       If deemed possible, please create a test and uncomment this definition.
 # _priority_queue_with_eltype{  D,Ord}(o::Ord, ps, ::Type{Pair{K,V} where K}) = PriorityQueue{Any,  D,Ord}(o, ps)
 
+
+"""
+    length(pq::PriorityQueue)
+
+Return the number of pairs (`k`, `v`) in the priority queue `pq`.
+"""
 Base.length(pq::PriorityQueue) = length(pq.xs)
+
+"""
+    isempty(pq::PriorityQueue)
+
+Verify if priority queue `pq` is empty.
+"""
 Base.isempty(pq::PriorityQueue) = isempty(pq.xs)
+
+"""
+    haskey(pq::PriorityQueue, key)
+
+Verify if priority queue `pq` has `key` in its keys.
+
+# Example
+
+```jldoctest
+ulia> pq = PriorityQueue("a" => 1, "b" => 2, "c" => 3)
+PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
+  "a" => 1
+  "b" => 2
+  "c" => 3
+
+julia> haskey(pq, "a")
+true
+
+julia> haskey(pq, "e")
+false
+```
+"""
 Base.haskey(pq::PriorityQueue, key) = haskey(pq.index, key)
 
 """
-    first(pq)
+    first(pq::PriorityQueue)
 
-Return the lowest priority key and value from a priority queue without removing that
-pair from the queue.
+Return the lowest priority pair (`k`, `v`) from `pq` without removing it from the
+priority queue.
 """
 Base.first(pq::PriorityQueue) = first(pq.xs)
 
@@ -208,23 +251,27 @@ function Base.setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
 end
 
 """
-    push!(pq, k=>v)
+    push!(pq::PriorityQueue{K,V}, pair::Pair{K,V}) where {K,V}
 
 Insert the a key `k` into a priority queue `pq` with priority `v`.
 
-```jldoctest
-julia> a = PriorityQueue("a"=>1, "b"=>2, "c"=>3)
-PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
-  "a" => 1
-  "b" => 2
-  "c" => 3
+# Examples 
 
-julia> push!(a, "d"=>4)
+```jldoctest
+julia> a = PriorityQueue("a" => 1, "b" => 2, "c" => 3, "e" => 5)
 PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 4 entries:
   "a" => 1
   "b" => 2
   "c" => 3
+  "e" => 5
+
+julia> push!(a, "d" => 4)
+PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 5 entries:
+  "a" => 1
+  "b" => 2
+  "c" => 3
   "d" => 4
+  "e" => 5
 ```
 """
 function Base.push!(pq::PriorityQueue{K,V}, pair::Pair{K,V}) where {K,V}
@@ -242,9 +289,11 @@ end
 Base.push!(pq::PriorityQueue{K,V}, kv::Pair) where {K,V} = push!(pq, Pair{K,V}(kv.first, kv.second))
 
 """
-    popfirst!(pq)
+    popfirst!(pq::PriorityQueue)
 
-Remove and return the lowest priority key and value from a priority queue as a pair.
+Remove and return the lowest priority key and value from a priority queue `pq` as a pair.
+
+# Examples
 
 ```jldoctest
 julia> a = PriorityQueue(Base.Order.Forward, "a" => 2, "b" => 3, "c" => 1)
@@ -285,12 +334,14 @@ function popat!(pq::PriorityQueue, key)
 end
 
 """
-    delete!(pq, key)
+    delete!(pq::PriorityQueue, key)
 
-Delete the mapping for the given key in a priority queue, and return the priority queue.
+Delete the mapping for the given `key` in a priority queue `pq` and return the priority queue.
+
 # Examples
+
 ```jldoctest
-julia> q = PriorityQueue(Base.Order.Forward, "a"=>2, "b"=>3, "c"=>1)
+julia> q = PriorityQueue(Base.Order.Forward, "a" => 2, "b" => 3, "c" => 1)
 PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
   "c" => 1
   "a" => 2
@@ -306,6 +357,11 @@ function Base.delete!(pq::PriorityQueue, key)
     return pq
 end
 
+"""
+    empty!(pq::PriorityQueue)  
+
+Reset priority queue `pq`.
+"""
 function Base.empty!(pq::PriorityQueue)
     empty!(pq.xs)
     empty!(pq.index)
