@@ -120,7 +120,7 @@ get_identity(::Type{X},typeof(*)) where {X<:Standard_Field} = one(X)
 function Segment_tree_node(Dtype::Type, Op::Function, iterated_op::Function)
     if get_identity(Dtype,Op) isa Nothing
         #Consider this solution.
-        #Workaround_op(x,y) = ifelse(x==nothing, y, Op(x,y))
+        #Workaround_op(x,y) = ifelse(x==nothing, y, ifelse(y==nothing,x,Op(x,y)))
         #Workaround_iterated_op(x,y) = ifelse(x==nothing, nothing, iterated_op(x,y))
         return Segment_tree_node_without_identity{Dtype,Op,iterated_op}()
     else
