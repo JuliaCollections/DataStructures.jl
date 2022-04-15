@@ -190,6 +190,10 @@ end
 function get_left_range(X::Standard_Segment_tree_node, Query_low, Current_low, Current_high)
     answer = get_element_identity(X)
     while true
+        if X.child_nodes == nothing
+            return get_op(X)(get_iterated_op(X)(X.density, Current_high-Query_low+1), answer)
+        end
+
         Current_mid = div(Current_low+Current_high,2)
         if Query_low > Current_mid
             Current_low = Current_mid+1
