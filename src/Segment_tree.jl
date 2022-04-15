@@ -171,7 +171,7 @@ function get_range(X::Standard_Segment_tree_node, Query_low, Query_high, Current
             Current_low = Current_mid+1
             X = get_right_child(X)
         else
-            return get_op(X)(get_left_range(get_left_child(X), Query_low, Current_low),get_right_range(get_right_child(X,Query_high, Current_high)))
+            return get_op(X)(get_left_range(get_left_child(X), Query_low, Current_low,Current_high),get_right_range(get_right_child(X),Query_high, Current_low,Current_high))
             #Working in progress.
         end
 
