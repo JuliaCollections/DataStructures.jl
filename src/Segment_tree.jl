@@ -216,9 +216,13 @@ function get_right_range(X::Standard_Segment_tree_node, Query_high, Current_low,
         end
 
         Current_mid = div(Current_low+Current_high,2)
-        if #
+        if Query_high <= Current_mid
+            Query_high = Current_mid
+            X = get_left_child(X)
         else
-
+            answer = get_op(X)(get_entire_range(get_left_child(X),Current_mid-Current_low+1), answer)
+            Current_low = Current_mid+1
+            X = get_right_child(X)
         end
         #Working in progress.
     end
