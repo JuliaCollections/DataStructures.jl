@@ -208,6 +208,18 @@ function get_left_range(X::Standard_Segment_tree_node, Query_low, Current_low, C
         
 end
 
-function get_right_range(X::Standard_Segment_tree_node, Query_high, Current_high)
+function get_right_range(X::Standard_Segment_tree_node, Query_high, Current_low,Current_high)
+    answer = get_element_identity(X)
+    while true
+        if X.child_nodes == nothing
+            return 
+        end
 
+        Current_mid = div(Current_low+Current_high,2)
+        if #
+        else
+
+        end
+        #Working in progress.
+    end
 end
