@@ -4,6 +4,9 @@ It should be made available as part of the (MIT-licensed) Datastructures.jl pack
 Feel free to use or extend this code.
 =#
 
+#cd("Data_structure)
+#(package) activate .
+
 
 
 abstract type Abstractsegmenttreenode{Dtype, Op, iterated_op} end
