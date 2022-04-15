@@ -177,7 +177,7 @@ end
 
 function get_left_range(X::Standard_Segment_tree_node, Query_low, Current_low, Current_high)
     while true
-
+        #Working in progress.
     end
         
 end
