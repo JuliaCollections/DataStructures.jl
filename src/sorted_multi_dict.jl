@@ -150,7 +150,7 @@ const SMDToken = Tuple{SortedMultiDict, IntSemiToken}
 ## points to the newly inserted item.
 
 """
-    insert!(sc, k)
+    insert!(sc, k, v)
 
 Argument `sc` is a SortedDict or SortedMultiDict, `k` is a key and
 `v` is the corresponding value. This inserts the `(k,v)` pair into
