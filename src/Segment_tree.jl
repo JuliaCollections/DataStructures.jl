@@ -168,11 +168,18 @@ end
 
 function get_entire_range(X::Standard_Segment_tree_node, range)
     #Working in progress.
-    
+    if X.child_nodes isa Nothing
+        return get_iterated_op(X)(X.density, range)
+    else
+        return X.value
+    end
 end
 
-function get_left_range(X::Standard_Segment_tree_node, Query_low, Current_low)
-    
+function get_left_range(X::Standard_Segment_tree_node, Query_low, Current_low, Current_high)
+    while true
+        
+    end
+        
 end
 
 function get_right_range(X::Standard_Segment_tree_node, Query_high, Current_high)
