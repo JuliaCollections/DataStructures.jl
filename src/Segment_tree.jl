@@ -116,11 +116,16 @@ get_identity(::Type{X},typeof(+)) where {X<:Standard_Field} = zero(X)
 get_identity(::Type{X},typeof(*)) where {X<:Standard_Field} = one(X)
 function Segment_tree_node(Dtype::Type, Op::Function, iterated_op::Function)
     if get_identity(Dtype,Op) isa Nothing
+        #Consider this solution.
+        #Workaround_op(x,y) = ifelse(x==nothing, y, Op(x,y))
+        #Workaround_iterated_op(x,y) = ifelse(x==nothing, nothing, iterated_op(x,y))
         return Segment_tree_node_without_identity{Dtype,Op,iterated_op}()
     else
         return Segment_tree_node{Dtype,Op,iterated_op,get_identity(Dtype,Op)}()
     end
 end
+get_element_identity(::Segment_tree_node{Dtype, Op, iterated_op, identity}) where {Dtype, Op, iterated_op, identity} = identity
+get_element_identity(::Segment_tree_node_without_identity) = nothing
 
 Standard_Segment_tree_node = Union{Segment_tree_node,Segment_tree_node_without_identity} #Standard meaning not every Segment_tree_node has this.
 #TODO: consider refactoring this into its abstract type instead of as union.
@@ -151,12 +156,16 @@ function get_range(X::Standard_Segment_tree_node, Query_low, Query_high, Current
     #end
     #Split into two functions, ones where you only care about prefix, and the other where you only care about suffix.
     while true
-        Current_mid = div(low+high,2)
+        if X.child_nodes == nothing
+            return get_iterated_op(X)(X.density, Query_high-Query_low+1) 
+        end
+
+        Current_mid = div(Current_low+Current_high,2)
         if Query_high <= Current_mid
             Current_high = Current_mid
             X = get_left_child(X)
         else if Query_low > Current_mid
-            Current_low = Current_mid
+            Current_low = Current_mid+1
             X = get_right_child(X)
         else
             return get_op(X)(get_left_range(get_left_child(X), Query_low, Current_low),get_right_range(get_right_child(X,Query_high, Current_high)))
@@ -176,7 +185,16 @@ function get_entire_range(X::Standard_Segment_tree_node, range)
 end
 
 function get_left_range(X::Standard_Segment_tree_node, Query_low, Current_low, Current_high)
+    answer = get_element_identity(X)
     while true
+        Current_mid = div(Current_low+Current_high,2)
+        if Query_low > Current_mid
+            Current_low = Current_mid+1
+            X = get_right_child(X)
+        else
+            answer = get_op(X)(answer,get_entire_range(get_right_child(X, Current_high-Current_mid)))
+            X = get_left_child(X)
+        end
         #Working in progress.
     end
         
