@@ -200,6 +200,7 @@ function get_left_range(X::Standard_Segment_tree_node, Query_low, Current_low, C
             X = get_right_child(X)
         else
             answer = get_op(X)(answer,get_entire_range(get_right_child(X, Current_high-Current_mid)))
+            Current_high = Current_mid
             X = get_left_child(X)
         end
         #Working in progress.
