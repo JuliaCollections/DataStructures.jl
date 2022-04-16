@@ -268,3 +268,30 @@ function Base.getindex(tree::AVLTree{K}, ind::Integer) where K
     value = traverse_tree(tree.root, ind)
     return value
 end
+
+"""
+    maximum(tree::AVLTree{K}) where K 
+
+Return biggest key in `tree` AVL Tree.
+"""
+function Base.maximum(tree::AVLTree{K}) where K
+    node = tree.root
+    while node.rightChild != nothing
+        node = node.rightChild
+    end
+    return node.data
+end
+
+"""
+    minimum(tree::AVLTree{K}) where K 
+
+Return smallest key in `tree` AVL Tree.
+"""
+function Base.minimum(tree::AVLTree{K}) where K
+    node = tree.root
+    while node.leftChild != nothing
+        node = node.leftChild
+    end
+    return node.data
+end
+
