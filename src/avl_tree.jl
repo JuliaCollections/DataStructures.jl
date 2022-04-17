@@ -270,11 +270,11 @@ function Base.getindex(tree::AVLTree{K}, ind::Integer) where K
 end
 
 """
-    maximum(tree::AVLTree{K}) where K 
+    maximum(tree::AVLTree)
 
 Return biggest key in `tree` AVL Tree.
 """
-function Base.maximum(tree::AVLTree{K}) where K
+function Base.maximum(tree::AVLTree)
     node = tree.root
     while node.rightChild != nothing
         node = node.rightChild
@@ -283,11 +283,11 @@ function Base.maximum(tree::AVLTree{K}) where K
 end
 
 """
-    minimum(tree::AVLTree{K}) where K 
+    minimum(tree::AVLTree)
 
 Return smallest key in `tree` AVL Tree.
 """
-function Base.minimum(tree::AVLTree{K}) where K
+function Base.minimum(tree::AVLTree)
     node = tree.root
     while node.leftChild != nothing
         node = node.leftChild
