@@ -121,18 +121,18 @@
         for i in 1:32
             push!(t8, i)
         end
-        @test minimum(tree) == 1
-        @test maximum(tree) == 32
-        delete!(tree, 32)
-        @test maximum(tree) == 31
-        delete!(tree, 1)
-        @test minimum(tree) == 2
-        delete!(tree, 20)
-        delete!(tree, 18)
-        delete!(tree, 5)
-        delete!(tree, 25)
-        @test maximum(tree) == 31
-        @test minimum(tree) == 2
+        @test minimum(t8) == 1
+        @test maximum(t8) == 32
+        delete!(t8, 32)
+        @test maximum(t8) == 31
+        delete!(t8, 1)
+        @test minimum(t8) == 2
+        delete!(t8, 20)
+        delete!(t8, 18)
+        delete!(t8, 5)
+        delete!(t8, 25)
+        @test maximum(t8) == 31
+        @test minimum(t8) == 2
     end
 
     @testset "minimum_node" begin
