@@ -91,7 +91,7 @@ mutable struct Segment_tree_node{Dtype, Op, iterated_op, identity}<:Abstractsegm
     density::Dtype
     #Implicitly have information about where it represents.
     function Segment_tree_node()
-        return new(nothing)
+        return new{Dtype,Op,iterated_op,identity}(nothing)
     end
 end
 
@@ -103,7 +103,7 @@ mutable struct Segment_tree_node_without_identity{Dtype,Op,iterated_op}<:Abstrac
     value::Union{Dtype,Nothing}
     density::Union{Dtype,Nothing}
     function Segment_tree_node_without_identity()
-        return new(nothing)
+        return new{Dtype,Op,iterated_op}(nothing)
     end
 end
 
