@@ -18,7 +18,7 @@ This package implements a variety of data structures, including
 -   Priority Queue
 -   Fenwick Tree
 -   Accumulators and Counters (i.e. Multisets / Bags)
--   Disjoint-Set
+-   Disjoint-Sets
 -   Binary Heap
 -   Mutable Binary Heap
 -   Ordered Dicts and Sets
