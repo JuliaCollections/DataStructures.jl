@@ -143,6 +143,9 @@ function get_range(X::Abstractsegmenttree, low, high)
     return get_range(get_head(X),low,high, 1, sizeof(X))
 end
 
+function set_range!(X::Abstractsegmenttree, low,high)
+    set_range!(get_head(X),low,high,1,sizeof(X))
+end
 
 
 
@@ -225,5 +228,27 @@ function get_right_range(X::Standard_Segment_tree_node, Query_high, Current_low,
             X = get_right_child(X)
         end
         #Working in progress.
+    end
+end
+
+function set_range!(X::Standard_Segment_tree_node, Query_low, Query_high, Current_low, Current_high)
+    while true
+        if X.child_nodes == nothing
+            #Do something about it to set the range correctly.
+            #Perhaps construct empty segment tree nodes?
+        end
+
+        Current_mid = div(Current_low+Current_high,2)
+        if Query_high <= Current_mid
+            Current_high = Current_mid
+            X = get_left_child(X)
+        else if Query_low > Current_mid
+            Current_low = Current_mid+1
+            X = get_right_child(X)
+        else
+            #Time to set left range and set right range.
+            #Working in progress.
+        end
+
     end
 end
