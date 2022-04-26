@@ -189,6 +189,76 @@
             @test  n2.left === n3
             @test  n2.right === n5
         end
+
+        begin
+            n1 = LinkCutTreeNode{Int}(1)
+            n2 = LinkCutTreeNode{Int}(2)
+            n3 = LinkCutTreeNode{Int}(3)
+            n4 = LinkCutTreeNode{Int}(4)
+            n5 = LinkCutTreeNode{Int}(5)
+            n6 = LinkCutTreeNode{Int}(6)
+            n7 = LinkCutTreeNode{Int}(7)
+            n8 = LinkCutTreeNode{Int}(8)
+            n9 = LinkCutTreeNode{Int}(9)
+            n10 = LinkCutTreeNode{Int}(10)
+
+            attach_left!(n3, n2)
+            attach_right!(n4, n2)
+            n2.path_parent = n1
+            attach_left!(n5, n3)
+            attach_right!(n6, n3)
+            attach_left!(n7, n5)
+            attach_right!(n8, n5)
+            attach_left!(n9, n7)
+            attach_right!(n10, n7)
+
+            splay!(n7)
+
+            @test  n7.path_parent === n1
+            @test  n7.left === n9
+            @test  n7.right === n2
+            @test  n2.left === n5
+            @test  n2.right === n4
+            @test  n5.left === n10
+            @test  n5.right === n3
+            @test  n3.left === n8
+            @test  n3.right === n6
+        end
+
+        begin
+            n1 = LinkCutTreeNode{Int}(1)
+            n2 = LinkCutTreeNode{Int}(2)
+            n3 = LinkCutTreeNode{Int}(3)
+            n4 = LinkCutTreeNode{Int}(4)
+            n5 = LinkCutTreeNode{Int}(5)
+            n6 = LinkCutTreeNode{Int}(6)
+            n7 = LinkCutTreeNode{Int}(7)
+            n8 = LinkCutTreeNode{Int}(8)
+            n9 = LinkCutTreeNode{Int}(9)
+            n10 = LinkCutTreeNode{Int}(10)
+
+            attach_left!(n3, n2)
+            attach_right!(n4, n2)
+            n2.path_parent = n1
+            attach_left!(n5, n4)
+            attach_right!(n6, n4)
+            attach_left!(n7, n6)
+            attach_right!(n8, n6)
+            attach_left!(n9, n8)
+            attach_right!(n10, n8)
+
+            splay!(n8)
+
+            @test  n8.path_parent === n1
+            @test  n8.left === n2
+            @test  n8.right === n10
+            @test  n2.left === n3
+            @test  n2.right === n6
+            @test  n6.left === n4
+            @test  n6.right === n9
+            @test  n4.left === n5
+            @test  n4.right === n7
+        end
     end
 
     @testset "access!" begin
