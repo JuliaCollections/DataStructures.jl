@@ -36,7 +36,8 @@ tests = ["deprecations",
          "swiss_dict",
          "avl_tree",
          "red_black_tree",
-         "splay_tree"
+         "splay_tree",
+         "link_cut_tree"
         ]
 
 if length(ARGS) > 0

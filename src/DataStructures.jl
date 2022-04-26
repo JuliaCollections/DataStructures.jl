@@ -57,6 +57,7 @@ module DataStructures
     export SplayTree, maximum_node
     export AVLTree, sorted_rank
     export SplayTree, maximum_node
+    export LinkCutTreeNode, access!, link!, cut!, find_root!, splay!
 
     export findkey
 
@@ -113,6 +114,7 @@ module DataStructures
     include("avl_tree.jl")
     include("red_black_tree.jl")
     include("splay_tree.jl")
+    include("link_cut_tree.jl")
 
     include("deprecations.jl")
 end
