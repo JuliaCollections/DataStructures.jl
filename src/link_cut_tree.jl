@@ -55,22 +55,13 @@ Make `w` the parent of `v`.
 Assumes `w` and `v` are nodes in different trees, and that `v` is a root node.
 """
 function link!(v::LinkCutTreeNode, w::LinkCutTreeNode)
-    # v is root of a tree
-    @assert v.path_parent === nothing
-    @assert v.left === nothing
+    if v.path_parent === nothing && v.left === nothing
+        access!(v)
+        access!(w)
 
-    access!(v)
-    access!(w)
-
-    @assert v.parent === nothing # v splayed
-    @assert v.path_parent === nothing # v accessed (on path from root)
-    @assert v.left === nothing # v root of tree
-    @assert v.right === nothing # v end of path (accessed)
-    @assert w.parent === nothing # w splayed
-    @assert w.path_parent === nothing # v accessed (on path from root)
-
-    v.left = w
-    w.parent = v
+        v.left = w
+        w.parent = v
+    end
 end
 
 """
@@ -81,12 +72,8 @@ Separate `v` from its parent
 function cut!(v::LinkCutTreeNode)
     access!(v)
 
-    @assert v.right === nothing # v end of path (accessed)
-    @assert v.path_parent === nothing # v accessed, so on path from root
-
     if v.left !== nothing
         v.left.parent = nothing
-        @assert v.left.path_parent === nothing
         v.left = nothing
     end
 end
@@ -120,8 +107,6 @@ function rotate_left!(v::LinkCutTreeNode)
     # ...   b
 
     w = v.right
-    @assert w !== nothing
-
     b = w.left
 
     v.right = b
@@ -156,8 +141,6 @@ function rotate_right!(v::LinkCutTreeNode)
     #       b     ...
 
     u = v.left
-    @assert u !== nothing
-
     b = u.right
 
     v.left = b
