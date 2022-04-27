@@ -55,14 +55,14 @@ Make `w` the parent of `v`.
 Assumes `w` and `v` are nodes in different trees, and that `v` is a root node.
 """
 function link!(v::LinkCutTreeNode, w::LinkCutTreeNode)
-    access!(v)
-    access!(w)
-
     # assumes find_root!(v) !== find_root!(w)
 
+    access!(v)
     if v.left !== nothing
         throw(ArgumentError("First argument must be root of tree"))
     end
+
+    access!(w)
 
     # Now: w.parent === nothing (w splayed) and
     # w.path_parent === nothing (w accessed - on path from root)
