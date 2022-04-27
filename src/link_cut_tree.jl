@@ -58,9 +58,14 @@ function link!(v::LinkCutTreeNode, w::LinkCutTreeNode)
     access!(v)
     access!(w)
 
+    # assumes find_root!(v) !== find_root!(w)
+
     if v.left !== nothing
         throw(ArgumentError("First argument must be root of tree"))
     end
+
+    # Now: w.parent === nothing (w splayed) and
+    # w.path_parent === nothing (w accessed - on path from root)
 
     v.left = w
     w.parent = v
