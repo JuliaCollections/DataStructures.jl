@@ -357,6 +357,15 @@
             @test n2.left === n1
             @test n1.parent === n2
         end
+
+        begin
+            n1 = LinkCutTreeNode{Int}(1)
+            n2 = LinkCutTreeNode{Int}(2)
+
+            n2.path_parent = n1
+
+            @test_throws ArgumentError link!(n2, n1)
+        end
     end
 
     @testset "cut!" begin
