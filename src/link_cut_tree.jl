@@ -78,6 +78,13 @@ function cut!(v::LinkCutTreeNode)
     end
 end
 
+function _find_path_root(v::LinkCutTreeNode)
+    while v.left !== nothing
+        v = v.left
+    end
+    return v
+end
+
 """
     find_root!(v)
 
@@ -85,11 +92,9 @@ Return the root node of the tree that holds `v`
 """
 function find_root!(v::LinkCutTreeNode)
     access!(v)
-    while v.left !== nothing
-        v = v.left
-    end
-    access!(v)
-    return v
+    r = _find_path_root(v)
+    access!(r)
+    return r
 end
 
 function rotate_left!(v::LinkCutTreeNode)
