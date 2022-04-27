@@ -55,13 +55,15 @@ Make `w` the parent of `v`.
 Assumes `w` and `v` are nodes in different trees, and that `v` is a root node.
 """
 function link!(v::LinkCutTreeNode, w::LinkCutTreeNode)
-    if v.path_parent === nothing && v.left === nothing
-        access!(v)
-        access!(w)
+    access!(v)
+    access!(w)
 
-        v.left = w
-        w.parent = v
+    if v.left !== nothing
+        throw(ArgumentError("First argument must be root of tree"))
     end
+
+    v.left = w
+    w.parent = v
 end
 
 """
