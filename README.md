@@ -34,6 +34,7 @@ This package implements a variety of data structures, including
 -   Red Black Tree
 -   AVL Tree
 -   Splay Tree
+-   Link/Cut Tree
 
 Resources
 ---------
