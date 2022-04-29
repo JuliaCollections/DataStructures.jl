@@ -26,6 +26,7 @@ This package implements a variety of data structures, including
 -   Red Black Tree
 -   AVL Tree
 -   Splay Tree
+-   Link/Cut Tree
 
 ## Contents
 
@@ -54,5 +55,6 @@ Pages = [
     "red_black_tree.md",
     "avl_tree.md",
     "splay_tree.md",
+    "link_cut_tree.md",
 ]
 ```

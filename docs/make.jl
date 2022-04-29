@@ -29,6 +29,7 @@ makedocs(
         "red_black_tree.md",
         "avl_tree.md",
         "splay_tree.md",
+        "link_cut_tree.md",
     ],
     modules = [DataStructures],
     format = Documenter.HTML()
