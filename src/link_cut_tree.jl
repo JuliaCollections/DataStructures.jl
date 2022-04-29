@@ -46,6 +46,8 @@ function access!(v::LinkCutTreeNode)
     end
 
     splay!(v)
+
+    return nothing
 end
 
 """
@@ -69,6 +71,8 @@ function link!(v::LinkCutTreeNode, w::LinkCutTreeNode)
 
     v.left = w
     w.parent = v
+
+    return nothing
 end
 
 """
@@ -83,6 +87,8 @@ function cut!(v::LinkCutTreeNode)
         v.left.parent = nothing
         v.left = nothing
     end
+
+    return nothing
 end
 
 function _find_path_root(v::LinkCutTreeNode)
@@ -136,6 +142,8 @@ function rotate_left!(v::LinkCutTreeNode)
     end
     w.left = v
     v.parent = w
+
+    return nothing
 end
 
 function rotate_right!(v::LinkCutTreeNode)
@@ -170,6 +178,8 @@ function rotate_right!(v::LinkCutTreeNode)
     end
     u.right = v
     v.parent = u
+
+    return nothing
 end
 
 function splay!(v::LinkCutTreeNode)
@@ -199,4 +209,6 @@ function splay!(v::LinkCutTreeNode)
             end
         end
     end
+
+    return nothing
 end
