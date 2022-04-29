@@ -21,14 +21,14 @@ julia> n2 = LinkCutTreeNode{Int}(2);
 
 julia> n3 = LinkCutTreeNode{Int}(3);
 
-julia> link!(n2, n1);
+julia> link!(n2, n1)
 
-julia> link!(n3, n1);
+julia> link!(n3, n1)
 
 julia> find_root!(n2) === find_root!(n3) === n1
 true
 
-julia> cut!(n3);
+julia> cut!(n3)
 
 julia> find_root!(n2) === find_root!(n3)
 false
