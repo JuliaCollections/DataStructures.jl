@@ -42,14 +42,14 @@ module DataStructures
     export SortedDict, SortedMultiDict, SortedSet
     export SDToken, SDSemiToken, SMDToken, SMDSemiToken
     export SetToken, SetSemiToken
-    export startof
+    export startof, endof ## both are deprecated
     export pastendsemitoken, beforestartsemitoken
     export pastendtoken, beforestarttoken
     export searchsortedafter, searchequalrange
     export packcopy, packdeepcopy
     export exclusive, inclusive, semitokens, inclusive_key, exclusive_key
     export orderobject, ordtype, Lt, compare, onlysemitokens
-    export tokens, onlytokens
+    export tokens, onlytokens, poplast!
 
     export MultiDict, enumerateall
     export RobinDict
@@ -65,12 +65,7 @@ module DataStructures
 
     export findkey
 
-    import Base.==
-    import Base.(:)
-    import Base.+
-    import Base.-
-    import Base.isequal
-    export sd_push!, ss_push!, smd_push!, poplast!
+    export push_return_token!
     export token_firstindex, token_lastindex
 
     include("delegate.jl")
@@ -127,5 +122,6 @@ module DataStructures
     include("splay_tree.jl")
 
     include("deprecations.jl")
+
 
 end

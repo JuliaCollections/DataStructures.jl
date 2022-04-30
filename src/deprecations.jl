@@ -17,6 +17,12 @@ Base.@deprecate_binding IntDisjointSets IntDisjointSet
 @deprecate dequeue_pair!(q::PriorityQueue) Base.popfirst!(q)
 @deprecate dequeue_pair!(q::PriorityQueue, key) popat!(q, key)
 
+@deprecate startof(m::SortedContainer) firstindex(m::SortedContainer)
+@deprecate endof(m::SortedContainer) lastindex(m::SortedContainer)
+@deprecate insert!(m::SortedSet, k) push_return_token!(m::SortedSet, k)
+@deprecate insert!(m::SortedDict, k, d) push_return_token!(m::SortedDict, k=>d)
+@deprecate insert!(m::SortedMultiDict, k, d) (push_return_token!(m::SortedMultiDict, k=>d))[2]
+
 function Base.peek(q::PriorityQueue)
     Expr(:meta, :noinline)
     Base.depwarn("`peek(q::PriorityQueue)` is deprecated, use `first(q)` instead.", :peek)

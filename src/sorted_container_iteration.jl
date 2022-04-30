@@ -19,19 +19,19 @@ const SortedMultiDictToken = Tuple{SortedMultiDict, IntSemiToken}
 const SDMToken = Tuple{SDMContainer, IntSemiToken}
 const SortedSetToken = Tuple{SortedSet, IntSemiToken}
 
-(==)(t1::Token, t2::Token) = (t1[1] === t2[1] && t1[2] == t2[2])
+Base.:(==)(t1::Token, t2::Token) = (t1[1] === t2[1] && t1[2] == t2[2])
 
 
 """
     Base.firstindex(m::SortedContainer)
-    startof(m::SortedContainer)
 
 Return the semitoken of
 the first entry of the container `m`, or the past-end semitoken
-if the container is empty.  Time: O(log *n*)
+if the container is empty.  This function was called
+`startof` (now deprecated) in previous versions of the package.
+Time: O(log *n*)
 """  
-Base.firstindex(m::SortedContainer) = startof(m)
-startof(m::SortedContainer) = IntSemiToken(beginloc(m.bt))
+Base.firstindex(m::SortedContainer) = IntSemiToken(beginloc(m.bt))
 
 
 """
@@ -48,14 +48,14 @@ token_firstindex(m::SortedContainer) = (m, firstindex(m))
 
 """
     Base.lastindex(m::SortedContainer)
-    endof(m::SortedContainer)
 
 Return the semitoken of the
 last entry of the sorted container `m`, or the before-start semitoken
-if the container is empty.  Time: O(log *n*)
+if the container is empty.   This function was called `endof` (now
+deprecated) in previous versions of the package.
+Time: O(log *n*)
 """
-Base.lastindex(m::SortedContainer) = endof(m)
-endof(m::SortedContainer) = IntSemiToken(endloc(m.bt))
+Base.lastindex(m::SortedContainer) = IntSemiToken(endloc(m.bt))
 
 
 """
@@ -109,25 +109,22 @@ sorted container `m`. Time: O(1)
 beforestarttoken(m::SortedContainer) = (m, beforestartsemitoken(m))
 
 
-delete_nocheck!(ii::Token) =  delete!(ii[1].bt, ii[2].address)
-
 
 """
     Base.delete!(token::Token) 
-    Base.delete!((m,st))
 
-Delete the item indexed by the token from a sorted container.  The
-token must point to live data.  The second form creates the token
-in-place as a tuple of a container `m` and a semitoken `st`.
+Delete the item indexed by the token from a sorted container.  
+A `BoundsError` is thrown if the token is invalid.
+Prepending with
+`@inbounds` may elide the correctness check and will result
+in undefined behavior if the token is invalid.
 Time: O(log *n*).
 """
-function Base.delete!(ii::Token)
-    has_data(ii)
-    delete_nocheck!(ii)
+Base.@propagate_inbounds function Base.delete!(ii::Token)
+    Base.@boundscheck has_data(ii)
+    delete!(ii[1].bt, ii[2].address)
 end
 
-
-advance_nocheck(ii::Token) = IntSemiToken(nextloc0(ii[1].bt, ii[2].address))
 
 """
     advance(token::Token)
@@ -135,16 +132,20 @@ advance_nocheck(ii::Token) = IntSemiToken(nextloc0(ii[1].bt, ii[2].address))
 
 Return the semitoken of the item in a sorted container
 one after the given token.  A `BoundsError` is thrown if the token is
-the past-end token.  The second form creates the token
+the past-end token.  
+Prepending with
+`@inbounds` may elide the correctness check and will result
+in undefined behavior if the token is invalid or
+points to the past-end token.
+The second form creates the token
 in-place as a tuple of a  container `m` and a semitoken `st`.
 Time: O(log *n*)
 """
-function advance(ii::Token)
-    not_pastend(ii)
-    advance_nocheck(ii)
+Base.@propagate_inbounds function advance(ii::Token)
+    Base.@boundscheck not_pastend(ii)
+    IntSemiToken(nextloc0(ii[1].bt, ii[2].address))
 end
 
-regress_nocheck(ii::Token) = IntSemiToken(prevloc0(ii[1].bt, ii[2].address))
 
 """
     regress(token::Token)
@@ -152,13 +153,18 @@ regress_nocheck(ii::Token) = IntSemiToken(prevloc0(ii[1].bt, ii[2].address))
 
 Return the semitoken of the item in a sorted container
 one before the given token.  A `BoundsError` is thrown if the token is
-the before-start token.  The second form creates the token
+the before-start token.  
+Prepending with
+`@inbounds` may elide the correctness check and will result
+in undefined behavior if the token is invalid or
+points to the before-start token.
+The second form creates the token
 in-place as a tuple of a container `m` and a semitoken `st`.
 Time: O(log *n*)
 """
-function regress(ii::Token)
-    not_beforestart(ii)
-    regress_nocheck(ii)
+Base.@propagate_inbounds function regress(ii::Token)
+    Base.@boundscheck not_beforestart(ii)
+    IntSemiToken(prevloc0(ii[1].bt, ii[2].address))
 end
 
 
@@ -228,8 +234,13 @@ Return the order object used to construct the container. Time: O(1)
 Return the data item indexed by the token.  If
 the container is a `SortedSet`, then this is a key in the set.
 If the container is a `SortedDict` or `SortedMultiDict`, then
-this is a key=>value pair.  It is a BoundsError() if the token
-is invalid or is the before-start or past-end token.  The 
+this is a key=>value pair.  It is a `BoundsError` if the token
+is invalid or is the before-start or past-end token.  
+Prepending with
+`@inbounds` may elide the correctness check and will result
+in undefined behavior if the token is invalid or
+points to the before-start or past-end token.
+The 
 second form creates the token in-place as a tuple of a 
 sorted container `m` 
 and a semitoken `st`.  Time: O(1)
@@ -238,34 +249,23 @@ function deref(ii::Token)
     error("This is not reachable because the specialized methods below will always be selected but is here to make the doc work")
 end
 
-@inline function deref_nocheck(ii::SortedDictToken)
+Base.@propagate_inbounds function deref(ii::SortedDictToken)
+    Base.@boundscheck has_data(ii)
     @inbounds kdrec = ii[1].bt.data[ii[2].address]
     return Pair(kdrec.k, kdrec.d)
 end
 
-function deref(ii::SortedDictToken)
-    has_data(ii)
-    deref_nocheck(ii)
-end
-
-@inline function deref_nocheck(ii::SortedMultiDictToken)
+Base.@propagate_inbounds function deref(ii::SortedMultiDictToken)
+    Base.@boundscheck has_data(ii)
     @inbounds kdrec = ii[1].bt.data[ii[2].address]
-    return kdrec.k => kdrec.d
+    return Pair(kdrec.k, kdrec.d)
 end
 
-function deref(ii::SortedMultiDictToken)
-    has_data(ii)
-    deref_nocheck(ii)
-end
 
-@inline function deref_nocheck(ii::SortedSetToken)
+Base.@propagate_inbounds function deref(ii::SortedSetToken)
+    Base.@boundscheck has_data(ii)
     @inbounds k = ii[1].bt.data[ii[2].address].k
     return k
-end
-
-function deref(ii::SortedSetToken)
-    has_data(ii)
-    deref_nocheck(ii)
 end
 
 
@@ -275,8 +275,13 @@ end
 
 Return the key portion of a data item (a key=>value pair) in a 
 `SortedDict` or `SortedMultiDict` indexed by the token.
-It is a BoundsError() if the token
-is invalid or is the before-start or past-end token. The 
+It is a `BoundsError` if the token
+is invalid or is the before-start or past-end token. 
+Prepending with
+`@inbounds` may elide the correctness check and will result
+in undefined behavior if the token is invalid or
+points to the before-start or past-end token.
+The 
 second form creates the token in-place as a tuple of a container `m` 
 and a semitoken `st`.  Time: O(1)
 """
@@ -285,16 +290,11 @@ function deref_key(ii::Token)
 end
 
 
-@inline function deref_key_nocheck(ii::SDMToken)
+Base.@propagate_inbounds function deref_key(ii::SDMToken)
+    Base.@boundscheck has_data(ii)
     @inbounds k = ii[1].bt.data[ii[2].address].k
     return k
 end
-
-function deref_key(ii::SDMToken)
-    has_data(ii)
-    deref_key_nocheck(ii)
-end
-
 
 
 """
@@ -304,8 +304,13 @@ end
 Returns the value portion of a data item (a key=>value pair)
 in a `SortedDict` or `SortedMultiDict` 
 indexed by the token. 
-It is a BoundsError() if the token
-is invalid or is the before-start or past-end token. The 
+It is a `BoundsError` if the token
+is invalid or is the before-start or past-end token. 
+Prepending with
+`@inbounds` may elide the correctness check and will result
+in undefined behavior if the token is invalid or
+points to the before-start or past-end token.
+The 
 second form creates the token in-place as a tuple of a container `m` 
 and a semitoken `st`.  Time: O(1)
 """
@@ -313,15 +318,12 @@ function deref_value(ii::Token)
     error("Cannot invoke deref_key on a SortedSet")
 end
 
-@inline function deref_value_nocheck(ii::SDMToken)
+Base.@propagate_inbounds function deref_value(ii::SDMToken)
+    Base.@boundscheck has_data(ii)
     @inbounds d = ii[1].bt.data[ii[2].address].d
     return d
 end
 
-function deref_value(ii::SDMToken)
-    has_data(ii)
-    deref_value_nocheck(ii)
-end
 
 """
     Base.first(sc::SortedContainer)
@@ -354,16 +356,20 @@ Base.last(m::SortedContainer) = deref(token_lastindex(m))
 Retrieve value portion of item from SortedDict or SortedMultiDict
 `m` indexed by `st`, a semitoken. Notation `m[st]` appearing in 
 an expression
-is equivalent to [`deref_value(token::Token)`](@ref) where `token=(m,st)`.  Time: O(1)
+is equivalent to [`deref_value(token::Token)`](@ref) where `token=(m,st)`.  
+It is a `BoundsError` if the token is invalid.  Prepending with
+`@inbounds` may elide the correctness check and results in undefined
+behavior if the token is invalid.
+Time: O(1)
 """
-function Base.getindex(m::SortedDict,
+Base.@propagate_inbounds function Base.getindex(m::SortedDict,
                        i::IntSemiToken)
     @boundscheck has_data((m,i))
     @inbounds d = m.bt.data[i.address].d
     return d
 end
 # Must repeat this to break ambiguity; cannot use SDMContainer.
-function Base.getindex(m::SortedMultiDict,
+Base.@propagate_inbounds function Base.getindex(m::SortedMultiDict,
                        i::IntSemiToken)
     @boundscheck has_data((m,i))
     @inbounds d = m.bt.data[i.address].d
@@ -377,9 +383,13 @@ end
     Base.setindex!(m::SortedMultiDict, newvalue, st::IntSemiToken)
 
 Set the value portion of item from SortedDict or SortedMultiDict
-`m` indexed by `st`, a semitoken to `newvalue`.  Time: O(1)
+`m` indexed by `st`, a semitoken to `newvalue`.  
+A `BoundsError` is thrown if the token is invalid.
+Prepending with `@inbounds` may elide the correctness check and
+results in undefined behavior if the token is invalid.
+Time: O(1)
 """
-function Base.setindex!(m::SortedDict,
+Base.@propagate_inbounds function Base.setindex!(m::SortedDict,
                         d_,
                         i::IntSemiToken)
     @boundscheck has_data((m,i))
@@ -389,8 +399,9 @@ function Base.setindex!(m::SortedDict,
                                      convert(valtype(m),d_))
     return m
 end
+
 ## Must repeat this to break ambiguity; cannot use SDMContainer
-function Base.setindex!(m::SortedMultiDict,
+Base.@propagate_inbounds function Base.setindex!(m::SortedMultiDict,
                         d_,
                         i::IntSemiToken)
     @boundscheck has_data((m,i))
@@ -1115,9 +1126,7 @@ Base.length(m::SortedContainer) = length(m.bt.data) - length(m.bt.freedatainds) 
 Base.isempty(m::SortedContainer) = length(m) == 0
 
 
-(:)(t1::Token, t2::Token) = _colon(t1,t2)
-
-function _colon(t1::Token, t2::Token)
+function Base.:(:)(t1::Token, t2::Token)
     t1[1] !== t2[1] &&
         throw(ArgumentError("First and second arguments of colon operator on sorted container tokens must refer to the same container"))
     IterableObject{typeof(t1[1]), InclusiveRange, default_KVIterType(t1[1]), OnlyTokenIter,
@@ -1126,8 +1135,8 @@ end
 
 
 """
-    +(t::Token, j::Integer)
-    -(t::Token, j::Integer)
+    Base.+(t::Token, j::Integer)
+    Base.-(t::Token, j::Integer)
 Return the token that is `j` positions ahead (if `+`) or behind (if `-`) of `t`.
 Here, `t` is a token for a sorted container and `j` is an integer. 
 If `j` is negative, then `+` regresses while `-` advances.
@@ -1136,11 +1145,9 @@ or past-end positions in the container,
 then the before-start/past-end tokens are returned (and there is no error).
 Time: O(*j*+log *n*), so this function is not optimized for long jumps.
 """
-+(t1::Token, numstep::Integer) = 
-    numstep >= 0 ? stepforward(t1, numstep) : stepback(t1, -numstep)
+Base.:(+)(t1::Token, numstep::Integer) = numstep >= 0 ? stepforward(t1, numstep) : stepback(t1, -numstep)
 
--(t1::Token, numstep::Integer) = 
-    numstep >= 0 ? stepback(t1, numstep) : stepforward(t1, -numstep)
+Base.:(-)(t1::Token, numstep::Integer) = numstep >= 0 ? stepback(t1, numstep) : stepforward(t1, -numstep)
 
 
 function stepforward(t1::Token, numstep::Integer)

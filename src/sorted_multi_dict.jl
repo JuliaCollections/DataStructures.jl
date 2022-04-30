@@ -20,10 +20,9 @@ SortedMultiDict{K,D,Ord}(o::Ord=Forward) where {K,D,Ord<:Ordering} =
 function SortedMultiDict{K,D,Ord}(o::Ord, kv) where {K,D,Ord<:Ordering}
     smd = SortedMultiDict{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
     for (k,v) in kv
-        smd_push!(smd, k=>v)
+        push_return_token!(smd, k=>v)
     end
     return smd
-    
 end
 
 
@@ -150,23 +149,25 @@ const SMDToken = Tuple{SortedMultiDict, IntSemiToken}
 
 
 """
-    smd_push!(smd::SortedMultiDict, pr::Pair)
+    DataStructures.push_return_token!(smd::SortedMultiDict, pr::Pair)
 
 Insert the key-value pair `pr`, i.e., `k=>v`, into `smd`.  
 If `k` already appears as a key
 in `smd`, then `k=>v` is inserted in the rightmost position after existing
-items with key `k`.  Unlike `push!`, `smd_push!` returns
-a semitoken referring to the new item.  This function replaces
+items with key `k`.  Unlike `push!`, 
+the
+return value is a 2-tuple whose first entry is boolean
+always equal to `true` and whose second entry is the semitoken of the new entry.
+(The reason for returning a bool whose value is always `true` is for consistency
+with `push_return_token!` for SortedDict and SortedSet.)
+This function replaces
 the deprecated `insert!`.
 Time: O(*c* log *n*)
 """
-@inline function smd_push!(m::SortedMultiDict{K,D,Ord}, pr::Pair) where {K, D, Ord <: Ordering}
-    b, i = insert!(m.bt, convert(K,pr.first), convert(D,pr.second), true)
-    IntSemiToken(i)
+@inline function push_return_token!(m::SortedMultiDict, pr::Pair)
+    b, i = insert!(m.bt, convert(keytype(m),pr.first), convert(valtype(m),pr.second), true)
+    b, IntSemiToken(i)
 end
-
-
-@deprecate insert!(m::SortedMultiDict, k, d) smd_push!(m::SortedMultiDict, k=>d)
 
 
 """
@@ -176,7 +177,7 @@ Insert the pair `p`, i.e., a `k=>v` into `smd`.
 If `k` already appears as a key
 in `smd`, then `k=>v` is inserted in the rightmost position after existing
 items with key `k`.  Returns the container.
-See also [`smd_push(smd::SortedMultiDict, p::Pair`]@ref.
+See also [`push_return_token!(smd::SortedMultiDict, p::Pair)`](@ref).
 Time: O(*c* log *n*)
 """
 @inline function Base.push!(m::SortedMultiDict{K,D}, pr::Pair) where {K,D}
@@ -186,7 +187,7 @@ end
 
 
 """
-    searchequalrange(smd::SortedMultiDict, k)
+    DataStructures.searchequalrange(smd::SortedMultiDict, k)
 
 Return two semitokens that correspond to the first and last
 items in the SortedMultiDict that have key exactly equal
@@ -273,8 +274,8 @@ function Base.isequal(m1::SortedMultiDict{K, D, Ord},
     if ord != orderobject(m2)
         return false
     end
-    p1 = startof(m1)
-    p2 = startof(m2)
+    p1 = firstindex(m1)
+    p2 = firstindex(m2)
     while true
         if p1 == pastendsemitoken(m1)
             return p2 == pastendsemitoken(m2)
@@ -282,11 +283,11 @@ function Base.isequal(m1::SortedMultiDict{K, D, Ord},
         if p2 == pastendsemitoken(m2)
             return false
         end
-        k1,d1 = deref_nocheck((m1,p1))
-        k2,d2 = deref_nocheck((m2,p2))
+        @inbounds k1,d1 = deref((m1,p1))
+        @inbounds k2,d2 = deref((m2,p2))
         (!eq(ord,k1,k2) || !isequal(d1,d2)) && return false
-        p1 = advance_nocheck((m1,p1))
-        p2 = advance_nocheck((m2,p2))
+        @inbounds p1 = advance((m1,p1))
+        @inbounds p2 = advance((m2,p2))
     end
 end
 
@@ -316,7 +317,7 @@ struct MergeManySortedMultiDicts{K, D, Ord <: Ordering}
 end
 
 function Base.iterate(sds::MergeManySortedMultiDicts{K, D, Ord},
-                      state = [startof(sds.vec[k]) for k=1:length(sds.vec)]) where
+                      state = [firstindex(sds.vec[k]) for k=1:length(sds.vec)]) where
 {K, D, Ord <: Ordering}
     ord = orderobject(sds.vec[1])
     firsti = 0
@@ -329,10 +330,10 @@ function Base.iterate(sds::MergeManySortedMultiDicts{K, D, Ord},
     end
     firsti == 0 && return nothing
     foundi = firsti
-    firstk = deref_key_nocheck((sds.vec[firsti], state[firsti]))
+    @inbounds firstk = deref_key((sds.vec[firsti], state[firsti]))
     for i = firsti + 1 : N
         if state[i] != pastendsemitoken(sds.vec[i])
-            k2 = deref_key_nocheck((sds.vec[i], state[i]))
+            @inbounds k2 = deref_key((sds.vec[i], state[i]))
             if lt(ord, k2, firstk)
                 foundi = i
                 firstk = k2
@@ -340,8 +341,8 @@ function Base.iterate(sds::MergeManySortedMultiDicts{K, D, Ord},
         end
     end
     foundsemitoken = state[foundi]
-    state[foundi] = advance_nocheck((sds.vec[foundi], foundsemitoken))
-    (deref_nocheck((sds.vec[foundi], foundsemitoken)), state)
+    @inbounds state[foundi] = advance((sds.vec[foundi], foundsemitoken))
+    @inbounds return (deref((sds.vec[foundi], foundsemitoken)), state)
 end
 
 """

@@ -111,9 +111,8 @@ is returned.  Time: O(*c* log *n*)
 end
 
 
-
 """
-    ss_push!(ss::SortedSet, k)
+    DataStructures.push_return_token!(ss::SortedSet, k)
 
 Insert the element `k`
 into the SortedSet `sc`.
@@ -127,13 +126,10 @@ second entry is the semitoken of the new entry.   This function
 replaces the deprecated `insert!`.
 Time: O(*c* log *n*)
 """
-@inline function ss_push!(m::SortedSet, k_)
+@inline function push_return_token!(m::SortedSet, k_)
     b, i = insert!(m.bt, convert(keytype(m),k_), nothing, false)
     return b, IntSemiToken(i)
 end
-
-@deprecate insert!(m::SortedSet, k) ss_push!(m::SortedSet, k)
-
 
 
 """
@@ -143,9 +139,9 @@ Insert the element `k` into the sorted set `ss`.
 If the `k` is already present, this overwrites
 the old value. (This is not necessarily a no-op; see remarks about the 
 customizing the sort order.) 
-See also [`ss_push!(ss::SortedSet, k)`]@ref.
+See also [`push_return_token!(ss::SortedSet, k)`](@ref).
 The return value is
-`sc`. Time: O(*c* log *n*)
+`ss`. Time: O(*c* log *n*)
 """
 @inline function Base.push!(m::SortedSet, k_)
     b, i = insert!(m.bt, convert(keytype(m),k_), nothing, false)
@@ -277,21 +273,21 @@ function Base.isequal(m1::SortedSet{K, Ord}, m2::SortedSet{K, Ord}) where {K, Or
     if ord != orderobject(m2)
         return invoke(issetequal, Tuple{AbstractSet, AbstractSet}, m1, m2)
     end
-    p1 = startof(m1)
-    p2 = startof(m2)
+    p1 = firstindex(m1)
+    p2 = firstindex(m2)
     while true
         p1 == pastendsemitoken(m1) && return p2 == pastendsemitoken(m2)
         p2 == pastendsemitoken(m2) && return false
-        k1 = deref_nocheck((m1,p1))
-        k2 = deref_nocheck((m2,p2))
+        @inbounds k1 = deref((m1,p1))
+        @inbounds k2 = deref((m2,p2))
         !eq(ord,k1,k2) && return false
-        p1 = advance_nocheck((m1,p1))
-        p2 = advance_nocheck((m2,p2))
+        @inbounds p1 = advance((m1,p1))
+        @inbounds p2 = advance((m2,p2))
     end
 end
 
 
-Base.issetequal(m1::SortedSet, m2::SortedSet) = isequal(m1::SortedSet, m2::SortedSet)
+Base.issetequal(m1::SortedSet, m2::SortedSet) = isequal(m1, m2)
 
 
 """
@@ -317,7 +313,7 @@ struct UnionManySortedSets{K, Ord <: Ordering}
 end
 
 function Base.iterate(ss::UnionManySortedSets{K, Ord},
-                      state = [startof(ss.vec[k]) for k=1:length(ss.vec)]) where
+                      state = [firstindex(ss.vec[k]) for k=1:length(ss.vec)]) where
 {K, Ord <: Ordering}
     ord = orderobject(ss.vec[1])
     N = length(ss.vec)
@@ -330,10 +326,10 @@ function Base.iterate(ss::UnionManySortedSets{K, Ord},
     end
     firsti == 0 && return nothing
     foundi = firsti
-    firstk = deref_nocheck((ss.vec[firsti], state[firsti]))
+    @inbounds firstk = deref((ss.vec[firsti], state[firsti]))
     for i = firsti + 1 : N
         if state[i] != pastendsemitoken(ss.vec[i])
-            k2 = deref_nocheck((ss.vec[i], state[i]))
+            @inbounds k2 = deref((ss.vec[i], state[i]))
             if !lt(ord, firstk, k2)
                 foundi = i
                 firstk = k2
@@ -342,8 +338,8 @@ function Base.iterate(ss::UnionManySortedSets{K, Ord},
     end
     for i = firsti : N
         if state[i] != pastendsemitoken(ss.vec[i]) &&
-            eq(ord, deref_nocheck((ss.vec[i], state[i])), firstk)
-            state[i] = advance_nocheck((ss.vec[i], state[i]))
+            @inbounds eq(ord, deref((ss.vec[i], state[i])), firstk)
+            @inbounds state[i] = advance((ss.vec[i], state[i]))
         end
     end
     (firstk, state)
@@ -398,26 +394,26 @@ struct TwoSortedSets_State
 end
 
 function Base.iterate(twoss::IntersectTwoSortedSets,
-                      state = TwoSortedSets_State(startof(twoss.m1),
-                                                  startof(twoss.m2)))
+                      state = TwoSortedSets_State(firstindex(twoss.m1),
+                                                  firstindex(twoss.m2)))
     m1 = twoss.m1
     m2 = twoss.m2
     ord = orderobject(m1)
     p1 = state.p1
     p2 = state.p2
     while p1 != pastendsemitoken(m1) && p2 != pastendsemitoken(m2)
-        k1 = deref_nocheck((m1, p1))
-        k2 = deref_nocheck((m2, p2))
+        @inbounds k1 = deref((m1, p1))
+        @inbounds k2 = deref((m2, p2))
         if lt(ord, k1, k2)
-            p1 = advance_nocheck((m1, p1))
+            @inbounds p1 = advance((m1, p1))
             continue
         end
         if lt(ord, k2, k1)
-            p2 = advance_nocheck((m2, p2))
+            @inbounds p2 = advance((m2, p2))
             continue
         end
-        return (k1, TwoSortedSets_State(advance_nocheck((m1, p1)),
-                                        advance_nocheck((m2, p2))))
+        @inbounds return (k1, TwoSortedSets_State(advance((m1, p1)),
+                                                  advance((m2, p2))))
     end
     return nothing
 end
@@ -474,8 +470,8 @@ struct SymdiffTwoSortedSets{K,Ord <: Ordering}
 end
 
 function Base.iterate(twoss::SymdiffTwoSortedSets,
-                      state = TwoSortedSets_State(startof(twoss.m1),
-                                                  startof(twoss.m2)))
+                      state = TwoSortedSets_State(firstindex(twoss.m1),
+                                                  firstindex(twoss.m2)))
     m1 = twoss.m1
     m2 = twoss.m2
     ord = orderobject(m1)
@@ -488,23 +484,23 @@ function Base.iterate(twoss::SymdiffTwoSortedSets,
             return nothing
         end
         if m1end
-            return (deref_nocheck((m2, p2)),
-                    TwoSortedSets_State(p1, advance_nocheck((m2,p2))))
+            @inbounds return (deref((m2, p2)),
+                              TwoSortedSets_State(p1, advance((m2,p2))))
         end
         if m2end
-            return (deref_nocheck((m1, p1)),
-                    TwoSortedSets_State(advance_nocheck((m1,p1)), p2))
+            @inbounds return (deref((m1, p1)),
+                              TwoSortedSets_State(advance((m1,p1)), p2))
         end
-        k1 = deref_nocheck((m1, p1))
-        k2 = deref_nocheck((m2, p2))
+        @inbounds k1 = deref((m1, p1))
+        @inbounds k2 = deref((m2, p2))
         if lt(ord, k1, k2)
-            return (k1, TwoSortedSets_State(advance_nocheck((m1,p1)), p2))
+            @inbounds return (k1, TwoSortedSets_State(advance((m1,p1)), p2))
         end
         if lt(ord, k2, k1)
-            return (k2, TwoSortedSets_State(p1, advance_nocheck((m2,p2))))
+            @inbounds return (k2, TwoSortedSets_State(p1, advance((m2,p2))))
         end
-        p1 = advance_nocheck((m1,p1))
-        p2 = advance_nocheck((m2,p2))
+        @inbounds p1 = advance((m1,p1))
+        @inbounds p2 = advance((m2,p2))
     end
 end
 
@@ -552,8 +548,8 @@ struct SetdiffTwoSortedSets{K, Ord <: Ordering}
 end
 
 function Base.iterate(twoss::SetdiffTwoSortedSets,
-                      state = TwoSortedSets_State(startof(twoss.m1),
-                                                  startof(twoss.m2)))
+                      state = TwoSortedSets_State(firstindex(twoss.m1),
+                                                  firstindex(twoss.m2)))
     m1 = twoss.m1
     m2 = twoss.m2
     ord = orderobject(m1)
@@ -566,17 +562,17 @@ function Base.iterate(twoss::SetdiffTwoSortedSets,
             return nothing
         end
         if m2end
-            return (deref_nocheck((m1, p1)), TwoSortedSets_State(advance_nocheck((m1,p1)), p2))
+            @inbounds return (deref((m1, p1)), TwoSortedSets_State(advance((m1,p1)), p2))
         end
-        k1 = deref_nocheck((m1, p1))
-        k2 = deref_nocheck((m2, p2))
+        @inbounds k1 = deref((m1, p1))
+        @inbounds k2 = deref((m2, p2))
         if lt(ord, k1, k2)
-            return (k1, TwoSortedSets_State(advance_nocheck((m1,p1)), p2))
+            @inbounds return (k1, TwoSortedSets_State(advance((m1,p1)), p2))
         end
         if !lt(ord, k2, k1)
-            p1 = advance_nocheck((m1,p1))
+            @inbounds p1 = advance((m1,p1))
         end
-        p2 = advance_nocheck((m2, p2))
+        @inbounds p2 = advance((m2, p2))
     end
 end
 
@@ -656,19 +652,19 @@ function Base.issubset(m1::SortedSet{K,Ord}, m2::SortedSet{K,Ord}) where {K, Ord
         length(m1) < length(m2) / log2(length(m2) + 2)
         return invoke(issubset, Tuple{Any, SortedSet}, m1, m2)
     end
-    p1 = startof(m1)
-    p2 = startof(m2)
+    p1 = firstindex(m1)
+    p2 = firstindex(m2)
     while p1 != pastendsemitoken(m1)
         p2 == pastendsemitoken(m2) && return false
-        k1 = deref_nocheck((m1, p1))
-        k2 = deref_nocheck((m2, p2))
+        @inbounds k1 = deref((m1, p1))
+        @inbounds k2 = deref((m2, p2))
         if eq(ord, k1, k2)
-            p1 = advance_nocheck((m1,p1))
-            p2 = advance_nocheck((m2,p2))
+            @inbounds p1 = advance((m1,p1))
+            @inbounds p2 = advance((m2,p2))
         elseif lt(ord, k1,k2)
             return false
         else
-            p2 = advance_nocheck((m2,p2))
+            @inbounds p2 = advance((m2,p2))
         end
     end
     return true
@@ -716,11 +712,6 @@ deletions. Time: O(*cn*)
 packdeepcopy(m::SortedSet{K,Ord}) where {K, Ord <: Ordering} =
     SortedSet{K}(Val(true), deepcopy(m), orderobject(m))
 
-
-function Base.show(io::IO, m::SortedSet{K,Ord}) where {K,Ord <: Ordering}
-    print(io, "SortedSet{", K, ",", Ord, "}(")
-    print(io, collect(m), ",", orderobject(m), ")")
-end
 
 """
     Base.empty(sc)

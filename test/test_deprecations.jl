@@ -126,4 +126,7 @@ end
     @test isa(insert!(s2, 5, "hello"), IntSemiToken)
     s3 = SortedSet{Int}()
     @test isa(insert!(s3, 5), Tuple{Bool, IntSemiToken})
+    s4 = SortedDict{Int,String}(3=>"o", 4=>"p")
+    @test deref_key((s4,startof(s4))) == 3
+    @test deref_key((s4,endof(s4))) == 4
 end

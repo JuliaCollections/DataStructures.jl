@@ -1,5 +1,4 @@
-using Base: Ordering, Forward, Reverse, ForwardOrdering,
-            ReverseOrdering
+using Base: Ordering, Forward, Reverse, ForwardOrdering, ReverseOrdering
 using DataStructures: IntSemiToken
 import Base.lt
 import DataStructures.eq
@@ -11,6 +10,9 @@ end
 lt(::CaseInsensitive, a, b) = isless(lowercase(a), lowercase(b))
 eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
 
+
+
+# For testing order objects
 
 struct ForBack <: Ordering
     flag::Bool
@@ -38,18 +40,7 @@ function my_primes(N)
     p
 end
 
-function remove_spaces(s::String)
-    b = Vector{UInt8}()
-    for c in s
-        if !isspace(c)
-            push!(b,UInt8(c))
-        end
-    end
-    String(b)
-end
-    
-
-
+remove_spaces(s::String) = replace(s, r"\s+"=>"")
 
 
 
@@ -256,7 +247,7 @@ function testSortedDictBasic()
         checkcorrectness(m1.bt, false)
         # fulldump(m1.bt)
     end
-    i1 = startof(m1)
+    i1 = firstindex(m1)
     count = 0
     while i1 != pastendsemitoken(m1)
         count += 1
@@ -301,7 +292,7 @@ function testSortedDictMethods()
     my_assert(typeof(m08b) == SortedDict{Real,Any,ForwardOrdering})
     m09a = SortedDict(Pair{Int}[1=>2, 3=>'a'])
     my_assert(typeof(m09a) == SortedDict{Int,Any,ForwardOrdering})
-    m09b = SortedDict([(1,2), (3,'a')])
+    m09b = SortedDict([(1,2), (3,'a')])  # test issue 239
     my_assert(typeof(m09a) == SortedDict{Int,Any,ForwardOrdering})
 
     my_assert(m0 == m02)
@@ -318,7 +309,7 @@ function testSortedDictMethods()
 
     expected = ([6,8,12], [18.2, 32.0, 33.1])
     checkcorrectness(m1.bt, false)
-    ii = startof(m1)
+    ii = firstindex(m1)
     m2 = packdeepcopy(m1)
     m3 = packcopy(m1)
     p = first(m1)
@@ -344,7 +335,7 @@ function testSortedDictMethods()
     checkcorrectness(m1.bt, false)
     checkcorrectness(m2.bt, false)
     my_assert(length(m2) == 3)
-    ii = startof(m2)
+    ii = firstindex(m2)
     for j = 1 : 3
         pr = deref((m2,ii))
         my_assert(pr[1] == expected[1][j] && pr[2] == expected[2][j])
@@ -353,7 +344,7 @@ function testSortedDictMethods()
 
     checkcorrectness(m3.bt, false)
     my_assert(length(m3) == 3)
-    ii = startof(m3)
+    ii = firstindex(m3)
     for j = 1 : 3
         pr = deref((m3,ii))
         my_assert(pr[1] == expected[1][j] && pr[2] == expected[2][j])
@@ -447,7 +438,7 @@ function testSortedDictMethods()
     m1[6] = 49.0
     my_assert(length(m1) == numprimes + 1)
     my_assert(m1[6] == 49.0)
-    b, i6 = sd_push!(m1, 6=>50.0)
+    b, i6 = push_return_token!(m1, 6=>50.0)
     my_assert(length(m1) == numprimes + 1)
     my_assert(!b)
     p = deref((m1,i6))
@@ -456,7 +447,7 @@ function testSortedDictMethods()
     p = deref((m1,i6))
     my_assert(p[1] == 6 && p[2] == 9.0)
     my_assert(m1[i6] == 9.0)
-    b2, i7 = sd_push!(m1, 8=>51.0)
+    b2, i7 = push_return_token!(m1, 8=>51.0)
     my_assert(b2)
     my_assert(length(m1) == numprimes + 2)
     p = deref((m1,i7))
@@ -465,7 +456,7 @@ function testSortedDictMethods()
     z = pop!(m1, 6)
     checkcorrectness(m1.bt, false)
     my_assert(z == 9.0)
-    i8 = startof(m1)
+    i8 = firstindex(m1)
     p = deref((m1,i8))
     my_assert(p[1] == 2 && p[2] == 4.0)
     my_assert(i8 != beforestartsemitoken(m1))
@@ -642,8 +633,8 @@ function testSortedDictLoops()
         m1[bitreverse(lUi)] = lUi
     end
     count = 0
-    for (stok,k,v) in semitokens(inclusive(m1, startof(m1), lastindex(m1)))
-        for (stok2,k2,v2) in semitokens(exclusive(m1, startof(m1), pastendsemitoken(m1)))
+    for (stok,k,v) in semitokens(inclusive(m1, firstindex(m1), lastindex(m1)))
+        for (stok2,k2,v2) in semitokens(exclusive(m1, firstindex(m1), pastendsemitoken(m1)))
             c = compare(m1,stok,stok2)
             if c < 0
                 my_assert(deref_key((m1,stok)) < deref_key((m1,stok2)))
@@ -655,7 +646,7 @@ function testSortedDictLoops()
             count += 1
         end
     end
-    my_assert(eltype(semitokens(exclusive(m1, startof(m1), pastendsemitoken(m1)))) ==
+    my_assert(eltype(semitokens(exclusive(m1, firstindex(m1), pastendsemitoken(m1)))) ==
            Tuple{IntSemiToken, T, T})
     my_assert(count == N^2)
     N = 1000
@@ -734,25 +725,25 @@ function testSortedDictLoops()
 
     pos1 = searchsortedfirst(m1, div(N,2))
     sk2 = zero1
-    for k in keys(exclusive(m1, startof(m1), pos1))
+    for k in keys(exclusive(m1, firstindex(m1), pos1))
         sk2 += k
     end
     my_assert(sk2 == skhalf)
-    my_assert(eltype(keys(exclusive(m1, startof(m1), pos1))) == T)
+    my_assert(eltype(keys(exclusive(m1, firstindex(m1), pos1))) == T)
 
 
 
     sk2a = zero1
-    for k in eachindex(exclusive(m1, startof(m1), pos1))
+    for k in eachindex(exclusive(m1, firstindex(m1), pos1))
         sk2a += k
     end
     my_assert(sk2a == skhalf)
-    my_assert(eltype(eachindex(exclusive(m1, startof(m1), pos1))) == T)
+    my_assert(eltype(eachindex(exclusive(m1, firstindex(m1), pos1))) == T)
 
 
 
     sv2 = zero1
-    for v in values(exclusive(m1, startof(m1), pos1))
+    for v in values(exclusive(m1, firstindex(m1), pos1))
         sv2 += v
     end
     my_assert(sv2 == svhalf)
@@ -760,26 +751,26 @@ function testSortedDictLoops()
     for (k,v) in exclusive(m1, pastendsemitoken(m1), pastendsemitoken(m1))
         count += 1
     end
-    my_assert(eltype(keys(exclusive(m1, startof(m1), pos1))) == T)
+    my_assert(eltype(keys(exclusive(m1, firstindex(m1), pos1))) == T)
     my_assert(count == 0)
 
 
     count = 0
-    for (k,v) in inclusive(m1, startof(m1), beforestartsemitoken(m1))
+    for (k,v) in inclusive(m1, firstindex(m1), beforestartsemitoken(m1))
         count += 1
     end
     my_assert(count == 0)
-    my_assert(eltype(keys(inclusive(m1, startof(m1), beforestartsemitoken(m1)))) == T)
+    my_assert(eltype(keys(inclusive(m1, firstindex(m1), beforestartsemitoken(m1)))) == T)
 
 
     count = 0
     sk5 = zero1
-    for k in eachindex(inclusive(m1, startof(m1), startof(m1)))
+    for k in eachindex(inclusive(m1, firstindex(m1), firstindex(m1)))
         sk5 += k
         count += 1
     end
-    my_assert(count == 1 && sk5 == deref_key((m1,startof(m1))))
-    my_assert(eltype(eachindex(inclusive(m1, startof(m1), startof(m1)))) == T)
+    my_assert(count == 1 && sk5 == deref_key((m1,firstindex(m1))))
+    my_assert(eltype(eachindex(inclusive(m1, firstindex(m1), firstindex(m1)))) == T)
 
     factors = SortedMultiDict{Int,Int}()
     N = 1000
@@ -788,7 +779,7 @@ function testSortedDictLoops()
     sum2 = 0
     for factor = 1 : N
         for multiple = factor : factor : N
-            smd_push!(factors, multiple=>factor)
+            push_return_token!(factors, multiple=>factor)
             sum1 += multiple
             sum2 += factor
             len += 1
@@ -1276,7 +1267,7 @@ function testSortedMultiDict()
     len = 0
     for factor = 1 : N
         for multiple = factor : factor : N
-            smd_push!(factors, multiple=>factor)
+            push_return_token!(factors, multiple=>factor)
             len += 1
         end
     end
@@ -1317,7 +1308,7 @@ function testSortedMultiDict()
     my_assert(60 in keys(factors))
     my_assert(!(-1 in keys(factors)))
     checkcorrectness(factors.bt, true)
-    i = startof(factors)
+    i = firstindex(factors)
     i = advance((factors,i))
     my_assert(deref((factors,i)) == Pair(2,1))
     my_assert(deref_key((factors,i)) == 2)
@@ -1349,7 +1340,7 @@ function testSortedMultiDict()
     my_assert(compare(factors,i,i2) != 0)
     my_assert(compare(factors,regress((factors,i)),i2) == 0)
     my_assert(compare(factors,i,i1) != 0)
-    smd_push!(factors, 80=>6)
+    push_return_token!(factors, 80=>6)
     my_assert(length(factors) == len + 1)
     checkcorrectness(factors.bt, true)
     expected1 = deepcopy(expected)
@@ -1377,7 +1368,7 @@ function testSortedMultiDict()
     checkcorrectness(factors.bt, true)
     my_assert(length(factors) == 0)
     my_assert(isempty(factors))
-    i = startof(factors)
+    i = firstindex(factors)
     my_assert(i == pastendsemitoken(factors))
     i = lastindex(factors)
     my_assert(i == beforestartsemitoken(factors))
@@ -1394,7 +1385,8 @@ function testSortedMultiDict()
     my_assert(isequal(m1,m2))
     my_assert(!isequal(m1,m3))
     my_assert(!isequal(m1, SortedMultiDict("apples"=>2.0)))
-    stok = smd_push!(m2, "cherries"=>6.1)
+    b,stok = push_return_token!(m2, "cherries"=>6.1)
+    my_assert(b)
     checkcorrectness(m2.bt, true)
     my_assert(!isequal(m1,m2))
     delete!((m2,stok))
@@ -1425,6 +1417,8 @@ function testSortedMultiDict()
         length(m3empty) == 0)
     m4 = merge(m1, m2)
     my_assert(isequal(m3, m4))
+    m5a = SortedMultiDict(Pair{Any,Any}[1=>4.5, 2=>8, 8=>6//7])  #address issue 239
+    my_assert(eltype(m5a) == Pair{Int,Real})
     m5 = merge(m2, m1)
     my_assert(!isequal(m3, m5))
     merge!(m1, m2)
@@ -1432,10 +1426,10 @@ function testSortedMultiDict()
     m7 = SortedMultiDict{Int,Int}()
     n1 = 10000
     for k = 1 : n1
-        smd_push!(m7, k=>k+1)
+        push_return_token!(m7, k=>k+1)
     end
     for k = 1 : n1
-        smd_push!(m7, k=>k+2)
+        push_return_token!(m7, k=>k+2)
     end
     for k = 1 : n1
         i1, i2 = searchequalrange(m7, k)
@@ -1482,30 +1476,32 @@ function testSortedMultiDict()
     my_assert(DataStructures.isordered(SortedMultiDict{Int, String}))
     # issue #773
     s = SortedMultiDict{Int, Int}()           
-    smd_push!(s, 4=>41)
-    smd_push!(s, 3=>31)
-    smd_push!(s, 2=>21)
-    smd_push!(s, 2=>22)
-    smd_push!(s, 2=>23)
-    smd_push!(s, 2=>24)
-    smd_push!(s, 2=>25)
-    smd_push!(s, 2=>26)
-    smd_push!(s, 1=>11)
-    smd_push!(s, 1=>12)
-    st1 = smd_push!(s, 1=>13)
-    st2 = smd_push!(s, 1=>14)
-    st3 = smd_push!(s, 1=>15)
-    st4 = smd_push!(s, 1=>16)
-    st5 = smd_push!(s, 1=>17)
-    st6 = smd_push!(s, 1=>18)
+    push_return_token!(s, 4=>41)
+    push_return_token!(s, 3=>31)
+    push_return_token!(s, 2=>21)
+    push_return_token!(s, 2=>22)
+    push_return_token!(s, 2=>23)
+    push_return_token!(s, 2=>24)
+    push_return_token!(s, 2=>25)
+    push_return_token!(s, 2=>26)
+    push_return_token!(s, 1=>11)
+    push_return_token!(s, 1=>12)
+    _,st1 = push_return_token!(s, 1=>13)
+    _,st2 = push_return_token!(s, 1=>14)
+    _,st3 = push_return_token!(s, 1=>15)
+    _,st4 = push_return_token!(s, 1=>16)
+    _,st5 = push_return_token!(s, 1=>17)
+    _,st6 = push_return_token!(s, 1=>18)
     delete!((s, st6))
     delete!((s, st5))
     delete!((s, st4))
     delete!((s, st3))
     delete!((s, st2))
     delete!((s, st1))
-    smd_push!(s, 1=>19)
+    push_return_token!(s, 1=>19)
     checkcorrectness(s.bt, true)
+    my_assert(length(SortedMultiDict{Int,Int}(Val(true), [1=>2,3=>7,3=>15])) == 3)
+    my_assert(length(SortedMultiDict{Int,Int}(Val(true), [8=>2,3=>7,3=>15], Reverse)) == 3)
     true
 end
 
@@ -1533,6 +1529,9 @@ function testSortedSet()
     my_assert(typeof(SortedSet([1,2,3], Reverse)) == SortedSet{Int, ReverseOrdering{ForwardOrdering}})
     my_assert(typeof(SortedSet{Float32}([1,2,3], Reverse)) == SortedSet{Float32, ReverseOrdering{ForwardOrdering}})
 
+    my_assert(length(SortedSet{Int}(Val(true), [1,3,7])) == 3)
+    my_assert(length(SortedSet{Int}(Val(true), [8,3,1], Reverse)) == 3)
+
     ss1 = SortedSet{String}(["berry", "cherry", "apple", "grape"])
     q = popfirst!(ss1)
     my_assert(q == "apple")
@@ -1541,6 +1540,8 @@ function testSortedSet()
     my_assert(q2 == "grape")
     my_assert(ss1 == Set(["cherry", "berry"]))
     my_assert(isequal(SortedSet{Int,ForBack}(ForBack(true), [5,6,4,8]),
+                      SortedSet{Int,ForBack}(ForBack(false), [5,6,4,8])))
+    my_assert(issetequal(SortedSet{Int,ForBack}(ForBack(true), [5,6,4,8]),
                       SortedSet{Int,ForBack}(ForBack(false), [5,6,4,8])))
     my_assert(!isequal(SortedSet{Int,ForBack}(ForBack(true), [5,6,4,8]),
                        SortedSet{Int,ForBack}(ForBack(false), [5,6,6,8])))
@@ -1554,6 +1555,8 @@ function testSortedSet()
     @test_throws ArgumentError SortedSet(Reverse, Reverse)
     @test_throws ArgumentError SortedSet{Int}(Reverse, Reverse)
     @test_throws ArgumentError SortedSet{Int}(Val(true), Reverse)
+    @test_throws ErrorException deref_key(token_firstindex(SortedSet{Int}([6])))
+    @test_throws ErrorException deref_value(token_firstindex(SortedSet{Int}([6])))
 
     smallest = 10.0
     largest = -10.0
@@ -1565,11 +1568,11 @@ function testSortedSet()
         smallest = min(smallest,ui)
         largest = max(largest,ui)
     end
-    isnew,st = ss_push!(m, 72.5)
+    isnew,st = push_return_token!(m, 72.5)
     my_assert(isnew)
     my_assert(deref((m,st)) == 72.5)
     delete!((m,st))
-    isnew,st = ss_push!(m, 73.5)
+    isnew,st = push_return_token!(m, 73.5)
     my_assert(isnew)
     my_assert(deref((m,st)) == 73.5)
     delete!(m, 73.5)
@@ -1586,7 +1589,7 @@ function testSortedSet()
     my_assert(count == N)
     my_assert(length(m) == N)
     ii2 = searchsortedfirst(m, 0.5)
-    i3 = startof(m)
+    i3 = firstindex(m)
     v = first(m)
     my_assert(v == smallest)
     my_assert(deref((m,i3)) == v)
@@ -1664,6 +1667,7 @@ function testSortedSet()
         Base.emptymutable(m3) == m3empty
         Base.emptymutable(m3, Char) == m3empty_char
     end
+    my_assert(eltype(SortedSet((4,4.5,6//7))) == Real) # issue 239
     m3_reverse = SortedSet(DataStructures.FasterReverse(), ["orange", "yellow", "red"])
     let m3empty_reverse_char = empty(m3_reverse, Char)
         @test typeof(m3empty_reverse_char) == SortedSet{Char, DataStructures.FasterReverse}
@@ -1802,6 +1806,9 @@ function testSortedDictConstructors()
     my_assert(typeof(SortedDict{Int,Int}(Reverse)) == SortedDict{Int,Int,ReverseOrdering{ForwardOrdering}})
     my_assert(typeof(SortedDict{Int,Int}(Reverse, 1=>2)) == SortedDict{Int,Int,ReverseOrdering{ForwardOrdering}})
     my_assert(typeof(SortedDict{Int,Int}(1=>2)) == SortedDict{Int,Int,ForwardOrdering})
+    my_assert(length(SortedDict{Int,Int}(Val(true), [1=>2,3=>7,8=>15])) == 3)
+    my_assert(length(SortedDict{Int,Int}(Val(true), [8=>2,3=>7,1=>15], Reverse)) == 3)
+    
 
     # @test_throws ArgumentError SortedDict(Reverse, Reverse)
     true
@@ -1996,7 +2003,7 @@ function testTokens()
     end
     my_assert(count == 5)
     count = 0
-    for t in token_firstindex(smd1) : token_lastindex(smd1)
+    for t in token_firstindex(smd1) : token_lastindex(smd1)  # address issue 669
         count += 1
         my_assert(deref_value(t) == result2[count])
     end
@@ -2070,6 +2077,7 @@ end
     #@test_throws ArgumentError isequal(SortedSet(["a"]), SortedSet(["b"],Reverse))
     #@test_throws ErrorException (("a",6) in m)
     #@test_throws ArgumentError ((2,5) in m1)
+    @test_throws ErrorException get(SortedDict(1=>3), SortedDict(1=>3), 1)
 
     s = SortedSet([10,30,50])
     @test pop!(s,10) == 10
