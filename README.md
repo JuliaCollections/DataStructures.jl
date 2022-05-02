@@ -2,7 +2,8 @@
 [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/5gw9xok4e58aixsv?svg=true)](https://ci.appveyor.com/project/kmsquire/datastructures-jl)
 [![Test Coverage](https://coveralls.io/repos/github/JuliaCollections/DataStructures.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaCollections/DataStructures.jl?branch=master)
 [![Test Coverage](https://codecov.io/github/JuliaCollections/DataStructures.jl/coverage.svg?branch=master)](https://codecov.io/github/JuliaCollections/DataStructures.jl?branch=master)
-[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://juliacollections.github.io/DataStructures.jl/latest)
+[![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliacollections.github.io/DataStructures.jl/stable)
+[![Dev Documentation](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliacollections.github.io/DataStructures.jl/dev)
 [![ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac)
 
 DataStructures.jl
@@ -38,4 +39,4 @@ This package implements a variety of data structures, including
 Resources
 ---------
 
--   **Documentation**: https://juliacollections.github.io/DataStructures.jl/latest
+-   **Documentation**: https://juliacollections.github.io/DataStructures.jl/stable/
