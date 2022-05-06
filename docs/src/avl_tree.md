@@ -4,32 +4,56 @@ DocTestSetup = :(using DataStructures)
 
 # AVL Tree
 
-The `AVLTree` type is an implementation of AVL Tree in Julia. It is a self-balancing binary search tree where balancing occurs based on the difference of height of the left subtree and the right subtree. Operations such as search, insert and delete can be done in `O(log n)` complexity, where `n` is the number of nodes in the `AVLTree`. Order-statistics on the keys can also be done in `O(log n)`.
+The AVL Tree is a self-balancing binary search tree in which balancing operations take place
+based on the difference of height between the left and right subtrees. Such operations may occur
+during the insertion and deletion of keys performing recursive _rotate operations_ to ensue
+that the difference between the heights of the left and right substrees is restricted to
+$[-1, 1]$.
 
-Examples:
+![](./assets/AVL-tree.svg)
 
-```jldoctest
-julia> tree = AVLTree{Int}();
+Example of AVL Tree with balance factors shown in green.
 
-julia> for k in 1:2:20
-           push!(tree, k)
-       end
+AVL Trees are often compared with [Red–Black Trees](./red_black_tree.md) because both take $O(\log n)$ time for the basic
+operations. However, for lookup-intensive applications, AVL Trees are faster than Red–Black Trees
+because they are more strictly balanced. Similar to Red–Black Trees, AVL Trees are height-balanced.
 
-julia> haskey(tree, 3)
-true
+!!! note "Complexity"
 
-julia> tree[4] # time complexity of this operation is O(log n)
-7
+    Computational complexity for common operations using an AVL Tree
 
-julia> for k in 1:2:10
-           delete!(tree, k)
-       end
+    | Operation | Average Case | Worst Case |
+    |-----------|--------------|------------|
+    | Space | $\Theta(n)$ | $O(n)$ |
+    | Search | $\Theta(\log n)$ | $O(\log n)$ |
+    | Insertion | $\Theta(\log n)$ | $O(\log n)$ |
+    | Deletion | $\Theta(\log n)$ | $O(\log n)$ |
 
-julia> haskey(tree, 5)
-false
+# Constructors
 
-julia> sorted_rank(tree, 17) # used for finding rank of the key
-4
+```@autodocs
+Modules = [DataStructures]
+Pages = ["src/avl_tree.jl"]
+Order = [:type]
+```
+
+# Usage
+
+The `AVLTree` type implements the following methods:
+
+- [`delete!(tree::AVLTree{K}, k::K) where K`](@ref)
+- [`in(key, tree::AVLTree)`](@ref)
+- [`getindex(tree::AVLTree{K}, ind::Integer) where K`](@ref)
+- [`haskey(tree::AVLTree{K}, k::K) where K`](@ref)
+- [`push!(tree::AVLTree{K}, k) where K`](@ref)
+- [`sorted_rank(tree::AVLTree{K}, key::K) where K`](@ref)
+
+-----
+
+```@autodocs
+Modules = [DataStructures]
+Pages = ["src/avl_tree.jl"]
+Order = [:function]
 ```
 
 ```@meta

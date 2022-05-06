@@ -19,6 +19,18 @@ Base.setproperty!(x::AVLTreeNode{T}, f::Symbol, v) where {T} =
 
 AVLTreeNode_or_null{T} = Union{AVLTreeNode{T}, Nothing}
 
+"""
+    AVLTree{T}
+
+Construct new `AVLTree` with keys of type `T`.
+
+# Example
+
+```jldoctest
+julia> tree = AVLTree{Int64}()
+AVLTree{Int64}(nothing, 0)
+```
+"""
 mutable struct AVLTree{T}
     root::AVLTreeNode_or_null{T}
     count::Int
@@ -28,6 +40,11 @@ end
 
 AVLTree() = AVLTree{Any}()
 
+"""
+    length(tree::AVLTree)
+
+Return number of elements in AVL tree `tree`.
+"""
 Base.length(tree::AVLTree) = tree.count
 
 get_height(node::Union{AVLTreeNode, Nothing}) = (node == nothing) ? Int8(0) : node.height
@@ -93,7 +110,7 @@ function right_rotate(z::AVLTreeNode)
 end
 
 """
-   minimum_node(tree::AVLTree, node::AVLTreeNode)
+    minimum_node(tree::AVLTree, node::AVLTreeNode)
 
 Returns the AVLTreeNode with minimum value in subtree of `node`.
 """
@@ -120,17 +137,28 @@ function search_node(tree::AVLTree{K}, d::K) where K
     return (node == nothing) ? prev : node
 end
 
-function Base.haskey(tree::AVLTree{K}, d::K) where K
+"""
+    haskey(tree::AVLTree{K}, k::K) where K
+
+Verify if AVL tree `tree` contains the key `k`. Analogous to [`in(key, tree::AVLTree)`](@ref).
+"""
+function Base.haskey(tree::AVLTree{K}, k::K) where K
     (tree.root == nothing) && return false
-    node = search_node(tree, d)
-    return (node.data == d)
+    node = search_node(tree, k)
+    return (node.data == k)
 end
 
+"""
+    in(key, tree::AVLTree)
+
+`In` infix  operator for `key` and `tree` types. Analogous to [`haskey(tree::AVLTree{K}, k::K) where K`](@ref).
+"""
 Base.in(key, tree::AVLTree) = haskey(tree, key)
 
 function insert_node(node::Nothing, key::K) where K
     return AVLTreeNode{K}(key)
 end
+
 function insert_node(node::AVLTreeNode{K}, key::K) where K
     if key < node.data
         node.leftChild = insert_node(node.leftChild, key)
@@ -171,9 +199,14 @@ function Base.insert!(tree::AVLTree{K}, d::K) where K
     return tree
 end
 
-function Base.push!(tree::AVLTree{K}, key0) where K
-    key = convert(K, key0)
-    insert!(tree, key)
+"""
+    push!(tree::AVLTree{K}, key) where K
+
+Insert `key` in AVL tree `tree`.
+"""
+function Base.push!(tree::AVLTree{K}, key) where K
+    key0 = convert(K, key)
+    insert!(tree, key0)
 end
 
 function delete_node!(node::AVLTreeNode{K}, key::K) where K
@@ -220,20 +253,39 @@ function delete_node!(node::AVLTreeNode{K}, key::K) where K
     return node
 end
 
-function Base.delete!(tree::AVLTree{K}, d::K) where K
+"""
+    delete!(tree::AVLTree{K}, k::K) where K
+
+Delete key `k` from `tree` AVL tree.
+"""
+function Base.delete!(tree::AVLTree{K}, k::K) where K
     # if the key is not in the tree, do nothing and return the tree
-    !haskey(tree, d) && return tree
+    !haskey(tree, k) && return tree
 
     # if the key is present, delete it from the tree
-    tree.root = delete_node!(tree.root, d)
+    tree.root = delete_node!(tree.root, k)
     tree.count -= 1
     return tree
 end
 
 """
-    sorted_rank(tree::AVLTree, key)
+    sorted_rank(tree::AVLTree{K}, key::K) where K
 
-Returns the rank of `key` present in the `tree`, if it present. A KeyError is thrown if `key` is not present.
+Returns the rank of `key` present in the `tree`, if it present. A `KeyError` is thrown if `key`
+is not present.
+
+# Exemples
+
+```jldoctest
+julia> tree = AVLTree{Int}();
+
+julia> for k in 1:2:20
+           push!(tree, k)
+       end
+
+julia> sorted_rank(tree, 17)
+9
+```
 """
 function sorted_rank(tree::AVLTree{K}, key::K) where K
     !haskey(tree, key) && throw(KeyError(key))
@@ -251,6 +303,29 @@ function sorted_rank(tree::AVLTree{K}, key::K) where K
     return rank
 end
 
+"""
+    getindex(tree::AVLTree{K}, ind::Integer) where K
+
+Considering the elements of `tree` sorted, returns the `ind`-th element in `tree`. Search
+operation is performed in \$O(\\log n)\$ time complexity.
+
+# Examples
+
+```jldoctest
+julia> tree = AVLTree{Int}()
+AVLTree{Int64}(nothing, 0)
+
+julia> for k in 1:2:20
+           push!(tree, k)
+       end
+
+julia> tree[4]
+7
+
+julia> tree[8]
+15
+```
+"""
 function Base.getindex(tree::AVLTree{K}, ind::Integer) where K
     @boundscheck (1 <= ind <= tree.count) || throw(BoundsError("$ind should be in between 1 and $(tree.count)"))
     function traverse_tree(node::AVLTreeNode_or_null, idx)
