@@ -2,10 +2,11 @@
     Stack{T}() where {T}
     Stack{T}(blksize::Integer) where {T}
 
-Create a `Stack` object containing elements of type `T` for Last-In-First-Out (LIFO) access.
+Create a `Stack` object containing elements of type `T` for Last In, First Out (LIFO) access.
 
 # Parameters
-`blksize::Integer` Unrolled linked-list bleck size (in bytes). Defualt = 1024.
+- `T::Type` Stack element data type.
+- `blksize::Integer` Unrolled linked-list bleck size (in bytes). Defualt = 1024.
 
 # Examples
 ```jldoctest
