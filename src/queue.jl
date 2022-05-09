@@ -42,11 +42,11 @@ Return the number of elements in queue `q`.
 Base.length(q::Queue) = length(q.store)
 
 """
-    eltype(::Type{Queue{T}}) where T = {T}
+    eltype(::Type{Queue{T}}) where {T}
 
 Return the type of the elements in the queue.
 """
-Base.eltype(::Type{Queue{T}}) where {T}
+Base.eltype(::Type{Queue{T}}) where {T} = T
 
 """
     first(q::Queue)

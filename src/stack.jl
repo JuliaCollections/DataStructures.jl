@@ -45,7 +45,7 @@ Base.length(s::Stack) = length(s.store)
 
 Return the type of the elements in the stack.
 """
-Base.eltype(::Type{Stack{T}}) where {T}
+Base.eltype(::Type{Stack{T}}) where {T} = T
 
 """
     first(s::Stack)
