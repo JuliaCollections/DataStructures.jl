@@ -139,7 +139,7 @@ Insert the element `k` into the sorted set `ss`.
 If the `k` is already present, this overwrites
 the old value. (This is not necessarily a no-op; see remarks about the 
 customizing the sort order.) 
-See also [`push_return_token!(ss::SortedSet, k)`](@ref).
+See also [`push_return_semitoken!(ss::SortedSet, k)`](@ref).
 The return value is
 `ss`. Time: O(*c* log *n*)
 """

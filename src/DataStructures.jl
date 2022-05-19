@@ -65,7 +65,7 @@ module DataStructures
 
     export findkey
 
-    export push_return_token!
+    export push_return_semitoken!
     export token_firstindex, token_lastindex
 
     include("delegate.jl")

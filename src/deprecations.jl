@@ -19,9 +19,9 @@ Base.@deprecate_binding IntDisjointSets IntDisjointSet
 
 @deprecate startof(m::SortedContainer) firstindex(m::SortedContainer)
 @deprecate endof(m::SortedContainer) lastindex(m::SortedContainer)
-@deprecate insert!(m::SortedSet, k) push_return_token!(m::SortedSet, k)
-@deprecate insert!(m::SortedDict, k, d) push_return_token!(m::SortedDict, k=>d)
-@deprecate insert!(m::SortedMultiDict, k, d) (push_return_token!(m::SortedMultiDict, k=>d))[2]
+@deprecate insert!(m::SortedSet, k) push_return_semitoken!(m::SortedSet, k)
+@deprecate insert!(m::SortedDict, k, d) push_return_semitoken!(m::SortedDict, k=>d)
+@deprecate insert!(m::SortedMultiDict, k, d) (push_return_semitoken!(m::SortedMultiDict, k=>d))[2]
 
 function Base.peek(q::PriorityQueue)
     Expr(:meta, :noinline)

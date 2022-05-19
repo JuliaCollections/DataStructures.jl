@@ -20,7 +20,7 @@ SortedMultiDict{K,D,Ord}(o::Ord=Forward) where {K,D,Ord<:Ordering} =
 function SortedMultiDict{K,D,Ord}(o::Ord, kv) where {K,D,Ord<:Ordering}
     smd = SortedMultiDict{K,D,Ord}(BalancedTree23{K,D,Ord}(o))
     for (k,v) in kv
-        push_return_token!(smd, k=>v)
+        push_return_semitoken!(smd, k=>v)
     end
     return smd
 end
@@ -149,7 +149,7 @@ const SMDToken = Tuple{SortedMultiDict, IntSemiToken}
 
 
 """
-    DataStructures.push_return_token!(smd::SortedMultiDict, pr::Pair)
+    DataStructures.push_return_semitoken!(smd::SortedMultiDict, pr::Pair)
 
 Insert the key-value pair `pr`, i.e., `k=>v`, into `smd`.  
 If `k` already appears as a key
@@ -159,12 +159,12 @@ the
 return value is a 2-tuple whose first entry is boolean
 always equal to `true` and whose second entry is the semitoken of the new entry.
 (The reason for returning a bool whose value is always `true` is for consistency
-with `push_return_token!` for SortedDict and SortedSet.)
+with `push_return_semitoken!` for SortedDict and SortedSet.)
 This function replaces
 the deprecated `insert!`.
 Time: O(*c* log *n*)
 """
-@inline function push_return_token!(m::SortedMultiDict, pr::Pair)
+@inline function push_return_semitoken!(m::SortedMultiDict, pr::Pair)
     b, i = insert!(m.bt, convert(keytype(m),pr.first), convert(valtype(m),pr.second), true)
     b, IntSemiToken(i)
 end
@@ -177,7 +177,7 @@ Insert the pair `p`, i.e., a `k=>v` into `smd`.
 If `k` already appears as a key
 in `smd`, then `k=>v` is inserted in the rightmost position after existing
 items with key `k`.  Returns the container.
-See also [`push_return_token!(smd::SortedMultiDict, p::Pair)`](@ref).
+See also [`push_return_semitoken!(smd::SortedMultiDict, p::Pair)`](@ref).
 Time: O(*c* log *n*)
 """
 @inline function Base.push!(m::SortedMultiDict{K,D}, pr::Pair) where {K,D}
