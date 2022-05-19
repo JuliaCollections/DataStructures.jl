@@ -996,6 +996,21 @@ while `k` will be the corresponding keys.  The returned keys lie between `key1` 
 ```
 Same as above, except the iteration is in the reverse order.
 
+Writing on the objects returned by `values` is not currently supported, e.g.,
+the following `map!` statement is not implemented even though the 
+analogous statement is available for `Dict` in Base.
+```julia
+    s = SortedDict(3=>4)
+    map!(x -> x*2, values(s))
+```
+The workaround is an explicit loop:
+```julia
+    s = SortedDict(3=>4)
+    for t in onlysemitokens(s)
+        s[t] *= 2
+    end
+```
+
 Running time for all iterations: O(*c*(*s* + log *n*)), where
 *s* is the number of steps from start to end of the iteration.
 """

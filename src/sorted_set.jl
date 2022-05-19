@@ -112,7 +112,7 @@ end
 
 
 """
-    DataStructures.push_return_token!(ss::SortedSet, k)
+    DataStructures.push_return_semitoken!(ss::SortedSet, k)
 
 Insert the element `k`
 into the SortedSet `sc`.
@@ -126,7 +126,7 @@ second entry is the semitoken of the new entry.   This function
 replaces the deprecated `insert!`.
 Time: O(*c* log *n*)
 """
-@inline function push_return_token!(m::SortedSet, k_)
+@inline function push_return_semitoken!(m::SortedSet, k_)
     b, i = insert!(m.bt, convert(keytype(m),k_), nothing, false)
     return b, IntSemiToken(i)
 end

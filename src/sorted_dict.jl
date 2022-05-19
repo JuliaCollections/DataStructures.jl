@@ -167,7 +167,7 @@ Assign or
 reassign the value associated with the key `k` to `newvalue`.  Note
 that the key is also overwritten; this is not necessarily a no-op
 since the equivalence in the sort-order does not imply equality.
-See also [`push_return_token!(sd::SortedDict, p::Pair)`](@ref).
+See also [`push_return_semitoken!(sd::SortedDict, p::Pair)`](@ref).
 Time: O(*c* log *n*)
 """
 @inline function Base.setindex!(m::SortedDict, d_, k_)
@@ -183,7 +183,7 @@ Insert key-vaue pair `p`, i.e., a `k=>v` pair, into `sd`.
 If the key `k` is already present, this overwrites the old value. 
 The key is also overwritten (not necessarily a no-op, since 
 sort-order equivalence may differ from equality).
-The return value is `sd`.   See also [`push_return_token!(sd::SortedDict, p::Pair)`](@ref).
+The return value is `sd`.   See also [`push_return_semitoken!(sd::SortedDict, p::Pair)`](@ref).
 Time: O(*c* log *n*)
 """
 @inline function Base.push!(m::SortedDict{K,D}, pr::Pair) where {K,D}
@@ -208,7 +208,7 @@ end
 
 
 """
-    DataStructures.push_return_token!(sd::SortedDict, p::Pair)
+    DataStructures.push_return_semitoken!(sd::SortedDict, p::Pair)
 
 Insert pair `p` of the form `k=>v` into `sd`.
 If the key is already present in `sd`, this
@@ -222,7 +222,7 @@ present) and whose second entry is the semitoken of the new entry.
 This function replaces the deprecated `insert!(sd,k,v)`.
  Time: O(*c* log *n*)
 """
-@inline function push_return_token!(m::SortedDict, pr::Pair)
+@inline function push_return_semitoken!(m::SortedDict, pr::Pair)
     b, i = insert!(m.bt, convert(keytype(m), pr.first), convert(valtype(m), pr.second), false)
     b, IntSemiToken(i)
 end
