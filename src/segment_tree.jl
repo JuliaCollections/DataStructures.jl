@@ -42,5 +42,10 @@ function repeat_op(base,time::Integer, op::Function)
     
     return final_value
 end
-
+#Identity is required.
 struct artificial_identity end
+
+
+identity(x,y) = artificial_identity
+identity(::T, ::typeof(+)) where {T<:Number} = zero(T)
+identity(::T, ::typeof(*)) where {T<:Number} = one(T)
