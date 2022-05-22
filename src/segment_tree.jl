@@ -49,3 +49,5 @@ struct artificial_identity end
 identity(x,y) = artificial_identity
 identity(::T, ::typeof(+)) where {T<:Number} = zero(T)
 identity(::T, ::typeof(*)) where {T<:Number} = one(T)
+operation_with_identity(f) = (x,y)-> (x===artificial_identity) ? y : (y===artificial_identity ? x : f(x,y))
+repeat_op_with_identity(f) = (base,time) -> (base===artificial_identity) ? artificial_identity : f(base,time)
