@@ -51,3 +51,16 @@ identity(::T, ::typeof(+)) where {T<:Number} = zero(T)
 identity(::T, ::typeof(*)) where {T<:Number} = one(T)
 operation_with_identity(f) = (x,y)-> (x===artificial_identity) ? y : (y===artificial_identity ? x : f(x,y))
 repeat_op_with_identity(f) = (base,time) -> (base===artificial_identity) ? artificial_identity : f(base,time)
+
+
+mutable struct Segment_tree_node{Dtype, Op, iterated_op, identity}<:Abstractsegmenttreenode{Dtype,Op,iterated_op}
+    child_nodes::Union{NTuple{2,Segment_tree_node{Dtype, Op, iterated_op, identity}},Nothing}
+    #Either both children are valid or none is valid. 
+    value::Dtype
+    density::Dtype
+    #Implicitly have information about where it represents.
+    function Segment_tree_node()
+        return new{Dtype,Op,iterated_op,identity}(nothing)
+    end
+end
+get_element_identity(::Segment_tree_node{Dtype, Op, iterated_op, identity}) where {Dtype, Op, iterated_op, identity} = identity
