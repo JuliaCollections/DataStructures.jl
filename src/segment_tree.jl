@@ -15,4 +15,32 @@ get_iterated_op(::Abstractsegmenttreenode{Dtype,Op,iterated_op}) where {Dtype, O
 
 get_middle(low, high) = div(low+high,2)
 
+function repeat_op(base,time::Integer, op::Function)
+    #Hopefully segment tree not larger than 64. Otherwise, big number segment tree may be needed.
+    Iterations = convert(UInt,time)
+    #Find trailing zeros.
+    baseline = base
+    for i in 1:trailing_zeros(Iterations)
+        baseline = op(baseline,baseline)
+    end
+    Iterations = Iterations>>trailing_zeros(Iterations)
+    
+    #Operate to get to the baseline.
+    #baseline = #Working in progress.
+    
+    #Then, you can iterate.
+    final_value = baseline
+    while (Iterations!=0)
+        Iterations>>=1
+        baseline = op(baseline,baseline)
+        if isodd(Iterations)
+            final_value = op(final_value,baseline)
+        end
+    end
+    #Something
 
+    
+    return final_value
+end
+
+struct artificial_identity end
