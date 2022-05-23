@@ -64,3 +64,4 @@ mutable struct Segment_tree_node{Dtype, Op, iterated_op, identity}<:Abstractsegm
     end
 end
 get_element_identity(::Segment_tree_node{Dtype, Op, iterated_op, identity}) where {Dtype, Op, iterated_op, identity} = identity
+
