@@ -74,4 +74,6 @@ function Segment_tree(type::Type{T}, size, op, iterated_op, identity::T) where {
     return Segment_tree{Segment_tree_node{type,op,iterated_op,identity}()}
 end
 
-function Segment_tree(type::Type, size, op; identity=)
+function Segment_tree(type::Type, size, op; iterated_op=)
+    #Make both 
+end
