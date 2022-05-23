@@ -65,3 +65,13 @@ mutable struct Segment_tree_node{Dtype, Op, iterated_op, identity}<:Abstractsegm
 end
 get_element_identity(::Segment_tree_node{Dtype, Op, iterated_op, identity}) where {Dtype, Op, iterated_op, identity} = identity
 
+struct Segment_tree{node_type} <: Abstractsegmenttree{node_type}
+    size::Int
+    head::node_type
+end
+function Segment_tree(type::Type{T}, size, op, iterated_op, identity::T) where {T}
+    size = convert(Int,size)
+    return Segment_tree{Segment_tree_node{type,op,iterated_op,identity}()}
+end
+
+function Segment_tree(type::Type, size, op; identity=)
