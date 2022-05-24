@@ -46,11 +46,11 @@ end
 struct artificial_identity end
 
 
-identity(x,y) = artificial_identity
-identity(::T, ::typeof(+)) where {T<:Number} = zero(T)
-identity(::T, ::typeof(*)) where {T<:Number} = one(T)
-operation_with_identity(f) = (x,y)-> (x===artificial_identity) ? y : (y===artificial_identity ? x : f(x,y))
-repeat_op_with_identity(f) = (base,time) -> (base===artificial_identity) ? artificial_identity : f(base,time)
+get_identity(x,y) = artificial_identity()
+get_identity(::Type{T}, ::typeof(+)) where {T<:Number} = zero(T)
+get_identity(::Type{T}, ::typeof(*)) where {T<:Number} = one(T)
+operation_with_identity(f) = (x,y)-> (x===artificial_identity()) ? y : (y===artificial_identity() ? x : f(x,y))
+repeat_op_with_identity(f) = (base,time) -> (base===artificial_identity()) ? artificial_identity() : f(base,time)
 
 
 mutable struct Segment_tree_node{Dtype, Op, iterated_op, identity}<:Abstractsegmenttreenode{Dtype,Op,iterated_op}
@@ -65,15 +65,32 @@ mutable struct Segment_tree_node{Dtype, Op, iterated_op, identity}<:Abstractsegm
 end
 get_element_identity(::Segment_tree_node{Dtype, Op, iterated_op, identity}) where {Dtype, Op, iterated_op, identity} = identity
 
-struct Segment_tree{node_type} <: Abstractsegmenttree{node_type}
+struct Segment_tree{node_type<:Abstractsegmenttreenode} <: Abstractsegmenttree{node_type}
     size::Int
     head::node_type
 end
-function Segment_tree(type::Type{T}, size, op, iterated_op, identity::T) where {T}
+function Segment_tree(type::Type{T}, size, op::Function, iterated_op::Function, identity::T) where {T}
     size = convert(Int,size)
-    return Segment_tree{Segment_tree_node{type,op,iterated_op,identity}()}
+    println(type)
+    println(op)
+    println(typeof(iterated_op))
+    println("iterated_op is ",iterated_op)
+    println(typeof(identity))
+    return Segment_tree{Segment_tree_node{type,op,iterated_op,identity}}(size,Segment_tree_node{type,op,iterated_op,identity}())
 end
 
-function Segment_tree(type::Type, size, op; iterated_op=)
+function Segment_tree(type::Type, size, op; iterated_op=nothing, identity=nothing)
     #Make both 
+    if iterated_op===nothing
+        iterated_op = (x,y)->repeat_op(x,y,op)
+    end
+    if identity === nothing
+        identity = get_identity(type,op)
+        if identity === artificial_identity()
+            type = Union{type,artificial_identity}
+            op = operation_with_identity(op)
+            iterated_op = repeat_op_with_identity(iterated_op)
+        end
+    end
+    return Segment_tree(type,size,op,iterated_op,identity)
 end
