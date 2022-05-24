@@ -80,7 +80,7 @@ function Segment_tree(type, size, op::Function, iterated_op::Function, identity)
 end
 
 function Segment_tree(type::Type, size, op; iterated_op=nothing, identity=nothing)
-    #Make both 
+    #A bit annoying but local scope must take place.
     new_op = op
     if iterated_op===nothing
         new_iterated_op = (x,y)->repeat_op(x,y,op)
