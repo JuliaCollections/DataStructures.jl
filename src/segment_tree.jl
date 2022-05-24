@@ -74,23 +74,28 @@ function Segment_tree(type, size, op::Function, iterated_op::Function, identity)
     println(typeof(iterated_op))
     println("iterated_op is ",iterated_op)
     println(iterated_op isa Function)
-    head = Segment_tree_node{type,op,iterated_op,identity}()
+    head = Segment_tree_node{type, op, iterated_op, identity}()
 
-    #return Segment_tree{Segment_tree_node{type,op,iterated_op,identity}}(size,Segment_tree_node{type,op,iterated_op,identity}())
+    return Segment_tree{Segment_tree_node{type,op,iterated_op,identity}}(size,head)
 end
 
 function Segment_tree(type::Type, size, op; iterated_op=nothing, identity=nothing)
     #Make both 
+    new_op = op
     if iterated_op===nothing
-        iterated_op = (x,y)->repeat_op(x,y,op)
+        new_iterated_op = (x,y)->repeat_op(x,y,op)
+    else
+        new_iterated_op = iterated_op
     end
     if identity === nothing
-        identity = get_identity(type,op)
-        if identity === artificial_identity()
+        new_identity = get_identity(type,op)
+        if new_identity === artificial_identity()
             type = Union{type,artificial_identity}
-            op = operation_with_identity(op)
-            iterated_op = repeat_op_with_identity(iterated_op)
+            new_op = operation_with_identity(op)
+            new_iterated_op = repeat_op_with_identity(new_iterated_op)
         end
+    else
+        new_identity = identity
     end
-    return Segment_tree(type,size,op,iterated_op,identity)
+    return Segment_tree(type,size,new_op,new_iterated_op,new_identity)
 end
