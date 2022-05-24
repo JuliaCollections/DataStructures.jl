@@ -59,7 +59,7 @@ mutable struct Segment_tree_node{Dtype, Op, iterated_op, identity}<:Abstractsegm
     value::Dtype
     density::Dtype
     #Implicitly have information about where it represents.
-    function Segment_tree_node()
+    function Segment_tree_node{Dtype,Op,iterated_op,identity}() where {Dtype,Op,iterated_op,identity}
         return new{Dtype,Op,iterated_op,identity}(nothing)
     end
 end
@@ -69,14 +69,14 @@ struct Segment_tree{node_type<:Abstractsegmenttreenode} <: Abstractsegmenttree{n
     size::Int
     head::node_type
 end
-function Segment_tree(type::Type{T}, size, op::Function, iterated_op::Function, identity::T) where {T}
+function Segment_tree(type, size, op::Function, iterated_op::Function, identity)
     size = convert(Int,size)
-    println(type)
-    println(op)
     println(typeof(iterated_op))
     println("iterated_op is ",iterated_op)
-    println(typeof(identity))
-    return Segment_tree{Segment_tree_node{type,op,iterated_op,identity}}(size,Segment_tree_node{type,op,iterated_op,identity}())
+    println(iterated_op isa Function)
+    head = Segment_tree_node{type,op,iterated_op,identity}()
+
+    #return Segment_tree{Segment_tree_node{type,op,iterated_op,identity}}(size,Segment_tree_node{type,op,iterated_op,identity}())
 end
 
 function Segment_tree(type::Type, size, op; iterated_op=nothing, identity=nothing)
