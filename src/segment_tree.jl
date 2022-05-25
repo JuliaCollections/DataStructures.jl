@@ -42,6 +42,17 @@ function repeat_op(base,time::Integer, op::Function)
     
     return final_value
 end
+
+#Specialized cases for repeat_op.
+
+repeat_op(base::Number, time::Integer, ::typeof(+)) = base*time
+repeat_op(base::Number, time::Integer, ::typeof(*)) = base^time
+repeat_op(base::T, time::Integer, ::typeof(xor)) where {T<:Integer} = iseven(time) ? zero(T) : base
+repeat_op(base::T, ::Integer, ::typeof(&)) = base
+repeat_op(base::T, ::Integer, ::typeof(|)) = base
+
+#I luv multiple dispatch!
+
 #Identity is required.
 struct artificial_identity end
 
@@ -71,11 +82,7 @@ struct Segment_tree{node_type<:Abstractsegmenttreenode} <: Abstractsegmenttree{n
 end
 function Segment_tree(type, size, op::Function, iterated_op::Function, identity)
     size = convert(Int,size)
-    println(typeof(iterated_op))
-    println("iterated_op is ",iterated_op)
-    println(iterated_op isa Function)
     head = Segment_tree_node{type, op, iterated_op, identity}()
-
     return Segment_tree{Segment_tree_node{type,op,iterated_op,identity}}(size,head)
 end
 
