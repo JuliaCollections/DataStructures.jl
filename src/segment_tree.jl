@@ -80,6 +80,7 @@ struct Segment_tree{node_type<:Abstractsegmenttreenode} <: Abstractsegmenttree{n
     size::Int
     head::node_type
 end
+sizeof(X::Segment_tree) = X.size
 function Segment_tree(type, size, op::Function, iterated_op::Function, identity)
     size = convert(Int,size)
     head = Segment_tree_node{type, op, iterated_op, identity}()
@@ -105,4 +106,32 @@ function Segment_tree(type::Type, size, op; iterated_op=nothing, identity=nothin
         new_identity = identity
     end
     return Segment_tree(type,size,new_op,new_iterated_op,new_identity)
+end
+
+
+@inline function get_range(X::Segment_tree,low,high)
+    
+    #The reason this is inlined is because there is only ONE line.
+    #This is only a wrapping call to another function which is NOT inlined.
+    return get_range(X.head,low,high,1,sizeof(X))
+end
+
+function get_range(X::Segment_tree_node, Query_low, Query_high, Current_low, Current_high)
+    while true
+        if X.child_nodes === nothing
+            return get_iterated_op(X)(X.density, Query_high-Query_low+1) 
+        end
+
+        Current_mid =get_middle(Current_low,Current_high)
+        if Query_high <= Current_mid
+            Current_high = Current_mid
+            X = get_left_child(X)
+        else if Query_low > Current_mid
+            Current_low = Current_mid+1
+            X = get_right_child(X)
+        else
+            return get_op(X)(get_left_range(get_left_child(X), Query_low, Current_low,Current_high),get_right_range(get_right_child(X),Query_high, Current_low,Current_high))
+            #Working in progress.
+        end
+    end
 end
