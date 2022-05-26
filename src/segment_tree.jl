@@ -135,3 +135,55 @@ function get_range(X::Segment_tree_node, Query_low, Query_high, Current_low, Cur
         end
     end
 end
+
+function get_left_range(X::Segment_tree_node, Query_low, Current_low, Current_high)
+    answer = get_element_identity(X)
+    while true
+        if X.child_nodes === nothing
+            return (get_iterated_op(X)(X.density, Current_high-Query_low+1), answer)
+        end
+
+        Current_mid = get_middle(Current_low,Current_high)
+        if Query_low > Current_mid
+            Current_low = Current_mid+1
+            X = get_right_child(X)
+        else
+            answer = get_op(X)(answer,get_entire_range(get_right_child(X, Current_high-Current_mid)))
+            Current_high = Current_mid
+            X = get_left_child(X)
+        end
+        #Working in progress.
+    end
+        
+end
+
+function get_right_range(X::Segment_tree_node, Query_high, Current_low,Current_high)
+    answer = get_element_identity(X)
+    while true
+        if X.child_nodes === nothing
+            return 
+        end
+
+        Current_mid = get_middle(Current_low,Current_high)
+        if Query_high <= Current_mid
+            Query_high = Current_mid
+            X = get_left_child(X)
+        else
+            answer = get_op(X)(get_entire_range(get_left_child(X),Current_mid-Current_low+1), answer)
+            Current_low = Current_mid+1
+            X = get_right_child(X)
+        end
+        #Working in progress.
+    end
+end
+
+#inline?
+function get_entire_range(X::Standard_Segment_tree_node, range)
+    #Working in progress.
+    if X.child_nodes === nothing
+        
+        return get_iterated_op(X)(X.density, range)
+    else
+        return X.value
+    end
+end
