@@ -109,13 +109,15 @@ function Segment_tree(type::Type, size, op; iterated_op=nothing, identity=nothin
 end
 
 
+
 @inline function get_range(X::Segment_tree,low,high)
     
     #The reason this is inlined is because there is only ONE line.
     #This is only a wrapping call to another function which is NOT inlined.
     return get_range(X.head,low,high,1,sizeof(X))
 end
-
+get_left_child(X::Segment_tree_node) = X.child_nodes[1]
+get_right_child(X::Segment_tree_node) = X.child_nodes[2]
 function get_range(X::Segment_tree_node, Query_low, Query_high, Current_low, Current_high)
     while true
         if X.child_nodes === nothing
@@ -178,7 +180,7 @@ function get_right_range(X::Segment_tree_node, Query_high, Current_low,Current_h
 end
 
 #inline?
-function get_entire_range(X::Standard_Segment_tree_node, range)
+function get_entire_range(X::Segment_tree_node, range)
     #Working in progress.
     if X.child_nodes === nothing
         
