@@ -151,7 +151,8 @@ function get_left_range(X::Segment_tree_node, Query_low, Current_low, Current_hi
             Current_low = Current_mid+1
             X = get_right_child(X)
         else
-            answer = get_op(X)(answer,get_entire_range(get_right_child(X, Current_high-Current_mid)))
+            #answer = get_op(X)(answer,get_entire_range(get_right_child(X, Current_high-Current_mid)))
+            answer = get_op(X)(answer,get_entire_range(get_right_child(X)))
             Current_high = Current_mid
             X = get_left_child(X)
         end
