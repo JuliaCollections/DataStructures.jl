@@ -116,6 +116,12 @@ end
     #This is only a wrapping call to another function which is NOT inlined.
     return get_range(X.head,low,high,1,sizeof(X))
 end
+
+@inline function set_range!(X::Segment_tree, low, high, value)
+    #Same logic. Wrap the call.
+    set_range!(get_head(X),low,high,1,sizeof(X), value)
+end
+
 get_left_child(X::Segment_tree_node) = X.child_nodes[1]
 get_right_child(X::Segment_tree_node) = X.child_nodes[2]
 function get_range(X::Segment_tree_node, Query_low, Query_high, Current_low, Current_high)
@@ -184,4 +190,27 @@ end
 
 @inline function get_entire_range(X::Segment_tree_node)
     return X.value
+end
+
+function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Current_high, value)
+    #Working in progress.
+    while true
+        if X.child_nodes === nothing
+            #Do something about it to set the range correctly.
+            #Perhaps construct empty segment tree nodes?
+        end
+
+        Current_mid = get_middle(Current_low,Current_high)
+        if Query_high <= Current_mid
+            Current_high = Current_mid
+            X = get_left_child(X)
+        else if Query_low > Current_mid
+            Current_low = Current_mid+1
+            X = get_right_child(X)
+        else
+            #Time to set left range and set right range.
+            #Working in progress.
+        end
+
+    end
 end
