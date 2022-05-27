@@ -155,7 +155,6 @@ function get_left_range(X::Segment_tree_node, Query_low, Current_low, Current_hi
             Current_high = Current_mid
             X = get_left_child(X)
         end
-        #Working in progress.
     end
         
 end
@@ -163,8 +162,7 @@ end
 function get_right_range(X::Segment_tree_node, Query_high, Current_low,Current_high)
     answer = get_element_identity(X)
     while true
-        if X.child_nodes === nothing
-            #Still in progress here.
+        if X.child_nodes === nothing #Is the terminal node.
             return (get_iterated_op(X)(X.density, Query_high-Current_low+1))
         end
 
