@@ -120,7 +120,7 @@ get_left_child(X::Segment_tree_node) = X.child_nodes[1]
 get_right_child(X::Segment_tree_node) = X.child_nodes[2]
 function get_range(X::Segment_tree_node, Query_low, Query_high, Current_low, Current_high)
     while true
-        if X.child_nodes === nothing
+        if X.child_nodes === nothing #Is the terminal node.
             return get_iterated_op(X)(X.density, Query_high-Query_low+1) 
         end
 
@@ -132,8 +132,9 @@ function get_range(X::Segment_tree_node, Query_low, Query_high, Current_low, Cur
             Current_low = Current_mid+1
             X = get_right_child(X)
         else
-            return get_op(X)(get_left_range(get_left_child(X), Query_low, Current_low,Current_high),get_right_range(get_right_child(X),Query_high, Current_low,Current_high))
-            #Working in progress.
+            return get_op(X)(get_left_range(get_left_child(X), Query_low, Current_low,Current_mid),get_right_range(get_right_child(X),Query_high, Current_mid+1,Current_high))
+            #If this branch is taken before the terminal node is reached, it means that there is a "split". 
+            #This can split only once. This information avoids excessive checks and recursion.
         end
     end
 end
@@ -141,7 +142,7 @@ end
 function get_left_range(X::Segment_tree_node, Query_low, Current_low, Current_high)
     answer = get_element_identity(X)
     while true
-        if X.child_nodes === nothing
+        if X.child_nodes === nothing #Is the terminal node.
             return (get_iterated_op(X)(X.density, Current_high-Query_low+1), answer)
         end
 
@@ -163,12 +164,13 @@ function get_right_range(X::Segment_tree_node, Query_high, Current_low,Current_h
     answer = get_element_identity(X)
     while true
         if X.child_nodes === nothing
-            return 
+            #Still in progress here.
+            return (get_iterated_op(X)(X.density, Query_high-Current_low+1))
         end
 
         Current_mid = get_middle(Current_low,Current_high)
         if Query_high <= Current_mid
-            Query_high = Current_mid
+            Current_high = Current_mid
             X = get_left_child(X)
         else
             answer = get_op(X)(get_entire_range(get_left_child(X),Current_mid-Current_low+1), answer)
@@ -180,12 +182,19 @@ function get_right_range(X::Segment_tree_node, Query_high, Current_low,Current_h
 end
 
 #inline?
-function get_entire_range(X::Segment_tree_node, range)
+#=
+Get rid of this insanity.
+@inline function get_entire_range(X::Segment_tree_node, range)
     #Working in progress.
     if X.child_nodes === nothing
-        
+        #Should this density thing be put at this level?
         return get_iterated_op(X)(X.density, range)
     else
         return X.value
     end
+end
+=#
+
+@inline function get_entire_range(X::Segment_tree_node)
+    return X.value
 end
