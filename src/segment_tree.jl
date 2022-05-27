@@ -179,22 +179,8 @@ function get_right_range(X::Segment_tree_node, Query_high, Current_low,Current_h
             Current_low = Current_mid+1
             X = get_right_child(X)
         end
-        #Working in progress.
     end
 end
-#=
-Get rid of this insanity.
-#inline?
-@inline function get_entire_range(X::Segment_tree_node, range)
-    #Working in progress.
-    if X.child_nodes === nothing
-        #Should this density thing be put at this level?
-        return get_iterated_op(X)(X.density, range)
-    else
-        return X.value
-    end
-end
-=#
 
 @inline function get_entire_range(X::Segment_tree_node)
     return X.value
