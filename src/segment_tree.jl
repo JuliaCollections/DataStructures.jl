@@ -134,7 +134,7 @@ function get_range(X::Segment_tree_node, Query_low, Query_high, Current_low, Cur
         if Query_high <= Current_mid
             Current_high = Current_mid
             X = get_left_child(X)
-        else if Query_low > Current_mid
+        elseif Query_low > Current_mid
             Current_low = Current_mid+1
             X = get_right_child(X)
         else
@@ -198,6 +198,8 @@ function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Cu
         if X.child_nodes === nothing
             #Do something about it to set the range correctly.
             #Perhaps construct empty segment tree nodes?
+            construct_children!(X, Query_low, Query_high, Current_low, Current_high, value)
+            #return?
         end
 
         Current_mid = get_middle(Current_low,Current_high)
@@ -213,4 +215,16 @@ function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Cu
         end
 
     end
+end
+
+function set_left_range!(X::Segment_tree_node, Query_low, Current_low, Current_high, value)
+    
+end
+
+function set_right_range!(X::Segment_tree_node, Query_high, Current_low, Current_high, value)
+    
+end
+
+function construct_children!(X::Segment_tree_node, Query_low, Query_high, Current_low, Current_high, value)
+
 end
