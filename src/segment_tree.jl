@@ -80,7 +80,7 @@ struct Segment_tree{node_type<:Abstractsegmenttreenode} <: Abstractsegmenttree{n
     size::Int
     head::node_type
     #The stack will be used each time it is required.
-    Stack::Vector{node_type}
+    stack::Vector{node_type}
     empty_node::node_type
 end
 sizeof(X::Segment_tree) = X.size
@@ -88,11 +88,11 @@ function Segment_tree(type, size, op::Function, iterated_op::Function, identity)
     size = convert(Int,size)
     head = Segment_tree_node{type, op, iterated_op, identity}()
     empty_node = Segment_tree_node{type, op, iterated_op, identity}()
-    Stack = Vector(undef,65)
+    stack = Vector(undef,65)
     for i in 1:65
-        Stack[i] = empty_node
+        stack[i] = empty_node
     end
-    return Segment_tree{Segment_tree_node{type,op,iterated_op,identity}}(size,head, Stack, empty_node)
+    return Segment_tree{Segment_tree_node{type,op,iterated_op,identity}}(size,head, stack, empty_node)
 end
 
 function Segment_tree(type::Type, size, op; iterated_op=nothing, identity=nothing)
@@ -127,7 +127,8 @@ end
 
 @inline function set_range!(X::Segment_tree, low, high, value)
     #Same logic. Wrap the call.
-    set_range!(get_head(X),low,high,1,sizeof(X), value)
+    #The utility memories are here.
+    set_range!(get_head(X),low,high,1,sizeof(X), value, X.stack, X.empty_node)
 end
 
 get_left_child(X::Segment_tree_node) = X.child_nodes[1]
@@ -201,14 +202,30 @@ end
     return X.value
 end
 
-function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Current_high, value)
+#=
+Plan: 
+
+set_range!.
+set_left_range!.
+set_right_range!
+construct_children!
+construct_left_children!
+construct_right_children!
+=#
+
+function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node)
     #Working in progress.
     while true
         if is_terminal(X)
             #Do something about it to set the range correctly.
             #Perhaps construct empty segment tree nodes?
             construct_children!(X, Query_low, Query_high, Current_low, Current_high, value)
-            #return?
+            #Next, we need to recompute the entire stack.
+            #Working in progress.
+            error("Working in progress.")
+
+
+            return
         end
 
         Current_mid = get_middle(Current_low,Current_high)
@@ -220,24 +237,34 @@ function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Cu
             X = get_right_child(X)
         else
             #Time to set left range and set right range.
+            set_left_range!(get_left_child(X), Query_low, Current_low, Current_mid, value, stack, empty_node)
+            set_right_range!(get_right_child, Query_high, Current_mid+1, Current_high, value, stack, empty_node)
+            #recompute the entire stack. The same way as above.
+            error("Working in progress.")
             #Working in progress.
         end
 
     end
 end
 
-function set_left_range!(X::Segment_tree_node, Query_low, Current_low, Current_high, value)
+
+
+function set_left_range!(X::Segment_tree_node, Query_low, Current_low, Current_high, value, stack, empty_node)
     
 end
 
-function set_right_range!(X::Segment_tree_node, Query_high, Current_low, Current_high, value)
+function set_right_range!(X::Segment_tree_node, Query_high, Current_low, Current_high, value, stack, empty_node)
     
 end
 
-function construct_children!(X::Segment_tree_node, Query_low, Query_high, Current_low, Current_high, value)
-
+function construct_children!(X::T, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node) where {T<:Segment_tree_node}
+    left = T(nothing, get_element_identity(X), get_element_identity(X))
+    right = T(nothing, get_element_identity(X), get_element_identity(X))
+    X.child_nodes = (left,right)
 end
 
+#=
 function propagate_density!(X::Segment_tree_node)
     get_left_child(X).density = get_right_child(X).density
 end
+=#
