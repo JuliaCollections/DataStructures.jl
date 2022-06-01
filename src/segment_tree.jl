@@ -48,8 +48,8 @@ end
 repeat_op(base::Number, time::Integer, ::typeof(+)) = base*time
 repeat_op(base::Number, time::Integer, ::typeof(*)) = base^time
 repeat_op(base::T, time::Integer, ::typeof(xor)) where {T<:Integer} = iseven(time) ? zero(T) : base
-repeat_op(base::T, ::Integer, ::typeof(&)) = base
-repeat_op(base::T, ::Integer, ::typeof(|)) = base
+repeat_op(base::Integer, ::Integer, ::typeof(&)) = base
+repeat_op(base::Integer, ::Integer, ::typeof(|)) = base
 
 #I luv multiple dispatch!
 
@@ -79,12 +79,20 @@ get_element_identity(::Segment_tree_node{Dtype, Op, iterated_op, identity}) wher
 struct Segment_tree{node_type<:Abstractsegmenttreenode} <: Abstractsegmenttree{node_type}
     size::Int
     head::node_type
+    #The stack will be used each time it is required.
+    Stack::Vector{node_type}
+    empty_node::node_type
 end
 sizeof(X::Segment_tree) = X.size
 function Segment_tree(type, size, op::Function, iterated_op::Function, identity)
     size = convert(Int,size)
     head = Segment_tree_node{type, op, iterated_op, identity}()
-    return Segment_tree{Segment_tree_node{type,op,iterated_op,identity}}(size,head)
+    empty_node = Segment_tree_node{type, op, iterated_op, identity}()
+    Stack = Vector(undef,65)
+    for i in 1:65
+        Stack[i] = empty_node
+    end
+    return Segment_tree{Segment_tree_node{type,op,iterated_op,identity}}(size,head, Stack, empty_node)
 end
 
 function Segment_tree(type::Type, size, op; iterated_op=nothing, identity=nothing)
@@ -124,9 +132,10 @@ end
 
 get_left_child(X::Segment_tree_node) = X.child_nodes[1]
 get_right_child(X::Segment_tree_node) = X.child_nodes[2]
+is_terminal(X::Segment_tree_node) = (X.child_nodes===nothing)
 function get_range(X::Segment_tree_node, Query_low, Query_high, Current_low, Current_high)
     while true
-        if X.child_nodes === nothing #Is the terminal node.
+        if is_terminal(X) #Is the terminal node.
             return get_iterated_op(X)(X.density, Query_high-Query_low+1) 
         end
 
@@ -148,7 +157,7 @@ end
 function get_left_range(X::Segment_tree_node, Query_low, Current_low, Current_high)
     answer = get_element_identity(X)
     while true
-        if X.child_nodes === nothing #Is the terminal node.
+        if is_terminal(X) #Is the terminal node.
            #Hopefully, this is correct.
            # get operation between the right (previously accumulated answer) and the left (this node)
            return get_op(X)(get_iterated_op(X)(X.density, Current_high-Query_low+1), answer)
@@ -171,7 +180,7 @@ end
 function get_right_range(X::Segment_tree_node, Query_high, Current_low,Current_high)
     answer = get_element_identity(X)
     while true
-        if X.child_nodes === nothing #Is the terminal node.
+        if is_terminal(X) #Is the terminal node.
             return get_op(X)(answer,get_iterated_op(X)(X.density, Query_high-Current_low+1))
         end
 
@@ -195,7 +204,7 @@ end
 function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Current_high, value)
     #Working in progress.
     while true
-        if X.child_nodes === nothing
+        if is_terminal(X)
             #Do something about it to set the range correctly.
             #Perhaps construct empty segment tree nodes?
             construct_children!(X, Query_low, Query_high, Current_low, Current_high, value)
@@ -206,7 +215,7 @@ function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Cu
         if Query_high <= Current_mid
             Current_high = Current_mid
             X = get_left_child(X)
-        else if Query_low > Current_mid
+        elseif Query_low > Current_mid
             Current_low = Current_mid+1
             X = get_right_child(X)
         else
