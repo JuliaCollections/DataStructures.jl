@@ -212,22 +212,37 @@ construct_children!
 construct_left_children!
 construct_right_children!
 =#
+function reconstruct_stack!(stack, empty_node, stack_begin, stack_end)
+    for i in stack_end:-1:stack_begin
+        node = stack[i]
+        node.value = get_op(node)(get_left_child(node).value,get_right_child(node).value)
+        stack[i] = empty_node
+    end
+end
+
 
 function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node)
     #Working in progress.
+    stack_top = 1 #The top of the stack where you can change.
     while true
         if is_terminal(X)
             #Do something about it to set the range correctly.
             #Perhaps construct empty segment tree nodes?
+            #Push the final into the stack.
             construct_children!(X, Query_low, Query_high, Current_low, Current_high, value)
+            #What to do here? Not sure.
+
+            reconstruct_stack!(stack,empty_node,1,stack_top-1)
             #Next, we need to recompute the entire stack.
+            #Please ensure that X is not in the stack. (Since this will be handled separately.)
             #Working in progress.
             error("Working in progress.")
 
 
             return
         end
-
+        stack[stack_top] = X
+        stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
         if Query_high <= Current_mid
             Current_high = Current_mid
@@ -238,8 +253,9 @@ function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Cu
         else
             #Time to set left range and set right range.
             set_left_range!(get_left_child(X), Query_low, Current_low, Current_mid, value, stack, empty_node)
-            set_right_range!(get_right_child, Query_high, Current_mid+1, Current_high, value, stack, empty_node)
-            #recompute the entire stack. The same way as above.
+            set_right_range!(get_right_child(X), Query_high, Current_mid+1, Current_high, value, stack, empty_node)
+            reconstruct_stack!(stack,empty_node,1,stack_top-1)
+            #recompute the entire stack. This time with X.
             error("Working in progress.")
             #Working in progress.
         end
@@ -250,17 +266,56 @@ end
 
 
 function set_left_range!(X::Segment_tree_node, Query_low, Current_low, Current_high, value, stack, empty_node)
-    
+    while true
+        if is_terminal(X) 
+            #Something here?
+        end
+        #Push the stack here?
+        Current_mid = get_middle(Current_low,Current_high)
+        if Query_low > Current_mid
+            #Not doing anything here?
+            Current_low = Current_mid+1
+            X = get_right_child(X)
+        else
+            #Do something here?
+            Current_high = Current_mid
+            X = get_left_child(X)
+        end
+    end
 end
 
 function set_right_range!(X::Segment_tree_node, Query_high, Current_low, Current_high, value, stack, empty_node)
-    
+    while true
+        if is_terminal(X) #Is the terminal node.
+            #Something here?
+        end
+
+        Current_mid = get_middle(Current_low,Current_high)
+        if Query_high <= Current_mid
+            #No need for anything? (Since the rest is out of range.)
+            Current_high = Current_mid
+            X = get_left_child(X)
+        else
+            #Same logic, something here?
+            Current_low = Current_mid+1
+            X = get_right_child(X)
+        end
+    end
 end
 
+function set_entire_range!(X::Segment_tree_node, range, value)
+    X.density = value
+    X.value = get_iterated_op(X)(range, value)
+end
 function construct_children!(X::T, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node) where {T<:Segment_tree_node}
+    #=
+    Supposedly start? 
+    Should Implicitly be here.
     left = T(nothing, get_element_identity(X), get_element_identity(X))
     right = T(nothing, get_element_identity(X), get_element_identity(X))
     X.child_nodes = (left,right)
+    =#
+    
 end
 
 #=
