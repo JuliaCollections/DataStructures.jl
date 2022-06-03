@@ -17,8 +17,8 @@ to bring it to the full potential.
 This code may be better optimized than code with explicit recursion found in many competitive programming codes, but it may still lacks many 
 good optimizations such as unrolling small leaves into a single array and so on.
 
-It's bittersweet really. The author quit competitive programming because there is no way the author could've implemented such a 
-complicated algorithm in time in a limited situation. Still, this is very useful.
+Let us bring the full potential out of this surprisingly general set of algortihm.
+Knowledge of abstract algebra should be put to use.
 =#
 
 #To test this package.
