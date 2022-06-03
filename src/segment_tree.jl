@@ -254,7 +254,6 @@ function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Cu
             #Next, we need to recompute the entire stack.
             #Please ensure that X is not in the stack. (Since this will be handled separately.)
             #Working in progress.
-            error("Working in progress.")
 
 
             return
@@ -274,7 +273,6 @@ function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Cu
             set_right_range!(get_right_child(X), Query_high, Current_mid+1, Current_high, value, stack, empty_node, stack_top)
             reconstruct_stack!(stack,empty_node,1,stack_top-1)
             #recompute the entire stack. This time with X.
-            error("Working in progress.")
             #Working in progress.
         end
 
