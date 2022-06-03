@@ -4,7 +4,25 @@ It should be made available as part of the (MIT-licensed) Datastructures.jl pack
 Feel free to use or extend this code.
 =#
 
-#cd("Data_structure)
+
+#=
+Note from the author: This has only barely touched the surface of its capability.
+For example, amortizing run-time costs would allow certain operations to happen on a specially initialized segment tree.
+Moreover, if the density is propagated at every step, and the underlying type has commutative property, additive would be possible.
+There are also 2d variants (Segment tree whose nodes are themselves segment tree) and so on.
+These are complicated.
+This is the crown jewel of competitive programming solving many challenging problems. The author tries to bring it out to the wider world
+to bring it to the full potential.
+
+This code may be better optimized than code with explicit recursion found in many competitive programming codes, but it may still lacks many 
+good optimizations such as unrolling small leaves into a single array and so on.
+
+It's bittersweet really. The author quit competitive programming because there is no way the author could've implemented such a 
+complicated algorithm in time in a limited situation. Still, this is very useful.
+=#
+
+#To test this package.
+#cd("Data_structure")
 #(package) activate .
 abstract type Abstractsegmenttreenode{Dtype, Op, iterated_op} end
 abstract type Abstractsegmenttree{node_type} end
@@ -284,6 +302,8 @@ function set_left_range!(X::Segment_tree_node, Query_low, Current_low, Current_h
             X = get_right_child(X)
         else
             #Do something here?
+            #Set range using Range and value.
+            set_entire_range!(get_right_child(X),Current_high-Current_mid,value)
             Current_high = Current_mid
             X = get_left_child(X)
         end
@@ -306,7 +326,8 @@ function set_right_range!(X::Segment_tree_node, Query_high, Current_low, Current
             Current_high = Current_mid
             X = get_left_child(X)
         else
-            #Same logic, something here?
+            #Same logic?
+            set_entire_range!(get_left_child(X), Current_mid-Current_low+1, value)
             Current_low = Current_mid+1
             X = get_right_child(X)
         end
@@ -316,6 +337,7 @@ end
 function set_entire_range!(X::Segment_tree_node, range, value)
     X.density = value
     X.value = get_iterated_op(X)(range, value)
+    X.child_nodes = nothing
 end
 function construct_children!(X::T, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node, stack_top) where {T<:Segment_tree_node}
     #=
