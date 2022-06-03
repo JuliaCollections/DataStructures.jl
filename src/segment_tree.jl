@@ -229,7 +229,7 @@ function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Cu
             #Do something about it to set the range correctly.
             #Perhaps construct empty segment tree nodes?
             #Push the final into the stack.
-            construct_children!(X, Query_low, Query_high, Current_low, Current_high, value)
+            construct_children!(X, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node, stack_top)
             #What to do here? Not sure.
 
             reconstruct_stack!(stack,empty_node,1,stack_top-1)
@@ -252,8 +252,8 @@ function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Cu
             X = get_right_child(X)
         else
             #Time to set left range and set right range.
-            set_left_range!(get_left_child(X), Query_low, Current_low, Current_mid, value, stack, empty_node)
-            set_right_range!(get_right_child(X), Query_high, Current_mid+1, Current_high, value, stack, empty_node)
+            set_left_range!(get_left_child(X), Query_low, Current_low, Current_mid, value, stack, empty_node, stack_top)
+            set_right_range!(get_right_child(X), Query_high, Current_mid+1, Current_high, value, stack, empty_node, stack_top)
             reconstruct_stack!(stack,empty_node,1,stack_top-1)
             #recompute the entire stack. This time with X.
             error("Working in progress.")
@@ -265,12 +265,18 @@ end
 
 
 
-function set_left_range!(X::Segment_tree_node, Query_low, Current_low, Current_high, value, stack, empty_node)
+function set_left_range!(X::Segment_tree_node, Query_low, Current_low, Current_high, value, stack, empty_node, stack_top)
     while true
         if is_terminal(X) 
+            construct_left_children!(X,Query_low,Current_low,Current_high,value,stack,empty_node, stack_top)
+            reconstruct_stack!(stack,empty_node,1,stack_top-1)
+            #Next, we need to recompute the entire stack.
+            #Please ensure that X is not in the stack. (Since this will be handled separately.)
             #Something here?
         end
         #Push the stack here?
+        stack[stack_top] = X
+        stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
         if Query_low > Current_mid
             #Not doing anything here?
@@ -284,12 +290,16 @@ function set_left_range!(X::Segment_tree_node, Query_low, Current_low, Current_h
     end
 end
 
-function set_right_range!(X::Segment_tree_node, Query_high, Current_low, Current_high, value, stack, empty_node)
+function set_right_range!(X::Segment_tree_node, Query_high, Current_low, Current_high, value, stack, empty_node, stack_top)
     while true
         if is_terminal(X) #Is the terminal node.
-            #Something here?
+            #Same logic.
+            construct_right_children!(X,Query_high,Current_low,Current_high,value,stack,empty_node,stack_top)
+            reconstruct_stack!(stack,empty_node,1,stack_top-1)
         end
 
+        stack[stack_top] = X
+        stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
         if Query_high <= Current_mid
             #No need for anything? (Since the rest is out of range.)
@@ -307,7 +317,7 @@ function set_entire_range!(X::Segment_tree_node, range, value)
     X.density = value
     X.value = get_iterated_op(X)(range, value)
 end
-function construct_children!(X::T, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node) where {T<:Segment_tree_node}
+function construct_children!(X::T, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node, stack_top) where {T<:Segment_tree_node}
     #=
     Supposedly start? 
     Should Implicitly be here.
@@ -318,6 +328,16 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
     
 end
 
+function construct_left_children!(X::Segment_tree_node, Query_low, Current_low, Current_high, value, stack, empty_node, stack_top)
+
+end
+function construct_right_children!(X::Segment_tree_node, Query_high, Current_low, Current_high, value, stack, empty_node, stack_top)
+    #Something here?
+end
+
+function construct_entire_range!()
+    #Hmm?
+end
 #=
 function propagate_density!(X::Segment_tree_node)
     get_left_child(X).density = get_right_child(X).density
