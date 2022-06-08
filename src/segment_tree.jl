@@ -24,6 +24,13 @@ Knowledge of abstract algebra should be put to use.
 #To test this package.
 #cd("Data_structure")
 #(package) activate .
+
+
+
+#=
+TODO: Consider adding cases of equal as a separate case.
+=#
+
 abstract type Abstractsegmenttreenode{Dtype, Op, iterated_op} end
 abstract type Abstractsegmenttree{node_type} end
 get_dtype(::Abstractsegmenttreenode{Dtype,Op,iterated_op}) where {Dtype, Op, iterated_op} = Dtype
@@ -181,7 +188,9 @@ function get_left_range(X::Segment_tree_node, Query_low, Current_low, Current_hi
            # get operation between the right (previously accumulated answer) and the left (this node)
            return get_op(X)(get_iterated_op(X)(X.density, Current_high-Query_low+1), answer)
         end
-
+        #If this new decision pass, compare Query_low with Current_mid+1.
+        #3 cases. Exact overlap, partial overlap, and no overlap. 
+        
         Current_mid = get_middle(Current_low,Current_high)
         if Query_low > Current_mid
             Current_low = Current_mid+1
@@ -321,6 +330,9 @@ function set_right_range!(X::Segment_tree_node, Query_high, Current_low, Current
         Current_mid = get_middle(Current_low,Current_high)
         if Query_high <= Current_mid
             #No need for anything? (Since the rest is out of range.)
+            #If Query_high == Current_mid (This means that it is EXACTLY half)
+            #Maybe do something else? Maybe end it right here?
+
             Current_high = Current_mid
             X = get_left_child(X)
         else
