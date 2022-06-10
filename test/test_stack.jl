@@ -38,6 +38,28 @@
             @test isempty(s) == (i == n)
             @test length(s) == n - i
         end
+
+        for i = 1 : n
+            pushfirst!(s, i)
+            @test first(s) == 1
+            @test last(s) == i
+            @test !isempty(s)
+            @test length(s) == i
+        end
+
+        @test collect(s) == collect(n:-1:1)
+
+        for i = 1 : n
+            x = popfirst!(s)
+            @test x == n - i + 1
+            if i < n
+                @test first(s) == 1
+            else
+                @test_throws ArgumentError first(s)
+            end
+            @test isempty(s) == (i == n)
+            @test length(s) == n - i
+        end
     end
 
     @testset "==" begin
