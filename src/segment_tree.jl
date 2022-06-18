@@ -112,6 +112,7 @@ sizeof(X::Segment_tree) = X.size
 function Segment_tree(type, size, op::Function, iterated_op::Function, identity)
     size = convert(Int,size)
     head = Segment_tree_node{type, op, iterated_op, identity}()
+    head.value = head.density = identity
     empty_node = Segment_tree_node{type, op, iterated_op, identity}()
     stack = Vector(undef,65)
     for i in 1:65
@@ -384,6 +385,35 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
         stack[stack_top] = X
         stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
+        if Query_high <= Current_mid
+            #Construct some children.
+            Current_high = Current_mid
+            left_child = T()
+            right_child = T()
+            right_child.value = right_child.density = old_density
+            X.child_nodes = (left_child, right_child)
+            X = get_left_child(X)
+        elseif Query_low > Current_mid
+            #Construct some children as well.
+            Current_high = Current_mid
+            left_child = T()
+            right_child = T()
+            left_child.value = left_child.density = old_density
+            X.child_nodes = (left_child, right_child)
+            X = get_left_child(X)
+            Current_low = Current_mid+1
+        else
+            #Construct left and right children.
+            left_child = T()
+            right_child = T()
+            left_child.density = right_child.density = old_density
+            X.child_nodes = (left_child, right_child)
+            construct_left_range!(get_left_child(X), Query_low, Current_low, Current_mid, value, stack, empty_node, stack_top)
+            construct_right_range!(get_right_child(X), Query_high, Current_mid+1, Current_high, value, stack, empty_node, stack_top)
+            reconstruct_stack!(stack,empty_node,1,stack_top-1)
+            return
+            #recompute the entire stack. This time with X.
+        end
     end
 
     
@@ -395,6 +425,7 @@ function construct_left_children!(X::Segment_tree_node, Query_low, Current_low, 
         stack[stack_top] = X
         stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
+        decision_boundary = Current_mid
     end
 end
 function construct_right_children!(X::Segment_tree_node, Query_high, Current_low, Current_high, value, stack, empty_node, stack_top)
