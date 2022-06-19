@@ -380,8 +380,9 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
     X.child_nodes = (left,right)
     =#
     stack_top = old_stack_top
-    old_density = X.density
+    
     while true
+        old_density = X.density
         stack[stack_top] = X
         stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
@@ -390,7 +391,7 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
             Current_high = Current_mid
             left_child = T()
             right_child = T()
-            right_child.value = right_child.density = old_density
+            right_child.density = old_density
             X.child_nodes = (left_child, right_child)
             X = get_left_child(X)
         elseif Query_low > Current_mid
@@ -398,7 +399,7 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
             Current_high = Current_mid
             left_child = T()
             right_child = T()
-            left_child.value = left_child.density = old_density
+            left_child.density = old_density
             X.child_nodes = (left_child, right_child)
             X = get_left_child(X)
             Current_low = Current_mid+1
@@ -422,6 +423,7 @@ end
 function construct_left_children!(X::T, Query_low, Current_low, Current_high, value, stack, empty_node, stack_top) where {T<:Segment_tree_node} 
     stack_top = old_stack_top
     while true
+        old_density = X.density
         stack[stack_top] = X
         stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
@@ -435,6 +437,7 @@ function construct_left_children!(X::T, Query_low, Current_low, Current_high, va
             set_entire_range!(left_child, Current_mid-Current_low,old_density)
             #The left range is out of range and must be of old density
             right_child.density = old_density
+            X.child_nodes = (left_child,right_child)
             X = get_right_child(X)
             #Now, this is happening again.
         elseif Query_low == decision_boundary
@@ -443,14 +446,18 @@ function construct_left_children!(X::T, Query_low, Current_low, Current_high, va
             left_child = T()
             right_child = T()
             set_entire_range!(left_child, Current_mid-Current_low,old_density)
-            set_entire_range!(right_child, Current_high-Current_mid+1)
+            set_entire_range!(right_child, Current_high-Current_mid+1, value)
+            X.child_nodes = (left_child,right_child)
             reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
             #reconstruct_stack
             return
         else
             #Do something here?
             #Set range using Range and value.
-            set_entire_range!(get_right_child(X),Current_high-Current_mid,value)
+            left_child = T()
+            right_child = T()
+            left_child.density = 
+            set_entire_range!(right_child, Current_high-Current_mid+1, value)
             Current_high = Current_mid
             X = get_left_child(X)
         end
