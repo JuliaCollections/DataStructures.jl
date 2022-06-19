@@ -419,16 +419,44 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
     
 end
 
-function construct_left_children!(X::Segment_tree_node, Query_low, Current_low, Current_high, value, stack, empty_node, stack_top)
+function construct_left_children!(X::T, Query_low, Current_low, Current_high, value, stack, empty_node, stack_top) where {T<:Segment_tree_node} 
     stack_top = old_stack_top
     while true
         stack[stack_top] = X
         stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
         decision_boundary = Current_mid
+        if Query_low > decision_boundary
+            #Same logic as get_left_range but with new constructed children.
+            Current_low = decision_boundary
+            #Get new children.
+            left_child = T()
+            right_child = T()
+            set_entire_range!(left_child, Current_mid-Current_low,old_density)
+            #The left range is out of range and must be of old density
+            right_child.density = old_density
+            X = get_right_child(X)
+            #Now, this is happening again.
+        elseif Query_low == decision_boundary
+            #set_entire_range!(get_right_child(X),Current_high-Current_mid,value)
+            #This is a special condition where we can just set both left and right.
+            left_child = T()
+            right_child = T()
+            set_entire_range!(left_child, Current_mid-Current_low,old_density)
+            set_entire_range!(right_child, Current_high-Current_mid+1)
+            reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
+            #reconstruct_stack
+            return
+        else
+            #Do something here?
+            #Set range using Range and value.
+            set_entire_range!(get_right_child(X),Current_high-Current_mid,value)
+            Current_high = Current_mid
+            X = get_left_child(X)
+        end
     end
 end
-function construct_right_children!(X::Segment_tree_node, Query_high, Current_low, Current_high, value, stack, empty_node, stack_top)
+function construct_right_children!(X::T, Query_high, Current_low, Current_high, value, stack, empty_node, stack_top) where {T<:Segment_tree_node}
     #Something here?
     stack_top = old_stack_top
     while true
@@ -438,9 +466,6 @@ function construct_right_children!(X::Segment_tree_node, Query_high, Current_low
     end
 end
 
-function construct_entire_range!()
-    #Hmm?
-end
 #=
 function propagate_density!(X::Segment_tree_node)
     get_left_child(X).density = get_right_child(X).density
