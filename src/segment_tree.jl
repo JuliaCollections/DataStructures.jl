@@ -503,3 +503,4 @@ function propagate_density!(X::Segment_tree_node)
     get_left_child(X).density = get_right_child(X).density
 end
 =#
+
