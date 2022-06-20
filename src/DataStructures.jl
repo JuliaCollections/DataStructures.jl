@@ -48,7 +48,6 @@ module DataStructures
 
     export MultiDict, enumerateall
     export RobinDict
-    export Segment_tree, get_range, set_range!
     export OrderedRobinDict, isordered
     export SwissDict
 
@@ -74,11 +73,13 @@ module DataStructures
     include("default_dict.jl")
     include("dict_support.jl")
     include("trie.jl")
-
     include("int_set.jl")
-
     include("fenwick.jl")
+
     include("segment_tree.jl")
+
+    export Segment_tree, get_range, set_range!
+
     include("list.jl")
     include("mutable_list.jl")
     include("balanced_tree.jl")
