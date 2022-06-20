@@ -39,7 +39,7 @@ Quarternion(a.real*b.real - a.i*b.i - a.j*b.j - a.k*b.k,
 
 @testset "segment_tree" begin
     @testset "Add" begin
-        X1 = Segment_tree(100,UInt64,Base.:+)
+        X1 = Segment_tree(UInt64,100,Base.:+)
         a = zeros(UInt64, 100)
         change_range!(X1, 3,37,53)
         change_range!(X1, 9,23,45)
@@ -56,7 +56,7 @@ Quarternion(a.real*b.real - a.i*b.i - a.j*b.j - a.k*b.k,
     @testset "Large_randomized_trial" begin
 
         #Don't worry about the overflow. This is unsigned integer.
-        X1 = Segment_tree(10000,UInt64, Base.:+)
+        X1 = Segment_tree(UInt64,10000, Base.:+)
         X2 = zeros(UInt64, 10000)
         for i in 1:10000
             a = rand(1:10000)
@@ -71,7 +71,7 @@ Quarternion(a.real*b.real - a.i*b.i - a.j*b.j - a.k*b.k,
     end
 
     @testset "Xor_trial" begin
-        X1 = Segment_tree(10000,UInt64, xor)
+        X1 = Segment_tree(UInt64,10000, xor)
         X2 = zeros(UInt64, 10000)
         for i in 1:10000
             a = rand(1:10000)
@@ -87,7 +87,7 @@ Quarternion(a.real*b.real - a.i*b.i - a.j*b.j - a.k*b.k,
     
     @testset "3x3_matrix_multiplication" begin
         #Float/etc should work fine as well. Just don't want to deal with precision issues.
-        X1 = Segment_tree(1000,Array{UInt64,2},*)
+        X1 = Segment_tree(Array{UInt64,2},1000,*)
         identity_matrix = zeros(UInt64,(3,3))
         identity_matrix[1,1] = identity_matrix[2,2] = identity_matrix[3,3] = 1
         #Vector of vector may not be the most efficient, but it should work without problem.
