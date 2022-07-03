@@ -42,17 +42,48 @@ Quarternion(a.real*b.real - a.i*b.i - a.j*b.j - a.k*b.k,
         X1 = Segment_tree(UInt64,100,Base.:+)
         a = zeros(UInt64, 100)
         set_range!(X1, 37,53, 3)
-        #set_range!(X1, 23,45, 9)
-        #set_range!(X1, 2,21, 5)
+        set_range!(X1, 23,45, 9)
+        set_range!(X1, 2,21, 5)
         a[37:53] .= 3
-        #a[23:45] .= 9
-        #a[2:21]  .= 5
+        a[23:45] .= 9
+        a[2:21]  .= 5
         @test sum(a[23:99]) == get_range(X1, 23,99)
         @test sum(a[55:87]) == get_range(X1, 55,87)
         @test sum(a[2:3]) == get_range(X1, 2, 3)
         @test sum(a[5:77]) == get_range(X1, 5,77)
     end
+    @testset "Small_randomized_trial" begin
+        #Don't worry about the overflow. This is unsigned integer.
+        X1 = Segment_tree(UInt64,15, Base.:+)
+        X2 = zeros(UInt64, 15)
+        for i in 1:1000
+            a = rand(1:15)
+            b = rand(a:15)
+            c = rand(UInt64)
+            set_range!(X1,a,b,c)
+            X2[a:b] .= c
+            d = rand(1:15)
+            e = rand(d:15)
+            @test sum(X2[d:e]) == get_range(X1,d,e)
+        end
     
+    end
+    
+    @testset "XL_array" begin
+        X1 = Segment_tree(UInt64,1000000, Base.:+)
+        X2 = zeros(UInt64, 1000000)
+        for i in 1:20
+            a = rand(1:1000000)
+            b = rand(a:1000000)
+            c = rand(UInt64)
+            set_range!(X1,a,b,c)
+            X2[a:b] .= c
+            d = rand(1:1000000)
+            e = rand(d:1000000)
+            @test sum(X2[d:e]) == get_range(X1,d,e)
+        end
+    end
+    #=
     @testset "Large_randomized_trial" begin
 
         #Don't worry about the overflow. This is unsigned integer.
@@ -107,5 +138,5 @@ Quarternion(a.real*b.real - a.i*b.i - a.j*b.j - a.k*b.k,
             @test reduce(*,X2[d:e]) == get_range(X1,d,e)
         end
     end
-    
+    =#
 end

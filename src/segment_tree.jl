@@ -201,14 +201,18 @@ function get_left_range(X::Segment_tree_node, Query_low, Current_low, Current_hi
         decision_boundary = Current_mid+1
         if Query_low > decision_boundary
             #Current_low = Current_mid+1 This is equivalent.
+            println("Skipping ", Current_low, " to ", Current_mid)
             Current_low = decision_boundary
+            
             X = get_right_child(X)
         elseif Query_low == decision_boundary
             #Wait a bit.
-            return get_op(X)(answer,get_entire_range(get_right_child(X)))
+            println("returning")
+            return get_op(X)(get_entire_range(get_right_child(X)), answer)
         else
             #answer = get_op(X)(answer,get_entire_range(get_right_child(X, Current_high-Current_mid))) (Except that the 2nd argument wasn't needed.)
-            answer = get_op(X)(answer,get_entire_range(get_right_child(X)))
+            println("Taking ", Current_mid+1, " to ", Current_high)
+            answer = get_op(X)(get_entire_range(get_right_child(X)), answer)
             Current_high = Current_mid
             X = get_left_child(X)
         end
@@ -228,12 +232,15 @@ function get_right_range(X::Segment_tree_node, Query_high, Current_low,Current_h
         decision_boundary = Current_mid
         #We write logics about variables. Let the compiler micro-optimize the registries.
         if Query_high < decision_boundary
+            println("Skipping ", Current_mid+1, " to ", Current_high)
             Current_high = decision_boundary
             X = get_left_child(X)
         elseif Query_high == decision_boundary
-            return get_op(X)(get_entire_range(get_left_child(X)), answer)
+            println("returning.")
+            return get_op(X)(answer, get_entire_range(get_left_child(X)))
         else
-            answer = get_op(X)(get_entire_range(get_left_child(X)), answer)
+            println("Taking ", Current_low, " to ", Current_mid)
+            answer = get_op(X)(answer, get_entire_range(get_left_child(X)))
             Current_low = Current_mid+1
             X = get_right_child(X)
         end
@@ -255,7 +262,7 @@ construct_left_children!
 construct_right_children!
 =#
 function reconstruct_stack!(stack, empty_node, stack_begin, stack_end)
-    println("Debugging: reconstructing stack from ",stack_begin," to ", stack_end)
+    #println("Debugging: reconstructing stack from ",stack_begin," to ", stack_end)
     for i in stack_end:-1:stack_begin
         node = stack[i]
         node.value = get_op(node)(get_left_child(node).value,get_right_child(node).value)
@@ -272,7 +279,13 @@ function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Cu
             #Do something about it to set the range correctly.
             #Perhaps construct empty segment tree nodes?
             #Push the final into the stack.
-            construct_children!(X, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node, stack_top)
+            if(Current_low == Current_high)
+                X.density=X.value=value
+            else
+                construct_children!(X, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node, stack_top)
+            end
+
+            
             #What to do here? Not sure.
 
             reconstruct_stack!(stack,empty_node,1,stack_top-1)
@@ -308,7 +321,7 @@ end
 
 
 function set_left_range!(X::Segment_tree_node, Query_low, Current_low, Current_high, value, stack, empty_node, old_stack_top)
-    println("set left range called from ", Current_low, " to ", Current_high)
+    #println("set left range called from ", Current_low, " to ", Current_high)
     stack_top = old_stack_top
     while true
 
@@ -316,7 +329,11 @@ function set_left_range!(X::Segment_tree_node, Query_low, Current_low, Current_h
 
         
         if is_terminal(X) 
-            construct_left_children!(X,Query_low,Current_low,Current_high,value,stack,empty_node, stack_top)
+            if(Current_low == Current_high)
+                X.density=X.value=value
+            else
+                construct_left_children!(X,Query_low,Current_low,Current_high,value,stack,empty_node, stack_top)
+            end
             reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
             return
         end
@@ -345,13 +362,17 @@ function set_left_range!(X::Segment_tree_node, Query_low, Current_low, Current_h
 end
 
 function set_right_range!(X::Segment_tree_node, Query_high, Current_low, Current_high, value, stack, empty_node, old_stack_top)
-    println("set right range called from ", Current_low, " to ", Current_high)
+    #println("set right range called from ", Current_low, " to ", Current_high)
     stack_top = old_stack_top
     while true
         if is_terminal(X) #Is the terminal node.
             #Same logic.
-            construct_right_children!(X,Query_high,Current_low,Current_high,value,stack,empty_node,stack_top)
-            #reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
+            if(Current_low == Current_high)
+                X.density=X.value=value
+            else
+                construct_right_children!(X,Query_high,Current_low,Current_high,value,stack,empty_node,stack_top)
+            end
+            reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
             return
         end
 
@@ -386,7 +407,7 @@ function set_entire_range!(X::Segment_tree_node, range, value)
     X.child_nodes = nothing
 end
 function construct_children!(X::T, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node, old_stack_top) where {T<:Segment_tree_node}
-    println("Construct children called from ", Current_low, " to ", Current_high)
+    #println("Construct children called from ", Current_low, " to ", Current_high)
     #=
     Supposedly start? 
     Should Implicitly be here.
@@ -408,6 +429,11 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
             set_entire_range!(right_child, Current_high-Current_mid, old_density)
             X.child_nodes = (left_child, right_child)
             Current_high = Current_mid
+            if (Current_low == Current_mid)
+                left_child.density = left_child.value = value
+                reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
+                return
+            end
             X = get_left_child(X)
         elseif Query_low > Current_mid
             #Construct some children as well.
@@ -417,6 +443,13 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
             set_entire_range!(left_child, Current_mid-Current_low+1, old_density)
             X.child_nodes = (left_child, right_child)
             Current_low = Current_mid+1
+            if (Current_low == Current_high)
+                #There is only ONE case now.
+                right_child.density = right_child.value = value
+                reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
+                return
+            end
+
             X = get_right_child(X)
         else
             #Construct left and right children.
@@ -436,7 +469,7 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
 end
 
 function construct_left_children!(X::T, Query_low, Current_low, Current_high, value, stack, empty_node, old_stack_top) where {T<:Segment_tree_node}
-    println("Construct left children called from ", Current_low, " to ", Current_high)
+    #println("Construct left children called from ", Current_low, " to ", Current_high)
     stack_top = old_stack_top
     old_density = X.density
     while true
@@ -444,6 +477,8 @@ function construct_left_children!(X::T, Query_low, Current_low, Current_high, va
         stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
         decision_boundary = Current_mid+1
+
+        #Case: if Current_low == Current_high
         if Query_low > decision_boundary
             #Same logic as get_left_range but with new constructed children.
             Current_low = decision_boundary
@@ -475,12 +510,19 @@ function construct_left_children!(X::T, Query_low, Current_low, Current_high, va
             set_entire_range!(right_child, Current_high-Current_mid, value)
             X.child_nodes = (left_child,right_child)
             Current_high = Current_mid
+            if(Current_low == Current_mid)
+                left_child.density = left_child.value = value
+                reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
+                return
+            end
+
+
             X = get_left_child(X)
         end
     end
 end
 function construct_right_children!(X::T, Query_high, Current_low, Current_high, value, stack, empty_node, old_stack_top) where {T<:Segment_tree_node}
-    println("Construct right children called from ", Current_low, " to ", Current_high)
+    #println("Construct right children called from ", Current_low, " to ", Current_high)
     #Something here?
     stack_top = old_stack_top
     old_density = X.density
@@ -511,6 +553,12 @@ function construct_right_children!(X::T, Query_high, Current_low, Current_high, 
             set_entire_range!(left_child, Current_mid-Current_low+1, value)
             X.child_nodes = (left_child,right_child)
             Current_low = Current_mid+1
+            if (Current_high == Current_mid)
+                right_child.density = right_child.value = value
+                reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
+                return
+            end
+
             X = get_right_child(X)
         end
     end
