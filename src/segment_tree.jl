@@ -156,9 +156,9 @@ end
 @inline function set_range!(X::Segment_tree, low, high, value)
     #Same logic. Wrap the call.
     #The utility memories are here.
-    println("Set range called from head from ", low, " to ", high)
+    println("Set range called from head from ", low, " to ", high, " setting value to ", value)
     set_range!(get_head(X),low,high,1,sizeof(X), value, X.stack, X.empty_node)
-    println("ending set range query")
+    #println("ending set range query")
 end
 
 get_left_child(X::Segment_tree_node) = X.child_nodes[1]
@@ -201,17 +201,17 @@ function get_left_range(X::Segment_tree_node, Query_low, Current_low, Current_hi
         decision_boundary = Current_mid+1
         if Query_low > decision_boundary
             #Current_low = Current_mid+1 This is equivalent.
-            println("Skipping ", Current_low, " to ", Current_mid)
+            #println("Skipping ", Current_low, " to ", Current_mid)
             Current_low = decision_boundary
             
             X = get_right_child(X)
         elseif Query_low == decision_boundary
             #Wait a bit.
-            println("returning")
+            #println("returning")
             return get_op(X)(get_entire_range(get_right_child(X)), answer)
         else
             #answer = get_op(X)(answer,get_entire_range(get_right_child(X, Current_high-Current_mid))) (Except that the 2nd argument wasn't needed.)
-            println("Taking ", Current_mid+1, " to ", Current_high)
+            #println("Taking ", Current_mid+1, " to ", Current_high)
             answer = get_op(X)(get_entire_range(get_right_child(X)), answer)
             Current_high = Current_mid
             X = get_left_child(X)
@@ -232,14 +232,14 @@ function get_right_range(X::Segment_tree_node, Query_high, Current_low,Current_h
         decision_boundary = Current_mid
         #We write logics about variables. Let the compiler micro-optimize the registries.
         if Query_high < decision_boundary
-            println("Skipping ", Current_mid+1, " to ", Current_high)
+            #println("Skipping ", Current_mid+1, " to ", Current_high)
             Current_high = decision_boundary
             X = get_left_child(X)
         elseif Query_high == decision_boundary
-            println("returning.")
+            #println("returning.")
             return get_op(X)(answer, get_entire_range(get_left_child(X)))
         else
-            println("Taking ", Current_low, " to ", Current_mid)
+            #println("Taking ", Current_low, " to ", Current_mid)
             answer = get_op(X)(answer, get_entire_range(get_left_child(X)))
             Current_low = Current_mid+1
             X = get_right_child(X)
@@ -445,9 +445,12 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
             Current_low = Current_mid+1
             if (Current_low == Current_high)
                 #There is only ONE case now.
+                
+                #=
                 right_child.density = right_child.value = value
                 reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
                 return
+                =#
             end
 
             X = get_right_child(X)
@@ -469,7 +472,7 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
 end
 
 function construct_left_children!(X::T, Query_low, Current_low, Current_high, value, stack, empty_node, old_stack_top) where {T<:Segment_tree_node}
-    #println("Construct left children called from ", Current_low, " to ", Current_high)
+    println("Construct left children called from ", Current_low, " to ", Current_high)
     stack_top = old_stack_top
     old_density = X.density
     while true
@@ -511,6 +514,13 @@ function construct_left_children!(X::T, Query_low, Current_low, Current_high, va
             X.child_nodes = (left_child,right_child)
             Current_high = Current_mid
             if(Current_low == Current_mid)
+                if (Current_low == Current_high)
+                    X.child_nodes = nothing
+                    X.density = X.value = value
+                    stack[stack_top-1] = empty_node
+                    reconstruct_stack!(stack, empty_node, old_stack_top, stack_top-2)
+                    return
+                end
                 left_child.density = left_child.value = value
                 reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
                 return
@@ -522,7 +532,7 @@ function construct_left_children!(X::T, Query_low, Current_low, Current_high, va
     end
 end
 function construct_right_children!(X::T, Query_high, Current_low, Current_high, value, stack, empty_node, old_stack_top) where {T<:Segment_tree_node}
-    #println("Construct right children called from ", Current_low, " to ", Current_high)
+    println("Construct right children called from ", Current_low, " to ", Current_high)
     #Something here?
     stack_top = old_stack_top
     old_density = X.density
@@ -554,6 +564,13 @@ function construct_right_children!(X::T, Query_high, Current_low, Current_high, 
             X.child_nodes = (left_child,right_child)
             Current_low = Current_mid+1
             if (Current_high == Current_mid)
+                if (Current_low == Current_high)
+                    X.child_nodes = nothing
+                    X.density = X.value = value
+                    stack[stack_top-1] = empty_node
+                    reconstruct_stack!(stack, empty_node, old_stack_top, stack_top-2)
+                    return
+                end
                 right_child.density = right_child.value = value
                 reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
                 return
@@ -570,3 +587,23 @@ function propagate_density!(X::Segment_tree_node)
 end
 =#
 
+
+function debug_print(X::Segment_tree)
+    println("Debug printing: ",1,"-",sizeof(X))
+    debug_print(X.head, 1, 1, sizeof(X))
+    println("end debug print")
+end
+
+function debug_print(X::Segment_tree_node, indent, low, high)
+    println(repeat("  ", indent),"value: ", X.value)
+    if is_terminal(X)
+        println(repeat("  ", indent),"density: ", X.density)
+    else
+        middle = get_middle(low,high)
+        println(repeat("  ", indent),"left: ",low,"-",middle)
+        debug_print(get_left_child(X), indent+1, low, middle)
+        println(repeat("  ", indent),"right: ",middle+1,"-",high)
+        debug_print(get_right_child(X), indent+1, middle+1, high)
+        println(repeat("  ", indent),"end")
+    end
+end
