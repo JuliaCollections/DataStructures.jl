@@ -120,6 +120,9 @@ end
 end
 
 @testset "insert!" begin
+    # issues 479 and 767: deprecate insert! (in favor of push_return_semitoken!)
+    # deprecate startof in favor of firstindex
+    # deprecate endof in favor of lastindex
     s = SortedDict{Int,String}();
     @test isa(insert!(s, 5, "hello"), Tuple{Bool, IntSemiToken})
     s2 = SortedMultiDict{Int,String}();

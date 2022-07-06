@@ -257,6 +257,12 @@ function testSortedDictBasic()
         checkcorrectness(m1.bt, false)
     end
     my_assert(count == 4)
+    # Check that issue 239 (cf 781) is resolved
+    ks = ["a", "c", "b"]
+    vs = [1,2,3]
+    s = SortedDict(zip(ks,vs))
+    my_assert(keytype(s) == String)
+    my_assert(valtype(s) == Int)
     true
 end
 
@@ -633,6 +639,7 @@ function testSortedDictLoops()
         m1[bitreverse(lUi)] = lUi
     end
     count = 0
+    # issue 767
     for (stok,k,v) in semitokens(inclusive(m1, firstindex(m1), lastindex(m1)))
         for (stok2,k2,v2) in semitokens(exclusive(m1, firstindex(m1), pastendsemitoken(m1)))
             c = compare(m1,stok,stok2)
@@ -1921,6 +1928,7 @@ function testTokens()
     my_assert(count == 4)
 
     count = 4
+    # Issue 671
     for t in onlytokens(Iterators.reverse(exclusive_key(smd1, 1, 5)))
         my_assert(deref_value(t) == result[count])
         count -= 1
