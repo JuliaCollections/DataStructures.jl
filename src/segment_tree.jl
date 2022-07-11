@@ -407,7 +407,7 @@ function set_entire_range!(X::Segment_tree_node, range, value)
     X.child_nodes = nothing
 end
 function construct_children!(X::T, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node, old_stack_top) where {T<:Segment_tree_node}
-    #println("Construct children called from ", Current_low, " to ", Current_high)
+    println("Construct children called from ", Current_low, " to ", Current_high)
     #=
     Supposedly start? 
     Should Implicitly be here.
@@ -445,12 +445,9 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
             Current_low = Current_mid+1
             if (Current_low == Current_high)
                 #There is only ONE case now.
-                
-                #=
                 right_child.density = right_child.value = value
                 reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
                 return
-                =#
             end
 
             X = get_right_child(X)
@@ -514,6 +511,7 @@ function construct_left_children!(X::T, Query_low, Current_low, Current_high, va
             X.child_nodes = (left_child,right_child)
             Current_high = Current_mid
             if(Current_low == Current_mid)
+                #=
                 if (Current_low == Current_high)
                     X.child_nodes = nothing
                     X.density = X.value = value
@@ -521,6 +519,7 @@ function construct_left_children!(X::T, Query_low, Current_low, Current_high, va
                     reconstruct_stack!(stack, empty_node, old_stack_top, stack_top-2)
                     return
                 end
+                =#
                 left_child.density = left_child.value = value
                 reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
                 return
@@ -564,6 +563,7 @@ function construct_right_children!(X::T, Query_high, Current_low, Current_high, 
             X.child_nodes = (left_child,right_child)
             Current_low = Current_mid+1
             if (Current_high == Current_mid)
+                #=
                 if (Current_low == Current_high)
                     X.child_nodes = nothing
                     X.density = X.value = value
@@ -571,6 +571,7 @@ function construct_right_children!(X::T, Query_high, Current_low, Current_high, 
                     reconstruct_stack!(stack, empty_node, old_stack_top, stack_top-2)
                     return
                 end
+                =#
                 right_child.density = right_child.value = value
                 reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
                 return
@@ -605,5 +606,23 @@ function debug_print(X::Segment_tree_node, indent, low, high)
         println(repeat("  ", indent),"right: ",middle+1,"-",high)
         debug_print(get_right_child(X), indent+1, middle+1, high)
         println(repeat("  ", indent),"end")
+    end
+end
+
+function check_consistency(X::Segment_tree)
+    consistency = check_consistency(X.head, 1, sizeof(X))
+    if (!consistency)
+        println("This segment tree is currently not consistent with the invariant:.")
+        debug_print(X)
+    end
+    return consistency
+end
+
+function check_consistency(X::Segment_tree_node, low, high)
+    if is_terminal(X)
+        return low <= high && get_iterated_op(X)(X.density,high-low+1) == X.value
+    else
+        middle = get_middle(low,high)
+        return check_consistency(get_left_child(X),low,middle) && check_consistency(get_right_child(X), middle+1, high)
     end
 end
