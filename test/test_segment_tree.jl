@@ -72,7 +72,7 @@ Quarternion(a.real*b.real - a.i*b.i - a.j*b.j - a.k*b.k,
     @testset "XL_array" begin
         X1 = Segment_tree(UInt64,1000000, Base.:+)
         X2 = zeros(UInt64, 1000000)
-        for i in 1:20
+        for i in 1:1000
             a = rand(1:1000000)
             b = rand(a:1000000)
             c = rand(UInt64)
@@ -89,7 +89,7 @@ Quarternion(a.real*b.real - a.i*b.i - a.j*b.j - a.k*b.k,
         #Don't worry about the overflow. This is unsigned integer.
         X1 = Segment_tree(UInt64,10000, Base.:+)
         X2 = zeros(UInt64, 10000)
-        for i in 1:10000
+        for i in 1:100000
             a = rand(1:10000)
             b = rand(a:10000)
             c = rand(UInt64)
@@ -104,7 +104,7 @@ Quarternion(a.real*b.real - a.i*b.i - a.j*b.j - a.k*b.k,
     @testset "Xor_trial" begin
         X1 = Segment_tree(UInt64,10000, xor)
         X2 = zeros(UInt64, 10000)
-        for i in 1:10000
+        for i in 1:100000
             a = rand(1:10000)
             b = rand(a:10000)
             c = rand(UInt64)
@@ -125,7 +125,7 @@ Quarternion(a.real*b.real - a.i*b.i - a.j*b.j - a.k*b.k,
         X2 = [copy(identity_matrix) for i in 1:1000]
         #Viewing without copying should be fine, as we won't mutate the arrays.
         #Static arrays recommended for serious uses of this.
-        for i in 1:1000
+        for i in 1:10000
             a = rand(1:1000)
             b = rand(a:1000)
             c = rand(UInt64,(3,3))
