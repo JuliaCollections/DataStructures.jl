@@ -83,7 +83,7 @@ Quarternion(a.real*b.real - a.i*b.i - a.j*b.j - a.k*b.k,
             @test sum(X2[d:e]) == get_range(X1,d,e)
         end
     end
-    #=
+    
     @testset "Large_randomized_trial" begin
 
         #Don't worry about the overflow. This is unsigned integer.
@@ -138,5 +138,5 @@ Quarternion(a.real*b.real - a.i*b.i - a.j*b.j - a.k*b.k,
             @test reduce(*,X2[d:e]) == get_range(X1,d,e)
         end
     end
-    =#
+    
 end
