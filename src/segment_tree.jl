@@ -451,12 +451,23 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
             end
 
             X = get_right_child(X)
+
+        #elseif Query_low == Current_mid
+        #Something is wrong in this line.
+
         else
             #Construct left and right children.
             left_child = T()
             right_child = T()
-            left_child.density = right_child.density = old_density
             X.child_nodes = (left_child, right_child)
+            if (Current_low == Current_mid)
+                left_child.density = right_child.density = value
+                left_child.value = right_child.value = value
+                reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
+                return
+            end
+            left_child.density = right_child.density = old_density
+            
             construct_left_children!(get_left_child(X), Query_low, Current_low, Current_mid, value, stack, empty_node, stack_top)
             construct_right_children!(get_right_child(X), Query_high, Current_mid+1, Current_high, value, stack, empty_node, stack_top)
             reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
@@ -561,8 +572,8 @@ function construct_right_children!(X::T, Query_high, Current_low, Current_high, 
             right_child = T()
             set_entire_range!(left_child, Current_mid-Current_low+1, value)
             X.child_nodes = (left_child,right_child)
-            Current_low = Current_mid+1
-            if (Current_high == Current_mid)
+            
+            if (Current_low == Current_mid)
                 #=
                 if (Current_low == Current_high)
                     X.child_nodes = nothing
@@ -576,7 +587,7 @@ function construct_right_children!(X::T, Query_high, Current_low, Current_high, 
                 reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
                 return
             end
-
+            Current_low = Current_mid+1
             X = get_right_child(X)
         end
     end
