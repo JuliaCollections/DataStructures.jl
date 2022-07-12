@@ -311,7 +311,7 @@ function Base.splice!(l::MutableLinkedList{T}, idx::Int, ins=_default_splice) wh
 end
 
 function Base.splice!(l::MutableLinkedList{T}, r::AbstractUnitRange{<:Integer}, ins=_default_splice) where T
-    @boundscheck 0 < (0 < first(r) <= l.len && last(r) <= l.len ) || throw(BoundsError(l, r))
+    @boundscheck (0 < first(r) <= l.len && last(r) <= l.len ) || throw(BoundsError(l, r))
     len = length(r)
     data = Vector{T}()
     node = l.node
