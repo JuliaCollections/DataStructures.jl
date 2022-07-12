@@ -238,7 +238,7 @@ function Base.popfirst!(l::MutableLinkedList)
     return data
 end
 
-function Base.popat!(l::MutableLinkedList, idx::Int)
+function popat!(l::MutableLinkedList, idx::Int)
     @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
     node = l.node
     for i = 1:idx
@@ -252,7 +252,7 @@ function Base.popat!(l::MutableLinkedList, idx::Int)
     return node.data
 end
 
-function Base.popat!(l::MutableLinkedList, idx::Int, default)
+function popat!(l::MutableLinkedList, idx::Int, default)
     if !(0 < idx <= l.len) 
         return default;
     end
