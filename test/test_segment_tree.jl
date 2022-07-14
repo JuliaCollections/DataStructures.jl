@@ -48,6 +48,18 @@ Quarternion(a.real*b.real - a.i*b.i - a.j*b.j - a.k*b.k,
             a.real*b.k + b.real*a.k + a.i*b.j - a.j*b.i,
 )
 
+function test_matmul(a,b)
+    ans = zeros(UInt64,(3,3))
+    for i in 1:3
+        for j in 1:3
+            for k in 1:3
+                ans[i,j] += a[i,k] * b[k,j]
+            end
+        end
+    end
+    return ans
+end
+
 @testset "segment_tree" begin
     @testset "Add" begin
         X1 = Segment_tree(UInt64,100,Base.:+)
@@ -194,14 +206,15 @@ Quarternion(a.real*b.real - a.i*b.i - a.j*b.j - a.k*b.k,
         end
     end
     @testset "String_concat" begin
-        String_choice = ["A", "B", "C", "D", "E"]
+        String_choice = ["A", "B", "C", "D", "E", "AA", "BFFG","ATL", "Moon", "Hey"]
+        #The words are random. The acronym's reference are coincidental.
         X1 = Segment_tree(String, 10000, Base.:*)
         X2 = ["" for i in 1:10000]
         for i in 1:10000
             
             a = rand(1:10000)
             b = rand(a:10000)
-            c = String_choice[rand(1:5)]
+            c = String_choice[rand(1:10)]
             set_range!(X1, a, b, c)
             X2[a:b] .= c
             d = rand(1:10000)
