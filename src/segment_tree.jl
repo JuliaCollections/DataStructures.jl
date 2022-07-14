@@ -75,6 +75,7 @@ repeat_op(base::Number, time::Integer, ::typeof(*)) = base^time
 repeat_op(base::T, time::Integer, ::typeof(xor)) where {T<:Integer} = iseven(time) ? zero(T) : base
 repeat_op(base::Integer, ::Integer, ::typeof(&)) = base
 repeat_op(base::Integer, ::Integer, ::typeof(|)) = base
+repeat_op(base::String, time::Integer, ::typeof(*)) = repeat(base, time)
 
 #I luv multiple dispatch!
 
@@ -86,6 +87,7 @@ get_identity(x,y) = artificial_identity()
 get_identity(::Type{T}, ::typeof(+)) where {T<:Number} = zero(T)
 get_identity(::Type{T}, ::typeof(*)) where {T<:Number} = one(T)
 get_identity(::Type{T}, ::typeof(xor)) where {T<:Integer} = zero(T)
+get_identity(::Type{T}, ::typeof(*)) where {T<:String} = ()->""
 operation_with_identity(f) = (x,y)-> (x===artificial_identity()) ? y : (y===artificial_identity() ? x : f(x,y))
 repeat_op_with_identity(f) = (base,time) -> (base===artificial_identity()) ? artificial_identity() : f(base,time)
 
@@ -100,7 +102,11 @@ mutable struct Segment_tree_node{Dtype, Op, iterated_op, identity}<:Abstractsegm
         return new{Dtype,Op,iterated_op,identity}(nothing)
     end
 end
-get_element_identity(::Segment_tree_node{Dtype, Op, iterated_op, identity}) where {Dtype, Op, iterated_op, identity} = identity
+
+process_identity(x) = x
+process_identity(x::Function) = x()
+get_element_identity(::Segment_tree_node{Dtype, Op, iterated_op, identity}) where {Dtype, Op, iterated_op, identity} = process_identity(identity)
+
 
 struct Segment_tree{node_type<:Abstractsegmenttreenode} <: Abstractsegmenttree{node_type}
     size::Int
@@ -112,9 +118,10 @@ end
 get_head(X::Segment_tree) = X.head
 sizeof(X::Segment_tree) = X.size
 function Segment_tree(type, size, op::Function, iterated_op::Function, identity)
+    #println(type)
     size = convert(Int,size)
     head = Segment_tree_node{type, op, iterated_op, identity}()
-    head.value = head.density = identity
+    head.value = head.density = process_identity(identity)
     empty_node = Segment_tree_node{type, op, iterated_op, identity}()
     stack = Vector(undef,65)
     for i in 1:65
@@ -455,7 +462,16 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
                 left_child.value = right_child.value = value
                 reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
                 return
+                
+            elseif (Current_mid+1 == Current_high)
+                left_child.density = old_density
+                construct_left_children!(get_left_child(X), Query_low, Current_low, Current_mid, value, stack, empty_node, stack_top)
+                right_child.density = right_child.value = value
+                reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
+                return
+                
             end
+
             left_child.density = right_child.density = old_density
             
             construct_left_children!(get_left_child(X), Query_low, Current_low, Current_mid, value, stack, empty_node, stack_top)
@@ -615,7 +631,7 @@ function check_consistency(X::Segment_tree)
     consistency = check_consistency(X.head, 1, sizeof(X))
     if (!consistency)
         println("This segment tree is currently not consistent with the invariant:.")
-        debug_print(X)
+        #debug_print(X)
     end
     return consistency
 end
@@ -625,6 +641,9 @@ function check_consistency(X::Segment_tree_node, low, high)
         return low <= high && get_iterated_op(X)(X.density,high-low+1) == X.value
     else
         middle = get_middle(low,high)
-        return check_consistency(get_left_child(X),low,middle) && check_consistency(get_right_child(X), middle+1, high)
+        return (check_consistency(get_left_child(X),low,middle) 
+        && check_consistency(get_right_child(X), middle+1, high) && 
+        X.value == get_op(X)(get_left_child(X).value, get_right_child(X).value)
+        )
     end
 end
