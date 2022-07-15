@@ -1,17 +1,25 @@
-import Base.Ordering
-import Base.Forward
-import Base.Reverse
-import DataStructures.eq
+using Base: Ordering, Forward, Reverse, ForwardOrdering, ReverseOrdering
+using DataStructures: IntSemiToken
 import Base.lt
-import Base.ForwardOrdering
-import Base.ReverseOrdering
-import DataStructures.IntSemiToken
+import DataStructures.eq
+
 
 struct CaseInsensitive <: Ordering
 end
 
 lt(::CaseInsensitive, a, b) = isless(lowercase(a), lowercase(b))
 eq(::CaseInsensitive, a, b) = isequal(lowercase(a), lowercase(b))
+
+
+
+# For testing order objects
+
+struct ForBack <: Ordering
+    flag::Bool
+end
+
+lt(o::ForBack, a, b) = o.flag ? isless(a,b) : isless(b,a)
+
 
 @noinline my_assert(stmt) = stmt ? nothing : throw(AssertionError("assertion failed"))
 
@@ -32,7 +40,7 @@ function my_primes(N)
     p
 end
 
-
+remove_spaces(s::String) = replace(s, r"\s+"=>"")
 
 
 
@@ -222,6 +230,8 @@ function checkcorrectness(t::DataStructures.BalancedTree23{K,D,Ord},
 end
 
 
+
+
 function testSortedDictBasic()
     # a few basic tests of SortedDict to start
     m1 = SortedDict((Dict{String,String}()), Forward)
@@ -237,7 +247,7 @@ function testSortedDictBasic()
         checkcorrectness(m1.bt, false)
         # fulldump(m1.bt)
     end
-    i1 = startof(m1)
+    i1 = firstindex(m1)
     count = 0
     while i1 != pastendsemitoken(m1)
         count += 1
@@ -247,6 +257,12 @@ function testSortedDictBasic()
         checkcorrectness(m1.bt, false)
     end
     my_assert(count == 4)
+    # Check that issue 239 (cf 781) is resolved
+    ks = ["a", "c", "b"]
+    vs = [1,2,3]
+    s = SortedDict(zip(ks,vs))
+    my_assert(keytype(s) == String)
+    my_assert(valtype(s) == Int)
     true
 end
 
@@ -269,20 +285,20 @@ function testSortedDictMethods()
     m05 = SortedDict{Int,Float64}(Reverse, Pair[1=>1, 2=>2.0])
     my_assert(typeof(m05) == SortedDict{Int,Float64,ReverseOrdering{ForwardOrdering}})
     m06a = SortedDict(Pair[1=>2.0, 3=>'a'])
-    my_assert(typeof(m06a) == SortedDict{Any,Any,ForwardOrdering})
+    my_assert(typeof(m06a) == SortedDict{Int,Any,ForwardOrdering})
     m06b = SortedDict([(1,2.0), (3,'a')])
     my_assert(typeof(m06b) == SortedDict{Int,Any,ForwardOrdering})
     m07a = SortedDict(Pair[1.0=>2, 2=>3])
-    my_assert(typeof(m07a) == SortedDict{Any,Any,ForwardOrdering})
+    my_assert(typeof(m07a) == SortedDict{Real, Int, ForwardOrdering})
     m07b = SortedDict([(1.0,2), (2,3)])
     my_assert(typeof(m07b) == SortedDict{Real,Int,ForwardOrdering})
     m08a = SortedDict(Pair[1.0=>2, 2=>'a'])
-    my_assert(typeof(m08a) == SortedDict{Any,Any,ForwardOrdering})
+    my_assert(typeof(m08a) == SortedDict{Real,Any,ForwardOrdering})
     m08b = SortedDict([(1.0,2), (2,'a')])
     my_assert(typeof(m08b) == SortedDict{Real,Any,ForwardOrdering})
     m09a = SortedDict(Pair{Int}[1=>2, 3=>'a'])
     my_assert(typeof(m09a) == SortedDict{Int,Any,ForwardOrdering})
-    m09b = SortedDict([(1,2), (3,'a')])
+    m09b = SortedDict([(1,2), (3,'a')])  # test issue 239
     my_assert(typeof(m09a) == SortedDict{Int,Any,ForwardOrdering})
 
     my_assert(m0 == m02)
@@ -294,12 +310,12 @@ function testSortedDictMethods()
 
     # Test Exceptions
     @test_throws ArgumentError SortedDict([1,2,3,4])
-    @test_throws ArgumentError SortedDict{Int,Int}([1,2,3,4])
+    @test_throws BoundsError SortedDict{Int,Int}([1,2,3,4])
 
 
     expected = ([6,8,12], [18.2, 32.0, 33.1])
     checkcorrectness(m1.bt, false)
-    ii = startof(m1)
+    ii = firstindex(m1)
     m2 = packdeepcopy(m1)
     m3 = packcopy(m1)
     p = first(m1)
@@ -325,7 +341,7 @@ function testSortedDictMethods()
     checkcorrectness(m1.bt, false)
     checkcorrectness(m2.bt, false)
     my_assert(length(m2) == 3)
-    ii = startof(m2)
+    ii = firstindex(m2)
     for j = 1 : 3
         pr = deref((m2,ii))
         my_assert(pr[1] == expected[1][j] && pr[2] == expected[2][j])
@@ -334,7 +350,7 @@ function testSortedDictMethods()
 
     checkcorrectness(m3.bt, false)
     my_assert(length(m3) == 3)
-    ii = startof(m3)
+    ii = firstindex(m3)
     for j = 1 : 3
         pr = deref((m3,ii))
         my_assert(pr[1] == expected[1][j] && pr[2] == expected[2][j])
@@ -411,7 +427,7 @@ function testSortedDictMethods()
     checkcorrectness(m1.bt, false)
     my_assert(ii == pastendsemitoken(m1))
     my_assert(status((m1,ii)) == 3)
-    my_assert(status((m1,SDSemiToken(-1))) == 0)
+    my_assert(status((m1,IntSemiToken(-1))) == 0)
     t = 0
     u = 0.0
     for pr in m1
@@ -428,7 +444,7 @@ function testSortedDictMethods()
     m1[6] = 49.0
     my_assert(length(m1) == numprimes + 1)
     my_assert(m1[6] == 49.0)
-    b, i6 = insert!(m1, 6, 50.0)
+    b, i6 = push_return_semitoken!(m1, 6=>50.0)
     my_assert(length(m1) == numprimes + 1)
     my_assert(!b)
     p = deref((m1,i6))
@@ -437,7 +453,7 @@ function testSortedDictMethods()
     p = deref((m1,i6))
     my_assert(p[1] == 6 && p[2] == 9.0)
     my_assert(m1[i6] == 9.0)
-    b2, i7 = insert!(m1, 8, 51.0)
+    b2, i7 = push_return_semitoken!(m1, 8=>51.0)
     my_assert(b2)
     my_assert(length(m1) == numprimes + 2)
     p = deref((m1,i7))
@@ -446,7 +462,7 @@ function testSortedDictMethods()
     z = pop!(m1, 6)
     checkcorrectness(m1.bt, false)
     my_assert(z == 9.0)
-    i8 = startof(m1)
+    i8 = firstindex(m1)
     p = deref((m1,i8))
     my_assert(p[1] == 2 && p[2] == 4.0)
     my_assert(i8 != beforestartsemitoken(m1))
@@ -560,6 +576,35 @@ function testSortedDictMethods()
     my_assert(!haskey(dfc, 3))
     my_assert([43] == get(dfc, 4, [43]))
     my_assert(!haskey(dfc, 4))
+    @test_throws ArgumentError SortedDict(Forward, Forward)
+    @test_throws ArgumentError SortedDict{Int,Int}(Forward, Forward)
+    @test_throws ArgumentError SortedDict(Val(true), Forward)
+    @test_throws ArgumentError SortedDict{Int,Int}(Val(true), Forward)
+    my_assert(isequal(SortedDict{Int,Int}(ForBack(true), 1=>3,2=>7),
+                      SortedDict{Int,Int}(ForBack(false), 1=>3, 2=>7)))
+    my_assert(!isequal(SortedDict{Int,Int}(ForBack(true), 1=>3,2=>7),
+                      SortedDict{Int,Int}(ForBack(false), 1=>3, 2=>8)))
+    my_assert(isequal(SortedDict(1=>3,2=>7),
+                      Dict(1=>3,2=>7)))
+    my_assert(!isequal(SortedDict(1=>3,2=>7),
+                       Dict(1=>3, 2=>8)))
+
+    my_assert(isequal(merge(SortedDict{Float64,Int}(ForBack(true), 3.5=>2, 4.5=>8),
+                            SortedDict{Float64,Int}(ForBack(false), 2.3=>2, 9.9=>8)),
+                      SortedDict{Float64,Int}(ForBack(true), 3.5 => 2, 4.5 => 8,
+                                              2.3 => 2, 9.9 => 8)))
+    my_assert(!isequal(merge(SortedDict{Float64,Int}(ForBack(true), 3.5=>2, 4.5=>8),
+                             SortedDict{Float64,Int}(ForBack(false), 2.3=>2, 9.9=>9)),
+                       SortedDict{Float64,Int}(ForBack(true), 3.5 => 2, 4.5 => 8,
+                                              2.3 => 2, 9.9 => 8)))
+    my_assert(isequal(merge(SortedDict{Float64,Int}(ForBack(true), 3.5=>2, 4.5=>8),
+                            Dict(2.3=>2, 9.9=>8)),
+                      SortedDict{Float64,Int}(ForBack(true), 3.5 => 2, 4.5 => 8,
+                                              2.3 => 2, 9.9 => 8)))
+    my_assert(!isequal(merge(SortedDict{Float64,Int}(ForBack(true), 3.5=>2, 4.5=>8),
+                             Dict(2.3=>2, 9.9=>9)),
+                       SortedDict{Float64,Int}(ForBack(true), 3.5 => 2, 4.5 => 8,
+                                               2.3 => 2, 9.9 => 8)))
     true
 end
 
@@ -594,8 +639,9 @@ function testSortedDictLoops()
         m1[bitreverse(lUi)] = lUi
     end
     count = 0
-    for (stok,k,v) in semitokens(inclusive(m1, startof(m1), lastindex(m1)))
-        for (stok2,k2,v2) in semitokens(exclusive(m1, startof(m1), pastendsemitoken(m1)))
+    # issue 767
+    for (stok,k,v) in semitokens(inclusive(m1, firstindex(m1), lastindex(m1)))
+        for (stok2,k2,v2) in semitokens(exclusive(m1, firstindex(m1), pastendsemitoken(m1)))
             c = compare(m1,stok,stok2)
             if c < 0
                 my_assert(deref_key((m1,stok)) < deref_key((m1,stok2)))
@@ -607,7 +653,7 @@ function testSortedDictLoops()
             count += 1
         end
     end
-    my_assert(eltype(semitokens(exclusive(m1, startof(m1), pastendsemitoken(m1)))) ==
+    my_assert(eltype(semitokens(exclusive(m1, firstindex(m1), pastendsemitoken(m1)))) ==
            Tuple{IntSemiToken, T, T})
     my_assert(count == N^2)
     N = 1000
@@ -686,25 +732,25 @@ function testSortedDictLoops()
 
     pos1 = searchsortedfirst(m1, div(N,2))
     sk2 = zero1
-    for k in keys(exclusive(m1, startof(m1), pos1))
+    for k in keys(exclusive(m1, firstindex(m1), pos1))
         sk2 += k
     end
     my_assert(sk2 == skhalf)
-    my_assert(eltype(keys(exclusive(m1, startof(m1), pos1))) == T)
+    my_assert(eltype(keys(exclusive(m1, firstindex(m1), pos1))) == T)
 
 
 
     sk2a = zero1
-    for k in eachindex(exclusive(m1, startof(m1), pos1))
+    for k in eachindex(exclusive(m1, firstindex(m1), pos1))
         sk2a += k
     end
     my_assert(sk2a == skhalf)
-    my_assert(eltype(eachindex(exclusive(m1, startof(m1), pos1))) == T)
+    my_assert(eltype(eachindex(exclusive(m1, firstindex(m1), pos1))) == T)
 
 
 
     sv2 = zero1
-    for v in values(exclusive(m1, startof(m1), pos1))
+    for v in values(exclusive(m1, firstindex(m1), pos1))
         sv2 += v
     end
     my_assert(sv2 == svhalf)
@@ -712,26 +758,26 @@ function testSortedDictLoops()
     for (k,v) in exclusive(m1, pastendsemitoken(m1), pastendsemitoken(m1))
         count += 1
     end
-    my_assert(eltype(keys(exclusive(m1, startof(m1), pos1))) == T)
+    my_assert(eltype(keys(exclusive(m1, firstindex(m1), pos1))) == T)
     my_assert(count == 0)
 
 
     count = 0
-    for (k,v) in inclusive(m1, startof(m1), beforestartsemitoken(m1))
+    for (k,v) in inclusive(m1, firstindex(m1), beforestartsemitoken(m1))
         count += 1
     end
     my_assert(count == 0)
-    my_assert(eltype(keys(inclusive(m1, startof(m1), beforestartsemitoken(m1)))) == T)
+    my_assert(eltype(keys(inclusive(m1, firstindex(m1), beforestartsemitoken(m1)))) == T)
 
 
     count = 0
     sk5 = zero1
-    for k in eachindex(inclusive(m1, startof(m1), startof(m1)))
+    for k in eachindex(inclusive(m1, firstindex(m1), firstindex(m1)))
         sk5 += k
         count += 1
     end
-    my_assert(count == 1 && sk5 == deref_key((m1,startof(m1))))
-    my_assert(eltype(eachindex(inclusive(m1, startof(m1), startof(m1)))) == T)
+    my_assert(count == 1 && sk5 == deref_key((m1,firstindex(m1))))
+    my_assert(eltype(eachindex(inclusive(m1, firstindex(m1), firstindex(m1)))) == T)
 
     factors = SortedMultiDict{Int,Int}()
     N = 1000
@@ -740,7 +786,7 @@ function testSortedDictLoops()
     sum2 = 0
     for factor = 1 : N
         for multiple = factor : factor : N
-            insert!(factors, multiple, factor)
+            push_return_semitoken!(factors, multiple=>factor)
             sum1 += multiple
             sum2 += factor
             len += 1
@@ -1214,17 +1260,21 @@ function testSortedMultiDict()
 
     test_pair_array = Pair{Char}['a'=>1, 'b'=>2, 'c'=>3]
     factors5 = SortedMultiDict(test_pair_array)
-    my_assert(typeof(factors5) == SortedMultiDict{Char,Any,ForwardOrdering})
-
+    my_assert(typeof(factors5) == SortedMultiDict{Char,Int,ForwardOrdering})
+    # test for `show` method for sortedmultidict
+    str1 = repr(MIME{Symbol("text/plain")}(), factors5)
+    my_assert(Meta.parse(str1).head == :call)
     #@test factors2 == factors3   # Broken!  TODO: fix me...
     my_assert(isequal(factors2, factors3))
+    my_assert(!isequal(SortedMultiDict{Int,Int,ForBack}(ForBack(true), [1=>2, 1=>3, 0=>1]),
+                       SortedMultiDict{Int,Int,ForBack}(ForBack(false), [1=>2, 1=>3, 0=>1])))
 
     N = 1000
     checkcorrectness(factors.bt, true)
     len = 0
     for factor = 1 : N
         for multiple = factor : factor : N
-            insert!(factors, multiple, factor)
+            push_return_semitoken!(factors, multiple=>factor)
             len += 1
         end
     end
@@ -1243,6 +1293,7 @@ function testSortedMultiDict()
     my_assert(ordtype(factors) == ForwardOrdering)
     my_assert(ordtype(typeof(factors)) == ForwardOrdering)
 
+    my_assert(2 in values(factors))
     push!(factors, 70 => 3)
     my_assert(length(factors) == len+1)
     my_assert(Pair(70,3) in factors)
@@ -1264,7 +1315,7 @@ function testSortedMultiDict()
     my_assert(60 in keys(factors))
     my_assert(!(-1 in keys(factors)))
     checkcorrectness(factors.bt, true)
-    i = startof(factors)
+    i = firstindex(factors)
     i = advance((factors,i))
     my_assert(deref((factors,i)) == Pair(2,1))
     my_assert(deref_key((factors,i)) == 2)
@@ -1296,7 +1347,7 @@ function testSortedMultiDict()
     my_assert(compare(factors,i,i2) != 0)
     my_assert(compare(factors,regress((factors,i)),i2) == 0)
     my_assert(compare(factors,i,i1) != 0)
-    insert!(factors, 80, 6)
+    push_return_semitoken!(factors, 80=>6)
     my_assert(length(factors) == len + 1)
     checkcorrectness(factors.bt, true)
     expected1 = deepcopy(expected)
@@ -1324,7 +1375,7 @@ function testSortedMultiDict()
     checkcorrectness(factors.bt, true)
     my_assert(length(factors) == 0)
     my_assert(isempty(factors))
-    i = startof(factors)
+    i = firstindex(factors)
     my_assert(i == pastendsemitoken(factors))
     i = lastindex(factors)
     my_assert(i == beforestartsemitoken(factors))
@@ -1341,7 +1392,8 @@ function testSortedMultiDict()
     my_assert(isequal(m1,m2))
     my_assert(!isequal(m1,m3))
     my_assert(!isequal(m1, SortedMultiDict("apples"=>2.0)))
-    stok = insert!(m2, "cherries", 6.1)
+    b,stok = push_return_semitoken!(m2, "cherries"=>6.1)
+    my_assert(b)
     checkcorrectness(m2.bt, true)
     my_assert(!isequal(m1,m2))
     delete!((m2,stok))
@@ -1372,6 +1424,8 @@ function testSortedMultiDict()
         length(m3empty) == 0)
     m4 = merge(m1, m2)
     my_assert(isequal(m3, m4))
+    m5a = SortedMultiDict(Pair{Any,Any}[1=>4.5, 2=>8, 8=>6//7])  #address issue 239
+    my_assert(eltype(m5a) == Pair{Int,Real})
     m5 = merge(m2, m1)
     my_assert(!isequal(m3, m5))
     merge!(m1, m2)
@@ -1379,10 +1433,10 @@ function testSortedMultiDict()
     m7 = SortedMultiDict{Int,Int}()
     n1 = 10000
     for k = 1 : n1
-        insert!(m7, k, k+1)
+        push_return_semitoken!(m7, k=>k+1)
     end
     for k = 1 : n1
-        insert!(m7, k, k+2)
+        push_return_semitoken!(m7, k=>k+2)
     end
     for k = 1 : n1
         i1, i2 = searchequalrange(m7, k)
@@ -1401,34 +1455,60 @@ function testSortedMultiDict()
         end
         my_assert(count == 2)
     end
+    my_assert(isequal(merge(SortedMultiDict{Int,Float64}(1=>3.0,
+                                                         2=>2.2),
+                            Dict(1=>2.0, 2=>2.3)),
+                      SortedMultiDict{Int,Float64}(1=>3.0, 1=>2.0, 2=>2.2, 2=>2.3)))
+    my_assert(!isequal(merge(SortedMultiDict{Int,Float64}(1=>3.0,
+                                                          2=>2.2),
+                            Dict(1=>2.0, 2=>2.3)),
+                      SortedMultiDict{Int,Float64}(1=>2.0, 1=>3.0, 2=>2.2, 2=>2.3)))
+    my_assert(isequal(merge(SortedMultiDict{Int,Float64,ForBack}(ForBack(true),
+                                                                 [1=>3.0,2=>2.2]),
+                            SortedMultiDict{Int,Float64,ForBack}(ForBack(false),
+                                                                 [1=>2.0,2=>2.3])),
+                      SortedMultiDict{Int,Float64,ForBack}(ForBack(true),
+                                                           [1=>3.0, 1=>2.0,
+                                                            2=>2.2, 2=>2.3])))
+    my_assert(!isequal(merge(SortedMultiDict{Int,Float64,ForBack}(ForBack(true),
+                                                                  [1=>3.0, 2=>2.2]),
+                             SortedMultiDict{Int,Float64,ForBack}(ForBack(false),
+                                                                  [1=>2.0,2=>2.3])),
+                      SortedMultiDict{Int,Float64,ForBack}(ForBack(true),
+                                                           [1=>3.0, 1=>2.0,
+                                                           2=>2.3, 2=>2.2])))
+
+    
     # issue #216
     my_assert(DataStructures.isordered(SortedMultiDict{Int, String}))
     # issue #773
     s = SortedMultiDict{Int, Int}()           
-    insert!(s, 4, 41)
-    insert!(s, 3, 31)
-    insert!(s, 2, 21)
-    insert!(s, 2, 22)
-    insert!(s, 2, 23)
-    insert!(s, 2, 24)
-    insert!(s, 2, 25)
-    insert!(s, 2, 26)
-    insert!(s, 1, 11)
-    insert!(s, 1, 12)
-    st1 = insert!(s, 1, 13)
-    st2 = insert!(s, 1, 14)
-    st3 = insert!(s, 1, 15)
-    st4 = insert!(s, 1, 16)
-    st5 = insert!(s, 1, 17)
-    st6 = insert!(s, 1, 18)
+    push_return_semitoken!(s, 4=>41)
+    push_return_semitoken!(s, 3=>31)
+    push_return_semitoken!(s, 2=>21)
+    push_return_semitoken!(s, 2=>22)
+    push_return_semitoken!(s, 2=>23)
+    push_return_semitoken!(s, 2=>24)
+    push_return_semitoken!(s, 2=>25)
+    push_return_semitoken!(s, 2=>26)
+    push_return_semitoken!(s, 1=>11)
+    push_return_semitoken!(s, 1=>12)
+    _,st1 = push_return_semitoken!(s, 1=>13)
+    _,st2 = push_return_semitoken!(s, 1=>14)
+    _,st3 = push_return_semitoken!(s, 1=>15)
+    _,st4 = push_return_semitoken!(s, 1=>16)
+    _,st5 = push_return_semitoken!(s, 1=>17)
+    _,st6 = push_return_semitoken!(s, 1=>18)
     delete!((s, st6))
     delete!((s, st5))
     delete!((s, st4))
     delete!((s, st3))
     delete!((s, st2))
     delete!((s, st1))
-    insert!(s, 1, 19)
+    push_return_semitoken!(s, 1=>19)
     checkcorrectness(s.bt, true)
+    my_assert(length(SortedMultiDict{Int,Int}(Val(true), [1=>2,3=>7,3=>15])) == 3)
+    my_assert(length(SortedMultiDict{Int,Int}(Val(true), [8=>2,3=>7,3=>15], Reverse)) == 3)
     true
 end
 
@@ -1456,8 +1536,34 @@ function testSortedSet()
     my_assert(typeof(SortedSet([1,2,3], Reverse)) == SortedSet{Int, ReverseOrdering{ForwardOrdering}})
     my_assert(typeof(SortedSet{Float32}([1,2,3], Reverse)) == SortedSet{Float32, ReverseOrdering{ForwardOrdering}})
 
-    # @test_throws ArgumentError SortedSet(Reverse, Reverse)
-    # @test_throws ArgumentError SortedSet{Int}(Reverse, Reverse)
+    my_assert(length(SortedSet{Int}(Val(true), [1,3,7])) == 3)
+    my_assert(length(SortedSet{Int}(Val(true), [8,3,1], Reverse)) == 3)
+
+    ss1 = SortedSet{String}(["berry", "cherry", "apple", "grape"])
+    q = popfirst!(ss1)
+    my_assert(q == "apple")
+    my_assert(ss1 == Set(["berry", "cherry", "grape"]))
+    q2 = poplast!(ss1)
+    my_assert(q2 == "grape")
+    my_assert(ss1 == Set(["cherry", "berry"]))
+    my_assert(isequal(SortedSet{Int,ForBack}(ForBack(true), [5,6,4,8]),
+                      SortedSet{Int,ForBack}(ForBack(false), [5,6,4,8])))
+    my_assert(issetequal(SortedSet{Int,ForBack}(ForBack(true), [5,6,4,8]),
+                      SortedSet{Int,ForBack}(ForBack(false), [5,6,4,8])))
+    my_assert(!isequal(SortedSet{Int,ForBack}(ForBack(true), [5,6,4,8]),
+                       SortedSet{Int,ForBack}(ForBack(false), [5,6,6,8])))
+    my_assert(isequal(SortedSet{Int,ForBack}(ForBack(true), [5,6,4,8]),
+                      SortedSet{Int,ForBack}(ForBack(true), [5,6,4,8])))
+    my_assert(!isequal(SortedSet{Int,ForBack}(ForBack(true), [5,6,4,8]),
+                       SortedSet{Int,ForBack}(ForBack(true), [5,6,6,8])))
+    
+              
+    
+    @test_throws ArgumentError SortedSet(Reverse, Reverse)
+    @test_throws ArgumentError SortedSet{Int}(Reverse, Reverse)
+    @test_throws ArgumentError SortedSet{Int}(Val(true), Reverse)
+    @test_throws ErrorException deref_key(token_firstindex(SortedSet{Int}([6])))
+    @test_throws ErrorException deref_value(token_firstindex(SortedSet{Int}([6])))
 
     smallest = 10.0
     largest = -10.0
@@ -1469,11 +1575,11 @@ function testSortedSet()
         smallest = min(smallest,ui)
         largest = max(largest,ui)
     end
-    isnew,st = insert!(m, 72.5)
+    isnew,st = push_return_semitoken!(m, 72.5)
     my_assert(isnew)
     my_assert(deref((m,st)) == 72.5)
     delete!((m,st))
-    isnew,st = insert!(m, 73.5)
+    isnew,st = push_return_semitoken!(m, 73.5)
     my_assert(isnew)
     my_assert(deref((m,st)) == 73.5)
     delete!(m, 73.5)
@@ -1490,7 +1596,7 @@ function testSortedSet()
     my_assert(count == N)
     my_assert(length(m) == N)
     ii2 = searchsortedfirst(m, 0.5)
-    i3 = startof(m)
+    i3 = firstindex(m)
     v = first(m)
     my_assert(v == smallest)
     my_assert(deref((m,i3)) == v)
@@ -1548,7 +1654,7 @@ function testSortedSet()
     pop!(m, smallest)
     checkcorrectness(m.bt, false)
     my_assert(length(m) == N - dcount - 1)
-    key1 = pop!(m)
+    key1 = popfirst!(m)
     my_assert(key1 == secondsmallest)
     my_assert(length(m) == N - dcount - 2)
     checkcorrectness(m.bt, false)
@@ -1568,6 +1674,7 @@ function testSortedSet()
         Base.emptymutable(m3) == m3empty
         Base.emptymutable(m3, Char) == m3empty_char
     end
+    my_assert(eltype(SortedSet((4,4.5,6//7))) == Real) # issue 239
     m3_reverse = SortedSet(DataStructures.FasterReverse(), ["orange", "yellow", "red"])
     let m3empty_reverse_char = empty(m3_reverse, Char)
         @test typeof(m3empty_reverse_char) == SortedSet{Char, DataStructures.FasterReverse}
@@ -1607,6 +1714,17 @@ function testSortedSet()
     m9a = intersect(m8, SortedSet(["yellow", "red", "white"]), m8)
     my_assert(typeof(m9a) == SortedSet{String, ForwardOrdering})
     my_assert(isequal(m9a, SortedSet(["red", "yellow"])))
+    my_assert(intersect(SortedSet{Int}([5,4,8,9]),
+                        [5,6,9,2], [5,10,10,9]) == Set{Int}([5,9]))    
+    my_assert(intersect(SortedSet{Int}([5,4,8,9]),
+                        [5,6,9,2], [5,10,10,8]) != Set{Int}([5,9]))
+    my_assert(isequal(intersect(SortedSet{Int,ForBack}(ForBack(true), [5,4,8,9]),
+                                SortedSet{Int,ForBack}(ForBack(false), [5,7,8,9])),
+                      SortedSet{Int}([5,8,9])))
+    my_assert(!isequal(intersect(SortedSet{Int,ForBack}(ForBack(true), [5,4,8,9]),
+                                 SortedSet{Int,ForBack}(ForBack(false), [5,7,8,9])),
+                       SortedSet{Int}([5,8])))
+    
     m10 = symdiff(m8,  SortedSet(["yellow", "red", "white"]))
     my_assert(typeof(m10) == SortedSet{String, ForwardOrdering})
     my_assert(isequal(m10, SortedSet(["white", "blue", "orange"])))
@@ -1618,16 +1736,54 @@ function testSortedSet()
                                  "zinc"]), m8)
     my_assert(isequal(m12, SortedSet(["zinc"])))
     my_assert(typeof(m12) == SortedSet{String, ForwardOrdering})
+    my_assert(isequal(symdiff(SortedSet{String}(["yellow","red", "green", "iron"]),
+                              ["iron", "yellow", "reed"]),
+                      SortedSet{String}(["red", "reed", "green"])))
+    my_assert(isequal(symdiff(SortedSet{String,ForBack}(ForBack(true),
+                                                        ["yellow","red", "green", "iron"]),
+                              SortedSet{String,ForBack}(ForBack(false),
+                                                        ["iron", "yellow", "reed"])),
+                      SortedSet{String,ForBack}(ForBack(false), ["red", "reed", "green"])))
     m13 = setdiff(m8, SortedSet(["yellow", "red", "white"]))
     my_assert(typeof(m13) == SortedSet{String, ForwardOrdering})
     my_assert(isequal(m13, SortedSet(["blue", "orange"])))
     m14 = setdiff(m8, SortedSet(["blue"]))
     my_assert(typeof(m14) == SortedSet{String, ForwardOrdering})
     my_assert(isequal(m14, SortedSet(["orange", "yellow", "red"])))
+    my_assert(isequal(setdiff(SortedSet(["red", "purple", "pearl", "black"]),
+                              ["red", "white", "white"],
+                              ["blue", "black", "green"]),
+                      SortedSet(["purple", "pearl"])))
+    my_assert(isequal(setdiff(SortedSet{String,ForBack}(ForBack(true),
+                                                        ["red", "purple", "pearl", "black"]),
+                              SortedSet{String,ForBack}(ForBack(false),
+                                                        ["purple", "hue", "pearl"])),
+                      SortedSet{String}(["red", "black"])))
+    
     my_assert(issubset(["yellow", "blue"], m8))
     my_assert(!issubset(["blue", "green"], m8))
+    my_assert(issubset(SortedSet(["green", "white", "red"]),
+                       SortedSet(["blue","white", "red", "green"])))
+    my_assert(issubset(SortedSet(collect(1:5)),
+                       SortedSet(collect(0:500))))
+    my_assert(!issubset(SortedSet(collect(0:5)),
+                       SortedSet(collect(1:500))))
+    my_assert(issubset(SortedSet(collect(1:499)),
+                       SortedSet(collect(0:500))))
+    my_assert(!issubset(SortedSet(collect(0:499)),
+                       SortedSet(collect(1:500))))
+    my_assert(!issubset(SortedSet(collect(1:501)),
+                       SortedSet(collect(1:500))))
+    my_assert(issubset(SortedSet{Int,ForBack}(ForBack(false), [1,5]),
+                       SortedSet{Int,ForBack}(ForBack(true), [1,5])))
+    my_assert(!issubset(SortedSet{Int,ForBack}(ForBack(false), [1,5,6]),
+                        SortedSet{Int,ForBack}(ForBack(true), [1,5])))
     setdiff!(m8, SortedSet(["yellow", "red", "white"]))
     my_assert(isequal(m8, SortedSet(["blue", "orange"])))
+    my_assert(isequal(union(SortedSet{Int,ForBack}(ForBack(true), [1,2,3]),
+                            SortedSet{Int,ForBack}(ForBack(false), [6,4,2])),
+                      SortedSet{Int}([1,2,3,4,6])))
+    
     true
 end
 
@@ -1657,6 +1813,9 @@ function testSortedDictConstructors()
     my_assert(typeof(SortedDict{Int,Int}(Reverse)) == SortedDict{Int,Int,ReverseOrdering{ForwardOrdering}})
     my_assert(typeof(SortedDict{Int,Int}(Reverse, 1=>2)) == SortedDict{Int,Int,ReverseOrdering{ForwardOrdering}})
     my_assert(typeof(SortedDict{Int,Int}(1=>2)) == SortedDict{Int,Int,ForwardOrdering})
+    my_assert(length(SortedDict{Int,Int}(Val(true), [1=>2,3=>7,8=>15])) == 3)
+    my_assert(length(SortedDict{Int,Int}(Val(true), [8=>2,3=>7,1=>15], Reverse)) == 3)
+    
 
     # @test_throws ArgumentError SortedDict(Reverse, Reverse)
     true
@@ -1688,6 +1847,186 @@ function testSortedMultiDictConstructors()
     true
 end
 
+function testTokens()
+    ss1 = SortedSet(["turkey", "chicken", "duck", "goose"])
+    ss2 = SortedSet(["turkey", "chicken", "duck", "goose"])
+    t1 = token_firstindex(ss1)
+    my_assert(t1 == (ss1, firstindex(ss1)))
+    my_assert(t1 != (ss2, firstindex(ss1)))
+    my_assert(t1 != (ss1, lastindex(ss1)))
+    my_assert(advance(beforestarttoken(ss1)) == firstindex(ss1))
+    my_assert(regress(pastendtoken(ss1)) == lastindex(ss1))
+
+    # test the IteratorSize functions
+    my_assert(length(collect(SortedSet([1,2,2,3]))) == 3)
+    my_assert(length(collect(keys(SortedDict([1=>2,2=>3,2=>4,3=>4])))) == 3)
+    ss3 = SortedSet([1,2,2,3])
+    my_assert(length(collect(inclusive(ss3, firstindex(ss3), lastindex(ss3)))) == 3)
+    my_assert(length(collect(exclusive(ss3, firstindex(ss3), lastindex(ss3)))) == 2)
+    smd1 = SortedMultiDict(5=>"j", 1=>"a", 3=>"b", 1=>"c", 3=>"s")
+    my_assert(typeof(smd1) == SortedMultiDict{Int,String, ForwardOrdering})
+    result = String[]
+    for (k,v) = exclusive_key(smd1, 1, 5)
+        push!(result,v)
+    end
+    my_assert(result == ["a", "c", "b", "s"])
+    result2 = String[]
+    for (k,v) = inclusive_key(smd1, 1, 5)
+        push!(result2, v)
+    end
+    my_assert(result2 == ["a", "c", "b", "s", "j"])
+    count = 0
+    for (t,k,v) in tokens(exclusive_key(smd1, 1, 5))
+        count += 1
+        my_assert(deref(t) == (k=>v))
+        my_assert(deref_value(t) == result[count])
+    end
+    my_assert(count == 4)
+    my_assert(eltype(tokens(exclusive_key(smd1, 1, 5))) ==
+              Tuple{Tuple{SortedMultiDict{Int,String,ForwardOrdering},IntSemiToken},
+                    Int, String})
+    count = 0
+    for (t,k,v) in tokens(smd1)
+        count += 1
+        my_assert(deref(t) == (k=>v))
+        my_assert(deref_value(t) == result2[count])
+    end
+    my_assert(count == 5)
+    count = 0
+    for (t,k) in tokens(keys(smd1))
+        count += 1
+        my_assert(deref_key(t) == k)
+        my_assert(deref_value(t) == result2[count])
+    end
+    my_assert(count == 5)
+    my_assert(eltype(tokens(keys(smd1))) ==
+              Tuple{Tuple{SortedMultiDict{Int,String,ForwardOrdering}, IntSemiToken},Int})
+    count = 0
+    for (t,v) in tokens(values(smd1))
+        count += 1
+        my_assert(deref_value(t) == v)
+        my_assert(deref_value(t) == result2[count])
+    end
+    my_assert(count == 5)
+    my_assert(eltype(tokens(values(smd1))) ==
+              Tuple{Tuple{SortedMultiDict{Int,String,ForwardOrdering}, IntSemiToken},String})
+    count = 0
+    for t in onlytokens(smd1)
+        count += 1
+        my_assert(deref_value(t) == result2[count])
+    end
+    my_assert(count == 5)
+    my_assert(eltype(onlytokens(smd1)) == Tuple{SortedMultiDict{Int,String,ForwardOrdering},
+                                                IntSemiToken})
+        
+    
+    count = 0
+    for t in onlytokens(exclusive_key(smd1, 1, 5))
+        count += 1
+        my_assert(deref_value(t) == result[count])
+    end
+    my_assert(count == 4)
+
+    count = 4
+    # Issue 671
+    for t in onlytokens(Iterators.reverse(exclusive_key(smd1, 1, 5)))
+        my_assert(deref_value(t) == result[count])
+        count -= 1
+    end
+    my_assert(count == 0)
+    count = 5
+    for t in onlytokens(Iterators.reverse(smd1))
+        my_assert(deref_value(t) == result2[count])
+        count -= 1
+    end
+    my_assert(count == 0)
+
+    count = 0
+    for (k,v) in Iterators.reverse(exclusive(smd1, firstindex(smd1), firstindex(smd1)))
+        count +=1
+    end
+    my_assert(count == 0)
+
+
+    count = 5
+    for (k,v) in Iterators.reverse(inclusive(smd1, firstindex(smd1), lastindex(smd1)))
+        my_assert(v == result2[count])
+        count -= 1
+    end
+    my_assert(count == 0)
+
+    count = 0
+    for (k,v) in Iterators.reverse(inclusive(smd1,
+                                             advance((smd1, firstindex(smd1))),
+                                             firstindex(smd1)))
+        count += 1
+    end
+    my_assert(count == 0)
+
+    
+    count = 0
+    for t in Iterators.reverse(exclusive_key(smd1, 1, 1))
+        count += 1
+    end
+    my_assert(count == 0)
+
+    count = 5
+    for t in onlytokens(Iterators.reverse(inclusive(smd1, firstindex(smd1), lastindex(smd1))))
+        my_assert(deref_value(t) == result2[count])
+        count -= 1
+    end
+    my_assert(count == 0)
+
+    count = 0
+    for t in onlytokens(Iterators.reverse(inclusive(smd1, lastindex(smd1), firstindex(smd1))))
+        my_assert(deref_value(t) == result2[count])
+    end
+    my_assert(count == 0)
+    
+    
+        
+    
+    count = 0
+    for t in Iterators.reverse(onlytokens(Iterators.reverse(exclusive_key(smd1, 1, 5))))
+        count += 1
+        my_assert(deref_value(t) == result[count])
+    end
+    my_assert(count == 4)
+    my_assert(keytype(exclusive_key(smd1, 1, 5)) == Int)
+    my_assert(valtype(exclusive_key(smd1, 1, 5)) == String)
+    count = 0
+    for (k,v) in pairs(exclusive_key(smd1, 1, 5))
+        count += 1
+        my_assert(v == result[count])
+    end
+    my_assert(keytype(exclusive_key(smd1,1, 5)) == Int)
+    my_assert(keytype(typeof(exclusive_key(smd1,1, 5))) == Int)
+    my_assert(valtype(exclusive_key(smd1,1, 5)) == String)
+    my_assert(valtype(typeof(exclusive_key(smd1,1, 5))) == String)
+    my_assert(count == 4)
+    count = 0
+    for (k,v) in pairs(smd1)
+        count += 1
+        my_assert(v == result2[count])
+    end
+    my_assert(count == 5)
+    count = 0
+    for t in token_firstindex(smd1) : token_lastindex(smd1)  # address issue 669
+        count += 1
+        my_assert(deref_value(t) == result2[count])
+    end
+    my_assert(count == 5)
+    count = 1
+    for t in token_firstindex(smd1) + 1 : token_lastindex(smd1) - 1
+        count += 1
+        my_assert(deref_value(t) == result2[count])
+    end
+    my_assert(count == 4)
+    true
+end
+        
+              
+
 
 @testset "SortedContainers" begin
     @test testSortedDictBasic()
@@ -1698,6 +2037,7 @@ end
     @test testSortedSet()
     @test testSortedDictConstructors()
     @test testSortedMultiDictConstructors()
+    @test testTokens()
 
 
     # test all the errors of sorted containers
@@ -1714,18 +2054,20 @@ end
     @test m === delete!(m,"a") # Okay to delete! nonexistent keys
     @test_throws KeyError pop!(m,"a")
     m3 = SortedDict((Dict{String, Int}()), Reverse)
-    @test_throws ArgumentError isequal(m2, m3)
     @test_throws BoundsError m[i1]
     @test_throws BoundsError regress((m,beforestartsemitoken(m)))
     @test_throws BoundsError advance((m,pastendsemitoken(m)))
     m1 = SortedMultiDict{Int,Int}()
     @test_throws ArgumentError SortedMultiDict([1,2,3])
     @test_throws ArgumentError SortedMultiDict(Forward, [1,2,3])
-    @test_throws ArgumentError SortedMultiDict{Int,Int}([1,2,3])
-    @test_throws ArgumentError SortedMultiDict{Int,Int}(Forward, [1,2,3])
+    @test_throws BoundsError SortedMultiDict{Int,Int}([1,2,3])
+    @test_throws BoundsError SortedMultiDict{Int,Int}(Forward, [1,2,3])
     @test_throws ArgumentError SortedMultiDict(Forward, Reverse)
-    @test_throws ArgumentError isequal(SortedMultiDict("a"=>1), SortedMultiDict("b"=>1.0))
-    @test_throws ArgumentError isequal(SortedMultiDict(["a"=>1],Reverse), SortedMultiDict(["b"=>1]))
+    @test_throws ArgumentError SortedMultiDict{Int,Int}(Forward, Reverse)
+    @test_throws ArgumentError SortedMultiDict(Val(true), Forward)
+    @test_throws ArgumentError SortedMultiDict{Int,Int}(Val(true), Forward)
+    #@test_throws ArgumentError isequal(SortedMultiDict("a"=>1), SortedMultiDict("b"=>1.0))
+    #@test_throws ArgumentError isequal(SortedMultiDict(["a"=>1],Reverse), SortedMultiDict(["b"=>1]))
     @test_throws MethodError SortedMultiDict{Char,Int}(Forward, ["aa"=>2, "bbb"=>5])
     @test_throws MethodError SortedMultiDict(Forward, [("aa",2)=>2, "bbb"=>5])
     @test_throws BoundsError first(m1)
@@ -1734,15 +2076,16 @@ end
     s = SortedSet([3,5])
     @test s === delete!(s,7) # Okay to delete! nonexistent keys
     @test_throws KeyError pop!(s, 7)
-    pop!(s)
-    pop!(s)
-    @test_throws BoundsError pop!(s)
+    popfirst!(s)
+    popfirst!(s)
+    @test_throws BoundsError popfirst!(s)
     @test_throws BoundsError first(s)
     @test_throws BoundsError last(s)
-    @test_throws ArgumentError isequal(SortedSet(["a"]), SortedSet([1]))
-    @test_throws ArgumentError isequal(SortedSet(["a"]), SortedSet(["b"],Reverse))
-    @test_throws ArgumentError (("a",6) in m)
-    @test_throws ArgumentError ((2,5) in m1)
+    @test_throws MethodError isequal(SortedSet(["a"]), SortedSet([1]))
+    #@test_throws ArgumentError isequal(SortedSet(["a"]), SortedSet(["b"],Reverse))
+    #@test_throws ErrorException (("a",6) in m)
+    #@test_throws ArgumentError ((2,5) in m1)
+    @test_throws ErrorException get(SortedDict(1=>3), SortedDict(1=>3), 1)
 
     s = SortedSet([10,30,50])
     @test pop!(s,10) == 10
@@ -1751,6 +2094,7 @@ end
     @test pop!(s,50, nothing) == 50
     @test pop!(s,50, nothing) == nothing
     @test isempty(s)
+    @test_throws ErrorException pop!(s)
 
     # Test AbstractSet/AbstractDict interface
     for m in [SortedSet([1,2]), SortedDict(1=>2, 2=>3), SortedMultiDict(1=>2, 1=>3)]
@@ -1765,3 +2109,4 @@ end
         end
     end
 end
+

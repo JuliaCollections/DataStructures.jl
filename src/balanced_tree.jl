@@ -72,13 +72,13 @@ end
 ## marker whose index is 1 and the after-end marker whose index is 2.
 ## These two markers live in dummy data nodes.
 
-function initializeTree!(tree::Array{TreeNode{K},1}) where K
+function initializeTree!(tree::Vector{TreeNode{K}}) where K
     resize!(tree,1)
     tree[1] = TreeNode{K}(K, 1, 2, 0, 0)
     return nothing
 end
 
-function initializeData!(data::Array{KDRec{K,D},1}) where {K,D}
+function initializeData!(data::Vector{KDRec{K,D}}) where {K,D}
     resize!(data, 2)
     data[1] = KDRec{K,D}(1)
     data[2] = KDRec{K,D}(1)
@@ -120,17 +120,17 @@ end
 
 mutable struct BalancedTree23{K, D, Ord <: Ordering}
     ord::Ord
-    data::Array{KDRec{K,D}, 1}
-    tree::Array{TreeNode{K}, 1}
+    data::Vector{KDRec{K,D}}
+    tree::Vector{TreeNode{K}}
     rootloc::Int
     depth::Int
-    freetreeinds::Array{Int,1}
-    freedatainds::Array{Int,1}
+    freetreeinds::Vector{Int}
+    freedatainds::Vector{Int}
     useddatacells::BitSet
     # The next two arrays are used as a workspace by the delete!
     # function.
-    deletionchild::Array{Int,1}
-    deletionleftkey::Array{K,1}
+    deletionchild::Vector{Int}
+    deletionleftkey::Vector{K}
     function BalancedTree23{K,D,Ord}(ord1::Ord) where {K,D,Ord<:Ordering}
         tree1 = Vector{TreeNode{K}}(undef, 1)
         initializeTree!(tree1)
@@ -313,12 +313,12 @@ end
 ## They replace the 'parent' field of either an internal tree node or
 ## a data node at the bottom tree level.
 
-function replaceparent!(data::Array{KDRec{K,D},1}, whichind::Int, newparent::Int) where {K,D}
+function replaceparent!(data::Vector{KDRec{K,D}}, whichind::Int, newparent::Int) where {K,D}
     data[whichind] = KDRec{K,D}(newparent, data[whichind].k, data[whichind].d)
     return nothing
 end
 
-function replaceparent!(tree::Array{TreeNode{K},1}, whichind::Int, newparent::Int) where K
+function replaceparent!(tree::Vector{TreeNode{K}}, whichind::Int, newparent::Int) where K
     tree[whichind] = TreeNode{K}(tree[whichind].child1, tree[whichind].child2,
                                  tree[whichind].child3, newparent,
                                  tree[whichind].splitkey1,
@@ -332,7 +332,7 @@ end
 ## location and marking it as used.  The return value is the
 ## index of the data just inserted into the vector.
 
-function push_or_reuse!(a::Vector, freelocs::Array{Int,1}, item)
+function push_or_reuse!(a::Vector, freelocs::Vector{Int}, item)
     if isempty(freelocs)
         push!(a, item)
         return length(a)
@@ -981,4 +981,101 @@ function Base.delete!(t::BalancedTree23{K,D,Ord}, it::Int) where {K,D,Ord<:Order
         end
     end
     return nothing
+end
+
+# Build a balanced tree from an iterable in which the data is already
+# sorted
+
+function BalancedTree23{K,D,Ord}(::Val{true},
+                                 iterable,
+                                 ord::Ord,
+                                 allowdups::Bool) where {K, D, Ord <: Ordering}
+    m = BalancedTree23{K,D,Ord}(ord)
+    lengthdata = length(m.data)
+    @assert lengthdata == 2
+    firsttrip = true
+    for (k,d) in iterable
+        # Must initialize the before-start and past-end markers
+        # with live data to prevent references to undefined fields
+        # later
+        if firsttrip
+            m.data[1] = KDRec{K,D}(m.data[1].parent, k, d)
+            m.data[2] = KDRec{K,D}(m.data[2].parent, k, d)
+        end
+
+            
+        if !firsttrip
+            lt(ord, k, m.data[lengthdata].k) && throw(ArgumentError("Keys out of order"))
+            if !allowdups 
+                !lt(ord, m.data[lengthdata].k, k) && throw(ArgumentError("Repeated key"))
+            end
+        end
+        push!(m.data, KDRec{K,D}(0, convert(K,k), convert(D,d)))
+        lengthdata += 1
+        push!(m.useddatacells, lengthdata)
+        firsttrip = false
+    end
+    resize!(m.tree, 0)
+    height = 0
+    belowlevlength = lengthdata
+    levbelowbaseind = 0
+    child_belowaddress = Vector{Int}(undef, 3)
+    child_keyaddress = Vector{Int}(undef, 3)
+    keysbelow = Int[]
+    newkeysbelow = Int[]
+
+    while true  # loop on tree levels
+        newlevbelowbaseind = length(m.tree)
+        resize!(newkeysbelow, 0)
+        # Loop over the nodes of the level below, stepping by 2's
+        # to form the tree nodes on the new level.  One tree node (the
+        # last one) may need to have three children if the
+        # number of nodes on the level below is odd.
+        for i = 1 : div(belowlevlength, 2)
+            cbase = i * 2 - 2
+            numchildren = (cbase == belowlevlength - 3) ? 3 : 2
+            for whichc = 1  : numchildren
+                i1 = cbase + whichc
+                if height == 0
+                    child_belowaddress[whichc] = (i1 == 1) ? 1 :
+                        ((i1 == length(m.data)) ? 2 : i1 + 1)
+                    child_keyaddress[whichc] = child_belowaddress[whichc]
+                else
+                    child_belowaddress[whichc] = levbelowbaseind + i1
+                    child_keyaddress[whichc] = keysbelow[i1]
+                end
+            end
+            if numchildren == 2
+                child_belowaddress[3] = 0
+                child_keyaddress[3] = child_keyaddress[2]
+            end
+            push!(newkeysbelow, child_keyaddress[1])
+            push!(m.tree,
+                  TreeNode{K}(child_belowaddress[1], child_belowaddress[2],
+                              child_belowaddress[3], 0,
+                              m.data[child_keyaddress[2]].k,
+                              m.data[child_keyaddress[3]].k))
+            myaddress = length(m.tree)
+            if height == 0
+                replaceparent!(m.data, child_belowaddress[1], myaddress)
+                replaceparent!(m.data, child_belowaddress[2], myaddress)
+                child_belowaddress[3] > 0 &&
+                    replaceparent!(m.data, child_belowaddress[3], myaddress)
+            else
+                replaceparent!(m.tree, child_belowaddress[1], myaddress)
+                replaceparent!(m.tree, child_belowaddress[2], myaddress)
+                child_belowaddress[3] > 0 &&
+                    replaceparent!(m.tree, child_belowaddress[3], myaddress)
+            end
+        end
+        #update for the next level
+        belowlevlength = length(m.tree) - newlevbelowbaseind
+        keysbelow, newkeysbelow = newkeysbelow, keysbelow
+        height += 1
+        levbelowbaseind = newlevbelowbaseind
+        belowlevlength == 1 && break  #root has been reached
+    end
+    m.rootloc = levbelowbaseind + 1
+    m.depth = height
+    m
 end
