@@ -42,7 +42,6 @@ module DataStructures
     export SortedDict, SortedMultiDict, SortedSet
     export SDToken, SDSemiToken, SMDToken, SMDSemiToken
     export SetToken, SetSemiToken
-    export startof, endof ## both are deprecated
     export pastendsemitoken, beforestartsemitoken
     export pastendtoken, beforestarttoken
     export searchsortedafter, searchequalrange
