@@ -31,6 +31,7 @@ function naive_reduce_matrix_mul(x)
     return ans
 end
 =#
+import Random.MersenneTwister
 
 
 struct Quarternion{T<:Real}
@@ -61,6 +62,7 @@ function test_matmul(a,b)
 end
 
 @testset "segment_tree" begin
+    rng = MersenneTwister(1234) #A strong rng needed.
     @testset "Add" begin
         X1 = Segment_tree(UInt64,100,Base.:+)
         a = zeros(UInt64, 100)
@@ -81,13 +83,13 @@ end
         X1 = Segment_tree(UInt64,15, Base.:+)
         X2 = zeros(UInt64, 15)
         for i in 1:1000
-            a = rand(1:15)
-            b = rand(a:15)
-            c = rand(UInt64)
+            a = rand(rng,1:15)
+            b = rand(rng,a:15)
+            c = rand(rng,UInt64)
             set_range!(X1,a,b,c)
             X2[a:b] .= c
-            d = rand(1:15)
-            e = rand(d:15)
+            d = rand(rng,1:15)
+            e = rand(rng,d:15)
             @test sum(X2[d:e]) == get_range(X1,d,e)
         end
     
@@ -97,13 +99,13 @@ end
         X1 = Segment_tree(UInt64,1000000, Base.:+)
         X2 = zeros(UInt64, 1000000)
         for i in 1:100
-            a = rand(1:1000000)
-            b = rand(a:1000000)
-            c = rand(UInt64)
+            a = rand(rng,1:1000000)
+            b = rand(rng,a:1000000)
+            c = rand(rng,UInt64)
             set_range!(X1,a,b,c)
             X2[a:b] .= c
-            d = rand(1:1000000)
-            e = rand(d:1000000)
+            d = rand(rng,1:1000000)
+            e = rand(rng,d:1000000)
             @test sum(X2[d:e]) == get_range(X1,d,e)
         end
     end
@@ -114,13 +116,13 @@ end
         X1 = Segment_tree(UInt64,10000, Base.:+)
         X2 = zeros(UInt64, 10000)
         for i in 1:10000
-            a = rand(1:10000)
-            b = rand(a:10000)
-            c = rand(UInt64)
+            a = rand(rng,1:10000)
+            b = rand(rng,a:10000)
+            c = rand(rng,UInt64)
             set_range!(X1,a,b,c)
             X2[a:b] .= c
-            d = rand(1:10000)
-            e = rand(d:10000)
+            d = rand(rng,1:10000)
+            e = rand(rng,d:10000)
             @test sum(X2[d:e]) == get_range(X1,d,e)
         end
     end
@@ -129,13 +131,13 @@ end
         X1 = Segment_tree(UInt64,10000, xor)
         X2 = zeros(UInt64, 10000)
         for i in 1:10000
-            a = rand(1:10000)
-            b = rand(a:10000)
+            a = rand(rng,1:10000)
+            b = rand(rng,a:10000)
             c = rand(UInt64)
             set_range!(X1,a,b,c)
             X2[a:b] .= c
-            d = rand(1:10000)
-            e = rand(d:10000)
+            d = rand(rng,1:10000)
+            e = rand(rng,d:10000)
             @test reduce(xor,X2[d:e]) == get_range(X1,d,e)
         end
     end
@@ -147,15 +149,15 @@ end
         #Viewing without copying should be fine, as we won't mutate the arrays.
         #Static arrays recommended for serious uses of this.
         for i in 1:10000
-            a = rand(1:1000)
-            b = rand(a:1000)
-            c = rand(UInt64,5)
+            a = rand(rng,1:1000)
+            b = rand(rng,a:1000)
+            c = rand(rng,UInt64,5)
             set_range!(X1,a,b,c)
             for j in a:b
                 X2[j] = c
             end
-            d = rand(1:1000)
-            e = rand(d:1000)
+            d = rand(rng,1:1000)
+            e = rand(rng,d:1000)
             
             if (reduce(+,X2[d:e]) != identity_vec)
                 #println(d," ", e)
@@ -182,15 +184,15 @@ end
         #Viewing without copying should be fine, as we won't mutate the arrays.
         #Static arrays recommended for serious uses of this.
         for i in 1:10000
-            a = rand(1:1000)
-            b = rand(a:1000)
-            c = rand(UInt64,(3,3))
+            a = rand(rng,1:1000)
+            b = rand(rng,a:1000)
+            c = rand(rng,UInt64,(3,3))
             set_range!(X1,a,b,copy(c))
             for j in a:b
                 X2[j] = copy(c)
             end
-            d = rand(1:1000)
-            e = rand(d:1000)
+            d = rand(rng,1:1000)
+            e = rand(rng,d:1000)
             
             if (reduce(*,X2[d:e]) != identity_matrix)
                 #println(d," ", e)
@@ -212,13 +214,13 @@ end
         X2 = ["" for i in 1:10000]
         for i in 1:10000
             
-            a = rand(1:10000)
-            b = rand(a:10000)
-            c = String_choice[rand(1:10)]
+            a = rand(rng,1:10000)
+            b = rand(rng,a:10000)
+            c = String_choice[rand(rng,1:10)]
             set_range!(X1, a, b, c)
             X2[a:b] .= c
-            d = rand(1:10000)
-            e = rand(d:10000)
+            d = rand(rng,1:10000)
+            e = rand(rng,d:10000)
             @test get_range(X1, d, e) == reduce(*, X2[d:e])
         end
     end
@@ -228,15 +230,15 @@ end
         X1 = Segment_tree(test_type, 10000, Base.:*; identity=identity)
         X2 = [identity for i in 1:10000]
         for i in 1:10000
-            a = rand(1:10000)
-            b = rand(a:10000)
-            c = test_type(rand(UInt64,4)...)
+            a = rand(rng,1:10000)
+            b = rand(rng,a:10000)
+            c = test_type(rand(rng,UInt64,4)...)
             set_range!(X1, a, b, c)
             for j in a:b
                 X2[j] = c
             end
-            d = rand(1:10000)
-            e = rand(d:10000)
+            d = rand(rng,1:10000)
+            e = rand(rng,d:10000)
             @test get_range(X1, d, e) == reduce(*, X2[d:e])
 
         end

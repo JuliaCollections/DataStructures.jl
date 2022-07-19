@@ -567,6 +567,16 @@ function construct_right_children!(X::T, Query_high, Current_low, Current_high, 
             Current_high = Current_mid
             X = get_left_child(X)
         elseif Query_high == decision_boundary
+
+            if (Current_low == Current_high)
+                stack[stack_top] = empty_node
+                stack_top -= 1
+                X.value = X.density = value
+                reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
+                return
+            end
+
+
             left_child = T()
             right_child = T()
             set_entire_range!(left_child, Current_mid-Current_low+1,value)
