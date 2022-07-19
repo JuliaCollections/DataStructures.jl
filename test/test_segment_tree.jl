@@ -64,7 +64,7 @@ end
 @testset "segment_tree" begin
     rng = MersenneTwister(1234) #A strong rng needed.
     @testset "Add" begin
-        X1 = Segment_tree(UInt64,100,Base.:+)
+        X1 = SegmentTree(UInt64,100,Base.:+)
         a = zeros(UInt64, 100)
         set_range!(X1, 37,53, 3)
         set_range!(X1, 23,45, 9)
@@ -80,7 +80,7 @@ end
     
     @testset "Small_randomized_trial" begin
         #Don't worry about the overflow. This is unsigned integer.
-        X1 = Segment_tree(UInt64,15, Base.:+)
+        X1 = SegmentTree(UInt64,15, Base.:+)
         X2 = zeros(UInt64, 15)
         for i in 1:1000
             a = rand(rng,1:15)
@@ -96,7 +96,7 @@ end
     end
     
     @testset "XL_array" begin
-        X1 = Segment_tree(UInt64,1000000, Base.:+)
+        X1 = SegmentTree(UInt64,1000000, Base.:+)
         X2 = zeros(UInt64, 1000000)
         for i in 1:100
             a = rand(rng,1:1000000)
@@ -113,7 +113,7 @@ end
     @testset "Large_randomized_trial" begin
 
         #Don't worry about the overflow. This is unsigned integer.
-        X1 = Segment_tree(UInt64,10000, Base.:+)
+        X1 = SegmentTree(UInt64,10000, Base.:+)
         X2 = zeros(UInt64, 10000)
         for i in 1:10000
             a = rand(rng,1:10000)
@@ -128,7 +128,7 @@ end
     end
     
     @testset "Xor_trial" begin
-        X1 = Segment_tree(UInt64,10000, xor)
+        X1 = SegmentTree(UInt64,10000, xor)
         X2 = zeros(UInt64, 10000)
         for i in 1:10000
             a = rand(rng,1:10000)
@@ -142,7 +142,7 @@ end
         end
     end
     @testset "Vector_add" begin
-        X1 = Segment_tree(Array{UInt64,1},1000, +)
+        X1 = SegmentTree(Array{UInt64,1},1000, +)
         identity_vec = zeros(UInt64,5)
         #Vector of vector may not be the most efficient, but it should work without problem.
         X2 = [identity_vec for i in 1:1000]
@@ -176,7 +176,7 @@ end
 
     @testset "3x3_matrix_multiplication" begin
         #Float/etc should work fine as well. Just don't want to deal with precision issues.
-        X1 = Segment_tree(Array{UInt64,2},1000, *)
+        X1 = SegmentTree(Array{UInt64,2},1000, *)
         identity_matrix = zeros(UInt64,(3,3))
         identity_matrix[1,1] = identity_matrix[2,2] = identity_matrix[3,3] = 1
         #Vector of vector may not be the most efficient, but it should work without problem.
@@ -210,7 +210,7 @@ end
     @testset "String_concat" begin
         String_choice = ["A", "B", "C", "D", "E", "AA", "BFFG","ATL", "Moon", "Hey"]
         #The words are random. The acronym's reference are coincidental.
-        X1 = Segment_tree(String, 10000, Base.:*)
+        X1 = SegmentTree(String, 10000, Base.:*)
         X2 = ["" for i in 1:10000]
         for i in 1:10000
             
@@ -227,7 +227,7 @@ end
     @testset "Quarternion_test" begin
         test_type = Quarternion{UInt64}
         identity = test_type(1,0,0,0)
-        X1 = Segment_tree(test_type, 10000, Base.:*; identity=identity)
+        X1 = SegmentTree(test_type, 10000, Base.:*; identity=identity)
         X2 = [identity for i in 1:10000]
         for i in 1:10000
             a = rand(rng,1:10000)

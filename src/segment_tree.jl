@@ -31,11 +31,11 @@ Knowledge of abstract algebra should be put to use.
 TODO: Consider adding cases of equal as a separate case.
 =#
 
-abstract type Abstractsegmenttreenode{Dtype, Op, iterated_op} end
+abstract type AbstractSegmentTreeNode{Dtype, Op, iterated_op} end
 abstract type Abstractsegmenttree{node_type} end
-get_dtype(::Abstractsegmenttreenode{Dtype,Op,iterated_op}) where {Dtype, Op, iterated_op} = Dtype
-get_op(::Abstractsegmenttreenode{Dtype,Op,iterated_op}) where {Dtype, Op, iterated_op} = Op
-get_iterated_op(::Abstractsegmenttreenode{Dtype,Op,iterated_op}) where {Dtype, Op, iterated_op} = iterated_op
+get_dtype(::AbstractSegmentTreeNode{Dtype,Op,iterated_op}) where {Dtype, Op, iterated_op} = Dtype
+get_op(::AbstractSegmentTreeNode{Dtype,Op,iterated_op}) where {Dtype, Op, iterated_op} = Op
+get_iterated_op(::AbstractSegmentTreeNode{Dtype,Op,iterated_op}) where {Dtype, Op, iterated_op} = iterated_op
 
 
 get_middle(low, high) = div(low+high,2)
@@ -92,45 +92,45 @@ operation_with_identity(f) = (x,y)-> (x===artificial_identity()) ? y : (y===arti
 repeat_op_with_identity(f) = (base,time) -> (base===artificial_identity()) ? artificial_identity() : f(base,time)
 
 
-mutable struct Segment_tree_node{Dtype, Op, iterated_op, identity}<:Abstractsegmenttreenode{Dtype,Op,iterated_op}
-    child_nodes::Union{NTuple{2,Segment_tree_node{Dtype, Op, iterated_op, identity}},Nothing}
+mutable struct SegmentTreeNode{Dtype, Op, iterated_op, identity}<:AbstractSegmentTreeNode{Dtype,Op,iterated_op}
+    child_nodes::Union{NTuple{2,SegmentTreeNode{Dtype, Op, iterated_op, identity}},Nothing}
     #Either both children are valid or none is valid. 
     value::Dtype
     density::Dtype
     #Implicitly have information about where it represents.
-    function Segment_tree_node{Dtype,Op,iterated_op,identity}() where {Dtype,Op,iterated_op,identity}
+    function SegmentTreeNode{Dtype,Op,iterated_op,identity}() where {Dtype,Op,iterated_op,identity}
         return new{Dtype,Op,iterated_op,identity}(nothing)
     end
 end
 
 process_identity(x) = x
 process_identity(x::Function) = x()
-get_element_identity(::Segment_tree_node{Dtype, Op, iterated_op, identity}) where {Dtype, Op, iterated_op, identity} = process_identity(identity)
+get_element_identity(::SegmentTreeNode{Dtype, Op, iterated_op, identity}) where {Dtype, Op, iterated_op, identity} = process_identity(identity)
 
 
-struct Segment_tree{node_type<:Abstractsegmenttreenode} <: Abstractsegmenttree{node_type}
+struct SegmentTree{node_type<:AbstractSegmentTreeNode} <: Abstractsegmenttree{node_type}
     size::Int
     head::node_type
     #The stack will be used each time it is required.
     stack::Vector{node_type}
     empty_node::node_type
 end
-get_head(X::Segment_tree) = X.head
-sizeof(X::Segment_tree) = X.size
-function Segment_tree(type, size, op::Function, iterated_op::Function, identity)
+get_head(X::SegmentTree) = X.head
+sizeof(X::SegmentTree) = X.size
+function SegmentTree(type, size, op::Function, iterated_op::Function, identity)
     #println(type)
     size = convert(Int,size)
-    head = Segment_tree_node{type, op, iterated_op, identity}()
+    head = SegmentTreeNode{type, op, iterated_op, identity}()
     head.value = head.density = process_identity(identity)
-    empty_node = Segment_tree_node{type, op, iterated_op, identity}()
+    empty_node = SegmentTreeNode{type, op, iterated_op, identity}()
     stack = Vector(undef,65)
     for i in 1:65
-        stack[i] = empty_node
+        @inbounds stack[i] = empty_node
     end
-    return Segment_tree{Segment_tree_node{type,op,iterated_op,identity}}(size,head, stack, empty_node)
+    return SegmentTree{SegmentTreeNode{type,op,iterated_op,identity}}(size,head, stack, empty_node)
 end
 
-function Segment_tree(type::Type, size, op; iterated_op=nothing, identity=nothing)
+function SegmentTree(type::Type, size, op; iterated_op=nothing, identity=nothing)
     #A bit annoying but local scope must take place.
     new_op = op
     if iterated_op===nothing
@@ -148,19 +148,19 @@ function Segment_tree(type::Type, size, op; iterated_op=nothing, identity=nothin
     else
         new_identity = identity
     end
-    return Segment_tree(type,size,new_op,new_iterated_op,new_identity)
+    return SegmentTree(type,size,new_op,new_iterated_op,new_identity)
 end
 
 
 
-@inline function get_range(X::Segment_tree,low,high)
+@inline function get_range(X::SegmentTree,low,high)
     #println("get range called from head from ", low, " to ", high)
     #The reason this is inlined is because there is only ONE line.
     #This is only a wrapping call to another function which is NOT inlined.
     return get_range(X.head,low,high,1,sizeof(X))
 end
 
-@inline function set_range!(X::Segment_tree, low, high, value)
+@inline function set_range!(X::SegmentTree, low, high, value)
     #Same logic. Wrap the call.
     #The utility memories are here.
     #println("Set range called from head from ", low, " to ", high, " setting value to ", value)
@@ -168,10 +168,10 @@ end
     #println("ending set range query")
 end
 
-get_left_child(X::Segment_tree_node) = X.child_nodes[1]
-get_right_child(X::Segment_tree_node) = X.child_nodes[2]
-is_terminal(X::Segment_tree_node) = (X.child_nodes===nothing)
-function get_range(X::Segment_tree_node, Query_low, Query_high, Current_low, Current_high)
+get_left_child(X::SegmentTreeNode) = X.child_nodes[1]
+get_right_child(X::SegmentTreeNode) = X.child_nodes[2]
+is_terminal(X::SegmentTreeNode) = (X.child_nodes===nothing)
+function get_range(X::SegmentTreeNode, Query_low, Query_high, Current_low, Current_high)
     while true
         if is_terminal(X) #Is the terminal node.
             return get_iterated_op(X)(X.density, Query_high-Query_low+1) 
@@ -192,7 +192,7 @@ function get_range(X::Segment_tree_node, Query_low, Query_high, Current_low, Cur
     end
 end
 
-function get_left_range(X::Segment_tree_node, Query_low, Current_low, Current_high)
+function get_left_range(X::SegmentTreeNode, Query_low, Current_low, Current_high)
     #println("get_left_range called from ", Current_low, " to ", Current_high)
     answer = get_element_identity(X)
     while true
@@ -227,7 +227,7 @@ function get_left_range(X::Segment_tree_node, Query_low, Current_low, Current_hi
         
 end
 
-function get_right_range(X::Segment_tree_node, Query_high, Current_low,Current_high)
+function get_right_range(X::SegmentTreeNode, Query_high, Current_low,Current_high)
     #println("get_right_range called from ", Current_low, " to ", Current_high)
     answer = get_element_identity(X)
     while true
@@ -254,21 +254,21 @@ function get_right_range(X::Segment_tree_node, Query_high, Current_low,Current_h
     end
 end
 
-@inline function get_entire_range(X::Segment_tree_node)
+@inline function get_entire_range(X::SegmentTreeNode)
     return X.value
 end
 
 function reconstruct_stack!(stack, empty_node, stack_begin, stack_end)
     #println("Debugging: reconstructing stack from ",stack_begin," to ", stack_end)
     for i in stack_end:-1:stack_begin
-        node = stack[i]
+        @inbounds node = stack[i]
         node.value = get_op(node)(get_left_child(node).value,get_right_child(node).value)
-        stack[i] = empty_node
+        @inbounds stack[i] = empty_node
     end
 end
 
 
-function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node)
+function set_range!(X::SegmentTreeNode, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node)
     #Working in progress.
     stack_top = 1 #The top of the stack where you can change.
     while true
@@ -293,7 +293,7 @@ function set_range!(X::Segment_tree_node, Query_low, Query_high, Current_low, Cu
 
             return
         end
-        stack[stack_top] = X
+        @inbounds stack[stack_top] = X
         stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
         if Query_high <= Current_mid
@@ -317,7 +317,7 @@ end
 
 
 
-function set_left_range!(X::Segment_tree_node, Query_low, Current_low, Current_high, value, stack, empty_node, old_stack_top)
+function set_left_range!(X::SegmentTreeNode, Query_low, Current_low, Current_high, value, stack, empty_node, old_stack_top)
     #println("set left range called from ", Current_low, " to ", Current_high)
     stack_top = old_stack_top
     while true
@@ -335,7 +335,7 @@ function set_left_range!(X::Segment_tree_node, Query_low, Current_low, Current_h
             return
         end
         #Push the stack here?
-        stack[stack_top] = X
+        @inbounds stack[stack_top] = X
         stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
         decision_boundary = Current_mid+1
@@ -358,7 +358,7 @@ function set_left_range!(X::Segment_tree_node, Query_low, Current_low, Current_h
     end
 end
 
-function set_right_range!(X::Segment_tree_node, Query_high, Current_low, Current_high, value, stack, empty_node, old_stack_top)
+function set_right_range!(X::SegmentTreeNode, Query_high, Current_low, Current_high, value, stack, empty_node, old_stack_top)
     #println("set right range called from ", Current_low, " to ", Current_high)
     stack_top = old_stack_top
     while true
@@ -373,7 +373,7 @@ function set_right_range!(X::Segment_tree_node, Query_high, Current_low, Current
             return
         end
 
-        stack[stack_top] = X
+        @inbounds stack[stack_top] = X
         stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
         decision_boundary = Current_mid
@@ -398,12 +398,12 @@ function set_right_range!(X::Segment_tree_node, Query_high, Current_low, Current
     end
 end
 
-function set_entire_range!(X::Segment_tree_node, range, value)
+function set_entire_range!(X::SegmentTreeNode, range, value)
     X.density = value
     X.value = get_iterated_op(X)(value, range)
     X.child_nodes = nothing
 end
-function construct_children!(X::T, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node, old_stack_top) where {T<:Segment_tree_node}
+function construct_children!(X::T, Query_low, Query_high, Current_low, Current_high, value, stack, empty_node, old_stack_top) where {T<:SegmentTreeNode}
     #println("Construct children called from ", Current_low, " to ", Current_high)
     #=
     Supposedly start? 
@@ -416,7 +416,7 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
     old_density = X.density
     while true
         #old_density = X.density
-        stack[stack_top] = X
+        @inbounds stack[stack_top] = X
         stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
         if Query_high <= Current_mid
@@ -485,12 +485,12 @@ function construct_children!(X::T, Query_low, Query_high, Current_low, Current_h
     
 end
 
-function construct_left_children!(X::T, Query_low, Current_low, Current_high, value, stack, empty_node, old_stack_top) where {T<:Segment_tree_node}
+function construct_left_children!(X::T, Query_low, Current_low, Current_high, value, stack, empty_node, old_stack_top) where {T<:SegmentTreeNode}
     #println("Construct left children called from ", Current_low, " to ", Current_high)
     stack_top = old_stack_top
     old_density = X.density
     while true
-        stack[stack_top] = X
+        @inbounds stack[stack_top] = X
         stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
         decision_boundary = Current_mid+1
@@ -548,13 +548,13 @@ function construct_left_children!(X::T, Query_low, Current_low, Current_high, va
         end
     end
 end
-function construct_right_children!(X::T, Query_high, Current_low, Current_high, value, stack, empty_node, old_stack_top) where {T<:Segment_tree_node}
+function construct_right_children!(X::T, Query_high, Current_low, Current_high, value, stack, empty_node, old_stack_top) where {T<:SegmentTreeNode}
     #println("Construct right children called from ", Current_low, " to ", Current_high)
     #Something here?
     stack_top = old_stack_top
     old_density = X.density
     while true
-        stack[stack_top] = X
+        @inbounds stack[stack_top] = X
         stack_top += 1
         Current_mid = get_middle(Current_low,Current_high)
         decision_boundary = Current_mid
@@ -569,7 +569,7 @@ function construct_right_children!(X::T, Query_high, Current_low, Current_high, 
         elseif Query_high == decision_boundary
 
             if (Current_low == Current_high)
-                stack[stack_top] = empty_node
+                @inbounds stack[stack_top] = empty_node
                 stack_top -= 1
                 X.value = X.density = value
                 reconstruct_stack!(stack,empty_node,old_stack_top,stack_top-1)
@@ -611,19 +611,19 @@ function construct_right_children!(X::T, Query_high, Current_low, Current_high, 
 end
 
 #=
-function propagate_density!(X::Segment_tree_node)
+function propagate_density!(X::SegmentTreeNode)
     get_left_child(X).density = get_right_child(X).density
 end
 =#
 
 
-function debug_print(X::Segment_tree)
+function debug_print(X::SegmentTree)
     println("Debug printing: ",1,"-",sizeof(X))
     debug_print(X.head, 1, 1, sizeof(X))
     println("end debug print")
 end
 
-function debug_print(X::Segment_tree_node, indent, low, high)
+function debug_print(X::SegmentTreeNode, indent, low, high)
     println(repeat("  ", indent),"value: ", X.value)
     if is_terminal(X)
         println(repeat("  ", indent),"density: ", X.density)
@@ -637,7 +637,7 @@ function debug_print(X::Segment_tree_node, indent, low, high)
     end
 end
 
-function check_consistency(X::Segment_tree)
+function check_consistency(X::SegmentTree)
     consistency = check_consistency(X.head, 1, sizeof(X))
     if (!consistency)
         println("This segment tree is currently not consistent with the invariant:.")
@@ -646,7 +646,7 @@ function check_consistency(X::Segment_tree)
     return consistency
 end
 
-function check_consistency(X::Segment_tree_node, low, high)
+function check_consistency(X::SegmentTreeNode, low, high)
     if is_terminal(X)
         return low <= high && get_iterated_op(X)(X.density,high-low+1) == X.value
     else
