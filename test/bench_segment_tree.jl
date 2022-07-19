@@ -113,7 +113,7 @@ rng use time:
 To ensure things are correct. 3311231602528483331 15847214091098195660
 
 
-The old c++ code was twice as fast playing with set_range!, but Julia's get_range is much faster.
+The old c++ code was about twice as fast playing with set_range!, but Julia's get_range is much faster.
 
 My Julia code.
 
