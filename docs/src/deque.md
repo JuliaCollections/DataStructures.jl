@@ -1,29 +1,51 @@
 # Deque
 
-The `Deque` type implements a double-ended queue using a list of blocks.
-This data structure supports constant-time insertion/removal of elements
-at both ends of a sequence.
+A Deque (short for Double-ended Queue) is an abstract data type that generalizes
+a Queue for which elements can be added to or removed from both the front (head)
+and the back (tail) in $O(1)$ time complexity.
 
-Usage:
+The type `Deque` implements the Double-ended Queue as a list of fixed-size blocks
+using an [unrolled linked list](https://en.wikipedia.org/wiki/Unrolled_linked_list).
 
-```julia
-a = Deque{Int}()
-isempty(a)          # test whether the dequeue is empty
-length(a)           # get the number of elements
-push!(a, 10)        # add an element to the back
-pop!(a)             # remove an element from the back
-pushfirst!(a, 20)   # add an element to the front
-popfirst!(a)        # remove an element from the front
-first(a)            # get the element at the front
-last(a)             # get the element at the back
-```
-
-*Note:* Julia's `Vector` type also provides this interface, and thus can
-be used as a deque. However, the `Deque` type in this package is
-implemented as a list of contiguous blocks (default size = 2K). As a
-deque grows, new blocks may be created and linked to existing blocks.
-This way avoids the copying when growing a vector.
+!!! note
+    Julia's `Vector` type also provides this interface, and thus can
+    be used as a deque. However, the `Deque` type in DataStructures.jl is
+    implemented as a list of contiguous blocks (default size = 1 kilo-byte). As a
+    Deque grows, new blocks are created and linked to existing blocks.
+    This apprach prevents copying operations that take place when growing a `Vector`.
 
 Benchmark shows that the performance of `Deque` is comparable to
-`Vector` on `push!`, and is noticeably faster on `pushfirst!` (by about
+`Vector` on `push!`, but is noticeably faster on `pushfirst!` (by about
 30% to 40%).
+
+
+## Constructors
+
+```@autodocs
+Modules = [DataStructures]
+Pages = ["src/deque.jl"]
+Order = [:type] # only types
+```
+
+## Usage
+
+The `Deque` implements the following methods:
+
+- [`==(x::Deque, y::Deque)`](@ref)
+- [`empty!(d::Deque{T}) where T`](@ref)
+- [`first(d::Deque)`](@ref)
+- [`isempty(d::Deque)`](@ref)
+- [`last(d::Deque)`](@ref)
+- [`length(d::Deque)`](@ref)
+- [`pop!(d::Deque{T}) where T`](@ref)
+- [`popfirst!(d::Deque{T}) where T`](@ref)
+- [`push!(d::Deque{T}, x) where T`](@ref)
+- [`pushfirst!(d::Deque{T}, x) where T`](@ref)
+
+-------
+
+```@autodocs
+Modules = [DataStructures]
+Pages = ["src/deque.jl"]
+Order = [:function] # only functions
+```

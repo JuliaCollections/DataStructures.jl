@@ -5,6 +5,9 @@ module DataStructures
                 isbitsunion, isiterable, dict_with_eltype, KeySet, Callable, _tablesz,
                 findnextnot, unsafe_getindex, unsafe_setindex!, peek
 
+   
+
+    import Base.insert!
     # Exports for old version of julia where Base doesn't export this
     export peek
     export popat!
@@ -39,12 +42,13 @@ module DataStructures
     export SortedDict, SortedMultiDict, SortedSet
     export SDToken, SDSemiToken, SMDToken, SMDSemiToken
     export SetToken, SetSemiToken
-    export startof
     export pastendsemitoken, beforestartsemitoken
+    export pastendtoken, beforestarttoken
     export searchsortedafter, searchequalrange
     export packcopy, packdeepcopy
-    export exclusive, inclusive, semitokens
+    export exclusive, inclusive, semitokens, inclusive_key, exclusive_key
     export orderobject, ordtype, Lt, compare, onlysemitokens
+    export tokens, onlytokens, poplast!
 
     export MultiDict, enumerateall
     export RobinDict
@@ -59,6 +63,9 @@ module DataStructures
     export SplayTree, maximum_node
 
     export findkey
+
+    export push_return_semitoken!
+    export token_firstindex, token_lastindex
 
     include("delegate.jl")
 
@@ -91,8 +98,7 @@ module DataStructures
     include("sorted_dict.jl")
     include("sorted_multi_dict.jl")
     include("sorted_set.jl")
-    include("tokens2.jl")
-    include("container_loops.jl")
+    include("sorted_container_iteration.jl")
     include("robin_dict.jl")
     include("ordered_robin_dict.jl")
     include("swiss_dict.jl")
@@ -117,4 +123,6 @@ module DataStructures
     include("splay_tree.jl")
 
     include("deprecations.jl")
+
+
 end

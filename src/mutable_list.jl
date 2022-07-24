@@ -68,7 +68,7 @@ end
 
 function Base.map(f::Base.Callable, l::MutableLinkedList{T}) where T
     if isempty(l) && f isa Function
-        S = Core.Compiler.return_type(f, (T,))
+        S = Core.Compiler.return_type(f, Tuple{T})
         return MutableLinkedList{S}()
     elseif isempty(l) && f isa Type
         return MutableLinkedList{f}()
