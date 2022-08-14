@@ -6,10 +6,10 @@ DocTestSetup = :(using DataStructures)
 
 The Stack data structure corresponds to a *Last In, First Out* (LIFO) queue in 
 which elements are added to and removed from only one of the ends of the queue.
-In DataStructures.jl the `Stack` type is a light-weight wrapper around the
-[`Deque`](./deque.md) type.
+In DataStructures.jl the [`Stack`](./stack.md) type is a light-weight wrapper around
+the [`Deque`](./deque.md) type.
 
-!!! note "Note: Iterator interface"
+!!! note "Notes on the Iterator interface implemented by the Stack"
     The `Stack` type implements the Julia Iterator interface; iterating
     over `Stack` returns items in *First In, Last Out* (FILO) order, i.e. "from top
     to bottom" of the stack. There is also a `Iterators.reverse` function which
