@@ -36,12 +36,10 @@
         end
 
         @testset "implicit conversion" begin
-            BinaryHeap{Float64, Base.ForwardOrdering}(vs)
-            BinaryMinHeap{Float64}(vs)
-            BinaryMaxHeap{Float64}(vs)
-            BinaryHeap{Tuple{Int, Float64}}(ordering, vs2)
-
-            @test true
+            @test BinaryHeap{Float64, Base.ForwardOrdering}(vs) isa BinaryHeap{Float64, Base.ForwardOrdering}
+            @test BinaryMinHeap{Float64}(vs) isa BinaryMinHeap{Float64}
+            @test BinaryMaxHeap{Float64}(vs) isa BinaryMaxHeap{Float64}
+            @test BinaryHeap{Tuple{Int, Float64}}(ordering, vs2) isa BinaryHeap{Tuple{Int, Float64}}
         end
 
         @testset "confirm heap" begin
