@@ -753,7 +753,7 @@ end
 end
 
 get_item(ito::IterableObject{C, R, KeysIter, TokenIter, D},
-         state::SAIterationState) where {C, R, KV, D} =
+         state::SAIterationState) where {C, R, D} =
              ((ito.m, IntSemiToken(state.next)), get_item0(ito, state))
 
 Base.eltype(::Type{IterableObject{C, R, KeysIter, TokenIter, D}}) where {C, R, D} =
@@ -761,7 +761,7 @@ Base.eltype(::Type{IterableObject{C, R, KeysIter, TokenIter, D}}) where {C, R, D
 
 
 get_item(ito::IterableObject{C, R, ValsIter, TokenIter, D},
-         state::SAIterationState) where {C, R, KV, D} =
+         state::SAIterationState) where {C, R, D} =
              ((ito.m, IntSemiToken(state.next)), get_item0(ito, state))
 
 Base.eltype(::Type{IterableObject{C, R, ValsIter, TokenIter, D}}) where {C, R, D} =
@@ -769,7 +769,7 @@ Base.eltype(::Type{IterableObject{C, R, ValsIter, TokenIter, D}}) where {C, R, D
 
 
 function get_item(ito::IterableObject{C, R, KeysValsIter, TokenIter, D},
-                  state::SAIterationState) where {C, R, KV, D}
+                  state::SAIterationState) where {C, R, D}
     i = get_item0(ito, state)
     ((ito.m, IntSemiToken(state.next)), i.first, i.second)
 end
@@ -778,21 +778,21 @@ Base.eltype(::Type{IterableObject{C, R, KeysValsIter, TokenIter, D}}) where {C, 
     Tuple{Tuple{C,IntSemiToken}, keytype(C), valtype(C)}
 
 get_item(ito::IterableObject{C, R, KeysIter, SemiTokenIter, D},
-         state::SAIterationState) where {C, R, KV, D} = 
+         state::SAIterationState) where {C, R, D} = 
              (IntSemiToken(state.next), get_item0(ito, state))
 
 Base.eltype(::Type{IterableObject{C, R, KeysIter, SemiTokenIter, D}}) where {C, R, D} =
     Tuple{IntSemiToken, keytype(C)}
 
 get_item(ito::IterableObject{C, R, ValsIter, SemiTokenIter, D},
-         state::SAIterationState) where {C, R, KV, D} = 
+         state::SAIterationState) where {C, R, D} = 
              (IntSemiToken(state.next), get_item0(ito, state))
 
 Base.eltype(::Type{IterableObject{C, R, ValsIter, SemiTokenIter, D}}) where {C, R, D} =
     Tuple{IntSemiToken, valtype(C)}
 
 function get_item(ito::IterableObject{C, R, KeysValsIter, SemiTokenIter, D},
-                  state::SAIterationState) where {C, R, KV, D}
+                  state::SAIterationState) where {C, R, D}
     i = get_item0(ito, state)
     (IntSemiToken(state.next), i.first, i.second)
 end
@@ -1121,13 +1121,13 @@ Base.eachindex(ss::SortedSet) = onlysemitokens(ss)
 
 
 Base.eachindex(ito::IterableObject{C, R, KeysValsIter, NoTokens, D}) where
-{C <: SortedDict, R, KV, D} = keys(ito)
+{C <: SortedDict, R, D} = keys(ito)
 
 Base.eachindex(ito::IterableObject{C, R, KV, NoTokens, D}) where
-{C <: SortedMultiDict, R, KV, T, D} = onlysemitokens(ito)
+{C <: SortedMultiDict, R, KV, D} = onlysemitokens(ito)
 
 Base.eachindex(ito::IterableObject{C, R, KV, NoTokens, D}) where
-{C <: SortedSet, R, KV, T, D} = onlysemitokens(ito)
+{C <: SortedSet, R, KV, D} = onlysemitokens(ito)
 
 
 """
