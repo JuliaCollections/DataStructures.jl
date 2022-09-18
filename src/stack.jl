@@ -43,14 +43,15 @@ Get the top item from the stack. Sometimes called peek.
 Base.first(s::Stack) = last(s.store)
 Base.last(s::Stack) = first(s.store)
 
-function Base.push!(s::Stack, x)
-    push!(s.store, x)
-    return s
-end
+Base.push!(s::Stack, x) = (push!(s.store, x); s)
+Base.pushfirst!(s::Stack, x) = (pushfirst!(s.store, x); s)
 
 Base.pop!(s::Stack) = pop!(s.store)
+Base.popfirst!(s::Stack) = popfirst!(s.store)
 
 Base.empty!(s::Stack) = (empty!(s.store); s)
+
+Base.collect(s::Stack) = collect(s.store)
 
 Base.iterate(st::Stack, s...) = iterate(Iterators.reverse(st.store), s...)
 
