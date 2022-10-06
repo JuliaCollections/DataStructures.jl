@@ -35,6 +35,6 @@ makedocs(
     format = Documenter.HTML()
 )
 
-deploydocs(
-    repo = "github.com/JuliaCollections/DataStructures.jl.git",
-)
+#deploydocs(
+#    repo = "github.com/JuliaCollections/DataStructures.jl.git",
+#)

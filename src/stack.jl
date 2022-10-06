@@ -2,18 +2,20 @@
     Stack{T}() where {T}
     Stack{T}(blksize::Integer) where {T}
 
-Create a `Stack` object containing elements of type `T` for Last In, First Out (LIFO) access.
+Create a `Stack` object containing elements of type `T` for **Last In, First Out**
+(LIFO) access.
 
 # Parameters
 - `T::Type` Stack element data type.
-- `blksize::Integer` Unrolled linked-list bleck size (in bytes). Default = 1024.
+- `blksize::Integer` Unrolled linked-list block size (in bytes) used in the
+    underlying representation of the stack. Default = 1024. 
 
 # Examples
 ```jldoctest
-julia> s_int = Stack{Int64}() # create a stack with int elements
+julia> s_int = Stack{Int64}() # create a stack with Int64 elements
 Stack{Int64}(Deque [Int64[]])
 
-julia> s_float = Stack{Float64}() # create a stack with float elements
+julia> s_float = Stack{Float64}() # create a stack with Float64 elements
 Stack{Float64}(Deque [Float64[]])
 ```
 """
@@ -27,23 +29,7 @@ Stack{T}(blksize::Integer) where {T} = Stack(Deque{T}(blksize))
 """
     isempty(s::Stack)
 
-Check if stack `s` is empty.
-
-# Example
-```jldoctest
-julia> s = Stack{Char}()
-Stack{Char}(Deque [Char[]])
-
-julia> isempty(s)
-true
-
-julia> for char in "racecar"
-           push!(s, char)
-       end
-
-julia> isempty(s)
-false
-```
+Returns `true` if stack `s` is empty - i.e. has no elements - or `false` otherwise.
 """
 Base.isempty(s::Stack) = isempty(s.store)
 
@@ -52,19 +38,6 @@ Base.isempty(s::Stack) = isempty(s.store)
     length(s::Stack)
 
 Return the number of elements in stack `s`.
-
-# Example
-```jldoctest
-julia> s = Stack{Char}()
-Stack{Char}(Deque [Char[]])
-
-julia> for char in "racecar"
-           push!(s, char)
-       end
-
-julia> length(s)
-7
-```
 """
 Base.length(s::Stack) = length(s.store)
 
@@ -73,18 +46,6 @@ Base.length(s::Stack) = length(s.store)
     eltype(::Type{Stack{T}}) where {T}
 
 Return the type of the elements in the stack.
-
-# Example
-```jldoctest
-julia> s = Stack{Float32}()
-Stack{Float32}(Deque [Float32[]])
-
-julia> eltype(s)
-Float32
-
-julia> eltype(s) <: Number
-true
-```
 """
 Base.eltype(::Type{Stack{T}}) where {T} = T
 
@@ -92,8 +53,9 @@ Base.eltype(::Type{Stack{T}}) where {T} = T
 """
     first(s::Stack)
 
-Get the first element of `s`. Since `s` is a stack, the first element will be the
-element at the top of `s` (also known as "peek" of the stack).
+Get the first element of `s` in *Last In, First Out* order. Since `s` is a stack,
+the first element will be the element at the top of `s` (also known as "peek" of
+the stack).
 
 # Example
 ```jldoctest
@@ -116,8 +78,8 @@ Base.first(s::Stack) = last(s.store)
 """
     last(s::Stack)
 
-Get the last element of `s`. Since `s` is a stack, the last element will be the at
-bottom of the stack.
+Get the last element of `s` in *Last In, First Out*. Since `s` is a stack, the last
+element will be the at bottom of the stack.
 
 # Example
 ```jldoctest
@@ -142,18 +104,6 @@ Base.last(s::Stack) = first(s.store)
     push!(s::Stack, x)
 
 Insert new element `x` in top of stack `s`.
-
-# Example
-```jldoctest
-julia> s = Stack{Int}()
-Stack{Int64}(Deque [Int64[]])
-
-julia> push!(s, 42)
-Stack{Int64}(Deque [[42]])
-
-julia> push!(s, 314)
-Stack{Int64}(Deque [[42, 314]])
-```
 """
 function Base.push!(s::Stack, x)
     push!(s.store, x)
@@ -165,28 +115,6 @@ end
     pop!(s::Stack) 
 
 Remove and return the top element from stack `s`.
-
-# Example
-```jldoctest
-julia> s = Stack{Int}()
-Stack{Int64}(Deque [Int64[]])
-
-julia> for i in 1:10
-           push!(s, i)
-       end
-
-julia> s
-Stack{Int64}(Deque [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]])
-
-julia> popped = pop!(s)
-10
-
-julia> s
-Stack{Int64}(Deque [[1, 2, 3, 4, 5, 6, 7, 8, 9]])
-
-julia> popped
-10
-```
 """
 Base.pop!(s::Stack) = pop!(s.store)
 
@@ -195,25 +123,6 @@ Base.pop!(s::Stack) = pop!(s.store)
     empty!(s::Stack)
 
 Make `s` empty by inplace-removing all its elements.
-
-# Example
-```jldoctest
-julia> s = Stack{Int}()
-Stack{Int64}(Deque [Int64[]])
-
-julia> for i in 1:4
-           push!(s, i)
-       end
-
-julia> isempty(s)
-false
-
-julia> empty!(s)
-Stack{Int64}(Deque [Int64[]])
-
-julia> isempty(s)
-true
-```
 """
 Base.empty!(s::Stack) = (empty!(s.store); s)
 
@@ -225,9 +134,9 @@ Iterators.reverse(s::Stack{T}) where {T} = DequeIterator{T}(s.store)
 """
     ==(x::Stack, y::Stack)
 
-Check if stacks `x` and `y` are equal in term of their contents. Internally calls `==()`
-for each of the pairs formed by the elements of `x` and `y` in the order they appear
-in the stack.
+Check if stacks `x` and `y` are equal in terms of their contents and the order in
+which they are present in the stack. Internally calls `==()` for each of the pairs
+formed by the elements of `x` and `y` in the order they appear in the stack.
 
 # Example
 ```jldoctest
@@ -246,6 +155,17 @@ julia> pop!(s1)
 "42"
 
 julia> s1 == s2
+false
+```
+```jldoctest
+julia> a, b = Stack{Int}(), Stack{Int}()
+(Stack{Int64}(Deque [Int64[]]), Stack{Int64}(Deque [Int64[]]))
+
+julia> for num in [1, 2, 3, 4] push!(a, num) end
+
+julia> for num in [1, 2, 4, 3] push!(b, num) end
+
+julia> a == b # same elements but in different order
 false
 ```
 """
