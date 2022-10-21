@@ -237,9 +237,7 @@ import DataStructures: IntSet
 
     @testset "Test logic against Set" begin
         p = IntSet([0,1,4,5])
-        resize!(p.bits, 6)
         q = IntSet([0,2,4,6])
-        resize!(q.bits, 8)
         p′ = complement(p)
         q′ = complement(q)
         function collect10(itr)
