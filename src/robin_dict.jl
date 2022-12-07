@@ -95,6 +95,9 @@ end
 
 # insert algorithm
 function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
+    sz = length(h.keys)
+    (h.count > ROBIN_DICT_LOAD_FACTOR * sz) && rehash!(h, sz<<2)
+
     # table full
     @assert h.count != length(h.keys)
 
@@ -244,8 +247,6 @@ end
 
 function _setindex!(h::RobinDict{K,V}, key::K, v0) where {K, V}
     v = convert(V, v0)
-    sz = length(h.keys)
-    (h.count > ROBIN_DICT_LOAD_FACTOR * sz) && rehash!(h, sz<<2)
     index = rh_insert!(h, key, v)
     @assert index > 0
     return h
