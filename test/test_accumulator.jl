@@ -2,53 +2,72 @@
 
 @testset "Accumulators" begin
 
-    ct = counter(String)
+    @testset "Running tests" begin
+        #TODO: all these tests should be made independent.
+        # Currently they all need to run in a particular order as they share `ct`
+        ct = counter(String)
 
-    @testset "Core Functionality" begin
-        @assert isa(ct, Accumulator{String,Int})
+        @testset "Core Functionality" begin
+            @assert isa(ct, Accumulator{String,Int})
 
-        @test ct["abc"] == 0
-        @test !haskey(ct, "abc")
-        @test isempty(collect(keys(ct)))
+            @test ct["abc"] == 0
+            @test !haskey(ct, "abc")
+            @test isempty(collect(keys(ct)))
+        end
+
+        @testset "Test setindex!" begin
+            ct["b"] = 2
+            @test ct["b"] == 2
+            ct["b"] = 0
+            @test ct["b"] == 0
+        end
+
+        @testset "Test inc!" begin
+            inc!(ct, "a")
+            @test haskey(ct, "a")
+            @test ct["a"] == 1
+
+            inc!(ct, "b", 2)
+            @test haskey(ct, "b")
+            @test ct["b"] == 2
+        end
+
+        @testset "Test dec!" begin
+            dec!(ct, "b")
+            @test ct["b"] == 1
+            dec!(ct, "b", 16)
+            @test ct["b"] == -15
+            ct["b"] = 2
+        end
+
+        @testset "Test convert" begin
+            inc!(ct, "b", 0x3)
+            @test ct["b"] == 5
+
+            @test !haskey(ct, "abc")
+            @test ct["abc"] == 0
+
+            @test length(ct) == 2
+            @test length(collect(ct)) == 2
+            @test length(collect(keys(ct))) == 2
+            @test length(collect(values(ct))) == 2
+            @test sum(ct) == 6
+        end
     end
 
-    @testset "Test setindex!" begin
-        ct["b"] = 2
-        @test ct["b"] == 2
-        ct["b"] = 0
-        @test ct["b"] == 0
-    end
+    @testset "pop!" begin
+        acc = Accumulator(:a=>1, :b=>2, :c=>3)
+        @test pop!(acc, :c) == 2
+        @test acc == Accumulator(:a=>1, :b=>2, :c=>2)
 
-    @testset "Test inc!" begin
-        inc!(ct, "a")
-        @test haskey(ct, "a")
-        @test ct["a"] == 1
+        # pop! with default differs from dec!
+        acc = Accumulator(:a=>1, :b=>2, :c=>3)
+        @test pop!(acc, :c, 3) == 2  # default, not decrement amount
+        @test acc == Accumulator(:a=>1, :b=>2, :c=>2)
 
-        inc!(ct, "b", 2)
-        @test haskey(ct, "b")
-        @test ct["b"] == 2
-    end
-
-    @testset "Test dec!" begin
-        dec!(ct, "b")
-        @test ct["b"] == 1
-        dec!(ct, "b", 16)
-        @test ct["b"] == -15
-        ct["b"] = 2
-    end
-
-    @testset "Test convert" begin
-        inc!(ct, "b", 0x3)
-        @test ct["b"] == 5
-
-        @test !haskey(ct, "abc")
-        @test ct["abc"] == 0
-
-        @test length(ct) == 2
-        @test length(collect(ct)) == 2
-        @test length(collect(keys(ct))) == 2
-        @test length(collect(values(ct))) == 2
-        @test sum(ct) == 6
+        acc = Accumulator(:a=>1, :b=>2, :c=>3)
+        @test pop!(acc, :d, 4) == 4
+        @test acc == Accumulator(:a=>1, :b=>2, :c=>3)
     end
 
     @testset "From Pairs" begin 
@@ -71,11 +90,6 @@
         @test ct2["a"] == 3
         @test ct2["b"] == 2
         @test ct2["c"] == 2
-
-        merge!(ct, ct2)
-        @test ct["a"] == 4
-        @test ct["b"] == 7
-        @test ct["c"] == 2
     end
 
     @testset "From Dict" begin
@@ -260,8 +274,6 @@
             @test sprint(show,Accumulator(1 => 3)) == "Accumulator(1 => 3)"
             @test sprint(show,Accumulator(1 => 3, 3 => 4)) == "Accumulator(3 => 4, 1 => 3)"
         end
-
-
     end
 
 end # @testset Accumulators

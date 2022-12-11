@@ -33,9 +33,8 @@ function counter(seq)
 end
 
 eltype_for_accumulator(seq::T) where T = eltype(T)
-function eltype_for_accumulator(seq::Base.Generator)
-    Base.@default_eltype(seq)
-end
+eltype_for_accumulator(seq::Base.Generator) = Base.@default_eltype(seq)
+
 
 
 Base.copy(ct::Accumulator) = Accumulator(copy(ct.map))
@@ -44,9 +43,9 @@ Base.length(a::Accumulator) = length(a.map)
 
 ## retrieval
 
-Base.get(ct::Accumulator, x, default) = get(ct.map, x, default)
 # need to allow user specified default in order to
 # correctly implement "informal" AbstractDict interface
+Base.get(ct::Accumulator, x, default) = get(ct.map, x, default)
 
 Base.getindex(ct::Accumulator{T,V}, x) where {T,V} = get(ct.map, x, zero(V))
 
@@ -76,12 +75,11 @@ inc!(ct::Accumulator, x, v::Number) = (ct[x] += v)
 inc!(ct::Accumulator{T, V}, x) where {T, V} = inc!(ct, x, one(V))
 
 # inc! is preferred over push!, but we need to provide push! for the Bag interpreation
-# which is used by classified_collections.jl
 Base.push!(ct::Accumulator, x) = inc!(ct, x)
 Base.push!(ct::Accumulator, x, a::Number) = inc!(ct, x, a)
 
 # To remove ambiguities related to Accumulator now being a subtype of AbstractDict
-Base.push!(ct::Accumulator, x::Pair)  = inc!(ct, x)
+Base.push!(ct::Accumulator{P}, x::P) where P<:Pair  = inc!(ct, x)
 
 
 """
@@ -92,7 +90,9 @@ Decrements the count for `x` by `v` (defaulting to one)
 dec!(ct::Accumulator, x, v::Number) = (ct[x] -= v)
 dec!(ct::Accumulator{T,V}, x) where {T,V} = dec!(ct, x, one(V))
 
-#TODO: once we are done deprecating `pop!` for `reset!` then add `pop!` as an alias for `dec!`
+Base.pop!(ct::Accumulator, x) = dec!(ct, x)
+Base.pop!(ct::Accumulator, x, default) = haskey(ct, x) ? dec!(ct, x) : default
+
 
 """
     merge!(ct1::Accumulator, others...)
@@ -183,6 +183,11 @@ nsmallest(acc::Accumulator, n) = partialsort!(collect(acc), 1:n, by=last, rev=fa
 ###########################################################
 ## Multiset operations
 
+"""
+    MultiplicityException{K,V} <: Exception
+
+For errors related to havign a negetive count when using an Accumulator as a multiset.
+"""
 struct MultiplicityException{K, V} <: Exception
     k::K
     v::V
