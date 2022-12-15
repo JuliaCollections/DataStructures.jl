@@ -144,7 +144,7 @@ Verify if priority queue `pq` has `key` in its keys.
 # Example
 
 ```jldoctest
-ulia> pq = PriorityQueue("a" => 1, "b" => 2, "c" => 3)
+julia> pq = PriorityQueue("a" => 1, "b" => 2, "c" => 3)
 PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
   "a" => 1
   "b" => 2
