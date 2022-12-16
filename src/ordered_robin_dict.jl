@@ -374,10 +374,7 @@ julia> pop!(d, "a")
 julia> pop!(d, "d")
 ERROR: KeyError: key "d" not found
 Stacktrace:
- [1] pop!(h::OrderedRobinDict{String, Int64}, key::String)
-   @ DataStructures ~/.julia/dev/DataStructures/src/ordered_robin_dict.jl:357
- [2] top-level scope
-   @ none:1
+[...]
 
 julia> pop!(d, "e", 4)
 4

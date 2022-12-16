@@ -93,7 +93,7 @@ julia> for i in range(1, 0.2, 5)
 julia> s
 Stack{Float32}(Deque [Float32[1.0, 0.8, 0.6, 0.4, 0.2]])
 
-julia> first(s)
+julia> last(s)
 1.0f0
 ```
 """

@@ -311,7 +311,6 @@ Return the value stored for the given key, or if no mapping for the key is prese
 ```jldoctest
 julia> d = RobinDict("a"=>1, "b"=>2, "c"=>3);
 
-
 julia> get!(d, "a", 5)
 1
 
@@ -515,17 +514,12 @@ Delete and return the mapping for `key` if it exists in `collection`, otherwise 
 ```jldoctest
 julia> d = RobinDict("a"=>1, "b"=>2, "c"=>3);
 
-
 julia> pop!(d, "a")
 1
 
 julia> pop!(d, "d")
 ERROR: KeyError: key "d" not found
-Stacktrace:
- [1] pop!(h::RobinDict{String, Int64}, key0::String)
-   @ DataStructures ~/.julia/dev/DataStructures/src/robin_dict.jl:505
- [2] top-level scope
-   @ none:1
+[...]
 
 julia> pop!(d, "e", 4)
 4
