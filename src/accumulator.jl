@@ -79,7 +79,7 @@ Base.push!(ct::Accumulator, x) = inc!(ct, x)
 Base.push!(ct::Accumulator, x, a::Number) = inc!(ct, x, a)
 
 # To remove ambiguities related to Accumulator now being a subtype of AbstractDict
-Base.push!(ct::Accumulator{P}, x::P) where P<:Pair  = inc!(ct, x)
+Base.push!(ct::Accumulator, x::Pair)  = inc!(ct, x)
 
 
 """
