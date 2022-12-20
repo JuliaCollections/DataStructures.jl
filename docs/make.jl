@@ -1,34 +1,40 @@
 using Documenter
 using DataStructures
 
+DocMeta.setdocmeta!(DataStructures, :DocTestSetup, :(using DataStructures); recursive=true)
 
 makedocs(
-    format = :html,
     sitename = "DataStructures.jl",
     pages = [
         "index.md",
         "deque.md",
         "circ_buffer.md",
         "circ_deque.md",
-        "stack_and_queue.md",
+        "stack.md",
+        "queue.md",
         "priority-queue.md",
+        "fenwick.md",
         "accumulators.md",
         "disjoint_sets.md",
         "heaps.md",
         "ordered_containers.md",
         "default_dict.md",
+        "robin_dict.md",
+        "swiss_dict.md",
         "trie.md",
         "linked_list.md",
+        "mutable_linked_list.md",
         "intset.md",
         "sorted_containers.md",
-    ]
+        "dibit_vector.md",
+        "red_black_tree.md",
+        "avl_tree.md",
+        "splay_tree.md",
+    ],
+    modules = [DataStructures],
+    format = Documenter.HTML()
 )
 
 deploydocs(
     repo = "github.com/JuliaCollections/DataStructures.jl.git",
-    julia  = "0.6",
-    latest = "master",
-    target = "build",
-    deps = nothing,  # we use the `format = :html`, without `mkdocs`
-    make = nothing,  # we use the `format = :html`, without `mkdocs`
 )

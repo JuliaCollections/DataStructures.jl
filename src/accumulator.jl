@@ -1,15 +1,23 @@
 #A counter type
 
-struct Accumulator{T, V<:Number} <: AbstractDict{T,V}
-    map::Dict{T,V}
+"""
+    Accumulator{T, V<:Number}
+
+A accumulator is a data structure that maintains an accumulated total for each key.
+The particular case where those totals are integers is a counter.
+"""
+struct Accumulator{T, V <: Number} <: AbstractDict{T, V}
+    map::Dict{T, V}
 end
 
 ## constructors
 
-Accumulator(::Type{T}, ::Type{V}) where {T,V<:Number} = Accumulator{T,V}(Dict{T,V}())
-counter(T::Type) = Accumulator(T,Int)
+Accumulator{T, V}() where {T, V <: Number} = Accumulator{T, V}(Dict{T, V}())
+Accumulator(map::AbstractDict) = Accumulator(Dict(map))
+Accumulator(ps::Pair...) = Accumulator(Dict(ps))
 
-counter(dct::Dict{T,V}) where {T,V<:Integer} = Accumulator{T,V}(copy(dct))
+counter(T::Type) = Accumulator{T, Int}()
+counter(dct::AbstractDict{T, V}) where {T, V<:Integer} = Accumulator{T, V}(Dict(dct))
 
 """
     counter(seq)
@@ -25,89 +33,82 @@ function counter(seq)
 end
 
 eltype_for_accumulator(seq::T) where T = eltype(T)
-function eltype_for_accumulator(seq::T) where {T<:Base.Generator}
+function eltype_for_accumulator(seq::Base.Generator)
     Base.@default_eltype(seq)
 end
 
 
+Base.copy(ct::Accumulator) = Accumulator(copy(ct.map))
 
-copy(ct::Accumulator) = Accumulator(copy(ct.map))
-
-length(a::Accumulator) = length(a.map)
+Base.length(a::Accumulator) = length(a.map)
 
 ## retrieval
 
-get(ct::Accumulator, x, default) = get(ct.map, x, default)
+Base.get(ct::Accumulator, x, default) = get(ct.map, x, default)
 # need to allow user specified default in order to
 # correctly implement "informal" AbstractDict interface
 
-getindex(ct::Accumulator{T,V}, x) where {T,V} = get(ct.map, x, zero(V))
+Base.getindex(ct::Accumulator{T,V}, x) where {T,V} = get(ct.map, x, zero(V))
 
-setindex!(ct::Accumulator, x, v) = setindex!(ct.map, x, v)
+Base.setindex!(ct::Accumulator, x, v) = setindex!(ct.map, x, v)
 
 
-haskey(ct::Accumulator, x) = haskey(ct.map, x)
+Base.haskey(ct::Accumulator, x) = haskey(ct.map, x)
 
-keys(ct::Accumulator) = keys(ct.map)
+Base.keys(ct::Accumulator) = keys(ct.map)
 
-values(ct::Accumulator) = values(ct.map)
+Base.values(ct::Accumulator) = values(ct.map)
 
-sum(ct::Accumulator) = sum(values(ct.map))
+Base.sum(ct::Accumulator) = sum(values(ct.map))
 
 ## iteration
 
-start(ct::Accumulator) = start(ct.map)
-next(ct::Accumulator, state) = next(ct.map, state)
-done(ct::Accumulator, state) = done(ct.map, state)
-# resolve ambiguity
-next(ct::Accumulator, state::Base.LegacyIterationCompat{I,T,S}) where {I>:Accumulator,T,S} = next(ct.map, state)
-done(ct::Accumulator, state::Base.LegacyIterationCompat{I,T,S}) where {I>:Accumulator,T,S} = done(ct.map, state)
+Base.iterate(ct::Accumulator, s...) = iterate(ct.map, s...)
 
 # manipulation
 
 """
-    inc!(ct, x, [v=1])
+    inc!(ct::Accumulator, x, [v=1])
 
 Increments the count for `x` by `v` (defaulting to one)
 """
-inc!(ct::Accumulator, x, a::Number) = (ct[x] += a)
-inc!(ct::Accumulator{T,V}, x) where {T,V} = inc!(ct, x, one(V))
+inc!(ct::Accumulator, x, v::Number) = (ct[x] += v)
+inc!(ct::Accumulator{T, V}, x) where {T, V} = inc!(ct, x, one(V))
 
 # inc! is preferred over push!, but we need to provide push! for the Bag interpreation
 # which is used by classified_collections.jl
-push!(ct::Accumulator, x) = inc!(ct, x)
-push!(ct::Accumulator, x, a::Number) = inc!(ct, x, a)
+Base.push!(ct::Accumulator, x) = inc!(ct, x)
+Base.push!(ct::Accumulator, x, a::Number) = inc!(ct, x, a)
 
 # To remove ambiguities related to Accumulator now being a subtype of AbstractDict
-push!(ct::Accumulator, x::Pair)  = inc!(ct, x)
-
+Base.push!(ct::Accumulator, x::Pair)  = inc!(ct, x)
 
 
 """
-    dec!(ct, x, [v=1])
+    dec!(ct::Accumulator, x, [v=1])
 
 Decrements the count for `x` by `v` (defaulting to one)
 """
-dec!(ct::Accumulator, x, a::Number) = (ct[x] -= a)
+dec!(ct::Accumulator, x, v::Number) = (ct[x] -= v)
 dec!(ct::Accumulator{T,V}, x) where {T,V} = dec!(ct, x, one(V))
 
 #TODO: once we are done deprecating `pop!` for `reset!` then add `pop!` as an alias for `dec!`
 
 """
-    merge!(ct1, others...)
+    merge!(ct1::Accumulator, others...)
 
 Merges the other counters into `ctl`,
 summing the counts for all elements.
 """
-function merge!(ct::Accumulator, other::Accumulator)
+function Base.merge!(ct::Accumulator, other::Accumulator)
     for (x, v) in other
         inc!(ct, x, v)
     end
-    ct
+    return ct
 end
 
 
-function merge!(ct1::Accumulator, others::Accumulator...)
+function Base.merge!(ct1::Accumulator, others::Accumulator...)
     for ct in others
         merge!(ct1,ct)
     end
@@ -122,7 +123,7 @@ Creates a new counter with total counts equal to the sum of the counts in the co
 
 See also merge!
 """
-function merge(ct1::Accumulator, others::Accumulator...)
+function Base.merge(ct1::Accumulator, others::Accumulator...)
     ct = copy(ct1)
     merge!(ct,others...)
 end
@@ -130,10 +131,9 @@ end
 """
     reset!(ct::Accumulator, x)
 
-Resets the count of `x` to zero.
-Returns its former count.
+Remove a key `x` from an accumulator, and return its current value
 """
-reset!(ct::Accumulator, x) = pop!(ct.map, x)
+reset!(ct::Accumulator{<:Any,V}, x) where V = haskey(ct.map, x) ? pop!(ct.map, x) : zero(V)
 
 """
      nlargest(acc::Accumulator, [n])
@@ -180,9 +180,73 @@ nsmallest(acc::Accumulator) = sort!(collect(acc), by=last, rev=false)
 nsmallest(acc::Accumulator, n) = partialsort!(collect(acc), 1:n, by=last, rev=false)
 
 
+###########################################################
+## Multiset operations
 
-## Deprecations
-@deprecate pop!(ct::Accumulator, x) reset!(ct, x)
-@deprecate push!(ct1::Accumulator, ct2::Accumulator) merge!(ct1,ct2)
+struct MultiplicityException{K, V} <: Exception
+    k::K
+    v::V
+end
+
+function Base.showerror(io::IO, err::MultiplicityException)
+    print(io, "When using an `Accumulator` as a multiset, all elements must have positive multiplicity")
+    print(io, " element `$(err.k)` has multiplicity $(err.v)")
+end
+
+drop_nonpositive!(a::Accumulator, k) = (a[k] > 0 || delete!(a.map, k))
 
 
+function Base.setdiff(a::Accumulator, b::Accumulator)
+    ret = copy(a)
+    for (k, v) in b
+        v > 0 || throw(MultiplicityException(k, v))
+        dec!(ret, k, v)
+        drop_nonpositive!(ret, k)
+    end
+    return ret
+end
+
+Base.issubset(a::Accumulator, b::Accumulator) = all(b[k] >= v for (k, v) in a)
+
+Base.union(a::Accumulator, b::Accumulator, c::Accumulator...) = union(union(a,b), c...)
+Base.union(a::Accumulator, b::Accumulator) = union!(copy(a), b)
+function Base.union!(a::Accumulator, b::Accumulator)
+    for (kb, vb) in b
+        va = a[kb]
+        vb >= 0 || throw(MultiplicityException(kb, vb))
+        va >= 0 || throw(MultiplicityException(kb, va))
+        a[kb] = max(va, vb)
+    end
+    return a
+end
+
+
+Base.intersect(a::Accumulator, b::Accumulator, c::Accumulator...) = insersect(intersect(a,b), c...)
+Base.intersect(a::Accumulator, b::Accumulator) = intersect!(copy(a), b)
+function Base.intersect!(a::Accumulator, b::Accumulator)
+    for k in union(keys(a), keys(b)) # union not interection as we want to check both multiplicities
+        va = a[k]
+        vb = b[k]
+        va >= 0 || throw(MultiplicityException(k, va))
+        vb >= 0 || throw(MultiplicityException(k, vb))
+
+        a[k] = min(va, vb)
+        drop_nonpositive!(a, k) # Drop any that ended up zero
+    end
+    return a
+end
+function Base.show(io::IO, acc::Accumulator{T,V}) where {T,V}
+    l = length(acc)
+    if l>0
+        print(io, "Accumulator(")
+    else
+        print(io,"Accumulator{$T,$V}(")
+    end
+    for (count, (k, v)) in enumerate(acc)
+        print(io, k, " => ", v)
+        if count < l
+            print(io, ", ")
+        end
+    end
+    print(io, ")")
+end

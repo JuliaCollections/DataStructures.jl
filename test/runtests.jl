@@ -5,30 +5,39 @@ using Serialization
 
 import DataStructures: IntSet
 
-@test isempty(detect_ambiguities(Base, Core, DataStructures))
+@test [] == detect_ambiguities(Core, DataStructures)
+@test [] == detect_ambiguities(Base, DataStructures)
 
-using Primes
-
-tests = ["int_set",
+tests = ["deprecations",
+         "int_set",
+         "sparse_int_set",
          "deque",
          "circ_deque",
          "sorted_containers",
-         "stack_and_queue",
+         "stack",
+         "queue",
          "accumulator",
-         "classified_collections",
          "disjoint_set",
          "binheap",
          "mutable_binheap",
+         "minmax_heap",
          "default_dict",
-         "ordered_dict",
          "weakkeyid_dict",
-         "ordered_set",
          "trie",
          "list",
+         "mutable_list",
          "multi_dict",
          "circular_buffer",
          "sorting",
-         "priority_queue"
+         "priority_queue",
+         "fenwick",
+         "robin_dict",
+         "ordered_robin_dict",
+         "dibit_vector",
+         "swiss_dict",
+         "avl_tree",
+         "red_black_tree",
+         "splay_tree"
         ]
 
 if length(ARGS) > 0

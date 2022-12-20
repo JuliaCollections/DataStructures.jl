@@ -1,100 +1,6 @@
 # Binary heap (non-mutable)
 
-#################################################
-#
-#   core implementation
-#
-#################################################
-
-function _heap_bubble_up!(comp::Comp, valtree::Array{T}, i::Int) where {Comp,T}
-    i0::Int = i
-    @inbounds v = valtree[i]
-
-    while i > 1  # nd is not root
-        p = i >> 1
-        @inbounds vp = valtree[p]
-
-        if compare(comp, v, vp)
-            # move parent downward
-            @inbounds valtree[i] = vp
-            i = p
-        else
-            break
-        end
-    end
-
-    if i != i0
-        @inbounds valtree[i] = v
-    end
-end
-
-function _heap_bubble_down!(comp::Comp, valtree::Array{T}, i::Int) where {Comp,T}
-    @inbounds v::T = valtree[i]
-    swapped = true
-    n = length(valtree)
-    last_parent = n >> 1
-
-    while swapped && i <= last_parent
-        lc = i << 1
-        if lc < n   # contains both left and right children
-            rc = lc + 1
-            @inbounds lv = valtree[lc]
-            @inbounds rv = valtree[rc]
-            if compare(comp, rv, lv)
-                if compare(comp, rv, v)
-                    @inbounds valtree[i] = rv
-                    i = rc
-                else
-                    swapped = false
-                end
-            else
-                if compare(comp, lv, v)
-                    @inbounds valtree[i] = lv
-                    i = lc
-                else
-                    swapped = false
-                end
-            end
-        else        # contains only left child
-            @inbounds lv = valtree[lc]
-            if compare(comp, lv, v)
-                @inbounds valtree[i] = lv
-                i = lc
-            else
-                swapped = false
-            end
-        end
-    end
-
-    valtree[i] = v
-end
-
-
-function _binary_heap_pop!(comp::Comp, valtree::Array{T}) where {Comp,T}
-    # extract root
-    v = valtree[1]
-
-    if length(valtree) == 1
-        empty!(valtree)
-    else
-        valtree[1] = pop!(valtree)
-        if length(valtree) > 1
-            _heap_bubble_down!(comp, valtree, 1)
-        end
-    end
-    v
-end
-
-
-function _make_binary_heap(comp::Comp, ty::Type{T}, xs) where {Comp,T}
-    n = length(xs)
-    valtree = copy(xs)
-    for i = 2 : n
-        _heap_bubble_up!(comp, valtree, i)
-    end
-    valtree
-end
-
+include("arrays_as_heaps.jl")
 
 #################################################
 #
@@ -102,27 +8,59 @@ end
 #
 #################################################
 
-mutable struct BinaryHeap{T,Comp} <: AbstractHeap{T}
-    comparer::Comp
+"""
+    FasterForward()
+
+FasterForward enables 2x faster float comparison versus Base.ForwardOrdering,
+but ordering is undefined if the data contains NaN values.
+Enable this higher-performance option by calling the BinaryHeap
+constructor instead of the BinaryMinHeap helper constructor.
+"""
+struct FasterForward <: Base.Ordering end
+Base.lt(o::FasterForward, a, b) = a < b
+
+"""
+    FasterReverse()
+
+FasterReverse enables 2x faster float comparison versus Base.ReverseOrdering,
+but ordering is undefined if the data contains NaN values.
+Enable this higher-performance option by calling the BinaryHeap
+constructor instead of the BinaryMaxHeap helper constructor.
+"""
+struct FasterReverse <: Base.Ordering end
+Base.lt(o::FasterReverse, a, b) = a > b
+
+mutable struct BinaryHeap{T, O <: Base.Ordering} <: AbstractHeap{T}
+    ordering::O
     valtree::Vector{T}
 
-    function BinaryHeap{T,Comp}(comp::Comp) where {T,Comp}
-        new{T,Comp}(comp, Vector{T}())
+    function BinaryHeap{T}(ordering::Base.Ordering) where T
+        new{T, typeof(ordering)}(ordering, Vector{T}())
     end
 
-    function BinaryHeap{T,Comp}(comp::Comp, xs) where {T,Comp}  # xs is an iterable collection of values
-        valtree = _make_binary_heap(comp, T, xs)
-        new{T,Comp}(comp, valtree)
+    function BinaryHeap{T}(ordering::Base.Ordering, xs::AbstractVector) where T
+        valtree = heapify(xs, ordering)
+        new{T, typeof(ordering)}(ordering, valtree)
     end
 end
 
-function binary_minheap(ty::Type{T}) where T
-    BinaryHeap{T,LessThan}(LessThan())
-end
+BinaryHeap(ordering::Base.Ordering, xs::AbstractVector{T}) where T = BinaryHeap{T}(ordering, xs)
 
-binary_maxheap(ty::Type{T}) where {T} = BinaryHeap{T,GreaterThan}(GreaterThan())
-binary_minheap(xs::AbstractVector{T}) where {T} = BinaryHeap{T,LessThan}(LessThan(), xs)
-binary_maxheap(xs::AbstractVector{T}) where {T} = BinaryHeap{T,GreaterThan}(GreaterThan(), xs)
+# Constructors using singleton order types as type parameters rather than arguments
+BinaryHeap{T, O}() where {T, O<:Base.Ordering} = BinaryHeap{T}(O())
+BinaryHeap{T, O}(xs::AbstractVector) where {T, O<:Base.Ordering} = BinaryHeap{T}(O(), xs)
+
+# These constructors needed for BinaryMaxHeap, until we have https://github.com/JuliaLang/julia/pull/37822
+BinaryHeap{T, DefaultReverseOrdering}() where {T} = BinaryHeap{T}(Base.Reverse)
+BinaryHeap{T, DefaultReverseOrdering}(xs::AbstractVector) where {T} = BinaryHeap{T}(Base.Reverse, xs)
+
+# Forward/reverse ordering type aliases
+const BinaryMinHeap{T} = BinaryHeap{T, Base.ForwardOrdering}
+const BinaryMaxHeap{T} = BinaryHeap{T, DefaultReverseOrdering}
+
+BinaryMinHeap(xs::AbstractVector{T}) where T = BinaryMinHeap{T}(xs)
+BinaryMaxHeap(xs::AbstractVector{T}) where T = BinaryMaxHeap{T}(xs)
+
 
 #################################################
 #
@@ -130,23 +68,46 @@ binary_maxheap(xs::AbstractVector{T}) where {T} = BinaryHeap{T,GreaterThan}(Grea
 #
 #################################################
 
-length(h::BinaryHeap) = length(h.valtree)
+"""
+    length(h::BinaryHeap)
 
-isempty(h::BinaryHeap) = isempty(h.valtree)
-
-function push!(h::BinaryHeap{T}, v::T) where T
-    valtree = h.valtree
-    push!(valtree, v)
-    _heap_bubble_up!(h.comparer, valtree, length(valtree))
-    h
-end
-
+Returns the number of elements in heap `h`.
+"""
+Base.length(h::BinaryHeap) = length(h.valtree)
 
 """
-    top(h::BinaryHeap)
+    isempty(h::BinaryHeap)
+
+Returns whether the heap `h` is empty.
+"""
+Base.isempty(h::BinaryHeap) = isempty(h.valtree)
+
+"""
+    push!(h::BinaryHeap, value)
+
+Adds the `value` element to the heap `h`.
+"""
+@inline function Base.push!(h::BinaryHeap, v)
+    heappush!(h.valtree, v, h.ordering)
+    return h
+end
+
+"""
+    first(h::BinaryHeap)
 
 Returns the element at the top of the heap `h`.
 """
-@inline top(h::BinaryHeap) = h.valtree[1]
+@inline Base.first(h::BinaryHeap) = h.valtree[1]
 
-pop!(h::BinaryHeap{T}) where {T} = _binary_heap_pop!(h.comparer, h.valtree)
+"""
+    pop!(h::BinaryHeap)
+
+Removes and returns the element at the top of the heap `h`.
+"""
+Base.pop!(h::BinaryHeap) = heappop!(h.valtree, h.ordering)
+
+# Suggest that heap `h` reserve capacity for at least `n` elements. This can improve performance.
+function Base.sizehint!(h::BinaryHeap, n::Integer)
+    sizehint!(h.valtree, n)
+    return h
+end

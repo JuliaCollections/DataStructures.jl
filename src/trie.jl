@@ -1,25 +1,21 @@
-mutable struct Trie{T}
-    value::T
-    children::Dict{Char,Trie{T}}
+mutable struct Trie{K,V}
+    value::V
+    children::Dict{K,Trie{K,V}}
     is_key::Bool
 
-    function Trie{T}() where T
-        self = new{T}()
-        self.children = Dict{Char,Trie{T}}()
+    function Trie{K,V}() where {K,V}
+        self = new{K,V}()
+        self.children = Dict{K,Trie{K,V}}()
         self.is_key = false
-        self
+        return self
     end
 
-    function Trie{T}(ks, vs) where T
-        t = Trie{T}()
-        for (k, v) in zip(ks, vs)
-            t[k] = v
-        end
-        return t
+    function Trie{K,V}(ks, vs) where {K,V}
+        return Trie{K,V}(zip(ks, vs))
     end
 
-    function Trie{T}(kv) where T
-        t = Trie{T}()
+    function Trie{K,V}(kv) where {K,V}
+        t = Trie{K,V}()
         for (k,v) in kv
             t[k] = v
         end
@@ -27,25 +23,26 @@ mutable struct Trie{T}
     end
 end
 
-Trie() = Trie{Any}()
-Trie(ks::AbstractVector{K}, vs::AbstractVector{V}) where {K<:AbstractString,V} = Trie{V}(ks, vs)
-Trie(kv::AbstractVector{Tuple{K,V}}) where {K<:AbstractString,V} = Trie{V}(kv)
-Trie(kv::AbstractDict{K,V}) where {K<:AbstractString,V} = Trie{V}(kv)
-Trie(ks::AbstractVector{K}) where {K<:AbstractString} = Trie{Nothing}(ks, similar(ks, Nothing))
+Trie() = Trie{Any,Any}()
+Trie(ks::AbstractVector{K}, vs::AbstractVector{V}) where {K,V} = Trie{eltype(K),V}(ks, vs)
+Trie(kv::AbstractVector{Tuple{K,V}}) where {K,V} = Trie{eltype(K),V}(kv)
+Trie(kv::AbstractDict{K,V}) where {K,V} = Trie{eltype(K),V}(kv)
+Trie(ks::AbstractVector{K}) where {K} = Trie{eltype(K),Nothing}(ks, similar(ks, Nothing))
 
-function setindex!(t::Trie{T}, val::T, key::AbstractString) where T
+function Base.setindex!(t::Trie{K,V}, val, key) where {K,V}
+    value = convert(V, val) # we don't want to iterate before finding out it fails
     node = t
     for char in key
         if !haskey(node.children, char)
-            node.children[char] = Trie{T}()
+            node.children[char] = Trie{K,V}()
         end
         node = node.children[char]
     end
     node.is_key = true
-    node.value = val
+    node.value = value
 end
 
-function getindex(t::Trie, key::AbstractString)
+function Base.getindex(t::Trie, key)
     node = subtrie(t, key)
     if node != nothing && node.is_key
         return node.value
@@ -53,7 +50,7 @@ function getindex(t::Trie, key::AbstractString)
     throw(KeyError("key not found: $key"))
 end
 
-function subtrie(t::Trie, prefix::AbstractString)
+function subtrie(t::Trie, prefix)
     node = t
     for char in prefix
         if !haskey(node.children, char)
@@ -62,33 +59,41 @@ function subtrie(t::Trie, prefix::AbstractString)
             node = node.children[char]
         end
     end
-    node
+    return node
 end
 
-function haskey(t::Trie, key::AbstractString)
+function Base.haskey(t::Trie, key)
     node = subtrie(t, key)
     node != nothing && node.is_key
 end
 
-function get(t::Trie, key::AbstractString, notfound)
+function Base.get(t::Trie, key, notfound)
     node = subtrie(t, key)
     if node != nothing && node.is_key
         return node.value
     end
-    notfound
+    return notfound
 end
 
-function keys(t::Trie, prefix::AbstractString="", found=AbstractString[])
+_concat(prefix::String, char::Char) = string(prefix, char)
+_concat(prefix::Vector{T}, char::T) where {T} = vcat(prefix, char)
+
+_empty_prefix(::Trie{Char,V}) where {V} = ""
+_empty_prefix(::Trie{K,V}) where {K,V} = K[]
+
+function Base.keys(t::Trie{K,V},
+                   prefix=_empty_prefix(t),
+                   found=Vector{typeof(prefix)}()) where {K,V}
     if t.is_key
         push!(found, prefix)
     end
     for (char,child) in t.children
-        keys(child, string(prefix,char), found)
+        keys(child, _concat(prefix, char), found)
     end
-    found
+    return found
 end
 
-function keys_with_prefix(t::Trie, prefix::AbstractString)
+function keys_with_prefix(t::Trie, prefix)
     st = subtrie(t, prefix)
     st != nothing ? keys(st,prefix) : []
 end
@@ -100,7 +105,7 @@ end
 # see the comments and implementation below for details.
 struct TrieIterator
     t::Trie
-    str::AbstractString
+    str
 end
 
 # At the start, there is no previous iteration,
@@ -108,22 +113,59 @@ end
 # We use a "dummy value" of it.t to keep the type of the state stable.
 # The second element is 0
 # since the root of the trie corresponds to a length 0 prefix of str.
-start(it::TrieIterator) = (it.t, 0)
-
-function next(it::TrieIterator, state::Tuple)
-    t, i = state
-    i == 0 && return it.t, (it.t, 1)
-
-    t = t.children[it.str[i]]
-    return (t, (t, i + 1))
+function Base.iterate(it::TrieIterator, (t, i) = (it.t, 0))
+    if i == 0
+        return it.t, (it.t, firstindex(it.str))
+    elseif i > lastindex(it.str) || !(it.str[i] in keys(t.children))
+        return nothing
+    else
+        t = t.children[it.str[i]]
+        return (t, (t, nextind(it.str, i)))
+    end
 end
 
-function done(it::TrieIterator, state::Tuple)
-    t, i = state
-    i == 0 && return false
-    i == length(it.str) + 1 && return true
-    return !(it.str[i] in keys(t.children))
-end
-
-path(t::Trie, str::AbstractString) = TrieIterator(t, str)
+partial_path(t::Trie, str) = TrieIterator(t, str)
 Base.IteratorSize(::Type{TrieIterator}) = Base.SizeUnknown()
+
+"""
+    find_prefixes(t::Trie, str)
+
+Find all keys from the `Trie` that are prefix of the given string
+
+# Examples
+```julia-repl
+julia> t = Trie(["A", "ABC", "ABCD", "BCE"])
+
+julia> find_prefixes(t, "ABCDE")
+3-element Vector{AbstractString}:
+ "A"
+ "ABC"
+ "ABCD"
+
+julia> t′ = Trie([1:1, 1:3, 1:4, 2:4]);
+
+julia> find_prefixes(t′, 1:5)
+3-element Vector{UnitRange{Int64}}:
+ 1:1
+ 1:3
+ 1:4
+
+julia> find_prefixes(t′, [1,2,3,4,5])
+3-element Vector{Vector{Int64}}:
+ [1]
+ [1, 2, 3]
+ [1, 2, 3, 4]
+```
+"""
+function find_prefixes(t::Trie, str::T) where {T}
+    prefixes = T[]
+    it = partial_path(t, str)
+    idx = 0
+    for t in it
+        if t.is_key
+            push!(prefixes, str[firstindex(str):idx])
+        end
+        idx = nextind(str, idx)
+    end
+    return prefixes
+end

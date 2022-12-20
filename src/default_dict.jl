@@ -50,25 +50,19 @@ DefaultDictBase{K,V}(default::F; kwargs...) where {K,V,F} = DefaultDictBase{K,V,
 # Functions
 
 # most functions are simply delegated to the wrapped dictionary
-@delegate DefaultDictBase.d [ get, haskey, getkey, pop!,
-                              start, done, next, isempty, length ]
-# resolve ambiguity
-next(d::DefaultDictBase, state::Base.LegacyIterationCompat{I,T,S}) where {I>:DefaultDictBase,T,S} = next(d.d, state)
-done(d::DefaultDictBase, state::Base.LegacyIterationCompat{I,T,S}) where {I>:DefaultDictBase,T,S} = done(d.d, state)
+@delegate DefaultDictBase.d [ Base.get, Base.haskey, Base.getkey, Base.pop!,
+                              Base.iterate, Base.isempty, Base.length ]
 
 # Some functions are delegated, but then need to return the main dictionary
 # NOTE: push! is not included below, because the fallback version just
 #       calls setindex!
-@delegate_return_parent DefaultDictBase.d [ delete!, empty!, setindex!, sizehint! ]
+@delegate_return_parent DefaultDictBase.d [ Base.delete!, Base.empty!, Base.setindex!, Base.sizehint! ]
 
-empty(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default; passkey=d.passkey)
-@deprecate similar(d::DefaultDictBase) empty(d)
+Base.empty(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default; passkey=d.passkey)
 
-next(v::Base.ValueIterator{T}, i::Int) where {T<:DefaultDictBase} = (v.dict.d.vals[i], Base.skip_deleted(v.dict.d,i+1))
+Base.getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 
-getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
-
-function getindex(d::DefaultDictBase{K,V,F}, key) where {K,V,F<:Base.Callable}
+function Base.getindex(d::DefaultDictBase{K,V,F}, key) where {K,V,F<:Base.Callable}
     if d.passkey
         return get!(d.d, key) do
             d.default(key)
@@ -81,7 +75,6 @@ function getindex(d::DefaultDictBase{K,V,F}, key) where {K,V,F<:Base.Callable}
 end
 
 
-
 ################
 
 # Here begins the actual definition of the DefaultDict and
@@ -92,6 +85,19 @@ end
 for _Dict in [:Dict, :OrderedDict]
     DefaultDict = Symbol("Default"*string(_Dict))
     @eval begin
+        """
+            $($DefaultDict)(default, pairs...; passkey=false)
+            $($DefaultDict)(default, d::AbstractDict; passkey=false)
+            $($DefaultDict){K, V}(default, pairs...; passkey=false)
+            $($DefaultDict){K, V}(default, dict::AbstractDict; passkey=false)
+        
+        Construct an $($(_Dict == :Dict ? "un" : ""))ordered dictionary from the given key-value `pairs` or `dict`
+        with a `default` value to be returned for keys that are not stored in the dictionary. The key and value
+        types may be optionally specified with the `K` and `V` parameters.
+        
+        If the `default` value is a `Function` or `Type`, then it will be _called_ upon the retrieval of a missing key,
+        with either 0 arguments (if `passkey==false`) or with the key that was requested.
+        """
         struct $DefaultDict{K,V,F} <: AbstractDict{K,V}
             d::DefaultDictBase{K,V,F,$_Dict{K,V}}
 
@@ -120,44 +126,40 @@ for _Dict in [:Dict, :OrderedDict]
 
         # Constructor syntax: DefaultDictBase{Int,Float64}(default)
         $DefaultDict{K,V}(; kwargs...) where {K,V} = throw(ArgumentError("$DefaultDict: no default specified"))
-        $DefaultDict{K,V}(default::F; kwargs...) where {K,V,F} = $DefaultDict{K,V,F}(default; kwargs...)
+        $DefaultDict{K,V}(default::F, pairs...; kwargs...) where {K,V,F} = $DefaultDict{K,V,F}(default, $_Dict{K,V}(pairs...); kwargs...)
+        $DefaultDict{K,V}(default::F, d::AbstractDict; kwargs...) where {K,V,F} = $DefaultDict{K,V,F}(default, $_Dict{K,V}(d); kwargs...)
 
         ## Functions
 
         # Most functions are simply delegated to the wrapped DefaultDictBase object
-        @delegate $DefaultDict.d [ getindex, get, get!, haskey,
-                                   getkey, pop!, start, next,
-                                   done, isempty, length ]
-        # resolve ambiguity
-        next(d::$DefaultDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:$DefaultDict,T,S} = next(d.d, state)
-        done(d::$DefaultDict, state::Base.LegacyIterationCompat{I,T,S}) where {I>:$DefaultDict,T,S} = done(d.d, state)
+        @delegate $DefaultDict.d [ Base.getindex, Base.get, Base.get!, Base.haskey,
+                                   Base.getkey, Base.pop!, Base.iterate,
+                                   Base.isempty, Base.length ]
 
         # Some functions are delegated, but then need to return the main dictionary
         # NOTE: push! is not included below, because the fallback version just
         #       calls setindex!
-        @delegate_return_parent $DefaultDict.d [ delete!, empty!, setindex!, sizehint! ]
+        @delegate_return_parent $DefaultDict.d [ Base.delete!, Base.empty!, Base.setindex!, Base.sizehint! ]
 
         # NOTE: The second and third definition of push! below are only
         # necessary for disambiguating with the fourth, fifth, and sixth
         # definitions of push! below.
         # If these are removed, the second and third definitions can be
         # removed as well.
-        push!(d::$DefaultDict, p::Pair) = (setindex!(d.d, p.second, p.first); d)
-        push!(d::$DefaultDict, p::Pair, q::Pair) = push!(push!(d, p), q)
-        push!(d::$DefaultDict, p::Pair, q::Pair, r::Pair...) = push!(push!(push!(d, p), q), r...)
+        Base.push!(d::$DefaultDict, p::Pair) = (setindex!(d.d, p.second, p.first); d)
+        Base.push!(d::$DefaultDict, p::Pair, q::Pair) = push!(push!(d, p), q)
+        Base.push!(d::$DefaultDict, p::Pair, q::Pair, r::Pair...) = push!(push!(push!(d, p), q), r...)
 
-        push!(d::$DefaultDict, p) = (setindex!(d.d, p[2], p[1]); d)
-        push!(d::$DefaultDict, p, q) = push!(push!(d, p), q)
-        push!(d::$DefaultDict, p, q, r...) = push!(push!(push!(d, p), q), r...)
+        Base.push!(d::$DefaultDict, p) = (setindex!(d.d, p[2], p[1]); d)
+        Base.push!(d::$DefaultDict, p, q) = push!(push!(d, p), q)
+        Base.push!(d::$DefaultDict, p, q, r...) = push!(push!(push!(d, p), q), r...)
 
-        empty(d::$DefaultDict{K,V,F}) where {K,V,F} = $DefaultDict{K,V,F}(d.d.default)
-        in(key, v::Base.KeySet{K,T}) where {K,T<:$DefaultDict{K}} = key in keys(v.dict.d.d)
-
-        @deprecate similar(d::$DefaultDict) empty(d)
+        Base.empty(d::$DefaultDict{K,V,F}) where {K,V,F} = $DefaultDict{K,V,F}(d.d.default)
+        Base.in(key, v::Base.KeySet{K,T}) where {K,T<:$DefaultDict{K}} = key in keys(v.dict.d.d)
     end
 end
 
-isordered(::Type{T}) where {T<:DefaultOrderedDict} = true
+OrderedCollections.isordered(::Type{T}) where {T<:DefaultOrderedDict} = true
 
 ## This should be uncommented to provide a DefaultSortedDict
 

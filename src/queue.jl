@@ -1,44 +1,100 @@
 # FIFO queue
 
+"""
+    Queue{T}() where {T}
+    Queue{T}([blksize::Integer=1024])
+
+Create a `Queue` object containing elements of type `T` for First In, First Out (FIFO) access.
+
+# Parameters
+
+- `T::Type` Queue element data type.
+- `blksize::Integer=1024` Unrolled linked-list bleck size (in bytes). Defualt = 1024.
+
+# Examples
+```jldoctest
+julia> q_int = Queue{Int64}() # create a queue with int elements
+Queue{Int64}(Deque [Int64[]])
+
+julia> q_float = Queue{Float64}() # create a queue with float elements
+Queue{Float64}(Deque [Float64[]])
+```
+"""
 mutable struct Queue{T}
     store::Deque{T}
 end
 
-"""
-    Queue(T[, blksize::Integer=1024])
-
-Create a `Queue` object containing elements of type `T`.
-"""
-Queue(ty::Type{T}) where {T} = Queue(Deque{T}())
-Queue(ty::Type{T}, blksize::Integer) where {T} = Queue(Deque{T}(blksize))
-
-isempty(s::Queue) = isempty(s.store)
-length(s::Queue) = length(s.store)
-
-front(s::Queue) = front(s.store)
-back(s::Queue) = back(s.store)
+Queue{T}() where {T} = Queue(Deque{T}())
+Queue{T}(blksize::Integer) where {T} = Queue(Deque{T}(blksize))
 
 """
-    enqueue!(s::Queue, x)
+    isempty(q::Queue)
 
-Inserts the value `x` to the end of the queue `s`.
+Check if queue `q` is empty.
 """
-function enqueue!(s::Queue, x)
-    push!(s.store, x)
-    s
+Base.isempty(q::Queue) = isempty(q.store)
+
+"""
+    length(q::Queue)
+
+Return the number of elements in queue `q`.
+"""
+Base.length(q::Queue) = length(q.store)
+
+"""
+    eltype(::Type{Queue{T}}) where {T}
+
+Return the type of the elements in the queue.
+"""
+Base.eltype(::Type{Queue{T}}) where {T} = T
+
+"""
+    first(q::Queue)
+
+Get the first item from queue `q`.
+"""
+Base.first(q::Queue) = first(q.store)
+
+"""
+    last(q::Queue)
+
+Get the last element in queue `q`.
+"""
+Base.last(s::Queue) = last(s.store)
+
+"""
+    push!(q::Queue, x)
+
+Inserts the value `x` to the end of the queue `q`.
+"""
+function Base.push!(q::Queue, x)
+    push!(q.store, x)
+    return q
 end
 
 """
-    dequeue!(s::Queue)
+    popfirst!(q::Queue)
 
-Removes an element from the front of the queue `s` and returns it.
+Removes an element from the front of the queue `q` and returns it.
 """
-dequeue!(s::Queue) = popfirst!(s.store)
+Base.popfirst!(s::Queue) = popfirst!(s.store)
+
+"""
+    empty!(q::Queue)
+
+Removes all elements from queue `q`.
+"""
+Base.empty!(s::Queue) = (empty!(s.store); s)
 
 # Iterators
 
-start(q::Queue) = start(q.store)
-next(q::Queue, s::Tuple) = next(q.store, s)
-done(q::Queue, s::Tuple) = done(q.store, s)
+Base.iterate(q::Queue, s...) = iterate(q.store, s...)
 
-reverse_iter(q::Queue) = reverse_iter(q.store)
+Iterators.reverse(q::Queue) = Iterators.reverse(q.store)
+
+"""
+    ==(x::Queue, y::Queue)
+
+Verify if queues `x` and `y` are equivalent in their contents.
+"""
+Base.:(==)(x::Queue, y::Queue) = x.store == y.store

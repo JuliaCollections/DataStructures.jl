@@ -1,8 +1,3 @@
-"""
-    CircularDeque{T}(n)
-
-Create a double-ended queue of maximum capacity `n`, implemented as a circular buffer. The element type is `T`.
-"""
 mutable struct CircularDeque{T}
     buffer::Vector{T}
     capacity::Int
@@ -11,49 +6,75 @@ mutable struct CircularDeque{T}
     last::Int
 end
 
+"""
+    CircularDeque{T}(n)
+
+Create a double-ended queue of maximum capacity `n`, implemented as a circular buffer. The element type is `T`.
+"""
 CircularDeque{T}(n::Int) where {T} = CircularDeque(Vector{T}(undef, n), n, 0, 1, n)
 
 Base.length(D::CircularDeque) = D.n
 Base.eltype(::Type{CircularDeque{T}}) where {T} = T
+
+"""
+    capacity(D::CircularDeque)
+
+Return the capacity of the circular deque
+"""
 capacity(D::CircularDeque) = D.capacity
 
 function Base.empty!(D::CircularDeque)
     D.n = 0
     D.first = 1
     D.last = D.capacity
-    D
+    return D
 end
 
 Base.isempty(D::CircularDeque) = D.n == 0
 
-@inline function front(D::CircularDeque)
+"""
+    first(D::CircularDeque)
+
+Get the item at the front of the queue.
+"""
+@inline function Base.first(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
-    D.buffer[D.first]
+    return @inbounds D.buffer[D.first]
 end
 
-@inline function back(D::CircularDeque)
+"""
+    last(D::CircularDeque)
+
+Get the item from the back of the queue.
+"""
+@inline function Base.last(D::CircularDeque)
     @boundscheck D.n > 0 || throw(BoundsError())
-    D.buffer[D.last]
+    return @inbounds D.buffer[D.last]
 end
 
 @inline function Base.push!(D::CircularDeque, v)
     @boundscheck D.n < D.capacity || throw(BoundsError()) # prevent overflow
     D.n += 1
-    tmp = D.last+1
+    tmp = D.last + 1
     D.last = ifelse(tmp > D.capacity, 1, tmp)  # wraparound
     @inbounds D.buffer[D.last] = v
-    D
+    return D
 end
 
-@inline function Base.pop!(D::CircularDeque)
-    v = back(D)
+@inline Base.@propagate_inbounds function Base.pop!(D::CircularDeque)
+    v = last(D)
     D.n -= 1
     tmp = D.last - 1
     D.last = ifelse(tmp < 1, D.capacity, tmp)
     v
 end
 
-@inline function pushfirst!(D::CircularDeque, v)
+"""
+    pushfirst!(D::CircularDeque, v)
+
+Add an element to the front.
+"""
+@inline function Base.pushfirst!(D::CircularDeque, v)
     @boundscheck D.n < D.capacity || throw(BoundsError())
     D.n += 1
     tmp = D.first - 1
@@ -62,8 +83,13 @@ end
     D
 end
 
-@inline function popfirst!(D::CircularDeque)
-    v = front(D)
+"""
+    popfirst!(D::CircularDeque)
+
+Remove the element at the front.
+"""
+@inline Base.@propagate_inbounds function Base.popfirst!(D::CircularDeque)
+    v = first(D)
     D.n -= 1
     tmp = D.first + 1
     D.first = ifelse(tmp > D.capacity, 1, tmp)
@@ -86,9 +112,9 @@ end
 end
 
 # Iteration via getindex
-@inline Base.start(d::CircularDeque) = 1
-@inline Base.next(d::CircularDeque, i::Int) = (_unsafe_getindex(d, i), i+1)
-@inline Base.done(d::CircularDeque, i::Int) = i == d.n + 1
+@inline function Base.iterate(d::CircularDeque, i = 1)
+    i == d.n + 1 ? nothing : (_unsafe_getindex(d, i), i+1)
+end
 
 function Base.show(io::IO, D::CircularDeque{T}) where T
     print(io, "CircularDeque{$T}([")

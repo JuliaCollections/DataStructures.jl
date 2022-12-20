@@ -11,7 +11,7 @@ function batch_pushback!(v::Container, n::Int, e::T) where {Container,T}
 end
 
 v = Int[]
-q = deque(Int)
+q = Deque{Int}()
 
 batch_pushback!(v, 10, 0)
 t1 = @elapsed batch_pushback!(v, 10^7, 0)
@@ -33,7 +33,7 @@ function batch_pushfront!(v::Container, n::Int, e::T) where {Container,T}
 end
 
 v = Int[]
-q = deque(Int)
+q = Deque{Int}()
 
 batch_pushfront!(v, 10, 0)
 t1 = @elapsed batch_pushfront!(v, 10^7, 0)
@@ -60,5 +60,17 @@ traverse(q)
 t2 = @elapsed traverse(q)
 
 println("traverse 10^7 integers:")
+@printf("    Vector:   elapsed = %8.4fs\n", t1)
+@printf("    Deque:    elapsed = %8.4fs\n", t2)
+
+# sum
+
+sum(v)
+t1 = @elapsed sum(v)
+
+sum(q)
+t2 = @elapsed sum(q)
+
+println("sum 10^7 integers:")
 @printf("    Vector:   elapsed = %8.4fs\n", t1)
 @printf("    Deque:    elapsed = %8.4fs\n", t2)
