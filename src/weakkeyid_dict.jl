@@ -18,12 +18,12 @@ See [`Dict`](@ref) for further help.
 """
 mutable struct WeakKeyIdDict{K,V} <: AbstractDict{K,V}
     ht::Dict{WeakRefForWeakDict,V}
-    lock::Threads.RecursiveSpinLock
+    lock::ReentrantLock
     finalizer::Function
 
     # Constructors mirror Dict's
     function WeakKeyIdDict{K,V}() where V where K
-        t = new(Dict{WeakRefForWeakDict,V}(), Threads.RecursiveSpinLock(), identity)
+        t = new(Dict{WeakRefForWeakDict,V}(), ReentrantLock(), identity)
         t.finalizer = function (k)
             # when a weak key is finalized, remove from dictionary if it is still there
             if islocked(t)
