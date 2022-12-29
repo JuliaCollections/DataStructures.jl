@@ -26,11 +26,12 @@ into a number of disjoint (non-overlapping) subsets.
 mutable struct IntDisjointSet{T<:Integer}
     parents::Vector{T}
     ranks::Vector{T}
+    sizes::Vector{T}
     ngroups::T
 end
 
-IntDisjointSet(n::T) where {T<:Integer} = IntDisjointSet{T}(collect(Base.OneTo(n)), zeros(T, n), n)
-IntDisjointSet{T}(n::Integer) where {T<:Integer} = IntDisjointSet{T}(collect(Base.OneTo(T(n))), zeros(T, T(n)), T(n))
+IntDisjointSet(n::T) where {T<:Integer} = IntDisjointSet{T}(collect(Base.OneTo(n)), zeros(T, n), ones(T, n), n)
+IntDisjointSet{T}(n::Integer) where {T<:Integer} = IntDisjointSet{T}(collect(Base.OneTo(T(n))), zeros(T, T(n)), ones(T, T(n)), T(n))
 Base.length(s::IntDisjointSet) = length(s.parents)
 
 """
@@ -107,6 +108,7 @@ function root_union!(s::IntDisjointSet{T}, x::T, y::T) where {T<:Integer}
         rks[x] += one(T)
     end
     @inbounds parents[y] = x
+    @inbounds s.sizes[x] += s.sizes[y]
     s.ngroups -= one(T)
     return x
 end
@@ -124,8 +126,19 @@ function Base.push!(s::IntDisjointSet{T}) where {T<:Integer}
     x = l + one(T)
     push!(s.parents, x)
     push!(s.ranks, zero(T))
+    push!(s.sizes, one(T))
     s.ngroups += one(T)
     return x
+end
+
+"""
+    setsize(s::IntDisjointSet{T}, x::T)
+
+Returns the size of the set that `x` is in.
+"""
+function setsize(s::IntDisjointSet{T}, x::T) where {T<:Integer}
+    xroot = find_root_impl!(s.parents, x)
+    return s.sizes[xroot]
 end
 
 """
@@ -141,8 +154,8 @@ mutable struct DisjointSet{T} <: AbstractSet{T}
     revmap::Vector{T}
     internal::IntDisjointSet{Int}
 
-    DisjointSet{T}() where T = new{T}(Dict{T,Int}(), Vector{T}(), IntDisjointSet(0))
-    function DisjointSet{T}(xs) where T    # xs must be iterable
+    DisjointSet{T}() where {T} = new{T}(Dict{T,Int}(), Vector{T}(), IntDisjointSet(0))
+    function DisjointSet{T}(xs) where {T}    # xs must be iterable
         imap = Dict{T,Int}()
         rmap = Vector{T}()
         n = length(xs)::Int
@@ -151,7 +164,7 @@ mutable struct DisjointSet{T} <: AbstractSet{T}
         id = 0
         for x in xs
             imap[x] = (id += 1)
-            push!(rmap,x)
+            push!(rmap, x)
         end
         return new{T}(imap, rmap, IntDisjointSet(n))
     end
@@ -177,7 +190,7 @@ Base.length(s::DisjointSet) = length(s.internal)
 Get a number of groups.
 """
 num_groups(s::DisjointSet) = num_groups(s.internal)
-Base.eltype(::Type{DisjointSet{T}}) where T = T
+Base.eltype(::Type{DisjointSet{T}}) where {T} = T
 Base.empty(s::DisjointSet{T}, ::Type{U}=T) where {T,U} = DisjointSet{U}()
 function Base.sizehint!(s::DisjointSet, n::Integer)
     sizehint!(s.intmap, n)
@@ -221,10 +234,17 @@ root_union!(s::DisjointSet{T}, x::T, y::T) where {T} = s.revmap[root_union!(s.in
 
 Make a new subset containing `x` if any existing subset of `s` does not contain `x`.
 """
-function Base.push!(s::DisjointSet{T}, x::T) where T
+function Base.push!(s::DisjointSet{T}, x::T) where {T}
     haskey(s.intmap, x) && return x
     id = push!(s.internal)
     s.intmap[x] = id
     push!(s.revmap, x) # Note, this assumes invariant: length(s.revmap) == id
     return x
 end
+
+"""
+    setsize(s::DisjointSet{T}, x::T)
+
+Returns the size of the set that `x` is in.
+"""
+setsize(s::DisjointSet{T}, x::T) where {T} = setsize(s.internal, s.intmap[x])
