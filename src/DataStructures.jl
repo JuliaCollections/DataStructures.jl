@@ -12,7 +12,6 @@ module DataStructures
     export peek
     export popat!
 
-    using Compat # Provides Base.Order.ReverseOrdering(). May remove this line with julia 1.4
     using OrderedCollections
     using OrderedCollections: isordered
     export OrderedDict, OrderedSet, LittleDict
