@@ -12,7 +12,7 @@ using an [unrolled linked list](https://en.wikipedia.org/wiki/Unrolled_linked_li
     be used as a deque. However, the `Deque` type in DataStructures.jl is
     implemented as a list of contiguous blocks (default size = 1 kilo-byte). As a
     Deque grows, new blocks are created and linked to existing blocks.
-    This apprach prevents copying operations that take place when growing a `Vector`.
+    This approach prevents copying operations that take place when growing a `Vector`.
 
 Benchmark shows that the performance of `Deque` is comparable to
 `Vector` on `push!`, but is noticeably faster on `pushfirst!` (by about
