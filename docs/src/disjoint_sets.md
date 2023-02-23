@@ -16,6 +16,7 @@ find_root!(a, 3)          # finds the root element of the subset that contains 3
 in_same_set(a, x, y)     # determines whether x and y are in the same set
 elem = push!(a)          # adds a single element in a new set; returns the new element
                          # (this operation is often called MakeSet)
+setsize(a, x)            # finds the size of the set that x is in
 ```
 
 One may also use other element types:
