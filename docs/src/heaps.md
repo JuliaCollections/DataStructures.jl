@@ -157,7 +157,7 @@ DataStructures.nextreme(Base.Forward, n, a) # Equivalent to nsmallest(n, a)
 One use case for custom orderings is to achieve faster performance with `Float`
 elements with the risk of random ordering if any elements are `NaN`.
 The provided `DataStructures.FasterForward` and `DataStructures.FasterReverse`
-orderings are optimized for this purpose and may achive a 2x performance boost:
+orderings are optimized for this purpose and may achieve a 2x performance boost:
 
 ```julia
 h = BinaryHeap{Float64, DataStructures.FasterForward}() # faster min heap

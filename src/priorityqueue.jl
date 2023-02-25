@@ -98,7 +98,7 @@ end
 # Construction inferring Key/Value types from input
 # e.g. PriorityQueue{}
 
-PriorityQueue(o1::Ordering, o2::Ordering) = throw(ArgumentError("PriorityQueue with two parameters must be called with an Ordering and an interable of pairs"))
+PriorityQueue(o1::Ordering, o2::Ordering) = throw(ArgumentError("PriorityQueue with two parameters must be called with an Ordering and an iterable of pairs"))
 PriorityQueue(kv, o::Ordering=Forward) = PriorityQueue(o, kv)
 function PriorityQueue(o::Ordering, kv)
     try
