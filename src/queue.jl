@@ -9,7 +9,7 @@ Create a `Queue` object containing elements of type `T` for First In, First Out 
 # Parameters
 
 - `T::Type` Queue element data type.
-- `blksize::Integer=1024` Unrolled linked-list bleck size (in bytes). Defualt = 1024.
+- `blksize::Integer=1024` Unrolled linked-list block size (in bytes). Default = 1024.
 
 # Examples
 ```jldoctest

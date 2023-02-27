@@ -1,5 +1,5 @@
 ## A SortedSet is a wrapper around balancedTree with
-## methods similiar to those of the julia Set.
+## methods similar to those of the julia Set.
 
 mutable struct SortedSet{K, Ord <: Ordering}  <: AbstractSet{K}
     bt::BalancedTree23{K,Nothing,Ord}

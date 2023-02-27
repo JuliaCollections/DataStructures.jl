@@ -174,7 +174,7 @@ v0.3.9 / 2015-05-03
 v0.3.8 / 2015-04-18
 ===================
 
-  * Add special OrderedDict deprection for Numbers
+  * Add special OrderedDict deprecation for Numbers
   * Fix warning about {A, B...}
 
 v0.3.7 / 2015-04-17

@@ -75,7 +75,7 @@ Increments the count for `x` by `v` (defaulting to one)
 inc!(ct::Accumulator, x, v::Number) = (ct[x] += v)
 inc!(ct::Accumulator{T, V}, x) where {T, V} = inc!(ct, x, one(V))
 
-# inc! is preferred over push!, but we need to provide push! for the Bag interpreation
+# inc! is preferred over push!, but we need to provide push! for the Bag interpretation
 # which is used by classified_collections.jl
 Base.push!(ct::Accumulator, x) = inc!(ct, x)
 Base.push!(ct::Accumulator, x, a::Number) = inc!(ct, x, a)
@@ -221,10 +221,10 @@ function Base.union!(a::Accumulator, b::Accumulator)
 end
 
 
-Base.intersect(a::Accumulator, b::Accumulator, c::Accumulator...) = insersect(intersect(a,b), c...)
+Base.intersect(a::Accumulator, b::Accumulator, c::Accumulator...) = intersect(intersect(a,b), c...)
 Base.intersect(a::Accumulator, b::Accumulator) = intersect!(copy(a), b)
 function Base.intersect!(a::Accumulator, b::Accumulator)
-    for k in union(keys(a), keys(b)) # union not interection as we want to check both multiplicities
+    for k in union(keys(a), keys(b)) # union not intersection as we want to check both multiplicities
         va = a[k]
         vb = b[k]
         va >= 0 || throw(MultiplicityException(k, va))
