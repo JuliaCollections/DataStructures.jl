@@ -81,7 +81,8 @@ function SortedDict(o::Ordering, kv)
     else
         throw(ArgumentError("In SortedDict(o,kv), kv should contain either pairs or 2-tuples"))
     end
-    SortedDict{eltype(c2).parameters[1], eltype(c2).parameters[2], typeof(o)}(o, c2)
+    SortedDict{
+                (c2).parameters[1], eltype(c2).parameters[2], typeof(o)}(o, c2)
 end
 SortedDict{K,D}(iter, o::Ordering=Forward) where {K, D} =
     SortedDict{K,D,typeof(o)}(o, iter)
@@ -231,11 +232,8 @@ end
 
 
 @inline Base.eltype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} =  Pair{K,D}
-@inline Base.eltype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} =  Pair{K,D}
 @inline Base.keytype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} = K
-@inline Base.keytype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = K
 @inline Base.valtype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} = D
-@inline Base.valtype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = D
 
 """
     Base.in(p::Pair, sd::SortedDict)
