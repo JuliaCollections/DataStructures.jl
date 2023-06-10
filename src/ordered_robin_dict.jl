@@ -305,10 +305,10 @@ julia> haskey(D, 'c')
 false
 ```
 """
-Base.haskey(h::OrderedRobinDict, key) = (get(h.dict, key, -2) > 0)
-Base.in(key, v::Base.KeySet{K,T}) where {K,T<:OrderedRobinDict{K}} = (get(v.dict, key, -1) >= 0)
+Base.haskey(h::OrderedRobinDict, key) = key in h.keys
+Base.in(key, v::Base.KeySet{K,T}) where {K,T<:OrderedRobinDict{K}} = key in v.dict.keys
 
-"""
+"""(get(h.dict, key, -2) > 0)
     getkey(collection, key, default)
 
 Return the key matching argument `key` if one exists in `collection`, otherwise return `default`.
