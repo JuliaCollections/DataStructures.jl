@@ -308,7 +308,7 @@ false
 Base.haskey(h::OrderedRobinDict, key) = (get(h.dict, key, -1) > 0)
 Base.in(key, v::Base.KeySet{K,T}) where {K,T<:OrderedRobinDict{K}} = (get(v.dict.dict, key, -1) >= 0)
 
-"""(get(h.dict, key, -2) > 0)
+"""
     getkey(collection, key, default)
 
 Return the key matching argument `key` if one exists in `collection`, otherwise return `default`.
