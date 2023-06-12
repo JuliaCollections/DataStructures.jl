@@ -305,8 +305,8 @@ julia> haskey(D, 'c')
 false
 ```
 """
-Base.haskey(h::OrderedRobinDict, key) = key in h.keys
-Base.in(key, v::Base.KeySet{K,T}) where {K,T<:OrderedRobinDict{K}} = key in v.dict.keys
+Base.haskey(h::OrderedRobinDict, key) = (get(h.dict, key, -1) > 0)
+Base.in(key, v::Base.KeySet{K,T}) where {K,T<:OrderedRobinDict{K}} = (get(v.dict.dict, key, -1) >= 0)
 
 """(get(h.dict, key, -2) > 0)
     getkey(collection, key, default)

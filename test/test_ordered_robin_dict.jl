@@ -139,6 +139,8 @@
         @test h["a","b"] == h[("a","b")] == 4
         h["a","b","c"] = 4
         @test h["a","b","c"] == h[("a","b","c")] == 4
+        h["b"] = missing
+        @test 5 == (h["b"] = 5)
     end
 
     @testset "KeyError" begin
