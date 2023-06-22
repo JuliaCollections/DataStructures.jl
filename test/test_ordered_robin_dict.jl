@@ -31,10 +31,10 @@
 
         # access, modification
         for c in 'a':'z'
-            d[c] = c - 'a' - 2
+            d[c] = c - 'a' + 1
         end
 
-        @test (d['a'] += 1) == -1
+        @test (d['a'] += 1) == 2
         @test 'a' in keys(d)
         @test haskey(d, 'a')
         @test get(d, 'B', 0) == 0
@@ -42,11 +42,11 @@
         @test getkey(d, 'B', nothing) == nothing
         @test !('B' in keys(d))
         @test !haskey(d, 'B')
-        @test pop!(d, 'a') == -1
+        @test pop!(d, 'a') == 2
 
         @test collect(keys(d)) == collect('b':'z')
-        @test collect(values(d)) == collect(-1:23)
-        @test collect(d) == [Pair(a,i) for (a,i) in zip('b':'z', -1:23)]
+        @test collect(values(d)) == collect(2:26)
+        @test collect(d) == [Pair(a,i) for (a,i) in zip('b':'z', 2:26)]
     end
 
     @testset "convert" begin
@@ -76,6 +76,13 @@
         od60[14]=15
 
         @test od60[14] == 15
+    end
+
+    @testset "Fixes issue 857" begin
+        h = OrderedRobinDict{Any,Any}([("a", missing), ("b", -2)])
+        @test 5 == (h["a"] = 5)
+        @test "b" in keys(h)
+        @test haskey(h,"b")
     end
 
 
@@ -139,8 +146,6 @@
         @test h["a","b"] == h[("a","b")] == 4
         h["a","b","c"] = 4
         @test h["a","b","c"] == h[("a","b","c")] == 4
-        h["b"] = missing
-        @test 5 == (h["b"] = 5)
     end
 
     @testset "KeyError" begin
