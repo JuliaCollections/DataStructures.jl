@@ -132,7 +132,7 @@ function Base.setindex!(h::OrderedRobinDict{K, V}, v0, key0) where {K,V}
     else
         @assert haskey(h, key0)
         @inbounds orig_v = h.vals[index]
-        (orig_v != v0) && (@inbounds h.vals[index] = v0)
+        !isequal(orig_v, v0) && (@inbounds h.vals[index] = v0)
     end
 
     check_for_rehash(h) && rehash!(h)
@@ -305,8 +305,8 @@ julia> haskey(D, 'c')
 false
 ```
 """
-Base.haskey(h::OrderedRobinDict, key) = (get(h.dict, key, -2) > 0)
-Base.in(key, v::Base.KeySet{K,T}) where {K,T<:OrderedRobinDict{K}} = (get(v.dict, key, -1) >= 0)
+Base.haskey(h::OrderedRobinDict, key) = (get(h.dict, key, -1) > 0)
+Base.in(key, v::Base.KeySet{K,T}) where {K,T<:OrderedRobinDict{K}} = (get(v.dict.dict, key, -1) >= 0)
 
 """
     getkey(collection, key, default)

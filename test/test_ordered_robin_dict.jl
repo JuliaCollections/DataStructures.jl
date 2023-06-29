@@ -78,6 +78,13 @@
         @test od60[14] == 15
     end
 
+    @testset "Fixes issue 857" begin
+        h = OrderedRobinDict{Any,Any}([("a", missing), ("b", -2)])
+        @test 5 == (h["a"] = 5)
+        @test "b" in keys(h)
+        @test haskey(h,"b")
+    end
+
 
     # #############################
     # Copied and modified from Base/test/dict.jl
