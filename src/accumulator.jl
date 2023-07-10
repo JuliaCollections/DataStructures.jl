@@ -1,18 +1,18 @@
 #A counter type
 
 """
-    Accumulator{T, V<:Number}
+    Accumulator{T, V}
 
 A accumulator is a data structure that maintains an accumulated total for each key.
 The particular case where those totals are integers is a counter.
 """
-struct Accumulator{T, V <: Number} <: AbstractDict{T, V}
+struct Accumulator{T, V} <: AbstractDict{T, V}
     map::Dict{T, V}
 end
 
 ## constructors
 
-Accumulator{T, V}() where {T, V <: Number} = Accumulator{T, V}(Dict{T, V}())
+Accumulator{T, V}() where {T, V} = Accumulator{T, V}(Dict{T, V}())
 Accumulator(map::AbstractDict) = Accumulator(Dict(map))
 Accumulator(ps::Pair...) = Accumulator(Dict(ps))
 
