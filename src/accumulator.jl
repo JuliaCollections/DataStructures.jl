@@ -14,7 +14,13 @@ end
 
 Accumulator{T, V}() where {T, V} = Accumulator{T, V}(Dict{T, V}())
 Accumulator(map::AbstractDict) = Accumulator(Dict(map))
-Accumulator(ps::Pair...) = Accumulator(Dict(ps))
+function Accumulator(p::Pair, ps::Pair...)
+    a = Accumulator(Dict(p))
+    for (k,v) in ps
+        inc!(a, k, v)
+    end
+    a
+end
 
 counter(T::Type) = Accumulator{T, Int}()
 counter(dct::AbstractDict{T, V}) where {T, V<:Integer} = Accumulator{T, V}(Dict(dct))
