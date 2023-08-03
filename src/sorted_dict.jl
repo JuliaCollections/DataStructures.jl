@@ -308,7 +308,7 @@ Returns the key type for SortedDict, SortedMultiDict and SortedSet.
 This function may also be applied to the type itself. Time: O(1)
 """
 @inline Base.keytype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} = K
-@inline Base.keytype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = K
+@inline Base.valtype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} = D
 
 """
     valtype(sc)
@@ -316,8 +316,6 @@ This function may also be applied to the type itself. Time: O(1)
 Returns the value type for SortedDict and SortedMultiDict. This
 function may also be applied to the type itself. Time: O(1)
 """
-@inline Base.valtype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} = D
-@inline Base.valtype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = D
 
 """
     ordtype(sc)
