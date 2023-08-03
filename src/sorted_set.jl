@@ -164,7 +164,6 @@ convertible to `eltype(m)`.  Time: O(*c* log *n*)
     return exactfound
 end
 
-@inline Base.eltype(::Type{SortedSet{K,Ord}}) where {K,Ord <: Ordering} = K
 @inline Base.keytype(m::SortedSet{K,Ord}) where {K,Ord <: Ordering} = K
 @inline Base.keytype(::Type{SortedSet{K,Ord}}) where {K,Ord <: Ordering} = K
 
