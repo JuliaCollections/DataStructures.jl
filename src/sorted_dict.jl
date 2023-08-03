@@ -231,11 +231,8 @@ end
 
 
 @inline Base.eltype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} =  Pair{K,D}
-@inline Base.eltype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} =  Pair{K,D}
 @inline Base.keytype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} = K
-@inline Base.keytype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = K
 @inline Base.valtype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} = D
-@inline Base.valtype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = D
 
 """
     Base.in(p::Pair, sd::SortedDict)
