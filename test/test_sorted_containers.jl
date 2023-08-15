@@ -426,8 +426,8 @@ function testSortedDictMethods()
     end
     checkcorrectness(m1.bt, false)
     my_assert(ii == pastendsemitoken(m1))
-    my_assert(status((m1,ii)) == 3)
-    my_assert(status((m1,IntSemiToken(-1))) == 0)
+    my_assert(DataStructures.status((m1,ii)) == 3)
+    my_assert(DataStructures.status((m1,IntSemiToken(-1))) == 0)
     t = 0
     u = 0.0
     for pr in m1
