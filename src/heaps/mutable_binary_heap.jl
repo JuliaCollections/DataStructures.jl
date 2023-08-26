@@ -220,7 +220,7 @@ function Base.push!(h::MutableBinaryHeap{T}, v) where T
     nodemap = h.node_map
     i = length(nodemap) + 1
     nd_id = length(nodes) + 1
-    push!(nodes, MutableBinaryHeapNode(convert(T, v), i))
+    push!(nodes, MutableBinaryHeapNode{T}(convert(T, v), i))
     push!(nodemap, nd_id)
     _heap_bubble_up!(h.ordering, nodes, nodemap, nd_id)
     return i
@@ -260,7 +260,7 @@ function update!(h::MutableBinaryHeap{T}, i::Int, v) where T
     nd_id = nodemap[i]
     v0 = nodes[nd_id].value
     x = convert(T, v)
-    nodes[nd_id] = MutableBinaryHeapNode(x, i)
+    nodes[nd_id] = MutableBinaryHeapNode{T}(x, i)
     if Base.lt(ordering, x, v0)
         _heap_bubble_up!(ordering, nodes, nodemap, nd_id)
     else
