@@ -96,7 +96,9 @@
 
                 @testset "append" begin
                     l2 = MutableLinkedList{Int}(n+1:2n...)
+                    cl2 = collect(l2)
                     append!(l, l2)
+                    @test collect(l2) == cl2 # l2 should not be mutated 
                     @test l == MutableLinkedList{Int}(1:2n...)
                     @test collect(l) == collect(MutableLinkedList{Int}(1:2n...))
                     l3 = MutableLinkedList{Int}(1:n...)

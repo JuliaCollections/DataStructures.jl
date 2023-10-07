@@ -8,8 +8,10 @@ mutable struct ListNode{T}
         node.prev = node
         return node
     end
-    function ListNode{T}(data) where T
+    function ListNode{T}(prev,data,next) where T
         node = new{T}(data)
+        node.next = next
+        node.prev = prev
         return node
     end
 end
@@ -18,24 +20,13 @@ mutable struct MutableLinkedList{T}
     len::Int
     node::ListNode{T}
     function MutableLinkedList{T}() where T
-        l = new{T}()
-        l.len = 0
-        l.node = ListNode{T}()
-        l.node.next = l.node
-        l.node.prev = l.node
-        return l
+        return new{T}(0, ListNode{T}())
     end
 end
 
 MutableLinkedList() = MutableLinkedList{Any}()
 
-function MutableLinkedList{T}(elts...) where T
-    l = MutableLinkedList{T}()
-    for elt in elts
-        push!(l, elt)
-    end
-    return l
-end
+MutableLinkedList{T}(elts...) where {T} = append!(MutableLinkedList{T}(), elts)
 
 Base.iterate(l::MutableLinkedList) = l.len == 0 ? nothing : (l.node.next.data, l.node.next.next)
 Base.iterate(l::MutableLinkedList, n::ListNode) = n === l.node ? nothing : (n.data, n.next)
@@ -107,69 +98,51 @@ function Base.reverse(l::MutableLinkedList{T}) where T
     return l2
 end
 
-function Base.copy(l::MutableLinkedList{T}) where T
-    l2 = MutableLinkedList{T}()
-    for h in l
-        push!(l2, h)
+Base.copy(l::MutableLinkedList{T}) where T = append!(MutableLinkedList{T}(), l)
+
+function _traverse(l::MutableLinkedList, idx::Int)
+    node = l.node
+    for _ in 1:idx
+        node = node.next
     end
-    return l2
+    return node
 end
 
 function Base.getindex(l::MutableLinkedList, idx::Int)
     @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
-    node = l.node
-    for i in 1:idx
-        node = node.next
-    end
-    return node.data
+    return _traverse(l, idx).data
 end
 
 function Base.getindex(l::MutableLinkedList{T}, r::UnitRange) where T
-    @boundscheck 0 < first(r) < last(r) <= l.len || throw(BoundsError(l, r))
+    @boundscheck 0 < first(r) <= last(r) <= l.len || throw(BoundsError(l, r))
     l2 = MutableLinkedList{T}()
-    node = l.node
-    for i in 1:first(r)
-        node = node.next
-    end
+    node = _traverse(l, first(r))
     len = length(r)
-    for j in 1:len
+    for _ in 1:len
         push!(l2, node.data)
         node = node.next
     end
-    l2.len = len
     return l2
 end
 
 function Base.setindex!(l::MutableLinkedList{T}, data, idx::Int) where T
     @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
-    node = l.node
-    for i in 1:idx
-        node = node.next
-    end
-    node.data = convert(T, data)
+    _traverse(l, idx).data = convert(T, data)
     return l
 end
 
-function Base.append!(l1::MutableLinkedList{T}, l2::MutableLinkedList{T}) where T
-    l1.node.prev.next = l2.node.next # l1's last's next is now l2's first
-    l2.node.prev.next = l1.node # l2's last's next is now l1.node
-    l1.len += length(l2)
-    return l1
-end
-
-function Base.append!(l::MutableLinkedList, elts...)
-    for elt in elts
-        push!(l, elt)
+function Base.append!(l::MutableLinkedList, itr)
+    for e in itr
+        push!(l, e)
     end
     return l
 end
+
+Base.append!(l::MutableLinkedList, elts...) = append!(l, elts)
 
 function Base.delete!(l::MutableLinkedList, idx::Int)
     @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
-    node = l.node
-    for i = 1:idx
-        node = node.next
-    end
+    node = _traverse(l, idx)
     prev = node.prev
     next = node.next
     prev.next = next
@@ -179,14 +152,11 @@ function Base.delete!(l::MutableLinkedList, idx::Int)
 end
 
 function Base.delete!(l::MutableLinkedList, r::UnitRange)
-    @boundscheck 0 < first(r) < last(r) <= l.len || throw(BoundsError(l, r))
-    node = l.node
-    for i in 1:first(r)
-        node = node.next
-    end
+    @boundscheck 0 < first(r) <= last(r) <= l.len || throw(BoundsError(l, r))
+    node = _traverse(l, first(r))
     prev = node.prev
     len = length(r)
-    for j in 1:len
+    for _ in 1:len
         node = node.next
     end
     next = node
@@ -198,9 +168,7 @@ end
 
 function Base.push!(l::MutableLinkedList{T}, data) where T
     oldlast = l.node.prev
-    node = ListNode{T}(data)
-    node.next = l.node
-    node.prev = oldlast
+    node = ListNode{T}(oldlast, data, l.node)
     l.node.prev = node
     oldlast.next = node
     l.len += 1
@@ -209,9 +177,7 @@ end
 
 function Base.pushfirst!(l::MutableLinkedList{T}, data) where T
     oldfirst = l.node.next
-    node = ListNode{T}(data)
-    node.prev = l.node
-    node.next = oldfirst
+    node = ListNode{T}(l.node, data, oldfirst)
     l.node.next = node
     oldfirst.prev = node
     l.len += 1
@@ -239,8 +205,7 @@ function Base.popfirst!(l::MutableLinkedList)
 end
 
 function Base.show(io::IO, node::ListNode)
-    x = node.data
-    print(io, "$(typeof(node))($x)")
+    print(io, typeof(node), "(", node.data, ")")
 end
 
 function Base.show(io::IO, l::MutableLinkedList)
