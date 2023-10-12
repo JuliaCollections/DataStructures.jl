@@ -23,6 +23,18 @@ Base.@deprecate_binding IntDisjointSets IntDisjointSet
 @deprecate insert!(m::SortedDict, k, d) push_return_semitoken!(m::SortedDict, k=>d)
 @deprecate insert!(m::SortedMultiDict, k, d) (push_return_semitoken!(m::SortedMultiDict, k=>d))[2]
 
+function Base.delete!(l::MutableLinkedList, idx)
+    Expr(:meta, :noinline)
+    Base.depwarn("`delete!(l::MutableLinkedList,idx::Int)` is deprecated, use `deleteat!(l,idx)` instead.", :delete!)
+    deleteat!(l,idx)
+end
+
+function Base.delete!(l::MutableLinkedList, r::UnitRange)
+    Expr(:meta, :noinline)
+    Base.depwarn("`delete!(l::MutableLinkedList,r::UnitRange)` is deprecated, use `deleteat!(l,idx)` instead.", :delete!)
+    deleteat!(l,r)
+end
+
 function Base.peek(q::PriorityQueue)
     Expr(:meta, :noinline)
     Base.depwarn("`peek(q::PriorityQueue)` is deprecated, use `first(q)` instead.", :peek)
