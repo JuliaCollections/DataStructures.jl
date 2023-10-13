@@ -323,11 +323,7 @@ function Base.popfirst!(pq::PriorityQueue)
     return x
 end
 
-if isdefined(Base, :popat!)  # We will overload if it is defined, else we define on our own
-    import Base: popat!
-end
-
-function popat!(pq::PriorityQueue, key)
+function Base.popat!(pq::PriorityQueue, key)
     idx = pq.index[key]
     force_up!(pq, idx)
     popfirst!(pq)
