@@ -1,14 +1,15 @@
-abstract type LinkedList{T} end
+
+
+struct Nil{T} end
+
+struct Cons{T}
+    head::T
+    tail::Union{Nil{T}, Cons{T}}
+end
+
+const LinkedList{T} = Union{Nil{T}, Cons{T}}
 
 Base.eltype(::Type{<:LinkedList{T}}) where T = T
-
-mutable struct Nil{T} <: LinkedList{T}
-end
-
-mutable struct Cons{T} <: LinkedList{T}
-    head::T
-    tail::LinkedList{T}
-end
 
 cons(h, t::LinkedList{T}) where {T} = Cons{T}(h, t)
 
