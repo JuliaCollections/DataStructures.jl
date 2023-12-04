@@ -101,9 +101,13 @@
                     @test l2 == MutableLinkedList{Int}()
                     @test collect(l) == collect(MutableLinkedList{Int}(1:2n...))
                     l3 = MutableLinkedList{Int}(1:n...)
-                    append!(l3, n+1:2n...)
+                    append!(l3, n+1:2n)
                     @test l3 == MutableLinkedList{Int}(1:2n...)
                     @test collect(l3) == collect(MutableLinkedList{Int}(1:2n...))
+                    l4 = MutableLinkedList{Int}(1:n...)
+                    push!(l4, n+1:2n...)
+                    @test l4 == MutableLinkedList{Int}(1:2n...)
+                    @test collect(l4) == collect(MutableLinkedList{Int}(1:2n...))
                 end
 
                 @testset "delete" begin

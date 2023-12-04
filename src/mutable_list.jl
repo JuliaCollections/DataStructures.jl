@@ -215,6 +215,14 @@ function Base.push!(l::MutableLinkedList{T}, data) where T
     return l
 end
 
+function Base.push!(l::MutableLinkedList{T}, data1, data...) where T
+    push!(l, data1)
+    for v in data
+        push!(l, v)
+    end
+    return l
+end
+
 function Base.pushfirst!(l::MutableLinkedList{T}, data) where T
     oldfirst = l.node.next
     node = ListNode{T}(data)
