@@ -165,7 +165,9 @@ end
 
 function Base.append!(l::MutableLinkedList, elts...)
     for elt in elts
-        push!(l, elt)
+        for v in elt
+            push!(l, v)
+        end
     end
     return l
 end
