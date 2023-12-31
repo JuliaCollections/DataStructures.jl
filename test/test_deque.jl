@@ -196,5 +196,20 @@
         @test length(sprint(dump,q)) >= 0
         @test typeof(empty!(q)) === typeof(Deque{Int}())
         @test isempty(q)
+        @test num_blocks(q) == 1
+        @test q.head === q.rear
+        @test sizeof(q.head.data) == q.head.capa * sizeof(eltype(q))
+    end
+
+    @testset "push! after empty!" begin
+        q = Deque{Int}(1)
+        push!(q,1)
+        push!(q,2)
+        empty!(q)
+        push!(q,3)
+        @test length(q) == 1
+        @test first(q) == 3
+        @test last(q) == 3
+        @test num_blocks(q) == 1
     end
 end # @testset Deque
