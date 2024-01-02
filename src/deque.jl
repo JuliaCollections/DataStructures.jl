@@ -39,7 +39,7 @@ isrear(blk::DequeBlock) =  blk.next === blk
 
 function reset!(blk::DequeBlock{T}, front::Int) where T
     empty!(blk.data)
-    blk.data = Vector{T}(undef, blk.capa)
+    resize!(blk.data, blk.capa)
     blk.front = front
     blk.back = front - 1
     blk.prev = blk
