@@ -38,6 +38,8 @@ isrear(blk::DequeBlock) =  blk.next === blk
 # reset the block to empty, and position
 
 function reset!(blk::DequeBlock{T}, front::Int) where T
+    empty!(blk.data)
+    resize!(blk.data, blk.capa)
     blk.front = front
     blk.back = front - 1
     blk.prev = blk
