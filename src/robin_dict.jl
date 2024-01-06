@@ -1,5 +1,7 @@
 # the load factor after which the dictionary `rehash` happens
 const ROBIN_DICT_LOAD_FACTOR = 0.70
+const DIBS_BYTES = 8
+const DIBS_MASK = 0x0000_00FF 
 
 """
     RobinDict([itr])
@@ -83,32 +85,29 @@ function RobinDict(kv)
     end
 end
 
-@propagate_inbounds isslotfilled(h::RobinDict, index) = !iszero(h.meta[index])
-@propagate_inbounds isslotempty(h::RobinDict, index) = iszero(h.meta[index])
+Base.@propagate_inbounds isslotfilled(h::RobinDict, index) = !iszero(h.meta[index])
+Base.@propagate_inbounds isslotempty(h::RobinDict, index) = iszero(h.meta[index])
 
 hash_key(key) = (hash(key)%UInt32)
 desired_index(hash, sz) = (hash & (sz - 1)) + 1
 
 function make_meta(hash::UInt32, dibs::Int)
     meta = hash
-    meta = (meta << 8) | (dibs % UInt32)
+    meta = (meta << DIBS_BYTES) | (dibs % UInt32)
     return meta
 end 
 
-hash_meta(meta::UInt32) = (meta>>8)
-dibs_meta(meta::UInt32) = Int(meta & 0x0000_00FF)
+hash_meta(meta::UInt32) = (meta>>DIBS_BYTES)
+dibs_meta(meta::UInt32) = Int(meta & DIBS_MASK)
 
-@propagate_inbounds calculate_distance(h::RobinDict, index) = dibs_meta(h.meta[index])
+Base.@propagate_inbounds calculate_distance(h::RobinDict, index) = dibs_meta(h.meta[index])
 
 # insert algorithm
-function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
+function rh_insert!(h::RobinDict{K, V}, key::K, val::V, hash = hash_key(key)) where {K, V}
     sz = length(h.keys)
     (h.count > ROBIN_DICT_LOAD_FACTOR * sz) && rehash!(h, sz<<2)
-
-    # table full
-    @assert h.count != length(h.keys)
     
-    ckey, cval, chash = key, val, hash_key(key)
+    ckey, cval, chash = key, val, hash
     cmeta = make_meta(chash, 0)
     sz = length(h.keys)
     index_init = desired_index(hash_meta(cmeta), sz)
@@ -140,14 +139,11 @@ function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
     @inbounds if isslotempty(h, index_curr)
         h.count += 1
     end
-    
-    # println(ckey, " ", index_curr, " ", index_init, " ", probe_current)
+
     @inbounds h.vals[index_curr] = cval
     @inbounds h.keys[index_curr] = ckey
     cmeta = hash_meta(cmeta)
     @inbounds h.meta[index_curr] = make_meta(cmeta, probe_current)
-    
-    @assert probe_current >= 0
     
     if h.idxfloor == 0
         h.idxfloor = index_curr
@@ -161,7 +157,7 @@ end
 function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
     oldk = h.keys
     oldv = h.vals
-    oldh = h.meta
+    oldmeta = h.meta
     sz = length(oldk)
     newsz = _tablesz(newsz)
     if h.count == 0
@@ -176,15 +172,15 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
 
     h.keys = Vector{K}(undef, newsz)
     h.vals = Vector{V}(undef, newsz)
-    h.meta = zeros(UInt32,newsz)
+    h.meta = zeros(UInt32, newsz)
     h.count = 0
     h.idxfloor = 0
 
     for i = 1:sz
-        @inbounds if oldh[i] != 0
+        @inbounds if oldmeta[i] != 0
             k = oldk[i]
             v = oldv[i]
-            rh_insert!(h, k, v)
+            rh_insert!(h, k, v, oldmeta[i] >> DIBS_BYTES)
         end
     end
     return h
@@ -200,7 +196,7 @@ function Base.sizehint!(d::RobinDict, newsz)
     rehash!(d, newsz)
 end
 
-function setindex!(h::RobinDict{K,V}, v0, key0) where {K, V}
+function Base.setindex!(h::RobinDict{K,V}, v0, key0) where {K, V}
     key = convert(K, key0)
     isequal(key, key0) || throw(ArgumentError("$key0 is not a valid key for type $K"))
     _setindex!(h, key, v0)
@@ -246,18 +242,26 @@ function Base.empty!(h::RobinDict{K,V}) where {K, V}
     return h
 end
  
-function rh_search(h::RobinDict{K, V}, key::K) where {K, V}
+Base.@assume_effects :terminates_locally Base.@propagate_inbounds function rh_search(h::RobinDict{K, V}, key) where {K, V}
     sz = length(h.keys)
     chash = hash_key(key)
     cmeta = make_meta(chash, 0)
     chash_meta = hash_meta(cmeta)
     index = desired_index(chash_meta, sz)
+    probe_current = 0
+
     @inbounds while true
-        if isslotempty(h, index)
-            return -1
-        elseif isequal(h.keys[index], key)
-            return index
+        isslotempty(h, index) && return -1
+
+        probe_current > calculate_distance(h, index) && return -1
+
+        if hash_meta(h.meta[index]) == chash_meta
+            if (key === h.keys[index] || isequal(h.keys[index], key))
+                return index
+            end
         end
+
+        probe_current += 1
         index = (index & (sz - 1)) + 1
     end
 end
@@ -286,7 +290,6 @@ RobinDict{String, Int64} with 4 entries:
   "d" => 4
 ```
 """
-Base.get!(collection, key, default)
 
 Base.get!(h::RobinDict{K,V}, key0, default) where {K,V} = get!(()->default, h, key0)
 
@@ -304,7 +307,6 @@ get!(dict, key) do
 end
 ```
 """
-Base.get!(f::Function, collection, key)
 
 function Base.get!(default::Callable, h::RobinDict{K,V}, key0::K) where {K, V}
     key = convert(K, key0)
@@ -439,8 +441,7 @@ function rh_delete!(h::RobinDict{K, V}, index) where {K, V}
         h.keys[curr] = h.keys[next]
         mmeta = h.meta[next]
         mdibs = dibs_meta(mmeta)
-        @assert mdibs > 0
-        h.meta[curr] = make_meta(mmeta, mdibs-1)
+        h.meta[curr] = make_meta(hash_meta(mmeta), mdibs-1)
         curr = next
         next = (next & (sz-1)) + 1
     end

@@ -379,16 +379,18 @@ end
 
 @testset "invariants" begin
     # Functions which are not exported, but are required for checking invariants
-    hash_key(key) = (hash(key)%UInt32) | 0x80000000
+    hash_key(key) = (hash(key)%UInt32)
     desired_index(hash, sz) = (hash & (sz - 1)) + 1
-    isslotfilled(h::RobinDict, index) = (h.hashes[index] != 0)
+    isslotfilled(h::RobinDict, index) = (h.meta[index] != 0)
     isslotempty(h::RobinDict, index) = (h.hashes[index] == 0)
+    DIBS_BYTES = 8
+    DIBS_MASK = 0x0000_00FF
+    hash_meta(meta::UInt32) = (meta>>DIBS_BYTES)
+    dibs_meta(meta::UInt32) = Int(meta & DIBS_MASK)
     
     function calculate_distance(h::RobinDict{K, V}, index) where {K, V}
         @assert isslotfilled(h, index)
-        sz = length(h.keys)
-        @inbounds index_init = desired_index(h.hashes[index], sz)
-        return (index - index_init + sz) & (sz - 1)
+        return dibs_meta(h.meta[index])
     end
 
     function get_idxfloor(h::RobinDict)
@@ -407,7 +409,7 @@ end
 
     for i in 1:length(h1.keys)
         if isslotfilled(h1, i)
-            @test hash_meta((hash_key(h1.keys[i])<< 8)) == hash_meta(h1.meta[i])
+            @test hash_meta((hash_key(h1.keys[i])<<DIBS_BYTES)) == hash_meta(h1.meta[i])
         end
     end
 
@@ -418,7 +420,7 @@ end
 
     for i in 1:length(h2.keys)
         if isslotfilled(h2, i)
-            @test hash_meta((hash_key(h2.keys[i])<<8)) == hash_meta(h2.meta[i])
+            @test hash_meta((hash_key(h2.keys[i])<<DIBS_BYTES)) == hash_meta(h2.meta[i])
         end
     end
 
@@ -429,7 +431,7 @@ end
 
     for i in 1:length(h3.keys)
         if isslotfilled(h3, i)
-            @test hash_meta((hash_key(h3.keys[i])<<8)) == hash_meta(h3.meta[i])
+            @test hash_meta((hash_key(h3.keys[i])<<DIBS_BYTES)) == hash_meta(h3.meta[i])
         end
     end
 
@@ -441,7 +443,7 @@ end
         for i=1:length(h.keys)
             isslotfilled(h, i) || continue
             (min_idx == 0) && (min_idx = i)
-            @assert hash_meta((hash_key(h.keys[i])<<8)) == hash_meta(h.meta[i])
+            @assert hash_meta((hash_key(h.keys[i])<<DIBS_BYTES)) == hash_meta(h.meta[i])
             @assert !iszero(h.meta[i])
             cnt += 1
             @assert typeof(h.meta[i]) == UInt32
