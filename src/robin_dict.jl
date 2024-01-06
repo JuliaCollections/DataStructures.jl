@@ -241,8 +241,8 @@ function Base.empty!(h::RobinDict{K,V}) where {K, V}
     h.idxfloor = 0
     return h
 end
- 
-Base.@assume_effects :terminates_locally Base.@propagate_inbounds function rh_search(h::RobinDict{K, V}, key) where {K, V}
+
+Base.@propagate_inbounds function rh_search(h::RobinDict{K, V}, key) where {K, V}
     sz = length(h.keys)
     chash = hash_key(key)
     cmeta = make_meta(chash, 0)
