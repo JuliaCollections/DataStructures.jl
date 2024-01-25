@@ -4,3 +4,4 @@ docs/site/
 docs/Manifest.toml
 Manifest.toml
 benchmark/*.json
+.vscode

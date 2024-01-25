@@ -20,13 +20,16 @@ mutable struct DequeBlock{T}
         blk.next = blk
         return blk
     end
+
+    # Convert any `Integer` to whatever `Int` is on the relevant machine
+    DequeBlock{T}(capa::Integer, front::Integer) where T = DequeBlock{T}(Int(capa), Int(front))
 end
 
 # block at the rear of the chain, elements towards the front
-rear_deque_block(ty::Type{T}, n::Int) where {T} = DequeBlock{T}(n, 1)
+rear_deque_block(ty::Type{T}, n::Integer) where {T} = DequeBlock{T}(n, 1)
 
 # block at the head of the train, elements towards the back
-head_deque_block(ty::Type{T}, n::Int) where {T} = DequeBlock{T}(n, n+1)
+head_deque_block(ty::Type{T}, n::Integer) where {T} = DequeBlock{T}(n, n+1)
 
 capacity(blk::DequeBlock) = blk.capa
 Base.length(blk::DequeBlock) = blk.back - blk.front + 1
@@ -80,7 +83,7 @@ mutable struct Deque{T}
     head::DequeBlock{T}
     rear::DequeBlock{T}
 
-    function Deque{T}(blksize::Int) where T
+    function Deque{T}(blksize::Integer) where T
         head = rear = rear_deque_block(T, blksize)
         new{T}(1, blksize, 0, head, rear)
     end
