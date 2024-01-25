@@ -12,6 +12,7 @@ end
 Create a double-ended queue of maximum capacity `n`, implemented as a circular buffer. The element type is `T`.
 """
 CircularDeque{T}(n::Int) where {T} = CircularDeque(Vector{T}(undef, n), n, 0, 1, n)
+CircularDeque{T}(n::Integer) where {T} = CircularDeque(Vector{T}(undef, Int(n)), Int(n), 0, 1, Int(n))
 
 Base.length(D::CircularDeque) = D.n
 Base.eltype(::Type{CircularDeque{T}}) where {T} = T
