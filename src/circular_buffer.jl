@@ -207,6 +207,11 @@ Return capacity of CircularBuffer.
 """
 capacity(cb::CircularBuffer) = cb.capacity
 
+# Base might define `isfull` from julia 1.11 onwards, see julia PR #53159
+if isdefined(Base, :isfull)
+    import Base: isfull
+end
+
 """
     isfull(cb::CircularBuffer)
 
