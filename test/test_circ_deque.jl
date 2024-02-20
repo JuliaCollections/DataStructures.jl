@@ -81,6 +81,29 @@
         for i in 1:5 push!(D, i) end
         @test collect([i for i in D]) == collect(1:5)
     end
+
+    VERSION >= v"1.3" && @testset "pop! and popfirst! do not leak" begin
+        D = CircularDeque{String}(5)
+
+        @testset "pop! doesn't leak" begin
+            push!(D,"foo")
+            push!(D,"bar")
+            ss2 = Base.summarysize(D)
+            pop!(D)
+            GC.gc(true)
+            ss1 = Base.summarysize(D)
+            @test ss1 < ss2
+        end
+        @testset "popfirst! doesn't leak" begin
+            push!(D,"baz")
+            push!(D,"bug")
+            ss2 = Base.summarysize(D)
+            popfirst!(D)
+            GC.gc(true)
+            ss1 = Base.summarysize(D)
+            @test ss1 < ss2
+        end
+    end
 end
 
 nothing
