@@ -112,4 +112,10 @@ module DataStructures
     include("splay_tree.jl")
 
     include("deprecations.jl")
+
+    @static if VERSION <= v"1.3"
+        _unsetindex!(x...) = nothing
+    else
+        _unsetindex! = Base._unsetindex!
+    end
 end
