@@ -197,4 +197,28 @@
         @test typeof(empty!(q)) === typeof(Deque{Int}())
         @test isempty(q)
     end
+
+    @testset "pop! and popfirst! don't leak" begin
+        q = Deque{String}(5)
+        GC.gc(true)
+
+        @testset "pop! doesn't leak" begin
+            push!(q,"foo")
+            push!(q,"bar")
+            ss2 = Base.summarysize(q.head)
+            pop!(q)
+            GC.gc(true)
+            ss1 = Base.summarysize(q.head)
+            @test ss1 < ss2
+        end
+        @testset "popfirst! doesn't leak" begin
+            push!(q,"baz")
+            push!(q,"bug")
+            ss2 = Base.summarysize(q.head)
+            popfirst!(q)
+            GC.gc(true)
+            ss1 = Base.summarysize(q.head)
+            @test ss1 < ss2
+        end
+    end
 end # @testset Deque
