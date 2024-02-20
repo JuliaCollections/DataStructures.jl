@@ -198,7 +198,7 @@
         @test isempty(q)
     end
 
-    @testset "pop! and popfirst! don't leak" begin
+    VERSION >= v"1.3" && @testset "pop! and popfirst! don't leak" begin
         q = Deque{String}(5)
         GC.gc(true)
 

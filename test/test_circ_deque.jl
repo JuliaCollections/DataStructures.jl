@@ -82,7 +82,7 @@
         @test collect([i for i in D]) == collect(1:5)
     end
 
-    @testset "pop! and popfirst! do not leak" begin
+    VERSION >= v"1.3" && @testset "pop! and popfirst! do not leak" begin
         D = CircularDeque{String}(5)
 
         @testset "pop! doesn't leak" begin
