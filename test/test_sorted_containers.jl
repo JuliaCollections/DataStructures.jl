@@ -426,8 +426,8 @@ function testSortedDictMethods()
     end
     checkcorrectness(m1.bt, false)
     my_assert(ii == pastendsemitoken(m1))
-    my_assert(status((m1,ii)) == 3)
-    my_assert(status((m1,IntSemiToken(-1))) == 0)
+    my_assert(DataStructures.status((m1,ii)) == 3)
+    my_assert(DataStructures.status((m1,IntSemiToken(-1))) == 0)
     t = 0
     u = 0.0
     for pr in m1
@@ -466,10 +466,10 @@ function testSortedDictMethods()
     p = deref((m1,i8))
     my_assert(p[1] == 2 && p[2] == 4.0)
     my_assert(i8 != beforestartsemitoken(m1))
-    my_assert(status((m1,i8)) == 1)
+    my_assert(DataStructures.status((m1,i8)) == 1)
     i9 = regress((m1,i8))
     my_assert(i9 == beforestartsemitoken(m1))
-    my_assert(status((m1,i9)) == 2)
+    my_assert(DataStructures.status((m1,i9)) == 2)
     i10 = findkey(m1, 17)
     i11 = regress((m1,i10))
     my_assert(deref_key((m1,i11)) == 13)
