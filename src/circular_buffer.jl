@@ -154,16 +154,12 @@ Return the number of elements currently in the buffer.
 """
 Base.length(cb::CircularBuffer) = cb.length
 
-Base.eltype(::Type{CircularBuffer{T}}) where T = T
-
 """
     size(cb::CircularBuffer)
 
 Return a tuple with the size of the buffer.
 """
 Base.size(cb::CircularBuffer) = (length(cb),)
-
-Base.convert(::Type{Array}, cb::CircularBuffer{T}) where {T} = T[x for x in cb]
 
 """
     isempty(cb::CircularBuffer)
