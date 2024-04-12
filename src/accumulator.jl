@@ -61,8 +61,6 @@ Base.setindex!(ct::Accumulator, x, v) = setindex!(ct.map, x, v)
 
 Base.haskey(ct::Accumulator, x) = haskey(ct.map, x)
 
-Base.keys(ct::Accumulator) = keys(ct.map)
-
 Base.values(ct::Accumulator) = values(ct.map)
 
 Base.sum(ct::Accumulator) = sum(values(ct.map))
