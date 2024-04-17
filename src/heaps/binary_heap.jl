@@ -39,7 +39,7 @@ mutable struct BinaryHeap{T, O <: Base.Ordering} <: AbstractHeap{T}
     end
 
     function BinaryHeap{T}(ordering::Base.Ordering, xs::AbstractVector) where T
-        valtree = heapify(xs, ordering)
+        valtree = @inline heapify!(copyto!(similar(xs), xs), ordering)
         new{T, typeof(ordering)}(ordering, valtree)
     end
 end
