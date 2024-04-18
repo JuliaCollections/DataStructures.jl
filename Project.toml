@@ -1,6 +1,6 @@
 name = "DataStructures"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.18.19"
+version = "0.18.20"
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
