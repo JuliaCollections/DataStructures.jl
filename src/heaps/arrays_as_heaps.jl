@@ -81,7 +81,7 @@ end
 
 In-place [`heapify`](@ref).
 """
-function heapify!(xs::AbstractArray, o::Ordering=Forward)
+@inline function heapify!(xs::AbstractArray, o::Ordering=Forward)
     for i in heapparent(length(xs)):-1:1
         percolate_down!(xs, i, o)
     end
