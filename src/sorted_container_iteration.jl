@@ -455,6 +455,19 @@ function Base.searchsortedlast(m::SortedContainer, k_)
 end
 
 
+"""
+    searchsortedbefore(m::SortedContainer, k)
+
+Return the semitoken of the last item in the container that is less than
+`k` in the sort order.  If there is no
+such item, then the before-start semitoken is returned.  Time: O(*c* log *n*)
+"""
+function searchsortedbefore(m::SortedContainer, k_)
+    i = findkeyless(m.bt, convert(keytype(m), k_))
+    IntSemiToken(i)
+end
+
+
 ## The next four are correctness-checking routines.  They are
 ## not exported.
 
