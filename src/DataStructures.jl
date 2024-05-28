@@ -99,7 +99,6 @@ module DataStructures
         isfull
     include("circular_buffer.jl")
 
-    export status
     export deref_key, deref_value, deref, advance, regress
 
     export PriorityQueue
