@@ -247,6 +247,20 @@ end
 Base.pop!(h::MutableBinaryHeap{T}) where {T} = _binary_heap_pop!(h.ordering, h.nodes, h.node_map)
 
 """
+    keys(h::MutableBinaryHeap)
+
+Returns the handles of the heap in an arbitrary order.
+"""
+Base.keys(h::MutableBinaryHeap) = h.node_map
+
+"""
+    values(h::MutableBinaryHeap)
+
+Returns an iterator over the elements of the heap in an arbitrary order.
+"""
+Base.values(h::MutableBinaryHeap) = (h.nodes[i].value for i in h.node_map)
+
+"""
     update!{T}(h::MutableBinaryHeap{T}, i::Int, v::T)
 
 Replace the element at index `i` in heap `h` with `v`.
