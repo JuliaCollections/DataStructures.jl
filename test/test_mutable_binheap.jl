@@ -234,11 +234,11 @@ end
         push!(h, 7)
         push!(h, 2)
         @test isequal(heap_values(h), [2, 10, 7])
-        @test isequal(list_values(h), [10, 7, 2])
+        @test isequal(list_values(h), [7, 10, 2])
 
         @test pop!(h) == 2
         @test isequal(heap_values(h), [7, 10])
-        @test isequal(list_values(h), [10, 7])
+        @test isequal(list_values(h), [7, 10])
 
     end
 
@@ -341,5 +341,18 @@ end
 
         update!(h, 2, 20)
         @test isequal(heap_values(h), [0.5, 10.1, 3.0, 20.0])
+    end
+
+    @testset "test memory use" begin # issue 745
+        h = MutableBinaryMinHeap{Int}()
+        push!(h, 1)
+        pop!(h)
+        # Expect to be in stable state for sequence of push!() pop!() after this
+        s = Base.summarysize(h)
+        for i in 1:100
+            push!(h, 1)
+            pop!(h)
+        end
+        @test Base.summarysize(h) == s
     end
 end # @testset MutableBinheap

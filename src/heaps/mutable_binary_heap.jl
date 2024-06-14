@@ -160,16 +160,17 @@ mutable struct MutableBinaryHeap{T, O <: Base.Ordering} <: AbstractMutableHeap{T
     ordering::O
     nodes::Vector{MutableBinaryHeapNode{T}}
     node_map::Vector{Int}
+    node_map_free::Vector{Int}
 
     function MutableBinaryHeap{T}(ordering::Base.Ordering) where T
         nodes = Vector{MutableBinaryHeapNode{T}}()
         node_map = Vector{Int}()
-        new{T, typeof(ordering)}(ordering, nodes, node_map)
+        new{T, typeof(ordering)}(ordering, nodes, node_map, Int[])
     end
 
     function MutableBinaryHeap{T}(ordering::Base.Ordering, xs::AbstractVector) where T
         nodes, node_map = _make_mutable_binary_heap(ordering, T, xs)
-        new{T, typeof(ordering)}(ordering, nodes, node_map)
+        new{T, typeof(ordering)}(ordering, nodes, node_map, Int[])
     end
 end
 
@@ -205,6 +206,7 @@ function Base.show(io::IO, h::MutableBinaryHeap)
 end
 
 
+
 #################################################
 #
 #   interfaces
@@ -216,19 +218,23 @@ Base.length(h::MutableBinaryHeap) = length(h.nodes)
 Base.isempty(h::MutableBinaryHeap) = isempty(h.nodes)
 
 function Base.push!(h::MutableBinaryHeap{T}, v) where T
-    nodes = h.nodes
-    nodemap = h.node_map
-    i = length(nodemap) + 1
-    nd_id = length(nodes) + 1
-    push!(nodes, MutableBinaryHeapNode(convert(T, v), i))
-    push!(nodemap, nd_id)
-    _heap_bubble_up!(h.ordering, nodes, nodemap, nd_id)
-    return i
+    nd_id = length(h.nodes) + 1
+    if isempty(h.node_map_free)
+        push!(h.node_map, nd_id)
+        handle = length(h.node_map)
+    else
+        handle = pop!(h.node_map_free)
+        @inbounds h.node_map[handle] = nd_id
+    end
+    push!(h.nodes, MutableBinaryHeapNode(convert(T, v), handle))
+    _heap_bubble_up!(h.ordering, h.nodes, h.node_map, nd_id)
+    return handle
 end
 
 function Base.sizehint!(h::MutableBinaryHeap, s::Integer)
     sizehint!(h.nodes, s)
     sizehint!(h.node_map, s)
+    sizehint!(h.node_map_free, s)
     return h
 end
 
@@ -244,7 +250,12 @@ function top_with_handle(h::MutableBinaryHeap)
     return el.value, el.handle
 end
 
-Base.pop!(h::MutableBinaryHeap{T}) where {T} = _binary_heap_pop!(h.ordering, h.nodes, h.node_map)
+@inline function Base.pop!(h::MutableBinaryHeap{T}) where {T}
+    @boundscheck isempty(h.nodes) && throw(BoundsError(h, 1))
+    @inbounds handle = h.nodes[1].handle
+    push!(h.node_map_free, handle)
+    _binary_heap_pop!(h.ordering, h.nodes, h.node_map)
+end
 
 """
     update!{T}(h::MutableBinaryHeap{T}, i::Int, v::T)
@@ -273,8 +284,10 @@ end
 
 Deletes the element with handle `i` from heap `h` .
 """
-function Base.delete!(h::MutableBinaryHeap{T}, i::Int) where T
-     nd_id = h.node_map[i]
+@inline function Base.delete!(h::MutableBinaryHeap{T}, i::Int) where T
+    @boundscheck (i < 1 || i > length(h.node_map)) && throw(BoundsError(h, i))
+    push!(h.node_map_free, i)
+    @inbounds nd_id = h.node_map[i]
     _binary_heap_pop!(h.ordering, h.nodes, h.node_map, nd_id)
     return h
 end
