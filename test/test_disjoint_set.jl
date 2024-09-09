@@ -48,10 +48,19 @@
                     @test union!(s, T(8), T(5)) == T(8)
                     @test num_groups(s) == T(7)
                     @test find_root!(s, T(6)) == T(8)
+                    @test find_root!(s, T(6), :iterative) == T(8)
+                    @test find_root!(s, T(6), :halving) == T(8)
+                    @test find_root!(s, T(6), :splitting) == T(8)
                     union!(s, T(2), T(6))
                     @test find_root!(s, T(2)) == T(8)
                     root1 = find_root!(s, T(6))
+                    root1 = find_root!(s, T(6), :iterative)
+                    root1 = find_root!(s, T(6), :halving)
+                    root1 = find_root!(s, T(6), :splitting)
                     root2 = find_root!(s, T(2))
+                    root2 = find_root!(s, T(2), :iterative)
+                    root2 = find_root!(s, T(2), :halving)
+                    root2 = find_root!(s, T(2), :splitting)
                     @test root_union!(s, T(root1), T(root2)) == T(8)
                     @test union!(s, T(5), T(6)) == T(8)
                 end
@@ -136,6 +145,24 @@
             @test root1 != root2
             root_union!(s, 7, 3)
             @test find_root!(s, 7) == find_root!(s, 3)
+
+            root1 = find_root!(s, 7, :iterative)
+            root2 = find_root!(s, 3, :iterative)
+            @test root1 != root2
+            root_union!(s, 7, 3)
+            @test find_root!(s, 7, :iterative) == find_root!(s, 3, :iterative)
+
+            root1 = find_root!(s, 7, :halving)
+            root2 = find_root!(s, 3, :halving)
+            @test root1 != root2
+            root_union!(s, 7, 3)
+            @test find_root!(s, 7, :halving) == find_root!(s, 3, :halving)
+
+            root1 = find_root!(s, 7, :splitting)
+            root2 = find_root!(s, 3, :splitting)
+            @test root1 != root2
+            root_union!(s, 7, 3)
+            @test find_root!(s, 7, :splitting) == find_root!(s, 3, :splitting)
         end
 
         @testset "Some tests using non-integer disjoint sets" begin

@@ -68,6 +68,7 @@ module DataStructures
     include("queue.jl")
     include("accumulator.jl")
     include("disjoint_set.jl")
+    export PCRecursive, PCIterative, PCHalving, PCSplitting
     include("heaps.jl")
 
     include("default_dict.jl")
