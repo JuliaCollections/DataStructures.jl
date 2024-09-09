@@ -242,6 +242,10 @@ end
 Find the root element of the subset in `s` which has the element `x` as a member.
 """
 find_root!(s::DisjointSet{T}, x::T) where {T} = s.revmap[find_root!(s.internal, s.intmap[x])]
+find_root!(s::DisjointSet{T}, x::T, ::PCIterative) where {T} = s.revmap[find_root!(s.internal, s.intmap[x], PCIterative())]
+find_root!(s::DisjointSet{T}, x::T, ::PCRecursive) where {T} = s.revmap[find_root!(s.internal, s.intmap[x], PCRecursive())]
+find_root!(s::DisjointSet{T}, x::T, ::PCHalving) where {T} = s.revmap[find_root!(s.internal, s.intmap[x], PCHalving())]
+find_root!(s::DisjointSet{T}, x::T, ::PCSplitting) where {T} = s.revmap[find_root!(s.internal, s.intmap[x], PCSplitting())]
 
 """
     in_same_set(s::DisjointSet{T}, x::T, y::T)

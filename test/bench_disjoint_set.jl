@@ -37,7 +37,7 @@ benchmark `find` operation
 function create_disjoint_set_struct(n::Int)
     parents = [1; collect(1:n-1)] # each element's parent is its predecessor
     ranks = zeros(Int, n) # ranks are all zero
-    DataStructures.IntDisjointSet(parents, ranks, n)
+    IntDisjointSet(parents, ranks, n)
 end
 
 # benchmarking function
@@ -47,20 +47,20 @@ function benchmark_find_root(n::Int)
         println("Recursive may path compression may encounter stack-overflow; skipping")
     else
         s = create_disjoint_set_struct(n)
-        @btime DataStructures.find_root!($s, $n, DataStructures.PCRecursive())
+        @btime find_root!($s, $n, PCRecursive())
     end
 
     println("Benchmarking iterative path compression implementation (find_root_iterative!):")
     s = create_disjoint_set_struct(n) # reset parents
-    @btime DataStructures.find_root!($s, $n, DataStructures.PCIterative())
+    @btime find_root!($s, $n, PCIterative())
 
     println("Benchmarking path-halving implementation (find_root_halving!):")
     s = create_disjoint_set_struct(n) # reset parents
-    @btime DataStructures.find_root!($s, $n, DataStructures.PCHalving())
+    @btime find_root!($s, $n, PCHalving())
 
     println("Benchmarking path-splitting implementation (find_root_path_splitting!):")
     s = create_disjoint_set_struct(n) # reset parents
-    @btime DataStructures.find_root!($s, $n, DataStructures.PCSplitting())
+    @btime find_root!($s, $n, PCSplitting())
 end
 
 # run benchmark tests
