@@ -114,8 +114,8 @@ module DataStructures
     include("deprecations.jl")
 
     @static if VERSION <= v"1.3"
-        _unsetindex!(a, i) = a
+        const _unsetindex!(a, i) = a
     else
-        _unsetindex! = Base._unsetindex!
+        const _unsetindex! = Base._unsetindex!
     end
 end
