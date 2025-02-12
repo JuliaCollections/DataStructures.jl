@@ -182,6 +182,8 @@ Base.empty(s::DisjointSet{T}, ::Type{U}=T) where {T,U} = DisjointSet{U}()
 function Base.sizehint!(s::DisjointSet, n::Integer)
     sizehint!(s.intmap, n)
     sizehint!(s.revmap, n)
+    sizehint!(s.internal.parents, n)
+    sizehint!(s.internal.ranks, n)
     return s
 end
 
