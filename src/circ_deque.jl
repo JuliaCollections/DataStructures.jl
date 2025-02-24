@@ -24,6 +24,13 @@ Return the capacity of the circular deque
 """
 capacity(D::CircularDeque) = D.capacity
 
+"""
+    isfull(D::CircularDeque)
+
+Test whether the deque is full.
+"""
+isfull(D::CircularDeque) = length(D) == D.capacity
+
 function Base.empty!(D::CircularDeque)
     D.n = 0
     D.first = 1
