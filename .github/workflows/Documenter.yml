@@ -1,18 +1,26 @@
 name: Documenter
 on:
-    push:
-        branches: [master]
-        tags: [v*]
-    pull_request:
+  push:
+    branches: [main, master]
+    tags: [v*]
+  pull_request:
 
 jobs:
-    Documenter:
-      name: Documentation
-      runs-on: ubuntu-latest
-      steps:
-          - uses: actions/checkout@v4
-          - uses: julia-actions/julia-buildpkg@latest
-          - uses: julia-actions/julia-docdeploy@latest
-            env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
+  Documenter:
+    permissions:
+      contents: write
+      statuses: write
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1'                         # replace this with whatever version you need
+          show-versioninfo: true               # this causes versioninfo to be printed to the action log
+      - uses: julia-actions/cache@v2              # cache using https://github.com/julia-actions/cache
+      - uses: julia-actions/julia-buildpkg@v1  # if package requires Pkg.build()
+      - uses: julia-actions/julia-docdeploy@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
