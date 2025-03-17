@@ -33,14 +33,14 @@ julia> # Julia code
 
 julia> # Insert keys with associated priorities
        pq["a"] = 10; pq["b"] = 5; pq["c"] = 15; pq
-PriorityQueue{Any,Any,Base.Order.ForwardOrdering} with 3 entries:
+PriorityQueue{Any, Any, Base.Order.ForwardOrdering} with 3 entries:
   "b" => 5
   "a" => 10
   "c" => 15
 
 julia> # Change the priority of an existing key
        pq["a"] = 0; pq
-PriorityQueue{Any,Any,Base.Order.ForwardOrdering} with 3 entries:
+PriorityQueue{Any, Any, Base.Order.ForwardOrdering} with 3 entries:
   "a" => 0
   "b" => 5
   "c" => 15

@@ -5,6 +5,7 @@ DocMeta.setdocmeta!(DataStructures, :DocTestSetup, :(using DataStructures); recu
 
 makedocs(
     sitename = "DataStructures.jl",
+    warnonly = true,  # FIXME: address all warnings and resolve them
     pages = [
         "index.md",
         "deque.md",

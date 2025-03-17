@@ -17,7 +17,7 @@ lowest priority element.
 
 ```jldoctest
 julia> PriorityQueue(Base.Order.Forward, "a" => 2, "b" => 3, "c" => 1)
-PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
+PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
   "c" => 1
   "a" => 2
   "b" => 3
@@ -212,13 +212,13 @@ Insert the a key `k` into a priority queue `pq` with priority `v`.
 
 ```jldoctest
 julia> a = PriorityQueue(PriorityQueue("a"=>1, "b"=>2, "c"=>3))
-PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
+PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
   "a" => 1
   "b" => 2
   "c" => 3
 
 julia> enqueue!(a, "d"=>4)
-PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 4 entries:
+PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 4 entries:
   "a" => 1
   "b" => 2
   "c" => 3
@@ -253,7 +253,7 @@ Remove and return the lowest priority key from a priority queue.
 
 ```jldoctest
 julia> a = PriorityQueue(Base.Order.Forward, ["a" => 2, "b" => 3, "c" => 1])
-PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
+PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
   "c" => 1
   "a" => 2
   "b" => 3
@@ -262,7 +262,7 @@ julia> dequeue!(a)
 "c"
 
 julia> a
-PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
+PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 2 entries:
   "a" => 2
   "b" => 3
 ```
@@ -293,7 +293,7 @@ Remove and return a the lowest priority key and value from a priority queue as a
 
 ```jldoctest
 julia> a = PriorityQueue(Base.Order.Forward, "a" => 2, "b" => 3, "c" => 1)
-PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
+PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
   "c" => 1
   "a" => 2
   "b" => 3
@@ -302,7 +302,7 @@ julia> dequeue_pair!(a)
 "c" => 1
 
 julia> a
-PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 2 entries:
+PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 2 entries:
   "a" => 2
   "b" => 3
 ```
@@ -332,7 +332,7 @@ Delete the mapping for the given key in a priority queue, and return the priorit
 # Examples
 ```jldoctest
 julia> q = PriorityQueue(Base.Order.Forward, "a"=>2, "b"=>3, "c"=>1)
-PriorityQueue{String,Int64,Base.Order.ForwardOrdering} with 3 entries:
+PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
   "c" => 1
   "a" => 2
   "b" => 3

@@ -13,14 +13,14 @@ Examples:
 
 ```jldoctest
 julia> d = RobinDict{Int, Char}(1 => 'a', 2 => 'b')
-RobinDict{Int64,Char} with 2 entries:
+RobinDict{Int64, Char} with 2 entries:
   2 => 'b'
   1 => 'a'
 
 julia> d[3] = 'c';
 
 julia> collect(d)
-3-element Array{Pair{Int64,Char},1}:
+3-element Vector{Pair{Int64, Char}}:
  2 => 'b'
  3 => 'c'
  1 => 'a'
@@ -31,7 +31,7 @@ julia> d[1]
 'a': ASCII/Unicode U+0061 (category Ll: Letter, lowercase)
 
 julia> d
-RobinDict{Int64,Char} with 2 entries:
+RobinDict{Int64, Char} with 2 entries:
   3 => 'c'
   1 => 'a'
 
