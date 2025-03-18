@@ -5,11 +5,13 @@ on:
     tags: [v*]
   pull_request:
 
+permissions:
+  actions: write   # needed to allow julia-actions/cache to delete old caches that it has created
+  contents: write  # needed to allow deploying docs
+  statuses: write
+
 jobs:
   Documenter:
-    permissions:
-      contents: write
-      statuses: write
     name: Documentation
     runs-on: ubuntu-latest
     steps:
@@ -18,7 +20,7 @@ jobs:
         with:
           version: '1'                         # replace this with whatever version you need
           show-versioninfo: true               # this causes versioninfo to be printed to the action log
-      - uses: julia-actions/cache@v2              # cache using https://github.com/julia-actions/cache
+      - uses: julia-actions/cache@v2           # cache using https://github.com/julia-actions/cache
       - uses: julia-actions/julia-buildpkg@v1  # if package requires Pkg.build()
       - uses: julia-actions/julia-docdeploy@v1
         env:
