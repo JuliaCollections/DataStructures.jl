@@ -2,8 +2,9 @@ name: Documenter
 on:
   push:
     branches: [main, master]
-    tags: [v*]
+    tags: ["v*"]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   actions: write   # needed to allow julia-actions/cache to delete old caches that it has created
