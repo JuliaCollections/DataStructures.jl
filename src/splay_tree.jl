@@ -126,7 +126,7 @@ function _join!(tree::SplayTree, s::Union{SplayTreeNode, Nothing}, t::Union{Spla
     end
 end
 
-function search_node!(tree::SplayTree{K}, d::K) where K
+function search_node(tree::SplayTree{K}, d::K) where K
     node = tree.root
     prev = nothing
     while node != nothing && node.data != d
@@ -147,7 +147,7 @@ function Base.haskey(tree::SplayTree{K}, d::K) where K
     if node === nothing
         return false
     else
-        node = search_node!(tree, d)
+        node = search_node(tree, d)
         (node === nothing) && return false
         return (node.data == d)
     end
@@ -157,7 +157,7 @@ Base.in(key, tree::SplayTree) = haskey(tree, key)
 
 function Base.delete!(tree::SplayTree{K}, d::K) where K
     node = tree.root
-    x = search_node!(tree, d)
+    x = search_node(tree, d)
     (x == nothing || x.data != d) && return tree
     t = nothing
     s = nothing
@@ -181,7 +181,7 @@ end
 
 function Base.push!(tree::SplayTree{K}, d0) where K
     d = convert(K, d0)
-    is_present = search_node!(tree, d)
+    is_present = search_node(tree, d)
     if (is_present !== nothing) && (is_present.data == d)
         return tree
     end

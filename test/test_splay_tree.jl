@@ -106,16 +106,16 @@
         @test !in('c', t4)
     end
 
-    @testset "search_node!" begin
+    @testset "search_node" begin
         t5 = SplayTree()
         for i in 1:32
             push!(t5, i)
         end
-        n1 = search_node!(t5, 21)
+        n1 = search_node(t5, 21)
         @test n1.data == 21
-        n2 = search_node!(t5, 35)
+        n2 = search_node(t5, 35)
         @test n2.data == 32
-        n3 = search_node!(t5, 0)
+        n3 = search_node(t5, 0)
         @test n3.data == 1
     end 
 
