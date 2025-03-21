@@ -237,4 +237,19 @@
 
         @test isequal(h.valtree, [0.5, 5.0, 3.0, 10.1])
     end
+
+    @testset "empty!" begin
+        vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
+        vs2 = collect(enumerate(vs))
+        ordering = Base.Order.By(last)
+
+        for h in (BinaryMinHeap(vs), BinaryMaxHeap(vs), BinaryHeap(ordering, vs2))
+            @test length(h) == length(vs)
+            @test !isempty(h)
+            ret = empty!(h)
+            @test ret === h
+            @test length(ret) == 0
+            @test isempty(ret)
+        end
+    end
 end # @testset BinaryHeap

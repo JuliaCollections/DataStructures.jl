@@ -226,6 +226,12 @@ function Base.push!(h::MutableBinaryHeap{T}, v) where T
     return i
 end
 
+function Base.empty!(h::MutableBinaryHeap)
+    empty!(h.nodes)
+    empty!(h.node_map)
+    return h
+end
+
 function Base.sizehint!(h::MutableBinaryHeap, s::Integer)
     sizehint!(h.nodes, s)
     sizehint!(h.node_map, s)
