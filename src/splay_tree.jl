@@ -137,7 +137,9 @@ function search_node(tree::SplayTree{K}, d::K) where K
             node = node.leftChild
         end
     end
-    return (node == nothing) ? prev : node
+    last = (node == nothing) ? prev : node
+    (last == nothing) || splay!(tree, last)
+    return last
 end
 
 function Base.haskey(tree::SplayTree{K}, d::K) where K
@@ -147,9 +149,7 @@ function Base.haskey(tree::SplayTree{K}, d::K) where K
     else
         node = search_node(tree, d)
         (node === nothing) && return false
-        is_found = (node.data == d)
-        is_found && splay!(tree, node)
-        return is_found
+        return (node.data == d)
     end
 end
 
@@ -158,11 +158,9 @@ Base.in(key, tree::SplayTree) = haskey(tree, key)
 function Base.delete!(tree::SplayTree{K}, d::K) where K
     node = tree.root
     x = search_node(tree, d)
-    (x == nothing) && return tree
+    (x == nothing || x.data != d) && return tree
     t = nothing
     s = nothing
-
-    splay!(tree, x)
 
     if x.rightChild !== nothing
         t = x.rightChild
