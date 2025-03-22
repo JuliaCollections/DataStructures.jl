@@ -126,6 +126,11 @@ function _join!(tree::SplayTree, s::Union{SplayTreeNode, Nothing}, t::Union{Spla
     end
 end
 
+# search_node must do a splay even in the case of failed searches to guarantee
+# the O(log n) amortized time bound. This might change the structure of the
+# tree, but does NOT change the user-visible state (has_key, in-order
+# traversals, etc., all keep the same results before and after). Hence we don't
+# mark it with a "!".
 function search_node(tree::SplayTree{K}, d::K) where K
     node = tree.root
     prev = nothing
