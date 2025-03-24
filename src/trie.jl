@@ -33,10 +33,7 @@ function Base.setindex!(t::Trie{K,V}, val, key) where {K,V}
     value = convert(V, val) # we don't want to iterate before finding out it fails
     node = t
     for char in key
-        if !haskey(node.children, char)
-            node.children[char] = Trie{K,V}()
-        end
-        node = node.children[char]
+        node = get!(Trie{K,V}, node.children, char)
     end
     node.is_key = true
     node.value = value
@@ -53,11 +50,8 @@ end
 function subtrie(t::Trie, prefix)
     node = t
     for char in prefix
-        if !haskey(node.children, char)
-            return nothing
-        else
-            node = node.children[char]
-        end
+        node = get!(node.children, char, nothing)
+        isnothing(node) && return nothing
     end
     return node
 end
