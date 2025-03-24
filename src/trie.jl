@@ -50,7 +50,7 @@ end
 function subtrie(t::Trie, prefix)
     node = t
     for char in prefix
-        node = get!(node.children, char, nothing)
+        node = get(node.children, char, nothing)
         isnothing(node) && return nothing
     end
     return node
