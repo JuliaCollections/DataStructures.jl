@@ -7,24 +7,23 @@ Create a `Stack` object containing elements of type `T` for **Last In, First Out
 
 # Parameters
 - `T::Type` Stack element data type.
-- `blksize::Integer` Unrolled linked-list block size (in bytes) used in the
-    underlying representation of the stack. Default = 1024. 
+- `blksize::Integer` unused
 
 # Examples
 ```jldoctest
 julia> s_int = Stack{Int64}() # create a stack with Int64 elements
-Stack{Int64}(Deque [Int64[]])
+Stack{Int64}([Int64[]])
 
 julia> s_float = Stack{Float64}() # create a stack with Float64 elements
-Stack{Float64}(Deque [Float64[]])
+Stack{Float64}(Float64[])
 ```
 """
-mutable struct Stack{T}
-    store::Deque{T}
+struct Stack{T}
+    store::Vector{T}
 end
 
-Stack{T}() where {T} = Stack(Deque{T}())
-Stack{T}(blksize::Integer) where {T} = Stack(Deque{T}(blksize))
+Stack{T}() where {T} = Stack(Vector{T}())
+Stack{T}(blksize::Integer) where {T} = Stack{T}()
 
 """
     isempty(s::Stack)
@@ -60,14 +59,14 @@ the stack).
 # Example
 ```jldoctest
 julia> s = Stack{Float32}()
-Stack{Float32}(Deque [Float32[]])
+Stack{Float32}([Float32[]])
 
 julia> for i in range(1, 0.2, 5)
            push!(s, i)
        end
 
 julia> s
-Stack{Float32}(Deque [Float32[1.0, 0.8, 0.6, 0.4, 0.2]])
+Stack{Float32}[Float32[1.0, 0.8, 0.6, 0.4, 0.2])
 
 julia> first(s)
 0.2f0
@@ -84,14 +83,14 @@ element will be the at bottom of the stack.
 # Example
 ```jldoctest
 julia> s = Stack{Float32}()
-Stack{Float32}(Deque [Float32[]])
+Stack{Float32}(Float32[])
 
 julia> for i in range(1, 0.2, 5)
            push!(s, i)
        end
 
 julia> s
-Stack{Float32}(Deque [Float32[1.0, 0.8, 0.6, 0.4, 0.2]])
+Stack{Float32}(Float32[1.0, 0.8, 0.6, 0.4, 0.2])
 
 julia> last(s)
 1.0f0
@@ -141,7 +140,7 @@ formed by the elements of `x` and `y` in the order they appear in the stack.
 # Example
 ```jldoctest
 julia> s1, s2 = Stack{String}(), Stack{String}()
-(Stack{String}(Deque [String[]]), Stack{String}(Deque [String[]]))
+(Stack{String}(String[]), Stack{String}(String[]))
 
 julia> for string in ["foo", "bar", "42"]
           push!(s1, string)
@@ -159,7 +158,7 @@ false
 ```
 ```jldoctest
 julia> a, b = Stack{Int}(), Stack{Int}()
-(Stack{Int64}(Deque [Int64[]]), Stack{Int64}(Deque [Int64[]]))
+(Stack{Int64}(Int64[]), Stack{Int64}(Int64[]))
 
 julia> for num in [1, 2, 3, 4] push!(a, num) end
 
