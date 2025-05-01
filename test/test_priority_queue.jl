@@ -122,7 +122,7 @@ import Base.Order.Reverse
                 @test_throws ArgumentError PriorityQueue(EltypeUnknownIterator(['a']))
             end
 
-            @testset "Eltype any"
+            @testset "Eltype any" begin
                 struct EltypeAnyIterator{T}
                     x::T
                 end
