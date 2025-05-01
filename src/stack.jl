@@ -127,9 +127,6 @@ Base.empty!(s::Stack) = (empty!(s.store); s)
 
 Base.iterate(st::Stack, s...) = iterate(Iterators.reverse(st.store), s...)
 
-Iterators.reverse(s::Stack{T}) where {T} = DequeIterator{T}(s.store)
-
-
 """
     ==(x::Stack, y::Stack)
 
