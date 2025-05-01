@@ -2,7 +2,7 @@
 
 function not_iterator_of_pairs(kv::T) where T
     # if the object is not iterable, return true, else check the eltype of the iteration
-    Base.isiterable(T) && return true 
+    Base.isiterable(T) || return true 
     # else, check if we can check `eltype`:
     if Base.IteratorEltype(kv) isa Base.HasEltype
         typ = eltype(kv)
