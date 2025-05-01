@@ -12,7 +12,7 @@ Create a `Stack` object containing elements of type `T` for **Last In, First Out
 # Examples
 ```jldoctest
 julia> s_int = Stack{Int64}() # create a stack with Int64 elements
-Stack{Int64}([Int64[]])
+Stack{Int64}(Int64[])
 
 julia> s_float = Stack{Float64}() # create a stack with Float64 elements
 Stack{Float64}(Float64[])
