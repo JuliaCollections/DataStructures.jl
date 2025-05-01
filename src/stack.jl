@@ -59,7 +59,7 @@ the stack).
 # Example
 ```jldoctest
 julia> s = Stack{Float32}()
-Stack{Float32}([Float32[]])
+Stack{Float32}(Float32[])
 
 julia> for i in range(1, 0.2, 5)
            push!(s, i)
