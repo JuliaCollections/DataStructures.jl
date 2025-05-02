@@ -105,6 +105,40 @@ import Base.Order.Reverse
             @test_throws ArgumentError PriorityQueue(Reverse, Reverse)
         end
 
+        @testset "Strange eltype situations" begin
+            @testset "Eltype unknown" begin
+                struct EltypeUnknownIterator{T}
+                    x::T
+                end
+                Base.IteratorEltype(::EltypeUnknownIterator) = Base.EltypeUnknown()
+                Base.iterate(i::EltypeUnknownIterator) = Base.iterate(i.x)
+                Base.iterate(i::EltypeUnknownIterator, state) = Base.iterate(i.x, state)
+                Base.IteratorSize(i::EltypeUnknownIterator) = Base.IteratorSize(i.x)
+                Base.length(i::EltypeUnknownIterator) = Base.length(i.x)
+                Base.size(i::EltypeUnknownIterator) = Base.size(i.x)
+    
+                @test_nowarn PriorityQueue(Dict(zip(1:5, 2:6)))
+                @test_nowarn PriorityQueue(EltypeUnknownIterator(Dict(zip(1:5, 2:6))))
+                @test_throws ArgumentError PriorityQueue(EltypeUnknownIterator(['a']))
+            end
+
+            @testset "Eltype any" begin
+                struct EltypeAnyIterator{T}
+                    x::T
+                end
+                Base.IteratorEltype(::EltypeAnyIterator) = Base.HasEltype()
+                Base.eltype(::EltypeAnyIterator) = Any
+                Base.iterate(i::EltypeAnyIterator) = Base.iterate(i.x)
+                Base.iterate(i::EltypeAnyIterator, state) = Base.iterate(i.x, state)
+                Base.IteratorSize(i::EltypeAnyIterator) = Base.IteratorSize(i.x)
+                Base.length(i::EltypeAnyIterator) = Base.length(i.x)
+                Base.size(i::EltypeAnyIterator) = Base.size(i.x)
+    
+                @test_nowarn PriorityQueue(EltypeAnyIterator(Dict(zip(1:5, 2:6))))
+                @test_throws ArgumentError PriorityQueue(EltypeAnyIterator(['a']))
+            end
+        end
+
     end
 
     @testset "PriorityQueueMethods" begin
