@@ -66,7 +66,7 @@ julia> for i in range(1, 0.2, 5)
        end
 
 julia> s
-Stack{Float32}[Float32[1.0, 0.8, 0.6, 0.4, 0.2])
+Stack{Float32}(Float32[1.0, 0.8, 0.6, 0.4, 0.2])
 
 julia> first(s)
 0.2f0
