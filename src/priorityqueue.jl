@@ -49,7 +49,7 @@ struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
     function PriorityQueue{K,V,O}(o::O, itr) where {K,V,O<:Ordering}
         xs = Vector{Pair{K,V}}(undef, length(itr))
         index = Dict{K, Int}()
-        for (i, (k, v)) in enumerate(itr)
+        @inbounds for (i, (k, v)) in enumerate(itr)
             xs[i] = Pair{K,V}(k, v)
             if haskey(index, k)
                 throw(ArgumentError("PriorityQueue keys must be unique"))
@@ -60,7 +60,7 @@ struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
 
         # heapify
         for i in heapparent(length(pq.xs)):-1:1
-            percolate_down!(pq, i)
+            @inbounds percolate_down!(pq, i)
         end
 
         return pq
@@ -167,8 +167,10 @@ priority queue.
 """
 Base.first(pq::PriorityQueue) = first(pq.xs)
 
-function percolate_down!(pq::PriorityQueue, i::Integer)
-    x = pq.xs[i]
+Base.@propagate_inbounds function percolate_down!(pq::PriorityQueue, i::Integer)
+    @boundscheck checkbounds(pq.xs, i)
+
+    @inbounds x = pq.xs[i]
     @inbounds while (l = heapleft(i)) <= length(pq)
         r = heapright(i)
         j = r > length(pq) || lt(pq.o, pq.xs[l].second, pq.xs[r].second) ? l : r
@@ -182,12 +184,14 @@ function percolate_down!(pq::PriorityQueue, i::Integer)
         end
     end
     pq.index[x.first] = i
-    pq.xs[i] = x
+    @inbounds pq.xs[i] = x
 end
 
 
-function percolate_up!(pq::PriorityQueue, i::Integer)
-    x = pq.xs[i]
+Base.@propagate_inbounds function percolate_up!(pq::PriorityQueue, i::Integer)
+    @boundscheck checkbounds(pq.xs, i)
+
+    @inbounds x = pq.xs[i]
     @inbounds while i > 1
         j = heapparent(i)
         xj = pq.xs[j]
@@ -200,7 +204,7 @@ function percolate_up!(pq::PriorityQueue, i::Integer)
         end
     end
     pq.index[x.first] = i
-    pq.xs[i] = x
+    @inbounds pq.xs[i] = x
 end
 
 # Equivalent to percolate_up! with an element having lower priority than any other
@@ -236,8 +240,8 @@ end
 # Change the priority of an existing element, or enqueue it if it isn't present.
 function Base.setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
     i = get(pq.index, key, 0)
-    if i != 0
-        @inbounds oldvalue = pq.xs[i].second
+    @inbounds if i != 0
+        oldvalue = pq.xs[i].second
         pq.xs[i] = Pair{K,V}(key, value)
         if lt(pq.o, oldvalue, value)
             percolate_down!(pq, i)
@@ -255,7 +259,7 @@ end
 
 Insert the a key `k` into a priority queue `pq` with priority `v`.
 
-# Examples 
+# Examples
 
 ```jldoctest
 julia> a = PriorityQueue("a" => 1, "b" => 2, "c" => 3, "e" => 5)
@@ -317,7 +321,7 @@ function Base.popfirst!(pq::PriorityQueue)
     if !isempty(pq)
         @inbounds pq.xs[1] = y
         pq.index[y.first] = 1
-        percolate_down!(pq, 1)
+        @inbounds percolate_down!(pq, 1)
     end
     delete!(pq.index, x.first)
     return x
@@ -354,7 +358,7 @@ function Base.delete!(pq::PriorityQueue, key)
 end
 
 """
-    empty!(pq::PriorityQueue)  
+    empty!(pq::PriorityQueue)
 
 Reset priority queue `pq`.
 """

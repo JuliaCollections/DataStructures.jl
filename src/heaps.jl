@@ -117,10 +117,10 @@ function nextreme(ord::Base.Ordering, n::Int, arr::AbstractVector{T}) where T
 
     rev = Base.ReverseOrdering(ord)
 
-    buffer = heapify(arr[1:n], rev)
+    buffer = heapify!(arr[1:n], rev)
 
-    for i = n + 1 : length(arr)
-        @inbounds xi = arr[i]
+    @inbounds for i = n + 1 : length(arr)
+        xi = arr[i]
         if Base.lt(rev, buffer[1], xi)
             buffer[1] = xi
             percolate_down!(buffer, 1, rev)

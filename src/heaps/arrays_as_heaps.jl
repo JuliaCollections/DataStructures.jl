@@ -13,9 +13,11 @@ heapleft(i::Integer) = 2i
 heapright(i::Integer) = 2i + 1
 heapparent(i::Integer) = div(i, 2)
 
-
 # Binary min-heap percolate down.
-function percolate_down!(xs::AbstractArray, i::Integer, x=xs[i], o::Ordering=Forward, len::Integer=length(xs))
+Base.@propagate_inbounds function percolate_down!(xs::AbstractArray, i::Integer, x, o::Ordering=Forward, len::Integer=length(xs))
+    @boundscheck checkbounds(xs, i)
+    @boundscheck checkbounds(xs, len)
+
     @inbounds while (l = heapleft(i)) <= len
         r = heapright(i)
         j = r > len || lt(o, xs[l], xs[r]) ? l : r
@@ -23,23 +25,23 @@ function percolate_down!(xs::AbstractArray, i::Integer, x=xs[i], o::Ordering=For
         xs[i] = xs[j]
         i = j
     end
-    xs[i] = x
+    @inbounds xs[i] = x
 end
-
-percolate_down!(xs::AbstractArray, i::Integer, o::Ordering, len::Integer=length(xs)) = percolate_down!(xs, i, xs[i], o, len)
+Base.@propagate_inbounds percolate_down!(xs::AbstractArray, i::Integer, o::Ordering, len::Integer=length(xs)) = percolate_down!(xs, i, xs[i], o, len)
 
 
 # Binary min-heap percolate up.
-function percolate_up!(xs::AbstractArray, i::Integer, x=xs[i], o::Ordering=Forward)
+Base.@propagate_inbounds function percolate_up!(xs::AbstractArray, i::Integer, x, o::Ordering=Forward)
+    @boundscheck checkbounds(xs, i)
+
     @inbounds while (j = heapparent(i)) >= 1
         lt(o, x, xs[j]) || break
         xs[i] = xs[j]
         i = j
     end
-    xs[i] = x
+    @inbounds xs[i] = x
 end
-
-@inline percolate_up!(xs::AbstractArray, i::Integer, o::Ordering) = percolate_up!(xs, i, xs[i], o)
+Base.@propagate_inbounds percolate_up!(xs::AbstractArray, i::Integer, o::Ordering) = percolate_up!(xs, i, xs[i], o)
 
 """
     heappop!(v, [ord])
@@ -48,10 +50,11 @@ Given a binary heap-ordered array, remove and return the lowest ordered element.
 For efficiency, this function does not check that the array is indeed heap-ordered.
 """
 function heappop!(xs::AbstractArray, o::Ordering=Forward)
+    Base.require_one_based_indexing(xs)
     x = xs[1]
     y = pop!(xs)
     if !isempty(xs)
-        percolate_down!(xs, 1, y, o)
+        @inbounds percolate_down!(xs, 1, y, o)
     end
     return x
 end
@@ -63,8 +66,9 @@ Given a binary heap-ordered array, push a new element `x`, preserving the heap p
 For efficiency, this function does not check that the array is indeed heap-ordered.
 """
 @inline function heappush!(xs::AbstractArray, x, o::Ordering=Forward)
+    Base.require_one_based_indexing(xs)
     push!(xs, x)
-    percolate_up!(xs, length(xs), o)
+    @inbounds percolate_up!(xs, length(xs), o)
     return xs
 end
 
@@ -76,8 +80,9 @@ end
 In-place [`heapify`](@ref).
 """
 @inline function heapify!(xs::AbstractArray, o::Ordering=Forward)
+    Base.require_one_based_indexing(xs)
     for i in heapparent(length(xs)):-1:1
-        percolate_down!(xs, i, o)
+        @inbounds percolate_down!(xs, i, o)
     end
     return xs
 end
@@ -129,6 +134,7 @@ false
 ```
 """
 function isheap(xs::AbstractArray, o::Ordering=Forward)
+    Base.require_one_based_indexing(xs)
     for i in 1:div(length(xs), 2)
         if lt(o, xs[heapleft(i)], xs[i]) ||
            (heapright(i) <= length(xs) && lt(o, xs[heapright(i)], xs[i]))
