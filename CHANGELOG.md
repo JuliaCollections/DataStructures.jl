@@ -53,6 +53,13 @@ Starting from version 0.19.0, CHANGELOG.md is managed in a format that follows <
 - Dependency on InteractiveUtils.jl
 - Support for Julia versions < 1.6 (JuliaCollections/DataStructures.jl#874)
 
+0.8 – 0.18
+===========
+Changelogs for 0.8 to 0.18.x are listed only on the [Github release pages](https://github.com/JuliaCollections/DataStructures.jl/releases):
+e.g.: [v0.18.22](https://github.com/JuliaCollections/DataStructures.jl/releases/tag/v0.18.22)
+
+
+
 0.7.0 / 2017-09-02
 ==================
 
