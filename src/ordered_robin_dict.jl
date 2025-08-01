@@ -170,7 +170,7 @@ function rehash!(h::OrderedRobinDict{K, V}) where {K, V}
     return h
 end
 
-function Base.sizehint!(d::OrderedRobinDict, newsz)
+function Base.sizehint!(d::OrderedRobinDict, newsz::Integer)
     oldsz = length(d)
     # grow at least 25%
     if newsz < (oldsz*5)>>2
@@ -232,7 +232,7 @@ end
 function Base.get!(default::Base.Callable, h::OrderedRobinDict{K,V}, key0) where {K,V}
     index = get(h.dict, key0, -2)
     index > 0 && return @inbounds h.vals[index]
-    
+
     v = convert(V, default())
     setindex!(h, v, key0)
     return v
