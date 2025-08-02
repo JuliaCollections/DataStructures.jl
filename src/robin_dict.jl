@@ -225,7 +225,7 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
     return h
 end
 
-function Base.sizehint!(d::RobinDict, newsz)
+function Base.sizehint!(d::RobinDict, newsz::Integer)
     newsz = _tablesz(newsz*2)  # *2 for keys and values in same array
     oldsz = length(d.keys)
     # grow at least 25%

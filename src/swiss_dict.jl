@@ -274,7 +274,7 @@ function maybe_rehash_shrink!(h::SwissDict)
    end
 end
 
-function Base.sizehint!(d::SwissDict, newsz)
+function Base.sizehint!(d::SwissDict, newsz::Integer)
     newsz = _tablesz(newsz*2)  # *2 for keys and values in same array
     oldsz = length(d.keys)
     # grow at least 25%
