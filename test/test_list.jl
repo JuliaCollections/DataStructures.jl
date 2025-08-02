@@ -1,3 +1,8 @@
+T = Int64
+if Int == Int32
+    T = Int32
+end
+
 @testset "LinkedList" begin
 
     @testset "basic tests" begin
@@ -46,7 +51,7 @@
         @test l3 == list(2,3)
         @test collect(l3) == [2; 3]
         @test collect(copy(l3)) == [2; 3]
-        @test sprint(show,l3) == "list(2, 3)"
+        @test sprint(show,l3) == "list{$T}(2, 3)"
     end
 
     @testset "l4" begin
