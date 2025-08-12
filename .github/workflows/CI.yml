@@ -46,7 +46,7 @@ jobs:
             # Install an x86_64 build of Julia, and run it under Rosetta 2 emulation
             arch: 'x64'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
