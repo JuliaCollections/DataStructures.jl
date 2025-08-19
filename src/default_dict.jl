@@ -25,15 +25,12 @@ a missing key returns (and stores) a default value.
 # Parameters
 
 - `K` Key type
-- `V` Value type  
+- `V` Value type
 - `F` Type of the default value or callable
 - `D` Type of the underlying dictionary
 - `default` Default value or callable to use for missing keys
 - `passkey::Bool=false` If true and default is callable, pass the key to the default function
 
-# Note
-
-This is an internal type. Users should use `DefaultDict` or `DefaultOrderedDict` instead.
 """
 struct DefaultDictBase{K,V,F,D} <: AbstractDict{K,V}
     default::F
@@ -222,7 +219,7 @@ for _Dict in [:Dict, :OrderedDict]
             push!(d::$($DefaultDict), p::Pair...)
 
         Insert one or more key-value pairs into the dictionary `d`.
-        
+
         # Examples
         ```jldoctest
         julia> d = $($DefaultDict)(0)
