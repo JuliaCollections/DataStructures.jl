@@ -14,6 +14,27 @@
 # subclassed.
 #
 
+"""
+    DefaultDictBase{K,V,F,D}(default[, dict][, pairs...]; passkey=false)
+
+Internal base type for DefaultDict and DefaultOrderedDict.
+
+This type handles the core "default on miss" behavior, where accessing
+a missing key returns (and stores) a default value.
+
+# Parameters
+
+- `K` Key type
+- `V` Value type  
+- `F` Type of the default value or callable
+- `D` Type of the underlying dictionary
+- `default` Default value or callable to use for missing keys
+- `passkey::Bool=false` If true and default is callable, pass the key to the default function
+
+# Note
+
+This is an internal type. Users should use `DefaultDict` or `DefaultOrderedDict` instead.
+"""
 struct DefaultDictBase{K,V,F,D} <: AbstractDict{K,V}
     default::F
     d::D
@@ -58,8 +79,21 @@ DefaultDictBase{K,V}(default::F; kwargs...) where {K,V,F} = DefaultDictBase{K,V,
 #       calls setindex!
 @delegate_return_parent DefaultDictBase.d [ Base.delete!, Base.empty!, Base.setindex!, Base.sizehint! ]
 
+"""
+    empty(d::DefaultDictBase)
+
+Create an empty DefaultDictBase with the same default and passkey settings.
+"""
 Base.empty(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default; passkey=d.passkey)
 
+"""
+    getindex(d::DefaultDictBase, key)
+
+Return the value for `key` if it exists, otherwise return and store the default value.
+
+For non-callable defaults, returns the constant value.
+For callable defaults, calls the function and stores the result.
+"""
 Base.getindex(d::DefaultDictBase, key) = get!(d.d, key, d.default)
 
 function Base.getindex(d::DefaultDictBase{K,V,F}, key) where {K,V,F<:Base.Callable}
@@ -90,13 +124,55 @@ for _Dict in [:Dict, :OrderedDict]
             $($DefaultDict)(default, d::AbstractDict; passkey=false)
             $($DefaultDict){K, V}(default, pairs...; passkey=false)
             $($DefaultDict){K, V}(default, dict::AbstractDict; passkey=false)
-        
-        Construct an $($(_Dict == :Dict ? "un" : ""))ordered dictionary from the given key-value `pairs` or `dict`
-        with a `default` value to be returned for keys that are not stored in the dictionary. The key and value
-        types may be optionally specified with the `K` and `V` parameters.
-        
-        If the `default` value is a `Function` or `Type`, then it will be _called_ upon the retrieval of a missing key,
-        with either 0 arguments (if `passkey==false`) or with the key that was requested.
+
+        Construct an $($(_Dict == :Dict ? "un" : ""))ordered dictionary with "default on miss" behavior.
+        When accessing a missing key, the dictionary returns (and stores) either the constant
+        `default` value (if non-callable) or the result of calling the callable `default`.
+
+        If the `default` is a `Function` or `Type`, it is called on retrieval of a missing key
+        with either zero arguments (if `passkey==false`) or with the requested key (if `passkey==true`).
+
+        # Examples
+        ```julia
+        # Counting pattern with constant default
+        counter = $($DefaultDict)(0)
+        for ch in "banana"
+            counter[ch] += 1
+        end
+        # counter['b'] == 1, counter['a'] == 3, counter['n'] == 2
+
+        # Grouping items with fresh container per key
+        groups = $($DefaultDict)(() -> Int[])
+        for (k, v) in [("a", 1), ("a", 2), ("b", 3)]
+            push!(groups[k], v)
+        end
+        # groups["a"] == [1, 2], groups["b"] == [3]
+
+        # Using type constructors as callable defaults
+        dd = $($DefaultDict)(Vector{String})
+        push!(dd[:colors], "red")
+        push!(dd[:colors], "blue")
+        # dd[:colors] == ["red", "blue"]
+
+        # passkey=false: default function called with no arguments
+        dd1 = $($DefaultDict)(() -> "default", passkey=false)
+        dd1["anything"]  # returns "default"
+
+        # passkey=true: default function receives the missing key
+        dd2 = $($DefaultDict)(k -> "Key '\$k' not found", passkey=true)
+        dd2["missing"]  # returns "Key 'missing' not found"
+        dd2["other"]    # returns "Key 'other' not found"
+
+        # Initialize with specified types
+        dd = $($DefaultDict){String,Int}(0)
+        dd["a"] = 1
+        dd["b"]  # returns 0
+
+        # Create from existing dictionary
+        base = Dict("a" => 1, "b" => 2)
+        dd = $($DefaultDict)(0, base)
+        dd["c"]  # returns 0
+        ```
         """
         struct $DefaultDict{K,V,F} <: AbstractDict{K,V}
             d::DefaultDictBase{K,V,F,$_Dict{K,V}}
@@ -141,6 +217,20 @@ for _Dict in [:Dict, :OrderedDict]
         #       calls setindex!
         @delegate_return_parent $DefaultDict.d [ Base.delete!, Base.empty!, Base.setindex!, Base.sizehint! ]
 
+        """
+            push!(d::$($DefaultDict), p::Pair)
+            push!(d::$($DefaultDict), p::Pair...)
+
+        Insert one or more key-value pairs into the dictionary `d`.
+        
+        # Examples
+        ```jldoctest
+        julia> d = $($DefaultDict)(0)
+        julia> push!(d, "a" => 1, "b" => 2)
+        julia> d["a"]
+        1
+        ```
+        """
         # NOTE: The second and third definition of push! below are only
         # necessary for disambiguating with the fourth, fifth, and sixth
         # definitions of push! below.
@@ -154,7 +244,17 @@ for _Dict in [:Dict, :OrderedDict]
         Base.push!(d::$DefaultDict, p, q) = push!(push!(d, p), q)
         Base.push!(d::$DefaultDict, p, q, r...) = push!(push!(push!(d, p), q), r...)
 
+        """
+            empty(d::$($DefaultDict))
+
+        Return an empty $($DefaultDict) with the same default value and type parameters.
+        """
         Base.empty(d::$DefaultDict{K,V,F}) where {K,V,F} = $DefaultDict{K,V,F}(d.d.default)
+        """
+            in(key, keys::Base.KeySet{K,$($DefaultDict){K}})
+
+        Check if `key` is present in the key set of a $($DefaultDict).
+        """
         Base.in(key, v::Base.KeySet{K,T}) where {K,T<:$DefaultDict{K}} = key in keys(v.dict.d.d)
     end
 end
