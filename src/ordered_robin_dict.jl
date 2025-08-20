@@ -382,7 +382,7 @@ julia> pop!(d, "e", 4)
 """
 function Base.pop!(h::OrderedRobinDict, key, default)
     index = get(h.dict, key, -1)
-    (index > 0) ? _pop(h, index) : default
+    (index > 0) ? _pop!(h, index) : default
 end
 
 """
