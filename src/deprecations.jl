@@ -6,7 +6,7 @@
 # Deprecations from #700
 Base.@deprecate_binding DisjointSets DisjointSet
 Base.@deprecate_binding IntDisjointSets IntDisjointSet
-@deprecate DisjointSets(xs...) DisjointSet(xs)
+@deprecate DisjointSet(xs...) DisjointSet(xs)
 # Enqueue and dequeue deprecations
 @deprecate enqueue!(q::Queue, x) Base.push!(q, x)
 @deprecate enqueue!(q::PriorityQueue, x) Base.push!(q, x)
