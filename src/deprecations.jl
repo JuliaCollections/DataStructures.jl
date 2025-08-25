@@ -6,7 +6,11 @@
 # Deprecations from #700
 Base.@deprecate_binding DisjointSets DisjointSet
 Base.@deprecate_binding IntDisjointSets IntDisjointSet
-@deprecate DisjointSets(xs...) DisjointSet(xs)
+# We won't want to make this `@deprecate DisjointSets(xs...) DisjointSet(xs)`
+# because then loading this package will trigger a deprecation warning when we
+# evaluate the deprecated DisjointSets binding. This breaks any package that
+# tries to load DataStructures with --depwarn=error
+@deprecate DisjointSet(xs...) DisjointSet(xs)
 # Enqueue and dequeue deprecations
 @deprecate enqueue!(q::Queue, x) Base.push!(q, x)
 @deprecate enqueue!(q::PriorityQueue, x) Base.push!(q, x)
