@@ -417,6 +417,7 @@
         end
 
         d = OrderedRobinDict(1=>'a', 2=>'b', 3=>'c')
+        @test pop!(d, 1, 'e') == 'a'
         @test pop!(d, 4, 'e') == 'e'
     end
 
