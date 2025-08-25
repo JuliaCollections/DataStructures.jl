@@ -8,7 +8,7 @@ Base.@deprecate_binding DisjointSets DisjointSet
 Base.@deprecate_binding IntDisjointSets IntDisjointSet
 # We won't want to make this `@deprecate DisjointSets(xs...) DisjointSet(xs)`
 # because then loading this package will trigger a deprecation warning when we
-# evaluate the deprrecated DisjointSets binding. This breaks any package that
+# evaluate the deprecated DisjointSets binding. This breaks any package that
 # tries to load DataStructures with --depwarn=error
 @deprecate DisjointSet(xs...) DisjointSet(xs)
 # Enqueue and dequeue deprecations
