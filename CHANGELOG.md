@@ -5,7 +5,23 @@ Starting from version 0.19.0, CHANGELOG.md is managed in a format that follows <
 <!-- links start -->
 [Unreleased]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.0...HEAD
 [0.19.0]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.18.22...v0.19.0
+[0.19.1]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.0...v0.19.1
 <!-- links end -->
+
+[0.19.1] - 2025-08-26
+=====================
+
+## Fixed
+
+- Add `newsz::Integer` type annotation to `sizehint!` overloads (JuliaCollections/DataStructures.jl#945)
+- Fix `pop!` with default for `OrderedRobinDict` (JuliaCollections/DataStructures.jl#950)
+- Fix deprecation of `DisjointSets(xs...)` to avoid warning on package load (JuliaCollections/DataStructures.jl#951)
+
+## Other
+
+- link to where missing change notes are (JuliaCollections/DataStructures.jl#944)
+- Bump `actions/checkout` from 4 to 5 (JuliaCollections/DataStructures.jl#947)
+- Add docstrings to `DefaultDict` (JuliaCollections/DataStructures.jl#948)
 
 [0.19.0] - 2025-07-31
 =====================
