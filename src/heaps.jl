@@ -109,6 +109,7 @@ end
 return an array of the first `n` values of `arr` sorted by `ord`.
 """
 function nextreme(ord::Base.Ordering, n::Int, arr::AbstractVector{T}) where T
+    Base.require_one_based_indexing(arr)
     if n <= 0
         return T[] # sort(arr)[1:n] returns [] for n <= 0
     elseif n >= length(arr)
