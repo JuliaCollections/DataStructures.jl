@@ -8,13 +8,13 @@ const n =  2 * (10^6)
 const T0 = 10
 const T = 10^6
 
-function batch_union!(s::IntDisjointSets, x::Vector{Int}, y::Vector{Int})
+function batch_union!(s::IntDisjointSet, x::Vector{Int}, y::Vector{Int})
     for i = 1 : length(x)
         @inbounds union!(s, x[i], y[i])
     end
 end
 
-s = IntDisjointSets(n)
+s = IntDisjointSet(n)
 
 # warming
 
