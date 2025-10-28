@@ -6,7 +6,15 @@ Starting from version 0.19.0, CHANGELOG.md is managed in a format that follows <
 [Unreleased]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.0...HEAD
 [0.19.0]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.18.22...v0.19.0
 [0.19.1]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.0...v0.19.1
+[0.19.2]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.1...v0.19.2
 <!-- links end -->
+
+[0.19.2]
+=====================
+
+## Added
+
+- `percolate_up!`, `percolate_down!` now use `@propagate_inbounds` to control bounds checking (JuliaCollections/DataStructures.jl#954)
 
 [0.19.1] - 2025-08-26
 =====================
