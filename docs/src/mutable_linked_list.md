@@ -29,8 +29,12 @@ delete!(l, idx)                   # delete element at index
 delete!(l, range)                 # delete elements within range a:b
 push!(l, data)                    # add element to end of list
 pushfirst!(l, data)               # add element to beginning of list
-pop!(l)                           # remove element from end of list
-popfirst!(l)                      # remove element from beginning of list
+pop!(l)                           # remove element from end of list and return its data
+popfirst!(l)                      # remove element from beginning of list and return its data
+popat!(l, idx, [default])         # remove element at index and return its data
+insert!(l, idx, data)             # insert at index an element contatining data
+splice!(l, idx, [elts])           # remove and return the element at index. Replacement elements will be spliced in if provided
+splice!(l, range, [elts])         # remove and return the elements in the range. Replacement elements will be spliced in if provided
 ```
 
 `MutableLinkedList` implements the Iterator interface, iterating over the list
