@@ -116,15 +116,34 @@
         @test haskey(t7, 1)
     end
 
-    @testset "minimum_node" begin
+    @testset "maximum and minimum" begin
         t8 = AVLTree{Int}()
-        @test minimum_node(t8.root) == nothing
         for i in 1:32
             push!(t8, i)
         end
-        m1 = minimum_node(t8.root)
+        @test minimum(t8) == 1
+        @test maximum(t8) == 32
+        delete!(t8, 32)
+        @test maximum(t8) == 31
+        delete!(t8, 1)
+        @test minimum(t8) == 2
+        delete!(t8, 20)
+        delete!(t8, 18)
+        delete!(t8, 5)
+        delete!(t8, 25)
+        @test maximum(t8) == 31
+        @test minimum(t8) == 2
+    end
+
+    @testset "minimum_node" begin
+        t9 = AVLTree{Int}()
+        @test minimum_node(t9.root) == nothing
+        for i in 1:32
+            push!(t9, i)
+        end
+        m1 = minimum_node(t9.root)
         @test m1.data == 1
-        node = t8.root
+        node = t9.root
         while node.leftChild != nothing
             m = minimum_node(node.leftChild)
             @test m == m1
@@ -133,13 +152,13 @@
     end
 
     @testset "rank" begin
-        t9 = AVLTree{Int}()
+        t10 = AVLTree{Int}()
         for i in 1:20
-            push!(t9, i)
+            push!(t10, i)
         end
         for i in 1:20
-            @test sorted_rank(t9, i) == i
+            @test sorted_rank(t10, i) == i
         end
-        @test_throws KeyError sorted_rank(t9, 21)
+        @test_throws KeyError sorted_rank(t10, 21)
     end
 end
