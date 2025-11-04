@@ -41,7 +41,7 @@ Base.@propagate_inbounds function percolate_up!(xs::AbstractArray, i::Integer, x
     end
     @inbounds xs[i] = x
 end
-Base.@propagate_inbounds percolate_up!(xs::AbstractArray, i::Integer, o::Ordering) = percolate_up!(xs, i, xs[i], o)
+Base.@propagate_inbounds percolate_up!(xs::AbstractArray, i::Integer, o::Ordering=Forward) = percolate_up!(xs, i, xs[i], o)
 
 """
     heappop!(v, [ord])
