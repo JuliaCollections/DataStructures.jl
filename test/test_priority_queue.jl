@@ -116,7 +116,7 @@ import Base.Order.Reverse
                 Base.IteratorSize(i::EltypeUnknownIterator) = Base.IteratorSize(i.x)
                 Base.length(i::EltypeUnknownIterator) = Base.length(i.x)
                 Base.size(i::EltypeUnknownIterator) = Base.size(i.x)
-    
+
                 @test_nowarn PriorityQueue(Dict(zip(1:5, 2:6)))
                 @test_nowarn PriorityQueue(EltypeUnknownIterator(Dict(zip(1:5, 2:6))))
                 @test_throws ArgumentError PriorityQueue(EltypeUnknownIterator(['a']))
@@ -133,7 +133,7 @@ import Base.Order.Reverse
                 Base.IteratorSize(i::EltypeAnyIterator) = Base.IteratorSize(i.x)
                 Base.length(i::EltypeAnyIterator) = Base.length(i.x)
                 Base.size(i::EltypeAnyIterator) = Base.size(i.x)
-    
+
                 @test_nowarn PriorityQueue(EltypeAnyIterator(Dict(zip(1:5, 2:6))))
                 @test_throws ArgumentError PriorityQueue(EltypeAnyIterator(['a']))
             end
@@ -338,6 +338,89 @@ import Base.Order.Reverse
             @test isheap([1, 2, 3], Base.Order.Forward)
             @test !isheap([1, 2, 3], Base.Order.Reverse)
         end
-    end
 
+        @testset "percolate_down!" begin
+            @testset "Basic percolate down" begin
+                xs = [10, 2, 3, 4, 5]
+                DataStructures.percolate_down!(xs, 1, 10, Base.Order.Forward)
+                @test xs == [2, 4, 3, 10, 5]
+            end
+
+            @testset "Element in correct position" begin
+                xs = [1, 2, 3, 4, 5]
+                DataStructures.percolate_down!(xs, 1, 1, Base.Order.Forward)
+                @test xs == [1, 2, 3, 4, 5]
+            end
+
+            @testset "Reverse ordering" begin
+                xs = [1, 5, 4, 3, 2]
+                DataStructures.percolate_down!(xs, 1, 1, Base.Order.Reverse)
+                @test xs == [5, 3, 4, 1, 2]
+            end
+
+            @testset "Custom length" begin
+                xs = [10, 2, 3, 4, 5]
+                DataStructures.percolate_down!(xs, 1, 10, Base.Order.Forward, 3)
+                @test xs == [2, 10, 3, 4, 5]
+            end
+
+            @testset "Without explicit x parameter" begin
+                xs = [10, 2, 3, 4, 5]
+                DataStructures.percolate_down!(xs, 1, Base.Order.Forward)
+                @test xs == [2, 4, 3, 10, 5]
+
+                xs = [10, 2, 3, 4, 5]
+                DataStructures.percolate_down!(xs, 1)
+                @test xs == [2, 4, 3, 10, 5]
+            end
+
+            @testset "From middle position" begin
+                xs = [2, 0, 3, 4, 5]
+                DataStructures.percolate_down!(xs, 2, 10, Base.Order.Forward)
+                @test xs == [2, 4, 3, 10, 5]
+            end
+        end
+
+        @testset "percolate_up!" begin
+            @testset "Basic percolate up" begin
+                xs = [1, 2, 3, 4, 0]
+                DataStructures.percolate_up!(xs, 5, 0, Base.Order.Forward)
+                @test xs == [0, 1, 3, 4, 2]
+            end
+
+            @testset "Element in correct position" begin
+                xs = [1, 2, 3, 4, 5]
+                DataStructures.percolate_up!(xs, 5, 5, Base.Order.Forward)
+                @test xs == [1, 2, 3, 4, 5]
+            end
+
+            @testset "Reverse ordering" begin
+                xs = [5, 4, 3, 2, 10]
+                DataStructures.percolate_up!(xs, 5, 10, Base.Order.Reverse)
+                @test xs == [10, 5, 3, 2, 4]
+            end
+
+            @testset "Percolate to root" begin
+                xs = [2, 3, 4, 5, 1]
+                DataStructures.percolate_up!(xs, 5, 1, Base.Order.Forward)
+                @test xs == [1, 2, 4, 5, 3]
+            end
+
+            @testset "Without explicit x parameter" begin
+                xs = [1, 2, 3, 4, 0]
+                DataStructures.percolate_up!(xs, 5, Base.Order.Forward)
+                @test xs == [0, 1, 3, 4, 2]
+
+                xs = [1, 2, 3, 4, 0]
+                DataStructures.percolate_up!(xs, 5)
+                @test xs == [0, 1, 3, 4, 2]
+            end
+
+            @testset "From middle position" begin
+                xs = [1, 5, 3, 10, 8]
+                DataStructures.percolate_up!(xs, 4, 0, Base.Order.Forward)
+                @test xs == [0, 1, 3, 5, 8]
+            end
+        end
+    end
 end # @testset "PriorityQueue"
