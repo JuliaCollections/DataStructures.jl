@@ -27,7 +27,7 @@ Base.@propagate_inbounds function percolate_down!(xs::AbstractArray, i::Integer,
     end
     @inbounds xs[i] = x
 end
-Base.@propagate_inbounds percolate_down!(xs::AbstractArray, i::Integer, o::Ordering, len::Integer=length(xs)) = percolate_down!(xs, i, xs[i], o, len)
+Base.@propagate_inbounds percolate_down!(xs::AbstractArray, i::Integer, o::Ordering=Forward, len::Integer=length(xs)) = percolate_down!(xs, i, xs[i], o, len)
 
 
 # Binary min-heap percolate up.
