@@ -9,6 +9,13 @@ Starting from version 0.19.0, CHANGELOG.md is managed in a format that follows <
 [0.19.2]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.1...v0.19.2
 <!-- links end -->
 
+[0.19.3]
+=====================
+
+## Fixed
+
+- Reintroduce a method for `percolate_up!` `percolate_down!` that doesn't require the element to be passed, which was unintentionally removed in 0.19.2 (JuliaCollections/DataStructures.jl#960).
+
 [0.19.2]
 =====================
 
