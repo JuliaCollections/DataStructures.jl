@@ -251,7 +251,7 @@ function Base.setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
     else
         push!(pq, key=>value)
     end
-    return value
+    return pq
 end
 
 """
