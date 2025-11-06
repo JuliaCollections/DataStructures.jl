@@ -152,9 +152,9 @@ end
 
 function Base.append!(l1::MutableLinkedList{T}, l2::MutableLinkedList{T}) where T
     l1.node.prev.next = l2.node.next # l1's last's next is now l2's first
-    l2.node.prev.next = l1.node # l2's last's next is now l1.node
     l2.node.next.prev = l1.node.prev # l2's first's prev is now l1's last
-    l1.node.prev      = l2.node.prev # l1's first's prev is now l2's last
+    l1.node.prev      = l2.node.prev # l1's last is now l2's last
+    l2.node.prev.next = l1.node # l2's last's next is now l1.node
     l1.len += length(l2)
     # make l2 empty
     l2.node.prev = l2.node
