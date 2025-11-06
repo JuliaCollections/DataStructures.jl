@@ -7,7 +7,7 @@ end
 
 mutable struct Cons{T} <: LinkedList{T}
     head::T
-    tail::LinkedList{T}
+    tail::Union{Nil{T}, Cons{T}}
 end
 
 cons(h, t::LinkedList{T}) where {T} = Cons{T}(h, t)
