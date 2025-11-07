@@ -29,10 +29,16 @@
                     @test num_groups(s) == T(9)
                     @test in_same_set(s, T(2), T(3))
                     @test find_root!(s, T(3)) == T(2)
+                    @test find_root!(s, T(3), PCIterative()) == T(2)
+                    @test find_root!(s, T(3), PCHalving()) == T(2)
+                    @test find_root!(s, T(3), PCSplitting()) == T(2)
                     union!(s, T(3), T(2))
                     @test num_groups(s) == T(9)
                     @test in_same_set(s, T(2), T(3))
                     @test find_root!(s, T(3)) == T(2)
+                    @test find_root!(s, T(3), PCIterative()) == T(2)
+                    @test find_root!(s, T(3), PCHalving()) == T(2)
+                    @test find_root!(s, T(3), PCSplitting()) == T(2)
                 end
 
                 @testset "more tests" begin
@@ -48,10 +54,19 @@
                     @test union!(s, T(8), T(5)) == T(8)
                     @test num_groups(s) == T(7)
                     @test find_root!(s, T(6)) == T(8)
+                    @test find_root!(s, T(6), PCIterative()) == T(8)
+                    @test find_root!(s, T(6), PCHalving()) == T(8)
+                    @test find_root!(s, T(6), PCSplitting()) == T(8)
                     union!(s, T(2), T(6))
                     @test find_root!(s, T(2)) == T(8)
                     root1 = find_root!(s, T(6))
+                    root1 = find_root!(s, T(6), PCIterative())
+                    root1 = find_root!(s, T(6), PCHalving())
+                    root1 = find_root!(s, T(6), PCSplitting())
                     root2 = find_root!(s, T(2))
+                    root2 = find_root!(s, T(2), PCIterative())
+                    root2 = find_root!(s, T(2), PCHalving())
+                    root2 = find_root!(s, T(2), PCSplitting())
                     @test root_union!(s, T(root1), T(root2)) == T(8)
                     @test union!(s, T(5), T(6)) == T(8)
                 end
@@ -98,6 +113,12 @@
 
             r = [find_root!(s, i) for i in 1 : 10]
             @test isequal(r, collect(1:10))
+            r = [find_root!(s, i, PCIterative()) for i in 1 : 10]
+            @test isequal(r, collect(1:10))
+            r = [find_root!(s, i, PCHalving()) for i in 1 : 10]
+            @test isequal(r, collect(1:10))
+            r = [find_root!(s, i, PCSplitting()) for i in 1 : 10]
+            @test isequal(r, collect(1:10))
         end
 
         @testset "union!" begin
@@ -117,6 +138,57 @@
             @test num_groups(s) == 2
         end
 
+        @testset "union! PCIterative" begin
+            for i = 1 : 5
+                x = 2 * i - 1
+                y = 2 * i
+                union!(s, x, y)
+                @test find_root!(s, x, PCIterative()) == find_root!(s, y, PCIterative())
+            end
+
+
+            @test union!(s, 1, 4) == find_root!(s, 1, PCIterative())
+            @test union!(s, 3, 5) == find_root!(s, 1, PCIterative())
+            @test union!(s, 7, 9) == find_root!(s, 7, PCIterative())
+
+            @test length(s) == 10
+            @test num_groups(s) == 2
+        end
+
+        @testset "union! PCHalving" begin
+            for i = 1 : 5
+                x = 2 * i - 1
+                y = 2 * i
+                union!(s, x, y)
+                @test find_root!(s, x, PCHalving()) == find_root!(s, y, PCHalving())
+            end
+
+
+            @test union!(s, 1, 4) == find_root!(s, 1, PCHalving())
+            @test union!(s, 3, 5) == find_root!(s, 1, PCHalving())
+            @test union!(s, 7, 9) == find_root!(s, 7, PCHalving())
+
+            @test length(s) == 10
+            @test num_groups(s) == 2
+        end
+
+        @testset "union! PCSplitting" begin
+            for i = 1 : 5
+                x = 2 * i - 1
+                y = 2 * i
+                union!(s, x, y)
+                @test find_root!(s, x, PCSplitting()) == find_root!(s, y, PCSplitting())
+            end
+
+
+            @test union!(s, 1, 4) == find_root!(s, 1, PCSplitting())
+            @test union!(s, 3, 5) == find_root!(s, 1, PCSplitting())
+            @test union!(s, 7, 9) == find_root!(s, 7, PCSplitting())
+
+            @test length(s) == 10
+            @test num_groups(s) == 2
+        end
+
         @testset "r0" begin
             r0 = [ find_root!(s,i) for i in 1:10 ]
             # Since this is a DisjointSet (not IntDisjointSet), the root for 17 will be 17, not 11
@@ -127,6 +199,45 @@
 
             r0 = [ r0 ; 17]
             r = [find_root!(s, i) for i in [1 : 10; 17] ]
+            @test isequal(r, r0)
+        end
+
+        @testset "r0 Iterative" begin
+            r0 = [ find_root!(s,i) for i in 1:10 ]
+            # Since this is a DisjointSet (not IntDisjointSet), the root for 17 will be 17, not 11
+            push!(s, 17)
+
+            @test length(s) == 11
+            @test num_groups(s) == 3
+
+            r0 = [ r0 ; 17]
+            r = [find_root!(s, i, PCIterative()) for i in [1 : 10; 17] ]
+            @test isequal(r, r0)
+        end
+
+        @testset "r0 Splitting" begin
+            r0 = [ find_root!(s,i) for i in 1:10 ]
+            # Since this is a DisjointSet (not IntDisjointSet), the root for 17 will be 17, not 11
+            push!(s, 17)
+
+            @test length(s) == 11
+            @test num_groups(s) == 3
+
+            r0 = [ r0 ; 17]
+            r = [find_root!(s, i, PCSplitting()) for i in [1 : 10; 17] ]
+            @test isequal(r, r0)
+        end
+
+        @testset "r0 Halving" begin
+            r0 = [ find_root!(s,i) for i in 1:10 ]
+            # Since this is a DisjointSet (not IntDisjointSet), the root for 17 will be 17, not 11
+            push!(s, 17)
+
+            @test length(s) == 11
+            @test num_groups(s) == 3
+
+            r0 = [ r0 ; 17]
+            r = [find_root!(s, i, PCHalving()) for i in [1 : 10; 17] ]
             @test isequal(r, r0)
         end
 
