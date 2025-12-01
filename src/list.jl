@@ -70,12 +70,22 @@ end
 Base.map(f::Base.Callable, l::Nil) = l
 
 function Base.map(f::Base.Callable, l::Cons{T}) where T
-    first = f(l.head)
-    l2 = cons(first, nil(typeof(first) <: T ? T : typeof(first)))
-    for h in l.tail
-        l2 = cons(f(h), l2)
+    # Tail recursion manually unrolled into iterative loop with local stack to avoid
+    # StackOverflow exception. The recursive logic is:
+    #     map(f::Base.Callable, l::Cons) = cons(f(head(l)), map(f, tail(l)))
+    # Recursion to iteration instructions: https://stackoverflow.com/a/159777/751061
+    stack = Vector{T}()
+    while !(tail(l) isa Nil)
+        push!(stack, head(l))
+        l::Cons{T} = tail(l)::Cons{T}
     end
-    reverse(l2)
+    # Note the new list might have a different eltype than T
+    first = f(head(l))
+    l2 = cons(first, nil(typeof(first) <: T ? T : typeof(first)))
+    for i in reverse(1:length(stack))
+        l2 = cons(f(stack[i]), l2)
+    end
+    return l2
 end
 
 function Base.filter(f::Function, l::LinkedList{T}) where T
