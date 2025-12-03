@@ -126,6 +126,11 @@ function _join!(tree::SplayTree, s::Union{SplayTreeNode, Nothing}, t::Union{Spla
     end
 end
 
+# search_node must do a splay even in the case of failed searches to guarantee
+# the O(log n) amortized time bound. This might change the structure of the
+# tree, but does NOT change the user-visible state (has_key, in-order
+# traversals, etc., all keep the same results before and after). Hence we don't
+# mark it with a "!".
 function search_node(tree::SplayTree{K}, d::K) where K
     node = tree.root
     prev = nothing
@@ -137,7 +142,9 @@ function search_node(tree::SplayTree{K}, d::K) where K
             node = node.leftChild
         end
     end
-    return (node == nothing) ? prev : node
+    last = (node == nothing) ? prev : node
+    (last == nothing) || splay!(tree, last)
+    return last
 end
 
 function Base.haskey(tree::SplayTree{K}, d::K) where K
@@ -147,9 +154,7 @@ function Base.haskey(tree::SplayTree{K}, d::K) where K
     else
         node = search_node(tree, d)
         (node === nothing) && return false
-        is_found = (node.data == d)
-        is_found && splay!(tree, node)
-        return is_found
+        return (node.data == d)
     end
 end
 
@@ -158,11 +163,9 @@ Base.in(key, tree::SplayTree) = haskey(tree, key)
 function Base.delete!(tree::SplayTree{K}, d::K) where K
     node = tree.root
     x = search_node(tree, d)
-    (x == nothing) && return tree
+    (x == nothing || x.data != d) && return tree
     t = nothing
     s = nothing
-
-    splay!(tree, x)
 
     if x.rightChild !== nothing
         t = x.rightChild
