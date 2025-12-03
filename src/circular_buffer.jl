@@ -1,5 +1,5 @@
 """
-    CircularBuffer{T}(v,n::Int)
+    CircularBuffer{T}(v, n::Int)
 
 The CircularBuffer type implements a circular buffer of fixed capacity
 where new items are pushed to the back of the list, overwriting values
@@ -14,29 +14,29 @@ mutable struct CircularBuffer{T} <: AbstractVector{T}
     length::Int
     buffer::Vector{T}
 
-    function CircularBuffer{T}(f,len,buf) where {T}
+    function CircularBuffer{T}(f::Int, len::Int, buf) where {T}
         f <= length(buf) || throw(ArgumentError("Value of 'first' must be inbounds of buffer"))
         len <= length(buf) || throw(ArgumentError("Value of 'length' must be <= length of buffer"))
         return new{T}(length(buf), f, len, buf)
     end
 
     # Convert any `Integer` to whatever `Int` is on the relevant machine
-    CircularBuffer{T}(f::Integer, len::Integer, buf::Integer) where {T} = CircularBuffer{T}(Int(f), Int(len), Int(buf))
+    CircularBuffer{T}(f::Integer, len::Integer, buf) where {T} = CircularBuffer{T}(Int(f), Int(len), buf)
 end
 
 function CircularBuffer{T}(iter, capacity::Integer) where {T}
-    vec = copyto!(Vector{T}(undef,capacity), iter)
-    CircularBuffer{T}(1, length(iter),vec)
+    vec = copyto!(Vector{T}(undef, capacity), iter)
+    CircularBuffer{T}(1, length(iter), vec)
 end
 
 CircularBuffer(capacity::Integer) = CircularBuffer{Any}(capacity)
 
-CircularBuffer{T}(capacity::Integer) where {T} = CircularBuffer{T}(T[],capacity)
+CircularBuffer{T}(capacity::Integer) where {T} = CircularBuffer{T}(T[], capacity)
 
-CircularBuffer(iter,capacity::Integer) =  CircularBuffer{eltype(iter)}(iter,capacity)
+CircularBuffer(iter, capacity::Integer) = CircularBuffer{eltype(iter)}(iter, capacity)
 
 function CircularBuffer{T}(iter) where {T}
-  vec = reshape(collect(T,iter),:) 
+  vec = reshape(collect(T, iter), :)
   CircularBuffer{T}(1, length(vec), vec)
 end
 
