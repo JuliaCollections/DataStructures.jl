@@ -7,7 +7,15 @@ Starting from version 0.19.0, CHANGELOG.md is managed in a format that follows <
 [0.19.0]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.18.22...v0.19.0
 [0.19.1]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.0...v0.19.1
 [0.19.2]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.1...v0.19.2
+[0.19.3]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.1...v0.19.3
 <!-- links end -->
+
+[0.19.4]
+====================
+
+## Fixed
+
+ - # Fixed #963: MutableBinaryHeap doesn't work with Abstract / Union Type (#869)
 
 [0.19.3]
 =====================
