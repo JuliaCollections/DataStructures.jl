@@ -21,7 +21,7 @@ jobs:
         with:
           version: '1'                         # replace this with whatever version you need
           show-versioninfo: true               # this causes versioninfo to be printed to the action log
-      - uses: julia-actions/cache@v2           # cache using https://github.com/julia-actions/cache
+      - uses: julia-actions/cache@v3           # cache using https://github.com/julia-actions/cache
       - uses: julia-actions/julia-buildpkg@v1  # if package requires Pkg.build()
       - uses: julia-actions/julia-docdeploy@v1
         env:
