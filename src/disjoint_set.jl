@@ -65,13 +65,64 @@ function _find_root_impl!(parents::Vector{T}, x::Integer) where {T<:Integer}
     return p
 end
 
+# iterative path compression: makes every node on the path point directly to the root
+@inline function find_root_iterative!(parents::Vector{T}, x::Integer) where {T<:Integer}
+    current = x
+    # find the root of the tree
+    @inbounds while parents[current] != current
+        current = parents[current]
+    end
+    root = current
+    # compress the path: make every node point directly to the root
+    current = x
+    @inbounds while parents[current] != root
+        p = parents[current] # temporarily store the parent
+        parents[current] = root # point directly to the root
+        current = p # move to the next node in the original path
+    end
+    return root
+end
+
+# path-halving and path-splitting are a one-pass forms of path compression with inverse-ackerman complexity
+# e.g., see p.19 of https://www.cs.princeton.edu/courses/archive/spr11/cos423/Lectures/PathCompressionAnalysisII.pdf
+
+# path-halving: every node on the path points to its grandparent
+@inline function find_root_halving!(parents::Vector{T}, x::Integer) where {T<:Integer}
+    current = x # use a separate variable 'current' to track traversal
+    @inbounds while parents[current] != current
+        @inbounds parents[current] = parents[parents[current]] # point to grandparent
+        @inbounds current = parents[current] # move to grandparent
+    end
+    return current
+end
+
+# path-splitting: every node on the path points to its grandparent
+@inline function find_root_splitting!(parents::Vector{T}, x::Integer) where {T<:Integer}
+    @inbounds while parents[x] != x
+        p = parents[x] # store the current parent
+        parents[x] = parents[p] # point to grandparent
+        x = p # move to parent
+    end
+    return x
+end
+
+
+struct PCRecursive end # path compression types
+struct PCIterative end # path compression types
+struct PCHalving end # path compression types
+struct PCSplitting end # path compression types
+
 """
     find_root!(s::IntDisjointSet{T}, x::T)
 
 Find the root element of the subset that contains an member `x`.
 Path compression happens here.
 """
-find_root!(s::IntDisjointSet{T}, x::T) where {T<:Integer} = find_root_impl!(s.parents, x)
+@inline find_root!(s::IntDisjointSet{T}, x::T) where {T<:Integer} = find_root_impl!(s.parents, x) # default
+@inline find_root!(s::IntDisjointSet{T}, x::T, ::PCRecursive) where {T<:Integer} = find_root_impl!(s.parents, x)
+@inline find_root!(s::IntDisjointSet{T}, x::T, ::PCIterative) where {T<:Integer} = find_root_iterative!(s.parents, x)
+@inline find_root!(s::IntDisjointSet{T}, x::T, ::PCHalving) where {T<:Integer} = find_root_halving!(s.parents, x)
+@inline find_root!(s::IntDisjointSet{T}, x::T, ::PCSplitting) where {T<:Integer} = find_root_splitting!(s.parents, x)
 
 """
     in_same_set(s::IntDisjointSet{T}, x::T, y::T)
@@ -197,6 +248,10 @@ end
 Find the root element of the subset in `s` which has the element `x` as a member.
 """
 find_root!(s::DisjointSet{T}, x::T) where {T} = s.revmap[find_root!(s.internal, s.intmap[x])]
+find_root!(s::DisjointSet{T}, x::T, ::PCIterative) where {T} = s.revmap[find_root!(s.internal, s.intmap[x], PCIterative())]
+find_root!(s::DisjointSet{T}, x::T, ::PCRecursive) where {T} = s.revmap[find_root!(s.internal, s.intmap[x], PCRecursive())]
+find_root!(s::DisjointSet{T}, x::T, ::PCHalving) where {T} = s.revmap[find_root!(s.internal, s.intmap[x], PCHalving())]
+find_root!(s::DisjointSet{T}, x::T, ::PCSplitting) where {T} = s.revmap[find_root!(s.internal, s.intmap[x], PCSplitting())]
 
 """
     in_same_set(s::DisjointSet{T}, x::T, y::T)
