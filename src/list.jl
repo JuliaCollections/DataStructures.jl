@@ -1,14 +1,15 @@
-abstract type LinkedList{T} end
+
+
+struct Nil{T} end
+
+struct Cons{T}
+    head::T
+    tail::Union{Nil{T}, Cons{T}}
+end
+
+const LinkedList{T} = Union{Nil{T}, Cons{T}}
 
 Base.eltype(::Type{<:LinkedList{T}}) where T = T
-
-mutable struct Nil{T} <: LinkedList{T}
-end
-
-mutable struct Cons{T} <: LinkedList{T}
-    head::T
-    tail::LinkedList{T}
-end
 
 cons(h, t::LinkedList{T}) where {T} = Cons{T}(h, t)
 
@@ -19,7 +20,20 @@ head(x::Cons) = x.head
 tail(x::Cons) = x.tail
 
 Base.:(==)(x::Nil, y::Nil) = true
-Base.:(==)(x::Cons, y::Cons) = (x.head == y.head) && (x.tail == y.tail)
+function Base.:(==)(x::LinkedList, y::LinkedList) 
+    # can be changed to the more elegant
+    # Base.:(==)(x::Cons, y::Cons) = (x.head == y.head) && (x.tail == y.tail)
+    # once julia supports tail call recursions
+    while x  isa Cons && y isa Cons
+        x.head == y.head || return false
+        x = x.tail
+        y = y.tail
+    end
+    if x isa Cons || y isa Cons
+        return false
+    end
+    return true
+end
 
 function Base.show(io::IO, l::LinkedList{T}) where T
     if isa(l,Nil)
