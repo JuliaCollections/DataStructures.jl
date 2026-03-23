@@ -37,6 +37,7 @@ function Base.sizehint!(s::IntDisjointSet, n::Integer)
     sizehint!(s.ranks, n)
     return s
 end
+Base.in(i::Integer, s::IntDisjointSet) = checkbounds(Bool, s.parents, i)
 
 """
     num_groups(s::IntDisjointSet)
@@ -175,6 +176,7 @@ Base.iterate(s::DisjointSet) = iterate(s.revmap)
 Base.iterate(s::DisjointSet, i) = iterate(s.revmap, i)
 
 Base.length(s::DisjointSet) = length(s.internal)
+Base.in(el, s::DisjointSet) = haskey(s.intmap, el)
 
 """
     num_groups(s::DisjointSet)
