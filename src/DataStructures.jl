@@ -73,10 +73,12 @@ module DataStructures
     include("default_dict.jl")
     include("dict_support.jl")
     include("trie.jl")
-
     include("int_set.jl")
-
     include("fenwick.jl")
+
+    include("segment_tree.jl")
+
+    export Segment_tree, get_range, set_range!
 
     include("list.jl")
     include("mutable_list.jl")
