@@ -13,6 +13,8 @@ length(h)            # returns the number of elements
 
 isempty(h)           # returns whether the heap is empty
 
+empty!(h)            # reset the heap
+
 push!(h, v)          # add a value to the heap
 
 first(h)             # return the first (top) value of a heap

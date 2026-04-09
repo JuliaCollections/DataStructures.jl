@@ -5,6 +5,19 @@ on:
     branches:
       - master
     tags: '*'
+
+concurrency:
+  # group by workflow and ref; the last slightly strange component ensures that for pull
+  # requests, we limit to 1 concurrent job, but for the default repository branch we don't
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref_name != github.event.repository.default_branch || github.run_number }}
+  # Cancel intermediate builds, but only if it is a pull request build.
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
+# needed to allow julia-actions/cache to delete old caches that it has created
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
@@ -14,33 +27,45 @@ jobs:
       matrix:
         version:
           - '1.6'
+          - 'lts'
           - '1'
 #          - 'nightly'
         os:
           - ubuntu-latest
-          - macOS-latest
+          - macos-latest
           - windows-latest
         arch:
-          - x64
+          - ''
+        exclude:
+          - os: macos-latest # Apple Silicon
+            version: '1.6'
+            arch: ''
+        include:
+          - os: macos-latest # Apple Silicon
+            version: '1.6'
+            # Install an x86_64 build of Julia, and run it under Rosetta 2 emulation
+            arch: 'x64'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
-          arch: ${{ matrix.arch }}
-      - uses: actions/cache@v3
-        env:
-          cache-name: cache-artifacts
-        with:
-          path: ~/.julia/artifacts
-          key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ hashFiles('**/Project.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-${{ env.cache-name }}-
-            ${{ runner.os }}-test-
-            ${{ runner.os }}-
+          arch: ${{ (matrix.arch == '') && runner.arch || matrix.arch }}
+      - uses: julia-actions/cache@v3
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
+      - name: "Run doctests"
+        if: ${{ matrix.version == 'lts' }} # only run in one Julia version due to fluctuations
+        run: |
+          julia --project=docs --color=yes --code-coverage -e '
+            using Pkg
+            Pkg.develop(PackageSpec(path=pwd()))
+            Pkg.instantiate()
+            using Documenter
+            using DataStructures
+            DocMeta.setdocmeta!(DataStructures, :DocTestSetup, :(using DataStructures); recursive=true)
+            doctest(DataStructures)'
       - uses: julia-actions/julia-processcoverage@v1
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
-          file: lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}

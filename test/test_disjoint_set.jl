@@ -35,6 +35,17 @@
                     @test find_root!(s, T(3)) == T(2)
                 end
 
+                @testset "`Base.in`" begin
+                    @test 1 in s
+                    @test 1 in s2
+                    @test 10 in s
+                    @test 10 in s2
+                    @test !(11 in s)
+                    @test !(11 in s2)
+                    @test !(0 in s)
+                    @test !(0 in s2)
+                end
+
                 @testset "more tests" begin
                     # We cannot support arbitrary indexing and still use @inbounds with IntDisjointSet
                     # (and it's not useful anyway)
@@ -136,6 +147,20 @@
             @test root1 != root2
             root_union!(s, 7, 3)
             @test find_root!(s, 7) == find_root!(s, 3)
+        end
+
+        @testset "`Base.in`" begin
+            s = DisjointSet{Int}([1, 3, 5, 7, 9])
+            for i in [1, 3, 5, 7, 9]
+                @test i in s
+            end
+            @test !(2 in s)
+
+            s = DisjointSet{String}(["a", "b", "c", "e"])
+            for i in ["a", "b", "c", "e"]
+                @test i in s
+            end
+            @test !("d" in s)
         end
 
         @testset "Some tests using non-integer disjoint sets" begin

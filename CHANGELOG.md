@@ -1,7 +1,103 @@
 Changelog is now in the [Github Release Notes](https://github.com/JuliaCollections/DataStructures.jl/releases).
 
+Starting from version 0.19.0, CHANGELOG.md is managed in a format that follows <https://keepachangelog.com/en/1.1.0/>.
 
-## Old Changelong (pre-2018)
+<!-- links start -->
+[Unreleased]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.18.22...v0.19.0
+[0.19.1]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.0...v0.19.1
+[0.19.2]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.1...v0.19.2
+[0.19.3]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.1...v0.19.3
+<!-- links end -->
+
+[0.19.4]
+====================
+
+## Fixed
+
+ - # Fixed #963: MutableBinaryHeap doesn't work with Abstract / Union Type (#869)
+
+[0.19.3]
+=====================
+
+## Fixed
+
+- Reintroduce a method for `percolate_up!` `percolate_down!` that doesn't require the element to be passed, which was unintentionally removed in 0.19.2 (JuliaCollections/DataStructures.jl#960).
+
+[0.19.2]
+=====================
+
+## Added
+
+- `percolate_up!`, `percolate_down!` now use `@propagate_inbounds` to control bounds checking (JuliaCollections/DataStructures.jl#954)
+
+[0.19.1] - 2025-08-26
+=====================
+
+## Fixed
+
+- Add `newsz::Integer` type annotation to `sizehint!` overloads (JuliaCollections/DataStructures.jl#945)
+- Fix `pop!` with default for `OrderedRobinDict` (JuliaCollections/DataStructures.jl#950)
+- Fix deprecation of `DisjointSets(xs...)` to avoid warning on package load (JuliaCollections/DataStructures.jl#951)
+
+## Other
+
+- link to where missing change notes are (JuliaCollections/DataStructures.jl#944)
+- Bump `actions/checkout` from 4 to 5 (JuliaCollections/DataStructures.jl#947)
+- Add docstrings to `DefaultDict` (JuliaCollections/DataStructures.jl#948)
+
+[0.19.0] - 2025-07-31
+=====================
+
+## Added
+- New `Queue` and `Stack` as separate types with enhanced documentation
+- Add `empty!` method for heaps (JuliaCollections/DataStructures.jl#932)
+- Support for recursive `DefaultDict` creation
+- Add `find_prefixes` method to `Trie` for finding all keys that are prefixes of a given string (JuliaCollections/DataStructures.jl#933)
+- Improved constructors for `CircularBuffer` allowing initialization with an iterable and capacity
+- Add `resize!` method for `CircularBuffer`
+- Enhanced documentation with doctests and improved examples throughout (JuliaCollections/DataStructures.jl#931)
+
+## Changed
+- Minimum Julia version requirement raised to 1.6 (JuliaCollections/DataStructures.jl#874)
+- `DisjointSets` renamed to `DisjointSet` (singular form) (JuliaCollections/DataStructures.jl#700)
+- `IntDisjointSets` renamed to `IntDisjointSet` (singular form) (JuliaCollections/DataStructures.jl#700)
+- PriorityQueue API updated to use standard Julia interfaces:
+  - `enqueue!` → `push!`
+  - `dequeue!` → `popfirst!`
+  - `dequeue_pair!` → `popfirst!`
+  - `peek` → `first`
+- Renamed methods in sorted containers:
+  - `startof` → `firstindex`
+  - `endof` → `lastindex`
+  - `insert!` → `push_return_semitoken!`
+- `Accumulator` constructor behavior changed to properly accumulate values when initialized with pairs
+- Documentation significantly expanded and reorganized
+- Performance improvements in heaps and various other data structures (JuliaCollections/DataStructures.jl#907)
+
+## Deprecated
+- `enqueue!` and `dequeue!` methods (use `push!` and `popfirst!` instead)
+- `peek` for PriorityQueue (use `first` instead)
+- `DisjointSets` (use `DisjointSet` instead) (JuliaCollections/DataStructures.jl#700)
+- `IntDisjointSets` (use `IntDisjointSet` instead) (JuliaCollections/DataStructures.jl#700)
+- `startof` and `endof` (use `firstindex` and `lastindex` instead)
+
+## Fixed
+- Memory management improvements using `Base._unsetindex!` in several data structures (JuliaCollections/DataStructures.jl#884)
+- Fixed `append!` behavior in `MutableLinkedList` to properly handle multiple arguments
+- Various bug fixes and correctness improvements
+
+## Removed
+- Dependency on Compat.jl
+- Dependency on InteractiveUtils.jl
+- Support for Julia versions < 1.6 (JuliaCollections/DataStructures.jl#874)
+
+0.8 – 0.18
+===========
+Changelogs for 0.8 to 0.18.x are listed only on the [Github release pages](https://github.com/JuliaCollections/DataStructures.jl/releases):
+e.g.: [v0.18.22](https://github.com/JuliaCollections/DataStructures.jl/releases/tag/v0.18.22)
+
+
 
 0.7.0 / 2017-09-02
 ==================
