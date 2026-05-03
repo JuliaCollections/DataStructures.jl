@@ -307,7 +307,7 @@ function testSortedDictMethods()
     my_assert(m1 == m11)
     my_assert(isequal(m1, m11))
 
-    m10 = union(SortedDict(), SortedDict())  # test issue 969
+    m10 = union(SortedSet(), SortedSet())  # test issue 969
     my_assert(length(m10) == 0)
 
     # Test Exceptions
