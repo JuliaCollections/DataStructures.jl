@@ -1015,6 +1015,9 @@ function BalancedTree23{K,D,Ord}(::Val{true},
         push!(m.useddatacells, lengthdata)
         firsttrip = false
     end
+    if firsttrip # no data items in tree, so return empty m.
+        return m
+    end
     resize!(m.tree, 0)
     height = 0
     belowlevlength = lengthdata
@@ -1055,6 +1058,7 @@ function BalancedTree23{K,D,Ord}(::Val{true},
                               child_belowaddress[3], 0,
                               m.data[child_keyaddress[2]].k,
                               m.data[child_keyaddress[3]].k))
+                
             myaddress = length(m.tree)
             if height == 0
                 replaceparent!(m.data, child_belowaddress[1], myaddress)
