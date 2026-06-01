@@ -430,18 +430,18 @@ function get_next_filled_index(h::OrderedRobinDict, index)
     return -1
 end
 
-Base.@propagate_inbounds function Base.iterate(h::OrderedRobinDict)
+Base.@propagate_inbounds function Base.iterate(h::OrderedRobinDict{K,V}) where {K,V}
     isempty(h) && return nothing
     check_for_rehash(h) && rehash!(h)
     index = get_first_filled_index(h)
-    return (Pair(h.keys[index], h.vals[index]), index+1)
+    @inbounds return (Pair{K,V}(h.keys[index], h.vals[index]), index+1)
 end
 
-Base.@propagate_inbounds function Base.iterate(h::OrderedRobinDict, i)
+Base.@propagate_inbounds function Base.iterate(h::OrderedRobinDict{K,V}, i) where {K,V}
     length(h.keys) < i && return nothing
     index = get_next_filled_index(h, i)
     (index < 0) && return nothing
-    return (Pair(h.keys[index], h.vals[index]), index+1)
+    @inbounds return (Pair{K,V}(h.keys[index], h.vals[index]), index+1)
 end
 
 Base.filter!(f, d::Union{RobinDict, OrderedRobinDict}) = Base.filter_in_one_pass!(f, d)

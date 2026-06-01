@@ -636,11 +636,11 @@ function Base.delete!(h::SwissDict, key)
     return h
 end
 
-Base.@propagate_inbounds function Base.iterate(h::SwissDict, state = h.idxfloor)
+Base.@propagate_inbounds function Base.iterate(h::SwissDict{K,V}, state = h.idxfloor) where {K,V}
     is = _iterslots(h, state)
     is === nothing && return nothing
     i, s = is
-    @inbounds p = h.keys[i] => h.vals[i]
+    @inbounds p = Pair{K,V}(h.keys[i], h.vals[i])
     return (p, s)
 end
 
