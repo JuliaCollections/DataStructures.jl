@@ -87,6 +87,7 @@ In-place [`heapify`](@ref).
     return xs
 end
 
+# Todo, benchmarking shows copy(xs) outperforms copyto!(similar(xs), xs) for 10^6 Float64
 """
     heapify(v, ord::Ordering=Forward)
 
@@ -95,7 +96,7 @@ Returns a new vector in binary heap order, optionally using the given ordering.
 julia> a = [1,3,4,5,2];
 
 julia> heapify(a)
-5-element Array{Int64,1}:
+5-element Vector{Int64}:
  1
  2
  4
@@ -103,7 +104,7 @@ julia> heapify(a)
  3
 
 julia> heapify(a, Base.Order.Reverse)
-5-element Array{Int64,1}:
+5-element Vector{Int64}:
  5
  3
  4
@@ -111,7 +112,6 @@ julia> heapify(a, Base.Order.Reverse)
  2
 ```
 """
-# Todo, benchmarking shows copy(xs) outperforms copyto!(similar(xs), xs) for 10^6 Float64
 heapify(xs::AbstractArray, o::Ordering=Forward) = heapify!(copyto!(similar(xs), xs), o)
 
 """

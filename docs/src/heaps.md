@@ -153,6 +153,20 @@ this ordering:
 DataStructures.nextreme(Base.Forward, n, a) # Equivalent to nsmallest(n, a)
 ```
 
+# Array-as-heap functions
+
+These functions treat an `AbstractArray` directly as a binary heap, mirroring
+the C++ `std::push_heap`/`pop_heap`/`make_heap` family. They operate in place
+on the array rather than wrapping it in a heap type.
+
+```@docs
+heappush!
+heappop!
+heapify!
+heapify
+isheap
+```
+
 
 # Improving performance with Float data
 
