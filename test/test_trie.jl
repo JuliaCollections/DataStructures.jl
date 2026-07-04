@@ -13,6 +13,22 @@
         @test sort(keys(t)) == ["amy", "ann", "emma", "kevin", "rob", "roger"]
         @test t["rob"] == 27
         @test sort(keys_with_prefix(t,"ro")) == ["rob", "roger"]
+
+        delete!(t, "roger")
+        @test !haskey(t, "roger")
+        @test haskey(t, "rob")
+        @test get(t,"rob",nothing) == 27
+        @test sort(keys(t)) == ["amy", "ann", "emma", "kevin", "rob"]
+        @test t["rob"] == 27
+        @test sort(keys_with_prefix(t,"ro")) == ["rob"]
+
+        # Ensure deletion cleans up dangling nodes
+        t = Trie(["A", "ABC"])
+        delete!(t, "ABC")
+        t_no_abc = Trie(["A"])
+        partial_no_abc = collect(partial_path(t_no_abc, "ABC"))
+        partial_original = collect(partial_path(t, "ABC"))
+        @test length(partial_no_abc) == length(partial_original)
     end
 
     @testset "Constructors" begin
