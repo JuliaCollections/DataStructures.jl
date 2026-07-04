@@ -47,6 +47,27 @@ function Base.getindex(t::Trie, key)
     throw(KeyError("key not found: $key"))
 end
 
+function Base.delete!(t::Trie, key; at_key=true)
+    if isempty(key) || (at_key && !haskey(t, key))
+        return t
+    end
+    node = subtrie(t, key)
+    isnothing(node) && return t # no subtrie in t at key, do nothing
+    if at_key # only set is_key to false on the inner-most node
+        node.is_key = false
+    end
+    all_dangling = true # assume all children are dangling
+    for (k,v) in node.children # clean up dangling nodes
+        if isempty(v.children) && !v.is_key # dangling
+            delete!(node.children, k)
+        else
+            all_dangling = false # at least one not dangling
+        end
+    end
+    # only recurse if all children were dangling
+    return all_dangling ? delete!(t, @view(key[1:end-1]); at_key=false) : t
+end
+
 function subtrie(t::Trie, prefix)
     node = t
     for char in prefix
