@@ -313,4 +313,65 @@ import DataStructures: IntSet
         show(IOBuffer(), complement(IntSet()))
     end
 
+
+    @testset "AbstractSet" begin
+        @test IntSet([1, 2]) isa AbstractSet{Int}
+        @test IntSet() isa AbstractSet{Int}
+
+        # Generic AbstractSet algorithms dispatch on IntSet
+        @test issetequal(IntSet([1, 2]), IntSet([2, 1]))
+        @test isdisjoint(IntSet([1]), IntSet([2]))
+        @test !isdisjoint(IntSet([1, 2]), IntSet([2, 3]))
+        @test IntSet([1]) ⊆ Set([1, 2])
+        @test Set([1]) ⊆ IntSet([1, 2])
+
+        # Cross-type equality becomes available via AbstractSet fallbacks
+        @test IntSet([1, 2]) == Set([1, 2])
+        @test IntSet([1, 2]) == SparseIntSet([1, 2])
+
+        # Derived operations stay within the type rather than degrading to Set
+        @test filter(isodd, IntSet([1, 2, 3])) isa IntSet
+        @test filter(isodd, IntSet([1, 2, 3])) == IntSet([1, 3])
+        @test filter(_ -> false, IntSet([1, 2])) isa IntSet
+        @test isempty(filter(_ -> false, IntSet([1, 2])))
+        @test setdiff(IntSet([1, 2, 3]), [2]) isa IntSet
+        @test setdiff(IntSet([1, 2, 3]), [2]) == IntSet([1, 3])
+        @test setdiff(IntSet([1, 2, 3]), IntSet([2])) isa IntSet
+
+        # filter! / intersect! with AbstractSet (Base uses filter!(in(s2), s))
+        s = IntSet([1, 2, 3])
+        filter!(isodd, s)
+        @test s == IntSet([1, 3])
+        s = IntSet([1, 2, 3])
+        intersect!(s, Set([2, 3, 4]))
+        @test s == IntSet([2, 3])
+        s = IntSet([1])
+        union!(s, Set([2]))
+        @test s == IntSet([1, 2])
+
+        # Same-type equality and ordering still win on specificity
+        @test IntSet([1]) == IntSet([1])
+        @test IntSet([1]) < IntSet([1, 2])
+        @test IntSet([1, 2]) <= IntSet([1, 2])
+
+        # symdiff! with an AbstractSet argument resolves unambiguously
+        @test symdiff!(IntSet([1, 2, 3]), Set([2, 4])) == IntSet([1, 3, 4])
+
+        # Complement remains IntSet <: AbstractSet
+        c = complement(IntSet([0, 1, 2]))
+        @test c isa IntSet
+        @test c isa AbstractSet{Int}
+        @test 3 in c
+        @test !(1 in c)
+
+        # emptymutable / copymutable keep type
+        @test Base.emptymutable(IntSet([1])) isa IntSet
+        s = IntSet([1, 2])
+        cpy = Base.copymutable(s)
+        push!(cpy, 9)
+        @test 9 in cpy
+        @test !(9 in s)
+    end
+
+
 end # @testset IntSet

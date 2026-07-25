@@ -2,7 +2,7 @@ const INT_PER_PAGE = div(ccall(:jl_getpagesize, Clong, ()), sizeof(Int))
 # we use this to mark pages not in use, it must never be written to.
 const NULL_INT_PAGE = Vector{Int}()
 
-mutable struct SparseIntSet
+mutable struct SparseIntSet <: AbstractSet{Int}
     packed ::Vector{Int}
     reverse::Vector{Vector{Int}}
     counters::Vector{Int}  # counts the number of real elements in each page of reverse.
@@ -15,6 +15,9 @@ SparseIntSet(indices) = union!(SparseIntSet(), indices)
 Base.eltype(::Type{SparseIntSet}) = Int
 
 Base.empty(::SparseIntSet) = SparseIntSet()
+Base.emptymutable(::SparseIntSet, ::Type{Int}=Int) = SparseIntSet()
+Base.copymutable(s::SparseIntSet) = copy(s)
+Base.filter!(f, s::SparseIntSet) = Base.unsafe_filter!(f, s)
 
 function Base.empty!(s::SparseIntSet)
     empty!(s.packed)
@@ -143,6 +146,7 @@ end
     return in(id, s) ? (@inbounds pop!(s, id)) : default
 end
 Base.popfirst!(s::SparseIntSet) = pop!(s, first(s))
+Base.delete!(s::SparseIntSet, id::Integer) = (pop!(s, id, nothing); s)
 
 @inline Base.iterate(set::SparseIntSet, args...) = iterate(set.packed, args...)
 
@@ -170,6 +174,7 @@ Base.intersect!(s1::SparseIntSet, ss...) = intersect!(s1, intersect(ss...))
 
 #Is there a more performant way to do this?
 Base.intersect!(s1::SparseIntSet, ns) = copy!(s1, intersect(s1, ns))
+Base.intersect!(s1::SparseIntSet, ns::AbstractSet) = copy!(s1, intersect(s1, ns))
 
 Base.setdiff(s::SparseIntSet, ns) = setdiff!(copy(s), ns)
 function Base.setdiff!(s::SparseIntSet, ns)

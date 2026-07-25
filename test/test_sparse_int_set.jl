@@ -1,5 +1,5 @@
 using DataStructures, Test
-import DataStructures: SparseIntSet
+import DataStructures: SparseIntSet, IntSet
 
 @testset "SparseIntSet" begin
     @testset "Construction, collect" begin
@@ -188,5 +188,50 @@ import DataStructures: SparseIntSet
         if VERSION >= v"1.1"
             @test zip() isa Iterators.Zip  # issue 621
         end
+
+
+    @testset "AbstractSet" begin
+        @test SparseIntSet([1, 2]) isa AbstractSet{Int}
+        @test SparseIntSet() isa AbstractSet{Int}
+
+        @test issetequal(SparseIntSet([1, 2]), SparseIntSet([2, 1]))
+        @test isdisjoint(SparseIntSet([1]), SparseIntSet([2]))
+        @test !isdisjoint(SparseIntSet([1, 2]), SparseIntSet([2, 3]))
+        @test SparseIntSet([1]) ⊆ Set([1, 2])
+        @test Set([1]) ⊆ SparseIntSet([1, 2])
+
+        @test SparseIntSet([1, 2]) == Set([1, 2])
+        @test SparseIntSet([1, 2]) == IntSet([1, 2])
+
+        @test filter(isodd, SparseIntSet([1, 2, 3])) isa SparseIntSet
+        @test issetequal(filter(isodd, SparseIntSet([1, 2, 3])), SparseIntSet([1, 3]))
+        @test filter(_ -> false, SparseIntSet([1, 2])) isa SparseIntSet
+        @test isempty(filter(_ -> false, SparseIntSet([1, 2])))
+        @test setdiff(SparseIntSet([1, 2, 3]), [2]) isa SparseIntSet
+        @test issetequal(setdiff(SparseIntSet([1, 2, 3]), [2]), SparseIntSet([1, 3]))
+
+        s = SparseIntSet([1, 2, 3])
+        filter!(isodd, s)
+        @test issetequal(s, SparseIntSet([1, 3]))
+        @test issetequal(intersect!(SparseIntSet([1, 2, 3]), Set([2, 3, 4])), SparseIntSet([2, 3]))
+        s = SparseIntSet([1])
+        union!(s, Set([2]))
+        @test issetequal(s, SparseIntSet([1, 2]))
+
+        @test SparseIntSet([1]) == SparseIntSet([1])
+        @test SparseIntSet([1]) < SparseIntSet([1, 2])
+        @test SparseIntSet([1, 2]) <= SparseIntSet([1, 2])
+
+        # No native symdiff; AbstractSet fallback must still work
+        @test issetequal(symdiff(SparseIntSet([1, 2]), Set([2, 3])), Set([1, 3]))
+
+        @test Base.emptymutable(SparseIntSet([1])) isa SparseIntSet
+        s = SparseIntSet([1, 2])
+        cpy = Base.copymutable(s)
+        push!(cpy, 9)
+        @test 9 in cpy
+        @test !(9 in s)
+    end
+
 
 end
