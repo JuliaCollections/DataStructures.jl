@@ -135,8 +135,9 @@ function Base.setdiff!(s1::IntSet, s2::IntSet)
 end
 
 Base.symdiff(s::IntSet, ns) = symdiff!(copy(s), ns)
-Base.symdiff!(s::IntSet, ns) = (for n in ns; symdiff!(s, n); end; s)
-Base.symdiff!(s::IntSet, ns::AbstractSet) = (for n in ns; symdiff!(s, n); end; s)
+for T in (AbstractSet, Any)
+    Base.symdiff!(s::IntSet, ns::T) = (for n in ns; symdiff!(s, n); end; s)
+end
 function Base.symdiff!(s::IntSet, n::Integer)
     0 <= n < typemax(Int) || throw(ArgumentError(_intset_bounds_err_msg))
     val = (n in s) ⊻ !s.inverse

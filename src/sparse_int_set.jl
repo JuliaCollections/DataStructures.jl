@@ -173,8 +173,9 @@ end
 Base.intersect!(s1::SparseIntSet, ss...) = intersect!(s1, intersect(ss...))
 
 #Is there a more performant way to do this?
-Base.intersect!(s1::SparseIntSet, ns) = copy!(s1, intersect(s1, ns))
-Base.intersect!(s1::SparseIntSet, ns::AbstractSet) = copy!(s1, intersect(s1, ns))
+for T in (AbstractSet, Any)
+    Base.intersect!(s1::SparseIntSet, ns::T) = copy!(s1, intersect(s1, ns))
+end
 
 Base.setdiff(s::SparseIntSet, ns) = setdiff!(copy(s), ns)
 function Base.setdiff!(s::SparseIntSet, ns)
