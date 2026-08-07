@@ -173,6 +173,7 @@ end
 Base.intersect!(s1::SparseIntSet, ss...) = intersect!(s1, intersect(ss...))
 
 #Is there a more performant way to do this?
+# Define both to break method ambiguity with Base's AbstractSet methods.
 for T in (AbstractSet, Any)
     Base.intersect!(s1::SparseIntSet, ns::T) = copy!(s1, intersect(s1, ns))
 end

@@ -135,6 +135,7 @@ function Base.setdiff!(s1::IntSet, s2::IntSet)
 end
 
 Base.symdiff(s::IntSet, ns) = symdiff!(copy(s), ns)
+# Define both to break method ambiguity with Base's AbstractSet methods (BitSet-style).
 for T in (AbstractSet, Any)
     Base.symdiff!(s::IntSet, ns::T) = (for n in ns; symdiff!(s, n); end; s)
 end
