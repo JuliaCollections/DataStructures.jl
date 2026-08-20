@@ -64,6 +64,14 @@
             @test D[7-i] === 6
             @test popfirst!(D) === i
         end
+        empty!(D)
+        @test isfull(D) == false
+        for i = 1:4
+            push!(D, 1)
+        end
+        @test isfull(D) == false
+        push!(D, 1)
+        @test isfull(D) == true
     end
 
     @testset "pushfirst! works on an empty deque" begin
