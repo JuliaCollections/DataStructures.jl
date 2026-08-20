@@ -30,8 +30,6 @@ module DataStructures
 
     export Trie, subtrie, keys_with_prefix, partial_path, find_prefixes
 
-    export LinkedList, Nil, Cons, nil, cons, head, tail, list
-    export MutableLinkedList
     export SortedDict, SortedMultiDict, SortedSet
     export SMDSemiToken, SMDToken
     export SetSemiToken
@@ -78,8 +76,6 @@ module DataStructures
 
     include("fenwick.jl")
 
-    include("list.jl")
-    include("mutable_list.jl")
     include("balanced_tree.jl")
     include("tokens.jl")
 

@@ -26,7 +26,6 @@ This package implements a variety of data structures, including
 -   SwissDict (inspired from [SwissTables](https://abseil.io/blog/20180927-swisstables))
 -   Dictionaries with Defaults
 -   Trie
--   Linked List and Mutable Linked List
 -   Sorted Dict, Sorted Multi-Dict and Sorted Set
 -   DataStructures.IntSet
 -   SparseIntSet
