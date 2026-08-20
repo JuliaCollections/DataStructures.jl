@@ -11,6 +11,7 @@ module DataStructures
     using OrderedCollections: isordered
     export OrderedDict, OrderedSet, LittleDict
     export DefaultDict, DefaultOrderedDict
+    export WeakKeyIdDict
 
     export complement, complement!
 
@@ -71,6 +72,7 @@ module DataStructures
     include("heaps.jl")
 
     include("default_dict.jl")
+    include("weakkeyid_dict.jl")
     include("dict_support.jl")
     include("trie.jl")
 

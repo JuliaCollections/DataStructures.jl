@@ -23,6 +23,7 @@ tests = [
          "mutable_binheap",
          "minmax_heap",
          "default_dict",
+         "weakkeyid_dict",
          "trie",
          "list",
          "mutable_list",
