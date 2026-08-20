@@ -39,7 +39,7 @@
         insert!(d, 'c', 1)
 
         # order changed from v0.4 to v0.5
-        @test collect(keys(d)) == ['c', 'a'] || collect(keys(d)) == ['a', 'c']
+        @test sort(collect(keys(d))) == ['a', 'a', 'a', 'c']
         @test collect(values(d)) == Array{Int,1}[[1],[1,2,3]] || collect(values(d)) == Array{Int,1}[[1,2,3], [1]]
 
         @test get(d, 'a', 0) == [1,2,3]
