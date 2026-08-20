@@ -29,7 +29,11 @@ function Base.show(io::IO, l::LinkedList{T}) where T
             print(io, "nil(", T, ")")
         end
     else
-        print(io, "list(")
+        if T === Any
+            print(io, "list(")
+        else
+            print(io, "list{$T}(")
+        end
         show(io, head(l))
         for t in tail(l)
             print(io, ", ")
