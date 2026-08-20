@@ -51,9 +51,8 @@ module DataStructures
     export DiBitVector
 
     export RBTree, search_node, minimum_node
-    export SplayTree, maximum_node
+    export SplayTree, search_node, maximum_node
     export AVLTree, sorted_rank
-    export SplayTree, maximum_node
 
     export findkey
 

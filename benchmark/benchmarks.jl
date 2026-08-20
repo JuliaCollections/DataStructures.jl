@@ -12,3 +12,4 @@ const SUITE = BenchmarkGroup()
 
 SUITE["heap"] = include("bench_heap.jl")
 SUITE["SparseIntSet"] = include("bench_sparse_int_set.jl")
+SUITE["trees"] = include("bench_trees.jl")
