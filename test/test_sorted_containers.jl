@@ -300,13 +300,15 @@ function testSortedDictMethods()
     my_assert(typeof(m09a) == SortedDict{Int,Any,ForwardOrdering})
     m09b = SortedDict([(1,2), (3,'a')])  # test issue 239
     my_assert(typeof(m09a) == SortedDict{Int,Any,ForwardOrdering})
-
     my_assert(m0 == m02)
     my_assert(isequal(m0, m02))
     my_assert(m1 == m01)
     my_assert(isequal(m1, m01))
     my_assert(m1 == m11)
     my_assert(isequal(m1, m11))
+
+    m10 = union(SortedSet(), SortedSet())  # test issue 969
+    my_assert(length(m10) == 0)
 
     # Test Exceptions
     @test_throws ArgumentError SortedDict([1,2,3,4])
