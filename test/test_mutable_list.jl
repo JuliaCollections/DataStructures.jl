@@ -108,6 +108,10 @@
                     push!(l4, n+1:2n...)
                     @test l4 == MutableLinkedList{Int}(1:2n...)
                     @test collect(l4) == collect(MutableLinkedList{Int}(1:2n...))
+                    l5 = MutableLinkedList{Int}(1:n...)
+                    l6 = MutableLinkedList{Int}()
+                    append!(l5, l6)
+                    @test l5.node.prev !== l5.node.prev.next
                 end
 
                 @testset "delete" begin
