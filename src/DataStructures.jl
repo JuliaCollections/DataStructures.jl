@@ -11,7 +11,7 @@ module DataStructures
     if isdefined(Base, :unsetindex!)
         using Base: unsetindex!
     else
-        unsetindex!(A, i) = Base._unsetindex!(A, i)
+        using Base: _unsetindex! as unsetindex!
     end
 
     using OrderedCollections
