@@ -56,6 +56,7 @@
         l4 = cat(l1, l2, l3)
         @test length(l4) == 3
         @test l4 == list(1, 2, 3)
+        @test l4 ≠ list(1, 2)
         @test collect(l4) == [1; 2; 3]
         @test collect(copy(l4)) == [1; 2; 3]
         @test sprint(show,l4) == "list(1, 2, 3)"
