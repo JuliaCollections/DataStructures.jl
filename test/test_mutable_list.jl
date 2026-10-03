@@ -164,6 +164,96 @@
                 end
             end
         end
+
+        @testset "insert / popat" begin
+            @testset "insert" begin
+                l = MutableLinkedList{Int}(1:n...)
+                @test_throws BoundsError insert!(l, 0, 0)
+                @test_throws BoundsError insert!(l, n+2, 0)
+                @test insert!(l, n+1, n+1) == MutableLinkedList{Int}(1:n+1...)
+                @test insert!(l, 1, 0) == MutableLinkedList{Int}(0:n+1...)
+                @test insert!(l, n+2, -1) == MutableLinkedList{Int}(0:n..., -1, n+1)
+                for i=n:-1:1
+                    insert!(l, n+2, i)
+                end
+                @test l == MutableLinkedList{Int}(0:n..., 1:n..., -1, n+1)
+                @test l.len == 2n + 3
+            end
+
+            @testset "popat" begin
+                l = MutableLinkedList{Int}(1:n...)
+                @test_throws BoundsError popat!(l, 0)
+                @test_throws BoundsError popat!(l, n+1)
+                @test popat!(l, 0, missing) === missing
+                @test popat!(l, n+1, Inf) === Inf
+                for i=2:n-1
+                    @test popat!(l, 2) == i
+                end
+                @test l == MutableLinkedList{Int}(1,n)
+                @test l.len == 2
+
+                l2 = MutableLinkedList{Int}(1:n...)
+                for i=n-1:-1:2
+                    @test popat!(l2, l2.len-1, 0) == i
+                end
+                @test l2 == MutableLinkedList{Int}(1,n)
+                @test l2.len == 2
+                @test popat!(l2, 1) == 1
+                @test popat!(l2, 1) == n
+                @test l2 == MutableLinkedList{Int}()
+                @test l2.len == 0
+                @test_throws BoundsError popat!(l2, 1)
+            end
+        end
+
+        @testset "splice" begin
+            @testset "no replacement" begin
+                l = MutableLinkedList{Int}(1:2n...)
+                @test splice!(l, n:1) == Int[]
+                @test l == MutableLinkedList{Int}(1:2n...)
+                @test collect(n+1:2n) == splice!(l, n+1:2n)
+                @test l == MutableLinkedList{Int}(1:n...)
+                for i = n:-1:1
+                    @test i == splice!(l, i)
+                end
+                @test l == MutableLinkedList{Int}()
+                @test_throws BoundsError splice!(l, 1)
+                
+            end
+            @testset "with replacement" begin
+                l = MutableLinkedList{Int}(1)  
+                for i = 2:n
+                    @test splice!(l, i-1:i-2, i) == Int[]
+                    @test last(l) == i
+                    @test l.len == i
+                end
+                @test l == MutableLinkedList{Int}(1:n...,)
+                for i = 1:n
+                    @test splice!(l, 1:0, i) == Int[]
+                    @test first(l) == 1
+                    @test l[2] == i
+                    @test l.len == i + n
+                end
+                @test l == MutableLinkedList{Int}(1, n:-1:1..., 2:n...)
+                previousdata = l[1:l.len]
+                for i = 1:2n
+                    @test splice!(l, i, i+2n) == previousdata[i]
+                    @test l[i] == i+2n
+                end
+                @test l == MutableLinkedList{Int}(2n+1:4n...)
+                @test splice!(l, n+1:2n, [3n+1, 3n+2]) == [3n+1:4n...,]
+                @test l == MutableLinkedList{Int}(2n+1:3n+2...)
+                @test l.len == n+2
+                for i=1:n+2
+                    @test splice!(l, i, -i) == i+2n
+                end
+                @test l == MutableLinkedList{Int}(-1:-1:-n-2...)
+                @test l.len == n+2
+                @test splice!(l, 1:n+2, 0) == collect(-1:-1:-n-2)
+                @test l == MutableLinkedList{Int}(0)
+                @test l.len == 1
+            end
+        end
     end
 
     @testset "random operations" begin

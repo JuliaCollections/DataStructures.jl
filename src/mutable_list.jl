@@ -254,6 +254,111 @@ function Base.popfirst!(l::MutableLinkedList)
     return data
 end
 
+if isdefined(Base, :popat!)  # We will overload if it is defined, else we define on our own
+    import Base: popat!
+end
+
+function popat!(l::MutableLinkedList, idx::Int)
+    @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
+    node = l.node
+    for i = 1:idx
+        node = node.next
+    end
+    prev = node.prev
+    next = node.next
+    prev.next = next
+    next.prev = prev
+    l.len -= 1
+    return node.data
+end
+
+function popat!(l::MutableLinkedList, idx::Int, default)
+    if !(0 < idx <= l.len) 
+        return default;
+    end
+    node = l.node
+    for i = 1:idx
+        node = node.next
+    end
+    prev = node.prev
+    next = node.next
+    prev.next = next
+    next.prev = prev
+    l.len -= 1
+    return node.data
+end
+
+function Base.insert!(l::MutableLinkedList{T}, idx::Int, data) where T
+    @boundscheck 0 < idx <= l.len + 1 || throw(BoundsError(l, idx))
+    prev = l.node
+    for i in 1:idx-1
+        prev = prev.next
+    end
+    next = prev.next
+    node = ListNode{T}(data)
+    node.prev = prev
+    node.next = next
+    prev.next = node
+    next.prev = node
+    l.len += 1
+    return l
+end
+
+const _default_splice = []
+
+function Base.splice!(l::MutableLinkedList{T}, idx::Int, ins=_default_splice) where T
+    @boundscheck 0 < idx <= l.len || throw(BoundsError(l, idx))
+    node = l.node
+    for i in 1:idx
+        node = node.next
+    end
+    data = node.data
+    prev = node.prev
+    next = node.next
+    if length(ins) == 0
+        prev.next = next
+        next.prev = prev
+        l.len -= 1
+        return data
+    end
+    insl = MutableLinkedList{T}(ins...)
+    insl.node.prev.next = next
+    insl.node.next.prev = prev
+    prev.next = insl.node.next
+    next.prev = insl.node.prev
+    l.len += insl.len - 1
+    return data
+end
+
+function Base.splice!(l::MutableLinkedList{T}, r::AbstractUnitRange{<:Integer}, ins=_default_splice) where T
+    @boundscheck (0 < first(r) <= l.len && last(r) <= l.len ) || throw(BoundsError(l, r))
+    len = length(r)
+    data = Vector{T}()
+    node = l.node
+    for i in 1:first(r)
+        node = node.next
+    end
+    prev = len > 0 ? node.prev : node
+    for i in 1:len
+        push!(data, node.data)
+        node = node.next
+    end
+    next = len > 0 ? node : node.next
+    if length(ins) == 0
+        prev.next = next
+        next.prev = prev
+        l.len -= len
+        return data
+    end
+    insl = MutableLinkedList{T}(ins...)
+    insl.node.prev.next = next
+    insl.node.next.prev = prev
+    prev.next = insl.node.next
+    next.prev = insl.node.prev
+    l.len += insl.len - len
+    return data
+end
+
 function Base.show(io::IO, node::ListNode)
     x = node.data
     print(io, "$(typeof(node))($x)")
