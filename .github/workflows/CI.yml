@@ -26,7 +26,6 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.6'
           - 'lts'
           - '1'
 #          - 'nightly'
@@ -34,17 +33,6 @@ jobs:
           - ubuntu-latest
           - macos-latest
           - windows-latest
-        arch:
-          - ''
-        exclude:
-          - os: macos-latest # Apple Silicon
-            version: '1.6'
-            arch: ''
-        include:
-          - os: macos-latest # Apple Silicon
-            version: '1.6'
-            # Install an x86_64 build of Julia, and run it under Rosetta 2 emulation
-            arch: 'x64'
     steps:
       - uses: actions/checkout@v7
       - uses: julia-actions/setup-julia@v2
