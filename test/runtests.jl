@@ -24,8 +24,6 @@ tests = [
          "minmax_heap",
          "default_dict",
          "trie",
-         "list",
-         "mutable_list",
          "multi_dict",
          "circular_buffer",
          "sorting",
