@@ -7,6 +7,13 @@ module DataStructures
 
     import Base.insert!
 
+    # public unsetindex! API introduced in 1.14 (julia#58943)
+    if isdefined(Base, :unsetindex!)
+        using Base: unsetindex!
+    else
+        using Base: _unsetindex! as unsetindex!
+    end
+
     using OrderedCollections
     using OrderedCollections: isordered
     export OrderedDict, OrderedSet, LittleDict
