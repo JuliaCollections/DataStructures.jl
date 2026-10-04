@@ -66,7 +66,7 @@ h = MutableBinaryMaxHeap([1,4,3,2])  # create a mutable min/max heap from a vect
 ## Using alternate orderings
 
 Heaps can also use alternate orderings apart from the default one defined by
-`Base.isless`. This is accomplished by passing an instance of `Base.Ordering`
+`Base.isless`. This is accomplished by passing an instance of `Base.Order.Ordering`
 as the first argument to the constructor. The top of the heap will then be the
 element that comes first according to this ordering.
 
@@ -79,7 +79,7 @@ data = collect(enumerate(["foo", "bar", "baz"]))
 h1 = BinaryHeap(data) # Standard lexicographic ordering for tuples
 first(h1)             # => (1, "foo")
 
-h2 = BinaryHeap(Base.By(last), data) # Order by 2nd element only
+h2 = BinaryHeap(Base.Order.By(last), data) # Order by 2nd element only
 first(h2)                            # => (2, "bar")
 ```
 
@@ -145,12 +145,12 @@ nlargest(3, data, by=x -> x^2)  # => [68,-25,21]
 nsmallest(3, data, by=x -> x^2) # => [0,-12,14]
 ```
 
-The lower-level `DataStructures.nextreme` function takes a `Base.Ordering`
+The lower-level `DataStructures.nextreme` function takes a `Base.Order.Ordering`
 instance as the first argument and returns the first `n` elements according to
 this ordering:
 
 ```julia
-DataStructures.nextreme(Base.Forward, n, a) # Equivalent to nsmallest(n, a)
+DataStructures.nextreme(Base.Order.Forward, n, a) # Equivalent to nsmallest(n, a)
 ```
 
 # Array-as-heap functions
