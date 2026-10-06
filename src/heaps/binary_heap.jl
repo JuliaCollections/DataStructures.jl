@@ -31,8 +31,8 @@ struct FasterReverse <: Base.Ordering end
 Base.lt(o::FasterReverse, a, b) = a > b
 
 mutable struct BinaryHeap{T, O <: Base.Ordering} <: AbstractHeap{T}
-    ordering::O
-    valtree::Vector{T}
+    const ordering::O
+    const valtree::Vector{T}
 
     function BinaryHeap{T}(ordering::Base.Ordering) where T
         new{T, typeof(ordering)}(ordering, Vector{T}())
