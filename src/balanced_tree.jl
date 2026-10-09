@@ -242,8 +242,8 @@ function Base.empty!(t::BalancedTree23)
     initializeTree!(t.tree)
     t.depth = 1
     t.rootloc = 1
-    t.freetreeinds = Vector{Int}()
-    t.freedatainds = Vector{Int}()
+    empty!(t.freetreeinds)
+    empty!(t.freedatainds)
     empty!(t.useddatacells)
     push!(t.useddatacells, 1, 2)
     return nothing

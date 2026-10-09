@@ -95,6 +95,9 @@ end
 
 # insert algorithm
 function rh_insert!(h::RobinDict{K, V}, key::K, val::V) where {K, V}
+    sz = length(h.keys)
+    (h.count > ROBIN_DICT_LOAD_FACTOR * sz) && rehash!(h, sz<<2)
+
     # table full
     @assert h.count != length(h.keys)
 
@@ -197,8 +200,8 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
     sz = length(oldk)
     newsz = _tablesz(newsz)
     if h.count == 0
-        resize!(h.keys, sz)
-        resize!(h.vals, sz)
+        resize!(h.keys, newsz)
+        resize!(h.vals, newsz)
         resize!(h.hashes, newsz)
         fill!(h.hashes, 0)
         h.count = 0
@@ -222,7 +225,7 @@ function rehash!(h::RobinDict{K,V}, newsz = length(h.keys)) where {K, V}
     return h
 end
 
-function Base.sizehint!(d::RobinDict, newsz)
+function Base.sizehint!(d::RobinDict, newsz::Integer)
     newsz = _tablesz(newsz*2)  # *2 for keys and values in same array
     oldsz = length(d.keys)
     # grow at least 25%
@@ -244,8 +247,6 @@ end
 
 function _setindex!(h::RobinDict{K,V}, key::K, v0) where {K, V}
     v = convert(V, v0)
-    sz = length(h.keys)
-    (h.count > ROBIN_DICT_LOAD_FACTOR * sz) && rehash!(h, sz<<2)
     index = rh_insert!(h, key, v)
     @assert index > 0
     return h
@@ -310,7 +311,6 @@ Return the value stored for the given key, or if no mapping for the key is prese
 # Examples
 ```jldoctest
 julia> d = RobinDict("a"=>1, "b"=>2, "c"=>3);
-
 
 julia> get!(d, "a", 5)
 1
@@ -515,17 +515,12 @@ Delete and return the mapping for `key` if it exists in `collection`, otherwise 
 ```jldoctest
 julia> d = RobinDict("a"=>1, "b"=>2, "c"=>3);
 
-
 julia> pop!(d, "a")
 1
 
 julia> pop!(d, "d")
 ERROR: KeyError: key "d" not found
-Stacktrace:
- [1] pop!(h::RobinDict{String, Int64}, key0::String)
-   @ DataStructures ~/.julia/dev/DataStructures/src/robin_dict.jl:505
- [2] top-level scope
-   @ none:1
+[...]
 
 julia> pop!(d, "e", 4)
 4

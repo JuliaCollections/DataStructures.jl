@@ -8,7 +8,8 @@ import DataStructures: IntSet
 @test [] == detect_ambiguities(Core, DataStructures)
 @test [] == detect_ambiguities(Base, DataStructures)
 
-tests = ["deprecations",
+tests = [
+         "deprecations",
          "int_set",
          "sparse_int_set",
          "deque",

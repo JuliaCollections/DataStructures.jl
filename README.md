@@ -1,5 +1,4 @@
-[![Travis Build Status](https://travis-ci.org/JuliaCollections/DataStructures.jl.svg?branch=master)](https://travis-ci.org/JuliaCollections/DataStructures.jl)
-[![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/5gw9xok4e58aixsv?svg=true)](https://ci.appveyor.com/project/kmsquire/datastructures-jl)
+[![CI](https://github.com/JuliaCollections/LRUCache.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaCollections/LRUCache.jl/actions/workflows/ci.yml)
 [![Test Coverage](https://coveralls.io/repos/github/JuliaCollections/DataStructures.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaCollections/DataStructures.jl?branch=master)
 [![Test Coverage](https://codecov.io/github/JuliaCollections/DataStructures.jl/coverage.svg?branch=master)](https://codecov.io/github/JuliaCollections/DataStructures.jl?branch=master)
 [![Stable Documentation](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliacollections.github.io/DataStructures.jl/stable)

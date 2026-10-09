@@ -274,7 +274,7 @@ function maybe_rehash_shrink!(h::SwissDict)
    end
 end
 
-function Base.sizehint!(d::SwissDict, newsz)
+function Base.sizehint!(d::SwissDict, newsz::Integer)
     newsz = _tablesz(newsz*2)  # *2 for keys and values in same array
     oldsz = length(d.keys)
     # grow at least 25%
@@ -410,7 +410,6 @@ Return the value stored for the given key, or if no mapping for the key is prese
 # Examples
 ```jldoctest
 julia> d = SwissDict("a"=>1, "b"=>2, "c"=>3);
-
 
 julia> get!(d, "a", 5)
 1
@@ -578,17 +577,12 @@ Delete and return the mapping for `key` if it exists in `collection`, otherwise 
 ```jldoctest
 julia> d = SwissDict("a"=>1, "b"=>2, "c"=>3);
 
-
 julia> pop!(d, "a")
 1
 
 julia> pop!(d, "d")
 ERROR: KeyError: key "d" not found
-Stacktrace:
- [1] pop!(h::SwissDict{String, Int64}, key::String)
-   @ DataStructures ~/.julia/dev/DataStructures/src/swiss_dict.jl:599
- [2] top-level scope
-   @ none:1
+[...]
 
 julia> pop!(d, "e", 4)
 4
@@ -642,11 +636,11 @@ function Base.delete!(h::SwissDict, key)
     return h
 end
 
-Base.@propagate_inbounds function Base.iterate(h::SwissDict, state = h.idxfloor)
+Base.@propagate_inbounds function Base.iterate(h::SwissDict{K,V}, state = h.idxfloor) where {K,V}
     is = _iterslots(h, state)
     is === nothing && return nothing
     i, s = is
-    @inbounds p = h.keys[i] => h.vals[i]
+    @inbounds p = Pair{K,V}(h.keys[i], h.vals[i])
     return (p, s)
 end
 

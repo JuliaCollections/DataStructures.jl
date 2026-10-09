@@ -2027,6 +2027,12 @@ end
         
               
 
+function testSortedAllocs()
+    d = SortedDict{Int,Int}(Base.Order.ForwardOrdering())
+    x = @allocated empty!(d)
+    my_assert(x == 0)
+    true
+end
 
 @testset "SortedContainers" begin
     @test testSortedDictBasic()
@@ -2038,6 +2044,7 @@ end
     @test testSortedDictConstructors()
     @test testSortedMultiDictConstructors()
     @test testTokens()
+    @test testSortedAllocs()
 
 
     # test all the errors of sorted containers
@@ -2109,4 +2116,3 @@ end
         end
     end
 end
-

@@ -1,6 +1,6 @@
 # This file was a part of Julia. License is MIT: http://julialang.org/license
 
-mutable struct IntSet
+mutable struct IntSet <: AbstractSet{Int}
     bits::BitVector
     inverse::Bool
     IntSet() = new(falses(256), false)
@@ -8,6 +8,9 @@ end
 IntSet(itr) = union!(IntSet(), itr)
 
 Base.empty(s::IntSet) = IntSet()
+Base.emptymutable(::IntSet, ::Type{Int}=Int) = IntSet()
+Base.copymutable(s::IntSet) = copy(s)
+Base.filter!(f, s::IntSet) = Base.unsafe_filter!(f, s)
 Base.copy(s1::IntSet) = copy!(IntSet(), s1)
 function Base.copy!(to::IntSet, from::IntSet)
     resize!(to.bits, length(from.bits))
@@ -132,7 +135,10 @@ function Base.setdiff!(s1::IntSet, s2::IntSet)
 end
 
 Base.symdiff(s::IntSet, ns) = symdiff!(copy(s), ns)
-Base.symdiff!(s::IntSet, ns) = (for n in ns; symdiff!(s, n); end; s)
+# Define both to break method ambiguity with Base's AbstractSet methods (BitSet-style).
+for T in (AbstractSet, Any)
+    Base.symdiff!(s::IntSet, ns::T) = (for n in ns; symdiff!(s, n); end; s)
+end
 function Base.symdiff!(s::IntSet, n::Integer)
     0 <= n < typemax(Int) || throw(ArgumentError(_intset_bounds_err_msg))
     val = (n in s) ⊻ !s.inverse

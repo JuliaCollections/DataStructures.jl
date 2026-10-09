@@ -1,4 +1,4 @@
-## A SortedDict is a wrapper around balancedTree with methods similiar
+## A SortedDict is a wrapper around balancedTree with methods similar
 ## to those of Julia container Dict.
 
 mutable struct SortedDict{K, D, Ord <: Ordering} <: AbstractDict{K,D}
@@ -179,7 +179,7 @@ end
 """
     Base.push!(sd::SortedDict, p::Pair)
 
-Insert key-vaue pair `p`, i.e., a `k=>v` pair, into `sd`.
+Insert key-value pair `p`, i.e., a `k=>v` pair, into `sd`.
 If the key `k` is already present, this overwrites the old value. 
 The key is also overwritten (not necessarily a no-op, since 
 sort-order equivalence may differ from equality).
@@ -231,11 +231,8 @@ end
 
 
 @inline Base.eltype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} =  Pair{K,D}
-@inline Base.eltype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} =  Pair{K,D}
 @inline Base.keytype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} = K
-@inline Base.keytype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = K
 @inline Base.valtype(m::SortedDict{K,D,Ord}) where {K,D,Ord <: Ordering} = D
-@inline Base.valtype(::Type{SortedDict{K,D,Ord}}) where {K,D,Ord <: Ordering} = D
 
 """
     Base.in(p::Pair, sd::SortedDict)

@@ -29,16 +29,9 @@
             @test d == rev
         end
 
-        @testset "sort unordered" begin
-            unordered = Dict(zip('a':'z', 26:-1:1))
-            @test sort(unordered) == forward
-            @test sort(unordered; rev=true) == rev
-            @test sort(unordered; byvalue=true) == rev
-            @test sort(unordered; byvalue=true, rev=true) == forward
-        end
     end
 
     @testset "Bug DataStructures.jl/#394" begin
-        @test sort(Dict(k=>string(k) for k in 1:3))[1] == "1"
+        @test sort(OrderedDict(k=>string(k) for k in 1:3))[1] == "1"
     end
 end

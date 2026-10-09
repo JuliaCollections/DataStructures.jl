@@ -153,13 +153,21 @@ end
 function Base.append!(l1::MutableLinkedList{T}, l2::MutableLinkedList{T}) where T
     l1.node.prev.next = l2.node.next # l1's last's next is now l2's first
     l2.node.prev.next = l1.node # l2's last's next is now l1.node
+    l2.node.next.prev = l1.node.prev # l2's first's prev is now l1's last
+    l1.node.prev      = l2.node.prev # l1's first's prev is now l2's last
     l1.len += length(l2)
+    # make l2 empty
+    l2.node.prev = l2.node
+    l2.node.next = l2.node
+    l2.len = 0
     return l1
 end
 
 function Base.append!(l::MutableLinkedList, elts...)
     for elt in elts
-        push!(l, elt)
+        for v in elt
+            push!(l, v)
+        end
     end
     return l
 end
@@ -204,6 +212,14 @@ function Base.push!(l::MutableLinkedList{T}, data) where T
     l.node.prev = node
     oldlast.next = node
     l.len += 1
+    return l
+end
+
+function Base.push!(l::MutableLinkedList{T}, data1, data...) where T
+    push!(l, data1)
+    for v in data
+        push!(l, v)
+    end
     return l
 end
 

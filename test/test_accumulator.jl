@@ -51,7 +51,7 @@
         @test sum(ct) == 6
     end
 
-    @testset "From Pairs" begin 
+    @testset "From Pairs" begin
         acc = Accumulator("a" => 2, "b" => 3, "c" => 1)
         @test isa(acc,Accumulator{String,Int})
         @test haskey(acc,"a")
@@ -60,6 +60,15 @@
         @test acc["a"] == 2
         @test acc["b"] == 3
         @test acc["c"] == 1
+    end
+
+    @testset "From Pairs with repeats" begin
+        acc = Accumulator("a" => 2, "b" => 3, "b" => 1)
+        @test isa(acc,Accumulator{String,Int})
+        @test haskey(acc,"a")
+        @test haskey(acc,"b")
+        @test acc["a"] == 2
+        @test acc["b"] == 4
     end
 
     @testset "From Vector" begin

@@ -196,5 +196,44 @@
         @test length(sprint(dump,q)) >= 0
         @test typeof(empty!(q)) === typeof(Deque{Int}())
         @test isempty(q)
+        @test num_blocks(q) == 1
+        @test q.head === q.rear
+        @test sizeof(q.head.data) == q.head.capa * sizeof(eltype(q))
+    end
+
+    @testset "push! after empty!" begin
+        q = Deque{Int}(1)
+        push!(q,1)
+        push!(q,2)
+        empty!(q)
+        push!(q,3)
+        @test length(q) == 1
+        @test first(q) == 3
+        @test last(q) == 3
+        @test num_blocks(q) == 1
+    end
+
+    @testset "pop! and popfirst! don't leak" begin
+        q = Deque{String}(5)
+        GC.gc(true)
+
+        @testset "pop! doesn't leak" begin
+            push!(q,"foo")
+            push!(q,"bar")
+            ss2 = Base.summarysize(q.head)
+            pop!(q)
+            GC.gc(true)
+            ss1 = Base.summarysize(q.head)
+            @test ss1 < ss2
+        end
+        @testset "popfirst! doesn't leak" begin
+            push!(q,"baz")
+            push!(q,"bug")
+            ss2 = Base.summarysize(q.head)
+            popfirst!(q)
+            GC.gc(true)
+            ss1 = Base.summarysize(q.head)
+            @test ss1 < ss2
+        end
     end
 end # @testset Deque

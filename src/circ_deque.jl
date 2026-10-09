@@ -12,6 +12,7 @@ end
 Create a double-ended queue of maximum capacity `n`, implemented as a circular buffer. The element type is `T`.
 """
 CircularDeque{T}(n::Int) where {T} = CircularDeque(Vector{T}(undef, n), n, 0, 1, n)
+CircularDeque{T}(n::Integer) where {T} = CircularDeque(Vector{T}(undef, Int(n)), Int(n), 0, 1, Int(n))
 
 Base.length(D::CircularDeque) = D.n
 Base.eltype(::Type{CircularDeque{T}}) where {T} = T
@@ -63,6 +64,7 @@ end
 
 @inline Base.@propagate_inbounds function Base.pop!(D::CircularDeque)
     v = last(D)
+    unsetindex!(D.buffer, D.last) # see issue/884
     D.n -= 1
     tmp = D.last - 1
     D.last = ifelse(tmp < 1, D.capacity, tmp)
@@ -90,6 +92,7 @@ Remove the element at the front.
 """
 @inline Base.@propagate_inbounds function Base.popfirst!(D::CircularDeque)
     v = first(D)
+    unsetindex!(D.buffer, D.first) # see issue/884
     D.n -= 1
     tmp = D.first + 1
     D.first = ifelse(tmp > D.capacity, 1, tmp)

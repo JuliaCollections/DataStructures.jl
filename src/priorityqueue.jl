@@ -49,7 +49,7 @@ struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
     function PriorityQueue{K,V,O}(o::O, itr) where {K,V,O<:Ordering}
         xs = Vector{Pair{K,V}}(undef, length(itr))
         index = Dict{K, Int}()
-        for (i, (k, v)) in enumerate(itr)
+        @inbounds for (i, (k, v)) in enumerate(itr)
             xs[i] = Pair{K,V}(k, v)
             if haskey(index, k)
                 throw(ArgumentError("PriorityQueue keys must be unique"))
@@ -60,7 +60,7 @@ struct PriorityQueue{K,V,O<:Ordering} <: AbstractDict{K,V}
 
         # heapify
         for i in heapparent(length(pq.xs)):-1:1
-            percolate_down!(pq, i)
+            @inbounds percolate_down!(pq, i)
         end
 
         return pq
@@ -98,7 +98,7 @@ end
 # Construction inferring Key/Value types from input
 # e.g. PriorityQueue{}
 
-PriorityQueue(o1::Ordering, o2::Ordering) = throw(ArgumentError("PriorityQueue with two parameters must be called with an Ordering and an interable of pairs"))
+PriorityQueue(o1::Ordering, o2::Ordering) = throw(ArgumentError("PriorityQueue with two parameters must be called with an Ordering and an iterable of pairs"))
 PriorityQueue(kv, o::Ordering=Forward) = PriorityQueue(o, kv)
 function PriorityQueue(o::Ordering, kv)
     try
@@ -144,7 +144,7 @@ Verify if priority queue `pq` has `key` in its keys.
 # Example
 
 ```jldoctest
-ulia> pq = PriorityQueue("a" => 1, "b" => 2, "c" => 3)
+julia> pq = PriorityQueue("a" => 1, "b" => 2, "c" => 3)
 PriorityQueue{String, Int64, Base.Order.ForwardOrdering} with 3 entries:
   "a" => 1
   "b" => 2
@@ -167,8 +167,10 @@ priority queue.
 """
 Base.first(pq::PriorityQueue) = first(pq.xs)
 
-function percolate_down!(pq::PriorityQueue, i::Integer)
-    x = pq.xs[i]
+Base.@propagate_inbounds function percolate_down!(pq::PriorityQueue, i::Integer)
+    @boundscheck checkbounds(pq.xs, i)
+
+    @inbounds x = pq.xs[i]
     @inbounds while (l = heapleft(i)) <= length(pq)
         r = heapright(i)
         j = r > length(pq) || lt(pq.o, pq.xs[l].second, pq.xs[r].second) ? l : r
@@ -182,12 +184,14 @@ function percolate_down!(pq::PriorityQueue, i::Integer)
         end
     end
     pq.index[x.first] = i
-    pq.xs[i] = x
+    @inbounds pq.xs[i] = x
 end
 
 
-function percolate_up!(pq::PriorityQueue, i::Integer)
-    x = pq.xs[i]
+Base.@propagate_inbounds function percolate_up!(pq::PriorityQueue, i::Integer)
+    @boundscheck checkbounds(pq.xs, i)
+
+    @inbounds x = pq.xs[i]
     @inbounds while i > 1
         j = heapparent(i)
         xj = pq.xs[j]
@@ -200,7 +204,7 @@ function percolate_up!(pq::PriorityQueue, i::Integer)
         end
     end
     pq.index[x.first] = i
-    pq.xs[i] = x
+    @inbounds pq.xs[i] = x
 end
 
 # Equivalent to percolate_up! with an element having lower priority than any other
@@ -236,8 +240,8 @@ end
 # Change the priority of an existing element, or enqueue it if it isn't present.
 function Base.setindex!(pq::PriorityQueue{K, V}, value, key) where {K,V}
     i = get(pq.index, key, 0)
-    if i != 0
-        @inbounds oldvalue = pq.xs[i].second
+    @inbounds if i != 0
+        oldvalue = pq.xs[i].second
         pq.xs[i] = Pair{K,V}(key, value)
         if lt(pq.o, oldvalue, value)
             percolate_down!(pq, i)
@@ -255,7 +259,7 @@ end
 
 Insert the a key `k` into a priority queue `pq` with priority `v`.
 
-# Examples 
+# Examples
 
 ```jldoctest
 julia> a = PriorityQueue("a" => 1, "b" => 2, "c" => 3, "e" => 5)
@@ -317,17 +321,13 @@ function Base.popfirst!(pq::PriorityQueue)
     if !isempty(pq)
         @inbounds pq.xs[1] = y
         pq.index[y.first] = 1
-        percolate_down!(pq, 1)
+        @inbounds percolate_down!(pq, 1)
     end
     delete!(pq.index, x.first)
     return x
 end
 
-if isdefined(Base, :popat!)  # We will overload if it is defined, else we define on our own
-    import Base: popat!
-end
-
-function popat!(pq::PriorityQueue, key)
+function Base.popat!(pq::PriorityQueue, key)
     idx = pq.index[key]
     force_up!(pq, idx)
     popfirst!(pq)
@@ -358,7 +358,7 @@ function Base.delete!(pq::PriorityQueue, key)
 end
 
 """
-    empty!(pq::PriorityQueue)  
+    empty!(pq::PriorityQueue)
 
 Reset priority queue `pq`.
 """

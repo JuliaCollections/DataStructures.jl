@@ -5,14 +5,15 @@ module DataStructures
                 isbitsunion, isiterable, dict_with_eltype, KeySet, Callable, _tablesz,
                 findnextnot, unsafe_getindex, unsafe_setindex!, peek
 
-   
-
     import Base.insert!
-    # Exports for old version of julia where Base doesn't export this
-    export peek
-    export popat!
 
-    using Compat # Provides Base.Order.ReverseOrdering(). May remove this line with julia 1.4
+    # public unsetindex! API introduced in 1.14 (julia#58943)
+    if isdefined(Base, :unsetindex!)
+        using Base: unsetindex!
+    else
+        using Base: _unsetindex! as unsetindex!
+    end
+
     using OrderedCollections
     using OrderedCollections: isordered
     export OrderedDict, OrderedSet, LittleDict
@@ -36,12 +37,11 @@ module DataStructures
 
     export Trie, subtrie, keys_with_prefix, partial_path, find_prefixes
 
-    export LinkedList, Nil, Cons, nil, cons, head, tail, list, filter, cat,
-           reverse
+    export LinkedList, Nil, Cons, nil, cons, head, tail, list
     export MutableLinkedList
     export SortedDict, SortedMultiDict, SortedSet
-    export SDToken, SDSemiToken, SMDToken, SMDSemiToken
-    export SetToken, SetSemiToken
+    export SMDSemiToken, SMDToken
+    export SetSemiToken
     export pastendsemitoken, beforestartsemitoken
     export pastendtoken, beforestarttoken
     export searchsortedafter, searchequalrange

@@ -13,6 +13,8 @@ length(h)            # returns the number of elements
 
 isempty(h)           # returns whether the heap is empty
 
+empty!(h)            # reset the heap
+
 push!(h, v)          # add a value to the heap
 
 first(h)             # return the first (top) value of a heap
@@ -151,13 +153,27 @@ this ordering:
 DataStructures.nextreme(Base.Forward, n, a) # Equivalent to nsmallest(n, a)
 ```
 
+# Array-as-heap functions
+
+These functions treat an `AbstractArray` directly as a binary heap, mirroring
+the C++ `std::push_heap`/`pop_heap`/`make_heap` family. They operate in place
+on the array rather than wrapping it in a heap type.
+
+```@docs
+heappush!
+heappop!
+heapify!
+heapify
+isheap
+```
+
 
 # Improving performance with Float data
 
 One use case for custom orderings is to achieve faster performance with `Float`
 elements with the risk of random ordering if any elements are `NaN`.
 The provided `DataStructures.FasterForward` and `DataStructures.FasterReverse`
-orderings are optimized for this purpose and may achive a 2x performance boost:
+orderings are optimized for this purpose and may achieve a 2x performance boost:
 
 ```julia
 h = BinaryHeap{Float64, DataStructures.FasterForward}() # faster min heap

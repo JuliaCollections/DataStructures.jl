@@ -132,7 +132,7 @@ function Base.setindex!(h::OrderedRobinDict{K, V}, v0, key0) where {K,V}
     else
         @assert haskey(h, key0)
         @inbounds orig_v = h.vals[index]
-        (orig_v != v0) && (@inbounds h.vals[index] = v0)
+        !isequal(orig_v, v0) && (@inbounds h.vals[index] = v0)
     end
 
     check_for_rehash(h) && rehash!(h)
@@ -170,7 +170,7 @@ function rehash!(h::OrderedRobinDict{K, V}) where {K, V}
     return h
 end
 
-function Base.sizehint!(d::OrderedRobinDict, newsz)
+function Base.sizehint!(d::OrderedRobinDict, newsz::Integer)
     oldsz = length(d)
     # grow at least 25%
     if newsz < (oldsz*5)>>2
@@ -232,7 +232,7 @@ end
 function Base.get!(default::Base.Callable, h::OrderedRobinDict{K,V}, key0) where {K,V}
     index = get(h.dict, key0, -2)
     index > 0 && return @inbounds h.vals[index]
-    
+
     v = convert(V, default())
     setindex!(h, v, key0)
     return v
@@ -305,8 +305,8 @@ julia> haskey(D, 'c')
 false
 ```
 """
-Base.haskey(h::OrderedRobinDict, key) = (get(h.dict, key, -2) > 0)
-Base.in(key, v::Base.KeySet{K,T}) where {K,T<:OrderedRobinDict{K}} = (get(v.dict, key, -1) >= 0)
+Base.haskey(h::OrderedRobinDict, key) = (get(h.dict, key, -1) > 0)
+Base.in(key, v::Base.KeySet{K,T}) where {K,T<:OrderedRobinDict{K}} = (get(v.dict.dict, key, -1) >= 0)
 
 """
     getkey(collection, key, default)
@@ -374,10 +374,7 @@ julia> pop!(d, "a")
 julia> pop!(d, "d")
 ERROR: KeyError: key "d" not found
 Stacktrace:
- [1] pop!(h::OrderedRobinDict{String, Int64}, key::String)
-   @ DataStructures ~/.julia/dev/DataStructures/src/ordered_robin_dict.jl:357
- [2] top-level scope
-   @ none:1
+[...]
 
 julia> pop!(d, "e", 4)
 4
@@ -385,7 +382,7 @@ julia> pop!(d, "e", 4)
 """
 function Base.pop!(h::OrderedRobinDict, key, default)
     index = get(h.dict, key, -1)
-    (index > 0) ? _pop(h, index) : default
+    (index > 0) ? _pop!(h, index) : default
 end
 
 """
@@ -433,18 +430,18 @@ function get_next_filled_index(h::OrderedRobinDict, index)
     return -1
 end
 
-Base.@propagate_inbounds function Base.iterate(h::OrderedRobinDict)
+Base.@propagate_inbounds function Base.iterate(h::OrderedRobinDict{K,V}) where {K,V}
     isempty(h) && return nothing
     check_for_rehash(h) && rehash!(h)
     index = get_first_filled_index(h)
-    return (Pair(h.keys[index], h.vals[index]), index+1)
+    @inbounds return (Pair{K,V}(h.keys[index], h.vals[index]), index+1)
 end
 
-Base.@propagate_inbounds function Base.iterate(h::OrderedRobinDict, i)
+Base.@propagate_inbounds function Base.iterate(h::OrderedRobinDict{K,V}, i) where {K,V}
     length(h.keys) < i && return nothing
     index = get_next_filled_index(h, i)
     (index < 0) && return nothing
-    return (Pair(h.keys[index], h.vals[index]), index+1)
+    @inbounds return (Pair{K,V}(h.keys[index], h.vals[index]), index+1)
 end
 
 Base.filter!(f, d::Union{RobinDict, OrderedRobinDict}) = Base.filter_in_one_pass!(f, d)

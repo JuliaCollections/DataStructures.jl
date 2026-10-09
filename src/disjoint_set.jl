@@ -32,6 +32,12 @@ end
 IntDisjointSet(n::T) where {T<:Integer} = IntDisjointSet{T}(collect(Base.OneTo(n)), zeros(T, n), n)
 IntDisjointSet{T}(n::Integer) where {T<:Integer} = IntDisjointSet{T}(collect(Base.OneTo(T(n))), zeros(T, T(n)), T(n))
 Base.length(s::IntDisjointSet) = length(s.parents)
+function Base.sizehint!(s::IntDisjointSet, n::Integer)
+    sizehint!(s.parents, n)
+    sizehint!(s.ranks, n)
+    return s
+end
+Base.in(i::Integer, s::IntDisjointSet) = checkbounds(Bool, s.parents, i)
 
 """
     num_groups(s::IntDisjointSet)
@@ -170,6 +176,7 @@ Base.iterate(s::DisjointSet) = iterate(s.revmap)
 Base.iterate(s::DisjointSet, i) = iterate(s.revmap, i)
 
 Base.length(s::DisjointSet) = length(s.internal)
+Base.in(el, s::DisjointSet) = haskey(s.intmap, el)
 
 """
     num_groups(s::DisjointSet)
@@ -182,6 +189,7 @@ Base.empty(s::DisjointSet{T}, ::Type{U}=T) where {T,U} = DisjointSet{U}()
 function Base.sizehint!(s::DisjointSet, n::Integer)
     sizehint!(s.intmap, n)
     sizehint!(s.revmap, n)
+    sizehint!(s.internal, n)
     return s
 end
 

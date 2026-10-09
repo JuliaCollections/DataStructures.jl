@@ -1,5 +1,7 @@
 # DataStructures.SparseIntSet
 
+`SparseIntSet` is an `AbstractSet{Int}` with a packed representation.
+
 Implementation of a __Sparse Integer Set__, for background see [Sparse Sets](https://www.computist.xyz/2018/06/sparse-sets.html).
 Only positive non-zero `Int`s are allowed inside the set.
 The idea is to have one **packed** `Vector` storing all the `Int`s contained in the set as to allow for fast iteration, and a sparse, paged **reverse** `Vector` with the position of a particular `Int` inside the **packed** `Vector`. This allows for very fast iteration, insertion and deletion of indices.

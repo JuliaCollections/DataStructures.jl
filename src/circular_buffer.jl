@@ -19,18 +19,21 @@ mutable struct CircularBuffer{T} <: AbstractVector{T}
         len <= length(buf) || throw(ArgumentError("Value of 'length' must be <= length of buffer"))
         return new{T}(length(buf), f, len, buf)
     end
+
+    # Convert any `Integer` to whatever `Int` is on the relevant machine
+    CircularBuffer{T}(f::Integer, len::Integer, buf::Integer) where {T} = CircularBuffer{T}(Int(f), Int(len), Int(buf))
 end
 
-function CircularBuffer{T}(iter, capacity::Int) where {T}
+function CircularBuffer{T}(iter, capacity::Integer) where {T}
     vec = copyto!(Vector{T}(undef,capacity), iter)
     CircularBuffer{T}(1, length(iter),vec)
 end
 
-CircularBuffer(capacity::Int) = CircularBuffer{Any}(capacity)
+CircularBuffer(capacity::Integer) = CircularBuffer{Any}(capacity)
 
-CircularBuffer{T}(capacity::Int) where {T} = CircularBuffer{T}(T[],capacity)
+CircularBuffer{T}(capacity::Integer) where {T} = CircularBuffer{T}(T[],capacity)
 
-CircularBuffer(iter,capacity::Int) =  CircularBuffer{eltype(iter)}(iter,capacity)
+CircularBuffer(iter,capacity::Integer) =  CircularBuffer{eltype(iter)}(iter,capacity)
 
 function CircularBuffer{T}(iter) where {T}
   vec = reshape(collect(T,iter),:) 
@@ -179,16 +182,12 @@ Return the number of elements currently in the buffer.
 """
 Base.length(cb::CircularBuffer) = cb.length
 
-Base.eltype(::Type{CircularBuffer{T}}) where T = T
-
 """
     size(cb::CircularBuffer)
 
 Return a tuple with the size of the buffer.
 """
 Base.size(cb::CircularBuffer) = (length(cb),)
-
-Base.convert(::Type{Array}, cb::CircularBuffer{T}) where {T} = T[x for x in cb]
 
 """
     isempty(cb::CircularBuffer)
@@ -203,6 +202,11 @@ Base.isempty(cb::CircularBuffer) = cb.length == 0
 Return capacity of CircularBuffer.
 """
 capacity(cb::CircularBuffer) = cb.capacity
+
+# Base might define `isfull` from julia 1.11 onwards, see julia PR #53159
+if isdefined(Base, :isfull)
+    import Base: isfull
+end
 
 """
     isfull(cb::CircularBuffer)

@@ -258,6 +258,14 @@ end
     end == 16
 
     @test d == RobinDict(8=>19, 19=>2, 42=>4)
+
+    d = RobinDict()
+    for i in 1:100
+        get!(d, i, i)
+    end
+    for i in 1:100
+        @test get(d, i, nothing) == i
+    end
 end
 
 @testset "push!" begin
