@@ -1,5 +1,3 @@
-Changelog is now in the [Github Release Notes](https://github.com/JuliaCollections/DataStructures.jl/releases).
-
 Starting from version 0.19.0, CHANGELOG.md is managed in a format that follows <https://keepachangelog.com/en/1.1.0/>.
 
 <!-- links start -->
@@ -7,8 +5,35 @@ Starting from version 0.19.0, CHANGELOG.md is managed in a format that follows <
 [0.19.0]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.18.22...v0.19.0
 [0.19.1]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.0...v0.19.1
 [0.19.2]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.1...v0.19.2
-[0.19.3]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.1...v0.19.3
+[0.19.3]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.2...v0.19.3
+[0.19.4]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.3...v0.19.4
+[0.19.5]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.4...v0.19.5
+[0.19.6]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.5...v0.19.6
+[0.19.7]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.6...v0.19.7
 <!-- links end -->
+
+
+[0.19.7]
+====================
+
+## Changed:
+ - # Changed #983: `IntSet` and `SparseIntSet` now subtype `AbstractSet{Int}`
+
+[0.19.6]
+====================
+
+## Changed:
+ - # Changed #973: OrderedCollections v2 is now considered compatible. As we re-export some of the OrderedCollections API, that does mean that you may technically see changes in behaviour of DataStructures.jl, these should be extremely rare and can be fixed by adding a direct dependency on OrderedCollections "^1"
+
+## Added
+ - # Added #977: docs for array-as-heap functions (`heappop!`, `heappush!`)
+
+
+[0.19.5]
+====================
+
+## Fixed
+ - # Fixed #971: dict performance for non-concrete values and keys
 
 [0.19.4]
 ====================
