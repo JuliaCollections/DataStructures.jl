@@ -52,11 +52,12 @@ end
 
 @testset "MutableBinheap" begin
 
-    vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
-    vs2 = collect(enumerate(vs))
     ordering = Base.Order.By(last)
 
     @testset "construct heap" begin
+        vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
+        vs2 = collect(enumerate(vs))
+
         MutableBinaryHeap{Int, Base.ForwardOrdering}()
         MutableBinaryHeap{Int, Base.ForwardOrdering}(vs)
 
@@ -94,6 +95,7 @@ end
     end
 
     @testset "make mutable binary minheap" begin
+        vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
         h = MutableBinaryMinHeap(vs)
 
         @test length(h) == 10
@@ -105,17 +107,20 @@ end
     end
 
     @testset "make mutable binary maxheap" begin
+        vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
         h = MutableBinaryMaxHeap(vs)
 
         @test length(h) == 10
         @test !isempty(h)
         @test first(h) == 16
         @test isequal(list_values(h), vs)
-        @test isequal(heap_values(h), [16, 14, 10, 8, 7, 3, 9, 1, 4, 2])
+        @test isequal(heap_values(h), [16, 14, 10, 8, 7, 9, 3, 2, 4, 1])
         @test sizehint!(h, 100) === h
     end
 
     @testset "make mutable binary custom ordering heap" begin
+        vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
+        vs2 = collect(enumerate(vs))
         h = MutableBinaryHeap(ordering, vs2)
 
         @test length(h) == 10
@@ -127,6 +132,7 @@ end
     end
 
     @testset "hmin / push! / pop!" begin
+        vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
         hmin = MutableBinaryMinHeap{Int}()
         @test length(hmin) == 0
         @test isempty(hmin)
@@ -158,6 +164,7 @@ end
     end
 
     @testset "hmax / push! / pop!" begin
+        vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
         hmax = MutableBinaryMaxHeap{Int}()
         @test length(hmax) == 0
         @test isempty(hmax)
@@ -189,6 +196,8 @@ end
     end
 
     @testset "Custom ordering push! / pop!" begin
+        vs = [4, 1, 3, 2, 16, 9, 10, 14, 8, 7]
+        vs2 = collect(enumerate(vs))
         heap = MutableBinaryHeap{Tuple{Int,Int}}(ordering)
         @test length(heap) == 0
         @test isempty(heap)
