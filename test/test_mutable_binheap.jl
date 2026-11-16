@@ -101,6 +101,7 @@ end
         @test first(h) == 1
         @test isequal(list_values(h), vs)
         @test isequal(heap_values(h), [1, 2, 3, 4, 7, 9, 10, 14, 8, 16])
+        @test verify_heap(h)
         @test sizehint!(h, 100) === h
     end
 
@@ -111,7 +112,8 @@ end
         @test !isempty(h)
         @test first(h) == 16
         @test isequal(list_values(h), vs)
-        @test isequal(heap_values(h), [16, 14, 10, 8, 7, 3, 9, 1, 4, 2])
+        @test isequal(heap_values(h), [16, 14, 10, 8, 7, 9, 3, 2, 4, 1])
+        @test verify_heap(h)
         @test sizehint!(h, 100) === h
     end
 
@@ -123,7 +125,23 @@ end
         @test first(h) == (2, 1)
         @test isequal(list_values(h), vs2)
         @test isequal(heap_values(h), [(2, 1), (4, 2), (3, 3), (1, 4), (10, 7), (6, 9), (7, 10), (8, 14), (9, 8), (5, 16)])
+        @test verify_heap(h)
         @test sizehint!(h, 100) === h
+    end
+
+    @testset "linear time heap building (#639)" begin
+        for len in (0, 1, 2, 15, 100)
+            arr = rand(1:1000, len)
+            h = MutableBinaryMinHeap(arr)
+            @test length(h) == len
+            @test verify_heap(h)
+            @test isequal(list_values(h), arr)
+
+            h_max = MutableBinaryMaxHeap(arr)
+            @test length(h_max) == len
+            @test verify_heap(h_max)
+            @test isequal(list_values(h_max), arr)
+        end
     end
 
     @testset "hmin / push! / pop!" begin
