@@ -12,7 +12,6 @@ Starting from version 0.19.0, CHANGELOG.md is managed in a format that follows <
 [0.19.7]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.6...v0.19.7
 <!-- links end -->
 
-
 [0.19.7]
 ====================
 
@@ -34,6 +33,7 @@ Starting from version 0.19.0, CHANGELOG.md is managed in a format that follows <
 
 ## Fixed
  - # Fixed #971: dict performance for non-concrete values and keys
+ - # Fixed #969: Error when working with empty `SortedSet`
 
 [0.19.4]
 ====================
