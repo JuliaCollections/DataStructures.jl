@@ -15,6 +15,9 @@ Starting from version 0.19.0, CHANGELOG.md is managed in a format that follows <
 [0.19.7]
 ====================
 
+## Fixed
+ - # Fixed #969: Error when working with empty `SortedSet`
+
 ## Changed:
  - # Changed #983: `IntSet` and `SparseIntSet` now subtype `AbstractSet{Int}`
 
@@ -33,7 +36,7 @@ Starting from version 0.19.0, CHANGELOG.md is managed in a format that follows <
 
 ## Fixed
  - # Fixed #971: dict performance for non-concrete values and keys
- - # Fixed #969: Error when working with empty `SortedSet`
+
 
 [0.19.4]
 ====================
