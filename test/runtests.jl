@@ -33,6 +33,7 @@ tests = [
          "fenwick",
          "robin_dict",
          "ordered_robin_dict",
+         "segment_tree",
          "dibit_vector",
          "swiss_dict",
          "avl_tree",
