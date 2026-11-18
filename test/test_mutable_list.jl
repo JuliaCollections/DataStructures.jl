@@ -108,6 +108,14 @@
                     push!(l4, n+1:2n...)
                     @test l4 == MutableLinkedList{Int}(1:2n...)
                     @test collect(l4) == collect(MutableLinkedList{Int}(1:2n...))
+                    l5 = copy(l)
+                    l6 = MutableLinkedList{Int}()
+                    append!(l5, l6)
+                    @test collect(l5) == 1:2n
+                    @test l6 == MutableLinkedList{Int}()
+                    append!(l6, l5)
+                    @test collect(l6) == 1:2n
+                    @test l5 == MutableLinkedList{Int}()
                 end
 
                 @testset "delete" begin
