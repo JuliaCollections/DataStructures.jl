@@ -9,6 +9,7 @@ Usage:
 ```julia
 a = CircularDeque{Int}(n)   # allocate a deque with maximum capacity n
 isempty(a)          # test whether the deque is empty
+isfull(a)           # test whether the deque is full
 empty!(a)           # reset the deque
 capacity(a)         # return capacity
 length(a)           # get the number of elements currently in the deque
