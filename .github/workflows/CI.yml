@@ -29,7 +29,8 @@ jobs:
           - '1.6'
           - 'lts'
           - '1'
-#          - 'nightly'
+          - 'pre'
+          - 'nightly'
         os:
           - ubuntu-latest
           - macos-latest
