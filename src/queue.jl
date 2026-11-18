@@ -98,3 +98,9 @@ Iterators.reverse(q::Queue) = Iterators.reverse(q.store)
 Verify if queues `x` and `y` are equivalent in their contents.
 """
 Base.:(==)(x::Queue, y::Queue) = x.store == y.store
+
+# Showing
+
+function Base.show(io::IO, s::Queue)
+   print(io,"Queue [$(collect(s.store))]")
+end
