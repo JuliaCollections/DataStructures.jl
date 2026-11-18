@@ -44,7 +44,7 @@ module DataStructures
     export SetSemiToken
     export pastendsemitoken, beforestartsemitoken
     export pastendtoken, beforestarttoken
-    export searchsortedafter, searchequalrange
+    export searchsortedafter, searchsortedbefore, searchequalrange
     export packcopy, packdeepcopy
     export exclusive, inclusive, semitokens, inclusive_key, exclusive_key
     export orderobject, ordtype, Lt, compare, onlysemitokens
