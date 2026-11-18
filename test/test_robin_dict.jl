@@ -5,7 +5,7 @@
     @test h1.idxfloor == 0
     @test length(h1.keys) == 16
     @test length(h1.vals) == 16
-    @test length(h1.hashes) == 16
+    @test length(h1.meta) == 16
     @test eltype(h1) == Pair{Any, Any}
     @test keytype(h1) == Any
     @test valtype(h1) == Any
@@ -334,11 +334,11 @@ end
     for i=1:1000
         h[i] = i+1
     end
-    length0 = length(h.hashes)
+    length0 = length(h.meta)
     empty!(h)
     @test h.count == 0
     @test h.idxfloor == 0
-    @test length(h.hashes) == length(h.keys) == length(h.vals) == length0
+    @test length(h.meta) == length(h.keys) == length(h.vals) == length0
     for i=-1000:1000
       @test !haskey(h, i)
     end
@@ -379,16 +379,18 @@ end
 
 @testset "invariants" begin
     # Functions which are not exported, but are required for checking invariants
-    hash_key(key) = (hash(key)%UInt32) | 0x80000000
+    hash_key(key) = (hash(key)%UInt32)
     desired_index(hash, sz) = (hash & (sz - 1)) + 1
-    isslotfilled(h::RobinDict, index) = (h.hashes[index] != 0)
+    isslotfilled(h::RobinDict, index) = (h.meta[index] != 0)
     isslotempty(h::RobinDict, index) = (h.hashes[index] == 0)
+    DIBS_BYTES = 8
+    DIBS_MASK = 0x0000_00FF
+    hash_meta(meta::UInt32) = (meta>>DIBS_BYTES)
+    dibs_meta(meta::UInt32) = Int(meta & DIBS_MASK)
     
     function calculate_distance(h::RobinDict{K, V}, index) where {K, V}
         @assert isslotfilled(h, index)
-        sz = length(h.keys)
-        @inbounds index_init = desired_index(h.hashes[index], sz)
-        return (index - index_init + sz) & (sz - 1)
+        return dibs_meta(h.meta[index])
     end
 
     function get_idxfloor(h::RobinDict)
@@ -407,7 +409,7 @@ end
 
     for i in 1:length(h1.keys)
         if isslotfilled(h1, i)
-            @test hash_key(h1.keys[i]) == h1.hashes[i]
+            @test hash_meta((hash_key(h1.keys[i])<<DIBS_BYTES)) == hash_meta(h1.meta[i])
         end
     end
 
@@ -418,7 +420,7 @@ end
 
     for i in 1:length(h2.keys)
         if isslotfilled(h2, i)
-            @test hash_key(h2.keys[i]) == h2.hashes[i]
+            @test hash_meta((hash_key(h2.keys[i])<<DIBS_BYTES)) == hash_meta(h2.meta[i])
         end
     end
 
@@ -429,7 +431,7 @@ end
 
     for i in 1:length(h3.keys)
         if isslotfilled(h3, i)
-            @test hash_key(h3.keys[i]) == h3.hashes[i]
+            @test hash_meta((hash_key(h3.keys[i])<<DIBS_BYTES)) == hash_meta(h3.meta[i])
         end
     end
 
@@ -441,11 +443,11 @@ end
         for i=1:length(h.keys)
             isslotfilled(h, i) || continue
             (min_idx == 0) && (min_idx = i)
-            @assert hash_key(h.keys[i]) == h.hashes[i]
-            @assert (h.hashes[i] & 0x80000000) != 0
+            @assert hash_meta((hash_key(h.keys[i])<<DIBS_BYTES)) == hash_meta(h.meta[i])
+            @assert !iszero(h.meta[i])
             cnt += 1
-            @assert typeof(h.hashes[i]) == UInt32
-            des_ind = desired_index(h.hashes[i], sz)
+            @assert typeof(h.meta[i]) == UInt32
+            des_ind = desired_index(hash_meta(h.meta[i]), sz)
             pos_diff = 0
             if (i >= des_ind)
                 pos_diff = i - des_ind
