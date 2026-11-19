@@ -81,7 +81,7 @@ DefaultDictBase{K,V}(default::F; kwargs...) where {K,V,F} = DefaultDictBase{K,V,
 
 Create an empty DefaultDictBase with the same default and passkey settings.
 """
-Base.empty(d::DefaultDictBase{K,V,F}) where {K,V,F} = DefaultDictBase{K,V,F}(d.default; passkey=d.passkey)
+Base.empty(d::DefaultDictBase{K,V,F,D}) where {K,V,F,D} = DefaultDictBase{K,V,F,D}(d.default; passkey=d.passkey)
 
 """
     getindex(d::DefaultDictBase, key)

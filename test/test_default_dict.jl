@@ -17,6 +17,10 @@ import DataStructures: DefaultDictBase, OrderedDict
         @test isa(DefaultDictBase{Int, String}(String), DefaultDictBase{Int, String, typeof(String), Dict{Int, String}})
         @test isa(DefaultDictBase{Int, String}(String; passkey=true), DefaultDictBase{Int, String, typeof(String), Dict{Int, String}})
         @test isa(DefaultDictBase{Int, String}(String; passkey=false), DefaultDictBase{Int, String, typeof(String), Dict{Int, String}})
+
+        e = empty(DefaultDictBase{Int, String}(string; passkey=true))
+        @test isa(e, DefaultDictBase{Int, String, typeof(string), Dict{Int, String}})
+        @test e[1] == "1"
     end
 
     @testset "DefaultDict" begin
