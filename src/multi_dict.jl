@@ -100,25 +100,26 @@ function Base.iterate(e::EnumerateAll)
     vs = V[]
     dstate = iterate(e.d.d)
     vstate = iterate(vs)
-    dstate === nothing || vstate === nothing && return nothing
     k = nothing
     while vstate === nothing
+        dstate === nothing && return nothing
         ((k, vs), dst) = dstate
         dstate = iterate(e.d.d, dst)
         vstate = iterate(vs)
     end
     v, vst = vstate
-    return ((k, v), (dstate, k, vs, vstate))
+    return ((k, v), (dstate, k, vs, vst))
 end
 
 function Base.iterate(e::EnumerateAll, s)
-    dstate, k, vs, vstate = s
-    dstate === nothing || vstate === nothing && return nothing
+    dstate, k, vs, vst = s
+    vstate = iterate(vs, vst)
     while vstate === nothing
+        dstate === nothing && return nothing
         ((k, vs), dst) = dstate
         dstate = iterate(e.d.d, dst)
         vstate = iterate(vs)
     end
     v, vst = vstate
-    return ((k, v), (dstate, k, vs, vstate))
+    return ((k, v), (dstate, k, vs, vst))
 end

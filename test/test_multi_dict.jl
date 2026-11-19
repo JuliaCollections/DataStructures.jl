@@ -120,15 +120,14 @@
         @test 15 <= count(d) <=45
         @test size(d) == (length(d), count(d))
 
-        #= --- broken phlavenk ----
         allvals = [kv for kv in enumerateall(d)]
         @test length(allvals) == count(d)
         @test all(kv->in(kv,d), enumerateall(d))
+        @test sort(collect(enumerateall(MultiDict(1 => 2, 1 => 3, 5 => 6)))) == [(1, 2), (1, 3), (5, 6)]
 
         # @test length(d) == 15
         # @test length(values(d)) == 15
         # @test length(keys(d)) <= 6
-        --- broken phlavenk ---- =#
     end
 
 end # @testset MultiDict
