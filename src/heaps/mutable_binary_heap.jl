@@ -1,5 +1,7 @@
 # Binary heap
 
+include("arrays_as_heaps.jl")
+
 struct MutableBinaryHeapNode{T}
     value::T
     handle::Int
@@ -131,10 +133,10 @@ end
 
 function _make_mutable_binary_heap(ord::Ordering, ty::Type{T}, values) where T
     # make a static binary index tree from a list of values
-
     n = length(values)
     nodes = Vector{MutableBinaryHeapNode{T}}(undef, n)
     nodemap = Vector{Int}(undef, n)
+    values = heapify!(values, ord)
 
     i::Int = 0
     for v in values
@@ -143,9 +145,6 @@ function _make_mutable_binary_heap(ord::Ordering, ty::Type{T}, values) where T
         @inbounds nodemap[i] = i
     end
 
-    for i = 1 : n
-        _heap_bubble_up!(ord, nodes, nodemap, i)
-    end
     return nodes, nodemap
 end
 
