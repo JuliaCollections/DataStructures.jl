@@ -1,7 +1,7 @@
 Starting from version 0.19.0, CHANGELOG.md is managed in a format that follows <https://keepachangelog.com/en/1.1.0/>.
 
 <!-- links start -->
-[Unreleased]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.0...HEAD
+[Unreleased]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.7...HEAD
 [0.19.0]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.18.22...v0.19.0
 [0.19.1]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.0...v0.19.1
 [0.19.2]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.1...v0.19.2
@@ -11,6 +11,12 @@ Starting from version 0.19.0, CHANGELOG.md is managed in a format that follows <
 [0.19.6]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.5...v0.19.6
 [0.19.7]: https://github.com/JuliaCollections/DataStructures.jl/compare/v0.19.6...v0.19.7
 <!-- links end -->
+
+[Unreleased]
+====================
+
+## Fixed
+ - # Fixed #1001: `empty` on a `DefaultDictBase` threw a `MethodError`
 
 [0.19.7]
 ====================
